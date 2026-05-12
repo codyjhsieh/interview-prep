@@ -97,11 +97,11 @@ function renderDashboard(state, hub) {
       <div class="flex-1 min-w-0">
         <div class="text-xs muted uppercase tracking-wider">${state.streak.count ? 'Welcome back' : 'Welcome'}</div>
         <h1 class="font-display text-2xl sm:text-3xl font-semibold mt-1 leading-tight">${esc(name)}<span class="muted font-normal"> — let's continue.</span></h1>
-        <div class="text-xs muted mt-2">Cue: <span class="text-[color:var(--text)]">${esc(state.user.when_cue || 'set in profile')}</span></div>
+        <div class="text-xs muted mt-2 mobile-hide">Cue: <span class="text-[color:var(--text)]">${esc(state.user.when_cue || 'set in profile')}</span></div>
         <div class="flex gap-2 mt-4 flex-wrap">
           ${next ? `<a class="btn btn-primary max-w-full" href="#category/${next.cat.id}/${next.mod.id}" id="primary-cta" style="overflow:hidden"><span class="truncate inline-block max-w-[260px] sm:max-w-[400px] align-middle">Continue · ${esc(next.lesson.name)}</span><span class="ml-1">→</span><span class="ml-2 dim text-[10px] hidden sm:inline">J</span></a>` : `<a class="btn btn-primary" href="#flashcards">Review flashcards →</a>`}
           <a class="btn max-w-full" href="#games/${todaysGame.id}" id="todays-game" style="overflow:hidden"><span class="truncate inline-block max-w-[200px] sm:max-w-[400px] align-middle">Today's game: ${esc(todaysGame.name)}</span><span class="ml-2 dim text-[10px] hidden sm:inline">G</span></a>
-          ${topGap && topGap.weight >= 8 && topGap.pct < 0.5 ? `<a class="btn max-w-full" href="#category/${topGap.id}" style="color:var(--warn);border-color:rgba(255,195,107,0.4);overflow:hidden"><span class="truncate inline-block max-w-[200px] sm:max-w-[400px] align-middle">⚠ Close gap · ${esc(topGap.name)}</span></a>` : ''}
+          ${topGap && topGap.weight >= 8 && topGap.pct < 0.5 ? `<a class="btn max-w-full mobile-hide" href="#category/${topGap.id}" style="color:var(--warn);border-color:rgba(255,195,107,0.4);overflow:hidden"><span class="truncate inline-block max-w-[200px] sm:max-w-[400px] align-middle">⚠ Close gap · ${esc(topGap.name)}</span></a>` : ''}
         </div>
       </div>
       <div class="flex items-center gap-4 shrink-0">
@@ -122,24 +122,24 @@ function renderDashboard(state, hub) {
     <div class="card !p-4">
       <div class="text-xs text-slate-400 uppercase tracking-wide">Streak</div>
       <div class="text-3xl font-bold mt-1 flex items-center gap-1">🔥 <span class="float">${state.streak.count}</span></div>
-      <div class="text-xs text-slate-500 mt-1">${state.streak.freezeAvailable} freeze${state.streak.freezeAvailable===1?'':'s'} available</div>
+      <div class="text-xs text-slate-500 mt-1 mobile-hide">${state.streak.freezeAvailable} freeze${state.streak.freezeAvailable===1?'':'s'} available</div>
     </div>
     <div class="card !p-4">
       <div class="text-xs text-slate-400 uppercase tracking-wide">Level</div>
       <div class="text-3xl font-bold mt-1 text-accent-400">${state.level}</div>
-      <div class="bar mt-2"><i style="width:${Math.round(lvlInfo.inLevel/lvlInfo.levelSpan*100)}%"></i></div>
-      <div class="text-xs text-slate-500 mt-1 font-mono">${lvlInfo.inLevel} / ${lvlInfo.levelSpan} XP</div>
+      <div class="bar mt-2 mobile-hide"><i style="width:${Math.round(lvlInfo.inLevel/lvlInfo.levelSpan*100)}%"></i></div>
+      <div class="text-xs text-slate-500 mt-1 font-mono mobile-hide">${lvlInfo.inLevel} / ${lvlInfo.levelSpan} XP</div>
     </div>
     <div class="card !p-4">
       <div class="text-xs muted uppercase tracking-wider">Today</div>
       <div class="text-3xl font-bold mt-1 numeric">${state.todayXP} <span class="text-sm muted font-normal">xp</span></div>
-      <div class="bar mt-2"><i style="width:${dailyGoalPct}%"></i></div>
-      <div class="text-xs muted mt-1">Goal: ${Math.round(state.user.goal/60*10)/10}h/day · <button class="underline hover:text-white" data-focus="50">+ Start 50-min focus</button></div>
+      <div class="bar mt-2 mobile-hide"><i style="width:${dailyGoalPct}%"></i></div>
+      <div class="text-xs muted mt-1 mobile-hide">Goal: ${Math.round(state.user.goal/60*10)/10}h/day · <button class="underline hover:text-white" data-focus="50">+ Start 50-min focus</button></div>
     </div>
     <div class="card !p-4">
       <div class="text-xs muted uppercase tracking-wider">Lessons</div>
       <div class="text-3xl font-bold mt-1 numeric">${Object.keys(state.completedLessons).length}</div>
-      <div class="text-xs muted mt-1">of ${totalLessonCount()} · ${formatTime(totalRemainingTime(state))} left of ${formatTime(totalCurriculumTime())}</div>
+      <div class="text-xs muted mt-1 mobile-hide">of ${totalLessonCount()} · ${formatTime(totalRemainingTime(state))} left of ${formatTime(totalCurriculumTime())}</div>
     </div>
   `;
   container.appendChild(stats);
@@ -153,7 +153,7 @@ function renderDashboard(state, hub) {
           <div>
             <div class="eyebrow" style="color:var(--bad)">Wrong-answer queue</div>
             <div class="text-2xl font-display font-semibold mt-1 numeric">${missedDue}<span class="text-sm muted ml-1">due today</span></div>
-            <div class="text-xs muted mt-1">${missedTotal} total · SM-2 scheduled · retrieval practice</div>
+            <div class="text-xs muted mt-1 mobile-hide">${missedTotal} total · SM-2 scheduled · retrieval practice</div>
           </div>
           <div class="text-2xl" style="color:var(--bad)">📍</div>
         </div>
@@ -164,7 +164,7 @@ function renderDashboard(state, hub) {
           <div>
             <div class="eyebrow" style="color:var(--sde)">Concept review queue</div>
             <div class="text-2xl font-display font-semibold mt-1 numeric">${conceptReviewsDue}<span class="text-sm muted ml-1">due today</span></div>
-            <div class="text-xs muted mt-1">${conceptReviewsTotal} scheduled · driven by your self-ratings</div>
+            <div class="text-xs muted mt-1 mobile-hide">${conceptReviewsTotal} scheduled · driven by your self-ratings</div>
           </div>
           <div class="text-2xl" style="color:var(--sde)">🔁</div>
         </div>
@@ -177,23 +177,44 @@ function renderDashboard(state, hub) {
   // Daily quests + Next up
   const row = el('div','grid lg:grid-cols-3 gap-4');
 
+  // Map each quest kind → destination route. Clicking the tile deeplinks to
+  // the place where the user can actually advance that quest end-to-end.
+  const questRoute = (q) => {
+    switch (q.kind) {
+      case 'flashcard': return '#flashcards';
+      case 'lesson':    return next ? `#category/${next.cat.id}/${next.mod.id}` : '#curriculum';
+      case 'drill':     return '#category/decomp';
+      case 'decomp':    return '#category/decomp';
+      case 'story':     return '#prep/stories';
+      case 'coding':    return '#category/coding';
+      default:          return '#curriculum';
+    }
+  };
   const questsCard = el('div','card lg:col-span-2');
   questsCard.innerHTML = `
     <div class="flex items-center justify-between mb-3">
       <h3 class="font-display font-semibold text-lg">Today's quests</h3>
-      <span class="text-xs text-slate-400">Resets at midnight · variable XP bonuses</span>
+      <span class="text-xs text-slate-400 mobile-hide">Resets at midnight · variable XP bonuses</span>
     </div>
     <div class="space-y-2">
-      ${quests.map(q => `
-        <div class="flex items-center gap-3 p-3 rounded-lg ${q.done?'bg-accent-500/10 border border-accent-500/30':'bg-ink-800/60 border border-ink-600/50'}">
+      ${quests.map(q => {
+        const pct = Math.round(q.progress/q.target*100);
+        const inner = `
           <div class="text-xl">${q.done?'✅':'🎯'}</div>
-          <div class="flex-1">
-            <div class="font-medium text-sm">${esc(q.name)}</div>
-            <div class="bar mt-1"><i style="width:${Math.round(q.progress/q.target*100)}%"></i></div>
+          <div class="flex-1 min-w-0">
+            <div class="font-medium text-sm flex items-center justify-between gap-2">
+              <span class="truncate">${esc(q.name)}</span>
+              <span class="text-[10px] font-mono dim shrink-0">${q.progress}/${q.target}</span>
+            </div>
+            <div class="bar mt-1"><i style="width:${pct}%"></i></div>
           </div>
-          <div class="text-sm font-mono text-accent-400">+${q.xp}</div>
-        </div>
-      `).join('')}
+          <div class="text-sm font-mono text-accent-400 shrink-0">+${q.xp}</div>
+        `;
+        if (q.done) {
+          return `<div class="flex items-center gap-3 p-3 rounded-lg bg-accent-500/10 border border-accent-500/30 opacity-80">${inner}</div>`;
+        }
+        return `<a href="${questRoute(q)}" class="flex items-center gap-3 p-3 rounded-lg bg-ink-800/60 border border-ink-600/50 hover:border-accent-500/50 transition" title="Go to where you can advance this quest">${inner}</a>`;
+      }).join('')}
     </div>
   `;
   row.appendChild(questsCard);
@@ -222,7 +243,7 @@ function renderDashboard(state, hub) {
   heat.innerHTML = `
     <div class="flex items-center justify-between mb-3">
       <h3 class="font-display font-semibold text-lg">Last 90 days</h3>
-      <span class="text-xs text-slate-400">XP per day</span>
+      <span class="text-xs text-slate-400 mobile-hide">XP per day</span>
     </div>
     <div id="heatmap" class="grid grid-flow-col auto-cols-min gap-[3px]"></div>
   `;
@@ -236,7 +257,7 @@ function renderDashboard(state, hub) {
       ${cov.categories.map(c => `
         <div>
           <div class="flex items-center justify-between text-sm mb-1">
-            <a href="#category/${c.id}" class="hover:text-accent-400 transition">${c.icon} ${esc(c.name)} <span class="text-xs text-slate-500">· weight ${c.weight}%</span></a>
+            <a href="#category/${c.id}" class="hover:text-accent-400 transition">${c.icon} ${esc(c.name)} <span class="text-xs text-slate-500 mobile-hide">· weight ${c.weight}%</span></a>
             <span class="text-xs font-mono">${c.done}/${c.total}</span>
           </div>
           <div class="bar"><i style="width:${Math.round(c.pct*100)}%"></i></div>
@@ -247,7 +268,8 @@ function renderDashboard(state, hub) {
   container.appendChild(catProg);
 
   // Learning-science card — labels reflect what's ACTUALLY active in the platform.
-  const sci = el('div','card');
+  // Heavy on text → hide on phones, show desktop+
+  const sci = el('div','card mobile-hide');
   sci.innerHTML = `
     <div class="flex items-center justify-between mb-3">
       <h3 class="font-display font-semibold text-lg">The science behind your prep</h3>
@@ -404,21 +426,21 @@ function renderCurriculum(state, hub) {
     <div class="card elevated">
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div>
-          <div class="eyebrow">Total content</div>
+          <div class="eyebrow">Total</div>
           <div class="text-2xl font-display font-semibold mt-1 numeric">${formatTime(grandMin)}</div>
-          <div class="text-xs muted">${CATEGORIES.length} cats · ${MODULES.length} mods · ${totalLessonCount()} lessons</div>
+          <div class="text-xs muted mobile-hide">${CATEGORIES.length} cats · ${MODULES.length} mods · ${totalLessonCount()} lessons</div>
         </div>
         <div>
-          <div class="eyebrow">Remaining for you</div>
+          <div class="eyebrow">Remaining</div>
           <div class="text-2xl font-display font-semibold mt-1 numeric" style="color:var(--accent)">${formatTime(remainingMin)}</div>
-          <div class="text-xs muted">${remainingMin === 0 ? 'all complete' : Math.round((1 - remainingMin/grandMin)*100) + '% complete'}</div>
+          <div class="text-xs muted mobile-hide">${remainingMin === 0 ? 'all complete' : Math.round((1 - remainingMin/grandMin)*100) + '% complete'}</div>
         </div>
-        <div>
+        <div class="mobile-hide">
           <div class="eyebrow">At your ${dailyGoalMin}-min goal</div>
           <div class="text-2xl font-display font-semibold mt-1 numeric">${daysToFinish}d</div>
           <div class="text-xs muted">~${(daysToFinish/7).toFixed(1)} weeks to finish</div>
         </div>
-        <div>
+        <div class="mobile-hide">
           <div class="eyebrow">Reality check</div>
           <div class="text-xs muted leading-snug mt-1">Doubling for reviews + mocks + drills, plan ~${(grandMin/60*2).toFixed(0)}h actual prep over 6–10 weeks.</div>
         </div>
@@ -480,12 +502,12 @@ function renderCurriculum(state, hub) {
             <span class="pill pill-${c.track === 'both' ? 'both' : c.track}">${c.track.toUpperCase()}</span>
           </div>
           <div class="font-display font-semibold text-lg mt-3">${esc(c.name)}</div>
-          <div class="flex items-center gap-3 text-[11px] muted mt-1 flex-wrap">
+          <div class="flex items-center gap-3 text-[11px] muted mt-1 flex-wrap mobile-hide">
             <span>Weight · <span class="text-[color:var(--text)] numeric">${c.weight}%</span></span>
             <span>ROI · <span title="${c.roi || 3}/5">${renderStars(c.roi || 3)}</span></span>
             <span>Time · <span class="text-[color:var(--text)] numeric">${formatTime(catTotal)}</span></span>
           </div>
-          <p class="text-sm muted mt-2 leading-relaxed">${esc(c.blurb)}</p>
+          <p class="text-sm muted mt-2 leading-relaxed mobile-hide">${esc(c.blurb)}</p>
           <div class="mt-4">
             <div class="flex items-center justify-between text-xs mb-1">
               <span class="muted">${c.done}/${c.total} lessons · ${catRemaining === 0 ? 'done' : formatTime(catRemaining) + ' left'}</span>
@@ -525,8 +547,8 @@ function renderCategory(state, hub, catId, openModuleId) {
       <div class="flex items-end justify-between flex-wrap gap-2 mt-2">
         <div class="min-w-0">
           <h1 class="font-display text-2xl sm:text-3xl font-semibold">${cat.icon} ${esc(cat.name)}</h1>
-          <p class="muted mt-1 text-sm max-w-3xl">${esc(cat.blurb)}</p>
-          <div class="text-xs muted mt-2">Total time · <span class="text-[color:var(--text)] numeric">${formatTime(categoryTime(cat.id))}</span> · Remaining · <span class="text-[color:var(--text)] numeric">${formatTime(categoryRemainingTime(cat.id, state))}</span></div>
+          <p class="muted mt-1 text-sm max-w-3xl mobile-hide">${esc(cat.blurb)}</p>
+          <div class="text-xs muted mt-2 mobile-hide">Total time · <span class="text-[color:var(--text)] numeric">${formatTime(categoryTime(cat.id))}</span> · Remaining · <span class="text-[color:var(--text)] numeric">${formatTime(categoryRemainingTime(cat.id, state))}</span></div>
         </div>
         <div class="text-right shrink-0">
           <div class="text-xs uppercase tracking-wider muted">Progress</div>
@@ -535,9 +557,9 @@ function renderCategory(state, hub, catId, openModuleId) {
       </div>
       <div class="bar mt-3"><i style="width:${Math.round(doneLessons/Math.max(1,totalLessons)*100)}%"></i></div>
       <div class="flex gap-2 mt-4 flex-wrap">
-        <button class="btn btn-primary" data-cat-quiz="${cat.id}">📝 Take ${cat.id} quiz (${(DATA.CATEGORY_QUIZZES[cat.id]||[]).length}q)</button>
-        <button class="btn" data-cat-dl-svg="${cat.id}">Download cheatsheet · SVG</button>
-        <button class="btn" data-cat-dl-png="${cat.id}">Download cheatsheet · PNG</button>
+        <button class="btn btn-primary" data-cat-quiz="${cat.id}">📝 Take quiz (${(DATA.CATEGORY_QUIZZES[cat.id]||[]).length}q)</button>
+        <button class="btn mobile-hide" data-cat-dl-svg="${cat.id}">Download cheatsheet · SVG</button>
+        <button class="btn mobile-hide" data-cat-dl-png="${cat.id}">Download cheatsheet · PNG</button>
       </div>
     </div>
     <div class="space-y-3" id="mod-list"></div>
@@ -626,7 +648,7 @@ function renderLesson(state, lessonId) {
         <h2 class="font-display text-2xl font-semibold leading-tight">${esc(lesson.name)}</h2>
         <div class="flex items-center gap-2 mt-2 text-xs muted">
           <span class="pill pill-${cat.track==='both'?'both':cat.track}">${cat.track.toUpperCase()}</span>
-          <span>${esc(lesson.type)}</span><span>·</span>
+          <span class="mobile-hide">${esc(lesson.type)}</span><span class="mobile-hide">·</span>
           <span>${lesson.time} min</span><span>·</span>
           <span style="color:var(--accent)">+${lesson.xp} XP</span>
         </div>
@@ -644,7 +666,7 @@ function renderLesson(state, lessonId) {
 
     <!-- Body always visible below the activity -->
     <div class="mt-5 pt-5 border-t border-[color:var(--hairline)] leading-relaxed text-[14.5px]">
-      <div class="eyebrow mb-2">Reference · the full insight</div>
+      <div class="eyebrow mb-2 mobile-hide">Reference · the full insight</div>
       ${lesson.body}
     </div>
     <div class="mt-6 flex items-center justify-between gap-2 flex-wrap">

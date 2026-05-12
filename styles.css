@@ -1145,3 +1145,45 @@ blockquote {
 .fixed.inset-0[style*="rgba(8,9,12"] {
   background: rgba(248,249,252,0.85) !important;
 }
+
+/* =========================================================================
+ * Mobile density reduction — hide secondary metadata, sublabels, blurbs
+ * The goal: on phones, show only what advances the user's next action.
+ * Reveal secondary detail on tablet+ (≥640px).
+ * ========================================================================= */
+.mobile-hide { display: none; }
+.mobile-only { display: revert; }
+@media (min-width: 640px) {
+  .mobile-hide { display: revert; }
+  .mobile-only { display: none !important; }
+}
+
+@media (max-width: 640px) {
+  /* Tighten card padding so content breathes */
+  .card { padding: 1rem 1.05rem; }
+  .card.elevated { padding: 1.1rem 1.15rem; }
+
+  /* Headings: shrink hero/page titles slightly */
+  h1.font-display { font-size: 1.5rem; line-height: 1.15; }
+  h2.font-display { font-size: 1.25rem; line-height: 1.2; }
+  h3.font-display { font-size: 1rem; }
+
+  /* Eyebrow labels are decorative — hide on phones to reduce noise */
+  .eyebrow { font-size: 9.5px; opacity: 0.6; }
+
+  /* Hide module intros under category-detail summaries (one less line per row) */
+  details summary .text-xs.text-slate-400.mt-1 { display: none; }
+
+  /* Lesson row meta line — drop type/time, keep only XP for scannability */
+  .lesson-row .text-xs.text-slate-500 > span:nth-child(-n+4) { display: none; }
+  .lesson-row .text-xs.text-slate-500 > span.text-accent-400 { display: inline; }
+
+  /* Tab subtitle "Resets at midnight · variable XP bonuses" — hide */
+  .card .flex.items-center.justify-between > .text-xs.text-slate-400 { font-size: 10.5px; opacity: 0.5; }
+
+  /* Reduce stat-card decoration: thinner number, no progress-bar (where present) */
+  .card .text-3xl.font-bold { font-size: 1.5rem; }
+
+  /* Quiz/category-list subtext: tighten line-height */
+  .leading-relaxed { line-height: 1.45; }
+}
