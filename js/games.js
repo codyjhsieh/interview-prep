@@ -904,6 +904,9 @@ function mountConceptActivity(container, lesson, state, opts = {}) {
     steps:     renderSteps, mcq: renderMCQ, truefalse: renderTF,
     sort:      renderSort, match: renderMatch,
     fillblank: renderFillBlank, decision: renderDecision, predict: renderPredict,
+    // SOTA learning-psychology widget types — generative over recognition
+    codepredict: renderCodePredict, findbug: renderFindBug,
+    cloze:       renderCloze,       whyexplain: renderWhyExplain,
   };
   const fn = renderers[it.type] || renderPredict;
 
@@ -1279,6 +1282,220 @@ function renderDecision(stage, it, onDone) {
       });
     });
     stage.querySelector('#dec-done')?.addEventListener('click', onDone);
+  }
+  paint();
+}
+
+/* ======================================================================
+ * SOTA learning-psychology widget types (added 2026)
+ * Each forces *generation* over recognition. MCQ tests "can you spot the
+ * right one;" these test "can you produce the answer." Strictly harder,
+ * strictly higher transfer. Sources noted per widget.
+ * ====================================================================== */
+
+/* ----- Code-predict: show code, predict its output BEFORE reveal.
+   Mechanism: prediction-error encoding (Brod 2018, Potts & Shanks 2014).
+   Config:
+     { type:'codepredict', code:'def f(x): ...', question:'What does f(3) return?',
+       options:[ ... ],   // optional — if omitted, free-text answer field
+       correct:N | 'answer-string',
+       explain:'Trace: ...' }                                              */
+function renderCodePredict(stage, it, onDone) {
+  let phase = 1; // 1 = predict, 2 = reveal + self-check
+  let userAnswer = null;
+  function paint() {
+    if (phase === 1) {
+      const useOptions = Array.isArray(it.options) && it.options.length > 0;
+      stage.innerHTML = `
+        <div class="card thin">
+          <div class="text-xs muted uppercase tracking-wider mb-2">Predict the output</div>
+          <pre class="text-[12.5px] leading-snug mb-3"><code>${esc(it.code || '')}</code></pre>
+          <div class="text-[14px] font-medium mb-3">${esc(it.question || 'What does this code output?')}</div>
+          ${useOptions
+            ? `<div class="grid gap-2">${it.options.map((o,i) => `<button class="btn justify-start text-left w-full !py-2.5 font-mono text-[13px]" data-opt="${i}"><span class="dim mr-2 numeric">${String.fromCharCode(65+i)}.</span> ${esc(o)}</button>`).join('')}</div>`
+            : `<input id="cp-free" class="w-full px-3 py-2 rounded-md border border-[color:var(--hairline)] font-mono text-[13px]" placeholder="Type the exact output">
+               <div class="text-right mt-2"><button class="btn btn-primary" id="cp-submit">Submit prediction →</button></div>`}
+          <div class="muted text-[11.5px] mt-3 dim">Predicting before reading triggers stronger encoding via prediction-error <span class="dim">(Brod 2018).</span></div>
+        </div>
+      `;
+      stage.querySelectorAll('[data-opt]').forEach(b => {
+        b.addEventListener('click', () => { userAnswer = parseInt(b.dataset.opt, 10); phase = 2; paint(); });
+      });
+      stage.querySelector('#cp-submit')?.addEventListener('click', () => {
+        userAnswer = (stage.querySelector('#cp-free').value || '').trim();
+        phase = 2; paint();
+      });
+    } else {
+      const useOptions = Array.isArray(it.options) && it.options.length > 0;
+      const isCorrect = useOptions
+        ? userAnswer === it.correct
+        : String(userAnswer).replace(/\s+/g,'') === String(it.correct).replace(/\s+/g,'');
+      const correctText = useOptions ? it.options[it.correct] : it.correct;
+      stage.innerHTML = `
+        <div class="card thin">
+          <div class="text-xs uppercase tracking-wider mb-2" style="color:${isCorrect?'var(--accent)':'var(--bad)'}">${isCorrect?'✓ Match':'✗ Off — that\'s the point'}</div>
+          <pre class="text-[12.5px] leading-snug mb-3"><code>${esc(it.code || '')}</code></pre>
+          <div class="text-[13.5px] mb-2"><b>Your prediction:</b> <span class="font-mono">${esc(useOptions ? it.options[userAnswer] : userAnswer)}</span></div>
+          <div class="text-[13.5px] mb-3"><b>Actual:</b> <span class="font-mono" style="color:var(--accent)">${esc(correctText)}</span></div>
+          <div class="text-[13px] leading-relaxed muted">${it.explain || ''}</div>
+        </div>
+      `;
+      // Wrong predictions enqueue for SRS — even on free-text we approximate
+      if (!isCorrect && it.id) {
+        const st = APP.getState();
+        GAMI.recordWrongAnswer(st, {
+          id: it.id, q: it.question, options: useOptions ? it.options : [], correct: it.correct,
+          explain: it.explain || '', cat: it.cat || 'coding', source: it._source || 'codepredict',
+        });
+        APP.afterStateChange();
+      }
+      onDone();
+    }
+  }
+  paint();
+}
+
+/* ----- Find-the-bug: show line-numbered code with a defect.
+   Mechanism: desirable difficulty + transfer-appropriate processing
+   (Bjork & Bjork 2011). Surfacing a subtle bug forces structural reading.
+   Config:
+     { type:'findbug', prompt:'...', codeLines:['line 1','line 2',...],
+       correctLine:N (1-indexed), explain:'...' }                          */
+function renderFindBug(stage, it, onDone) {
+  let chosen = null;
+  function paint(submitted) {
+    stage.innerHTML = `
+      <div class="card thin">
+        <div class="text-xs muted uppercase tracking-wider mb-2">Find the bug</div>
+        <div class="text-[14px] font-medium mb-3">${esc(it.prompt || 'Which line has the defect?')}</div>
+        <div class="rounded-md border border-[color:var(--hairline)] overflow-hidden">
+          ${(it.codeLines || []).map((ln, i) => {
+            const lineNum = i + 1;
+            const isPicked = chosen === lineNum;
+            const isCorrect = submitted && lineNum === it.correctLine;
+            const isWrong = submitted && isPicked && lineNum !== it.correctLine;
+            let bg = 'transparent';
+            if (isCorrect) bg = 'rgba(14,163,113,0.12)';
+            else if (isWrong) bg = 'rgba(215,56,76,0.12)';
+            else if (isPicked) bg = 'rgba(46,111,224,0.08)';
+            return `<button class="block w-full text-left px-3 py-1.5 font-mono text-[12.5px] hover:bg-[rgba(46,111,224,0.05)]" data-line="${lineNum}" style="background:${bg};border-bottom:1px solid var(--hairline)"><span class="dim mr-3 numeric">${String(lineNum).padStart(2,' ')}</span>${esc(ln)}</button>`;
+          }).join('')}
+        </div>
+        ${!submitted ? `<div class="text-right mt-3"><button class="btn btn-primary" id="fb-submit" ${chosen===null?'disabled style="opacity:0.5"':''}>Submit →</button></div>` : `<div class="mt-3 p-3 rounded-md text-[13px] leading-relaxed" style="background:${chosen===it.correctLine?'rgba(14,163,113,0.08)':'rgba(215,56,76,0.08)'};border:1px solid ${chosen===it.correctLine?'rgba(14,163,113,0.25)':'rgba(215,56,76,0.25)'}"><b>${chosen===it.correctLine?'✓ Caught it.':'✗ Bug was on line '+it.correctLine+'.'}</b> ${esc(it.explain || '')}</div>`}
+      </div>
+    `;
+    stage.querySelectorAll('[data-line]').forEach(b => {
+      b.addEventListener('click', () => { if (submitted) return; chosen = parseInt(b.dataset.line, 10); paint(false); });
+    });
+    stage.querySelector('#fb-submit')?.addEventListener('click', () => {
+      paint(true);
+      if (chosen !== it.correctLine && it.id) {
+        const st = APP.getState();
+        GAMI.recordWrongAnswer(st, {
+          id: it.id, q: it.prompt, options: (it.codeLines || []).map((_,i)=>'line '+(i+1)),
+          correct: it.correctLine - 1, explain: it.explain || '', cat: it.cat || 'coding', source: it._source || 'findbug',
+        });
+        APP.afterStateChange();
+      }
+      onDone();
+    });
+  }
+  paint(false);
+}
+
+/* ----- Cloze: fill the missing line/expression in a code template.
+   Mechanism: worked-example fading (Renkl & Atkinson 2003). Reduces
+   cognitive load over from-scratch coding while preserving generation.
+   Config:
+     { type:'cloze', prompt:'...', before:'code above blank',
+       blank:'____', after:'code after blank',
+       options:[ ... ], correct:N, explain:'...' }                          */
+function renderCloze(stage, it, onDone) {
+  let chosen = null;
+  function paint(submitted) {
+    const opts = it.options || [];
+    stage.innerHTML = `
+      <div class="card thin">
+        <div class="text-xs muted uppercase tracking-wider mb-2">Complete the snippet</div>
+        <div class="text-[14px] font-medium mb-3">${esc(it.prompt || 'Pick the line that completes the template.')}</div>
+        <pre class="text-[12.5px] leading-snug mb-3"><code>${esc(it.before || '')}<span style="background:rgba(255,195,107,0.18);border:1px dashed var(--warn);padding:1px 4px;border-radius:3px">${submitted && chosen!==null ? esc(opts[chosen]) : '____'}</span>${esc(it.after || '')}</code></pre>
+        <div class="grid gap-2">
+          ${opts.map((o,i) => {
+            const isPicked = chosen === i;
+            const isCorrect = submitted && i === it.correct;
+            const isWrong = submitted && isPicked && i !== it.correct;
+            let style = '';
+            if (isCorrect) style = 'background:rgba(14,163,113,0.1);border-color:var(--accent)';
+            else if (isWrong) style = 'background:rgba(215,56,76,0.1);border-color:var(--bad)';
+            else if (isPicked) style = 'background:rgba(46,111,224,0.08);border-color:var(--sde)';
+            return `<button class="btn justify-start text-left w-full !py-2.5 font-mono text-[12.5px]" data-cl="${i}" style="${style}"><span class="dim mr-2 numeric">${String.fromCharCode(65+i)}.</span> ${esc(o)}</button>`;
+          }).join('')}
+        </div>
+        ${submitted ? `<div class="mt-3 p-3 rounded-md text-[13px] leading-relaxed" style="background:${chosen===it.correct?'rgba(14,163,113,0.08)':'rgba(215,56,76,0.08)'};border:1px solid ${chosen===it.correct?'rgba(14,163,113,0.25)':'rgba(215,56,76,0.25)'}"><b>${chosen===it.correct?'✓ Correct.':'✗ Off — see correct option above.'}</b> ${esc(it.explain || '')}</div>` : ''}
+      </div>
+    `;
+    stage.querySelectorAll('[data-cl]').forEach(b => {
+      b.addEventListener('click', () => {
+        if (submitted) return;
+        chosen = parseInt(b.dataset.cl, 10);
+        paint(true);
+        if (chosen !== it.correct && it.id) {
+          const st = APP.getState();
+          GAMI.recordWrongAnswer(st, {
+            id: it.id, q: it.prompt, options: opts, correct: it.correct,
+            explain: it.explain || '', cat: it.cat || 'coding', source: it._source || 'cloze',
+          });
+          APP.afterStateChange();
+        }
+        onDone();
+      });
+    });
+  }
+  paint(false);
+}
+
+/* ----- Why-explain: type a 1-2 sentence "why" BEFORE seeing the answer.
+   Mechanism: self-explanation effect (Chi 1989, Bisra et al. 2018 meta).
+   No automatic correctness check — user compares to model and self-rates.
+   Config:
+     { type:'whyexplain', prompt:'Why is X true?',
+       modelAnswer:'...', rubric:['key point 1','key point 2'] }            */
+function renderWhyExplain(stage, it, onDone) {
+  let phase = 1;
+  let userText = '';
+  function paint() {
+    if (phase === 1) {
+      stage.innerHTML = `
+        <div class="card thin">
+          <div class="text-xs muted uppercase tracking-wider mb-2">Explain — in your own words</div>
+          <div class="text-[14px] font-medium mb-3">${esc(it.prompt || 'Why does this work?')}</div>
+          <textarea id="we-text" rows="4" class="w-full px-3 py-2 rounded-md border border-[color:var(--hairline)] text-[13px] leading-relaxed" placeholder="One or two sentences. State the mechanism, not just the conclusion."></textarea>
+          <div class="flex justify-between items-center mt-2">
+            <div class="text-[11.5px] muted dim">Self-explaining BEFORE reading the answer ≈ +.55 d on procedural transfer <span class="dim">(Bisra et al. 2018 meta).</span></div>
+            <button class="btn btn-primary" id="we-submit">Reveal model answer →</button>
+          </div>
+        </div>
+      `;
+      stage.querySelector('#we-submit').addEventListener('click', () => {
+        userText = (stage.querySelector('#we-text').value || '').trim();
+        phase = 2;
+        paint();
+      });
+    } else {
+      stage.innerHTML = `
+        <div class="card thin">
+          <div class="text-xs uppercase tracking-wider mb-2 muted">Compare</div>
+          ${userText ? `<div class="text-[13px] mb-3 p-3 rounded-md" style="background:rgba(46,111,224,0.05);border:1px solid rgba(46,111,224,0.2)"><div class="text-[10.5px] muted uppercase tracking-wider mb-1">Your explanation</div><div class="leading-relaxed">${esc(userText)}</div></div>` : ''}
+          <div class="text-[13px] mb-3 p-3 rounded-md" style="background:rgba(14,163,113,0.05);border:1px solid rgba(14,163,113,0.25)">
+            <div class="text-[10.5px] uppercase tracking-wider mb-1" style="color:var(--accent)">Model answer</div>
+            <div class="leading-relaxed">${esc(it.modelAnswer || '')}</div>
+          </div>
+          ${Array.isArray(it.rubric) && it.rubric.length ? `<div class="text-[12px] muted mb-3"><b>Did you hit these?</b><ul class="list-disc pl-5 mt-1 space-y-0.5">${it.rubric.map(r=>`<li>${esc(r)}</li>`).join('')}</ul></div>` : ''}
+          <div class="text-[12.5px] muted">Self-rate your explanation in the panel below — that drives your concept-review schedule.</div>
+        </div>
+      `;
+      onDone();
+    }
   }
   paint();
 }

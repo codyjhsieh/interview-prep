@@ -1848,6 +1848,1368 @@ The three common DP shapes:
      body:'Each node = dict[char→node] + is_word flag. Insert is O(len). Search is O(len). Use for autocomplete, spell-check, dictionary problems.'},
   ]
 },
+{
+  cat:'coding', id:'cod-backtrack', name:'Backtracking — subsets, permutations, N-queens',
+  intro:'When the question is "enumerate / count all valid arrangements," backtracking is usually the answer. Same template, four variations.',
+  lessons:[
+    {id:'bt-1', type:'concept', name:'The backtracking template (subsets / power set)', xp:12, time:9,
+     body:`Backtracking is depth-first enumeration with <b>undo</b>. You pick an option, recurse, then un-pick before trying the next option. Every backtracking solution has the same four parts: a partial state, a base case that records or returns it, a loop over choices, and the undo.
+<br><br>
+<b>Canonical example — generate all subsets of [1,2,3]:</b>
+<pre><code>def subsets(nums):
+    out, path = [], []
+    def dfs(i):
+        if i == len(nums):
+            out.append(path[:])      # snapshot — path[] mutates
+            return
+        # choice 1: exclude nums[i]
+        dfs(i + 1)
+        # choice 2: include nums[i]
+        path.append(nums[i])
+        dfs(i + 1)
+        path.pop()                   # the undo
+    dfs(0)
+    return out</code></pre>
+Time is O(N · 2^N) — 2^N subsets, each O(N) to copy. Memory is O(N) for the recursion stack plus output.
+<br><br>
+<b>The trap candidates fall into:</b> appending <code>path</code> directly instead of <code>path[:]</code>. Without the slice you store the same list reference 2^N times and every entry mutates together. State it aloud: "I'm copying with path-colon because path is mutated as we recurse."
+<br><br>
+<b>Pattern recognition:</b> "Generate / enumerate / count all X that satisfy Y" with N small (~≤20). If N is large, you usually need DP or a math identity, not backtracking.`,
+     interactive:{ type:'findbug',
+       prompt:'This subsets() has a subtle bug. Which line fails on input [1,2]?',
+       codeLines:[
+         'def subsets(nums):',
+         '    out, path = [], []',
+         '    def dfs(i):',
+         '        if i == len(nums):',
+         '            out.append(path)',
+         '            return',
+         '        dfs(i + 1)',
+         '        path.append(nums[i])',
+         '        dfs(i + 1)',
+         '        path.pop()',
+         '    dfs(0)',
+         '    return out',
+       ],
+       correctLine:5,
+       cat:'coding',
+       explain:'Line 5 appends path by reference. After dfs unwinds, every entry in out points to the same (now empty) list — all 2^N entries become []. Fix: out.append(path[:]) or list(path).'}},
+
+    {id:'bt-2', type:'concept', name:'Permutations — used/visited bookkeeping', xp:12, time:9,
+     body:`Permutations differ from subsets in one way: order matters, and each element appears exactly once per arrangement. So you can't iterate by index — you iterate by remaining choices.
+<br><br>
+<b>Template (using a "used" array):</b>
+<pre><code>def permutations(nums):
+    out, path = [], []
+    used = [False] * len(nums)
+    def dfs():
+        if len(path) == len(nums):
+            out.append(path[:])
+            return
+        for i, x in enumerate(nums):
+            if used[i]: continue
+            used[i] = True
+            path.append(x)
+            dfs()
+            path.pop()
+            used[i] = False
+    dfs()
+    return out</code></pre>
+Time is O(N · N!). Memory is O(N) for recursion + path + used.
+<br><br>
+<b>Variant: permutations with duplicates.</b> Sort the array first, then skip duplicates at each level: <code>if i &gt; 0 and nums[i] == nums[i-1] and not used[i-1]: continue</code>. This prevents generating the same permutation twice.
+<br><br>
+<b>Variant: next permutation in-place.</b> Different problem entirely — see <code>itertools.permutations</code> or the "next-permutation" algorithm (scan from right for first descending, swap, reverse suffix). O(N) time, O(1) extra space.`,
+     interactive:{ type:'codepredict',
+       code:'def perms(nums):\n    out, path = [], []\n    used = [False] * len(nums)\n    def dfs():\n        if len(path) == len(nums):\n            out.append(path[:]); return\n        for i, x in enumerate(nums):\n            if used[i]: continue\n            used[i] = True; path.append(x)\n            dfs()\n            path.pop(); used[i] = False\n    dfs()\n    return out\n\nresult = perms([1, 1, 2])\nprint(len(result))',
+       question:'What does this print for input [1,1,2]?',
+       options:['3','4','6','9'],
+       correct:2,
+       cat:'coding',
+       explain:'Backtracking treats positions as distinct: 3! = 6, including [1,1,2] appearing twice (once via each "1"). To collapse to 3 unique, sort first and skip when nums[i] == nums[i-1] and not used[i-1].'}},
+
+    {id:'bt-3', type:'concept', name:'Combinations & combination sum — pruning on the path', xp:12, time:9,
+     body:`Combinations = choose K from N, order doesn't matter. The key trick is starting the inner loop from <code>i + 1</code> (or <code>i</code> for "reuse allowed") so you never revisit earlier indices.
+<br><br>
+<b>K-combinations:</b>
+<pre><code>def combinations(nums, k):
+    out, path = [], []
+    def dfs(start):
+        if len(path) == k:
+            out.append(path[:]); return
+        for i in range(start, len(nums)):
+            path.append(nums[i])
+            dfs(i + 1)        # i+1: no repeats
+            path.pop()
+    dfs(0)
+    return out</code></pre>
+<br>
+<b>Combination sum (each number reusable):</b> the same shape, two changes — recurse with <code>dfs(i)</code> instead of <code>i+1</code>, and prune when <code>remaining &lt; 0</code>.
+<pre><code>def combinationSum(candidates, target):
+    out, path = [], []
+    candidates.sort()
+    def dfs(start, remaining):
+        if remaining == 0:
+            out.append(path[:]); return
+        for i in range(start, len(candidates)):
+            if candidates[i] &gt; remaining:
+                break                     # sorted → all later candidates exceed too
+            path.append(candidates[i])
+            dfs(i, remaining - candidates[i])
+            path.pop()
+    dfs(0, target)
+    return out</code></pre>
+The <code>break</code> after sort is the senior signal — it turns worst-case exponential into something tractable when target is small.`,
+     interactive:{ type:'cloze',
+       prompt:'Combination-sum: each candidate is REUSABLE. Pick the recursive call that allows reuse.',
+       before:'def combinationSum(cands, target):\n    out, path = [], []\n    cands.sort()\n    def dfs(start, remaining):\n        if remaining == 0:\n            out.append(path[:]); return\n        for i in range(start, len(cands)):\n            if cands[i] > remaining: break\n            path.append(cands[i])\n            ',
+       after:'\n            path.pop()\n    dfs(0, target)\n    return out',
+       options:[
+         'dfs(i + 1, remaining - cands[i])',
+         'dfs(i, remaining - cands[i])',
+         'dfs(0, remaining - cands[i])',
+         'dfs(start, remaining - cands[i])',
+       ],
+       correct:1,
+       cat:'coding',
+       explain:'dfs(i, …) keeps the same start index so we can pick cands[i] again at the next level — that\'s reuse. dfs(i+1, …) would solve "combination sum II" where each candidate is single-use. dfs(0, …) reintroduces all earlier candidates → duplicate results.'}},
+
+    {id:'bt-4', type:'concept', name:'N-Queens — pruning with diagonal sets', xp:12, time:10,
+     body:`N-queens is the classic "backtracking with constraint propagation" problem. Place N queens on an N×N board so no two attack. The brute-force is N^N; the smart version is closer to N!.
+<br><br>
+The constraint is: no two queens share a row, column, or diagonal. Track all three with sets.
+<br><br>
+<b>Key insight — encoding diagonals:</b> on the / diagonal, <code>row + col</code> is constant. On the \\ diagonal, <code>row - col</code> is constant. Two sets is all you need.
+<pre><code>def nQueens(n):
+    out = []
+    cols, diag1, diag2 = set(), set(), set()
+    board = [-1] * n
+    def dfs(row):
+        if row == n:
+            out.append(board[:]); return
+        for col in range(n):
+            if col in cols or (row+col) in diag1 or (row-col) in diag2:
+                continue
+            cols.add(col); diag1.add(row+col); diag2.add(row-col)
+            board[row] = col
+            dfs(row + 1)
+            cols.remove(col); diag1.remove(row+col); diag2.remove(row-col)
+    dfs(0)
+    return out</code></pre>
+Time is roughly O(N!) — way better than N^N because invalid placements get pruned at every level.
+<br><br>
+<b>The senior signal:</b> mention that you place queens one per row by construction (so the row constraint is automatic). Junior candidates often add a row-set too — it's redundant.`,
+     interactive:{ type:'whyexplain',
+       prompt:'Why does N-queens hash diagonals with <code>row + col</code> and <code>row - col</code>?',
+       modelAnswer:'Each anti-diagonal (the / kind) shares a constant row+col. Each main diagonal (the \\ kind) shares a constant row-col. Hashing into two sets gives O(1) "is this diagonal already taken?" without allocating a 2D matrix or scanning the board on each placement. Together with the column set, three O(1) checks per candidate placement — the algorithm runs in roughly O(N!) instead of O(N^N).',
+       rubric:[
+         'Notes that row+col is constant on one diagonal direction',
+         'Notes that row-col is constant on the other',
+         'Mentions O(1) lookup advantage over scanning the board',
+       ],
+       cat:'coding'}},
+
+    {id:'bt-5', type:'concept', name:'Word search on a grid — DFS with in-place visited', xp:12, time:9,
+     body:`Given a 2D grid of letters and a target word, return True if the word can be formed by adjacent (up/down/left/right) letters, using each cell at most once. This problem appears in 5%+ of senior on-sites.
+<br><br>
+<b>The template — DFS from every starting cell:</b>
+<pre><code>def exist(board, word):
+    R, C = len(board), len(board[0])
+    def dfs(r, c, i):
+        if i == len(word): return True
+        if r &lt; 0 or r &gt;= R or c &lt; 0 or c &gt;= C: return False
+        if board[r][c] != word[i]: return False
+        # in-place visited: temporarily mark cell, restore on return
+        tmp, board[r][c] = board[r][c], '#'
+        found = (dfs(r+1, c, i+1) or dfs(r-1, c, i+1)
+                 or dfs(r, c+1, i+1) or dfs(r, c-1, i+1))
+        board[r][c] = tmp
+        return found
+    return any(dfs(r, c, 0) for r in range(R) for c in range(C))</code></pre>
+Time is O(R · C · 4^L) where L is word length. Memory is O(L) for the recursion stack — no separate visited matrix.
+<br><br>
+<b>The trick:</b> the <code>board[r][c] = '#'</code> mutation IS the visited set. Restoring it on the way back out (the backtracking undo) means you don't pay for an R×C boolean matrix. Senior candidates always mention this.
+<br><br>
+<b>Variant — word search II (Trie):</b> when you're searching for MANY words at once, build a Trie of words and walk the grid once. Order-of-magnitude faster than running word search per word.`,
+     interactive:{ type:'findbug',
+       prompt:'Word-search DFS — find the line that breaks correctness on revisits.',
+       codeLines:[
+         'def exist(board, word):',
+         '    R, C = len(board), len(board[0])',
+         '    def dfs(r, c, i):',
+         '        if i == len(word): return True',
+         '        if not (0 <= r < R and 0 <= c < C): return False',
+         '        if board[r][c] != word[i]: return False',
+         '        # mark visited; restore on backtrack',
+         '        found = (dfs(r+1,c,i+1) or dfs(r-1,c,i+1)',
+         '                 or dfs(r,c+1,i+1) or dfs(r,c-1,i+1))',
+         '        return found',
+         '    return any(dfs(r,c,0) for r in range(R) for c in range(C))',
+       ],
+       correctLine:7,
+       cat:'coding',
+       explain:'The comment promises an in-place visited mark, but no mutation happens. With no visited tracking the same cell can be reused — word="AA" would match a single "A" cell via self-recursion. Fix: tmp = board[r][c]; board[r][c] = "#" before the OR; restore after.'}},
+  ]
+},
+{
+  cat:'coding', id:'cod-intervals', name:'Intervals — merge, insert, meeting rooms',
+  intro:'Interval problems all share one preprocessing step (sort by start) and one of three downstream patterns (fold, insert-by-phase, count-active).',
+  lessons:[
+    {id:'iv-1', type:'concept', name:'Merge overlapping intervals — the canonical pattern', xp:12, time:9,
+     body:`Given a list of intervals, merge any that overlap. Sort by start, then fold left-to-right.
+<br><br>
+<b>The "overlap" definition matters.</b> Two intervals [a,b] and [c,d] overlap if <code>c &lt;= b</code> (touching counts). If your problem says touching does NOT count, use <code>c &lt; b</code> — read the prompt twice.
+<pre><code>def merge(intervals):
+    intervals.sort(key=lambda x: x[0])
+    out = []
+    for start, end in intervals:
+        if out and start &lt;= out[-1][1]:
+            out[-1][1] = max(out[-1][1], end)
+        else:
+            out.append([start, end])
+    return out</code></pre>
+Time O(N log N) for the sort, O(N) for the scan → O(N log N) overall. Memory O(N) for output, O(1) extra if input mutable.
+<br><br>
+<b>The trap:</b> <code>out[-1][1] = end</code> (without <code>max</code>) silently wrong on inputs like <code>[[1,10],[2,5]]</code> — you'd truncate to 5 instead of keeping 10. <code>max</code> is the safety.
+<br><br>
+<b>Recognition:</b> if the question involves "overlap," "merge," "consolidate ranges," or anything like "find the unique covered time" — merge intervals is your first thought.`,
+     interactive:{ type:'codepredict',
+       code:'def merge(intervals):\n    intervals.sort(key=lambda x: x[0])\n    out = []\n    for s, e in intervals:\n        if out and s <= out[-1][1]:\n            out[-1][1] = e          # <-- bug? watch carefully\n        else:\n            out.append([s, e])\n    return out\n\nprint(merge([[1,10],[2,5],[8,12]]))',
+       question:'What does this print?',
+       options:[
+         '[[1,12]]',
+         '[[1,10],[8,12]]',
+         '[[1,5],[8,12]]',
+         '[[1,5]]',
+       ],
+       correct:3,
+       cat:'coding',
+       explain:'Truncates instead of keeping max. After [1,10] absorbs [2,5], the line clobbers 10 down to 5. Then [8,12] starts at 8 which is > 5, so it begins a new group. Result: [[1,5],[8,12]]. The fix is out[-1][1] = max(out[-1][1], e).'}},
+
+    {id:'iv-2', type:'concept', name:'Insert interval — the three-phase walk', xp:12, time:9,
+     body:`Given a list of non-overlapping intervals (already sorted by start) and a new interval, insert it and merge any resulting overlaps. The clean solution walks the input in three phases.
+<pre><code>def insert(intervals, new):
+    out, i, n = [], 0, len(intervals)
+    # Phase 1: copy everything strictly before new
+    while i &lt; n and intervals[i][1] &lt; new[0]:
+        out.append(intervals[i]); i += 1
+    # Phase 2: merge anything overlapping new
+    while i &lt; n and intervals[i][0] &lt;= new[1]:
+        new[0] = min(new[0], intervals[i][0])
+        new[1] = max(new[1], intervals[i][1])
+        i += 1
+    out.append(new)
+    # Phase 3: copy the rest
+    while i &lt; n:
+        out.append(intervals[i]); i += 1
+    return out</code></pre>
+Time O(N), memory O(N). Single pass over the input — no full re-sort because input is already sorted.
+<br><br>
+<b>Senior signal:</b> state the three phases out loud as you write them. "Phase 1: anything fully before. Phase 2: anything overlapping — keep absorbing into new. Phase 3: anything fully after." It signals you've done this exact problem before AND that you read clean code.`,
+     interactive:{ type:'cloze',
+       prompt:'Insert-interval three-phase walk. Pick the Phase-2 condition.',
+       before:'def insert(intervals, new):\n    out, i, n = [], 0, len(intervals)\n    # Phase 1: copy everything strictly before new\n    while i < n and intervals[i][1] < new[0]:\n        out.append(intervals[i]); i += 1\n    # Phase 2: absorb anything overlapping new\n    while i < n and ',
+       after:':\n        new[0] = min(new[0], intervals[i][0])\n        new[1] = max(new[1], intervals[i][1])\n        i += 1\n    out.append(new)\n    while i < n: out.append(intervals[i]); i += 1\n    return out',
+       options:[
+         'intervals[i][0] <= new[1]',
+         'intervals[i][1] <= new[1]',
+         'intervals[i][0] < new[0]',
+         'intervals[i][1] >= new[0]',
+       ],
+       correct:0,
+       cat:'coding',
+       explain:'Phase 2 absorbs intervals whose START is ≤ new\'s END (they overlap or touch). Option B compares the wrong ends. Option C re-tests Phase 1. Option D is subtly different — it works only because Phase 1 already ate the disjoint-before ones, but it relies on that invariant; "start ≤ new end" is the direct condition.'}},
+
+    {id:'iv-3', type:'concept', name:'Meeting rooms II — min rooms via heap or sweep', xp:12, time:10,
+     body:`Given intervals [start, end], find the minimum number of meeting rooms needed (max concurrent meetings). Two excellent solutions; pick based on which framing your interviewer asked.
+<br><br>
+<b>Approach 1 — Min-heap of end times:</b>
+<pre><code>import heapq
+def minMeetingRooms(intervals):
+    intervals.sort(key=lambda x: x[0])
+    heap = []                          # heap of end times
+    for start, end in intervals:
+        if heap and heap[0] &lt;= start:
+            heapq.heappop(heap)        # reuse the freed room
+        heapq.heappush(heap, end)
+    return len(heap)</code></pre>
+Time O(N log N), memory O(N). The intuition: at each new meeting, if any earliest-ending room is free, reuse it; else open a new one. The heap size IS the answer.
+<br><br>
+<b>Approach 2 — Sweep line (chronological events):</b>
+<pre><code>def minMeetingRooms(intervals):
+    starts = sorted(s for s, _ in intervals)
+    ends   = sorted(e for _, e in intervals)
+    rooms = 0; max_rooms = 0
+    i = j = 0
+    while i &lt; len(starts):
+        if starts[i] &lt; ends[j]:        # meeting starts before any ends → need a room
+            rooms += 1
+            max_rooms = max(max_rooms, rooms)
+            i += 1
+        else:                          # a meeting ends → free a room
+            rooms -= 1
+            j += 1
+    return max_rooms</code></pre>
+Same complexity, simpler data structure. Some interviewers prefer this version because it generalizes to "max concurrent X" across any event stream.
+<br><br>
+<b>The trap on the sweep:</b> use <code>&lt;</code> not <code>&lt;=</code>. <code>starts[i] == ends[j]</code> means a meeting ends exactly when another starts — the room can be reused, so it's NOT a new room.`,
+     interactive:{ type:'codepredict',
+       code:'def minRooms(intervals):\n    starts = sorted(s for s,_ in intervals)\n    ends   = sorted(e for _,e in intervals)\n    rooms = peak = 0\n    i = j = 0\n    while i < len(starts):\n        if starts[i] <= ends[j]:     # <-- using <=\n            rooms += 1\n            peak = max(peak, rooms)\n            i += 1\n        else:\n            rooms -= 1\n            j += 1\n    return peak\n\nprint(minRooms([[0,30],[30,60]]))',
+       question:'What does this print?',
+       options:['1','2','3','0'],
+       correct:1,
+       cat:'coding',
+       explain:'Two back-to-back meetings should need 1 room, not 2. The <= treats "end at 30, start at 30" as still active when the new one begins → counts a second room. Correct comparator is starts[i] < ends[j].'}},
+
+    {id:'iv-4', type:'concept', name:'Non-overlapping intervals — greedy by END', xp:12, time:9,
+     body:`Different intervals problem, different sort key. Given intervals, find the minimum number to REMOVE so the remainder is non-overlapping. The greedy choice is to keep the interval that ends EARLIEST among overlapping options — it frees room for the most future intervals.
+<pre><code>def eraseOverlapIntervals(intervals):
+    intervals.sort(key=lambda x: x[1])       # sort by END, not start
+    end = float('-inf')
+    kept = 0
+    for s, e in intervals:
+        if s &gt;= end:
+            kept += 1
+            end = e
+    return len(intervals) - kept</code></pre>
+Time O(N log N), memory O(1) extra. This is "interval scheduling maximization" — classic greedy, provably optimal.
+<br><br>
+<b>Why end-first works:</b> ending early leaves the most room. A counter-proof: sort by start instead. <code>[[1,100], [2,3], [3,4]]</code> — sort by start says "keep [1,100], drop two." Sort by end says "drop [1,100], keep two." End-first wins.
+<br><br>
+<b>Recognition tip:</b> any time the question says "minimum removals to make non-overlapping" or "max non-overlapping" — sort by END. If it says "merge overlapping" — sort by START. The keyword "maximum non-overlapping" is the giveaway.`,
+     interactive:{ type:'whyexplain',
+       prompt:'Why does sort-by-END (not start) give the optimal "minimum removals" for non-overlapping intervals?',
+       modelAnswer:'The greedy choice is to keep the interval that ends earliest among feasible options, because that maximizes the room remaining for future intervals. Sort-by-start can lock in a long interval (e.g., [1,100]) that ends late and blocks many shorter compatible ones. Sort-by-end picks [2,3] first, freeing the timeline at t=3 — strictly more future choices remain. The exchange argument: in any optimal solution, swapping its first interval for the one with the earliest end keeps the solution valid and never decreases the count.',
+       rubric:[
+         'Mentions earliest-end frees the most future capacity',
+         'Provides counterexample where sort-by-start traps a long interval',
+         'Acknowledges this is a classic exchange-argument-style greedy proof',
+       ],
+       cat:'coding'}},
+  ]
+},
+{
+  cat:'coding', id:'cod-trees', name:'Trees in depth — traversals, LCA, serialize, validate',
+  intro:'Binary trees show up in ~25% of SDE on-sites. The six patterns below cover the canonical questions; once you have them memorized, most tree problems become composition.',
+  lessons:[
+    {id:'tr-1', type:'concept', name:'Three traversals + level-order, iterative versions', xp:12, time:9,
+     body:`Every tree problem reduces to one of four traversals. Memorize the iterative versions — interviewers love asking "do it without recursion" because Python's default recursion limit is 1000 and production trees can be deeper.
+<br><br>
+<b>Pre-order (DFS), iterative with a stack:</b>
+<pre><code>def preorder(root):
+    if not root: return []
+    out, stack = [], [root]
+    while stack:
+        node = stack.pop()
+        out.append(node.val)
+        if node.right: stack.append(node.right)   # right first → left popped first
+        if node.left:  stack.append(node.left)
+    return out</code></pre>
+<b>In-order (DFS), iterative:</b>
+<pre><code>def inorder(root):
+    out, stack, node = [], [], root
+    while stack or node:
+        while node:
+            stack.append(node); node = node.left
+        node = stack.pop()
+        out.append(node.val)
+        node = node.right
+    return out</code></pre>
+<b>Level-order (BFS) with deque:</b>
+<pre><code>from collections import deque
+def levelOrder(root):
+    if not root: return []
+    out, q = [], deque([root])
+    while q:
+        level = []
+        for _ in range(len(q)):                  # snapshot len → per-level grouping
+            n = q.popleft()
+            level.append(n.val)
+            if n.left:  q.append(n.left)
+            if n.right: q.append(n.right)
+        out.append(level)
+    return out</code></pre>
+The <code>for _ in range(len(q))</code> snapshot is the level-grouping trick — without it, you get a flat traversal not grouped by depth.
+<br><br>
+<b>Time: O(N) for all four. Memory: O(H) for DFS (H = tree height), O(W) for BFS (W = max width).</b> For a balanced tree both are O(log N); for a worst-case skewed tree DFS is O(N) memory.`,
+     interactive:{ type:'codepredict',
+       code:'from collections import deque\nclass N:\n    def __init__(self, v, l=None, r=None): self.v, self.l, self.r = v, l, r\n#       1\n#      / \\\n#     2   3\n#    /\n#   4\nroot = N(1, N(2, N(4)), N(3))\n\ndef levelOrder(root):\n    if not root: return []\n    out, q = [], deque([root])\n    while q:\n        level = []\n        while q:                          # <-- inner while q (no snapshot)\n            n = q.popleft()\n            level.append(n.v)\n            if n.l: q.append(n.l)\n            if n.r: q.append(n.r)\n        out.append(level)\n    return out\n\nprint(levelOrder(root))',
+       question:'What does this print?',
+       options:[
+         '[[1], [2, 3], [4]]',
+         '[[1, 2, 3, 4]]',
+         '[[1], [2], [3], [4]]',
+         '[[1, 2], [3, 4]]',
+       ],
+       correct:1,
+       cat:'coding',
+       explain:'The inner while-q drains every node into one level — children get added and processed in the same iteration. You lose per-level grouping. The fix is for _ in range(len(q)) to snapshot the current level\'s size before children are enqueued.'}},
+
+    {id:'tr-2', type:'concept', name:'Lowest Common Ancestor — BST vs binary tree', xp:12, time:9,
+     body:`Two flavors of LCA, two completely different algorithms. Knowing both — and which applies — is the senior signal.
+<br><br>
+<b>BST LCA (O(log N) on balanced, O(H) worst case):</b> the BST property means the LCA is the first node whose value is between p.val and q.val.
+<pre><code>def lcaBST(root, p, q):
+    while root:
+        if p.val &lt; root.val and q.val &lt; root.val:
+            root = root.left
+        elif p.val &gt; root.val and q.val &gt; root.val:
+            root = root.right
+        else:
+            return root      # split point — found it</code></pre>
+<b>Generic binary tree LCA (O(N), single DFS):</b>
+<pre><code>def lcaBT(root, p, q):
+    if not root or root is p or root is q:
+        return root
+    L = lcaBT(root.left, p, q)
+    R = lcaBT(root.right, p, q)
+    if L and R: return root      # p, q in different subtrees → here is LCA
+    return L or R                # both nodes in same subtree → propagate up</code></pre>
+The generic version returns "the highest node that has at least one of p, q in its subtree, with the special case that if BOTH show up, we are the LCA."
+<br><br>
+<b>The interview trap:</b> using the BST algorithm on a non-BST will silently return wrong answers. Always ask "is this a BST?" before coding.`,
+     interactive:{ type:'whyexplain',
+       prompt:'In the generic-tree LCA, <code>if L and R: return root</code>. Why does that line identify the LCA?',
+       modelAnswer:'Each recursive call returns "the highest node in this subtree that equals p or q, or contains either of them." When BOTH sides return non-None, it means p is in one subtree and q is in the other — root is therefore the deepest node that has p in one subtree and q in the other, which is exactly the definition of LCA. When only one side returns non-None, both targets are in that side (or one of them IS that node) — we propagate the partial answer upward, where eventually the other branch will be found at some ancestor.',
+       rubric:[
+         'Notes the function returns p, q, OR the LCA (depending on context)',
+         'Identifies L-and-R as the "split point" — targets in different subtrees',
+         'Explains why one-sided returns propagate up instead of stopping',
+       ],
+       cat:'coding'}},
+
+    {id:'tr-3', type:'concept', name:'Serialize & deserialize binary tree (BFS encoding)', xp:12, time:10,
+     body:`Encode a tree as a string, then reconstruct. The cleanest encoding for general binary trees uses BFS with explicit null markers — each position is either a value or "#".
+<pre><code>from collections import deque
+
+def serialize(root):
+    if not root: return ""
+    out, q = [], deque([root])
+    while q:
+        n = q.popleft()
+        if n:
+            out.append(str(n.val))
+            q.append(n.left); q.append(n.right)
+        else:
+            out.append("#")
+    return ",".join(out)
+
+def deserialize(s):
+    if not s: return None
+    vals = s.split(",")
+    root = TreeNode(int(vals[0]))
+    q = deque([root]); i = 1
+    while q and i &lt; len(vals):
+        n = q.popleft()
+        if vals[i] != "#":
+            n.left = TreeNode(int(vals[i]))
+            q.append(n.left)
+        i += 1
+        if i &lt; len(vals) and vals[i] != "#":
+            n.right = TreeNode(int(vals[i]))
+            q.append(n.right)
+        i += 1
+    return root</code></pre>
+<br>
+<b>Why BFS over DFS?</b> Both work, but BFS gives a level-order encoding humans can read and that maps cleanly to "store tree at index in array" representations. DFS-preorder works too and is more compact for very sparse trees — pick based on what the interviewer asks for.
+<br><br>
+<b>Trap:</b> if values can include the delimiter or "#" literal, the encoding breaks. Production solutions JSON-encode each value. In an interview, state assumption: "I'm assuming values are integers and don't contain commas."`,
+     interactive:{ type:'codepredict',
+       code:'from collections import deque\nclass N:\n    def __init__(self, v, l=None, r=None): self.v, self.l, self.r = v, l, r\n\ndef serialize(root):\n    if not root: return ""\n    out, q = [], deque([root])\n    while q:\n        n = q.popleft()\n        if n:\n            out.append(str(n.v))\n            q.append(n.l); q.append(n.r)\n        else:\n            out.append("#")\n    return ",".join(out)\n\n#     1\n#    / \\\n#   2   3\nroot = N(1, N(2), N(3))\nprint(serialize(root))',
+       question:'What does this print?',
+       options:[
+         '1,2,3',
+         '1,2,3,#,#,#,#',
+         '1,#,2,#,3,#,#',
+         '1,2,#,#,3,#,#',
+       ],
+       correct:1,
+       cat:'coding',
+       explain:'BFS with explicit nulls emits the root value, then each child slot in level order. Both 2 and 3 are leaves, so each contributes "#,#" for its missing children. Final: "1,2,3,#,#,#,#". The "1,2,#,#,3,#,#" form is the DFS-preorder encoding — different traversal.'}},
+
+    {id:'tr-4', type:'concept', name:'Validate BST — pass min/max bounds, not just check children', xp:12, time:9,
+     body:`The most common wrong solution: "every node's value > left child and < right child." That's <b>not</b> the BST property — it's a much weaker local check.
+<br><br>
+The actual BST property is global: every value in the LEFT subtree must be less than the node; every value in the RIGHT subtree greater. A counterexample to the local check:
+<pre><code>      5
+     / \\
+    3   7
+       / \\
+      2   8
+# Local check passes everywhere, but 2 is in 5's right subtree → violates BST.</code></pre>
+<b>Correct: thread (min, max) bounds down the recursion.</b>
+<pre><code>def isValidBST(root, lo=float('-inf'), hi=float('inf')):
+    if not root: return True
+    if not (lo &lt; root.val &lt; hi): return False
+    return (isValidBST(root.left,  lo, root.val) and
+            isValidBST(root.right, root.val, hi))</code></pre>
+<br>
+<b>Alternative — in-order produces sorted output:</b> a BST is valid iff its in-order traversal is strictly increasing. One pass, easy to write, but uses O(N) memory if you materialize the array (or O(H) if you keep "prev" state during recursion).
+<br><br>
+<b>The senior signal:</b> mention both approaches, and call out that strict <code>&lt;</code> (not <code>&lt;=</code>) matters if the BST forbids duplicates. Some definitions allow equal values on one side; check with the interviewer.`,
+     interactive:{ type:'findbug',
+       prompt:'This isValidBST passes the local "parent < right child, parent > left child" check on every node. It still returns True for a tree that violates the BST property. Which line is wrong?',
+       codeLines:[
+         'def isValidBST(root):',
+         '    def check(node):',
+         '        if not node: return True',
+         '        if node.left  and node.left.val  >= node.val: return False',
+         '        if node.right and node.right.val <= node.val: return False',
+         '        return check(node.left) and check(node.right)',
+         '    return check(root)',
+       ],
+       correctLine:6,
+       cat:'coding',
+       explain:'Line 6 only recurses; it never propagates an inherited (lo, hi) bound. A node in the right subtree of a grandparent could satisfy its immediate parent yet still violate the grandparent\'s bound. Correct fix: pass running min/max bounds down — check(node.left, lo, node.val) and check(node.right, node.val, hi).'}},
+
+    {id:'tr-5', type:'concept', name:'Kth smallest in BST — in-order with a counter', xp:12, time:8,
+     body:`A BST's in-order traversal gives sorted ascending order. To find the kth smallest, run in-order and stop at the kth visit. Don't build the full list — stop early.
+<pre><code>def kthSmallest(root, k):
+    stack, node = [], root
+    while stack or node:
+        while node:
+            stack.append(node); node = node.left
+        node = stack.pop()
+        k -= 1
+        if k == 0: return node.val
+        node = node.right
+    return None  # k out of range</code></pre>
+Time O(H + k), memory O(H). For a balanced tree, both are O(log N + k). Much better than O(N) "materialize then index."
+<br><br>
+<b>Followup interviewers love:</b> "what if the tree is modified frequently and you need kth-smallest queries many times?" Answer: augment each node with <code>subtree_size</code>. Then kth-smallest becomes O(H) directly by walking the tree using subtree sizes (like an indexed BST). Mentioning this followup BEFORE the interviewer asks is a strong senior signal.`,
+     interactive:{ type:'cloze',
+       prompt:'Kth-smallest in BST via iterative in-order. Pick the line that stops early at k.',
+       before:'def kthSmallest(root, k):\n    stack, node = [], root\n    while stack or node:\n        while node:\n            stack.append(node); node = node.left\n        node = stack.pop()\n        ',
+       after:'\n        node = node.right',
+       options:[
+         'k -= 1\n        if k == 0: return node.val',
+         'if node.val == k: return node.val',
+         'stack.append(node.val)\n        if len(stack) == k: return stack[-1]',
+         'k += 1\n        if k == len(stack): return node.val',
+       ],
+       correct:0,
+       cat:'coding',
+       explain:'Decrement k each in-order visit; the kth visited node is the kth smallest. Option B confuses index with value. Option C re-uses the stack as a buffer, leaks O(k) memory and misuses it. Option D inverts the counter direction.'}},
+
+    {id:'tr-6', type:'concept', name:'Max path sum (binary tree) — return one, track best', xp:12, time:10,
+     body:`Find the maximum sum of any path in a binary tree, where a path is any sequence of nodes connected by edges (doesn't have to pass through root). Classic "return one thing, track another" pattern.
+<pre><code>def maxPathSum(root):
+    best = [float('-inf')]                 # mutable to share across closures
+    def gain(node):
+        if not node: return 0
+        L = max(gain(node.left),  0)       # negative branches → don't extend
+        R = max(gain(node.right), 0)
+        best[0] = max(best[0], node.val + L + R)   # path through node
+        return node.val + max(L, R)        # return upward — can only extend one side
+    gain(root)
+    return best[0]</code></pre>
+<br>
+The trick: <b>at each node we compute two different things</b>. The function returns the best path that STARTS at this node and goes down one branch (so the parent can extend through us). But we also track the best path that PASSES THROUGH this node (uses both children). Those are different — only the "extend down one side" version is returnable up.
+<br><br>
+<b>Two subtle points:</b>
+<br>
+1. <code>max(gain(left), 0)</code> — if a branch is net-negative, prune it. Don't include it in the path.
+<br>
+2. The "passes-through" computation uses both branches; the return uses only one. Mixing these is the most common bug.`,
+     interactive:{ type:'whyexplain',
+       prompt:'In max-path-sum, why does <code>gain</code> return <code>node.val + max(L, R)</code> but track <code>node.val + L + R</code> in the running best?',
+       modelAnswer:'Two different things are being computed at each node. (1) "Best path starting at this node going DOWN one branch" — this is what we return to the parent, because the parent will extend this through itself, and the path-through-parent can only enter from one of its children. Using both children at this node would create a Y-shape that dead-ends and can\'t be extended further. (2) "Best path that PASSES THROUGH this node" — this CAN use both children (left arm + node + right arm), and is a candidate for the global best. We track that in best[], but don\'t return it.',
+       rubric:[
+         'Identifies the two distinct quantities (return value vs. global best)',
+         'Explains the topological constraint: a path extending upward can use only one child',
+         'Notes that "through-the-node" path is a valid candidate even though non-extendable',
+       ],
+       cat:'coding'}},
+  ]
+},
+{
+  cat:'coding', id:'cod-greedy', name:'Greedy — jump game, gas station, task scheduler',
+  intro:'Greedy is "take the locally best choice and prove it\'s globally optimal." When it works, code is short and beautiful. When it doesn\'t, you reach for DP. Learn to recognize which is which.',
+  lessons:[
+    {id:'gr-1', type:'concept', name:'Jump game — reach the end with greedy max-reach', xp:12, time:9,
+     body:`Given an array where <code>nums[i]</code> is the maximum jump length from position <code>i</code>, return True if you can reach the last index. The naive DP is O(N²). The greedy is O(N) and embarrassingly short.
+<br><br>
+<b>The key insight:</b> track the FURTHEST index reachable so far. If you ever reach an index that exceeds your reach, you're stuck. Otherwise you make it.
+<pre><code>def canJump(nums):
+    reach = 0
+    for i, jump in enumerate(nums):
+        if i &gt; reach: return False    # past the frontier, dead end
+        reach = max(reach, i + jump)
+        if reach &gt;= len(nums) - 1: return True
+    return True</code></pre>
+Time O(N), memory O(1). The greedy works because at every step we know the BEST we could have done — there's no benefit to a "save this jump for later" strategy.
+<br><br>
+<b>Variant — jump game II</b> ("minimum jumps to reach end"): trickier. Use BFS-style with two pointers tracking the current level's far-reach and the next level's far-reach. Each "level boundary" you cross is one jump. O(N).`,
+     interactive:{ type:'codepredict',
+       code:'def canJump(nums):\n    reach = 0\n    for i, jump in enumerate(nums):\n        if i > reach: return False\n        reach = max(reach, i + jump)\n    return True\n\nprint(canJump([3, 2, 1, 0, 4]))',
+       question:'What does this print?',
+       options:['True','False','None','Error'],
+       correct:1,
+       cat:'coding',
+       explain:'Trace: i=0 jump=3 → reach=3. i=1 jump=2 → reach=3. i=2 jump=1 → reach=3. i=3 jump=0 → reach=3 (no progress). i=4 — but i=4 > reach=3, so we return False. Stuck at index 3 with jump 0; the 4 behind it is unreachable.'}},
+
+    {id:'gr-2', type:'concept', name:'Gas station — total + running min', xp:12, time:9,
+     body:`Given gas[i] (fuel at station i) and cost[i] (fuel to reach station i+1), find the starting index that lets you complete the circuit, or return -1 if impossible.
+<br><br>
+<b>Two crisp facts that solve it:</b>
+<br>
+1. The circuit is possible iff <code>sum(gas) &gt;= sum(cost)</code> — otherwise you'll always run out somewhere.
+<br>
+2. If you ever go negative on your running tank, you can't have started anywhere in the range [start, current]. Reset start to current+1 and tank to 0.
+<pre><code>def canCompleteCircuit(gas, cost):
+    if sum(gas) &lt; sum(cost): return -1
+    tank = 0; start = 0
+    for i in range(len(gas)):
+        tank += gas[i] - cost[i]
+        if tank &lt; 0:
+            start = i + 1
+            tank = 0
+    return start</code></pre>
+Time O(N), memory O(1). Beautiful.
+<br><br>
+<b>The proof that "if total is enough, start works":</b> the function never re-tries earlier indices — yet it's correct. Why? Because if total ≥ 0 and we crashed at index i, then any prior candidate start s ≤ i also fails (the segment [s,i] had to be net-negative). So no index ≤ i can be optimal — skip past i. By the end, the unique surviving start is the answer.`,
+     interactive:{ type:'whyexplain',
+       prompt:'Gas station: after the loop crashes at index i, we set <code>start = i + 1</code>. Why is it safe to never re-test indices ≤ i?',
+       modelAnswer:'If tank went negative somewhere within the segment [start, i], the sum of (gas - cost) over that segment is negative. Any earlier candidate start s within [start, i] would inherit the same trailing deficit (or worse, since we\'d start with less buffer than we accumulated from start). So no index in [start, i] can be a valid starting point. We move start to i+1 with a clean tank and continue. Combined with the global "sum(gas) ≥ sum(cost)" check, the last surviving start is provably valid.',
+       rubric:[
+         'Notes the segment [start, i] is net-negative',
+         'Argues any earlier index in that segment inherits at least the same deficit',
+         'Connects to the global total check that guarantees a solution exists',
+       ],
+       cat:'coding'}},
+
+    {id:'gr-3', type:'concept', name:'Task scheduler — count buckets, formula', xp:12, time:9,
+     body:`Given a list of tasks (chars) and a cooldown N (same task can't run within N steps of itself), find the minimum total time including idles.
+<br><br>
+<b>The closed-form solution:</b>
+<pre><code>from collections import Counter
+def leastInterval(tasks, n):
+    counts = Counter(tasks).values()
+    max_count = max(counts)
+    most_frequent = sum(1 for c in counts if c == max_count)
+    # "Frame" of (n+1) slots filled by the most-frequent task, last row partial
+    framework = (max_count - 1) * (n + 1) + most_frequent
+    return max(framework, len(tasks))</code></pre>
+Time O(N + 26·log26). Memory O(26) = O(1).
+<br><br>
+<b>The intuition:</b> imagine the most-frequent task M appears K times. It MUST occupy K time slots with N gaps between consecutive appearances. That creates a "framework" of (K-1)·(N+1) + 1 slots. Tasks that tie with M for max count each add one more to the last row. Everything else fills idle slots; if there's not enough idle space, the answer is simply len(tasks) (no idles needed).
+<br><br>
+The <code>max(framework, len(tasks))</code> at the end handles the case where you have so many distinct tasks that no idles are required.`,
+     interactive:{ type:'codepredict',
+       code:'from collections import Counter\ndef leastInterval(tasks, n):\n    counts = Counter(tasks).values()\n    M = max(counts)\n    most = sum(1 for c in counts if c == M)\n    framework = (M - 1) * (n + 1) + most\n    return max(framework, len(tasks))\n\nprint(leastInterval(["A","A","A","B","B","B"], 2))',
+       question:'What does this print?',
+       options:['6','7','8','9'],
+       correct:2,
+       cat:'coding',
+       explain:'Both A and B appear 3 times (max). M=3, most=2 (two tasks tie). framework = (3-1)·(2+1) + 2 = 6 + 2 = 8. len(tasks)=6. max(8,6)=8. The schedule looks like A B _ A B _ A B (slots 7 and 8 used by the final A,B; idle in middle).'}},
+
+    {id:'gr-4', type:'concept', name:'Interval scheduling maximization — pick by earliest end', xp:12, time:8,
+     body:`Given N intervals, select the maximum number that don't overlap. This is the textbook greedy and shows up disguised as "max non-conflicting meetings," "max activities," "max non-overlapping bookings."
+<pre><code>def maxNonOverlapping(intervals):
+    intervals.sort(key=lambda x: x[1])    # sort by END
+    count, end = 0, float('-inf')
+    for s, e in intervals:
+        if s &gt;= end:
+            count += 1
+            end = e
+    return count</code></pre>
+Time O(N log N), memory O(1) extra.
+<br><br>
+<b>The proof (exchange argument):</b> assume OPT is the maximum, and suppose OPT's first-chosen interval is NOT the one ending earliest. Swap it with the earliest-ending one — the swap is safe (new interval ends ≤ old, frees more future room), and we now have a solution of the same size that picks earliest-end first. Repeat for OPT's second, third, etc. By induction, the "always earliest end" choice is optimal.
+<br><br>
+<b>Recognition:</b> "select MAXIMUM non-overlapping X" → sort by END. "MERGE overlapping X" → sort by START. The keyword "maximum" is the giveaway.`,
+     interactive:{ type:'cloze',
+       prompt:'Pick the line that completes the greedy.',
+       before:'def maxNonOverlapping(intervals):\n    intervals.sort(key=lambda x: x[1])\n    count, end = 0, float("-inf")\n    for s, e in intervals:\n        ',
+       after:'\n            count += 1\n            end = e\n    return count',
+       options:[
+         'if s >= end:',
+         'if e >= end:',
+         'if s > end and e > end:',
+         'if s >= end and e <= s:',
+       ],
+       correct:0,
+       cat:'coding',
+       explain:'Greedy keeps an interval iff its start is at or after the last kept interval\'s end (no overlap; touching is OK depending on definition). Option B compares against end of the new interval — meaningless. Option C is a redundant double-check (e > end follows from s ≥ end after sort). Option D contradicts itself.'}},
+  ]
+},
+{
+  cat:'coding', id:'cod-dp', name:'DP families — 1D, 2D, knapsack, LIS, edit distance',
+  intro:'Most DP problems collapse into five recognizable shapes. Once you can name the shape from the prompt, the recurrence almost writes itself.',
+  lessons:[
+    {id:'dp-1', type:'concept', name:'1D DP — house robber, climbing stairs', xp:12, time:9,
+     body:`State is one variable (usually the index). At each step, you choose between a few options and take the best.
+<br><br>
+<b>House robber:</b> rob houses linearly without robbing two adjacent. Max total?
+<pre><code>def rob(nums):
+    prev2 = prev1 = 0
+    for x in nums:
+        cur = max(prev1, prev2 + x)   # skip current, OR take current + best up to 2 back
+        prev2, prev1 = prev1, cur
+    return prev1</code></pre>
+Time O(N), memory O(1). The two-variable trick is the senior signal — naive DP uses an O(N) array.
+<br><br>
+<b>Climbing stairs:</b> ways to climb N stairs taking 1 or 2 at a time. Same shape:
+<pre><code>def climb(n):
+    a, b = 1, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a</code></pre>
+This is literally Fibonacci. Recognizing that links it to a closed-form (Binet's formula) for O(1).
+<br><br>
+<b>Recognition pattern:</b> at each index, you pick "take X options" and the previous state is enough to compute the next. State = one int. O(N) time, O(1) space.`,
+     interactive:{ type:'codepredict',
+       code:'def rob(nums):\n    prev2 = prev1 = 0\n    for x in nums:\n        cur = max(prev1, prev2 + x)\n        prev2, prev1 = prev1, cur\n    return prev1\n\nprint(rob([2, 7, 9, 3, 1]))',
+       question:'What does this print?',
+       options:['12','11','13','10'],
+       correct:0,
+       cat:'coding',
+       explain:'Optimal robbery: houses at index 0,2,4 → 2+9+1=12. Trace: x=2 → cur=2. x=7 → cur=max(2, 0+7)=7. x=9 → cur=max(7, 2+9)=11. x=3 → cur=max(11, 7+3)=11. x=1 → cur=max(11, 11+1)=12. Returns 12.'}},
+
+    {id:'dp-2', type:'concept', name:'2D DP — unique paths, edit distance', xp:12, time:9,
+     body:`State is two variables (typically two indices). dp[i][j] = best answer to subproblem (i, j).
+<br><br>
+<b>Unique paths (m×n grid, only down/right):</b>
+<pre><code>def uniquePaths(m, n):
+    dp = [[1] * n for _ in range(m)]
+    for i in range(1, m):
+        for j in range(1, n):
+            dp[i][j] = dp[i-1][j] + dp[i][j-1]
+    return dp[m-1][n-1]</code></pre>
+Time O(M·N). Memory O(M·N), reducible to O(N) by keeping only the previous row.
+<br><br>
+<b>Edit distance (min ops to transform A into B):</b>
+<pre><code>def editDistance(a, b):
+    m, n = len(a), len(b)
+    dp = [[0] * (n+1) for _ in range(m+1)]
+    for i in range(m+1): dp[i][0] = i        # delete all of a's first i chars
+    for j in range(n+1): dp[0][j] = j        # insert all of b's first j chars
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            if a[i-1] == b[j-1]:
+                dp[i][j] = dp[i-1][j-1]      # match — free
+            else:
+                dp[i][j] = 1 + min(
+                    dp[i-1][j],              # delete from a
+                    dp[i][j-1],              # insert into a
+                    dp[i-1][j-1]             # substitute
+                )
+    return dp[m][n]</code></pre>
+Time O(M·N), memory O(M·N) (reducible to O(min(M,N))).
+<br><br>
+<b>Recognition:</b> "transform A to B," "match two strings," "grid traversal" → 2D DP. The recurrence usually combines three or four adjacent cells.`,
+     interactive:{ type:'cloze',
+       prompt:'Edit distance — pick the recurrence when characters differ.',
+       before:'if a[i-1] == b[j-1]:\n    dp[i][j] = dp[i-1][j-1]\nelse:\n    dp[i][j] = 1 + min(\n        ',
+       after:',\n    )',
+       options:[
+         'dp[i-1][j], dp[i][j-1], dp[i-1][j-1]',
+         'dp[i-1][j-1], dp[i+1][j+1]',
+         'dp[i-1][j], dp[i+1][j], dp[i][j-1]',
+         'dp[i][j], dp[i-1][j], dp[i][j-1]',
+       ],
+       correct:0,
+       cat:'coding',
+       explain:'Three adjacent cells map to the three edit ops: dp[i-1][j] (delete from A → drop char), dp[i][j-1] (insert into A → consume B char), dp[i-1][j-1] (substitute). +1 for the operation itself. Option B looks ahead, which violates DP topological order. Options C and D include invalid or self-referential cells.'}},
+
+    {id:'dp-3', type:'concept', name:'0/1 Knapsack — bounded capacity, each item once', xp:12, time:10,
+     body:`Given items with weights and values and a knapsack capacity W, maximize value while staying under W. Each item is taken 0 or 1 times.
+<pre><code>def knapsack(weights, values, W):
+    n = len(weights)
+    dp = [[0] * (W+1) for _ in range(n+1)]
+    for i in range(1, n+1):
+        for w in range(W+1):
+            dp[i][w] = dp[i-1][w]                            # skip item i
+            if weights[i-1] &lt;= w:
+                dp[i][w] = max(dp[i][w],
+                               dp[i-1][w - weights[i-1]] + values[i-1])  # take item i
+    return dp[n][W]</code></pre>
+Time O(N·W), memory O(N·W). Reducible to O(W) by iterating <b>backwards</b> over w:
+<pre><code>def knapsackO1(weights, values, W):
+    dp = [0] * (W+1)
+    for i in range(len(weights)):
+        for w in range(W, weights[i]-1, -1):                 # backwards!
+            dp[w] = max(dp[w], dp[w - weights[i]] + values[i])
+    return dp[W]</code></pre>
+<b>Why backwards?</b> Going forward would double-count item i (you'd add it to dp[w-weights[i]] which already includes item i for higher w values, leading to unbounded knapsack — which IS what you want if items are reusable).
+<br><br>
+<b>Variant — unbounded knapsack (coin change-style):</b> iterate forwards. Same DP, opposite direction.`,
+     interactive:{ type:'whyexplain',
+       prompt:'In the O(W)-space 0/1 knapsack, you iterate w from W DOWN to weights[i]. Why backwards?',
+       modelAnswer:'In the 1D rolling array, dp[w] for the new item is computed from dp[w - weight[i]]. If you iterate forward, dp[w - weight[i]] would already have been updated to include item i, and you\'d be allowing item i to be reused — that\'s unbounded knapsack. Iterating backwards from W to weight[i] guarantees that dp[w - weight[i]] still reflects the previous row (item i not yet taken), preserving the 0/1 invariant. The forward-iteration version is correct for the unbounded variant where each item is reusable.',
+       rubric:[
+         'Notes that forward iteration would double-count item i',
+         'Distinguishes 0/1 (backward) vs unbounded (forward)',
+         'Mentions the rolling-array reuses memory: dp[w - weight[i]] must reflect the prior row',
+       ],
+       cat:'coding'}},
+
+    {id:'dp-4', type:'concept', name:'LIS — patience sort gives O(N log N)', xp:12, time:9,
+     body:`Longest Increasing Subsequence. The standard DP is O(N²); patience sort with binary insert is O(N log N).
+<pre><code>from bisect import bisect_left
+def lengthOfLIS(nums):
+    tails = []
+    for x in nums:
+        i = bisect_left(tails, x)
+        if i == len(tails):
+            tails.append(x)              # extends LIS
+        else:
+            tails[i] = x                 # replace — smaller tail keeps options open
+    return len(tails)</code></pre>
+Time O(N log N), memory O(K) where K is LIS length.
+<br><br>
+<b>What tails actually means:</b> <code>tails[i]</code> is the smallest possible tail of an increasing subsequence of length <code>i+1</code>. It's NOT the LIS itself — it's a separate, possibly-not-real sequence used to determine the length. The final array's length IS the answer.
+<br><br>
+<b>Why bisect_left and not bisect_right?</b> For "strictly increasing" you want bisect_left (don't include duplicates). For "non-decreasing," use bisect_right.
+<br><br>
+<b>Variant — longest common subsequence (LCS):</b> different problem (two strings), 2D DP in O(M·N). Both come up; don't confuse them.`,
+     interactive:{ type:'codepredict',
+       code:'from bisect import bisect_left\ndef lengthOfLIS(nums):\n    tails = []\n    for x in nums:\n        i = bisect_left(tails, x)\n        if i == len(tails):\n            tails.append(x)\n        else:\n            tails[i] = x\n    return len(tails)\n\nprint(lengthOfLIS([10, 9, 2, 5, 3, 7, 101, 18]))',
+       question:'What does this print?',
+       options:['3','4','5','6'],
+       correct:1,
+       cat:'coding',
+       explain:'Trace tails: 10→[10]. 9→[9]. 2→[2]. 5→[2,5]. 3→[2,3]. 7→[2,3,7]. 101→[2,3,7,101]. 18→[2,3,7,18]. Length=4. One actual LIS is [2,3,7,101] or [2,3,7,18]; tails ends at [2,3,7,18] but that\'s the artifact array, not the LIS.'}},
+
+    {id:'dp-5', type:'concept', name:'Palindrome partition — interval DP', xp:12, time:9,
+     body:`Given a string, return the minimum cuts needed to partition it into palindromes. State is (start, end) of a substring — that's interval DP.
+<br><br>
+<b>Two-pass approach:</b>
+<br>
+1. Precompute <code>isPal[i][j]</code> = is s[i:j+1] a palindrome? O(N²).
+<br>
+2. <code>dp[i]</code> = min cuts for s[:i]. Then <code>dp[i] = min(dp[j] + 1)</code> for all j where s[j:i] is palindrome.
+<pre><code>def minCut(s):
+    n = len(s)
+    isPal = [[False] * n for _ in range(n)]
+    for end in range(n):
+        for start in range(end + 1):
+            if s[start] == s[end] and (end - start &lt; 2 or isPal[start+1][end-1]):
+                isPal[start][end] = True
+    dp = [0] * n
+    for i in range(n):
+        if isPal[0][i]:
+            dp[i] = 0; continue
+        dp[i] = i  # worst case: cut between every char
+        for j in range(1, i+1):
+            if isPal[j][i]:
+                dp[i] = min(dp[i], dp[j-1] + 1)
+    return dp[n-1]</code></pre>
+Time O(N²), memory O(N²). The palindrome precompute uses the classic 2D recurrence (extend from both ends, with the special cases for length-1 and length-2 substrings).
+<br><br>
+<b>Recognition:</b> "partition," "split string," "min cuts to satisfy property X on each piece" → interval DP, often O(N²) or O(N³). When you see this, also consider whether expand-around-center palindrome finding (Manacher) gives an O(N) precompute.`,
+     interactive:{ type:'whyexplain',
+       prompt:'In the palindrome DP, the line <code>s[start] == s[end] and (end - start &lt; 2 or isPal[start+1][end-1])</code> handles which two cases?',
+       modelAnswer:'Two scenarios: (1) The substring is length 1 or 2 (end - start < 2): single chars are always palindromes; length-2 substrings are palindromes iff both chars match. The endpoint match alone suffices, no inner substring to check. (2) Length 3 or more: the substring is a palindrome iff the endpoints match AND the strictly-inner substring (start+1, end-1) is itself a palindrome. The recursive case piggybacks on previously computed isPal values, which is why we iterate end outer and start inner — when we ask about isPal[start+1][end-1], it was filled in an earlier pass over a shorter end value.',
+       rubric:[
+         'Identifies the two length regimes (≤2 and ≥3)',
+         'Explains why the inner-substring check is needed for length ≥ 3',
+         'Notes the iteration order ensures inner cells are filled before they are read',
+       ],
+       cat:'coding'}},
+  ]
+},
+{
+  cat:'coding', id:'cod-linked', name:'Linked list patterns — reverse, merge, copy, fast/slow',
+  intro:'Linked-list questions reduce to four moves: reverse, merge two sorted, two-pointer fast/slow, deep-copy with arbitrary pointers. Master these and most variations fall out.',
+  lessons:[
+    {id:'ll-1', type:'concept', name:'Reverse a linked list — iterative + recursive', xp:12, time:8,
+     body:`The iterative version is THE classic warmup. You should be able to write it from muscle memory.
+<pre><code>def reverse(head):
+    prev, cur = None, head
+    while cur:
+        nxt = cur.next
+        cur.next = prev
+        prev = cur
+        cur = nxt
+    return prev</code></pre>
+Time O(N), memory O(1).
+<br><br>
+<b>The recursive version</b> is shorter but uses O(N) stack:
+<pre><code>def reverseR(head):
+    if not head or not head.next: return head
+    new_head = reverseR(head.next)
+    head.next.next = head
+    head.next = None
+    return new_head</code></pre>
+<br>
+<b>The senior signal:</b> on systems with deep lists (10K+), the recursive version will stack-overflow. Always reach for iterative in production. Mention this if interviewer asks "which is better?"
+<br><br>
+<b>Variant — reverse a sublist</b> (LeetCode "Reverse Linked List II"): walk to position m, then run the iterative reverse for (n-m+1) steps, then splice. Track the "before-m" node so you can re-link cleanly.`,
+     interactive:{ type:'findbug',
+       prompt:'This iterative reverse is one line off. Find the bug.',
+       codeLines:[
+         'def reverse(head):',
+         '    prev, cur = None, head',
+         '    while cur:',
+         '        cur.next = prev',
+         '        nxt = cur.next',
+         '        prev = cur',
+         '        cur = nxt',
+         '    return prev',
+       ],
+       correctLine:5,
+       cat:'coding',
+       explain:'Line 4 already mutated cur.next to prev, so line 5 reads the wrong successor — nxt becomes prev (going backwards) and the loop loses the tail. Lines 4 and 5 must be swapped: save nxt FIRST, then mutate. This is the most common bug on this problem.'}},
+
+    {id:'ll-2', type:'concept', name:'Merge two sorted lists — dummy-head trick', xp:12, time:7,
+     body:`Always use a dummy head to avoid special-casing the first node. After the merge, return dummy.next.
+<pre><code>def mergeTwoLists(a, b):
+    dummy = ListNode(0)
+    tail = dummy
+    while a and b:
+        if a.val &lt;= b.val:
+            tail.next = a; a = a.next
+        else:
+            tail.next = b; b = b.next
+        tail = tail.next
+    tail.next = a or b      # attach whichever still has nodes
+    return dummy.next</code></pre>
+Time O(M + N), memory O(1).
+<br><br>
+<b>Followup interviewers love — merge K sorted lists:</b> use a min-heap of head pointers. Push the K heads; pop the smallest, append to result, push its next. Time O(N log K) where N = total nodes. Strictly better than pairwise merge or one big sort.
+<pre><code>import heapq
+def mergeKLists(lists):
+    heap = []
+    counter = 0   # tiebreaker for non-comparable ListNodes
+    for l in lists:
+        if l: heapq.heappush(heap, (l.val, counter, l)); counter += 1
+    dummy = ListNode(0); tail = dummy
+    while heap:
+        _, _, node = heapq.heappop(heap)
+        tail.next = node; tail = node
+        if node.next:
+            heapq.heappush(heap, (node.next.val, counter, node.next)); counter += 1
+    return dummy.next</code></pre>
+The <code>counter</code> tiebreaker handles equal vals — without it, heap comparison falls back to ListNode comparison (which raises TypeError).`,
+     interactive:{ type:'whyexplain',
+       prompt:'In merge K sorted lists with a heap, why include a counter in the heap tuple?',
+       modelAnswer:'Python\'s heapq compares tuples element-by-element. If two nodes have equal values, comparison falls through to the third tuple element. Without a counter, that\'s the ListNode itself — and ListNode (unless you defined __lt__) raises TypeError on comparison. The counter is a simple unique-per-push tiebreaker that prevents falling into the unorderable third element. Some alternatives: define __lt__ on ListNode (intrusive), or wrap nodes in a comparator object. The counter is the cleanest workaround.',
+       rubric:[
+         'Identifies tuple element-wise comparison',
+         'Explains the fall-through to ListNode triggers TypeError',
+         'Notes alternative solutions and tradeoffs',
+       ],
+       cat:'coding'}},
+
+    {id:'ll-3', type:'concept', name:'Fast/slow — cycle detect + find cycle start', xp:12, time:9,
+     body:`Floyd\'s tortoise-and-hare. The fast pointer moves 2 steps, slow moves 1. If there\'s a cycle, they meet inside it.
+<pre><code>def hasCycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast: return True
+    return False</code></pre>
+Time O(N), memory O(1).
+<br><br>
+<b>Find the cycle ENTRANCE</b> (LeetCode "Linked List Cycle II"): after they meet, reset slow to head. Now move BOTH at speed 1; the next meeting point is the cycle entrance. Why? Math: if the cycle has length C, slow traveled S, fast traveled 2S, and S = nC + D where D is distance from head to entrance. So slow is D steps into the cycle from start. Walking D more steps from both head and the meeting point lands them both at the entrance.
+<pre><code>def detectCycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            slow = head
+            while slow is not fast:
+                slow = slow.next; fast = fast.next
+            return slow
+    return None</code></pre>
+<br>
+<b>Variant — middle of a list:</b> same trick, simpler. When fast reaches end, slow is at the middle.`,
+     interactive:{ type:'codepredict',
+       code:'def hasCycle(head):\n    slow = fast = head\n    while fast and fast.next:\n        slow = slow.next\n        fast = fast.next.next\n        if slow is fast: return True\n    return False\n\n# Build 1 -> 2 -> 3 -> 4 -> 2 (cycle back to node 2)\nclass N:\n    def __init__(self, v): self.v, self.next = v, None\na, b, c, d = N(1), N(2), N(3), N(4)\na.next = b; b.next = c; c.next = d; d.next = b\nprint(hasCycle(a))',
+       question:'What does this print?',
+       options:['True','False','None','Error'],
+       correct:0,
+       cat:'coding',
+       explain:'There\'s a cycle (1→2→3→4→2→3→4→...). Fast/slow eventually meet inside the cycle. Trace: slow=2 fast=3; slow=3 fast=2 (wrapped); slow=4 fast=4 — meet, return True.'}},
+
+    {id:'ll-4', type:'concept', name:'Copy list with random pointer — interleave or hashmap', xp:12, time:9,
+     body:`Each node has <code>.next</code> and <code>.random</code> (which can point anywhere). Deep copy the structure.
+<br><br>
+<b>Approach 1 — hash map (O(N) extra space):</b>
+<pre><code>def copyRandomList(head):
+    if not head: return None
+    old_to_new = {}
+    cur = head
+    while cur:
+        old_to_new[cur] = Node(cur.val)
+        cur = cur.next
+    cur = head
+    while cur:
+        old_to_new[cur].next   = old_to_new.get(cur.next)
+        old_to_new[cur].random = old_to_new.get(cur.random)
+        cur = cur.next
+    return old_to_new[head]</code></pre>
+<br>
+<b>Approach 2 — interleave (O(1) extra space):</b>
+<br>
+1. Insert each copy right after its original: A → A\' → B → B\' → C → C\'
+<br>
+2. Set <code>copy.random = original.random.next</code> (the .next gets you the new node)
+<br>
+3. Detach the two lists.
+<pre><code>def copyRandomListO1(head):
+    if not head: return None
+    cur = head
+    while cur:                                  # 1. interleave
+        nxt = cur.next
+        cur.next = Node(cur.val)
+        cur.next.next = nxt
+        cur = nxt
+    cur = head
+    while cur:                                  # 2. wire randoms
+        if cur.random:
+            cur.next.random = cur.random.next
+        cur = cur.next.next
+    new_head = head.next                        # 3. detach
+    cur = head
+    while cur:
+        copy = cur.next
+        cur.next = copy.next
+        copy.next = copy.next.next if copy.next else None
+        cur = cur.next
+    return new_head</code></pre>
+The interleave version is the senior signal — most candidates only know the hashmap approach.`,
+     interactive:{ type:'whyexplain',
+       prompt:'In the O(1)-space interleave copy, why is the line <code>copy.random = original.random.next</code> correct?',
+       modelAnswer:'After step 1 (interleave), every original X is immediately followed by its copy X\'. So X.next IS X\'. When we want to set copy_X.random, we know copy_X.random should point to the COPY of whatever X.random pointed to. That copy is exactly X.random.next (because X.random was interleaved with its own copy in step 1). The .next dereference is what bridges "where the original pointed" to "where its corresponding copy lives" — no hash map needed because the structure itself encodes the mapping during the interleaved phase.',
+       rubric:[
+         'Notes the interleaved structure puts copy right after original',
+         'Explains the .next dereference is the implicit mapping',
+         'Identifies this as why no hash map is required',
+       ],
+       cat:'coding'}},
+  ]
+},
+{
+  cat:'coding', id:'cod-stack', name:'Stack patterns — valid parens, min stack, calculator',
+  intro:'Beyond monotonic stack, four classic uses of a plain stack. Each comes up reliably in entry-to-mid senior on-sites.',
+  lessons:[
+    {id:'st-1', type:'concept', name:'Valid parentheses — pair-match with stack', xp:12, time:6,
+     body:`Given a string of brackets <code>()[]{}</code>, return True iff all open/close pairs match in correct order.
+<pre><code>def isValid(s):
+    pair = {')':'(', ']':'[', '}':'{'}
+    stack = []
+    for ch in s:
+        if ch in pair:
+            if not stack or stack.pop() != pair[ch]:
+                return False
+        else:
+            stack.append(ch)
+    return not stack</code></pre>
+Time O(N), memory O(N). The <code>not stack</code> final check catches unmatched opens.
+<br><br>
+<b>Variant — longest valid parentheses:</b> harder. Stack of indices, push -1 initially. On "(": push i. On ")": pop. If stack empty, push i (new base). Else, current valid length = i - stack[-1]. Track max.`,
+     interactive:{ type:'codepredict',
+       code:'def isValid(s):\n    pair = {")":"(", "]":"[", "}":"{"}\n    stack = []\n    for ch in s:\n        if ch in pair:\n            if not stack or stack.pop() != pair[ch]:\n                return False\n        else:\n            stack.append(ch)\n    return not stack\n\nprint(isValid("([)]"))',
+       question:'What does this print?',
+       options:['True','False','None','Error'],
+       correct:1,
+       cat:'coding',
+       explain:'Stack walks: "(" push → ["("]. "[" push → ["(", "["]. ")" pop "[" — expected "(" but got "[", return False. The string has correctly-counted brackets but they interleave (cross), so it\'s invalid. The stack catches this — order matters, not just count.'}},
+
+    {id:'st-2', type:'concept', name:'Min stack — O(1) min query', xp:12, time:7,
+     body:`Design a stack that supports push/pop/top/getMin all in O(1).
+<br><br>
+<b>The trick — store pairs (value, current_min):</b>
+<pre><code>class MinStack:
+    def __init__(self):
+        self.stack = []
+    def push(self, x):
+        m = x if not self.stack else min(x, self.stack[-1][1])
+        self.stack.append((x, m))
+    def pop(self):
+        self.stack.pop()
+    def top(self):
+        return self.stack[-1][0]
+    def getMin(self):
+        return self.stack[-1][1]</code></pre>
+Every push pays an extra O(1) for the min computation; the min is always at the top. Space is O(N) — one int per element extra.
+<br><br>
+<b>Alternative — auxiliary stack of mins:</b> push to aux only when new value ≤ current min; pop from aux only when popping equals aux top. Saves space when many duplicates of the minimum exist.`,
+     interactive:{ type:'cloze',
+       prompt:'Pick the correct push line for the (value, current_min) pair encoding.',
+       before:'class MinStack:\n    def __init__(self):\n        self.stack = []\n    def push(self, x):\n        ',
+       after:'\n    def pop(self): self.stack.pop()\n    def getMin(self): return self.stack[-1][1]',
+       options:[
+         'm = x if not self.stack else min(x, self.stack[-1][1])\n        self.stack.append((x, m))',
+         'self.stack.append(x)',
+         'self.stack.append((x, x))',
+         'self.stack.append((x, min(x, self.stack[-1][0])))',
+       ],
+       correct:0,
+       cat:'coding',
+       explain:'For each push, current min is x (if stack empty) or min(x, previous top\'s min). Option B drops the min tracking entirely. Option C always claims x is its own min — wrong unless stack is empty. Option D compares with the previous VALUE, not its min — wrong if the previous-min is buried below.'}},
+
+    {id:'st-3', type:'concept', name:'Decode string — nested k[content]', xp:12, time:9,
+     body:`Given "3[a]2[bc]" → "aaabcbc". "3[a2[c]]" → "accaccacc". Build the decoded string with a stack of (multiplier, partial_string) pairs.
+<pre><code>def decodeString(s):
+    stack = []
+    cur_str = ""
+    cur_num = 0
+    for ch in s:
+        if ch.isdigit():
+            cur_num = cur_num * 10 + int(ch)
+        elif ch == '[':
+            stack.append((cur_str, cur_num))
+            cur_str = ""
+            cur_num = 0
+        elif ch == ']':
+            prev_str, num = stack.pop()
+            cur_str = prev_str + cur_str * num
+        else:
+            cur_str += ch
+    return cur_str</code></pre>
+Time O(N · max_decoded_length), memory O(N · stack depth).
+<br><br>
+<b>The trick to recognize:</b> the multiplier comes BEFORE the bracket, so you accumulate it (using <code>* 10 + digit</code> for multi-digit numbers) and push it onto the stack when you hit "[". When you hit "]", you pop the multiplier and the partial-string-from-outside-this-pair, and combine them.`,
+     interactive:{ type:'codepredict',
+       code:'def decodeString(s):\n    stack = []\n    cur_str = ""\n    cur_num = 0\n    for ch in s:\n        if ch.isdigit():\n            cur_num = cur_num * 10 + int(ch)\n        elif ch == "[":\n            stack.append((cur_str, cur_num))\n            cur_str, cur_num = "", 0\n        elif ch == "]":\n            prev_str, num = stack.pop()\n            cur_str = prev_str + cur_str * num\n        else:\n            cur_str += ch\n    return cur_str\n\nprint(decodeString("2[ab3[c]]"))',
+       question:'What does this print?',
+       options:['"ab3cab3c"','"abcccabccc"','"abcabcccc"','"ababccc"'],
+       correct:1,
+       cat:'coding',
+       explain:'Walk: "2[ab3[c]]" — outer 2[...] repeats the inner result twice. Inner "ab3[c]" = "ab" + ("c" × 3) = "abccc". Outer: "abccc" × 2 = "abcccabccc". The decode-from-outside-in is exactly what the stack achieves.'}},
+  ]
+},
+{
+  cat:'coding', id:'cod-select', name:'Selection — quickselect, top-K, median of two arrays',
+  intro:'When you need "the Kth thing" or "the median," sorting is overkill. Three sharper techniques.',
+  lessons:[
+    {id:'sel-1', type:'concept', name:'Quickselect — Kth largest in O(N) avg', xp:12, time:9,
+     body:`Quickselect is Quicksort minus the recursion on the side you don\'t need. Average case O(N), worst case O(N²). For interview purposes, the average bound is what matters.
+<pre><code>import random
+def quickselect(nums, k):
+    # k is 1-indexed: 1 = largest, 2 = second largest, ...
+    def partition(lo, hi):
+        pivot = nums[random.randint(lo, hi)]
+        # Hoare partition: produce "≥ pivot" then "≤ pivot" zones
+        i = lo
+        for j in range(lo, hi):
+            if nums[j] &gt; pivot:
+                nums[i], nums[j] = nums[j], nums[i]
+                i += 1
+        # Put pivot in its final place by moving the last element here
+        # (simplified: standard Lomuto with pivot at end; see notes)
+        return i
+    target = k - 1                    # 0-indexed position of the kth largest
+    lo, hi = 0, len(nums) - 1
+    while lo &lt;= hi:
+        p = partition(lo, hi)
+        if p == target: return nums[p]
+        elif p &lt; target: lo = p + 1
+        else: hi = p - 1
+    return -1</code></pre>
+The randomized pivot is essential — without it, sorted inputs trigger O(N²). Always state this aloud.
+<br><br>
+<b>Alternative — min-heap of size K:</b> O(N log K). For very small K relative to N, heap is competitive. For K close to N/2 (e.g., median), quickselect wins. Mention this tradeoff.`,
+     interactive:{ type:'whyexplain',
+       prompt:'Quickselect averages O(N) time but worst-case O(N²). What single choice prevents the worst case from being triggered by sorted input?',
+       modelAnswer:'Randomized pivot selection. With a deterministic pivot (e.g., always pick the first or last element), a sorted or reverse-sorted input degenerates: every partition splits N into N-1 + 1, recursion is N levels deep, work per level is O(N), total O(N²). Picking a random pivot makes any pre-sorted ordering equivalent to a random ordering with high probability — expected partition is balanced, expected work is N + N/2 + N/4 + ... = 2N = O(N). The randomization happens once per partition; it\'s cheap, and it gives a strong probabilistic guarantee against adversarial input.',
+       rubric:[
+         'Identifies pivot selection as the issue',
+         'Explains why sorted input causes the worst case',
+         'Notes randomization gives expected O(N) regardless of input distribution',
+       ],
+       cat:'coding'}},
+
+    {id:'sel-2', type:'concept', name:'Top-K with heap — streaming-friendly', xp:12, time:8,
+     body:`When you need the top K from a stream (don\'t see all data at once), heap is the answer.
+<pre><code>import heapq
+def topKLargest(nums, k):
+    heap = []
+    for x in nums:
+        if len(heap) &lt; k:
+            heapq.heappush(heap, x)
+        elif x &gt; heap[0]:
+            heapq.heapreplace(heap, x)     # pop min, push x atomically
+    return sorted(heap, reverse=True)       # final sort if order matters</code></pre>
+Time O(N log K). Memory O(K) — bounded regardless of N.
+<br><br>
+<b>Why min-heap for top-K LARGEST?</b> The smallest of the top K sits at the root, so we can instantly compare new elements against it. If a new x exceeds the root, swap. If not, discard.
+<br><br>
+<b>Comparison to quickselect:</b>
+<table>
+<tr><th>Problem</th><th>Use</th></tr>
+<tr><td>Top K from a stream</td><td>Heap (bounded memory, online)</td></tr>
+<tr><td>Top K from a fixed array, K small</td><td>Heap</td></tr>
+<tr><td>Top K from a fixed array, K = N/2</td><td>Quickselect</td></tr>
+<tr><td>Need them sorted</td><td>Heap, then sort top K — O(N log K + K log K)</td></tr>
+</table>`,
+     interactive:{ type:'cloze',
+       prompt:'Pick the line that maintains the top-K-largest invariant.',
+       before:'import heapq\ndef topK(nums, k):\n    heap = []\n    for x in nums:\n        if len(heap) < k:\n            heapq.heappush(heap, x)\n        elif x > heap[0]:\n            ',
+       after:'\n    return heap',
+       options:[
+         'heapq.heapreplace(heap, x)',
+         'heapq.heappush(heap, x)',
+         'heap.append(x)',
+         'heap[0] = x',
+       ],
+       correct:0,
+       cat:'coding',
+       explain:'heapreplace pops the smallest and pushes x in one O(log K) operation — keeps size at K. Option B grows the heap past K. Option C breaks the heap invariant (it\'s a list internally, but unsorted append violates the structure). Option D mutates the root without re-heapifying — sift down/up is needed.'}},
+
+    {id:'sel-3', type:'concept', name:'Median of two sorted arrays — binary search', xp:12, time:11,
+     body:`Find the median of two sorted arrays in O(log(min(m,n))). A LeetCode hard, and one of the most-asked questions at FAANG senior on-sites.
+<br><br>
+<b>The insight:</b> the median splits the combined array into two halves of equal size. Binary-search on the SPLIT POINT of the shorter array — the longer array\'s split is then determined.
+<pre><code>def findMedianSortedArrays(a, b):
+    if len(a) &gt; len(b): a, b = b, a       # ensure a is shorter
+    m, n = len(a), len(b)
+    half = (m + n + 1) // 2
+    lo, hi = 0, m
+    while lo &lt;= hi:
+        i = (lo + hi) // 2
+        j = half - i
+        a_left  = a[i-1] if i &gt; 0 else float('-inf')
+        a_right = a[i]   if i &lt; m else float('inf')
+        b_left  = b[j-1] if j &gt; 0 else float('-inf')
+        b_right = b[j]   if j &lt; n else float('inf')
+        if a_left &lt;= b_right and b_left &lt;= a_right:
+            if (m + n) % 2 == 0:
+                return (max(a_left, b_left) + min(a_right, b_right)) / 2
+            else:
+                return max(a_left, b_left)
+        elif a_left &gt; b_right:
+            hi = i - 1
+        else:
+            lo = i + 1</code></pre>
+The +∞/−∞ sentinels handle "split at the very start" or "very end" cases without special-casing.
+<br><br>
+This question separates strong candidates from average ones; explicit pre-mortem ("here are the boundary cases I'm worried about") is the senior signal.`,
+     interactive:{ type:'whyexplain',
+       prompt:'Why does the median-of-two-sorted-arrays algorithm binary-search on the SHORTER array?',
+       modelAnswer:'The binary search domain is [0, m] — all valid split points of array a. If a is shorter, we have fewer possible splits, so log(m) iterations. Searching on the longer one would be log(n) — same asymptotic, but: when m is much smaller than n (e.g., m=1, n=10^6), searching on a is log(1)=0 iterations vs log(10^6)=20. More importantly, with the shorter array as the search variable, j = half - i is always in [0, n], so we never have to clamp or special-case j going out of bounds. Ensuring a is the shorter array makes the math clean and minimizes the search depth in the worst case.',
+       rubric:[
+         'Notes the binary search bound is the length of the array being searched',
+         'Notes that ensuring shorter-on-the-search-axis keeps the complementary index in bounds',
+         'Identifies the asymptotic and practical advantages',
+       ],
+       cat:'coding'}},
+  ]
+},
+{
+  cat:'coding', id:'cod-strings', name:'String matching — KMP, Rabin-Karp, rolling hash',
+  intro:'When you need to find a pattern (or many patterns) inside a text, naive O(M·N) breaks at scale. Three algorithms cover 95% of advanced string problems.',
+  lessons:[
+    {id:'sm-1', type:'concept', name:'KMP — failure function for O(M+N) matching', xp:12, time:11,
+     body:`The Knuth-Morris-Pratt algorithm matches a pattern of length M inside a text of length N in O(M + N), beating the naive O(M·N).
+<br><br>
+<b>The key insight:</b> precompute a "failure function" — for each pattern prefix, how far back can we slide on a mismatch without missing a possible match? This avoids re-comparing characters we already know match.
+<br><br>
+<b>Step 1 — build the failure (LPS) array:</b>
+<pre><code>def buildLPS(pat):
+    lps = [0] * len(pat)
+    length = 0      # length of previous longest prefix-suffix
+    i = 1
+    while i &lt; len(pat):
+        if pat[i] == pat[length]:
+            length += 1
+            lps[i] = length
+            i += 1
+        elif length:
+            length = lps[length - 1]    # fall back along the chain
+        else:
+            lps[i] = 0
+            i += 1
+    return lps</code></pre>
+<br>
+<b>Step 2 — match using LPS:</b>
+<pre><code>def kmp(text, pat):
+    if not pat: return 0
+    lps = buildLPS(pat)
+    i = j = 0
+    while i &lt; len(text):
+        if text[i] == pat[j]:
+            i += 1; j += 1
+            if j == len(pat):
+                return i - j          # match found
+        elif j:
+            j = lps[j - 1]            # slide pattern using LPS
+        else:
+            i += 1
+    return -1</code></pre>
+<br>
+The "slide" via lps[j-1] is what avoids re-comparing. Total comparisons across all of KMP is at most 2N.`,
+     interactive:{ type:'whyexplain',
+       prompt:'In KMP, on a mismatch we slide the pattern by <code>j - lps[j-1]</code> instead of just 1. Why is this always safe?',
+       modelAnswer:'lps[j-1] is the length of the longest proper prefix of pat[0..j-1] that is ALSO a suffix. So pat[0..lps[j-1]-1] already matches text[i-lps[j-1] .. i-1] — we know that prefix is in the text, because we just walked through it matching pat[0..j-1]. Sliding the pattern so its lps[j-1]-length prefix lines up with that confirmed substring of text means we never miss a possible match, and we never re-compare the lps[j-1] characters we already know match. A naive "slide by 1" would re-test all of these and might miss a valid match if the pattern has internal repetition (e.g., "aab" in "aaab").',
+       rubric:[
+         'Defines LPS as longest proper prefix-suffix overlap',
+         'Explains why the slide preserves match correctness',
+         'Notes the avoided re-comparison and time savings',
+       ],
+       cat:'coding'}},
+
+    {id:'sm-2', type:'concept', name:'Rabin-Karp — rolling hash for fast substring match', xp:12, time:9,
+     body:`Rabin-Karp hashes the pattern and every window of the text, comparing hashes (O(1) per window) instead of strings (O(M)). Expected O(N + M).
+<pre><code>def rabinKarp(text, pat):
+    if len(pat) &gt; len(text): return -1
+    M, N = len(pat), len(text)
+    base, mod = 256, 10**9 + 7
+
+    pat_hash = 0
+    win_hash = 0
+    h = pow(base, M-1, mod)              # base^(M-1) mod mod
+
+    for i in range(M):
+        pat_hash = (pat_hash * base + ord(pat[i])) % mod
+        win_hash = (win_hash * base + ord(text[i])) % mod
+
+    for i in range(N - M + 1):
+        if pat_hash == win_hash and text[i:i+M] == pat:    # verify on hash hit
+            return i
+        if i &lt; N - M:
+            win_hash = (
+                (win_hash - ord(text[i]) * h) * base + ord(text[i + M])
+            ) % mod
+    return -1</code></pre>
+The verification step (<code>text[i:i+M] == pat</code>) catches hash collisions. With a good hash, collisions are rare; total expected work is O(N + M).
+<br><br>
+<b>Where Rabin-Karp shines:</b> matching MANY patterns at once. Hash all K patterns, then scan the text once — every window\'s hash gets checked against the set in O(1). Total O(N + K·M).`,
+     interactive:{ type:'codepredict',
+       code:'def naiveMatch(text, pat):\n    M, N = len(pat), len(text)\n    for i in range(N - M + 1):\n        if text[i:i+M] == pat:\n            return i\n    return -1\n\nprint(naiveMatch("aaaaaab", "aaab"))',
+       question:'What does this print?',
+       options:['3','4','5','-1'],
+       correct:0,
+       cat:'coding',
+       explain:'Naive scan: i=0 "aaaa"!="aaab". i=1 "aaaa"!="aaab". i=2 "aaaa"!="aaab". i=3 "aaab"=="aaab" → return 3. Worst case complexity is O(M·N) — that\'s the pathological pattern that motivates KMP / Rabin-Karp.'}},
+
+    {id:'sm-3', type:'concept', name:'Z-function — every prefix-length match in O(N)', xp:12, time:9,
+     body:`The Z-array of a string S has Z[i] = length of the longest substring starting at i that is also a prefix of S. Built in O(N) with the "Z-box" technique. Useful for: pattern matching, longest palindromic substring, string periodicity.
+<pre><code>def zFunction(s):
+    n = len(s)
+    z = [0] * n
+    l, r = 0, 0                       # current Z-box bounds
+    for i in range(1, n):
+        if i &lt; r:
+            z[i] = min(r - i, z[i - l])
+        while i + z[i] &lt; n and s[z[i]] == s[i + z[i]]:
+            z[i] += 1
+        if i + z[i] &gt; r:
+            l, r = i, i + z[i]
+        # z[0] left as 0 by convention; some define z[0] = n
+    return z</code></pre>
+Each character is compared at most twice across the whole computation, giving the O(N) bound.
+<br><br>
+<b>Pattern matching with Z:</b> build Z on <code>pat + "#" + text</code>, then any position where Z = len(pat) is a match. The "#" separator prevents the pattern from matching across into itself.`,
+     interactive:{ type:'codepredict',
+       code:'def zFunction(s):\n    n = len(s)\n    z = [0] * n\n    l, r = 0, 0\n    for i in range(1, n):\n        if i < r: z[i] = min(r - i, z[i - l])\n        while i + z[i] < n and s[z[i]] == s[i + z[i]]:\n            z[i] += 1\n        if i + z[i] > r:\n            l, r = i, i + z[i]\n    return z\n\nprint(zFunction("aabaab"))',
+       question:'What does this print?',
+       options:[
+         '[0, 1, 0, 3, 1, 0]',
+         '[0, 0, 0, 3, 1, 0]',
+         '[0, 1, 0, 4, 0, 0]',
+         '[0, 0, 1, 3, 1, 0]',
+       ],
+       correct:0,
+       cat:'coding',
+       explain:'Z[0]=0 (convention). i=1: s[1]="a" matches s[0]="a", s[2]="b" ≠ s[1]="a" → z[1]=1. i=2: s[2]="b" ≠ s[0]="a" → z[2]=0. i=3: "aab" matches prefix "aab" → z[3]=3. i=4: "a" matches → z[4]=1. i=5: "b" ≠ "a" → z[5]=0. Result: [0,1,0,3,1,0].'}},
+  ]
+},
 
 /* ===== SYSTEM DESIGN ===== */
 {
