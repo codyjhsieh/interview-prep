@@ -688,37 +688,78 @@ function mountPet3D(container, p) {
     const frame = new T.Mesh(new T.BoxGeometry(1.75, 1.45, 0.04), new T.MeshStandardMaterial({ color: 0x5A6373 }));
     frame.position.set(1.0, 3.0, -FLOOR_W/2 + 0.10);
     scene.add(frame);
-    // Sun / moon disc visible through the window. Sits IN FRONT of the
-    // window pane (z slightly closer to camera than the pane), with
-    // renderOrder forced so it never z-fights with the emissive sky.
-    // Color, size, and glow shift with time of day.
-    const isNight = tod.phase === 'night' || tod.phase === 'late';
-    const sunR = isNight ? 0.18 : 0.30;
-    const sunVis = new T.Mesh(
-      new T.SphereGeometry(sunR, 16, 12),
-      new T.MeshBasicMaterial({ color: tod.sunColor })
-    );
-    const sunXInWindow  = Math.max(-0.55, Math.min(0.55, tod.sunPos[0] / 14 * 0.55));
-    const sunYInWindow  = Math.max(-0.45, Math.min(0.45, (tod.sunPos[1] - 5) / 14 * 0.5));
-    sunVis.position.set(1.0 + sunXInWindow, 3.0 + sunYInWindow, -FLOOR_W/2 + 0.18);
-    sunVis.renderOrder = 5;
-    sunVis.material.depthTest = false;
-    scene.add(sunVis);
-    // Glow halo around the sun/moon — bigger, dimmer, additive blend
-    const halo = new T.Mesh(
-      new T.SphereGeometry(sunR * 2.4, 16, 12),
-      new T.MeshBasicMaterial({
-        color: tod.sunColor,
-        transparent: true,
-        opacity: isNight ? 0.18 : 0.30,
-        depthTest: false,
-        blending: T.AdditiveBlending,
-      })
-    );
-    halo.position.copy(sunVis.position);
-    halo.position.z -= 0.01;     // slight bias so sun draws on top of halo
-    halo.renderOrder = 4;
-    scene.add(halo);
+    // Sun/moon are CONCEPTUALLY in the background (outside the room),
+    // not rendered inside the window pane. What you SEE inside the room
+    // is their light passing through — a colored floor patch where the
+    // rays land, plus an angled volumetric beam from window to patch.
+    // Calculate the ray's landing point on the floor based on sun pos.
+    const windowCenter = new T.Vector3(1, 3, -FLOOR_W/2 + 0.12);
+    const sunWorld = new T.Vector3(tod.sunPos[0], tod.sunPos[1], tod.sunPos[2]);
+    // Ray direction = from sun toward window center, continuing into the room.
+    const rayDir = windowCenter.clone().sub(sunWorld).normalize();
+    let beamReaches = false;
+    let landPos = new T.Vector3();
+    if (rayDir.y < -0.04) {
+      // Continue the ray past the window plane until it hits the floor (y=0)
+      const distFromSunToFloor = (0 - sunWorld.y) / rayDir.y;
+      // The point on the floor where the ray would land if unobstructed
+      landPos.set(
+        sunWorld.x + rayDir.x * distFromSunToFloor,
+        0,
+        sunWorld.z + rayDir.z * distFromSunToFloor,
+      );
+      // Light only reaches the floor if (a) the ray actually enters via the
+      // window (within window bounds) and (b) the landing point is on the
+      // floor (within FLOOR_W/2). For simplicity, just clamp to floor.
+      beamReaches = Math.abs(landPos.x) < FLOOR_W/2 - 0.5 &&
+                    Math.abs(landPos.z) < FLOOR_W/2 - 0.5 &&
+                    tod.sunIntensity > 0.45;
+    }
+    if (beamReaches) {
+      // 1) Bright floor patch where the ray lands — additive blend so it
+      //    brightens whatever's underneath without becoming a flat color block.
+      const patch = new T.Mesh(
+        new T.PlaneGeometry(2.0, 1.8),
+        new T.MeshBasicMaterial({
+          color: tod.sunColor,
+          transparent: true,
+          opacity: Math.min(0.45, tod.sunIntensity * 0.42),
+          blending: T.AdditiveBlending,
+          depthWrite: false,
+        })
+      );
+      patch.position.set(landPos.x, 0.02, landPos.z);
+      patch.rotation.x = -Math.PI / 2;
+      patch.renderOrder = 1;
+      scene.add(patch);
+
+      // 2) Volumetric beam — translucent rectangular prism from the window
+      //    pane down to the floor patch. Additive blend gives the "dust in
+      //    a sunbeam" feel without needing a real volumetric shader.
+      const start = new T.Vector3(1, 3, -FLOOR_W/2 + 0.18);
+      const end   = new T.Vector3(landPos.x, 0, landPos.z);
+      const beamVec = end.clone().sub(start);
+      const beamLen = beamVec.length();
+      const beam = new T.Mesh(
+        new T.BoxGeometry(1.4, beamLen, 1.2),
+        new T.MeshBasicMaterial({
+          color: tod.sunColor,
+          transparent: true,
+          opacity: Math.min(0.14, tod.sunIntensity * 0.12),
+          blending: T.AdditiveBlending,
+          depthWrite: false,
+        })
+      );
+      // Center the beam between window and patch, then rotate so its
+      // local +Y points from start to end.
+      beam.position.copy(start.clone().add(end).multiplyScalar(0.5));
+      beam.quaternion.setFromUnitVectors(
+        new T.Vector3(0, 1, 0),
+        beamVec.clone().normalize()
+      );
+      beam.renderOrder = 0;
+      scene.add(beam);
+    }
   } else {
     const pic = new T.Mesh(new T.BoxGeometry(1.2, 1.4, 0.05), new T.MeshStandardMaterial({ color: 0x5BA585 }));
     pic.position.set(1.0, 3.0, -FLOOR_W/2 + 0.12);
