@@ -449,7 +449,12 @@ function ensureDailyQuests(state, pool) {
  *   form    (-50..+50) — body axis. Negative = chubby. Positive = jacked.
  *
  * XP → pet rules:
- *   Hit daily goal           →  vitality +25 (cap 100); marked fed today
+ *   Hit daily goal           →  toast: "Bit is hungry, drop food" (one-shot
+ *                                /day). NOTE: no automatic vitality bump
+ *                                anymore — actively topping vitality up
+ *                                requires the manual "Drop food" button.
+ *   Drop food pile (manual)  →  vitality +8 (cap 100); form ±1 depending
+ *                                on whether the user is on the workout path
  *   Hit ≥1.5× daily goal     →  form += +6 (jacked path) — counts as exercise
  *   Hit ≥1.0× but <1.5×      →  form += -2 (chubby drift — fed without exercise)
  *   PRIOR day = 0 XP         →  vitality = 0 (instant death — full skip)
