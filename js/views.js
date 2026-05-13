@@ -479,6 +479,38 @@ function _darken(hex, factor) {
   return (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(b);
 }
 
+/* Animation easing toolkit (Penner-style curves).
+ * Use these instead of linear lerps so motion always has a "feel." */
+const Ease = {
+  inOutCubic: t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2,
+  outBack:    t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3*Math.pow(t-1, 3) + c1*Math.pow(t-1, 2); },
+  outQuad:    t => 1 - (1-t) * (1-t),
+  inQuad:     t => t * t,
+  outQuint:   t => 1 - Math.pow(1-t, 5),
+  // Parabolic arc 0..1..0 over [0,1] — for foot lifts during walk
+  arc:        t => 4 * t * (1 - t),
+  // Cycloid-ish bob (smoothed |sin|) for body during walk
+  bob:        t => Math.pow(Math.abs(Math.sin(t * Math.PI)), 0.65),
+};
+
+/* Damped-spring step. Returns updated [value, velocity].
+ * stiffness ~ 80 = snappy. damping ~ 10 = settles in ~0.5s. */
+function _dampSpring(value, velocity, target, dt, stiffness = 80, damping = 12) {
+  const force = (target - value) * stiffness;
+  const friction = velocity * damping;
+  velocity += (force - friction) * dt;
+  value += velocity * dt;
+  return [value, velocity];
+}
+
+/* Shortest-path angle delta — for facing rotations (avoid the long way around). */
+function _shortAngle(from, to) {
+  let d = to - from;
+  while (d >  Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  return d;
+}
+
 function mountPet3D(container, p) {
   if (!container || !window.THREE) return null;
   // Dispose any prior mount on this container
@@ -571,115 +603,152 @@ function mountPet3D(container, p) {
   const petColor = moodColors[mood] || moodColors.content;
   const petMat = new T.MeshStandardMaterial({ color: petColor, flatShading: true, roughness: 0.65 });
 
-  /* ---- Cute Bit body: toddler proportions (oversized head), low-poly
-     IcosahedronGeometry for visible facets, white-with-pupil eyes,
-     little ears, pink cheek spots. ---- */
-  // Cuter proportions — head is dominant
-  let bw = 0.95, bh = 0.85, bd = 0.95;
-  let headR = 0.7;  // head radius
-  if (p.stage === 'baby')         { bw = 0.7;  bh = 0.55; bd = 0.7;  headR = 0.78; }
-  else if (p.body === 'jacked')   { bw = 1.35; bh = 1.0;  bd = 0.85; headR = 0.65; }
-  else if (p.body === 'fit')      { bw = 1.0;  bh = 1.1;  bd = 0.85; headR = 0.65; }
-  else if (p.body === 'chubby')   { bw = 1.3;  bh = 0.8;  bd = 1.2;  headR = 0.7; }
+  /* ---- Bit's rig ----
+   * Named sub-groups so each part can be animated independently
+   * (breathing on bodyGroup, blinks on eyes, ear lag on each ear, etc.)
+   *
+   *   petGroup
+   *     facing                    rotation.y = direction of motion
+   *       bodyGroup               root for body block (scale → squash/stretch)
+   *         body mesh
+   *         feetGroup
+   *           footL (own pivot for step lift)
+   *           footR
+   *       headGroup               nodding / forward-bob during walk
+   *         head mesh
+   *         earGroupL / earGroupR (rotation lag w/ damped spring)
+   *         eyeL / eyeR  (scaleY for blinks)
+   *         pupilL / pupilR (position offset for eye dart)
+   *         cheeks, mouth, sparkles
+   */
+
+  // Stage / body geometry parameters — minimalist silhouette family
+  let bw, bh, bd, headR, hasFeet = true, eyeScale = 1;
+  if (p.stage === 'baby')         { bw = 0.65; bh = 0.55; bd = 0.65; headR = 0.82; hasFeet = false; eyeScale = 1.15; }
+  else if (p.stage === 'teen')    { bw = 0.85; bh = 0.85; bd = 0.85; headR = 0.7;  eyeScale = 1.0; }
+  else if (p.body === 'jacked')   { bw = 1.35; bh = 1.05; bd = 0.85; headR = 0.65; eyeScale = 0.92; }
+  else if (p.body === 'fit')      { bw = 0.9;  bh = 1.15; bd = 0.85; headR = 0.68; eyeScale = 0.95; }
+  else if (p.body === 'chubby')   { bw = 1.3;  bh = 0.78; bd = 1.2;  headR = 0.72; eyeScale = 1.0; }
+  else                            { bw = 0.95; bh = 0.95; bd = 0.95; headR = 0.7;  eyeScale = 1.0; }
 
   const petGroup = new T.Group();
-  // The pet has a "forward" axis along +Z; we set rotation.y to face direction.
-  const facing = new T.Group();   // contains body+head+features; rotates as a unit
+  const facing = new T.Group();
   petGroup.add(facing);
 
-  // Body — slightly rounded (use IcosahedronGeometry detail 1 = 80 faces, low-poly)
-  // Actually use BoxGeometry but with bigger Y radius for soft "egg" shape via scale
+  // BODY group — squashable, breathing
+  const bodyGroup = new T.Group();
+  facing.add(bodyGroup);
   const body = new T.Mesh(new T.IcosahedronGeometry(0.55, 1), petMat);
   body.scale.set(bw, bh, bd);
   body.position.y = bh * 0.55;
   body.castShadow = true;
-  facing.add(body);
+  bodyGroup.add(body);
+  bodyGroup.userData.baseScaleY = 1;     // for breath
 
-  // Head — separate, larger, low-poly icosahedron for visible facets
+  // HEAD group — nods + forward-bobs during walk; eyes/ears children of this
+  const headGroup = new T.Group();
+  headGroup.position.y = bh + headR * 0.05;
+  facing.add(headGroup);
+
   const head = new T.Mesh(new T.IcosahedronGeometry(headR, 1), petMat);
-  head.position.y = bh + headR * 0.85;
+  head.position.y = headR * 0.8;
   head.castShadow = true;
-  facing.add(head);
+  headGroup.add(head);
 
-  // Two little ears on top — small flat-shaded cones tilted out
+  // Ears — each in its own pivot so we can swing them independently
   const earMat = new T.MeshStandardMaterial({ color: petColor, flatShading: true, roughness: 0.65 });
   const earGeo = new T.ConeGeometry(headR * 0.22, headR * 0.5, 4);
-  const earL = new T.Mesh(earGeo, earMat);
-  const earR = new T.Mesh(earGeo, earMat);
-  const earY = bh + headR * 1.4;
-  earL.position.set(-headR * 0.55, earY, 0);
-  earR.position.set( headR * 0.55, earY, 0);
-  earL.rotation.z =  Math.PI * 0.12;
-  earR.rotation.z = -Math.PI * 0.12;
-  earL.castShadow = true; earR.castShadow = true;
-  facing.add(earL); facing.add(earR);
+  function makeEar(side) {
+    const grp = new T.Group();
+    const m = new T.Mesh(earGeo, earMat);
+    m.castShadow = true;
+    m.position.y = headR * 0.25;
+    grp.add(m);
+    grp.position.set(side * headR * 0.55, headR * 1.25, 0);
+    grp.rotation.z = side * -0.12 * Math.PI;
+    return grp;
+  }
+  const earGroupL = makeEar(-1);
+  const earGroupR = makeEar( 1);
+  headGroup.add(earGroupL); headGroup.add(earGroupR);
 
-  // Eyes — white spheres with dark pupils. Bigger = cuter.
+  // Eyes — white sphere + dark pupil (pupil is a separate child so we can
+  // offset it for eye-dart without moving the white sclera).
   const eyeWhiteMat = new T.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.2 });
   const eyeDarkMat  = new T.MeshStandardMaterial({ color: 0x0F172A, roughness: 0.15 });
-  const eyeWhiteGeo = new T.SphereGeometry(headR * 0.22, 12, 10);
-  const eyePupilGeo = new T.SphereGeometry(headR * 0.10, 8, 6);
-  const eyeY = bh + headR * 0.95;
+  const eyeWhiteGeo = new T.SphereGeometry(headR * 0.22 * eyeScale, 12, 10);
+  const eyePupilGeo = new T.SphereGeometry(headR * 0.10 * eyeScale, 8, 6);
+  const eyeY = headR * 0.85;
   const eyeOff = headR * 0.35;
   const eyeFront = headR * 0.86;
-  // Left eye
-  const eyeWL = new T.Mesh(eyeWhiteGeo, eyeWhiteMat);
-  eyeWL.position.set(-eyeOff, eyeY, eyeFront);
-  facing.add(eyeWL);
-  const eyePL = new T.Mesh(eyePupilGeo, eyeDarkMat);
-  eyePL.position.set(-eyeOff, eyeY, eyeFront + headR * 0.13);
-  facing.add(eyePL);
-  // Right eye
-  const eyeWR = new T.Mesh(eyeWhiteGeo, eyeWhiteMat);
-  eyeWR.position.set( eyeOff, eyeY, eyeFront);
-  facing.add(eyeWR);
-  const eyePR = new T.Mesh(eyePupilGeo, eyeDarkMat);
-  eyePR.position.set( eyeOff, eyeY, eyeFront + headR * 0.13);
-  facing.add(eyePR);
+  function makeEye(side) {
+    const grp = new T.Group();
+    grp.position.set(side * eyeOff, eyeY, eyeFront);
+    grp.userData.baseScaleY = 1;     // for blink animation
+    const white = new T.Mesh(eyeWhiteGeo, eyeWhiteMat);
+    grp.add(white);
+    const pupil = new T.Mesh(eyePupilGeo, eyeDarkMat);
+    pupil.position.z = headR * 0.13;
+    pupil.userData.basePos = pupil.position.clone();
+    grp.userData.pupil = pupil;
+    grp.add(pupil);
+    // Sparkle
+    const spark = new T.Mesh(new T.SphereGeometry(headR * 0.035, 6, 4), new T.MeshBasicMaterial({ color: 0xFFFFFF }));
+    spark.position.set(headR * 0.06, headR * 0.04, headR * 0.17);
+    grp.add(spark);
+    return grp;
+  }
+  const eyeGroupL = makeEye(-1);
+  const eyeGroupR = makeEye( 1);
+  headGroup.add(eyeGroupL); headGroup.add(eyeGroupR);
 
-  // Eye sparkles — tiny white dots offset to one side for "light catch"
-  const sparkGeo = new T.SphereGeometry(headR * 0.035, 6, 4);
-  const sparkMat = new T.MeshBasicMaterial({ color: 0xFFFFFF });
-  const sparkL = new T.Mesh(sparkGeo, sparkMat);
-  sparkL.position.set(-eyeOff + headR * 0.06, eyeY + headR * 0.04, eyeFront + headR * 0.17);
-  facing.add(sparkL);
-  const sparkR = new T.Mesh(sparkGeo, sparkMat);
-  sparkR.position.set( eyeOff + headR * 0.06, eyeY + headR * 0.04, eyeFront + headR * 0.17);
-  facing.add(sparkR);
-
-  // Cheek spots — small pink discs on the sides of the face
+  // Cheek spots
   const cheekMat = new T.MeshStandardMaterial({ color: 0xFF9DAE, roughness: 0.6, transparent: true, opacity: 0.7 });
   const cheekGeo = new T.SphereGeometry(headR * 0.13, 8, 6);
   const cheekL = new T.Mesh(cheekGeo, cheekMat);
-  cheekL.position.set(-headR * 0.65, bh + headR * 0.7, headR * 0.55);
+  cheekL.position.set(-headR * 0.65, headR * 0.6, headR * 0.55);
   cheekL.scale.set(1, 0.6, 0.3);
-  facing.add(cheekL);
+  headGroup.add(cheekL);
   const cheekR = new T.Mesh(cheekGeo, cheekMat);
-  cheekR.position.set( headR * 0.65, bh + headR * 0.7, headR * 0.55);
+  cheekR.position.set( headR * 0.65, headR * 0.6, headR * 0.55);
   cheekR.scale.set(1, 0.6, 0.3);
-  facing.add(cheekR);
+  headGroup.add(cheekR);
 
-  // Mouth — small smile shape via two thin boxes meeting at center
+  // Mouth — two thin boxes meeting at center for a small smile
   const mouthMat = new T.MeshStandardMaterial({ color: 0x4A2E1C });
   const mouthGeo = new T.BoxGeometry(headR * 0.18, headR * 0.04, headR * 0.04);
+  const mouthGroup = new T.Group();
+  mouthGroup.position.set(0, headR * 0.52, eyeFront + headR * 0.02);
   const mL = new T.Mesh(mouthGeo, mouthMat);
   const mR = new T.Mesh(mouthGeo, mouthMat);
-  const mouthY = bh + headR * 0.62;
-  mL.position.set(-headR * 0.09, mouthY, eyeFront + headR * 0.02);
+  mL.position.x = -headR * 0.09;
   mL.rotation.z =  Math.PI * 0.12;
-  mR.position.set( headR * 0.09, mouthY, eyeFront + headR * 0.02);
+  mR.position.x =  headR * 0.09;
   mR.rotation.z = -Math.PI * 0.12;
-  facing.add(mL); facing.add(mR);
+  mouthGroup.add(mL); mouthGroup.add(mR);
+  headGroup.add(mouthGroup);
 
-  // Tiny feet — two small boxes peeking out from under the body
-  const footMat = new T.MeshStandardMaterial({ color: _darken(petColor, 0.7), flatShading: true });
-  const footGeo = new T.BoxGeometry(bw * 0.28, 0.12, bd * 0.4);
-  const footL = new T.Mesh(footGeo, footMat);
-  const footR = new T.Mesh(footGeo, footMat);
-  footL.position.set(-bw * 0.22, 0.06, bd * 0.25);
-  footR.position.set( bw * 0.22, 0.06, bd * 0.25);
-  footL.castShadow = true; footR.castShadow = true;
-  facing.add(footL); facing.add(footR);
+  // Feet — each pivoted so it can step (translate Y up + back during stride).
+  // Babies don't have visible feet (chibi proportions).
+  let footL = null, footR = null;
+  if (hasFeet) {
+    const footMat = new T.MeshStandardMaterial({ color: _darken(petColor, 0.7), flatShading: true });
+    const footGeo = new T.BoxGeometry(bw * 0.28, 0.12, bd * 0.4);
+    footL = new T.Mesh(footGeo, footMat);
+    footR = new T.Mesh(footGeo, footMat);
+    footL.castShadow = true; footR.castShadow = true;
+    footL.position.set(-bw * 0.22, 0.06, bd * 0.18);
+    footR.position.set( bw * 0.22, 0.06, bd * 0.18);
+    footL.userData.baseY = footL.position.y;
+    footR.userData.baseY = footR.position.y;
+    facing.add(footL); facing.add(footR);
+  }
+  // Headgroup base position so we can ride on the body's breath/walk-bob
+  headGroup.userData.baseY = headGroup.position.y;
+  headGroup.userData.baseZ = 0;
+
+  // Forward-lean tilt (anticipation/follow-through) — applied to facing.rotation.x
+  facing.userData.baseRotX = 0;
 
   scene.add(petGroup);
 
@@ -837,11 +906,29 @@ function mountPet3D(container, p) {
   let pauseUntil = 0;
   let currentFacing = 0;   // current rotation.y, lerp-smoothed each frame
 
+  // ---- Ambient animation state (always running, independent of activity) ----
+  // Blink: random next-blink time, then a 90ms close window.
+  let nextBlinkAt = 2 + Math.random() * 4;
+  let blinkPhase = -1;   // -1 = not blinking, 0..1 = in blink
+  // Eye dart: pupil targets a random offset every 3-6 seconds, easeInOutCubic transition.
+  let eyeDartTargetX = 0, eyeDartTargetY = 0, eyeDartCurX = 0, eyeDartCurY = 0;
+  let nextEyeDartAt = 1.5 + Math.random() * 3;
+  // Ear twitch: random ear gets a +12° rotation pulse every ~5-10s
+  let nextEarTwitchAt = 4 + Math.random() * 6;
+  let earTwitchPhase = -1;       // -1 = idle, else 0..1
+  let earTwitchSide = 0;         // -1 = L, +1 = R
+  // Facing rotation via damped spring (no more lerp snaps)
+  let facingVel = 0;
+  // Walk forward-lean (anticipation)
+  let leanVel = 0;
+  // Walk gait phase 0..1 (one full step = 0.5 of cycle)
+  let gait = 0;
+  // Sticky activity state for one-shot animations (eat chomp, etc.)
+  const oneShot = { kind: null, start: 0, duration: 0 };
+
   function tick(now) {
     if (!mounted) return;
     if (!visible) {
-      // Tab hidden or canvas scrolled off-screen — schedule a wake-check
-      // every ~250ms but skip rendering.
       setTimeout(() => requestAnimationFrame(tick), 250);
       return;
     }
@@ -849,17 +936,76 @@ function mountPet3D(container, p) {
     lastFrame = now;
     t += dt;
 
-    // Adaptive frame budget — high motion = full speed, low motion = 30fps
-    // cap so the GPU can idle between frames.
+    // Adaptive frame budget (60fps active / 30fps ambient — perf gating)
     const highMotion = p.activity === 'walk' || p.activity === 'play' || p.activity === 'workout' || foodPiles.some(f => !f.eaten);
-    const minFrameInterval = highMotion ? 16 : 33;   // 60fps vs 30fps
+    const minFrameInterval = highMotion ? 16 : 33;
     if (now - lastRender < minFrameInterval) {
       requestAnimationFrame(tick);
       return;
     }
     lastRender = now;
 
-    // Food piles bob gently in place
+    // ===== AMBIENT (always-on) =====
+    // Breathing — body Y scale oscillates 1.0..1.018 at 0.4 Hz, with a softer
+    // wave (cycloid-ish, not sin²) so the rhythm feels organic.
+    const breath = 1 + Math.sin(t * 0.4 * Math.PI * 2) * 0.018;
+    bodyGroup.scale.y = breath;
+
+    // Head micro-bob — offset π/3 from breath, smaller amplitude
+    const headBob = Math.sin(t * 0.62 * Math.PI * 2 + Math.PI/3) * 0.012;
+    headGroup.position.y = (headGroup.userData.baseY + headBob);
+
+    // Blink
+    if (blinkPhase < 0) {
+      if (t > nextBlinkAt) { blinkPhase = 0; nextBlinkAt = t + 3.5 + Math.random() * 5; }
+    } else {
+      blinkPhase += dt / 0.09;   // 90ms close, 90ms open
+      // Use a 0..1..0 triangle for the close-then-open cycle
+      const k = blinkPhase < 0.5 ? blinkPhase * 2 : (1 - blinkPhase) * 2;
+      const eyeScaleY = 1 - Math.max(0, Math.min(1, k)) * 0.92;
+      eyeGroupL.scale.y = eyeScaleY;
+      eyeGroupR.scale.y = eyeScaleY;
+      if (blinkPhase >= 1) {
+        blinkPhase = -1;
+        eyeGroupL.scale.y = 1;
+        eyeGroupR.scale.y = 1;
+      }
+    }
+
+    // Eye dart
+    if (t > nextEyeDartAt) {
+      eyeDartTargetX = (Math.random() * 2 - 1) * headR * 0.07;
+      eyeDartTargetY = (Math.random() * 2 - 1) * headR * 0.04;
+      nextEyeDartAt = t + 2 + Math.random() * 4;
+    }
+    eyeDartCurX += (eyeDartTargetX - eyeDartCurX) * Math.min(1, dt * 6);
+    eyeDartCurY += (eyeDartTargetY - eyeDartCurY) * Math.min(1, dt * 6);
+    const pupL = eyeGroupL.userData.pupil;
+    const pupR = eyeGroupR.userData.pupil;
+    pupL.position.set(pupL.userData.basePos.x + eyeDartCurX, pupL.userData.basePos.y + eyeDartCurY, pupL.userData.basePos.z);
+    pupR.position.set(pupR.userData.basePos.x + eyeDartCurX, pupR.userData.basePos.y + eyeDartCurY, pupR.userData.basePos.z);
+
+    // Ear twitch
+    if (earTwitchPhase < 0) {
+      if (t > nextEarTwitchAt) {
+        earTwitchSide = Math.random() < 0.5 ? -1 : 1;
+        earTwitchPhase = 0;
+        nextEarTwitchAt = t + 5 + Math.random() * 8;
+      }
+    } else {
+      earTwitchPhase += dt / 0.22;   // 220ms total
+      const k = earTwitchPhase < 0.4
+        ? Ease.outQuad(earTwitchPhase / 0.4) * 0.21       // out
+        : Ease.outQuad(1 - (earTwitchPhase - 0.4) / 0.6) * 0.21;  // back
+      const ear = earTwitchSide < 0 ? earGroupL : earGroupR;
+      ear.rotation.x = -k;
+      if (earTwitchPhase >= 1) {
+        earTwitchPhase = -1;
+        ear.rotation.x = 0;
+      }
+    }
+
+    // ===== FOOD PILE BOB =====
     for (let i = 0; i < foodPiles.length; i++) {
       if (!foodPiles[i].eaten) {
         foodPiles[i].group.position.y = Math.sin(t * 2 + i * 1.7) * 0.025;
@@ -867,29 +1013,41 @@ function mountPet3D(container, p) {
       }
     }
 
+    // ===== PER-STATE BEHAVIOR =====
     const activity = p.activity;
-    // Force walking mode if there's food on the floor — Bit can't ignore it
     const walking = activity === 'walk' || foodPiles.some(f => !f.eaten);
+
     if (walking) {
-      // Wander: move toward target. If we got there or paused too long, pick a new one.
+      const speed = 1.05;
       if (t < pauseUntil) {
-        petGroup.position.y = Math.sin(t * 3) * 0.04;
+        // Standing between targets — fast breath echo (panting after walk)
+        petGroup.position.y *= 0.85;
+        // Decelerate lean back to 0
+        const [v, vv] = _dampSpring(facing.rotation.x, facingVel /* abused for lean */, 0, dt, 90, 14);
+        // Note: above abuse — use leanVel slot instead
+        const [lx, nvl] = _dampSpring(facing.rotation.x, leanVel, 0, dt, 90, 14);
+        facing.rotation.x = lx; leanVel = nvl;
       } else {
         const dx = target.x - petGroup.position.x;
         const dz = target.z - petGroup.position.z;
         const dist = Math.sqrt(dx*dx + dz*dz);
         if (dist < 0.22) {
-          // Arrived. If this was a food pile, eat it.
+          // ===== ARRIVE — eat if this is a food pile =====
           if (target.foodIdx >= 0 && !foodPiles[target.foodIdx].eaten) {
             const pile = foodPiles[target.foodIdx];
             pile.eaten = true;
-            // Crunch animation: collapse to floor + fade, then remove
+            // Eat one-shot — body squashes + head dips + bounce back
+            oneShot.kind = 'eat'; oneShot.start = t; oneShot.duration = 0.42;
+            // Visual: pile collapses (scale.y → 0) over 320ms
             const pileGroup = pile.group;
             const eatStart = t;
             const eatAnim = () => {
               if (!mounted) return;
-              const k = Math.min(1, (performance.now() - now) / 360 + (t - eatStart) * 2.8);
-              pileGroup.scale.set(1 - k, Math.max(0, 1 - k * 1.6), 1 - k);
+              const dur = 0.32;
+              const k = Math.min(1, (t - eatStart) / dur);
+              const eased = Ease.outQuint(k);
+              pileGroup.scale.set(1 - eased, Math.max(0, 1 - eased * 1.5), 1 - eased);
+              pileGroup.position.y -= eased * 0.04;
               if (k < 1) requestAnimationFrame(eatAnim);
               else {
                 scene.remove(pileGroup);
@@ -897,7 +1055,6 @@ function mountPet3D(container, p) {
               }
             };
             eatAnim();
-            // Persist eaten state — mutate the actual state.pet so it survives reload
             try {
               const st = APP.getState();
               if (st && st.pet) {
@@ -906,38 +1063,115 @@ function mountPet3D(container, p) {
               }
             } catch (_) {}
           }
-          // Pause briefly, then pick next target (food first, else random)
-          pauseUntil = t + 0.4 + Math.random() * 0.6;
+          pauseUntil = t + 0.35 + Math.random() * 0.55;
           const hasFood = foodPiles.some(f => !f.eaten);
           target = hasFood ? _nearestFoodTarget() : _newRandomTarget();
         } else {
-          const speed = 1.05;
+          // ===== MOVING TOWARD TARGET =====
           const step = Math.min(dist, speed * dt);
           const nx = dx / dist;
           const nz = dz / dist;
           petGroup.position.x += nx * step;
           petGroup.position.z += nz * step;
+
+          // Facing — damped spring (no linear lerp). Stiffness picked for ~250ms settle.
           const targetAngle = Math.atan2(nx, nz);
-          let delta = targetAngle - currentFacing;
-          while (delta >  Math.PI) delta -= Math.PI * 2;
-          while (delta < -Math.PI) delta += Math.PI * 2;
-          currentFacing += delta * Math.min(1, dt * 8);
+          const angleDelta = _shortAngle(currentFacing, targetAngle);
+          const [newFacing, newFacingVel] = _dampSpring(currentFacing, facingVel, currentFacing + angleDelta, dt, 120, 18);
+          currentFacing = newFacing;
+          facingVel = newFacingVel;
           facing.rotation.y = currentFacing;
-          petGroup.position.y = Math.abs(Math.sin(t * 9)) * 0.08;
+
+          // Anticipation lean — body tilts forward while accelerating
+          const [lx, nvl] = _dampSpring(facing.rotation.x, leanVel, -0.06, dt, 80, 11);
+          facing.rotation.x = lx; leanVel = nvl;
+
+          // GAIT — phase advances per step. Cycle: ~0.45s per step at speed 1.05.
+          gait += dt / 0.45;
+          if (gait >= 1) gait -= 1;
+          // Body cycloid bob — peaks at midstance (gait near 0.25 and 0.75)
+          const bodyBob = Math.abs(Math.sin(gait * Math.PI * 2));
+          petGroup.position.y = Ease.bob(gait * 2 % 1) * 0.075;
+
+          // Feet — alternating parabolic arc. Left foot leads on phase 0..0.5, right on 0.5..1.
+          if (footL && footR) {
+            const lP = (gait * 2) % 1;        // left foot phase
+            const rP = ((gait * 2) + 1) % 1;  // right foot phase, offset π
+            // Only lift when in "swing" half of the half-cycle
+            const lLift = lP < 1 ? Ease.arc(lP) * 0.16 : 0;
+            const rLift = rP < 1 ? Ease.arc(rP) * 0.16 : 0;
+            footL.position.y = footL.userData.baseY + lLift;
+            footR.position.y = footR.userData.baseY + rLift;
+            // Forward stride — foot translates in Z by ±0.08
+            footL.position.z = bd * 0.18 + (lP - 0.5) * 0.12;
+            footR.position.z = bd * 0.18 + (rP - 0.5) * 0.12;
+          }
+
+          // Head forward-bob — slight pitch on each step (look ahead)
+          headGroup.rotation.x = Math.sin(gait * Math.PI * 4) * 0.04;
+
+          // Ear lag — ears swing slightly opposite to head rotation, with delay
+          const earLagTarget = -headGroup.rotation.x * 1.6;
+          earGroupL.rotation.x += (earLagTarget - earGroupL.rotation.x) * Math.min(1, dt * 9);
+          earGroupR.rotation.x += (earLagTarget - earGroupR.rotation.x) * Math.min(1, dt * 9);
         }
       }
-    } else if (activity === 'idle' || activity === 'beg' || activity === 'eat') {
-      petGroup.position.y = Math.sin(t * 3) * 0.05;
+    } else if (activity === 'idle' || activity === 'beg') {
+      // Just breathing + the already-running ambient. Tiny weight shift.
+      petGroup.position.y = Math.sin(t * 1.2) * 0.015;
+      // Decay lean to zero
+      const [lx, nvl] = _dampSpring(facing.rotation.x, leanVel, 0, dt, 70, 14);
+      facing.rotation.x = lx; leanVel = nvl;
     } else if (activity === 'sleep') {
-      petGroup.position.y = 0.4 + Math.sin(t * 1.4) * 0.025;
+      facing.rotation.z = Math.PI / 2.6;
+      petGroup.position.y = 0.36 + Math.sin(t * 0.9) * 0.018;   // slower breath
     } else if (activity === 'workout') {
-      petGroup.position.y = -Math.abs(Math.sin(t * 4)) * 0.18;
+      // Squat — body Y dips with bend; head dips less; arms stay (no arms)
+      const sqPhase = (t % 1.0) / 1.0;
+      const squat = Ease.bob(sqPhase) * 0.22;
+      petGroup.position.y = -squat;
+      bodyGroup.scale.y = breath - squat * 0.4;
+      // Slight forward lean during squat
+      facing.rotation.x = -squat * 0.6;
     } else if (activity === 'play') {
-      petGroup.position.y = Math.abs(Math.sin(t * 6)) * 0.18;
-      facing.rotation.y = Math.sin(t * 2) * 0.4;
-    } else if (activity === 'cough') {
-      const startX = petGroup.userData.startX || 0;
-      petGroup.position.x = startX + Math.sin(t * 12) * 0.04;
+      // Hop — parabolic arc per bounce
+      const hopPhase = (t * 1.6) % 1;
+      petGroup.position.y = Ease.arc(hopPhase) * 0.32;
+      // Wiggle on each landing
+      facing.rotation.y = currentFacing + Math.sin(t * 3.2) * 0.35;
+    } else if (activity === 'cough' || activity === 'eat') {
+      if (activity === 'cough') {
+        const startX = petGroup.userData.startX || 0;
+        petGroup.position.x = startX + Math.sin(t * 14) * 0.035;
+        bodyGroup.scale.y = breath - Math.abs(Math.sin(t * 14)) * 0.06;
+      }
+    }
+
+    // ===== ONE-SHOT eat chomp (overrides ambient for its duration) =====
+    if (oneShot.kind === 'eat') {
+      const k = (t - oneShot.start) / oneShot.duration;
+      if (k >= 1) { oneShot.kind = null; }
+      else {
+        // Phases: 0..0.25 dip down (inQuad), 0.25..0.6 chomp+squash (outBack), 0.6..1 bounce up (outBack)
+        if (k < 0.3) {
+          const u = Ease.inQuad(k / 0.3);
+          headGroup.rotation.x = u * 0.6;
+          headGroup.position.y = headGroup.userData.baseY + headBob - u * 0.18;
+          bodyGroup.scale.y = breath - u * 0.12;
+        } else if (k < 0.65) {
+          const u = (k - 0.3) / 0.35;
+          headGroup.rotation.x = 0.6 - u * 0.55;
+          headGroup.position.y = headGroup.userData.baseY + headBob - 0.18 + u * 0.20;
+          bodyGroup.scale.y = breath - 0.12 + u * 0.15;
+        } else {
+          const u = Ease.outBack((k - 0.65) / 0.35);
+          headGroup.rotation.x = 0.05 - u * 0.05;
+          headGroup.position.y = headGroup.userData.baseY + headBob - 0 + (1 - u) * 0.02;
+          bodyGroup.scale.y = breath + 0.03 * (1 - u);
+          // Side wiggle = "yum" reaction
+          facing.rotation.y = currentFacing + Math.sin(u * Math.PI * 2) * 0.12;
+        }
+      }
     }
 
     renderer.render(scene, camera);
