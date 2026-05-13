@@ -1107,12 +1107,26 @@ table { display: block; max-width: 100%; overflow-x: auto; }
 }
 
 /* =========================================================================
- * Code / pre blocks inside lesson bodies — light surface
+ * Code / pre blocks inside lesson bodies — light surface + Prism tokens
  * ========================================================================= */
 pre {
   background: #F4F5F9 !important;
   color: var(--text) !important;
   border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  font-size: 12.5px;
+  line-height: 1.55;
+  font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  margin: 12px 0;
+}
+pre code, pre code[class*="language-"] {
+  background: transparent !important;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  text-shadow: none;
 }
 code {
   background: rgba(15,23,42,0.05);
@@ -1120,6 +1134,106 @@ code {
   border-radius: 4px;
   font-size: 90%;
 }
+
+/* Prism token colors for our light theme — Tomorrow-ish but readable on
+ * the warm #F4F5F9 surface. Aim: high-contrast structural tokens (keywords,
+ * functions), softer auxiliary tokens (comments, punctuation). */
+.token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6B7686; font-style: italic; }
+.token.punctuation { color: #475467; }
+.token.property, .token.tag, .token.boolean, .token.number, .token.constant,
+.token.symbol, .token.deleted { color: #B22B3D; }
+.token.selector, .token.attr-name, .token.string, .token.char, .token.builtin,
+.token.inserted { color: #0B8A60; }
+.token.operator, .token.entity, .token.url, .language-css .token.string,
+.style .token.string { color: #2E6FE0; }
+.token.atrule, .token.attr-value, .token.keyword { color: #6336C7; font-weight: 600; }
+.token.function, .token.class-name { color: #A86409; font-weight: 600; }
+.token.regex, .token.important, .token.variable { color: #C7780E; }
+
+/* =========================================================================
+ * Lesson-body shared components — replaces the 100+ inline style="..." UL
+ * blocks and standardizes emphasis hierarchy.
+ * ========================================================================= */
+.list-muted {
+  margin: 6px 0 6px 18px;
+  color: var(--muted);
+}
+.list-muted li { margin: 2px 0; }
+
+/* Callouts: warn / note / senior / depth. Used as
+ * <div class="callout callout-senior">
+ *   <div class="callout-label">Senior signal</div>
+ *   …body…
+ * </div>
+ */
+.callout {
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 14px 0;
+  border: 1px solid;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.callout-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.78;
+  margin-bottom: 4px;
+}
+.callout-senior {
+  background: rgba(14, 163, 113, 0.05);
+  border-color: rgba(14, 163, 113, 0.25);
+}
+.callout-senior .callout-label { color: var(--accent); }
+.callout-warn {
+  background: rgba(199, 120, 14, 0.05);
+  border-color: rgba(199, 120, 14, 0.25);
+}
+.callout-warn .callout-label { color: var(--warn); }
+.callout-note {
+  background: rgba(46, 111, 224, 0.05);
+  border-color: rgba(46, 111, 224, 0.25);
+}
+.callout-note .callout-label { color: var(--sde); }
+.callout-depth {
+  background: rgba(120, 73, 224, 0.05);
+  border-color: rgba(120, 73, 224, 0.25);
+}
+.callout-depth .callout-label { color: #6336C7; }
+.callout-bad {
+  background: rgba(215, 56, 76, 0.05);
+  border-color: rgba(215, 56, 76, 0.25);
+}
+.callout-bad .callout-label { color: var(--bad); }
+
+/* Tradeoff tables inside lesson bodies */
+.lesson-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 12px 0;
+}
+.lesson-table thead tr {
+  border-bottom: 1px solid var(--hairline);
+}
+.lesson-table th {
+  text-align: left;
+  padding: 7px 10px;
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+.lesson-table td {
+  padding: 7px 10px;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(15,23,42,0.04);
+}
+.lesson-table tr:last-child td { border-bottom: none; }
+.lesson-table td:first-child { font-weight: 600; color: var(--text); }
 blockquote {
   background: rgba(46,111,224,0.04);
   border-left: 3px solid var(--sde);

@@ -15,6 +15,26 @@ function el(tag, cls, html) {
 }
 function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// Auto-classify + Prism-highlight every <pre><code> block under `root`.
+// Default = python. Heuristic upgrades to sql/bash/json when the code obviously
+// is one of those. Idempotent — re-runs safely on already-classified blocks.
+function highlightCodeIn(root) {
+  if (!root || !window.Prism) return;
+  root.querySelectorAll('pre > code').forEach(code => {
+    const text = code.textContent || '';
+    // Skip if already labelled
+    const hasLang = [...code.classList].some(c => c.startsWith('language-'));
+    if (!hasLang) {
+      let lang = 'python';
+      if (/^\s*(SELECT|WITH|CREATE TABLE|INSERT INTO|UPDATE|DELETE FROM|ALTER TABLE)\b/im.test(text)) lang = 'sql';
+      else if (/^\s*(#!\/bin\/|curl |gh |git |aws |gcloud |kubectl |docker )/m.test(text)) lang = 'bash';
+      else if (/^\s*\{[\s\S]*\}\s*$/.test(text) && /"[^"]+"\s*:/.test(text)) lang = 'json';
+      code.classList.add('language-' + lang);
+    }
+    try { window.Prism.highlightElement(code); } catch (_) { /* tolerate per-block failures */ }
+  });
+}
+
 const verticalPill = {
   ai: 'pill-ai', hospitality: 'pill-hosp', marketplace: 'pill-mkt',
   devtools: 'pill-dev', fintech: 'pill-both'
@@ -787,6 +807,9 @@ function renderLesson(state, lessonId) {
     interaction.innerHTML = `<div class="rounded-md p-3" style="background:rgba(215,56,76,0.08);border:1px solid rgba(215,56,76,0.3);color:var(--bad);font-size:13px;font-family:monospace;white-space:pre-wrap">⚠ Activity failed to mount:\n${esc(String(err && err.stack || err))}</div>`;
   }
   ANIM.viewIn(card);
+  // Syntax-highlight every <pre><code> block that doesn't already specify a language.
+  // Default to Python (~95% of curriculum code). SQL/Bash/JSON detected by content.
+  highlightCodeIn(card);
   wrap.addEventListener('click', (e) => { if (e.target === wrap) wrap.remove(); });
 
   // Enter = mark & next (only when button is actually enabled)
@@ -1848,6 +1871,8 @@ function renderMockInterview(state, hub, mode) {
       stage.innerHTML = `<div style="color:var(--bad)">Activity failed to load — clicking the advance button will let you proceed.</div>`;
       unlock();
     }
+    // Syntax-highlight the lesson body code blocks
+    highlightCodeIn(container);
     advanceBtn.addEventListener('click', () => {
       if (idx < 2) session.phase = 'review-' + (idx + 1);
       else        session.phase = 'test';
