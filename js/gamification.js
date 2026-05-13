@@ -452,12 +452,18 @@ function ensureDailyQuests(state, pool) {
  *   Hit daily goal           →  vitality +25 (cap 100); marked fed today
  *   Hit ≥1.5× daily goal     →  form += +6 (jacked path) — counts as exercise
  *   Hit ≥1.0× but <1.5×      →  form += -2 (chubby drift — fed without exercise)
- *   Miss daily goal          →  vitality -30 per day; form decays toward 0 by 1
+ *   PRIOR day = 0 XP         →  vitality = 0 (instant death — full skip)
+ *   PRIOR day 0<XP<goal      →  vitality -= 30 × (1 − XP/goal)  (scaled penalty)
+ *   PRIOR day XP ≥ goal      →  no penalty (form/age still advance)
  *   vitality < 30            →  pet appears sick (cough activity)
  *   vitality < 50            →  pet begs (empty food bowl in room)
  *   vitality = 0             →  pet dies, respawns as baby tomorrow; deaths++
  *   form > +25               →  body = "jacked" (>+15 = "fit")
  *   form < -25               →  body = "chubby"
+ *
+ * The "PRIOR day" rules run every time `_petTick` fires after a calendar-
+ * day rollover, walking from the last-tick date through yesterday. They
+ * do NOT apply to today's in-progress XP — only fully-completed days.
  */
 
 /* A small curated palette of pleasant body hues. Every time Bit is born
@@ -531,14 +537,64 @@ function _migratePet(p) {
   return p;
 }
 
-function _petTick(p, today) {
+function _petTick(p, today, state) {
   if (p.lastTickDate === today) return p;
   let daysElapsed = daysBetween(p.lastTickDate || today, today);
   if (daysElapsed <= 0) { p.lastTickDate = today; return p; }
   daysElapsed = Math.min(daysElapsed, 30);
+
+  // ── DAILY-GOAL RULE ─────────────────────────────────────────────────
+  // For every *complete* calendar day from p.lastTickDate (inclusive) up
+  // to (but not including) today, look at how much XP the user earned:
+  //
+  //   • 0 XP (full skip)           → vitality = 0 (instant death)
+  //   • 0 < XP < goal (shortfall)  → vitality -= 30 × (1 - XP/goal),
+  //                                  i.e. heavier penalty the further
+  //                                  short of the goal you were
+  //   • XP >= goal (kept up)       → no penalty (manual food drops are
+  //                                  the only way to actively top up
+  //                                  vitality at that point)
+  //
+  // Grace period: a brand-new pet (ageDays === 0) is exempt on its very
+  // first day after creation, otherwise creating Bit at 11 PM and not
+  // earning the goal in the remaining hour would kill him by morning.
+  const goal = (state && state.user && state.user.goal) || 60;
+  const history = (state && state.history) || [];
+  const xpByDate = Object.create(null);
+  for (const h of history) xpByDate[h.date] = h.xp || 0;
+  const checkStarvation = p.lastTickDate && (p.ageDays > 0 || daysElapsed > 1);
+  if (checkStarvation) {
+    const dayMs = 24 * 3600 * 1000;
+    const lastT  = new Date(p.lastTickDate + 'T00:00:00').getTime();
+    const todayT = new Date(today          + 'T00:00:00').getTime();
+    for (let t = lastT; t < todayT; t += dayMs) {
+      const dKey = new Date(t).toISOString().slice(0, 10);
+      const dayXP = xpByDate[dKey] || 0;
+      if (dayXP === 0) {
+        // Full skip — instant death.
+        p.vitality = 0;
+        break;
+      } else if (dayXP < goal) {
+        // Partial-credit day — vitality drops in proportion to the
+        // shortfall. Max penalty is 30 (matching the old unconditional
+        // -30/day decay) when XP is barely-nonzero.
+        const shortfall = (goal - dayXP) / goal;          // 0..1
+        const penalty = Math.round(30 * shortfall);
+        p.vitality = Math.max(0, p.vitality - penalty);
+        if (p.vitality === 0) break;
+      }
+      // dayXP >= goal: no penalty. The user kept up that day.
+    }
+  } else if (!checkStarvation) {
+    // Fallback for the grace-period case (brand-new pet, first day):
+    // apply the original gentle -30/day so vitality still moves.
+    for (let i = 0; i < daysElapsed; i++) {
+      p.vitality = Math.max(0, p.vitality - 30);
+      if (p.vitality === 0) break;
+    }
+  }
+  // Form & age advance every day regardless
   for (let i = 0; i < daysElapsed; i++) {
-    p.vitality = Math.max(0, p.vitality - 30);
-    // Form decays toward 0 at 1/day
     if (p.form > 0)      p.form = Math.max(0, p.form - 1);
     else if (p.form < 0) p.form = Math.min(0, p.form + 1);
     p.ageDays += 1;
@@ -589,7 +645,7 @@ function petState(state) {
   const goal = (state.user && state.user.goal) || 60;
   const todayXP = state.todayXP || 0;
 
-  _petTick(state.pet, today);
+  _petTick(state.pet, today, state);
   const p = state.pet;
 
   // Reset the "eaten today" counter when the calendar day rolls over.
