@@ -166,17 +166,25 @@ function stopFocusSession() {
 
 /* ---------- Global event delegation ---------- */
 function bindEvents() {
+  // Track the last clicked element so Liquid-Glass FLIP can grow the modal
+  // out of that source rect. Captured at pointerdown so we have it before
+  // any handler dispatches navigation.
+  document.addEventListener('pointerdown', e => {
+    window._lastClickSource = e.target?.closest?.('.lesson-row, [data-open], [data-lesson], a, button, .card') || e.target;
+  }, true);
+
   document.addEventListener('click', e => {
-    // Lesson open
-    const openId = e.target?.dataset?.open;
-    if (openId) {
-      VIEWS.renderLesson(state, openId);
+    // Lesson open — pass the source (button or row) so the modal grows from it.
+    const openBtn = e.target?.closest?.('[data-open]');
+    if (openBtn) {
+      const src = e.target.closest('.lesson-row') || openBtn;
+      VIEWS.renderLesson(state, openBtn.dataset.open, src);
       return;
     }
     // Lesson row click also opens
     const row = e.target.closest('[data-lesson]');
     if (row && !e.target.closest('button')) {
-      VIEWS.renderLesson(state, row.dataset.lesson);
+      VIEWS.renderLesson(state, row.dataset.lesson, row);
       return;
     }
     // Close lesson modal

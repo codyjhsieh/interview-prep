@@ -15,6 +15,341 @@ function el(tag, cls, html) {
 }
 function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+/* =========================================================================
+ * 8-bit tamagotchi — life-sim companion fed by hitting the daily XP goal.
+ *
+ * Sprite: a 16-row grid of pixel rows where each char is a color index.
+ *   '.' = transparent
+ *   'B' = body (mood-tinted)
+ *   'D' = body-dark (shading)
+ *   'E' = eye (always dark)
+ *   'H' = highlight (light spot on body)
+ *   'M' = mouth (varies by mood)
+ *   'X' = closed eye (sleep / death)
+ *
+ * Body variants share the same eye/mouth slots but vary outline geometry.
+ * Each rect rendered as <rect width=8 height=8>; 16-row grid = 128px sprite.
+ * ========================================================================= */
+
+const PET_SPRITES = {
+  // Egg — pre-hatch. Just a wobble.
+  'egg': [
+    '....BBBBBB......',
+    '...BBBBBBBB.....',
+    '..BBBBHHBBBB....',
+    '..BBBHHHHBBB....',
+    '..BBBBBBBBBB....',
+    '..BBBBBBBBBB....',
+    '..BBBBBBBBBB....',
+    '...BBBBBBBB.....',
+    '....BBBBBB......',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+  ],
+  // Baby — small, big head, big eyes
+  'baby': [
+    '....BBBBBB......',
+    '...BBBBBBBB.....',
+    '..BBHBBBBHBB....',
+    '..BBEBBBBEBB....',
+    '..BBBBBBBBBB....',
+    '..BBBBMMBBBB....',
+    '..BBBBBBBBBB....',
+    '...BBBBBBBB.....',
+    '....BBBBBB......',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+  ],
+  // Adult normal — proportional
+  'normal': [
+    '....BBBBBB......',
+    '...BBBBBBBB.....',
+    '..BBHBBBBHBB....',
+    '..BBEBBBBEBB....',
+    '..BBBBBBBBBB....',
+    '..BBBBMMBBBB....',
+    '..BBBBBBBBBB....',
+    '.BBBBBBBBBBBB...',
+    '.BBBBBBBBBBBB...',
+    '.BBBBBBBBBBBB...',
+    '.BBBBBBBBBBBB...',
+    '..BBBBBBBBBB....',
+    '..BB......BB....',
+    '..BB......BB....',
+    '................',
+    '................',
+  ],
+  // Fit — same as normal but with definition lines + slightly leaner
+  'fit': [
+    '....BBBBBB......',
+    '...BBBBBBBB.....',
+    '..BBHBBBBHBB....',
+    '..BBEBBBBEBB....',
+    '..BBBBBBBBBB....',
+    '..BBBBMMBBBB....',
+    '...BBBBBBBB.....',
+    '.BBBBBBBBBBBB...',
+    '.BBDBBBBBBDBB...',
+    '.BBDBBBBBBDBB...',
+    '.BBBBBBBBBBBB...',
+    '..BBBBBBBBBB....',
+    '..BB......BB....',
+    '..BB......BB....',
+    '................',
+    '................',
+  ],
+  // Chubby — wider waist, rounder
+  'chubby': [
+    '....BBBBBB......',
+    '...BBBBBBBB.....',
+    '..BBHBBBBHBB....',
+    '..BBEBBBBEBB....',
+    '..BBBBBBBBBB....',
+    '..BBBBMMBBBB....',
+    '..BBBBBBBBBB....',
+    'BBBBBBBBBBBBBB..',
+    'BBBBBBBBBBBBBB..',
+    'BBBBBBBBBBBBBB..',
+    'BBBBBBBBBBBBBB..',
+    'BBBBBBBBBBBBBB..',
+    '.BBBBBBBBBBBB...',
+    '..BB......BB....',
+    '..BB......BB....',
+    '................',
+  ],
+  // Jacked — wide shoulders + lats, narrow waist (V-shape)
+  'jacked': [
+    '....BBBBBB......',
+    '...BBBBBBBB.....',
+    '..BBHBBBBHBB....',
+    '..BBEBBBBEBB....',
+    '..BBBBBBBBBB....',
+    '..BBBBMMBBBB....',
+    '..BBBBBBBBBB....',
+    'BBBBBBBBBBBBBB..',
+    'BBDBBBBBBBBDBB..',
+    'BBDBBBBBBBBDBB..',
+    '.BBBBBBBBBBBB...',
+    '..BBBBBBBBBB....',
+    '...BBBBBBBB.....',
+    '..BB......BB....',
+    '..BB......BB....',
+    '................',
+  ],
+};
+
+// Body palette per mood / state — eyes and mouth swap, body color tints
+const PET_PALETTE = {
+  // mood -> { body, dark, eye, mouth, highlight }
+  'thrilled': { body: '#7CCDA8', dark: '#5BA585', eye: '#1F2937', mouth: '#1F2937', highlight: '#C8EEDA' },
+  'content':  { body: '#9CC7E6', dark: '#7BA5C6', eye: '#1F2937', mouth: '#1F2937', highlight: '#D8E9F5' },
+  'hungry':   { body: '#E6C28D', dark: '#C6A06D', eye: '#1F2937', mouth: '#7A4E1A', highlight: '#F5DDB5' },
+  'sad':      { body: '#B9A8C9', dark: '#9787A8', eye: '#1F2937', mouth: '#4A2E5A', highlight: '#D9CDE5' },
+  'sick':     { body: '#A8AAB5', dark: '#888A95', eye: '#1F2937', mouth: '#4A4E55', highlight: '#C5C7D2' },
+};
+
+function _moodForActivity(activity, fedToday) {
+  if (activity === 'eat')      return 'thrilled';
+  if (activity === 'cough' || activity === 'sick')  return 'sick';
+  if (activity === 'beg')      return 'hungry';
+  if (activity === 'droop')    return 'sad';
+  if (activity === 'workout')  return 'thrilled';
+  if (activity === 'sleep')    return fedToday ? 'content' : 'sad';
+  if (fedToday)                return 'thrilled';
+  return 'content';
+}
+
+function _petSpriteSVG(stage, body, activity, fedToday) {
+  // Closed eyes for sleep
+  const sleeping = activity === 'sleep';
+  // Open mouth for eat
+  const eating = activity === 'eat';
+  // Sick: cross eyes (X)
+  const sick = activity === 'cough';
+  // Mouth shape (draw separately via mood)
+  const mood = _moodForActivity(activity, fedToday);
+  const pal = PET_PALETTE[mood] || PET_PALETTE.content;
+  const key = stage === 'egg' ? 'egg' : (stage === 'baby' ? 'baby' : body);
+  const grid = PET_SPRITES[key] || PET_SPRITES['normal'];
+  const PX = 7;  // px per pixel
+  const rects = [];
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[r].length; c++) {
+      const ch = grid[r][c];
+      if (ch === '.') continue;
+      let fill = null;
+      if (ch === 'B') fill = pal.body;
+      else if (ch === 'D') fill = pal.dark;
+      else if (ch === 'H') fill = pal.highlight;
+      else if (ch === 'E') fill = sleeping ? pal.body : pal.eye;
+      else if (ch === 'M') fill = pal.mouth;
+      if (fill) rects.push(`<rect x="${c * PX}" y="${r * PX}" width="${PX}" height="${PX}" fill="${fill}"/>`);
+    }
+  }
+  // Overlays: sleeping Zz, eating sparkle, sick wobble lines
+  let overlay = '';
+  if (sleeping) overlay = `<text x="80" y="14" font-family="monospace" font-size="11" fill="${pal.eye}" font-weight="bold">Zz</text>`;
+  if (eating)   overlay = `<text x="78" y="40" font-family="monospace" font-size="14" fill="${pal.body}">✨</text>`;
+  if (sick)     overlay = `<text x="78" y="20" font-family="monospace" font-size="12" fill="${pal.dark}">~</text>`;
+  return `<svg viewBox="0 0 112 112" width="112" height="112" shape-rendering="crispEdges">${rects.join('')}${overlay}</svg>`;
+}
+
+function renderPetCard(state, p) {
+  const card = el('div','card pet-card overflow-hidden');
+  // Status line: what is the pet doing right now
+  const statusLine = {
+    'egg-wobble': `${p.name} hatches tomorrow`,
+    'walk':       `${p.name} is wandering around`,
+    'idle':       `${p.name} is hanging out`,
+    'eat':        `${p.name} is eating! +1 day`,
+    'sleep':      `${p.name} is napping`,
+    'play':       `${p.name} is playing`,
+    'workout':    `${p.name} is at the gym 💪`,
+    'cough':      `${p.name} is sick — feed soon!`,
+    'beg':        `${p.name} is starving — hit your XP goal`,
+    'droop':      `${p.name} is sad — needs you`,
+  }[p.activity] || `${p.name} is here`;
+
+  const stageLabel = p.stage === 'egg' ? 'Egg'
+                   : p.stage === 'baby' ? `Baby · day ${p.ageDays}`
+                   : p.stage === 'teen' ? `Teen · day ${p.ageDays}`
+                   : `Adult · day ${p.ageDays}`;
+
+  const bodyLabel = p.stage === 'adult' ? ` (${p.body})` : '';
+
+  // Bar helper
+  const bar = (val, color) => `<div class="bar h-1 rounded-full overflow-hidden" style="background:rgba(15,23,42,0.06)"><i style="width:${val}%;background:${color};display:block;height:100%"></i></div>`;
+
+  card.innerHTML = `
+    <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+      <div>
+        <h3 class="font-display font-semibold text-lg">${esc(p.name)} <span class="text-xs muted font-normal ml-1">${stageLabel}${bodyLabel}</span></h3>
+        <div class="text-[12.5px] muted mt-0.5">${esc(statusLine)}</div>
+      </div>
+      ${p.deathCount > 0 ? `<div class="text-[10.5px] muted" title="Total times your pet has died">🪦 × ${p.deathCount}</div>` : ''}
+    </div>
+
+    <div class="flex items-center gap-4 flex-wrap">
+      <div class="pet-play-area relative" style="width:160px; height:128px; border-radius:12px; background:linear-gradient(180deg, rgba(46,111,224,0.04), rgba(14,163,113,0.05)); border:1px solid var(--hairline); overflow:hidden;">
+        <div class="pet-sprite ${p.activity === 'walk' ? 'pet-walking' : ''} ${p.activity === 'idle' || p.activity === 'eat' || p.activity === 'beg' ? 'pet-bobbing' : ''}"
+             style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); transform-origin:bottom center;">
+          ${_petSpriteSVG(p.stage, p.body, p.activity, p.fedToday)}
+        </div>
+        ${p.stage === 'egg' ? '<div class="absolute bottom-1 left-0 right-0 text-center text-[10px] muted">tap-tap...</div>' : ''}
+      </div>
+
+      <div class="flex-1 min-w-[150px] space-y-2">
+        <div>
+          <div class="flex justify-between text-[11px] muted mb-0.5"><span>Health</span><span class="numeric">${p.health}/100</span></div>
+          ${bar(p.health, p.health >= 60 ? 'var(--accent)' : p.health >= 30 ? 'var(--warn)' : 'var(--bad)')}
+        </div>
+        <div>
+          <div class="flex justify-between text-[11px] muted mb-0.5"><span>Fullness</span><span class="numeric">${p.fullness}/100</span></div>
+          ${bar(p.fullness, p.fullness >= 50 ? 'var(--accent)' : 'var(--warn)')}
+        </div>
+        ${p.stage !== 'egg' && p.stage !== 'baby' ? `
+        <div>
+          <div class="flex justify-between text-[11px] muted mb-0.5"><span>Fitness</span><span class="numeric">${p.fitness}/100</span></div>
+          ${bar(p.fitness, 'var(--sde)')}
+        </div>` : ''}
+      </div>
+    </div>
+
+    <div class="mt-3 pt-3 border-t border-[color:var(--hairline)]">
+      ${p.fedToday
+        ? `<div class="text-[12.5px]" style="color:var(--accent)">✓ Fed today (${p.todayXP}/${p.goal} XP). ${p.justFed ? `<b>Just fed!</b>` : 'Pet is happy.'}</div>`
+        : `<div class="flex items-center justify-between gap-2 flex-wrap">
+             <div class="text-[12.5px]">
+               <b>${p.xpToFeed} XP</b> to feed ${esc(p.name)} <span class="muted">(${p.todayXP}/${p.goal})</span>
+             </div>
+             <a href="#curriculum" class="btn btn-primary !py-1.5 !px-3 text-[12.5px]">Go earn XP →</a>
+           </div>
+           <div class="bar mt-2"><i style="width:${p.xpProgress}%"></i></div>`}
+    </div>
+  `;
+  return card;
+}
+
+// Liquid-glass FLIP morph: animate `target` so it appears to grow OUT of
+// the bounding rect of `source`. The glass surface stretches as one body
+// from source to target with spring-overshoot easing; backdrop blur briefly
+// intensifies (variable refraction during motion); content inside (any
+// `.glass-content`) fades in after the surface arrives.
+//
+// Falls back to a centered scale-in if `source` isn't provided (e.g., when
+// the lesson was opened via keyboard shortcut, not a click on a row).
+function flipMorphIn(target, source, opts = {}) {
+  if (!target || !target.animate) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return;
+  }
+  // 1) Read final rect (forces layout). If no source, still do a centered grow.
+  const tgtRect = target.getBoundingClientRect();
+  let dx = 0, dy = 0, scale = 0.88;
+  if (source && source.getBoundingClientRect) {
+    const s = source.getBoundingClientRect();
+    if (s.width > 0 && s.height > 0) {
+      dx = (s.left + s.width / 2) - (tgtRect.left + tgtRect.width / 2);
+      dy = (s.top + s.height / 2) - (tgtRect.top + tgtRect.height / 2);
+      // Scale so source rect appears to grow into target rect. Liquid Glass
+      // stretches as one mass (use min so we don't squish either axis).
+      scale = Math.max(0.06, Math.min(s.width / tgtRect.width, s.height / tgtRect.height));
+    }
+  }
+  // 2) CRITICAL: write the initial state INLINE before the next paint.
+  // Without this, the first paint shows the modal at its final position and
+  // then "snaps" backward to the source — the flash the user reported.
+  // Setting inline transform + opacity here means the first browser paint
+  // already reflects the source position.
+  target.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`;
+  target.style.opacity = '0.55';
+  target.classList.add('glass-morphing');
+  // 3) Force layout commit so the inline styles are flushed before we start
+  // the animation. (offsetWidth read triggers a reflow.)
+  void target.offsetWidth;
+  // 4) Run the WAAPI animation. fill:'both' keeps it stable at keyframe 0
+  // until the first frame ticks.
+  const anim = target.animate(
+    [
+      { transform: `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`,
+        opacity: 0.55,
+        offset: 0 },
+      // Mid-flight — lifts in Z, brief overshoot in scale ("wet snap")
+      { transform: `translate3d(${dx * 0.05}px, ${dy * 0.05}px, 28px) scale(1.025)`,
+        opacity: 1,
+        offset: 0.78 },
+      // Rest at identity
+      { transform: 'translate3d(0, 0, 0) scale(1)',
+        opacity: 1,
+        offset: 1 },
+    ],
+    {
+      duration: opts.duration || 620,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      fill: 'both',
+    }
+  );
+  // 5) Clear the inline transform/opacity + drop .glass-morphing on land.
+  // The 0.18s-delayed transition on .glass-content then fades the body in.
+  anim.addEventListener('finish', () => {
+    target.classList.remove('glass-morphing');
+    target.style.transform = '';
+    target.style.opacity = '';
+  });
+  return anim;
+}
+window._lastClickSource = null;   // captured by app.js pointerdown for FLIP source
+
 // Auto-classify + Prism-highlight every <pre><code> block under `root`.
 // Default = python. Heuristic upgrades to sql/bash/json when the code obviously
 // is one of those. Idempotent — re-runs safely on already-classified blocks.
@@ -163,6 +498,12 @@ function renderDashboard(state, hub) {
     </div>
   `;
   container.appendChild(stats);
+
+  // 8-bit tamagotchi — fed by hitting daily XP goal, dies if neglected
+  const pet = GAMI.petState(state);
+  GAMI.saveImmediate(state);   // persist the daily-tick / feed result
+  const petCard = renderPetCard(state, pet);
+  container.appendChild(petCard);
 
   // SRS review tiles — surface only when there's something due / queued
   if (missedTotal > 0 || conceptReviewsTotal > 0) {
@@ -695,7 +1036,7 @@ function renderCategory(state, hub, catId, openModuleId) {
 }
 
 /* ====================== LESSON MODAL ====================== */
-function renderLesson(state, lessonId) {
+function renderLesson(state, lessonId, sourceEl) {
   let lesson, mod, cat;
   for (const m of MODULES) {
     const l = m.lessons.find(x => x.id === lessonId);
@@ -728,50 +1069,60 @@ function renderLesson(state, lessonId) {
     checklist: 'Tick at least one item',
   }[lesson.type] || 'Engage with the lesson';
 
+  // Glass-content wrapper makes the inner stuff fade in AFTER the modal
+  // surface has flown into place (Liquid Glass: content catches up to glass).
   card.innerHTML = `
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <div class="text-xs muted mb-1">${esc(cat.name)} · ${esc(mod.name)}</div>
-        <h2 class="font-display text-2xl font-semibold leading-tight">${esc(lesson.name)}</h2>
-        <div class="flex items-center gap-2 mt-2 text-xs muted">
-          <span class="pill pill-${cat.track==='both'?'both':cat.track}">${cat.track.toUpperCase()}</span>
-          <span class="mobile-hide">${esc(lesson.type)}</span><span class="mobile-hide">·</span>
-          <span>${lesson.time} min</span><span>·</span>
-          <span style="color:var(--accent)">+${lesson.xp} XP</span>
+    <div class="glass-content">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div class="text-xs muted mb-1">${esc(cat.name)} · ${esc(mod.name)}</div>
+          <h2 class="font-display text-2xl font-semibold leading-tight">${esc(lesson.name)}</h2>
+          <div class="flex items-center gap-2 mt-2 text-xs muted">
+            <span class="pill pill-${cat.track==='both'?'both':cat.track}">${cat.track.toUpperCase()}</span>
+            <span class="mobile-hide">${esc(lesson.type)}</span><span class="mobile-hide">·</span>
+            <span>${lesson.time} min</span><span>·</span>
+            <span style="color:var(--accent)">+${lesson.xp} XP</span>
+          </div>
         </div>
+        <button class="text-2xl muted hover:text-white" data-close="lesson" aria-label="Close">×</button>
       </div>
-      <button class="text-2xl muted hover:text-white" data-close="lesson" aria-label="Close">×</button>
-    </div>
-    <div id="engagement-status" class="mt-4 px-3 py-2 rounded-md text-[12.5px] flex items-center gap-2"
-         style="background:rgba(199,120,14,0.08); border:1px solid rgba(199,120,14,0.25); color:var(--warn)">
-      <span class="font-mono">○</span>
-      <span>${esc(stepLabel)} to unlock Mark complete</span>
-    </div>
-
-    <!-- Activity FIRST — most prominent, slot for mountLessonInteraction -->
-    <div id="lesson-interaction" class="mt-4 min-h-[2rem]"></div>
-
-    <!-- Body always visible below the activity -->
-    <div class="mt-5 pt-5 border-t border-[color:var(--hairline)] lesson-prose">
-      <div class="eyebrow mb-2 mobile-hide">Reference · the full insight</div>
-      ${lesson.body}
-    </div>
-    <div class="mt-6 flex items-center justify-between gap-2 flex-wrap">
-      <div class="flex gap-2 items-center">
-        <button class="btn btn-ghost" data-close="lesson">Close <span class="dim text-[10px] ml-1 hidden sm:inline">Esc</span></button>
-        ${done ? '' : `<button class="btn btn-ghost text-[12.5px]" data-skip="${lesson.id}" title="Mark complete with 0 XP — for material you already know cold">Skip · no XP</button>`}
+      <div id="engagement-status" class="mt-4 px-3 py-2 rounded-md text-[12.5px] flex items-center gap-2"
+           style="background:rgba(199,120,14,0.08); border:1px solid rgba(199,120,14,0.25); color:var(--warn)">
+        <span class="font-mono">○</span>
+        <span>${esc(stepLabel)} to unlock Mark complete</span>
       </div>
-      <div class="flex gap-2">
-        ${done ? '' : `<button class="btn" data-complete="${lesson.id}" data-just-complete="1" data-gated="1" disabled style="opacity:0.5;pointer-events:none">Mark complete</button>`}
-        <button class="btn ${done?'btn-ghost':'btn-primary'}" data-complete="${lesson.id}" data-next-after="1" data-gated="${done?0:1}"
-                ${done?'':'disabled style="opacity:0.5;pointer-events:none"'}>
-          ${done ? 'Next →' : `Mark & next →`}<span class="dim text-[10px] ml-2 hidden sm:inline">Enter</span>
-        </button>
+
+      <!-- Activity FIRST — most prominent, slot for mountLessonInteraction -->
+      <div id="lesson-interaction" class="mt-4 min-h-[2rem]"></div>
+
+      <!-- Body always visible below the activity -->
+      <div class="mt-5 pt-5 border-t border-[color:var(--hairline)] lesson-prose">
+        <div class="eyebrow mb-2 mobile-hide">Reference · the full insight</div>
+        ${lesson.body}
+      </div>
+      <div class="mt-6 flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex gap-2 items-center">
+          <button class="btn btn-ghost" data-close="lesson">Close <span class="dim text-[10px] ml-1 hidden sm:inline">Esc</span></button>
+          ${done ? '' : `<button class="btn btn-ghost text-[12.5px]" data-skip="${lesson.id}" title="Mark complete with 0 XP — for material you already know cold">Skip · no XP</button>`}
+        </div>
+        <div class="flex gap-2">
+          ${done ? '' : `<button class="btn" data-complete="${lesson.id}" data-just-complete="1" data-gated="1" disabled style="opacity:0.5;pointer-events:none">Mark complete</button>`}
+          <button class="btn ${done?'btn-ghost':'btn-primary'}" data-complete="${lesson.id}" data-next-after="1" data-gated="${done?0:1}"
+                  ${done?'':'disabled style="opacity:0.5;pointer-events:none"'}>
+            ${done ? 'Next →' : `Mark & next →`}<span class="dim text-[10px] ml-2 hidden sm:inline">Enter</span>
+          </button>
+        </div>
       </div>
     </div>
   `;
   wrap.appendChild(card);
   document.body.appendChild(wrap);
+
+  // Liquid Glass FLIP — the modal surface grows out of the clicked source
+  // (lesson row, "Open" button, quest tile, etc.). Source falls back to
+  // window._lastClickSource if not passed explicitly.
+  const src = sourceEl || window._lastClickSource;
+  flipMorphIn(card, src);
 
   // When the lesson's interaction fires its engagement signal, unlock buttons.
   const status = card.querySelector('#engagement-status');
@@ -806,7 +1157,7 @@ function renderLesson(state, lessonId) {
     console.error('mountLessonInteraction failed:', err);
     interaction.innerHTML = `<div class="rounded-md p-3" style="background:rgba(215,56,76,0.08);border:1px solid rgba(215,56,76,0.3);color:var(--bad);font-size:13px;font-family:monospace;white-space:pre-wrap">⚠ Activity failed to mount:\n${esc(String(err && err.stack || err))}</div>`;
   }
-  ANIM.viewIn(card);
+  // (FLIP morph above replaces the prior generic ANIM.viewIn() fade-up entrance.)
   // Syntax-highlight every <pre><code> block that doesn't already specify a language.
   // Default to Python (~95% of curriculum code). SQL/Bash/JSON detected by content.
   highlightCodeIn(card);

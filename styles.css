@@ -79,6 +79,19 @@
   /* Spring transition (Apple-style overshoot) */
   --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease:   cubic-bezier(0.32, 0.72, 0, 1);
+  /* Liquid Glass motion tokens.
+   * --spring-overshoot: entrance — overshoots target with 2 oscillations.
+   * --spring-settle:    exit — gentle deceleration into rest.
+   * --spring-snap:      quick taps, no overshoot.
+   * Use Web Animations API with these as easing on the FLIP transforms. */
+  --spring-overshoot: linear(
+    0, 0.012 1.5%, 0.06 3.3%, 0.16 5.9%, 0.337 9.6%, 0.526 13.5%,
+    0.706 17.6%, 0.853 21.8%, 0.962 26.1%, 1.024 30.4%, 1.046 34.9%,
+    1.04 39.6%, 1.022 44.4%, 1.003 49.5%, 0.987 55%, 0.984 61%,
+    0.991 67.5%, 1 100%
+  );
+  --spring-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --spring-snap:   cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * { box-sizing: border-box; }
@@ -410,12 +423,68 @@ header.sticky > *, main > header > * { position: relative; z-index: 1; }
   animation: none;   /* no ambient sweep inside modals */
 }
 
+/* =========================================================================
+ * Liquid Glass motion states
+ *
+ * `.glass-morphing` is applied to a card during a FLIP transition. It:
+ *   • Increases backdrop blur (variable refraction during motion)
+ *   • Hides content briefly (it catches up after glass has arrived)
+ *   • Suppresses ambient sweep (it would compete with the motion)
+ *
+ * `.glass-trail` adds a subtle motion-blur smear via box-shadow when an
+ *   element translates fast. Applied during the morph, removed on rest.
+ * ========================================================================= */
+.glass-morphing {
+  -webkit-backdrop-filter: blur(96px) saturate(260%) brightness(1.14) contrast(1.06) !important;
+  backdrop-filter: blur(96px) saturate(260%) brightness(1.14) contrast(1.06) !important;
+  will-change: transform, opacity;
+}
+.glass-morphing::after { animation-play-state: paused !important; }
+.glass-morphing .glass-content {
+  opacity: 0;
+  transform: scale(0.98);
+}
+.glass-content {
+  transition: opacity 0.35s var(--spring-settle) 0.18s,
+              transform 0.35s var(--spring-settle) 0.18s;
+}
+
+.glass-trail {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(15,23,42,0.07),
+    var(--sh-lift),
+    /* Smear behind the moving glass */
+    0 24px 48px -16px rgba(15,23,42,0.18),
+    0 0 60px -10px rgba(255,255,255,0.45);
+}
+
 /* Reduce motion respect */
 @media (prefers-reduced-motion: reduce) {
   .card, .card::after { animation: none !important; }
   .card:hover { transform: translateY(-2px); }
   .card:active { transform: scale(0.995); }
 }
+
+/* =========================================================================
+ * Pet tamagotchi animations
+ * ========================================================================= */
+.pet-sprite svg { image-rendering: pixelated; image-rendering: crisp-edges; }
+.pet-bobbing { animation: pet-bob 1.4s ease-in-out infinite; }
+@keyframes pet-bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(-3px); }
+}
+.pet-walking { animation: pet-walk 8s ease-in-out infinite; }
+@keyframes pet-walk {
+  /* Walk back and forth across the play area. */
+  0%   { transform: translateX(-150%); }
+  25%  { transform: translateX(0%); }
+  50%  { transform: translateX(150%); }
+  75%  { transform: translateX(0%); }
+  100% { transform: translateX(-150%); }
+}
+.pet-card { contain: layout style; }
 
 .divider { height: 1px; background: var(--hairline); margin: 0.95rem 0; }
 

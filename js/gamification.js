@@ -372,6 +372,150 @@ function ensureDailyQuests(state, pool) {
   return state;
 }
 
+/* ---------- Pet (tamagotchi) ----------
+ * An 8-bit companion that lives or dies based on your daily XP discipline.
+ *
+ * Life-sim mechanics:
+ *   • Stages: egg → baby (days 0-2) → teen (days 3-7) → adult (8+)
+ *   • Health (0-100): -25 per day the goal is missed. Reaches 0 → death,
+ *                     pet respawns as an egg the next day.
+ *   • Fullness (0-100): +60 on feed (goal hit). -30 per day not fed.
+ *   • Fitness (0-100): +12 when XP > 1.5× goal (over-achievement = exercise).
+ *                      -3 per sedentary day. Builds toward "jacked" body.
+ *   • Fatness (0-100): +8 when fed without exercise that day.
+ *                      -4 per day with exercise. Builds toward "chubby" body.
+ *
+ * Body shape (visual):
+ *   • Egg → just an oval, no body type
+ *   • Baby/teen → cute, neutral
+ *   • Adult: skinny / normal / chubby / jacked (by fitness vs fatness)
+ *
+ * Activities (random, render-time choice):
+ *   walk · idle · eat · sleep · workout · play · cough (sick) · droop (sad)
+ *
+ * State fields (persisted):
+ *   { stage, ageDays, health, fullness, fitness, fatness,
+ *     lastFedDate, lastTickDate, deathCount, name }
+ */
+
+function _newPet(name = 'Bit') {
+  return {
+    stage: 'egg',
+    ageDays: 0,
+    health: 100,
+    fullness: 80,
+    fitness: 10,
+    fatness: 0,
+    lastFedDate: null,
+    lastTickDate: todayKey(),
+    deathCount: 0,
+    name,
+  };
+}
+
+// Daily-tick: applies degradation for each day elapsed since lastTickDate.
+// Idempotent — safe to call multiple times per day; only fires for new days.
+function _petTick(p, today) {
+  if (p.lastTickDate === today) return p;
+  let daysElapsed = daysBetween(p.lastTickDate || today, today);
+  if (daysElapsed <= 0) { p.lastTickDate = today; return p; }
+  daysElapsed = Math.min(daysElapsed, 30);  // cap to avoid wild swings on long absences
+  for (let i = 0; i < daysElapsed; i++) {
+    // Each day where the user didn't feed on that calendar day = miss
+    p.fullness = Math.max(0, p.fullness - 30);
+    p.fitness  = Math.max(0, p.fitness - 3);
+    p.fatness  = Math.max(0, p.fatness - 4);
+    // Health drop if not fed yesterday (we approximate with fullness state)
+    if (p.fullness < 30) p.health = Math.max(0, p.health - 25);
+    p.ageDays += 1;
+    if (p.health === 0) break;
+  }
+  p.lastTickDate = today;
+  // Death + respawn as egg
+  if (p.health === 0) {
+    const oldName = p.name;
+    const deaths = (p.deathCount || 0) + 1;
+    Object.assign(p, _newPet(oldName));
+    p.deathCount = deaths;
+  }
+  // Stage progression by age
+  if (p.stage === 'egg' && p.ageDays >= 1) p.stage = 'baby';
+  if (p.stage === 'baby' && p.ageDays >= 3) p.stage = 'teen';
+  if (p.stage === 'teen' && p.ageDays >= 8) p.stage = 'adult';
+  return p;
+}
+
+// Compute body-shape descriptor for the adult stage (and partly for teen).
+function _petBody(p) {
+  if (p.stage === 'egg')  return 'egg';
+  if (p.stage === 'baby') return 'baby';
+  if (p.fitness > 60 && p.fatness < 25) return 'jacked';
+  if (p.fatness > 55)                   return 'chubby';
+  if (p.fitness > 30 && p.fatness < 40) return 'fit';
+  return 'normal';
+}
+
+// Pick today's activity — deterministic per (today, ageDays) so the pet
+// doesn't flip every render but does change day to day. Mood/stat overrides
+// activity (e.g. sick beats walk).
+function _petActivity(p, today, justFed) {
+  if (p.stage === 'egg')          return 'egg-wobble';
+  if (justFed)                    return 'eat';
+  if (p.health < 30)              return 'cough';
+  if (p.fullness < 25)            return 'beg';
+  if (p.fitness > 70)             return 'workout';
+  // Deterministic random based on date hash
+  const seed = parseInt(today.replaceAll('-', ''), 10) + (p.ageDays * 7);
+  const pool = ['walk', 'idle', 'sleep', 'play', 'walk', 'idle'];
+  return pool[seed % pool.length];
+}
+
+function petState(state) {
+  if (!state.pet || !state.pet.stage) state.pet = _newPet();
+  const today = todayKey();
+  const goal = (state.user && state.user.goal) || 60;
+  const todayXP = state.todayXP || 0;
+
+  // 1) Apply any daily ticks since last render (degradation / death / staging)
+  _petTick(state.pet, today);
+  const p = state.pet;
+
+  // 2) Feed today if XP goal met AND we haven't fed today
+  const justFed = (todayXP >= goal) && p.lastFedDate !== today && p.stage !== 'egg';
+  if (justFed) {
+    p.fullness = Math.min(100, p.fullness + 60);
+    p.health   = Math.min(100, p.health + 12);
+    p.lastFedDate = today;
+    // Bulk metabolism: did the user push past 1.5× goal? (exercise)
+    if (todayXP >= goal * 1.5) {
+      p.fitness = Math.min(100, p.fitness + 12);
+      p.fatness = Math.max(0, p.fatness - 3);
+    } else {
+      // Fed but not exercising → fatten slightly
+      p.fatness = Math.min(100, p.fatness + 8);
+    }
+  }
+
+  return {
+    name: p.name,
+    stage: p.stage,
+    body: _petBody(p),
+    activity: _petActivity(p, today, justFed),
+    health: p.health,
+    fullness: p.fullness,
+    fitness: p.fitness,
+    fatness: p.fatness,
+    ageDays: p.ageDays,
+    deathCount: p.deathCount || 0,
+    fedToday: p.lastFedDate === today,
+    justFed,
+    goal,
+    todayXP,
+    xpToFeed: Math.max(0, goal - todayXP),
+    xpProgress: Math.min(100, Math.round((todayXP / goal) * 100)),
+  };
+}
+
 /* ---------- Struggle stats ----------
  * Aggregates signals that point to "where this user struggles":
  *   1. Wrong-answer queue counts per category (raw + per-lesson)
@@ -548,6 +692,7 @@ return {
   logFreeRecall,
   ensureDailyQuests, bumpQuestProgress,
   struggleStats,
+  petState,
   checkBadges,
   coverage,
   xpForLevel, levelFromXP, levelProgress,
