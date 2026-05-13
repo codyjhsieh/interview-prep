@@ -755,27 +755,27 @@ vec = r.data[0].embedding</code></pre>`,
 <br><br>
 <b>1. Hosted, specialized.</b> Pinecone, Weaviate Cloud, Qdrant Cloud. Managed service, you pay per index size + query volume. Zero ops.
 <ul class="list-muted">
-  <li>✅ Fast setup, scales smoothly to billions of vectors</li>
-  <li>❌ Vendor lock-in; outbound network call</li>
+  <li><span class="icon-check"></span> Fast setup, scales smoothly to billions of vectors</li>
+  <li><span class="icon-x"></span> Vendor lock-in; outbound network call</li>
   <li>Use when: prototyping or non-VPC customers</li>
 </ul>
 <b>2. Open-source, self-host.</b> Qdrant, Weaviate, Milvus.
 <ul class="list-muted">
-  <li>✅ Run in customer VPC, no vendor lock-in, free</li>
-  <li>❌ You operate it (backup, scaling, upgrade)</li>
+  <li><span class="icon-check"></span> Run in customer VPC, no vendor lock-in, free</li>
+  <li><span class="icon-x"></span> You operate it (backup, scaling, upgrade)</li>
   <li>Use when: enterprise customers requiring data-in-VPC</li>
 </ul>
 <b>3. Extension on existing DB.</b> pgvector (Postgres), MongoDB Atlas Vector, Elasticsearch dense_vector.
 <ul class="list-muted">
-  <li>✅ No new DB to operate — your existing Postgres / Elastic now does vectors</li>
-  <li>✅ Hybrid queries: filter by metadata in SQL, then vector search</li>
-  <li>❌ Slower than specialized at scale (10M+ vectors)</li>
+  <li><span class="icon-check"></span> No new DB to operate — your existing Postgres / Elastic now does vectors</li>
+  <li><span class="icon-check"></span> Hybrid queries: filter by metadata in SQL, then vector search</li>
+  <li><span class="icon-x"></span> Slower than specialized at scale (10M+ vectors)</li>
   <li>Use when: small-to-medium scale, want minimal ops</li>
 </ul>
 <b>4. Embedded / in-process.</b> FAISS, ChromaDB.
 <ul class="list-muted">
-  <li>✅ No network overhead, simple</li>
-  <li>❌ Single-machine, no built-in persistence</li>
+  <li><span class="icon-check"></span> No network overhead, simple</li>
+  <li><span class="icon-x"></span> Single-machine, no built-in persistence</li>
   <li>Use when: prototyping, single-server deployments, edge inference</li>
 </ul>
 <b>The dimensions that matter at scale:</b>
@@ -3819,16 +3819,16 @@ end
 <b>Push model (fan-out on write).</b> When user A posts, write a copy of the post ID into the <b>inbox</b> of every follower of A.
 <pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">A posts → loop over A's 200 followers → INSERT into 200 inboxes
 Reader's feed = SELECT FROM inbox WHERE user_id = reader ORDER BY ts LIMIT 50</pre>
-✅ Read is O(1) — just scan your inbox. Sub-10 ms feed loads.
-<br>❌ Celebrity write amplification: 1 post by an idol → 100M inbox inserts. Storage explosion (the same post stored 100M times).
+<span class="icon-check"></span> Read is O(1) — just scan your inbox. Sub-10 ms feed loads.
+<br><span class="icon-x"></span> Celebrity write amplification: 1 post by an idol → 100M inbox inserts. Storage explosion (the same post stored 100M times).
 <br><br>
 <b>Pull model (fan-out on read).</b> Store posts once by author. At read time, look up "who do I follow," fetch their recent posts, merge.
 <pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">A posts → INSERT into posts(author_id, post_id, ts)
 Reader's feed = SELECT FROM posts
   WHERE author_id IN (followees of reader)
   ORDER BY ts LIMIT 50</pre>
-✅ Write is O(1). Storage is normal (one copy per post).
-<br>❌ Read is expensive — if you follow 5,000 accounts, that's a 5,000-author query. Heavy users pay every page load.
+<span class="icon-check"></span> Write is O(1). Storage is normal (one copy per post).
+<br><span class="icon-x"></span> Read is expensive — if you follow 5,000 accounts, that's a 5,000-author query. Heavy users pay every page load.
 <br><br>
 <b>Hybrid (the production answer).</b> Set a <b>celebrity threshold</b> (e.g., 1M followers). For authors below the threshold: push (fan-out on write). For authors above: pull (fan-out on read). Each reader's feed = merge(pushed inbox + pulled celebrity timelines).
 <pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">feed(reader) =
@@ -4014,12 +4014,12 @@ Real systems also have to choose between low latency and strong consistency even
      body:`Picking a database is mostly picking a storage engine. Two dominant families: <b>B-tree</b> (Postgres, MySQL/InnoDB, SQL Server) and <b>LSM tree</b> (RocksDB, Cassandra, ScyllaDB, HBase, Bigtable). They make opposite tradeoffs.
 <br><br>
 <b>B-tree.</b> A sorted on-disk tree of fixed-size pages. Reads = log(N) page fetches. Writes = locate page → modify in place → fsync. <b>In-place update.</b>
-<br>✅ Excellent point reads and range scans. Predictable latency. SQL planners love it.
-<br>❌ Random writes are expensive — each write may rewrite a 4 KB page even to flip 8 bytes. <b>Write amplification ≈ 4–10×</b>.
+<br><span class="icon-check"></span> Excellent point reads and range scans. Predictable latency. SQL planners love it.
+<br><span class="icon-x"></span> Random writes are expensive — each write may rewrite a 4 KB page even to flip 8 bytes. <b>Write amplification ≈ 4–10×</b>.
 <br><br>
 <b>LSM (Log-Structured Merge).</b> Writes go to an in-memory <code>memtable</code> + WAL (append-only). When memtable fills, flush to disk as an immutable sorted file (SSTable). Background <b>compaction</b> merges SSTables to keep read paths short.
-<br>✅ Insanely fast writes — sequential append. <b>Write amplification ≈ 1× at write time</b>, paid later in compaction.
-<br>❌ Reads may have to check multiple SSTables (read amplification). Compaction steals CPU and IO. Worst-case tail latency on read.
+<br><span class="icon-check"></span> Insanely fast writes — sequential append. <b>Write amplification ≈ 1× at write time</b>, paid later in compaction.
+<br><span class="icon-x"></span> Reads may have to check multiple SSTables (read amplification). Compaction steals CPU and IO. Worst-case tail latency on read.
 <br><br>
 <b>The asymmetry in one picture:</b>
 <pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">B-tree:  WRITE → seek → modify page → fsync (random IO, 4-10× amp)
@@ -4053,16 +4053,16 @@ LSM:     WRITE → append memtable + WAL (sequential, fast)
      body:`Once your data lives on more than one box, you need to answer: <b>which copy is the truth?</b> Three topologies, escalating complexity.
 <br><br>
 <b>1. Single-leader (leader-follower).</b> Writes go to the leader; followers replicate. The default for Postgres + standby, MySQL replicas, MongoDB.
-<br>✅ Simple. Reads can scale by adding followers.
-<br>❌ Followers lag (replication lag). Failover is manual or needs an election. Writes are bottlenecked on the leader.
+<br><span class="icon-check"></span> Simple. Reads can scale by adding followers.
+<br><span class="icon-x"></span> Followers lag (replication lag). Failover is manual or needs an election. Writes are bottlenecked on the leader.
 <br><br>
 <b>2. Multi-leader.</b> Multiple regions accept writes; replicate to each other. Used by globally distributed apps with offline sync.
-<br>✅ Low write latency everywhere. Survives whole-region failure.
-<br>❌ Conflict resolution is hell. Two leaders edit the same row → which wins? Last-write-wins loses data. CRDTs are non-trivial.
+<br><span class="icon-check"></span> Low write latency everywhere. Survives whole-region failure.
+<br><span class="icon-x"></span> Conflict resolution is hell. Two leaders edit the same row → which wins? Last-write-wins loses data. CRDTs are non-trivial.
 <br><br>
 <b>3. Leaderless (Dynamo-style).</b> Any replica accepts writes; quorum read/write. Cassandra, DynamoDB, Riak.
-<br>✅ No single point of failure. Tunable consistency per query (R + W > N → strong-ish).
-<br>❌ Eventual consistency by default. Stale reads. Anti-entropy via Merkle trees.
+<br><span class="icon-check"></span> No single point of failure. Tunable consistency per query (R + W > N → strong-ish).
+<br><span class="icon-x"></span> Eventual consistency by default. Stale reads. Anti-entropy via Merkle trees.
 <br><br>
 <b>Why you need consensus.</b> Even in single-leader, the question "who IS the leader right now?" requires consensus. Otherwise two nodes both think they're the leader (split-brain), and they each accept conflicting writes. <b>Raft</b> is the practical algorithm to answer "who's the leader?" and "what's the replicated log?".
 <br><br>
@@ -4342,16 +4342,16 @@ Here's the question every senior engineer asks first: <b>"Where does Acme's data
 The way you keep tenants separated is called <b>multi-tenancy architecture</b>. Three flavors, in order of isolation (and cost):
 <br><br>
 <b>1. Pool</b> — one shared database. Every row has a <code>tenant_id</code> column. Every query is <code>WHERE tenant_id = ?</code>.
-<br>✅ Cheapest. One database to operate. Easy to add new tenants.
-<br>❌ One bug in the WHERE clause → cross-tenant leak. Noisy-neighbor risk (a heavy tenant slows everyone else). HIPAA / SOC2 reviewers HATE this — your compliance review becomes "prove every query filters correctly."
+<br><span class="icon-check"></span> Cheapest. One database to operate. Easy to add new tenants.
+<br><span class="icon-x"></span> One bug in the WHERE clause → cross-tenant leak. Noisy-neighbor risk (a heavy tenant slows everyone else). HIPAA / SOC2 reviewers HATE this — your compliance review becomes "prove every query filters correctly."
 <br><br>
 <b>2. Silo</b> — every tenant gets their OWN database, sometimes in their OWN cloud region.
-<br>✅ Max isolation. No way to leak across tenants — they're physically separate. Easy compliance ("each customer's data is in its own database, in their region of choice"). Customer can leave with their data trivially.
-<br>❌ Expensive. N databases to operate, monitor, back up. Schema changes are N migrations. New-tenant onboarding takes hours, not seconds.
+<br><span class="icon-check"></span> Max isolation. No way to leak across tenants — they're physically separate. Easy compliance ("each customer's data is in its own database, in their region of choice"). Customer can leave with their data trivially.
+<br><span class="icon-x"></span> Expensive. N databases to operate, monitor, back up. Schema changes are N migrations. New-tenant onboarding takes hours, not seconds.
 <br><br>
 <b>3. Bridge</b> — shared schema (one set of migrations), but per-tenant database. Middle ground.
-<br>✅ Schema reuse + partial isolation. Easier to operate than silo, more compliant than pool.
-<br>❌ Doesn't satisfy the most paranoid compliance teams. Still N databases.
+<br><span class="icon-check"></span> Schema reuse + partial isolation. Easier to operate than silo, more compliant than pool.
+<br><span class="icon-x"></span> Doesn't satisfy the most paranoid compliance teams. Still N databases.
 <br><br>
 <b>How to choose:</b> match isolation to the customer's compliance posture. Mercy Hospital (HIPAA): silo, with their data in us-east-1 because they require US-only. Acme: pool is fine, they're cost-sensitive. Mid-market regulated SaaS: bridge.
 <br><br>
@@ -4494,18 +4494,18 @@ SAML is verbose and old, but every legacy enterprise IdP supports it. If your cu
 <br><br>
 <b>1. Multi-tenant SaaS + PrivateLink / Private Service Connect.</b>
 <br>Your normal SaaS. Customer\'s data still sits in your cloud account, but traffic between their VPC and yours goes over AWS PrivateLink (or GCP\'s equivalent) — never crosses the public internet. From their security team\'s POV, this is "private connectivity."
-<br>✅ Easiest. One codebase. One deploy. Customer\'s data is logically siloed (still your DBs).
-<br>❌ Their data is still in YOUR account — some compliance teams reject this even with PrivateLink.
+<br><span class="icon-check"></span> Easiest. One codebase. One deploy. Customer\'s data is logically siloed (still your DBs).
+<br><span class="icon-x"></span> Their data is still in YOUR account — some compliance teams reject this even with PrivateLink.
 <br><br>
 <b>2. Single-tenant in your VPC (BYOC-adjacent).</b>
 <br>You stand up a dedicated cluster for this customer. Same image, same infra-as-code, but their own DB, their own compute, their own region. Your team operates it.
-<br>✅ True isolation. Their data lives in their dedicated DB. Compliance reviews are smoother.
-<br>❌ N customers = N clusters to monitor, patch, deploy to. Your SRE on-call burden multiplies. Need automation (Terraform + per-tenant pipelines) to stay sane.
+<br><span class="icon-check"></span> True isolation. Their data lives in their dedicated DB. Compliance reviews are smoother.
+<br><span class="icon-x"></span> N customers = N clusters to monitor, patch, deploy to. Your SRE on-call burden multiplies. Need automation (Terraform + per-tenant pipelines) to stay sane.
 <br><br>
 <b>3. Full on-prem / in-customer-cloud.</b>
 <br>You hand the customer a Helm chart. They run it in THEIR Kubernetes cluster, often in THEIR cloud account, often air-gapped (no outbound internet). The customer\'s IT operates it.
-<br>✅ Their data never leaves their environment. Satisfies the strictest compliance.
-<br>❌ Brutal to support. They run the version they want. Bug reports come without logs. You build observability tools they can run locally. You write a documentation site for their IT.
+<br><span class="icon-check"></span> Their data never leaves their environment. Satisfies the strictest compliance.
+<br><span class="icon-x"></span> Brutal to support. They run the version they want. Bug reports come without logs. You build observability tools they can run locally. You write a documentation site for their IT.
 <br><br>
 <b>The senior insight:</b> the right answer for a customer depends on their compliance posture and your willingness to support the operational cost. Most SaaS companies offer shape 1 as default; shape 2 to enterprises willing to pay premium; shape 3 only when forced by regulated industries (defense, healthcare, public sector). The decision impacts your engineering org structure for years — you need an SRE team that can support whichever shapes you commit to.`,
      interactive:{ type:'match',
@@ -4641,8 +4641,8 @@ resp = stub.IssueRefund(refund_pb2.RefundRequest(
      body:`"Our ERP is from 2003 and there's no API" is one of the most common FDE blockers. The customer wants AI on top of their data; the data is locked in a Windows app running on a server in a closet. Here's the ladder of integration shapes, in order of preference. <b>Always exhaust the higher rungs first.</b>
 <br><br>
 <b>Rung 1 — Official SDK / API wrapper.</b> Many "legacy" systems have an SDK that nobody on the customer's team remembers exists. Ask the vendor directly: "Do you have a REST/SOAP/COM API or SDK?" SAP has BAPIs. Oracle has REST endpoints. Sage has webhooks in newer versions. Even AS/400 systems often have an ODBC driver. <b>Always check the vendor docs before assuming there's no API.</b>
-<br>✅ Cleanest. Stable contract. Vendor-supported.
-<br>❌ May cost a license fee. May require version upgrades the customer hasn't done.
+<br><span class="icon-check"></span> Cleanest. Stable contract. Vendor-supported.
+<br><span class="icon-x"></span> May cost a license fee. May require version upgrades the customer hasn't done.
 <br><br>
 <b>Rung 2 — Database direct (read replica).</b> If the ERP's data lives in SQL Server / Oracle / DB2, you can often connect a read replica and query directly. <b>Never touch the primary</b> — you'll break their reporting and possibly their billing.
 <pre><code>-- Set up: replicate the customer's ERP DB to a separate Postgres
@@ -4652,8 +4652,8 @@ SELECT order_id, customer_id, total, status
 FROM   replica.dbo.orders
 WHERE  updated_at > '2024-01-01'
 ORDER  BY updated_at DESC;</code></pre>
-✅ Real-time-ish (replication lag is seconds). Full schema access.
-<br>❌ Schema breaks on vendor updates. Reverse-engineering the schema is detective work. Some tables are encrypted or held in proprietary formats.
+<span class="icon-check"></span> Real-time-ish (replication lag is seconds). Full schema access.
+<br><span class="icon-x"></span> Schema breaks on vendor updates. Reverse-engineering the schema is detective work. Some tables are encrypted or held in proprietary formats.
 <br><br>
 <b>Rung 3 — Flat-file batch export over SFTP.</b> The ERP exports a nightly CSV / fixed-width file. You SFTP-pull it, parse it, ingest it.
 <pre><code>def nightly_ingest():
@@ -4666,12 +4666,12 @@ ORDER  BY updated_at DESC;</code></pre>
             bulk_load(rows, table='orders')
         already_ingested.add(fn)
         sftp.rename(f'/exports/orders/{fn}', f'/exports/archive/{fn}')</code></pre>
-✅ Works with literally any system that can write a file. Stable. Cheap.
-<br>❌ Latency = export frequency (daily, hourly at best). No real-time signals. File-format changes silently. Backfill on a missed file is a manual operation.
+<span class="icon-check"></span> Works with literally any system that can write a file. Stable. Cheap.
+<br><span class="icon-x"></span> Latency = export frequency (daily, hourly at best). No real-time signals. File-format changes silently. Backfill on a missed file is a manual operation.
 <br><br>
 <b>Rung 4 — RPA / UI scraping (the last resort).</b> A bot drives the ERP's UI — opens screens, copies fields, pastes into your system. Vendors: UiPath, Automation Anywhere, custom Selenium.
-<br>✅ Works when nothing else does.
-<br>❌ Brittle (a button moves → bot breaks). Slow (seconds per record). Requires dedicated infrastructure (Windows VM running 24/7 with the ERP installed). Vendors hate it (often violates their TOS).
+<br><span class="icon-check"></span> Works when nothing else does.
+<br><span class="icon-x"></span> Brittle (a button moves → bot breaks). Slow (seconds per record). Requires dedicated infrastructure (Windows VM running 24/7 with the ERP installed). Vendors hate it (often violates their TOS).
 <br><br>
 <b>The SLA conversation you must have.</b> Whatever rung you pick, write the SLA down explicitly so neither side is surprised:
 <table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0">
@@ -4839,7 +4839,7 @@ eval_scores:     { faithfulness, relevance, ... } (when LLM-as-judge runs)</pre>
 <b>The format that works</b> — post in a shared channel (Slack, customer portal) every Friday afternoon, in this exact structure:
 <pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline);white-space:pre">📊 [Customer Name] — Week of May 10
 
-✅ Shipped this week
+<span class="icon-check"></span> Shipped this week
   • Deployed eval dashboard v1 (you can view at /evals)
   • Resolved Tuesday data-quality regression
     (root cause: timezone bug; fix deployed Wed AM)
@@ -5097,12 +5097,12 @@ INNER JOIN orders o ON o.user_id = u.id;</pre>
 <b>CROSS JOIN</b> — Cartesian product. Every row of A paired with every row of B. Useful for generating combinations / date dimensions.
 <br><br>
 <b>The trap: anti-joins.</b> "Find users with NO orders." Three ways to write it; only two are safe.
-<pre style="background:rgba(0,0,0,0.3);padding:8px;border-radius:8px;font-size:11.5px;line-height:1.4;border:1px solid var(--hairline);white-space:pre">-- ✅ Safe (LEFT JOIN + IS NULL):
+<pre style="background:rgba(0,0,0,0.3);padding:8px;border-radius:8px;font-size:11.5px;line-height:1.4;border:1px solid var(--hairline);white-space:pre">-- <span class="icon-check"></span> Safe (LEFT JOIN + IS NULL):
 SELECT u.* FROM users u
 LEFT JOIN orders o ON o.user_id = u.id
 WHERE o.id IS NULL;
 
--- ✅ Safe (NOT EXISTS):
+-- <span class="icon-check"></span> Safe (NOT EXISTS):
 SELECT u.* FROM users u
 WHERE NOT EXISTS (
   SELECT 1 FROM orders o WHERE o.user_id = u.id
@@ -6404,16 +6404,16 @@ Most platforms do (1) — pre-block, with a 5-minute hold during the user\'s che
      body:`When supply and demand meet in a marketplace, you have to PICK who matches whom. The three strategies, with their tradeoffs:
 <br><br>
 <b>Greedy matching.</b> For each demand (e.g., a shift), pick the best supply (e.g., a worker) that\'s available. "Best" usually = highest rating, closest distance.
-<br>✅ Simple. Fast. O(N · M) at worst.
-<br>❌ Locally optimal, globally bad. Greedy gives every popular shift to the highest-rated workers. New workers never get offered shifts. The platform stagnates at the bottom of the supply distribution.
+<br><span class="icon-check"></span> Simple. Fast. O(N · M) at worst.
+<br><span class="icon-x"></span> Locally optimal, globally bad. Greedy gives every popular shift to the highest-rated workers. New workers never get offered shifts. The platform stagnates at the bottom of the supply distribution.
 <br><br>
 <b>Bipartite matching (Hungarian algorithm).</b> Build a bipartite graph: workers on one side, shifts on the other, edges weighted by goodness-of-fit. Run the Hungarian algorithm to find the maximum-weight matching — assign N workers to N shifts globally optimally.
-<br>✅ Globally optimal. New workers get matched too.
-<br>❌ O(N³) — expensive at scale. Doesn\'t handle dynamics well (matches are computed once; what about workers joining mid-window?).
+<br><span class="icon-check"></span> Globally optimal. New workers get matched too.
+<br><span class="icon-x"></span> O(N³) — expensive at scale. Doesn\'t handle dynamics well (matches are computed once; what about workers joining mid-window?).
 <br><br>
 <b>ML-ranked.</b> Train a model on historical accept/decline / no-show events. For each (worker, shift) pair, predict the probability of "successful match." Sort shifts by this score per worker.
-<br>✅ Learns the patterns you can\'t hand-code (this worker prefers morning shifts, this employer doesn\'t mind beginners). Improves over time.
-<br>❌ Cold-start problem for new workers/employers. Black-box; hard to explain rationale to users.
+<br><span class="icon-check"></span> Learns the patterns you can\'t hand-code (this worker prefers morning shifts, this employer doesn\'t mind beginners). Improves over time.
+<br><span class="icon-x"></span> Cold-start problem for new workers/employers. Black-box; hard to explain rationale to users.
 <br><br>
 <b>Production pattern (Instawork-style):</b> a hybrid pipeline.
 <pre style="background:rgba(0,0,0,0.3);padding:8px;border-radius:8px;font-size:11.5px;line-height:1.4;border:1px solid var(--hairline);white-space:pre">1. Hard filter: must satisfy compliance (license,
@@ -6775,8 +6775,8 @@ A new card you rate "Good" three times: review tomorrow, then 4 days later, then
 technical mechanism] [the customer-or-business outcome with
 a number].</pre>
 <b>Example:</b>
-<br>❌ "Worked on machine learning pipeline."
-<br>✅ "Owned end-to-end deployment of a fraud-detection ML system to a top-3 payments customer; designed eval golden set + shadow-mode rollout; reduced false-positive rate from 4% to 0.8%, saving customer ~$2M/yr."
+<br><span class="icon-x"></span> "Worked on machine learning pipeline."
+<br><span class="icon-check"></span> "Owned end-to-end deployment of a fraud-detection ML system to a top-3 payments customer; designed eval golden set + shadow-mode rollout; reduced false-positive rate from 4% to 0.8%, saving customer ~$2M/yr."
 <br><br>
 <b>What to cut:</b>
 <ul class="list-muted">
@@ -7043,20 +7043,20 @@ const DAILY_QUESTS = [
 
 /* ---------- BADGES ---------- */
 const BADGES = [
-  { id:'first-day',     name:'First Day',           desc:'Completed onboarding.',                icon:'🌱' },
-  { id:'streak-3',      name:'3-Day Streak',        desc:'Studied 3 days in a row.',             icon:'🔥' },
-  { id:'streak-7',      name:'Week Warrior',        desc:'7 days in a row.',                     icon:'⚔️' },
-  { id:'streak-30',     name:'Habit Forged',        desc:'30 days in a row. The habit is yours.',icon:'🏆' },
-  { id:'first-decomp',  name:'Decomposer',          desc:'Completed your first decomp drill.',   icon:'🧩' },
-  { id:'rag-master',    name:'RAG Master',          desc:'Finished the RAG module.',             icon:'🤖' },
-  { id:'sql-snake',     name:'SQL Snake',           desc:'Finished SQL fluency module.',         icon:'🐍' },
-  { id:'mock-1',        name:'Mock Veteran',        desc:'Logged 5 mock interviews.',            icon:'🎯' },
-  { id:'company-deep',  name:'Company Scout',       desc:'Read all 20 company deep-dives.',       icon:'🔭' },
-  { id:'lvl-5',         name:'Level 5',             desc:'Reached level 5.',                     icon:'⭐' },
-  { id:'lvl-10',        name:'Level 10',            desc:'Reached level 10.',                    icon:'🌟' },
-  { id:'comeback',      name:'Comeback Kid',        desc:'Resumed after a 3-day gap.',           icon:'🦾' },
-  { id:'night-owl',     name:'Night Owl',           desc:'Studied after midnight.',              icon:'🦉' },
-  { id:'early-bird',    name:'Early Bird',          desc:'Studied before 7 AM.',                  icon:'🐦' },
+  { id:'first-day',     name:'First Day',           desc:'Completed onboarding.',                icon:'sprout' },
+  { id:'streak-3',      name:'3-Day Streak',        desc:'Studied 3 days in a row.',             icon:'flame' },
+  { id:'streak-7',      name:'Week Warrior',        desc:'7 days in a row.',                     icon:'swords' },
+  { id:'streak-30',     name:'Habit Forged',        desc:'30 days in a row. The habit is yours.',icon:'trophy' },
+  { id:'first-decomp',  name:'Decomposer',          desc:'Completed your first decomp drill.',   icon:'puzzle' },
+  { id:'rag-master',    name:'RAG Master',          desc:'Finished the RAG module.',             icon:'cpu' },
+  { id:'sql-snake',     name:'SQL Snake',           desc:'Finished SQL fluency module.',         icon:'database' },
+  { id:'mock-1',        name:'Mock Veteran',        desc:'Logged 5 mock interviews.',            icon:'target' },
+  { id:'company-deep',  name:'Company Scout',       desc:'Read all 20 company deep-dives.',       icon:'telescope' },
+  { id:'lvl-5',         name:'Level 5',             desc:'Reached level 5.',                     icon:'star' },
+  { id:'lvl-10',        name:'Level 10',            desc:'Reached level 10.',                    icon:'sparkles' },
+  { id:'comeback',      name:'Comeback Kid',        desc:'Resumed after a 3-day gap.',           icon:'biceps-flexed' },
+  { id:'night-owl',     name:'Night Owl',           desc:'Studied after midnight.',              icon:'moon' },
+  { id:'early-bird',    name:'Early Bird',          desc:'Studied before 7 AM.',                  icon:'sun' },
 ];
 
 /* ---------- FLASHCARDS (spaced repetition) ---------- */
@@ -7284,7 +7284,7 @@ const FLASHCARDS = [
   { id:'fc-cli-3', cat:'client', q:'Demo failure recovery?', a:'Acknowledge + run two tracks: visible (show recorded version) + backend (debug). Never blame customer\'s env in the moment. RCA within 24h.' },
   { id:'fc-cli-4', cat:'client', q:'Customer demands 6 weeks in 3 days — move?', a:'Decompose to the 20% that unblocks them + document tradeoffs + get the REAL deadline (often softer than stated).' },
   { id:'fc-cli-5', cat:'client', q:'Same problem recurs 2 hours after fix — response?', a:'Own as Sev1 + commit specific timeline + status updates every 4 hours. Defending the prior fix kills trust further.' },
-  { id:'fc-cli-6', cat:'client', q:'Writing customer status updates — format?', a:'✅ Shipped this week · 🚧 In flight · ⚠️ Risks/blockers · 📅 Next week. 5 bullets read better than 3 paragraphs.' },
+  { id:'fc-cli-6', cat:'client', q:'Writing customer status updates — format?', a:'<span class="icon-check"></span> Shipped this week · 🚧 In flight · ⚠️ Risks/blockers · 📅 Next week. 5 bullets read better than 3 paragraphs.' },
   { id:'fc-cli-7', cat:'client', q:'Customer\'s IT team blocks integration — move?', a:'Structured security review proposal (SOC2 docs + architecture + sub-processor list). Bypassing them = political damage.' },
   { id:'fc-cli-8', cat:'client', q:'A customer-side champion is leaving — what next?', a:'Get reintroduced to replacement + re-confirm scope/timeline with new owner. Champion loss = retention risk.' },
   { id:'fc-cli-9', cat:'client', q:'Explaining stochastic AI to a CFO?', a:'Weather-forecast analogy + show confidence range + 95th-percentile worst case + leading indicators. Quant always wins with CFOs.' },

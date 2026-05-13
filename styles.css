@@ -431,6 +431,31 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
  * ========================================================================= */
 .pet-card { contain: layout style; }
 
+/* Pseudo-icon classes for lesson body content (where ✅/❌ used to live).
+ * Mass-replaced in data.js so all "pro / con" lines render with classy
+ * Lucide icons instead of green/red emojis. Color via currentColor so
+ * pair with text-color utilities to tint per context.  */
+.icon-check::before,
+.icon-x::before {
+  content: '';
+  display: inline-block;
+  width: 14px; height: 14px;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  vertical-align: -2px;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+.icon-check { color: var(--accent); }
+.icon-check::before { -webkit-mask-image: url('assets/icons/check.svg'); mask-image: url('assets/icons/check.svg'); }
+.icon-x { color: var(--bad); }
+.icon-x::before { -webkit-mask-image: url('assets/icons/x.svg'); mask-image: url('assets/icons/x.svg'); }
+
 /* Pet card layout — desktop puts Bit on the left and all stats+actions
  * stacked on the right. Mobile falls back to the original vertical stack
  * (3D scene full-width on top, panel beneath). The 720px breakpoint

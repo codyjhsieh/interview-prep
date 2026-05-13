@@ -121,7 +121,7 @@ function mountQuiz(container, state, opts={}) {
     GAMI.bumpQuestProgress(state, 'coding');
     APP.afterStateChange();
     ANIM.confettiBurst('m');
-    ANIM.toast({ icon:'⚡', title:`+${r.xpGained} XP${r.bonusLabel||''}`, body:`${score}/${N*10} on Lightning Quiz` });
+    ANIM.toast({ icon: VIEWS.iconHTML('zap', {size: 18}), title:`+${r.xpGained} XP${r.bonusLabel||''}`, body:`${score}/${N*10} on Lightning Quiz` });
   }
 
   if (timeLeft !== Infinity) {
@@ -513,7 +513,7 @@ function mountDecomp(container, state) {
     render();
   }
   function fireHint(text) {
-    ANIM.toast({ icon:'💡', title:'Decomposition cue', body:text });
+    ANIM.toast({ icon: VIEWS.iconHTML('lightbulb', {size: 18}), title:'Decomposition cue', body:text });
     const feed = container.querySelector('#dh-feed');
     const node = document.createElement('div');
     node.className = 'card card-warn fade-in-up';
@@ -727,7 +727,7 @@ function mountLessonInteraction(container, state, lesson, modContext, opts = {})
       signalEngagement();
     });
     wrap.querySelector('#hint').addEventListener('click', () => {
-      ANIM.toast({ icon:'💡', title:'Hint', body:'Re-read the question. Restate it in your own words before answering.' });
+      ANIM.toast({ icon: VIEWS.iconHTML('lightbulb', {size: 18}), title:'Hint', body:'Re-read the question. Restate it in your own words before answering.' });
     });
   } else if (lesson.type === 'drill') {
     wrap.querySelector('#t-start')?.addEventListener('click', () => {
@@ -810,7 +810,7 @@ function mountConceptActivity(container, lesson, state, opts = {}) {
   */
   container.innerHTML = `
     <div class="rounded-md p-3 mb-3 flex items-start gap-2" style="background:rgba(14,163,113,0.06); border:1px solid rgba(14,163,113,0.25)">
-      <span style="color:var(--accent); font-size:14px">🎯</span>
+      <span style="color:var(--accent); display:inline-flex; align-items:center">${VIEWS.iconHTML('target', {size: 14})}</span>
       <div class="flex-1">
         <div class="text-[11px] uppercase tracking-wider" style="color:var(--accent); font-weight:600; letter-spacing:0.08em">Activity · ${esc(typeLabel)}</div>
         <div class="text-[12.5px] muted">Generation effect: try producing the answer in your own words BEFORE the structured activity.</div>
@@ -1241,7 +1241,7 @@ function renderFillBlank(stage, it, onDone) {
       <div id="fb-fb" class="hidden mt-3 p-3 rounded-md text-[13px] leading-relaxed"></div>
     </div>
   `;
-  stage.querySelector('#fb-hint').addEventListener('click', () => ANIM.toast({ icon:'💡', title:'Hint', body: it.hint || 'Think about what data structure removes the next element in O(1).' }));
+  stage.querySelector('#fb-hint').addEventListener('click', () => ANIM.toast({ icon: VIEWS.iconHTML('lightbulb', {size: 18}), title:'Hint', body: it.hint || 'Think about what data structure removes the next element in O(1).' }));
   stage.querySelector('#fb-check').addEventListener('click', () => {
     const blanks = [...stage.querySelectorAll('[data-blank]')];
     const ok = blanks.every((b,i) => {

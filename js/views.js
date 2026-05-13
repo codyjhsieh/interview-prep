@@ -2372,7 +2372,7 @@ function renderDashboard(state, hub) {
             <div class="text-2xl font-display font-semibold mt-1 numeric">${missedDue}<span class="text-sm muted ml-1">due today</span></div>
             <div class="text-xs muted mt-1 mobile-hide">${missedTotal} total · SM-2 scheduled · retrieval practice</div>
           </div>
-          <div class="text-2xl" style="color:var(--bad)">📍</div>
+          <div style="color:var(--bad); display:inline-flex">${iconHTML('target', {size: 22})}</div>
         </div>
         ${missedDue > 0 ? '<div class="text-xs mt-3" style="color:var(--bad)">→ Start review</div>' : '<div class="text-xs mt-3 muted">All caught up — next batch tomorrow</div>'}
       </a>
@@ -2383,7 +2383,7 @@ function renderDashboard(state, hub) {
             <div class="text-2xl font-display font-semibold mt-1 numeric">${conceptReviewsDue}<span class="text-sm muted ml-1">due today</span></div>
             <div class="text-xs muted mt-1 mobile-hide">${conceptReviewsTotal} scheduled · driven by your self-ratings</div>
           </div>
-          <div class="text-2xl" style="color:var(--sde)">🔁</div>
+          <div style="color:var(--sde); display:inline-flex">${iconHTML('refresh-cw', {size: 22})}</div>
         </div>
         ${conceptReviewsDue > 0 ? '<div class="text-xs mt-3" style="color:var(--sde)">→ Start review</div>' : '<div class="text-xs mt-3 muted">Nothing due · next concept review when scheduled</div>'}
       </a>
@@ -3629,7 +3629,7 @@ function renderProfile(state, hub) {
         ${BADGES.map(b => {
           const got = !!state.badges[b.id];
           return `<div class="text-center p-3 rounded-lg ${got?'bg-accent-500/10 border border-accent-500/30':'bg-ink-800/40 border border-ink-700/40 opacity-50'}">
-            <div class="text-3xl ${got?'':'grayscale'}">${b.icon}</div>
+            <div style="color:${got ? 'var(--accent)' : 'var(--dim)'}; display:inline-flex; align-items:center; justify-content:center">${iconHTML(b.icon, {size: 30})}</div>
             <div class="text-xs mt-1 font-medium">${esc(b.name)}</div>
             <div class="text-[10px] text-slate-400 mt-0.5">${esc(b.desc)}</div>
           </div>`;
@@ -3941,7 +3941,7 @@ function renderReview(state, hub, mode='missed') {
               <div class="font-display font-semibold mt-1">${esc(c.lesson.name)}</div>
               <div class="text-xs muted mt-1">Due since ${new Date(c.due).toLocaleDateString()}</div>
             </div>
-            <div class="text-xl">🔁</div>
+            <div style="display:inline-flex">${iconHTML('refresh-cw', {size: 18})}</div>
           </div>
         </a>
       `).join('');

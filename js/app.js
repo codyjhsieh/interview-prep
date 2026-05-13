@@ -226,7 +226,7 @@ function bindEvents() {
       const r = GAMI.logLessonComplete(state, completeId, lessonXP(completeId));
       if (!r.alreadyDone) {
         ANIM.confettiBurst('s');
-        ANIM.toast({ icon:'✅', title:`+${r.xpGained} XP${r.bonusLabel || ''}`, body: 'Lesson saved.' });
+        ANIM.toast({ icon: VIEWS.iconHTML('check', {size: 18}), title:`+${r.xpGained} XP${r.bonusLabel || ''}`, body: 'Lesson saved.' });
         GAMI.bumpQuestProgress(state, 'lesson');
         const lesson = findLesson(completeId);
         if (lesson?.type === 'drill') GAMI.bumpQuestProgress(state, 'drill');
@@ -336,7 +336,7 @@ function bindEvents() {
         GAMI.bumpQuestProgress(state, 'story');
         ANIM.toast({ icon: VIEWS.iconHTML('star', {size: 18}), title:`+${r.xpGained} XP${r.bonusLabel||''}`, body:'Story saved.' });
       } else {
-        ANIM.toast({ icon:'💾', title:'Updated' });
+        ANIM.toast({ icon: VIEWS.iconHTML('save', {size: 18}), title:'Updated' });
       }
       afterStateChange();
       render();
