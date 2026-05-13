@@ -53,8 +53,7 @@ TITLE_INCLUDE = re.compile(
   r"full[\s-]stack[\s-]engineer|product[\s-]engineer|"
   r"ai[\s-]engineer|applied[\s-]ai[\s-]engineer|ml[\s-]engineer|"
   r"machine[\s-]learning[\s-]engineer|infrastructure[\s-]engineer|"
-  r"platform[\s-]engineer|data[\s-]engineer|systems[\s-]engineer|"
-  r"member\s+of\s+technical\s+staff|mts"
+  r"platform[\s-]engineer|data[\s-]engineer|systems[\s-]engineer"
   r")\b", re.IGNORECASE)
 TITLE_EXCLUDE = re.compile(
   r"\b("
@@ -163,6 +162,28 @@ CANDIDATES = [
 
   # Sales AI
   ("unify","Unify","ashby","unify","saas","AI for outbound sales","Series A","$24M","Thrive",["Thrive","OpenAI","Sequoia Scout"],"AI sales rep / prospecting platform. Data + agents."),
+
+  # ── Expansion batch — additional verified NYC-hiring companies ────────
+  # More AI
+  ("ideogram","Ideogram","ashby","ideogram","ai","Generative image AI","Series A","$80M","a16z",["a16z","Index"],"Text-to-image generation. Multimodal eval + GPU pipeline."),
+  ("poolside","Poolside","ashby","poolside","ai","AI for software engineering","Series B","$626M","Bain Capital",["Bain","DST","Felicis"],"Frontier AI for code. Frontier model R&D + product engineering."),
+
+  # More Fintech / SaaS
+  ("drata","Drata","ashby","drata","saas","Continuous compliance automation","Series C","$328M","ICONIQ",["ICONIQ","GGV","Iconiq Capital"],"SOC2/ISO/HIPAA automation. Compliance + integrations breadth."),
+  ("numeric","Numeric","ashby","numeric","fintech","AI-powered close software","Series B","$67M","Menlo",["Menlo","8VC"],"Modern accounting close. Spreadsheet UX + workflow + AI."),
+
+  # More Devtools
+  ("glide","Glide","ashby","glide","devtools","No-code apps from spreadsheets","Series B","$22M","First Round",["First Round","Benchmark"],"Spreadsheet → app builder. Real-time sync + visual programming."),
+
+  # More public / large-co NYC eng
+  ("yext","Yext","greenhouse","yext","saas","Brand / search platform (NYSE)","Public","$255M pre-IPO","Insight",["NYSE","Insight","Marker"],"Public co. Knowledge-graph platform + AI answers."),
+  ("the-trade-desk","The Trade Desk","greenhouse","thetradedesk","saas","DSP for digital advertising (NASDAQ)","Public","$26M pre-IPO","IA Ventures",["NASDAQ","IA Ventures"],"Public co. Real-time bidding + ad tech at scale."),
+  ("lyft","Lyft","greenhouse","lyft","consumer","Rideshare + mobility (NASDAQ)","Public","$5B pre-IPO","Andreessen Horowitz",["NASDAQ","a16z","Founders Fund"],"Public co. Mobility platform — matching, payments, mapping."),
+  ("reddit","Reddit","greenhouse","reddit","media","Social discussion platform (NYSE)","Public","$1.3B pre-IPO","Advance",["NYSE","Advance","Tencent"],"Public co. Massive social platform with rich data + recs."),
+  ("jane-street","Jane Street","greenhouse","janestreet","fintech","Quant trading firm","Private","Self-funded","Private",["Private"],"Quant trading. Strong on functional programming (OCaml), CS fundamentals."),
+  ("mosaic","Mosaic","ashby","mosaic","fintech","Strategic finance platform","Series C","$45M","Founders Fund",["Founders Fund","Y Combinator"],"FP&A software for CFOs. Modeling + integrations."),
+  ("monte-carlo","Monte Carlo","ashby","montecarlodata","devtools","Data observability","Series D","$236M","ICONIQ",["ICONIQ","Accel","Salesforce Ventures"],"Data reliability platform. Lineage, anomaly detection, integrations."),
+  ("forge","Forge","ashby","forge","fintech","Private-markets liquidity","Public","$240M pre-IPO","Tiger",["NYSE","Tiger","FTV"],"Private secondary marketplace. Markets infra + compliance."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -192,6 +213,11 @@ DOMAINS = {
   "oscar":"hioscar.com","maven-clinic":"mavenclinic.com","ridgeline":"ridgelineapps.com",
   "justworks":"justworks.com","kalshi":"kalshi.com","polymarket":"polymarket.com",
   "watershed":"watershedclimate.com","unify":"unifygtm.com","runway":"runwayml.com",
+  "ideogram":"ideogram.ai","poolside":"poolside.ai","drata":"drata.com",
+  "numeric":"numeric.io","glide":"glideapps.com","yext":"yext.com",
+  "the-trade-desk":"thetradedesk.com","lyft":"lyft.com","reddit":"reddit.com",
+  "jane-street":"janestreet.com","mosaic":"mosaic.tech",
+  "monte-carlo":"montecarlodata.com","forge":"forgeglobal.com",
 }
 
 

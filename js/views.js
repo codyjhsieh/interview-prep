@@ -3190,60 +3190,79 @@ const USER_PROFILE = {
 };
 
 function companyFitScore(c) {
-  let s = 50;
+  // Brutally-honest baseline: a candidate with a 2-year recent gap +
+  // a short fired stint is structurally screened out at most companies
+  // before a human reads the resume. The scoring below is intentionally
+  // harsh — most companies should land in 20–55. A score in the 70s
+  // means "this is a place where the bar is forgiving of the gap and
+  // your AI-engineering profile is actually a strong match."
+  let s = 35;
 
   // Vertical: AI background plays best in AI / devtools / infra.
-  if (c.vertical === 'ai') s += 12;
+  if (c.vertical === 'ai') s += 14;
   else if (c.vertical === 'devtools' || c.vertical === 'infra') s += 7;
-  else if (c.vertical === 'fintech') s += 3;
-  else if (c.vertical === 'health' || c.vertical === 'saas') s += 1;
+  else if (c.vertical === 'fintech') s += 2;
+  else if (c.vertical === 'health' || c.vertical === 'saas') s += 0;
+  else s -= 2;
 
   // Stage: earlier is more forgiving of a 2y gap + a short fired stint.
+  // Late-stage process companies will gap-screen at the recruiter step.
   const stage = (c.stage || '').toLowerCase();
-  if (/series a/.test(stage) || /seed/.test(stage)) s += 16;
+  if (/seed/.test(stage)) s += 22;
+  else if (/series a/.test(stage)) s += 18;
   else if (/series b/.test(stage)) s += 11;
-  else if (/series c/.test(stage)) s += 5;
-  else if (/series d|series e/.test(stage)) s -= 2;
-  else if (/series f|late|take-private/.test(stage)) s -= 8;
-  else if (/public/.test(stage)) s -= 12;
+  else if (/series c/.test(stage)) s += 3;
+  else if (/series d/.test(stage)) s -= 8;
+  else if (/series e/.test(stage)) s -= 12;
+  else if (/series f|late|take-private/.test(stage)) s -= 16;
+  else if (/public/.test(stage)) s -= 20;
 
-  // Size of raise — very high raised cos run a heavier process.
+  // Size of raise — bigger == more bureaucracy + pedigree filtering.
   const r = c.raised || '';
   const num = parseFloat(r.replace(/[^\d.]/g, '')) || 0;
-  if (r.includes('B') && num >= 1) s -= 10;
-  else if (r.includes('B')) s -= 5;
-  else if (num >= 500) s -= 4;
-  else if (num <= 50) s += 4;
+  if (r.includes('B') && num >= 5) s -= 18;
+  else if (r.includes('B') && num >= 1) s -= 12;
+  else if (r.includes('B')) s -= 7;
+  else if (num >= 500) s -= 6;
+  else if (num >= 200) s -= 2;
+  else if (num <= 30) s += 6;
 
-  // Elite-bar penalty: places where 2y gap + a short fire is functionally
-  // screen-out at the resume stage.
+  // Elite-bar penalty: where the 2y gap + a fire is essentially a
+  // resume-screen reject. These bars don't bend for non-linear paths.
   const elite = new Set([
-    'openai','anthropic','stripe','figma','notion',
-    'cognition','cursor','perplexity','cohere',
+    'openai','anthropic','stripe','figma','notion','cognition',
+    'cursor','perplexity','cohere','glean','sierra','jane-street',
+    'scaleai','ramp','airtable',
   ]);
-  if (elite.has(c.id)) s -= 20;
+  if (elite.has(c.id)) s -= 30;
 
-  // Founding-role available = builder-first hiring; gap matters less.
-  if ((c.jobs || []).some(j => j.level === 'founding')) s += 10;
+  // Mid-tier penalty: process-heavy but not frontier elite.
+  const heavy = new Set(['plaid','brex','mercury','datadog','mongodb','vercel','attentive','gusto','carta']);
+  if (heavy.has(c.id)) s -= 8;
 
-  return Math.max(5, Math.min(95, Math.round(s)));
+  // Founding-role bonus — builder-first hiring forgives gaps.
+  if ((c.jobs || []).some(j => j.level === 'founding')) s += 12;
+
+  return Math.max(3, Math.min(85, Math.round(s)));
 }
 
 function roleFitScore(c, j) {
   let s = companyFitScore(c);
-  if (j.level === 'founding') s += 6;
+  if (j.level === 'founding') s += 8;
   const t = (j.title || '').toLowerCase();
-  if (/ai engineer|ml engineer|machine[\s-]learning|applied ai/.test(t)) s += 6;
-  if (/forward[\s-]deployed|\bfde\b/.test(t)) s += 4;
-  if (j.level === 'senior') s += 2;
-  return Math.max(5, Math.min(95, Math.round(s)));
+  if (/ai engineer|ml engineer|machine[\s-]learning|applied ai/.test(t)) s += 7;
+  if (/forward[\s-]deployed|\bfde\b/.test(t)) s += 5;
+  if (j.level === 'senior') s += 1;
+  return Math.max(3, Math.min(88, Math.round(s)));
 }
 
 function fitTier(score) {
-  if (score >= 72) return { label: 'Strong fit',  cls: 'fit-strong'  };
-  if (score >= 58) return { label: 'Worth trying', cls: 'fit-worth'   };
-  if (score >= 42) return { label: 'Long shot',   cls: 'fit-long'    };
-  return                   { label: 'Tough bar',   cls: 'fit-tough'   };
+  // Brutally honest tier bands. Most companies should fall in long-shot
+  // or tough-bar for a long-gap, post-fire candidate.
+  if (score >= 65) return { label: 'Strong fit',   cls: 'fit-strong' };
+  if (score >= 48) return { label: 'Worth trying', cls: 'fit-worth'  };
+  if (score >= 30) return { label: 'Long shot',    cls: 'fit-long'   };
+  return                   { label: 'Tough bar',    cls: 'fit-tough'  };
 }
 
 function fitBadgeHTML(score) {
@@ -3276,17 +3295,21 @@ function renderCompanies(state, hub) {
       <p class="muted text-sm mt-1">${COMPANIES.length} startups, ${totalJobs} live NYC engineering postings. Verified ${esc(verifiedAt || 'recently')}. Ranked by fit for your background — sorted highest first.</p>
     </div>
 
-    <div class="flex items-center gap-2 flex-wrap">
-      <div class="tabs" id="co-mode">
-        <div class="tab active" data-mode="companies">Companies <span class="ml-1 muted text-[10px] font-mono">${COMPANIES.length}</span></div>
-        <div class="tab" data-mode="roles">Individual roles <span class="ml-1 muted text-[10px] font-mono">${totalJobs}</span></div>
+    <div class="flex justify-center">
+      <div class="tabs tabs-primary" id="co-mode">
+        <span class="tab-thumb" aria-hidden="true"></span>
+        <button type="button" class="tab active" data-mode="companies">Companies <span class="ml-1 muted text-[10px] font-mono">${COMPANIES.length}</span></button>
+        <button type="button" class="tab" data-mode="roles">Individual roles <span class="ml-1 muted text-[10px] font-mono">${totalJobs}</span></button>
       </div>
     </div>
 
-    <div class="flex items-center gap-2 flex-wrap">
-      <input id="co-search" type="search" placeholder="Search companies, roles, or investors…" class="flex-1 min-w-[200px] max-w-md"/>
-      <div class="tabs" id="co-vfilter">${verticalTabs}</div>
-      <div class="tabs hidden" id="co-lfilter">${levelTabs}</div>
+    <div class="filter-bar">
+      <input id="co-search" type="search" placeholder="Search companies, roles, or investors…" class="search-glass"/>
+      <div class="tabs" id="co-filters">
+        ${verticalTabs}
+        <span class="filter-divider" data-level-only aria-hidden="true"></span>
+        ${levelTabs}
+      </div>
     </div>
 
     <div id="co-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -3294,9 +3317,14 @@ function renderCompanies(state, hub) {
   `;
   hub.appendChild(container);
 
-  const grid     = container.querySelector('#co-grid');
-  const rolelist = container.querySelector('#co-rolelist');
-  const lfilter  = container.querySelector('#co-lfilter');
+  const grid       = container.querySelector('#co-grid');
+  const rolelist   = container.querySelector('#co-rolelist');
+  const filterBar  = container.querySelector('#co-filters');
+  // Hide the level-filter chips + divider in Companies mode by class
+  // on the merged filter bar.
+  function syncLevelVis() {
+    filterBar.classList.toggle('hide-levels', curMode === 'companies');
+  }
   let curMode    = 'companies';
   let curVFilter = 'all';
   let curLFilter = 'all';
@@ -3428,19 +3456,36 @@ function renderCompanies(state, hub) {
   }
 
   function paint() {
+    syncLevelVis();
     if (curMode === 'companies') {
       grid.classList.remove('hidden');
       rolelist.classList.add('hidden');
-      lfilter.classList.add('hidden');
       paintCompanies();
     } else {
       grid.classList.add('hidden');
       rolelist.classList.remove('hidden');
-      lfilter.classList.remove('hidden');
       paintRoles();
     }
   }
   paint();
+
+  // Liquid-Glass animated thumb under the primary tab. Position is
+  // tracked via CSS variables on the container so the thumb can slide
+  // between segments with spring easing without a layout thrash.
+  function syncThumb() {
+    const modeEl = container.querySelector('#co-mode');
+    if (!modeEl) return;
+    const active = modeEl.querySelector('.tab.active');
+    if (!active) return;
+    const parentRect = modeEl.getBoundingClientRect();
+    const r = active.getBoundingClientRect();
+    modeEl.style.setProperty('--thumb-x', (r.left - parentRect.left) + 'px');
+    modeEl.style.setProperty('--thumb-w', r.width + 'px');
+  }
+  // Initial position after layout settles
+  requestAnimationFrame(syncThumb);
+  // Recompute on viewport changes
+  window.addEventListener('resize', syncThumb, { passive: true });
 
   // Mode toggle
   container.querySelectorAll('#co-mode .tab').forEach(tab => {
@@ -3448,24 +3493,23 @@ function renderCompanies(state, hub) {
       container.querySelectorAll('#co-mode .tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       curMode = tab.dataset.mode;
+      syncThumb();
       paint();
     });
   });
-  // Vertical filter
-  container.querySelectorAll('#co-vfilter .tab').forEach(tab => {
+  // Merged filter bar — vertical chips + level chips share one pill.
+  // Click handler differentiates by data-vfilter vs data-lfilter.
+  container.querySelectorAll('#co-filters .tab').forEach(tab => {
     tab.addEventListener('click', () => {
-      container.querySelectorAll('#co-vfilter .tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      curVFilter = tab.dataset.vfilter;
-      paint();
-    });
-  });
-  // Level filter (only meaningful in Roles mode)
-  container.querySelectorAll('#co-lfilter .tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      container.querySelectorAll('#co-lfilter .tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      curLFilter = tab.dataset.lfilter;
+      if (tab.dataset.vfilter) {
+        container.querySelectorAll('#co-filters .tab[data-vfilter]').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        curVFilter = tab.dataset.vfilter;
+      } else if (tab.dataset.lfilter) {
+        container.querySelectorAll('#co-filters .tab[data-lfilter]').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        curLFilter = tab.dataset.lfilter;
+      }
       paint();
     });
   });
