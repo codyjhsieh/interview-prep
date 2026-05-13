@@ -805,50 +805,65 @@ function mountPet3D(container, p) {
   headGroup.add(head);
 
   // Stage-specific head accessory — distinguishes each life-stage at a glance.
+  // Head mesh sits centered at y = headR*0.8 with radius headR, so the head
+  // occupies y ∈ [-0.2, +1.8]*headR in headGroup coords. Cones go ON TOP
+  // (base at y = 1.8*headR). Torus headbands need major-radius > head's
+  // cross-section at that height to actually wrap visibly around the head.
   const headDarkMat = new T.MeshStandardMaterial({ color: _darken(petColor, 0.55), flatShading: true });
+  const TOP_Y = headR * 1.8;
   if (p.stage === 'baby') {
-    // Baby curl — single twisted spike on top, like a baby's hair curl
-    const tuft = new T.Mesh(new T.ConeGeometry(headR * 0.13, headR * 0.45, 5), headDarkMat);
-    tuft.position.y = headR * 1.65;
-    tuft.rotation.z = 0.25;
+    // Baby curl — twisted hair spike. Bigger + clearly on top.
+    const curlH = headR * 0.55;
+    const tuft = new T.Mesh(new T.ConeGeometry(headR * 0.16, curlH, 5), headDarkMat);
+    tuft.position.y = TOP_Y + curlH / 2;     // base sits ON the head, not inside
+    tuft.rotation.z = 0.35;
     tuft.castShadow = true;
     headGroup.add(tuft);
   } else if (p.stage === 'teen') {
-    // Teen fin — taller, slightly angled forward like an awkward mohawk
-    const fin = new T.Mesh(new T.ConeGeometry(headR * 0.16, headR * 0.68, 4), headDarkMat);
-    fin.position.y = headR * 1.7;
+    // Teen fin — tall, forward-leaning mohawk
+    const finH = headR * 0.80;
+    const fin = new T.Mesh(new T.ConeGeometry(headR * 0.20, finH, 4), headDarkMat);
+    fin.position.y = TOP_Y + finH / 2;
     fin.rotation.x = -Math.PI * 0.10;
     fin.castShadow = true;
     headGroup.add(fin);
   } else if (p.body === 'fit') {
-    // Athletic headband — torus around the head
+    // Athletic headband — RED torus wrapping around the head's forehead.
+    // Major radius slightly > head radius at this y so the tube actually
+    // pokes outside the sphere instead of vanishing inside it.
     const bandMat = new T.MeshStandardMaterial({ color: 0xD7384C, flatShading: true, roughness: 0.5 });
-    const band = new T.Mesh(new T.TorusGeometry(headR * 0.88, headR * 0.09, 6, 14), bandMat);
-    band.position.y = headR * 0.95;
+    const band = new T.Mesh(new T.TorusGeometry(headR * 1.02, headR * 0.11, 6, 16), bandMat);
+    band.position.y = headR * 1.15;   // forehead level
     band.rotation.x = Math.PI / 2;
     band.castShadow = true;
     headGroup.add(band);
   } else if (p.body === 'jacked') {
-    // Sweatband + slight forehead vein-like ridge
-    const bandMat = new T.MeshStandardMaterial({ color: 0xF2EAFB, flatShading: true });
-    const band = new T.Mesh(new T.TorusGeometry(headR * 0.88, headR * 0.10, 6, 14), bandMat);
-    band.position.y = headR * 0.95;
+    // White sweatband — same idea, brighter, slightly thicker.
+    const bandMat = new T.MeshStandardMaterial({ color: 0xF8F4FF, flatShading: true, roughness: 0.6 });
+    const band = new T.Mesh(new T.TorusGeometry(headR * 1.03, headR * 0.13, 6, 16), bandMat);
+    band.position.y = headR * 1.10;
     band.rotation.x = Math.PI / 2;
     band.castShadow = true;
     headGroup.add(band);
   } else if (p.body === 'chubby') {
-    // Chubby — small chef's-hat-like dome on top
-    const hatMat = new T.MeshStandardMaterial({ color: 0xF5DDB5, flatShading: true });
-    const hat = new T.Mesh(new T.IcosahedronGeometry(headR * 0.35, 1), hatMat);
-    hat.position.y = headR * 1.55;
-    hat.scale.set(1, 0.6, 1);
+    // Cream chef's-hat dome — sits clearly on top of head
+    const hatMat = new T.MeshStandardMaterial({ color: 0xF8E8C4, flatShading: true });
+    const hatH = headR * 0.45;
+    const hat = new T.Mesh(new T.IcosahedronGeometry(headR * 0.42, 1), hatMat);
+    hat.position.y = TOP_Y + (hatH / 2) - headR * 0.05;   // slight overlap with scalp
+    hat.scale.set(1, 0.55, 1);
     hat.castShadow = true;
     headGroup.add(hat);
+    // Small button on top of hat for extra "ridiculous"
+    const button = new T.Mesh(new T.IcosahedronGeometry(headR * 0.08, 0), new T.MeshStandardMaterial({ color: 0xD7384C, flatShading: true }));
+    button.position.y = hat.position.y + headR * 0.25;
+    headGroup.add(button);
   } else {
-    // Normal adult — small forehead tuft like a cowlick
-    const tuft = new T.Mesh(new T.ConeGeometry(headR * 0.10, headR * 0.28, 4), headDarkMat);
-    tuft.position.set(headR * 0.18, headR * 1.6, 0);
-    tuft.rotation.z = -0.4;
+    // Normal adult — small forehead cowlick tuft
+    const tuftH = headR * 0.32;
+    const tuft = new T.Mesh(new T.ConeGeometry(headR * 0.11, tuftH, 4), headDarkMat);
+    tuft.position.set(headR * 0.20, TOP_Y + tuftH / 2 - headR * 0.05, 0);
+    tuft.rotation.z = -0.45;
     tuft.castShadow = true;
     headGroup.add(tuft);
   }
