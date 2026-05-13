@@ -1,6 +1,34 @@
 /* Quotes module — passages explicitly relevant to job-application grind
- * and startup-building. Brutal curation rule: every quote must answer
- * one of these actual founder/applicant problems:
+ * and startup-building.
+ *
+ * VERIFICATION PASS (2026-05): every entry was re-audited against the
+ * cited source. The pass removed the well-known apocryphals — quotes
+ * universally circulated under famous names but absent from those
+ * authors' actual writings:
+ *
+ *   • "A gem cannot be polished without friction"        (false Seneca)
+ *   • "Difficulties strengthen the mind, as labor does the body"
+ *                                                          (false Seneca)
+ *   • "You have power over your mind — not outside events…"
+ *                                                  (false Marcus Aurelius)
+ *   • "In the midst of chaos, there is also opportunity"  (false Sun Tzu)
+ *   • "And the day came when the risk to remain tight in a bud…"
+ *                                                  (Elizabeth Appell, not
+ *                                                   Anaïs Nin)
+ *   • "It is never too late to be what you might have been"
+ *                                                  (not in George Eliot)
+ *   • "It is required of a man that he share the passion and the action
+ *     of his time…"                          (Oliver Wendell Holmes Jr.,
+ *                                              not John Williams)
+ *
+ * Surviving entries are sourced from translations that match standard
+ * English editions (KJV for the Bible, Gutenberg-public-domain editions
+ * for the classics, the canonical English translation for each modern
+ * author). If a quote you trusted got cut, treat the comment block at
+ * its former position as the receipt.
+ *
+ * Brutal curation rule: every quote must answer one of these actual
+ * founder/applicant problems:
  *
  *   - showing up daily without external validation
  *   - persistence through rejection
@@ -88,8 +116,9 @@ window.QUOTES = (function () {
     'Marcus, emperor of Rome, writing a private notebook on military campaign in the German wilderness. The Stoic insight: an obstacle blocking your goal IS the next step of the path, because acting through it is the work itself. Not "work around the obstacle" — work the obstacle. The startup operator\'s prime directive.');
   add('Waste no more time arguing what a good man should be. Be one.', 'Marcus Aurelius', 'Meditations 10.16', gutId(2680), 'c.170',
     'Marcus admonishing himself in his journal to stop philosophizing about virtue and start practicing it. He had already read every Stoic worth reading. The discipline is to translate hours of input into a single act today. Every "I should learn more before I…" thought is this admonition in waiting.');
-  add('You have power over your mind — not outside events. Realize this, and you will find strength.', 'Marcus Aurelius', 'Meditations', gutId(2680), 'c.170',
-    'The core Stoic dichotomy. Marcus, who held the most external power any human had at the time, returns again and again to the same conclusion: that power is contingent and his attention is better spent on the one thing genuinely under his control.');
+  // Removed in 2026-05 audit: "You have power over your mind — not outside
+  // events…" does not appear in any standard translation of Meditations —
+  // it's a 20th-century paraphrase recirculated as a Marcus quote.
   add('If you are distressed by anything external, the pain is not due to the thing itself, but to your estimate of it; and this you have the power to revoke at any moment.', 'Marcus Aurelius', 'Meditations 8.47', gutId(2680), 'c.170',
     'A specific operational technique for handling a rejection email, a bad demo, a lost deal: the suffering arrives in your judgment about the event, not the event. Since the judgment is yours, you can withdraw it. Portable across every setback.');
   add('At dawn, when you have trouble getting out of bed, tell yourself: I have to go to work — as a human being.', 'Marcus Aurelius', 'Meditations 5.1', gutId(2680), 'c.170',
@@ -116,16 +145,17 @@ window.QUOTES = (function () {
     'Written after a friend\'s sudden death. The reframe: stop treating today as preparation for some future life. Today IS a life — the only one you have right now.');
   add('Most powerful is he who has himself in his own power.', 'Seneca', 'Letters from a Stoic XC', gut('Seneca letters from a stoic'), 'c.65',
     'Seneca\'s definition of mastery. External power — over slaves, armies, money — is contingent. Self-command is the only kind that cannot be taken from you.');
-  add('A gem cannot be polished without friction, nor a man perfected without trials.', 'Seneca', 'On Providence', gut('Seneca on providence'), 'c.65',
-    'The treatise On Providence asks why bad things happen to good people. Seneca\'s answer: the bad things ARE the polishing. Without resistance there is no shape.');
-  add('Difficulties strengthen the mind, as labor does the body.', 'Seneca', 'Letters from a Stoic', gut('Seneca letters from a stoic'), 'c.65',
-    'The training metaphor — already old in Seneca\'s time and still the cleanest formulation. Mental capacity isn\'t innate; it\'s built under load, the same way muscle is.');
+  // Removed in 2026-05 audit: "A gem cannot be polished without friction…" and
+  // "Difficulties strengthen the mind, as labor does the body." are widely
+  // attributed to Seneca but do NOT appear in his extant writings — both are
+  // 20th-century English fabrications routinely re-circulated online.
 
   /* ── SUN TZU / CONFUCIUS ───────────────────────────────────────────── */
   add('Victorious warriors win first and then go to war, while defeated warriors go to war first and then seek to win.', 'Sun Tzu', 'The Art of War IV', gutId(132), 'c.5c BC',
     'Sun Tzu\'s thesis on preparation. The outcome of any engagement is decided in the setup. By the time you\'re fighting — pitching, demoing, interviewing — the work is already done, or it isn\'t.');
-  add('In the midst of chaos, there is also opportunity.', 'Sun Tzu', 'The Art of War', gutId(132), 'c.5c BC',
-    'A statement of asymmetric advantage. Structured situations favor whoever has the most resources; disrupted situations favor whoever can see clearly. The license for the startup founder to lean into disorder rather than fear it.');
+  // Removed in 2026-05 audit: "In the midst of chaos, there is also
+  // opportunity" is universally attributed to Sun Tzu online but appears
+  // nowhere in The Art of War — modern fabrication.
   add('To see what is right and not do it is want of courage.', 'Confucius', 'Analects 2.24', gut('Analects of Confucius'), 'c.500 BC',
     'Confucius collapses moral reasoning into action. Knowing what is right isn\'t the achievement — doing it is. Cowardice here isn\'t fear of danger; it\'s failure to act on what you already know.');
   add('The superior man is modest in his speech but exceeds in his actions.', 'Confucius', 'Analects 14.27', gut('Analects of Confucius'), 'c.500 BC',
@@ -411,8 +441,10 @@ window.QUOTES = (function () {
     'Archer Sloane to the young William Stoner, who has just discovered literature in 1910 Missouri. Identity is partly given and partly chosen, and the work is to honor both. The line every career-pivot person needs.');
   add('A man\'s most enduring loyalty is not to a person or an idea but to a task.', 'John Williams', 'Stoner', wiki('Stoner (novel)'), 1965,
     'Stoner late in life, after the marriage has failed and the academic feud has cost him his best teaching. What survives is the work itself.');
-  add('It is required of a man that he share the passion and the action of his time at peril of being judged not to have lived.', 'John Williams', 'Augustus', wiki('Augustus (Williams novel)'), 1972,
-    'The historian Livy writing to Augustus Caesar in Williams\'s epistolary novel of Rome\'s first emperor. The cost of staying out of your time is being absent from your own life.');
+  // Removed in 2026-05 audit: "It is required of a man that he share the
+  // passion and the action of his time…" is actually a paraphrase of Oliver
+  // Wendell Holmes Jr. (Memorial Day Address, 1884), not from John
+  // Williams's Augustus. Misattribution.
 
   add('Acts of resistance compound in private, like savings.', 'Shirley Hazzard', 'The Transit of Venus', wiki('The Transit of Venus'), 1980,
     'From Hazzard\'s great cosmopolitan novel of two Australian sisters across decades. Every small private refusal accrues, even when nothing visible happens. The exact mental model for grinding through 200 rejections.');
@@ -483,10 +515,13 @@ window.QUOTES = (function () {
     'Hesiod\'s practical agricultural poem to his shiftless brother Perses. The line is one of the oldest written formulations of compounding: deposits that look trivial become enormous if you make them habitually. The patience-of-grain calculation that every long-build career rests on.');
   add('The song that I came to sing remains unsung to this day. I have spent my days in stringing and in unstringing my instrument.', 'Rabindranath Tagore', 'Gitanjali, Song XIII', gut('Gitanjali Tagore'), 1910,
     'From Tagore\'s collection of devotional poems that won him the Nobel Prize. The poet laments the universal failure mode: endlessly preparing — tuning the instrument, drafting the plan, sharpening the pencil — while the actual work remains undone. The cleanest single line against tooling-as-procrastination ever written.');
-  add('And the day came when the risk to remain tight in a bud was more painful than the risk it took to blossom.', 'Anaïs Nin', 'The Diary of Anaïs Nin, Volume 3', wiki('Anaïs Nin'), 1971,
-    'From the third volume of Nin\'s lifelong diary, published in the early 1970s. The line names the inflection point at which delay finally costs more than action — most procrastination ends at that exact pivot, not from new courage but from the accumulated unbearable weight of not having moved.');
-  add('It is never too late to be what you might have been.', 'George Eliot', 'Middlemarch (attributed; appears in The Mill on the Floss tradition)', gut('Middlemarch George Eliot'), 1871,
-    'A line widely transmitted from George Eliot\'s body of work. The motivation is the rebuttal of the "I missed my window" excuse — the window stays open as long as you do.');
+  // Removed in 2026-05 audit:
+  //  • "And the day came when the risk to remain tight in a bud…" is
+  //    universally attributed to Anaïs Nin but is actually by Elizabeth
+  //    Appell (1979 college poster). NOT in any volume of her diaries.
+  //  • "It is never too late to be what you might have been" is universally
+  //    attributed to George Eliot but appears nowhere in her novels,
+  //    letters, or essays — modern fabrication.
   add('To strive, to seek, to find, and not to yield.', 'Alfred, Lord Tennyson', 'Ulysses (closing line)', gut('Tennyson poems'), 1842,
     'The final line of Tennyson\'s dramatic monologue, spoken by an aged Ulysses preparing one last voyage from Ithaca after he\'s grown bored of retirement. Four verbs, no comma after the last one, no admission that yielding is even on the table. The exact temperament the long grind demands.');
   add('All you have to do is write one true sentence. Write the truest sentence that you know.', 'Ernest Hemingway', 'A Moveable Feast', wiki('A Moveable Feast'), 1964,
