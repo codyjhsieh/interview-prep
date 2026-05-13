@@ -130,6 +130,20 @@ function buildTabbar() {
   // Wire the More tab — opens a Liquid Glass sheet listing secondary routes.
   const moreBtn = bar.querySelector('[data-more-toggle]');
   if (moreBtn) moreBtn.addEventListener('click', openMoreSheet);
+
+  // Tap-to-expand (Apple's iOS 26 spec): tapping any tab — including the
+  // selected/collapsed pill — restores the bar to its full size. The
+  // scroll listener will re-minimize on the next scroll-down delta, so
+  // user intent is preserved without permanently locking the bar open.
+  bar.addEventListener('click', () => {
+    if (document.body.classList.contains('nav-minimized')) {
+      document.body.classList.remove('nav-minimized');
+      // Reset the scroll baseline so the next minimize cycle starts fresh
+      // from wherever we are now (without spuriously interpreting the
+      // expand as a "scroll up" delta).
+      lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    }
+  }, { capture: true });                          // fire before <a> navigates
 }
 
 /* "More" sheet — Liquid Glass overlay sliding up from the bottom. Lists
