@@ -31,132 +31,137 @@ function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt
  * Each rect rendered as <rect width=8 height=8>; 16-row grid = 128px sprite.
  * ========================================================================= */
 
-const PET_SPRITES = {
-  // Egg — pre-hatch. Just a wobble.
-  'egg': [
-    '....BBBBBB......',
-    '...BBBBBBBB.....',
-    '..BBBBHHBBBB....',
-    '..BBBHHHHBBB....',
-    '..BBBBBBBBBB....',
-    '..BBBBBBBBBB....',
-    '..BBBBBBBBBB....',
-    '...BBBBBBBB.....',
-    '....BBBBBB......',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-  ],
-  // Baby — small, big head, big eyes
-  'baby': [
-    '....BBBBBB......',
-    '...BBBBBBBB.....',
-    '..BBHBBBBHBB....',
-    '..BBEBBBBEBB....',
-    '..BBBBBBBBBB....',
-    '..BBBBMMBBBB....',
-    '..BBBBBBBBBB....',
-    '...BBBBBBBB.....',
-    '....BBBBBB......',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-  ],
-  // Adult normal — proportional
-  'normal': [
-    '....BBBBBB......',
-    '...BBBBBBBB.....',
-    '..BBHBBBBHBB....',
-    '..BBEBBBBEBB....',
-    '..BBBBBBBBBB....',
-    '..BBBBMMBBBB....',
-    '..BBBBBBBBBB....',
-    '.BBBBBBBBBBBB...',
-    '.BBBBBBBBBBBB...',
-    '.BBBBBBBBBBBB...',
-    '.BBBBBBBBBBBB...',
-    '..BBBBBBBBBB....',
-    '..BB......BB....',
-    '..BB......BB....',
-    '................',
-    '................',
-  ],
-  // Fit — same as normal but with definition lines + slightly leaner
-  'fit': [
-    '....BBBBBB......',
-    '...BBBBBBBB.....',
-    '..BBHBBBBHBB....',
-    '..BBEBBBBEBB....',
-    '..BBBBBBBBBB....',
-    '..BBBBMMBBBB....',
-    '...BBBBBBBB.....',
-    '.BBBBBBBBBBBB...',
-    '.BBDBBBBBBDBB...',
-    '.BBDBBBBBBDBB...',
-    '.BBBBBBBBBBBB...',
-    '..BBBBBBBBBB....',
-    '..BB......BB....',
-    '..BB......BB....',
-    '................',
-    '................',
-  ],
-  // Chubby — wider waist, rounder
-  'chubby': [
-    '....BBBBBB......',
-    '...BBBBBBBB.....',
-    '..BBHBBBBHBB....',
-    '..BBEBBBBEBB....',
-    '..BBBBBBBBBB....',
-    '..BBBBMMBBBB....',
-    '..BBBBBBBBBB....',
-    'BBBBBBBBBBBBBB..',
-    'BBBBBBBBBBBBBB..',
-    'BBBBBBBBBBBBBB..',
-    'BBBBBBBBBBBBBB..',
-    'BBBBBBBBBBBBBB..',
-    '.BBBBBBBBBBBB...',
-    '..BB......BB....',
-    '..BB......BB....',
-    '................',
-  ],
-  // Jacked — wide shoulders + lats, narrow waist (V-shape)
-  'jacked': [
-    '....BBBBBB......',
-    '...BBBBBBBB.....',
-    '..BBHBBBBHBB....',
-    '..BBEBBBBEBB....',
-    '..BBBBBBBBBB....',
-    '..BBBBMMBBBB....',
-    '..BBBBBBBBBB....',
-    'BBBBBBBBBBBBBB..',
-    'BBDBBBBBBBBDBB..',
-    'BBDBBBBBBBBDBB..',
-    '.BBBBBBBBBBBB...',
-    '..BBBBBBBBBB....',
-    '...BBBBBBBB.....',
-    '..BB......BB....',
-    '..BB......BB....',
-    '................',
-  ],
+/* ============================================================================
+ * PS2-era polygonal isometric pet + room renderer.
+ *
+ * Everything is flat-shaded polygons in one big SVG with shape-rendering:
+ * crispEdges (no anti-aliasing — the PS2 / Dreamcast / Saturn aesthetic).
+ * Three facets per cuboid: top (lightest), left (medium), right (darkest).
+ * Vertices computed in isometric space with 2:1 axis ratio.
+ *
+ * Layout (viewBox 0 0 240 156):
+ *   floor diamond  (20,90)..(220,90) horizontal, back (120,60), front (120,130)
+ *   left wall      attached to left edge of floor
+ *   right wall     attached to right edge of floor
+ *   pet group      positioned + transformed for walk animation
+ *   props          isometric props on floor
+ * ========================================================================== */
+
+const PET_PALETTE = {
+  // mood → { top (light, sky-lit), left (medium), right (dark, in shadow), edge, eye, mouth }
+  'thrilled': { top:'#B6EBCC', left:'#7CCDA8', right:'#3D8466', edge:'#1F4D38', eye:'#0F172A', mouth:'#0F172A' },
+  'content':  { top:'#D7E7F4', left:'#9CC7E6', right:'#5A7E9C', edge:'#2C4660', eye:'#0F172A', mouth:'#0F172A' },
+  'hungry':   { top:'#F4DDB0', left:'#E6C28D', right:'#A07B47', edge:'#634822', eye:'#0F172A', mouth:'#3D2606' },
+  'sad':      { top:'#DAC7E8', left:'#B9A8C9', right:'#6F5C7F', edge:'#3D3148', eye:'#0F172A', mouth:'#28182E' },
+  'sick':     { top:'#CFD1DA', left:'#A8AAB5', right:'#5C5E68', edge:'#33353C', eye:'#0F172A', mouth:'#2A2D33' },
 };
 
-// Body palette per mood / state — eyes and mouth swap, body color tints
-const PET_PALETTE = {
-  // mood -> { body, dark, eye, mouth, highlight }
-  'thrilled': { body: '#7CCDA8', dark: '#5BA585', eye: '#1F2937', mouth: '#1F2937', highlight: '#C8EEDA' },
-  'content':  { body: '#9CC7E6', dark: '#7BA5C6', eye: '#1F2937', mouth: '#1F2937', highlight: '#D8E9F5' },
-  'hungry':   { body: '#E6C28D', dark: '#C6A06D', eye: '#1F2937', mouth: '#7A4E1A', highlight: '#F5DDB5' },
-  'sad':      { body: '#B9A8C9', dark: '#9787A8', eye: '#1F2937', mouth: '#4A2E5A', highlight: '#D9CDE5' },
-  'sick':     { body: '#A8AAB5', dark: '#888A95', eye: '#1F2937', mouth: '#4A4E55', highlight: '#C5C7D2' },
-};
+// Isometric helpers — project (x, y, z) world coords to 2D screen coords.
+// Using 2:1 isometric ratio: 1 world unit = 2 screen px horizontal, 1 screen px vertical.
+function _iso(x, y, z) {
+  return [
+    (x - z) * 1.0,                  // screen X
+    (x + z) * 0.5 - y * 1.0         // screen Y  (negative y = up)
+  ];
+}
+
+// Build an isometric cuboid (3 visible facets: top, left, right) at world
+// origin (ox, oz) sitting on the floor (y=0), with given width/depth/height.
+// Returns SVG polygon strings.
+function _isoCuboid(ox, oz, w, d, h, pal) {
+  // 8 corners
+  const bFL = _iso(ox,     0, oz + d);  // bottom front-left
+  const bFR = _iso(ox + w, 0, oz + d);  // bottom front-right
+  const bBR = _iso(ox + w, 0, oz);      // bottom back-right
+  const bBL = _iso(ox,     0, oz);      // bottom back-left
+  const tFL = _iso(ox,     h, oz + d);
+  const tFR = _iso(ox + w, h, oz + d);
+  const tBR = _iso(ox + w, h, oz);
+  const tBL = _iso(ox,     h, oz);
+  // Three visible faces (top diamond, left rhombus, right rhombus)
+  const top   = [tFL, tFR, tBR, tBL];
+  const left  = [bFL, tFL, tBL, bBL];   // facing left → wait, actually this is the LEFT side of the cuboid
+  const right = [bFR, tFR, tFL, bFL];   // the right side facing front-right of viewer
+  // Hmm — in isometric view of a cuboid, the two visible front faces are:
+  //   the wall at z = oz+d (front face, facing camera and slightly left)
+  //   the wall at x = ox+w (right face, facing camera and slightly right)
+  const front = [bFL, bFR, tFR, tFL];   // x varying, z=oz+d
+  const side  = [bFR, bBR, tBR, tFR];   // x=ox+w, z varying
+  // Use front+side+top as the three visible facets
+  const pts = (poly) => poly.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  return [
+    // Top — lightest
+    `<polygon points="${pts(top)}"   fill="${pal.top}"   stroke="${pal.edge}" stroke-width="0.5"/>`,
+    // Right (camera-right facet) — darkest
+    `<polygon points="${pts(side)}"  fill="${pal.right}" stroke="${pal.edge}" stroke-width="0.5"/>`,
+    // Front (camera-facing facet) — mid
+    `<polygon points="${pts(front)}" fill="${pal.left}"  stroke="${pal.edge}" stroke-width="0.5"/>`,
+  ].join('');
+}
+
+// Pet body — stacked cuboids (legs+body+head) sized by stage/body type.
+// Coords in world units. Origin is room front-left corner; pet stands at
+// the floor center (ox≈11, oz≈11 in a 22×22 floor).
+function _isoPetBody(stage, body, pal, ox, oz) {
+  let bw = 5, bd = 5, bh = 6;        // body block (width, depth, height)
+  let hw = 4, hd = 4, hh = 4;        // head block
+  if (stage === 'baby')              { bw = 4; bd = 4; bh = 4;  hw = 4.2; hd = 4.2; hh = 4.2; }
+  else if (body === 'jacked')        { bw = 6; bd = 5; bh = 6;  hw = 3.6; hd = 3.6; hh = 3.6; }
+  else if (body === 'fit')           { bw = 5; bd = 5; bh = 6.5; hw = 3.8; hd = 3.8; hh = 3.8; }
+  else if (body === 'chubby')        { bw = 6; bd = 6; bh = 5;  hw = 4.2; hd = 4.2; hh = 4; }
+  // Body block centered at (ox, oz)
+  const bx = ox - bw / 2;
+  const bz = oz - bd / 2;
+  const bodyPolys = _isoCuboid(bx, bz, bw, bd, bh, pal);
+  // Head block centered above body
+  const hx = ox - hw / 2;
+  const hz = oz - hd / 2;
+  const headPolys = _isoCuboid(hx, hz, hw, hd, hh, { ...pal, top: pal.top, left: _shade(pal.left, 1.05), right: _shade(pal.right, 1.05) });
+  return { bodyPolys, headPolys, hx, hz, hw, hd, hh, headTopY: bh + hh };
+}
+
+// Subtle lightening for the head (so it doesn't blend into body)
+function _shade(hex, factor) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.min(255, Math.round(((n >> 16) & 0xff) * factor));
+  const g = Math.min(255, Math.round(((n >> 8) & 0xff) * factor));
+  const b = Math.min(255, Math.round((n & 0xff) * factor));
+  return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+}
+
+// Eyes + mouth — drawn flat on the head's front face (z = hz + hd plane).
+function _isoFace(stage, body, mood, activity, ox, oz, headY, headW) {
+  const pal = PET_PALETTE[mood];
+  const sleeping = activity === 'sleep';
+  const cy = headY * 0.55;   // eye height inside head
+  // Front face of head sits at z = oz + (hd/2) approximately
+  const eyeOffset = headW * 0.20;
+  const e1 = _iso(ox - eyeOffset, cy, oz + 0.05);
+  const e2 = _iso(ox + eyeOffset, cy, oz + 0.05);
+  if (sleeping) {
+    return `
+      <line x1="${(e1[0]-1.4).toFixed(1)}" y1="${e1[1].toFixed(1)}" x2="${(e1[0]+1.4).toFixed(1)}" y2="${e1[1].toFixed(1)}" stroke="${pal.eye}" stroke-width="0.8" stroke-linecap="square"/>
+      <line x1="${(e2[0]-1.4).toFixed(1)}" y1="${e2[1].toFixed(1)}" x2="${(e2[0]+1.4).toFixed(1)}" y2="${e2[1].toFixed(1)}" stroke="${pal.eye}" stroke-width="0.8" stroke-linecap="square"/>`;
+  }
+  if (activity === 'cough') {
+    // X eyes
+    return `
+      <line x1="${(e1[0]-1).toFixed(1)}" y1="${(e1[1]-1).toFixed(1)}" x2="${(e1[0]+1).toFixed(1)}" y2="${(e1[1]+1).toFixed(1)}" stroke="${pal.eye}" stroke-width="0.7"/>
+      <line x1="${(e1[0]-1).toFixed(1)}" y1="${(e1[1]+1).toFixed(1)}" x2="${(e1[0]+1).toFixed(1)}" y2="${(e1[1]-1).toFixed(1)}" stroke="${pal.eye}" stroke-width="0.7"/>
+      <line x1="${(e2[0]-1).toFixed(1)}" y1="${(e2[1]-1).toFixed(1)}" x2="${(e2[0]+1).toFixed(1)}" y2="${(e2[1]+1).toFixed(1)}" stroke="${pal.eye}" stroke-width="0.7"/>
+      <line x1="${(e2[0]-1).toFixed(1)}" y1="${(e2[1]+1).toFixed(1)}" x2="${(e2[0]+1).toFixed(1)}" y2="${(e2[1]-1).toFixed(1)}" stroke="${pal.eye}" stroke-width="0.7"/>`;
+  }
+  // Normal eyes — small diamond polygons
+  const eye = (cx, cy) => `<polygon points="${cx},${cy-0.9} ${cx+0.7},${cy} ${cx},${cy+0.9} ${cx-0.7},${cy}" fill="${pal.eye}"/>`;
+  // Mouth — a small line (smile for thrilled, flat otherwise)
+  const m1 = _iso(ox - 1.2, cy * 0.45, oz + 0.05);
+  const m2 = _iso(ox + 1.2, cy * 0.45, oz + 0.05);
+  const happy = mood === 'thrilled' || activity === 'eat' || activity === 'play';
+  const mouth = happy
+    ? `<path d="M${m1[0].toFixed(1)},${m1[1].toFixed(1)} Q${ox.toFixed(1)},${(m1[1]+1.5).toFixed(1)} ${m2[0].toFixed(1)},${m2[1].toFixed(1)}" stroke="${pal.mouth}" stroke-width="0.7" fill="none"/>`
+    : `<line x1="${m1[0].toFixed(1)}" y1="${m1[1].toFixed(1)}" x2="${m2[0].toFixed(1)}" y2="${m2[1].toFixed(1)}" stroke="${pal.mouth}" stroke-width="0.7"/>`;
+  return eye(e1[0], e1[1]) + eye(e2[0], e2[1]) + mouth;
+}
 
 function _moodForActivity(activity, fedToday) {
   if (activity === 'eat')      return 'thrilled';
@@ -204,8 +209,195 @@ function _petSpriteSVG(stage, body, activity, fedToday) {
   return `<svg viewBox="0 0 112 112" width="112" height="112" shape-rendering="crispEdges">${rects.join('')}${overlay}</svg>`;
 }
 
+/* Isometric props — drawn as small cuboids on the floor. Each returns
+ * SVG <polygon> markup in world coordinates (pre-translated). */
+function _isoBowl(ox, oz, full) {
+  const w = 3, d = 3, h = 1.2;
+  const wood  = { top:'#A06B3A', left:'#7A4E1A', right:'#4E3416', edge:'#2A1A0A' };
+  const food  = { top:'#F4B23A', left:'#C7780E', right:'#8E5408', edge:'#3D2606' };
+  const bowl = _isoCuboid(ox - w/2, oz - d/2, w, d, h, wood);
+  if (!full) return bowl;
+  // Food mound — small cube on top
+  const fx = ox - 1.0, fz = oz - 1.0;
+  const fy = h;
+  const foodCube = _isoCuboid(fx, fz, 2, 2, 0.8, food);
+  return bowl + `<g transform="translate(0,${-_iso(0,fy,0)[1].toFixed(1)})">${foodCube}</g>`;
+}
+function _isoBed(ox, oz) {
+  const w = 6, d = 4, h = 1.5;
+  const frame = { top:'#A87CE6', left:'#7849E0', right:'#4F2C9E', edge:'#2A1564' };
+  const pillow= { top:'#F2EAFB', left:'#D6C9F0', right:'#A89BC6', edge:'#6F5C7F' };
+  let svg = _isoCuboid(ox - w/2, oz - d/2, w, d, h, frame);
+  // Pillow stacked on top, at the "head" of the bed
+  const px = ox - w/2 + 0.3, pz = oz - d/2 + 0.3;
+  svg += `<g>${_isoCuboidAt(px, pz, 1.8, 1.5, 0.7, pillow, h)}</g>`;
+  return svg;
+}
+function _isoDumbbell(ox, oz) {
+  const wood = { top:'#7C8694', left:'#475467', right:'#28323C', edge:'#1F2937' };
+  const grip = { top:'#B0BAC6', left:'#94A3B8', right:'#586674', edge:'#28323C' };
+  // Two end caps + a grip bar
+  const end1 = _isoCuboid(ox - 2.0, oz - 1.0, 1.2, 2, 1.2, wood);
+  const end2 = _isoCuboid(ox + 0.8, oz - 1.0, 1.2, 2, 1.2, wood);
+  const bar  = _isoCuboid(ox - 0.8, oz - 0.3, 1.6, 0.6, 0.7, grip);
+  return end1 + bar + end2;
+}
+function _isoBall(ox, oz) {
+  const ball = { top:'#FF8898', left:'#D7384C', right:'#8A1F2E', edge:'#4A0F1A' };
+  return _isoCuboid(ox - 0.9, oz - 0.9, 1.8, 1.8, 1.8, ball);
+}
+// Same as _isoCuboid but offsets Y so it sits at floor + offsetY
+function _isoCuboidAt(ox, oz, w, d, h, pal, baseY) {
+  const bFL = _iso(ox,     baseY,     oz + d);
+  const bFR = _iso(ox + w, baseY,     oz + d);
+  const bBR = _iso(ox + w, baseY,     oz);
+  const bBL = _iso(ox,     baseY,     oz);
+  const tFL = _iso(ox,     baseY + h, oz + d);
+  const tFR = _iso(ox + w, baseY + h, oz + d);
+  const tBR = _iso(ox + w, baseY + h, oz);
+  const tBL = _iso(ox,     baseY + h, oz);
+  const top   = [tFL, tFR, tBR, tBL];
+  const front = [bFL, bFR, tFR, tFL];
+  const side  = [bFR, bBR, tBR, tFR];
+  const pts = (poly) => poly.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  return [
+    `<polygon points="${pts(top)}"   fill="${pal.top}"   stroke="${pal.edge}" stroke-width="0.5"/>`,
+    `<polygon points="${pts(side)}"  fill="${pal.right}" stroke="${pal.edge}" stroke-width="0.5"/>`,
+    `<polygon points="${pts(front)}" fill="${pal.left}"  stroke="${pal.edge}" stroke-width="0.5"/>`,
+  ].join('');
+}
+
+/* Renders the whole isometric scene as one SVG. */
+function _isoSceneSVG(p, wallDecor) {
+  const mood = _moodForActivity(p.activity, p.fedToday);
+  const pal = PET_PALETTE[mood];
+  // World grid: floor is 22 wide × 22 deep. Walls 16 tall.
+  const FW = 22, FD = 22, WH = 16;
+  // Floor tile palette
+  const floorA = { top:'#C49A6A', edge:'#7A5328' };
+  const floorB = { top:'#A6814F', edge:'#7A5328' };
+  // Wall palettes
+  const wallBack  = { top:'#F5E9D8', left:'#EFDDC2', right:'#D8C29C', edge:'#A88456' };
+  // Build floor as a grid of diamond tiles
+  let floor = '';
+  const TILE = 4;
+  for (let x = 0; x < FW; x += TILE) {
+    for (let z = 0; z < FD; z += TILE) {
+      const pal2 = ((x + z) / TILE) % 2 === 0 ? floorA : floorB;
+      const a = _iso(x, 0, z);
+      const b = _iso(x + TILE, 0, z);
+      const c = _iso(x + TILE, 0, z + TILE);
+      const d = _iso(x, 0, z + TILE);
+      floor += `<polygon points="${a[0].toFixed(1)},${a[1].toFixed(1)} ${b[0].toFixed(1)},${b[1].toFixed(1)} ${c[0].toFixed(1)},${c[1].toFixed(1)} ${d[0].toFixed(1)},${d[1].toFixed(1)}" fill="${pal2.top}" stroke="${pal2.edge}" stroke-width="0.3"/>`;
+    }
+  }
+  // Left wall — z=0 plane, x from 0 to FW, y from 0 to WH
+  const lwBL = _iso(0,   0,  0);
+  const lwBR = _iso(FW,  0,  0);
+  const lwTR = _iso(FW,  WH, 0);
+  const lwTL = _iso(0,   WH, 0);
+  // Right wall — x=FW plane, z from 0 to FD, y from 0 to WH
+  const rwBL = _iso(FW,  0,  0);
+  const rwBR = _iso(FW,  0,  FD);
+  const rwTR = _iso(FW,  WH, FD);
+  const rwTL = _iso(FW,  WH, 0);
+  const wallPts = (a,b,c,d) => `${a[0].toFixed(1)},${a[1].toFixed(1)} ${b[0].toFixed(1)},${b[1].toFixed(1)} ${c[0].toFixed(1)},${c[1].toFixed(1)} ${d[0].toFixed(1)},${d[1].toFixed(1)}`;
+  // Hmm — for isometric two-wall room, the visible walls are the BACK two
+  // (z=0 wall facing camera-left, x=FW wall facing camera-right is BEHIND
+  // the floor in this projection — let me reverse).
+  //
+  // Actually in standard isometric, the back walls (z=0, x=0) face the camera
+  // and the floor is in front of them. Let me use those:
+  const bwBL = _iso(0,   0,  0);   // bottom-left of back wall
+  const bwBR = _iso(FW,  0,  0);   // bottom-right of back wall (corner)
+  const bwTR = _iso(FW,  WH, 0);   // top-right of back wall
+  const bwTL = _iso(0,   WH, 0);   // top-left of back wall
+  // Side wall (z varying, x=0)
+  const swBR = _iso(0,   0,  0);   // shared corner
+  const swBF = _iso(0,   0,  FD);  // bottom-front
+  const swTF = _iso(0,   WH, FD);  // top-front
+  const swTR = _iso(0,   WH, 0);   // top-back
+
+  const backWall = `<polygon points="${wallPts(bwBL, bwBR, bwTR, bwTL)}" fill="${wallBack.left}" stroke="${wallBack.edge}" stroke-width="0.5"/>`;
+  const sideWall = `<polygon points="${wallPts(swBR, swBF, swTF, swTR)}" fill="${wallBack.right}" stroke="${wallBack.edge}" stroke-width="0.5"/>`;
+
+  // Wall decor — small polygon on the back wall at world (8, 11, 0)
+  let decor = '';
+  if (wallDecor === 'window') {
+    // Sky window (3×3 in wall-x × wall-y), centered on back wall
+    const wx1 = 8, wx2 = 14, wy1 = 9, wy2 = 13;
+    const a = _iso(wx1, wy2, 0), b = _iso(wx2, wy2, 0), c = _iso(wx2, wy1, 0), d = _iso(wx1, wy1, 0);
+    const sky = `<polygon points="${wallPts(a,b,c,d)}" fill="#A8D8F0" stroke="#5A6373" stroke-width="0.4"/>`;
+    // Window cross-bars
+    const m1 = _iso((wx1+wx2)/2, wy2, 0), m2 = _iso((wx1+wx2)/2, wy1, 0);
+    const m3 = _iso(wx1, (wy1+wy2)/2, 0), m4 = _iso(wx2, (wy1+wy2)/2, 0);
+    const bars = `<line x1="${m1[0]}" y1="${m1[1]}" x2="${m2[0]}" y2="${m2[1]}" stroke="#5A6373" stroke-width="0.4"/><line x1="${m3[0]}" y1="${m3[1]}" x2="${m4[0]}" y2="${m4[1]}" stroke="#5A6373" stroke-width="0.4"/>`;
+    decor = sky + bars;
+  } else {
+    // Framed picture on back wall
+    const wx1 = 10, wx2 = 15, wy1 = 9, wy2 = 13;
+    const a = _iso(wx1, wy2, 0), b = _iso(wx2, wy2, 0), c = _iso(wx2, wy1, 0), d = _iso(wx1, wy1, 0);
+    const frame = `<polygon points="${wallPts(a,b,c,d)}" fill="#7A4E1A" stroke="#3D2606" stroke-width="0.5"/>`;
+    const innerW = 0.4;
+    const ai = _iso(wx1+innerW, wy2-innerW, 0), bi = _iso(wx2-innerW, wy2-innerW, 0);
+    const ci = _iso(wx2-innerW, wy1+innerW, 0), di = _iso(wx1+innerW, wy1+innerW, 0);
+    const pic = `<polygon points="${wallPts(ai,bi,ci,di)}" fill="#5BA585" stroke="#3D8466" stroke-width="0.3"/>`;
+    decor = frame + pic;
+  }
+
+  // Props on floor — varies by activity
+  let props = '';
+  if (p.activity === 'eat')     props += _isoBowl(7, 16, true);
+  if (p.activity === 'beg')     props += _isoBowl(7, 16, false);
+  if (p.activity === 'sleep')   props += _isoBed(11, 14);
+  if (p.activity === 'workout') props += _isoDumbbell(15, 16);
+  if (p.activity === 'play')    props += _isoBall(7, 16);
+
+  // Pet body — positioned at floor center (11, 0, 11)
+  let petOx = 11, petOz = 11;
+  // Adjust position based on activity
+  if (p.activity === 'eat' || p.activity === 'beg') { petOx = 10; petOz = 14; }
+  if (p.activity === 'workout') { petOx = 14; petOz = 14; }
+  if (p.activity === 'play')    { petOx = 10; petOz = 14; }
+  if (p.activity === 'sleep')   { petOx = 11; petOz = 14; }
+  const petGeom = _isoPetBody(p.stage, p.body, pal, petOx, petOz);
+  // Face on the front of head (head sits at y = bodyHeight, head front face)
+  const headTopY = petGeom.headTopY;
+  // Wrap pet in a group so we can transform (walk animation)
+  const isWalk = p.activity === 'walk';
+  const walkClass = isWalk ? 'pet-iso-walk' : '';
+  // Shadow under pet — flat ellipse on floor
+  const shadowC = _iso(petOx, 0, petOz);
+  const shadow = `<ellipse cx="${shadowC[0].toFixed(1)}" cy="${shadowC[1].toFixed(1)}" rx="4" ry="1.6" fill="rgba(15,23,42,0.22)"/>`;
+
+  // ---- Assemble ----
+  const scale = 4;            // world unit → screen pixel
+  const trX = 120;            // SVG translate-X
+  const trY = 24;             // SVG translate-Y (top of room area)
+  return `
+    <svg viewBox="0 0 240 156" width="100%" height="100%" shape-rendering="crispEdges" preserveAspectRatio="xMidYMid meet" class="pet-iso-scene">
+      <g transform="translate(${trX} ${trY}) scale(${scale})">
+        ${backWall}
+        ${sideWall}
+        ${decor}
+        ${floor}
+        ${shadow}
+        ${props}
+        <g class="${walkClass}">
+          ${petGeom.bodyPolys}
+          <g transform="translate(0,${-_iso(0, /*body height*/ (p.stage === 'baby' ? 4 : p.body === 'chubby' ? 5 : p.body === 'jacked' ? 6 : 6), 0)[1].toFixed(2)})">
+            ${petGeom.headPolys}
+            ${_isoFace(p.stage, p.body, mood, p.activity, petOx, petOz, headTopY * 0.65, petGeom.hw)}
+          </g>
+        </g>
+      </g>
+    </svg>
+  `;
+}
+
 // Activity props rendered into the room as their own SVG sprites. Each
 // returns an SVG snippet positioned via CSS in the parent .pet-room.
+// (Legacy — replaced by the isometric scene above. Kept for compat.)
 const PET_PROPS = {
   // Food bowl — present during 'beg' (empty) and 'eat' (with food)
   bowl: (full) => `
@@ -264,17 +456,305 @@ const PET_PROPS = {
     </svg>`,
 };
 
+/* =========================================================================
+ * mountPet3D — real WebGL room + pet via Three.js procedural primitives.
+ *
+ * Builds a scene with:
+ *   • Orthographic camera at iso angle for that "PS2 / GameCube" look
+ *   • Directional light + ambient (soft drop shadow under pet)
+ *   • Floor (box), 2 back walls (box), per-mood-tinted pet (body + head + eyes)
+ *   • Props per activity (bowl/bed/dumbbell/ball as primitives)
+ *   • Animation loop driven by rAF — walk, bob, sleep wobble, workout pump
+ *
+ * Returns { dispose } so the caller can stop the rAF loop on re-render.
+ * Falls back to a no-op + SVG scene if Three.js isn't available.
+ * ========================================================================= */
+const _PET_MOUNTS = new WeakMap();   // container → { dispose }
+
+function mountPet3D(container, p) {
+  if (!container || !window.THREE) return null;
+  // Dispose any prior mount on this container
+  if (_PET_MOUNTS.has(container)) {
+    try { _PET_MOUNTS.get(container).dispose(); } catch(_) {}
+    _PET_MOUNTS.delete(container);
+  }
+  container.innerHTML = '';
+
+  const T = window.THREE;
+  const w = container.clientWidth  || 240;
+  const h = container.clientHeight || 156;
+
+  // ---- Scene + camera ----
+  const scene = new T.Scene();
+  scene.background = null;   // transparent — card background shows through
+  const aspect = w / h;
+  const d = 5.5;
+  const camera = new T.OrthographicCamera(-d*aspect, d*aspect, d, -d, 0.1, 100);
+  // Classic iso angle
+  camera.position.set(8, 7, 8);
+  camera.lookAt(0, 1.5, 0);
+
+  // ---- Lights ----
+  scene.add(new T.AmbientLight(0xffffff, 0.55));
+  const sun = new T.DirectionalLight(0xfff4e0, 0.95);
+  sun.position.set(6, 10, 4);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.camera.left   = -8;
+  sun.shadow.camera.right  =  8;
+  sun.shadow.camera.top    =  8;
+  sun.shadow.camera.bottom = -8;
+  sun.shadow.camera.near   =  0.1;
+  sun.shadow.camera.far    =  30;
+  sun.shadow.bias = -0.0008;
+  scene.add(sun);
+
+  // ---- Room: floor + 2 back walls ----
+  const FLOOR_W = 8;
+  const floorMat = new T.MeshStandardMaterial({ color: 0xC49A6A, roughness: 0.85 });
+  const floor = new T.Mesh(new T.BoxGeometry(FLOOR_W, 0.2, FLOOR_W), floorMat);
+  floor.position.y = -0.1;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // Skirting around the floor — slightly darker thin ring
+  const skirtMat = new T.MeshStandardMaterial({ color: 0x7A5328, roughness: 0.8 });
+  const skirt = new T.Mesh(new T.BoxGeometry(FLOOR_W + 0.05, 0.04, FLOOR_W + 0.05), skirtMat);
+  skirt.position.y = 0.02;
+  scene.add(skirt);
+
+  const wallMat = new T.MeshStandardMaterial({ color: 0xF2E2C6, roughness: 0.9 });
+  const WALL_H = 5;
+  const wallBack = new T.Mesh(new T.BoxGeometry(FLOOR_W, WALL_H, 0.2), wallMat);
+  wallBack.position.set(0, WALL_H/2, -FLOOR_W/2);
+  wallBack.receiveShadow = true;
+  scene.add(wallBack);
+  const wallSide = new T.Mesh(new T.BoxGeometry(0.2, WALL_H, FLOOR_W), wallMat);
+  wallSide.position.set(-FLOOR_W/2, WALL_H/2, 0);
+  wallSide.receiveShadow = true;
+  scene.add(wallSide);
+
+  // Wall decor: alternating picture/window. Daily seeded.
+  const wallDecorIsWindow = (parseInt((p.lastTickDate || '').replaceAll('-','')) % 2 === 0);
+  if (wallDecorIsWindow) {
+    const win = new T.Mesh(new T.BoxGeometry(1.6, 1.3, 0.05), new T.MeshStandardMaterial({ color: 0xA8D8F0, emissive: 0x4A7095, emissiveIntensity: 0.15 }));
+    win.position.set(1.0, 3.0, -FLOOR_W/2 + 0.12);
+    scene.add(win);
+    const frame = new T.Mesh(new T.BoxGeometry(1.75, 1.45, 0.04), new T.MeshStandardMaterial({ color: 0x5A6373 }));
+    frame.position.set(1.0, 3.0, -FLOOR_W/2 + 0.10);
+    scene.add(frame);
+  } else {
+    const pic = new T.Mesh(new T.BoxGeometry(1.2, 1.4, 0.05), new T.MeshStandardMaterial({ color: 0x5BA585 }));
+    pic.position.set(1.0, 3.0, -FLOOR_W/2 + 0.12);
+    scene.add(pic);
+    const frame = new T.Mesh(new T.BoxGeometry(1.45, 1.65, 0.04), new T.MeshStandardMaterial({ color: 0x7A4E1A }));
+    frame.position.set(1.0, 3.0, -FLOOR_W/2 + 0.10);
+    scene.add(frame);
+  }
+
+  // ---- Pet body ----
+  const moodColors = {
+    thrilled: 0x7CCDA8, content: 0x9CC7E6, hungry: 0xE6C28D,
+    sad: 0xB9A8C9, sick: 0xA8AAB5,
+  };
+  const mood = _moodForActivity(p.activity, p.fedToday);
+  const petColor = moodColors[mood] || moodColors.content;
+  const petMat = new T.MeshStandardMaterial({ color: petColor, flatShading: true, roughness: 0.65 });
+
+  // Body cuboid — sized by stage/body
+  let bw = 1.0, bh = 1.0, bd = 1.0;
+  let hwHead = 0.85;
+  if (p.stage === 'baby')              { bw = 0.85; bh = 0.85; bd = 0.85; hwHead = 0.85; }
+  else if (p.body === 'jacked')        { bw = 1.4;  bh = 1.0;  bd = 0.85; hwHead = 0.75; }
+  else if (p.body === 'fit')           { bw = 1.0;  bh = 1.1;  bd = 0.85; hwHead = 0.78; }
+  else if (p.body === 'chubby')        { bw = 1.35; bh = 0.9;  bd = 1.25; hwHead = 0.85; }
+  else                                  { bw = 1.0;  bh = 1.0;  bd = 0.95; hwHead = 0.85; }
+
+  const petGroup = new T.Group();
+  const body = new T.Mesh(new T.BoxGeometry(bw, bh, bd), petMat);
+  body.position.y = bh / 2;
+  body.castShadow = true;
+  body.receiveShadow = false;
+  petGroup.add(body);
+
+  const head = new T.Mesh(new T.BoxGeometry(hwHead, hwHead, hwHead), petMat);
+  head.position.y = bh + hwHead / 2;
+  head.castShadow = true;
+  petGroup.add(head);
+
+  // Eyes — small dark cubes on the front face of the head
+  const eyeMat = new T.MeshStandardMaterial({ color: 0x0F172A, roughness: 0.3 });
+  const eyeGeo = new T.BoxGeometry(0.13, 0.13, 0.05);
+  const eyeL = new T.Mesh(eyeGeo, eyeMat);
+  const eyeR = new T.Mesh(eyeGeo, eyeMat);
+  const eyeY = bh + hwHead * 0.62;
+  const eyeOffset = hwHead * 0.22;
+  const eyeZ = hwHead / 2 + 0.02;
+  eyeL.position.set(-eyeOffset, eyeY, eyeZ);
+  eyeR.position.set( eyeOffset, eyeY, eyeZ);
+  petGroup.add(eyeL); petGroup.add(eyeR);
+
+  // Mouth — thin dark cube
+  const mouthMat = new T.MeshStandardMaterial({ color: 0x1F2937 });
+  const mouth = new T.Mesh(new T.BoxGeometry(0.22, 0.04, 0.04), mouthMat);
+  mouth.position.set(0, bh + hwHead * 0.38, hwHead / 2 + 0.02);
+  petGroup.add(mouth);
+
+  scene.add(petGroup);
+
+  // ---- Props per activity ----
+  if (p.activity === 'eat' || p.activity === 'beg') {
+    const bowlMat = new T.MeshStandardMaterial({ color: 0x7A4E1A, roughness: 0.7 });
+    const bowl = new T.Mesh(new T.CylinderGeometry(0.5, 0.4, 0.3, 12), bowlMat);
+    bowl.position.set(-1.5, 0.15, 1.5);
+    bowl.castShadow = true; bowl.receiveShadow = true;
+    scene.add(bowl);
+    if (p.activity === 'eat') {
+      const foodMat = new T.MeshStandardMaterial({ color: 0xC7780E });
+      const food = new T.Mesh(new T.SphereGeometry(0.3, 12, 8), foodMat);
+      food.position.set(-1.5, 0.4, 1.5);
+      food.castShadow = true;
+      scene.add(food);
+    }
+    petGroup.position.set(-0.7, 0, 1.5);
+    petGroup.rotation.y = -Math.PI / 4;
+  }
+  if (p.activity === 'sleep') {
+    const bedFrameMat = new T.MeshStandardMaterial({ color: 0x7849E0, roughness: 0.7 });
+    const bedFrame = new T.Mesh(new T.BoxGeometry(2.4, 0.4, 1.4), bedFrameMat);
+    bedFrame.position.set(0, 0.2, 1.2);
+    bedFrame.castShadow = true; bedFrame.receiveShadow = true;
+    scene.add(bedFrame);
+    const pillow = new T.Mesh(new T.BoxGeometry(0.7, 0.18, 1.0), new T.MeshStandardMaterial({ color: 0xE5DEF7 }));
+    pillow.position.set(-0.8, 0.49, 1.2);
+    pillow.castShadow = true;
+    scene.add(pillow);
+    petGroup.position.set(0.2, 0.4, 1.2);
+    petGroup.rotation.z = Math.PI / 2.6;
+  }
+  if (p.activity === 'workout') {
+    const barMat = new T.MeshStandardMaterial({ color: 0x94A3B8, metalness: 0.6, roughness: 0.3 });
+    const bar = new T.Mesh(new T.CylinderGeometry(0.08, 0.08, 1.6, 8), barMat);
+    bar.rotation.z = Math.PI/2;
+    bar.position.set(1.5, 0.7, 1.5);
+    bar.castShadow = true;
+    scene.add(bar);
+    const weightMat = new T.MeshStandardMaterial({ color: 0x475467, roughness: 0.5 });
+    const wL = new T.Mesh(new T.CylinderGeometry(0.32, 0.32, 0.25, 12), weightMat);
+    wL.rotation.z = Math.PI/2;
+    wL.position.set(0.8, 0.7, 1.5);
+    wL.castShadow = true;
+    scene.add(wL);
+    const wR = wL.clone(); wR.position.set(2.2, 0.7, 1.5);
+    scene.add(wR);
+    petGroup.position.set(1.5, 0, 0);
+  }
+  if (p.activity === 'play') {
+    const ballMat = new T.MeshStandardMaterial({ color: 0xD7384C, roughness: 0.4 });
+    const ball = new T.Mesh(new T.SphereGeometry(0.35, 16, 12), ballMat);
+    ball.position.set(-1.6, 0.35, 1.4);
+    ball.castShadow = true;
+    scene.add(ball);
+    petGroup.position.set(-0.5, 0, 1.0);
+  }
+
+  // ---- Renderer ----
+  const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(w, h);
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = T.PCFSoftShadowMap;
+  renderer.outputColorSpace = T.SRGBColorSpace || T.sRGBEncoding;
+  container.appendChild(renderer.domElement);
+
+  // ---- Animation loop ----
+  let mounted = true;
+  let t = 0;
+  const startX = petGroup.position.x;
+  const startZ = petGroup.position.z;
+  let lastFrame = performance.now();
+
+  function tick(now) {
+    if (!mounted) return;
+    const dt = Math.min(0.05, (now - lastFrame) / 1000);
+    lastFrame = now;
+    t += dt;
+
+    const activity = p.activity;
+    if (activity === 'walk') {
+      // Walk a square path around the floor
+      const period = 10;
+      const phase = (t % period) / period;
+      const px = 2.5 * Math.cos(phase * Math.PI * 2);
+      const pz = 2.5 * Math.sin(phase * Math.PI * 2);
+      petGroup.position.x = px;
+      petGroup.position.z = pz;
+      petGroup.rotation.y = Math.atan2(-Math.sin(phase * Math.PI * 2), Math.cos(phase * Math.PI * 2)) + Math.PI/2;
+      petGroup.position.y = Math.abs(Math.sin(t * 8)) * 0.08;
+    } else if (activity === 'idle' || activity === 'beg' || activity === 'eat') {
+      petGroup.position.y = Math.sin(t * 3) * 0.05;
+    } else if (activity === 'sleep') {
+      petGroup.position.y = 0.4 + Math.sin(t * 1.4) * 0.025;
+    } else if (activity === 'workout') {
+      // Squat pulse
+      petGroup.position.y = -Math.abs(Math.sin(t * 4)) * 0.18;
+    } else if (activity === 'play') {
+      petGroup.position.y = Math.abs(Math.sin(t * 6)) * 0.18;
+      petGroup.rotation.y = Math.sin(t * 2) * 0.4;
+    } else if (activity === 'cough') {
+      petGroup.position.x = startX + Math.sin(t * 12) * 0.04;
+    }
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // ---- Responsive: resize on container size changes ----
+  const ro = new ResizeObserver(entries => {
+    const cw = entries[0].contentRect.width;
+    const ch = entries[0].contentRect.height;
+    if (!cw || !ch) return;
+    renderer.setSize(cw, ch);
+    const a = cw / ch;
+    camera.left = -d * a; camera.right = d * a;
+    camera.top = d; camera.bottom = -d;
+    camera.updateProjectionMatrix();
+  });
+  ro.observe(container);
+
+  const handle = {
+    dispose: () => {
+      mounted = false;
+      try { ro.disconnect(); } catch(_) {}
+      try { renderer.dispose(); } catch(_) {}
+      try { if (renderer.domElement && renderer.domElement.parentNode === container) container.removeChild(renderer.domElement); } catch(_) {}
+      // Free GPU resources
+      scene.traverse(obj => {
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+          else obj.material.dispose();
+        }
+      });
+    }
+  };
+  _PET_MOUNTS.set(container, handle);
+  return handle;
+}
+
 function renderPetCard(state, p) {
   const card = el('div','card pet-card overflow-hidden');
+  // Status line — blunter when health is low.
   const statusLine = {
     'walk':    `${p.name} is wandering around`,
     'idle':    `${p.name} is hanging out`,
-    'eat':     `${p.name} is eating! +1 day`,
+    'eat':     `${p.name} is eating! +1 day alive`,
     'sleep':   `${p.name} is napping`,
     'play':    `${p.name} is playing`,
     'workout': `${p.name} is at the gym 💪`,
-    'cough':   `${p.name} is sick — feed soon!`,
-    'beg':     `${p.name} is starving — hit your XP goal`,
+    'cough':   `${p.name} is wheezing and dying — feed NOW`,
+    'beg':     `${p.name} is starving — hit your XP goal or watch it die`,
     'droop':   `${p.name} is sad — needs you`,
   }[p.activity] || `${p.name} is here`;
 
@@ -285,23 +765,8 @@ function renderPetCard(state, p) {
 
   const bar = (val, color) => `<div class="bar h-1 rounded-full overflow-hidden" style="background:rgba(15,23,42,0.06)"><i style="width:${val}%;background:${color};display:block;height:100%"></i></div>`;
 
-  // Decide which prop(s) to show in the room based on activity
-  const props = [];
-  if (p.activity === 'eat')     props.push({ html: PET_PROPS.bowl(true),   className: 'pet-prop-bowl' });
-  if (p.activity === 'beg')     props.push({ html: PET_PROPS.bowl(false),  className: 'pet-prop-bowl' });
-  if (p.activity === 'sleep')   props.push({ html: PET_PROPS.bed(),        className: 'pet-prop-bed' });
-  if (p.activity === 'workout') props.push({ html: PET_PROPS.dumbbell(),   className: 'pet-prop-dumbbell' });
-  if (p.activity === 'play')    props.push({ html: PET_PROPS.ball(),       className: 'pet-prop-ball' });
-
-  // Wall decor — always present, alternates daily
-  const wallDecor = (parseInt((state.pet.lastTickDate || '').replaceAll('-',''), 10) % 2 === 0)
-    ? { html: PET_PROPS.pic(), className: 'pet-wall-pic' }
-    : { html: PET_PROPS.window(), className: 'pet-wall-window' };
-
-  const petPositionClass = p.activity === 'walk' ? 'pet-walking'
-                          : p.activity === 'sleep' ? 'pet-on-bed'
-                          : (p.activity === 'idle' || p.activity === 'eat' || p.activity === 'beg' || p.activity === 'workout') ? 'pet-bobbing'
-                          : '';
+  // Wall decor alternates daily (window vs. picture frame)
+  const wallDecor = (parseInt((state.pet.lastTickDate || '').replaceAll('-',''), 10) % 2 === 0) ? 'picture' : 'window';
 
   card.innerHTML = `
     <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
@@ -309,19 +774,12 @@ function renderPetCard(state, p) {
         <h3 class="font-display font-semibold text-lg">${esc(p.name)}'s room <span class="text-xs muted font-normal ml-1">${stageLabel}${bodyLabel}</span></h3>
         <div class="text-[12.5px] muted mt-0.5">${esc(statusLine)}</div>
       </div>
-      ${p.deathCount > 0 ? `<div class="text-[10.5px] muted" title="Total times your pet has died">🪦 × ${p.deathCount}</div>` : ''}
+      ${p.deathCount > 0 ? `<div class="text-[10.5px] muted" title="Total times you let your pet die">🪦 × ${p.deathCount}</div>` : ''}
     </div>
 
     <div class="flex items-stretch gap-4 flex-wrap">
-      <div class="pet-room relative">
-        <div class="pet-room-wall"></div>
-        <div class="pet-room-floor"></div>
-        <div class="${wallDecor.className} pet-wall-decor">${wallDecor.html}</div>
-        ${props.map(pr => `<div class="${pr.className} pet-prop">${pr.html}</div>`).join('')}
-        <div class="pet-sprite ${petPositionClass}">
-          ${_petSpriteSVG(p.stage, p.body, p.activity, p.fedToday)}
-        </div>
-      </div>
+      <!-- Three.js WebGL scene mounts inside this container -->
+      <div class="pet-room-3d" id="pet-room-3d-host"></div>
 
       <div class="flex-1 min-w-[150px] space-y-2 self-center">
         <div>
@@ -364,11 +822,12 @@ function renderPetCard(state, p) {
     <details class="mt-3">
       <summary class="text-[11px] muted cursor-pointer hover:opacity-80">How feeding works ▾</summary>
       <ul class="list-muted mt-2 text-[11.5px]" style="font-size:11.5px">
-        <li><b>Hit ${p.goal} XP today</b> → ${esc(p.name)} eats: vitality +25 cap 100</li>
-        <li><b>Hit ${Math.round(p.goal*1.5)} XP today</b> → ${esc(p.name)} works out: body shifts toward Jacked (+6)</li>
-        <li><b>Hit ${p.goal} but not ${Math.round(p.goal*1.5)}</b> → body drifts toward Chubby (-2)</li>
-        <li><b>Miss the goal</b> → vitality -30 per day; body drifts back to Normal</li>
-        <li><b>Vitality 0</b> → ${esc(p.name)} dies and respawns as a baby tomorrow</li>
+        <li><b>Hit ${p.goal} XP today</b> → ${esc(p.name)} eats: vitality <span style="color:var(--accent)">+25</span> (cap 100)</li>
+        <li><b>Hit ${Math.round(p.goal*1.5)} XP today</b> → ${esc(p.name)} hits the gym: body shifts toward <b>Jacked</b> (+6)</li>
+        <li><b>Hit ${p.goal} but not ${Math.round(p.goal*1.5)}</b> → fed but sedentary: drifts toward <b>Chubby</b> (-2)</li>
+        <li><b>Skip a day</b> → vitality <span style="color:var(--bad)">-30</span>; body drifts back to Normal</li>
+        <li><b>3 skipped days in a row</b> → vitality hits zero. ${esc(p.name)} <b style="color:var(--bad)">starves to death</b> in its little isometric room while you do absolutely nothing about it.</li>
+        <li><b>Death =</b> all stats reset, streak gone, a new baby pet hatches tomorrow morning to start over. Your 🪦 counter goes up forever. There is no resurrection.</li>
       </ul>
     </details>
   `;
@@ -566,12 +1025,23 @@ function renderDashboard(state, hub) {
   `;
   container.appendChild(hero);
 
-  // 8-bit tamagotchi — sits directly under the hero, the first thing the
-  // user sees after the welcome card. Fed by hitting daily XP goal.
+  // Polygonal isometric tamagotchi — sits directly under the hero. Fed
+  // by hitting the daily XP goal. Rendered with Three.js (real WebGL).
   const pet = GAMI.petState(state);
   GAMI.saveImmediate(state);
   const petCard = renderPetCard(state, pet);
   container.appendChild(petCard);
+  // Mount the 3D scene now that the host div is attached + has dimensions.
+  // Falls back gracefully (empty container) if Three.js isn't available.
+  requestAnimationFrame(() => {
+    const host = petCard.querySelector('#pet-room-3d-host');
+    if (host) {
+      // Pass the persisted lastTickDate up so window/picture rotation stays stable
+      const pp = { ...pet, lastTickDate: state.pet && state.pet.lastTickDate };
+      try { mountPet3D(host, pp); }
+      catch (err) { console.warn('[pet3d] mount failed, falling back:', err); }
+    }
+  });
 
   // Stats row
   const stats = el('div','grid grid-cols-2 sm:grid-cols-4 gap-4');
