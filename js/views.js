@@ -3175,26 +3175,15 @@ function renderLesson(state, lessonId, sourceEl) {
 
 /* ====================== COMPANIES ====================== */
 
-/* User-profile fit scoring.
+/* Probability-of-offer heuristic.
  *
- * The profile below drives a probability-of-offer heuristic that ranks
- * companies and individual roles for THIS user. Edit `USER_PROFILE`
- * (or, eventually, expose it in the Profile screen) to recalibrate.
- *
- * The current profile: EECS @ Berkeley '19 → Amazon (3y) → 1y gap →
- * AI Engineer @ BrainPOP (6mo, fired) → 2y gap. So: strong school +
- * strong big-tech background, but a 2-year recent gap and a short
- * fired stint — which (a) hurts elite-bar process-heavy companies a
- * lot (FAANG, top frontier-AI labs) and (b) helps early-stage
- * builder-mode companies that index on raw chops + recent shipping
- * over linear pedigree.
- *
- * The scores are not predictions of actual outcomes — they're a
- * relative ranking to focus applications on companies where the
- * profile is least likely to be auto-screened.
+ * The signal flags below drive a relative ranking — they are NOT
+ * outcome predictions, they're a relative ordering so applications
+ * focus on companies whose hiring filters are friendliest to the
+ * candidate profile they describe. Tune by editing the booleans
+ * and the weights inside companyFitScore / roleFitScore.
  */
 const USER_PROFILE = {
-  summary: "EECS @ UC Berkeley '19 · Amazon 3y · BrainPOP AI Engineer 6mo · 2y gap",
   hasAiExperience: true,
   hasLongGap: true,
   hadFire: true,
@@ -3285,11 +3274,6 @@ function renderCompanies(state, hub) {
     <div>
       <h1 class="font-display text-2xl sm:text-3xl font-semibold">Companies</h1>
       <p class="muted text-sm mt-1">${COMPANIES.length} startups, ${totalJobs} live NYC engineering postings. Verified ${esc(verifiedAt || 'recently')}. Ranked by fit for your background — sorted highest first.</p>
-    </div>
-
-    <div class="fit-strip card" style="padding:10px 14px">
-      <div class="text-[11px] uppercase tracking-wider muted mb-1" style="letter-spacing:0.22em">Ranking for</div>
-      <div class="text-[13px]">${esc(USER_PROFILE.summary)}</div>
     </div>
 
     <div class="flex items-center gap-2 flex-wrap">
