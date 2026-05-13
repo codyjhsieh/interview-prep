@@ -499,9 +499,19 @@ function _petActivity(p, today, justFed) {
   if (justFed)                    return 'eat';
   if (p.vitality < 30)            return 'cough';
   if (p.vitality < 50)            return 'beg';
-  if (p.form > 35)                return 'workout';
-  const seed = parseInt(today.replaceAll('-', ''), 10) + (p.ageDays * 7);
-  const pool = ['walk', 'idle', 'sleep', 'play', 'walk', 'idle'];
+  // Time-of-day biases the activity pool. Hard-locks for late-night / early
+  // morning (asleep) and only triggers workouts during daytime when fit.
+  const h = new Date().getHours();
+  if (h < 6 || h >= 22)           return 'sleep';
+  if (p.form > 35 && h >= 8 && h < 19) return 'workout';
+  let pool;
+  if (h < 8)        pool = ['idle', 'idle', 'walk'];                   // waking up
+  else if (h < 12)  pool = ['walk', 'walk', 'play', 'idle'];           // morning — active
+  else if (h < 17)  pool = ['walk', 'play', 'walk', 'play', 'idle'];   // afternoon — most active
+  else if (h < 20)  pool = ['walk', 'idle', 'walk', 'idle'];           // evening — chill
+  else              pool = ['idle', 'sleep', 'idle'];                  // late — winding down
+  // Cycle through pool every ~4 hours so re-renders within a window stay stable
+  const seed = parseInt(today.replaceAll('-', ''), 10) + (p.ageDays * 7) + Math.floor(h / 4);
   return pool[seed % pool.length];
 }
 

@@ -517,6 +517,88 @@ function _shortAngle(from, to) {
   return d;
 }
 
+/* Real sun-arc physics for the pet room.
+ *
+ * The window sits on the back wall (z = -FLOOR_W/2). The sun is positioned
+ * OUTSIDE the back wall (z < -FLOOR_W/2) and arcs across the sky from east
+ * to west over a 12-hour day (6am sunrise → 6pm sunset). Below the horizon
+ * at night, we fall back to moonlight (dim cool blue from the opposite arc).
+ *
+ * Returns:
+ *   sunPos       — [x, y, z] for the directional light position
+ *   sunColor     — directional light color
+ *   sunIntensity — directional light intensity
+ *   ambColor     — ambient light color
+ *   ambIntensity — ambient light intensity
+ *   skyColor     — used as window-pane emissive + scene canvas backdrop
+ *   floorTint    — slight floor color multiplier (cooler at night)
+ *   phase        — string label (dawn / day / sunset / evening / night / late)
+ *
+ * Sun position is calibrated so the window (at world (~1, 3, -4)) receives
+ * direct light during the day and the sun visibly tracks east → west.
+ */
+function _sunPhysicsParams() {
+  const now = new Date();
+  const h = now.getHours() + now.getMinutes() / 60;
+  let phase, sunPos, sunColor, sunIntensity, ambColor, ambIntensity, skyColor, floorTint;
+  if (h >= 6 && h < 18) {
+    // Daytime — sun arcs across the sky from east (sunrise) to west (sunset)
+    const tNorm = (h - 6) / 12;                  // 0 sunrise → 1 sunset
+    const angle = tNorm * Math.PI;
+    const R = 14;                                // sun arc radius
+    sunPos = [
+       Math.cos(angle) * R,                       // east (+x) → west (-x)
+       Math.sin(angle) * (R * 0.95) + 1.5,        // 0 at horizon → R near noon
+      -10 - Math.abs(Math.cos(angle)) * 2,         // pulled back behind wall, varies subtly
+    ];
+    const elev = Math.sin(angle);                // 0 at horizon, 1 at zenith
+
+    if (h < 7.5) {                               // dawn
+      phase = 'dawn';
+      sunColor = 0xffb87a;
+      sunIntensity = 0.5 + elev * 0.5;
+      ambColor = 0xffc8a0;
+      ambIntensity = 0.55;
+      skyColor = 0xffd0a0;
+      floorTint = 0xffeed8;
+    } else if (h >= 16.5) {                      // sunset
+      phase = 'sunset';
+      sunColor = 0xff8048;
+      sunIntensity = 0.55 + elev * 0.5;
+      ambColor = 0xff9c70;
+      ambIntensity = 0.6;
+      skyColor = 0xff8d54;
+      floorTint = 0xffd8b8;
+    } else {                                     // midday
+      phase = 'day';
+      sunColor = 0xfff4d8;
+      sunIntensity = 0.85 + elev * 0.3;
+      ambColor = 0xffffff;
+      ambIntensity = 0.55;
+      skyColor = 0x9ed0f0;
+      floorTint = 0xffffff;
+    }
+  } else {
+    // Night — moonlight from a parallel arc, dim cool blue
+    phase = (h < 6) ? 'night' : 'late';
+    const nightT = (h < 6) ? (h + 6) / 12 : (h - 18) / 12;
+    const angle = nightT * Math.PI;
+    const R = 10;
+    sunPos = [
+      -Math.cos(angle) * R,
+       Math.sin(angle) * (R * 0.7) + 1,
+      -10,
+    ];
+    sunColor = 0x7a96c4;     // moonlight blue
+    sunIntensity = 0.35;
+    ambColor = 0x3a4870;     // cool deep blue ambient
+    ambIntensity = 0.45;
+    skyColor = 0x1a2540;     // dark night sky
+    floorTint = 0xa0b0d0;
+  }
+  return { phase, hour: h, sunPos, sunColor, sunIntensity, ambColor, ambIntensity, skyColor, floorTint };
+}
+
 function mountPet3D(container, p) {
   if (!container || !window.THREE) return null;
   // Dispose any prior mount on this container
@@ -540,12 +622,11 @@ function mountPet3D(container, p) {
   camera.position.set(8, 7, 8);
   camera.lookAt(0, 1.5, 0);
 
-  // ---- Lights ----
-  // Smaller shadow map (512² vs 1024²) — invisible quality drop at this
-  // canvas size, ~4× cheaper per shadow pass.
-  scene.add(new T.AmbientLight(0xffffff, 0.55));
-  const sun = new T.DirectionalLight(0xfff4e0, 0.95);
-  sun.position.set(6, 10, 4);
+  // ---- Lights with real time-of-day sun physics ----
+  const tod = _sunPhysicsParams();
+  scene.add(new T.AmbientLight(tod.ambColor, tod.ambIntensity));
+  const sun = new T.DirectionalLight(tod.sunColor, tod.sunIntensity);
+  sun.position.set(tod.sunPos[0], tod.sunPos[1], tod.sunPos[2]);
   sun.castShadow = true;
   sun.shadow.mapSize.set(512, 512);
   sun.shadow.camera.left   = -8;
@@ -553,9 +634,12 @@ function mountPet3D(container, p) {
   sun.shadow.camera.top    =  8;
   sun.shadow.camera.bottom = -8;
   sun.shadow.camera.near   =  0.1;
-  sun.shadow.camera.far    =  30;
+  sun.shadow.camera.far    =  35;
   sun.shadow.bias = -0.0008;
   scene.add(sun);
+  // Tint the container background to match the sky (visible around the edges
+  // of the canvas if any, and through any transparent regions).
+  container.style.background = `linear-gradient(180deg, #${tod.skyColor.toString(16).padStart(6,'0')} 0%, #c49a6a 100%)`;
 
   // ---- Room: floor + 2 back walls ----
   const FLOOR_W = 8;
@@ -585,12 +669,37 @@ function mountPet3D(container, p) {
   // Wall decor: alternating picture/window. Daily seeded.
   const wallDecorIsWindow = (parseInt((p.lastTickDate || '').replaceAll('-','')) % 2 === 0);
   if (wallDecorIsWindow) {
-    const win = new T.Mesh(new T.BoxGeometry(1.6, 1.3, 0.05), new T.MeshStandardMaterial({ color: 0xA8D8F0, emissive: 0x4A7095, emissiveIntensity: 0.15 }));
+    // Window pane EMITS the current sky color — looks like real daylight
+    // (or moonlight) glowing through. Emissive intensity is high enough that
+    // the pane visually reads as a light source even at night.
+    const skyHex = tod.skyColor;
+    const isDay = tod.phase === 'day' || tod.phase === 'dawn' || tod.phase === 'sunset';
+    const win = new T.Mesh(
+      new T.BoxGeometry(1.6, 1.3, 0.05),
+      new T.MeshStandardMaterial({
+        color: skyHex,
+        emissive: skyHex,
+        emissiveIntensity: isDay ? 0.65 : 0.35,
+        roughness: 0.3,
+      })
+    );
     win.position.set(1.0, 3.0, -FLOOR_W/2 + 0.12);
     scene.add(win);
     const frame = new T.Mesh(new T.BoxGeometry(1.75, 1.45, 0.04), new T.MeshStandardMaterial({ color: 0x5A6373 }));
     frame.position.set(1.0, 3.0, -FLOOR_W/2 + 0.10);
     scene.add(frame);
+    // Sun/moon disc visible through the window — its X position tracks the
+    // sun's horizontal angle so the user can see the time of day at a glance.
+    const sunVis = new T.Mesh(
+      new T.SphereGeometry(0.16, 12, 8),
+      new T.MeshBasicMaterial({ color: tod.sunColor })
+    );
+    // Place sun disc within window bounds. Sun X varies ±0.55 within window
+    // width based on horizontal position in sky (sunPos[0] ∈ ~[-14,14]).
+    const sunXInWindow  = Math.max(-0.55, Math.min(0.55, tod.sunPos[0] / 14 * 0.55));
+    const sunYInWindow  = Math.max(-0.45, Math.min(0.45, (tod.sunPos[1] - 5) / 14 * 0.5));
+    sunVis.position.set(1.0 + sunXInWindow, 3.0 + sunYInWindow, -FLOOR_W/2 + 0.14);
+    scene.add(sunVis);
   } else {
     const pic = new T.Mesh(new T.BoxGeometry(1.2, 1.4, 0.05), new T.MeshStandardMaterial({ color: 0x5BA585 }));
     pic.position.set(1.0, 3.0, -FLOOR_W/2 + 0.12);
