@@ -360,68 +360,12 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
   will-change: transform, filter;
 }
 
-/* View Transitions API — Chrome 111+, Safari 18+. The browser cross-fades
- * snapshots of the old + new DOM around the route swap. We use a pure
- * opacity crossfade with matched durations and standard ease so there's
- * no double-overshoot or scale/translate jitter on top of the fade.
- *
- * IMPORTANT: persistent navigation elements (the floating tab bar, the
- * sticky header, the docked sidebar) get their own view-transition-name
- * so the browser DOESN'T re-snapshot them as part of root. Without this,
- * both old + new snapshots include the nav with its old-vs-new active
- * tab, which during the crossfade reads as the active pill moving
- * between positions. With the names below, the nav is treated as a
- * continuous element across route changes — it stays put. */
-/* Persistent nav elements get their own view-transition-name so they
- * don't get caught in the root crossfade (which would re-snapshot them
- * with the old vs new active state and read as the pill jumping).
- * NOTE: NOT applying this to the header — view-transition-name on a
- * position:sticky element caused the header to lose its sticky behavior
- * in WebKit. The header is small and re-snapshotting it during the
- * root crossfade is fine — the transition is opacity-only anyway. */
-#liquid-tabbar { view-transition-name: liquid-tabbar; }
-#sidebar       { view-transition-name: docked-sidebar; }
-
-@keyframes vt-fade-in  { from { opacity: 0; } to { opacity: 1; } }
-@keyframes vt-fade-out { from { opacity: 1; } to { opacity: 0; } }
-/* Crossfade with `mix-blend-mode: plus-lighter` so the old + new snapshots
- * sum to opacity 1 at every midpoint (instead of dipping to ~0.75 with
- * normal blend, which reads as a fade-through-black flicker). The fade
- * timing is intentionally short so route swaps feel snappy. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.18s;
-  animation-timing-function: var(--spring-settle);
-  animation-fill-mode: both;
-  mix-blend-mode: plus-lighter;
-}
-::view-transition-old(root) { animation-name: vt-fade-out; }
-::view-transition-new(root) { animation-name: vt-fade-in; }
-
-/* Nav elements: keep the snapshot fully visible throughout the route
- * swap. The bar and sidebar are the SAME DOM nodes before/after — the
- * only diff is the .active class (which is updated synchronously
- * BEFORE startViewTransition, so OLD and NEW snapshots are identical).
- * Pin both pseudos at opacity 1 so the NEW snapshot fully covers OLD
- * with no fade — the user sees the live bar unchanged. */
-@keyframes vt-stable { from, to { opacity: 1; } }
-::view-transition-old(liquid-tabbar),
-::view-transition-new(liquid-tabbar),
-::view-transition-old(docked-sidebar),
-::view-transition-new(docked-sidebar) {
-  animation: vt-stable 0.18s linear both;
-  mix-blend-mode: normal;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root),
-  ::view-transition-old(liquid-tabbar),
-  ::view-transition-new(liquid-tabbar) {
-    animation-duration: 0.06s;
-    animation-timing-function: linear;
-  }
-}
+/* (View Transitions API removed — every wiring of it produced a
+ * rectangular flicker on the tab bar / sidebar pill because the API
+ * hides live elements during snapshot, and any in-flight CSS transition
+ * captured at slightly different progress points in OLD vs NEW reads as
+ * a flicker. Route swaps are now a plain DOM replace + ANIM.viewIn
+ * fade-in on the #view content. See app.js: render.) */
 
 /* Top-edge specular gloss — static only, no animation, no pointer tracking */
 .card::before {
@@ -585,8 +529,8 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
   opacity: 0.62;
   overflow: hidden;
   transition:
-    color 0.32s var(--spring-settle),
-    opacity 0.32s var(--spring-settle),
+    color 0.28s var(--spring-settle),
+    opacity 0.28s var(--spring-settle),
     max-width 0.45s var(--spring-overshoot),
     padding 0.45s var(--spring-overshoot);
 }
@@ -606,21 +550,20 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
 #liquid-tabbar .tab-item.active .tab-label {
   font-weight: 600;
 }
-/* Icon pop on activation — iOS 26 plays a brief spring-overshoot scale
- * when a tab becomes selected. Adds the "dynamic" feel without a
- * separate moving pill indicator. The transition lives on the icon so
- * the inactive→active transition animates, but the icon settles back
- * to 1.0 at rest. */
+/* Icon pop on activation — driven from JS via Element.animate after the
+ * view-transition completes (see app.js: popActiveIcon). Driving it
+ * imperatively avoids the flicker that a CSS transition produced: the
+ * view-transition pseudo hides the live bar mid-animation and the
+ * snapshot freezes the icon at its in-progress scale, then the live
+ * element returns at a more-advanced animation state — a visible jump.
+ * With JS we wait for the transition to fully end, then run the pop on
+ * the fully-visible live element. Resting state remains scale(1). */
 #liquid-tabbar .tab-item .icon {
-  transition: transform 0.42s var(--spring-overshoot);
-  transform: scale(1);
+  transform: translateZ(0);          /* GPU layer; no scale transition here */
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
 }
-#liquid-tabbar .tab-item.active .icon {
-  transform: scale(1.14);
-}
-/* Press feedback — spring-snap, asymmetric origin under the touch.
- * Pointer-coords are written to --press-x by JS; falls back to center
- * on keyboard activation. */
+/* Press feedback — gentle scale-down on touch. */
 #liquid-tabbar .tab-item:active {
   transform: scale(0.94);
   transition: transform 0.18s var(--spring-snap);

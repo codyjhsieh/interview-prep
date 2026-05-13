@@ -197,6 +197,31 @@ function setActiveTabbar(routeId) {
   });
 }
 
+/* Imperative icon-pop animation for tab + sidebar active item. We do
+ * this from JS (Web Animations API) rather than a CSS transition
+ * because the view-transition pseudo hides the live element mid-
+ * transition — a CSS transition would freeze the icon at its in-
+ * progress scale, then snap to the final state when the live element
+ * returns, which reads as a flicker. By running this AFTER the
+ * transition's `.finished` promise resolves, the pop plays on the
+ * fully-visible live element. */
+let _lastActiveRoute = null;
+function popActiveIcons() {
+  const sel = '#liquid-tabbar .tab-item.active .icon, .sidebar-nav .nav-item.active .icon';
+  document.querySelectorAll(sel).forEach(icon => {
+    if (typeof icon.animate !== 'function') return;
+    icon.animate(
+      [
+        { transform: 'translateZ(0) scale(1)',    offset: 0    },
+        { transform: 'translateZ(0) scale(1.18)', offset: 0.42 },
+        { transform: 'translateZ(0) scale(0.96)', offset: 0.72 },
+        { transform: 'translateZ(0) scale(1)',    offset: 1    },
+      ],
+      { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'none' }
+    );
+  });
+}
+
 /* Minimize-on-scroll — debounce via rAF, threshold-based hysteresis so
  * the bar doesn't flicker on small scroll movements. */
 let lastScrollY = 0;
@@ -262,16 +287,24 @@ function render() {
     updateHeader();
   };
 
-  // View Transitions API — Chrome 111+, Safari 18+. When supported, the
-  // browser snapshots the old DOM, calls swap(), snapshots the new DOM,
-  // and cross-fades them. With matching view-transition-name on elements
-  // in old and new DOM, those elements morph (FLIP). Fallback: just swap.
-  if (typeof document.startViewTransition === 'function') {
-    document.startViewTransition(swap);
-  } else {
-    swap();
-    ANIM.viewIn(hub.firstElementChild);                // legacy fade-in
-  }
+  // Did the active route actually change? Pop the icon only when it did,
+  // so re-renders for the SAME route (e.g., state updates) don't fire
+  // a spurious bounce.
+  const routeChanged = (_lastActiveRoute !== route);
+  _lastActiveRoute = route;
+
+  // Plain swap — no View Transitions API. We tried wrapping the swap
+  // in document.startViewTransition for the crossfade morph, but the
+  // API hides the live tab bar and sidebar during the snapshot phase
+  // (~180ms), and any in-flight CSS transition (color, opacity, scale)
+  // ends up captured at different progress points in OLD vs NEW, which
+  // reads as a rectangular flicker on the pill. Doing a direct swap is
+  // crisp, instant, and lets the icon-pop fire immediately without the
+  // ~180ms delay of `tx.finished`. The #view content itself fades in
+  // via ANIM.viewIn so route changes still feel intentional.
+  swap();
+  ANIM.viewIn(hub.firstElementChild);
+  if (routeChanged) requestAnimationFrame(popActiveIcons);
 }
 
 function afterStateChange() {
