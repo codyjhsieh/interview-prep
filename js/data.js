@@ -857,13 +857,13 @@ def execute_tool_call(call):
      interactive:{ type:'mcq',
        q:'Your agent has access to a refund tool. A user crafts an adversarial prompt that gets the LLM to call refund() with $1000. What\'s the right architectural defense?',
        options:[
-         'Better prompt engineering to prevent the model from being fooled',
-         'A deterministic rule between the LLM\'s tool call and the actual refund execution: "is this user eligible? Is this within policy? Does this exceed the daily cap?" The LLM proposes; the rule executes.',
-         'A safer model',
-         'No agent should have refund access'
+         'Add stronger prompt-engineering and adversarial test cases so the model learns to refuse the jailbreak attempts you\'ve seen so far.',
+         'Place a deterministic validator between the tool call and execution: eligibility check, policy bounds, spend cap. The LLM proposes; the validator executes.',
+         'Switch to a frontier model with better alignment training and lower hallucination rates on tool-calling benchmarks.',
+         'Run two LLMs in parallel and only execute when both independently agree the refund is appropriate — quorum defeats single-prompt attacks.'
        ],
        correct:1,
-       explain:'The LLM is generative — it can be fooled. The defense is a deterministic validator between LLM output and action execution. The LLM proposes; deterministic rules + spend caps + HITL on big actions enforce policy.'}},
+       explain:'A is brittle — every new jailbreak technique restarts the cat-and-mouse. C punts to the model vendor; the LLM is still the boundary. D scales cost 2× without solving the core issue (both LLMs see the same prompt and may both be fooled). The actual defense is a deterministic, non-generative validator between LLM output and side-effect execution.'}},
     {id:'rag-3', type:'concept', name:'How retrieval actually works (sparse vs dense vs hybrid)', xp:10, time:8,
      body:`You've chunked the docs. Now: given a user query, which chunks do you fetch? There are two fundamentally different retrieval methods, and the production answer is "use both."
 <br><br>
@@ -4332,13 +4332,13 @@ Niche. Useful when you only ever care about the most recent change.
      interactive:{ type:'mcq',
        q:'Your customer\'s warehouse is missing deleted records — they exist in Postgres at time T1, are deleted at T2, but the warehouse still shows them at T3. What\'s the likely cause?',
        options:[
-         'CDC misconfiguration',
-         'Polling-based sync (deletes aren\'t captured because the row is gone before the next poll)',
-         'Network issue',
-         'Schema drift'
+         'CDC is misconfigured — DELETE events are being filtered out before reaching the warehouse sink.',
+         'Polling-based sync — SELECT can\'t see rows that no longer exist, so deletes silently vanish.',
+         'Network partition between Debezium and Kafka dropped the DELETE events during the outage window.',
+         'Schema drift caused the deleted_at column to be dropped, so soft-deletes look like live rows.'
        ],
        correct:1,
-       explain:'Classic polling problem. SELECT-based sync can\'t see deleted rows (they\'re gone). CDC reads the transaction log and emits DELETE events explicitly. The fix is switching to CDC.'}},
+       explain:'Polling can\'t see deletes — the row is gone before the next poll runs, so SELECT just returns "no row" and the warehouse keeps the stale copy forever. CDC (Debezium) reads the WAL and emits explicit DELETE events. A is plausible but specific (would mean a config bug, not a fundamental method limitation). C is too localized for "T1→T3 missing." D describes soft-delete drift, not hard-delete loss.'}},
     {id:'pp-2', type:'concept', name:'Data quality checks — the 5 tiers', xp:12, time:8,
      body:`Your customer says "the dashboard shows weird numbers Tuesday." You investigate: upstream sales data was missing 8% of rows that day, silently. The pipeline ran. The warehouse loaded. The dashboard rendered. Nobody knew.
 <br><br>
@@ -4706,13 +4706,13 @@ The Amazon "disagree and commit" framework is the canonical answer here, but mos
      interactive:{ type:'mcq',
        q:'OpenAI asks "why are you interested in this role specifically?" Best answer?',
        options:[
-         '"I want to work at OpenAI because the technology is amazing."',
+         '"I want to work at OpenAI because the technology is the most interesting in the field, and the team is exceptional — I want to be part of the company defining the frontier."',
          '"FDE means deploying directly with enterprise customers — fast iteration, less abstract, more weekly impact per engineer. I want that pace and that proximity to actual users."',
-         '"I think AGI is important."',
-         '"My friend recommended it."'
+         '"I think the mission of building AGI safely is the most important problem of our generation, and I want to contribute to that mission in any role that\'ll have me."',
+         '"My background in [X] aligns well with what FDEs do at OpenAI, and I\'ve been following the product line closely — I think I\'d ramp up quickly and add value within the first quarter."'
        ],
        correct:1,
-       explain:'Specific to FDE, names the tradeoffs (pace, proximity to users, less polished code), shows you understand what the role actually is day-to-day. Vague "OpenAI is cool" answers signal you applied because of the brand.'}},
+       explain:'Names the FDE-specific tradeoffs (pace, customer proximity, less-polished code) — signals you understand the day-to-day. A is "OpenAI is cool" thinly veiled. C is mission talk without picking the role. D is generic candidate-fit pitch that could apply anywhere.'}},
 
     {id:'v-2', type:'concept', name:'Anthropic — values and how they probe in interviews', xp:10, time:7,
      body:`Anthropic\'s public stance: powerful AI is coming whether we want it or not, and the people building it should be the ones most thoughtful about safety. Their values map to that directly.
@@ -4753,13 +4753,13 @@ The Amazon "disagree and commit" framework is the canonical answer here, but mos
      interactive:{ type:'mcq',
        q:'Palantir interviewer asks "tell me about a real failure." Best opening?',
        options:[
-         '"My biggest failure is that I work too hard."',
-         '"At my last job we tried to deploy a model that had a 30% false-positive rate. I owned the rollout. I rushed past the eval review because I thought we\'d catch issues post-launch. We didn\'t. The customer lost trust for 6 months. I now insist on pre-launch shadow runs for every deploy."',
-         '"I once disagreed with my manager about an architecture decision."',
-         '"I\'m bad at networking."'
+         '"My biggest failure is that I care too much about quality — I sometimes hold up shipping. I\'ve been working on letting go of perfectionism with smaller PRs."',
+         '"I tried to deploy a model with a 30% false-positive rate. I owned the rollout but rushed the eval review thinking we\'d catch issues post-launch. We didn\'t — the customer lost trust for 6 months. I now insist on shadow runs before every deploy."',
+         '"I once disagreed with my manager about an architecture decision. They wanted REST, I wanted gRPC. I pushed back politely but eventually deferred — they were right in the end about team familiarity."',
+         '"In my first job I shipped code with a bug that caused a small customer outage. We fixed it within an hour. I learned to write better tests and now use CI for everything I deploy."'
        ],
        correct:1,
-       explain:'Specific, owned, with the actual mechanism of failure, the cost, the lesson, and the systemic change you made afterwards. The fake-failure dodge (option A) is the textbook reject signal at Palantir.'}},
+       explain:'Specific, owned, with the actual mechanism of failure (rushed eval), the cost ($6 months lost trust), the lesson, and the systemic change. A is the textbook fake-failure dodge. C is a disagreement story dressed up as failure — Palantir explicitly flags this. D names a failure but it\'s small, lacks judgment ownership, and the lesson ("write tests") is generic.'}},
   ]
 },
 
@@ -5538,13 +5538,13 @@ The ledger is append-only — you NEVER update or delete an entry. Adjustments a
      interactive:{ type:'mcq',
        q:'A Palantir interviewer asks why you want a public-sector FDE role. Strongest answer?',
        options:[
-         '"I want to work somewhere with cool tech."',
-         '"I want my work to materially affect mission-critical outcomes — counter-fraud, public health, or operational intelligence — and I accept the slower procurement cycle that comes with it. The trade-off matches what I want next."',
-         '"The pay is good."',
-         '"I\'ve always wanted to work at Palantir."'
+         '"I admire the engineering culture, and the chance to work on cutting-edge problems with talented people is what attracts me to public sector."',
+         '"I want my work to materially affect mission-critical outcomes — counter-fraud, public health, ops intel — and I accept the slower procurement cycle that comes with it."',
+         '"Compensation is competitive and the equity story is interesting. The mission alignment is a bonus on top of the financial fit."',
+         '"I\'ve followed Palantir for years, read the founders\' essays, and the public-sector focus is what I want to be part of for the next chapter of my career."'
        ],
        correct:1,
-       explain:'Specific mission resonance + acceptance of the tradeoff (procurement slowness) = senior public-sector FDE answer. Generic enthusiasm or compensation focus signals the wrong values fit.'}},
+       explain:'Specific mission resonance + acceptance of the tradeoff (procurement) = senior public-sector answer. A is generic culture-fit. C leads with money — instant red flag. D is enthusiasm without naming what you actually want to BUILD or accept.'}},
     {id:'dh-6', type:'concept', name:'B2B SaaS at scale — PLG vs sales-led growth', xp:12, time:9,
      body:`B2B SaaS companies follow one of two growth motions, and they fundamentally shape what your engineering work looks like.
 <br><br>
@@ -5907,13 +5907,13 @@ The negotiation conversation usually takes 2-3 rounds over a week. Stay friendly
      interactive:{ type:'mcq',
        q:'You got an offer at $180k base + $250k equity over 4 years. Recruiter asks "what would it take to close this today?" Best response?',
        options:[
-         '"That\'s fair, I\'ll accept."',
-         '"$200k base."',
-         '"I\'m really excited about this. Is there flexibility on base and on the equity refresh structure? My target with my other process is closer to $200k base + $300k equity. If we can land near there, I\'d sign now."',
-         '"I need to talk to my spouse."'
+         '"Thanks — this is competitive. I\'ll accept the offer as-is, can you send the paperwork by EOD?"',
+         '"I want $250k base. The number you sent doesn\'t reflect my market rate or what I\'ve seen at peers."',
+         '"I\'m really excited. Is there flexibility on base and on the equity refresh? My target is closer to $200k + $300k — if we land near there I\'d sign now."',
+         '"I appreciate it. I need a week to think it over and compare against my other processes before I can give you a clear answer."'
        ],
        correct:2,
-       explain:'Anchors high but professionally, names specific axes, signals willingness to close, references a competing process without being aggressive. This phrasing routinely moves offers 10-20% higher in tech.'}},
+       explain:'Anchors high but professionally, names specific axes (base + equity refresh), signals willingness to close, references competing processes without naming amounts you can\'t back. Option A leaves money on the table. Option B is combative and unspecific. Option D is fine but loses the close-today leverage the recruiter just offered.'}},
   ]
 },
 ];

@@ -1,8 +1,27 @@
 # Quiz Coverage Report
 
-**Platform:** FDE/SDE 2026 Interview Prep · **Date:** 2026-05-11
+**Platform:** FDE/SDE 2026 Interview Prep · **Date:** 2026-05-12
 
 Tracking progress toward the **10x quiz expansion** target.
+
+## Recent additions (post-2026-05-12 push)
+
+- **9 LeetCode pattern modules** added: backtracking, intervals, trees-in-depth, greedy, DP families, linked-list patterns, stack patterns, selection, string matching. 39 new lessons, all with idiomatic Python snippets.
+- **4 new generative widget types** added to games.js: `codepredict`, `findbug`, `cloze`, `whyexplain` — all eliminate the length-bias problem because answers are line numbers, code outputs, or self-rated free text rather than verbose paragraphs.
+- **Code snippets backfilled** in 14 concepts across AI (RAG, evals, agents), sysd (rate limiter, multi-tenancy, webhooks), data (indexes), cloud (OAuth + PKCE).
+
+## MCQ length-bias status (brutal honesty)
+
+Tracked metric: % of MCQ widgets where the correct option is >1.5× the average wrong-option length. This is the classic "the long one is the answer" tell.
+
+| Pass | MCQs | Length-biased | Notes |
+|---|---:|---:|---|
+| Baseline | 62 | 52 (83%) | Original content |
+| After Phase 3a (this push) | 59 | 46 (77%) | 6 worst offenders rewritten; 3 MCQs converted to non-MCQ widgets during Phase 1 retrofits |
+| Target | — | <20% | Hand-rewrite remaining 46 distractors to be plausible-and-length-matched |
+
+**Structural exception:** behavioral/strategic-answer MCQs ("tell me about a failure," "why this role") have correct answers that genuinely encode multi-clause reasoning — these can\'t be compressed without losing teaching value. For these, the production move is to migrate to `whyexplain` or `sort` widgets where length-bias is impossible by design, rather than artificially pad distractors.
+
 
 ---
 
