@@ -1274,31 +1274,39 @@ function mountPet3D(container, p) {
   // nearest pile, eats it on contact (pile vanishes; eatenTodayXP += pileXP).
   // Positions are deterministically scattered around the floor.
   const FLOOR_HALF = 2.8;
-  const foodPiles = [];  // [{ mesh, x, z, eaten:false }]
-  if (p.foodPilesAvailable > 0) {
-    // Seeded RNG for stable positions across re-renders the same day
+  const foodPiles = [];  // [{ mesh, x, z, eaten:false, dropping?:bool }]
+  // Materials lifted so dropFood() can reuse them at runtime.
+  const foodMat = new T.MeshStandardMaterial({ color: 0xC7780E, flatShading: true, roughness: 0.7 });
+  const foodMatDark = new T.MeshStandardMaterial({ color: 0x8E5408, flatShading: true, roughness: 0.7 });
+  function _makeFoodPile() {
+    const g = new T.Group();
+    const k0 = new T.Mesh(new T.IcosahedronGeometry(0.13, 0), foodMat);
+    const k1 = new T.Mesh(new T.IcosahedronGeometry(0.11, 0), foodMatDark);
+    const k2 = new T.Mesh(new T.IcosahedronGeometry(0.10, 0), foodMat);
+    k0.position.set(0, 0.13, 0);
+    k1.position.set(0.10, 0.11, 0.04);
+    k2.position.set(-0.08, 0.11, -0.05);
+    k0.castShadow = k1.castShadow = k2.castShadow = true;
+    g.add(k0); g.add(k1); g.add(k2);
+    return g;
+  }
+  // Bit's "I see food!" reaction window — set when dropFood is called.
+  let bitReactionUntil = 0;
+
+  if (p.foodPilesAvailable > 0 && p.autoSpawnFood !== false) {
+    // Legacy auto-spawn (lifecycle preview only — dashboard uses the explicit
+    // Drop-food button via handle.dropFood instead, so we suppress this by
+    // default and let dashboard opt out via autoSpawnFood:false).
     const dateSeed = parseInt((p.lastTickDate || '20260101').replaceAll('-',''), 10);
     function rand(i) {
       const x = Math.sin(dateSeed + i * 9301) * 43758.5453;
       return x - Math.floor(x);
     }
-    const foodMat = new T.MeshStandardMaterial({ color: 0xC7780E, flatShading: true, roughness: 0.7 });
-    const foodMatDark = new T.MeshStandardMaterial({ color: 0x8E5408, flatShading: true, roughness: 0.7 });
     for (let i = 0; i < p.foodPilesAvailable; i++) {
       const px = (rand(i * 2) * 2 - 1) * FLOOR_HALF;
       const pz = (rand(i * 2 + 1) * 2 - 1) * FLOOR_HALF;
-      // Pile = 3 small icosahedrons clustered
-      const pileGroup = new T.Group();
-      const k0 = new T.Mesh(new T.IcosahedronGeometry(0.13, 0), foodMat);
-      const k1 = new T.Mesh(new T.IcosahedronGeometry(0.11, 0), foodMatDark);
-      const k2 = new T.Mesh(new T.IcosahedronGeometry(0.10, 0), foodMat);
-      k0.position.set(0, 0.13, 0);
-      k1.position.set(0.10, 0.11, 0.04);
-      k2.position.set(-0.08, 0.11, -0.05);
-      k0.castShadow = k1.castShadow = k2.castShadow = true;
-      pileGroup.add(k0); pileGroup.add(k1); pileGroup.add(k2);
+      const pileGroup = _makeFoodPile();
       pileGroup.position.set(px, 0, pz);
-      // Subtle idle bob via random Y-offset per pile (visual variety)
       pileGroup.userData.baseY = 0;
       scene.add(pileGroup);
       foodPiles.push({ group: pileGroup, x: px, z: pz, eaten: false });
@@ -1621,13 +1629,8 @@ function mountPet3D(container, p) {
               }
             };
             eatAnim();
-            try {
-              const st = APP.getState();
-              if (st && st.pet) {
-                st.pet.eatenTodayXP = (st.pet.eatenTodayXP || 0) + (p.pileXP || 10);
-                if (typeof GAMI !== 'undefined' && GAMI.saveImmediate) GAMI.saveImmediate(st);
-              }
-            } catch (_) {}
+            // Note: eatenTodayXP is debited at drop time (Drop-food button),
+            // not at arrival, so Bit eating is purely visual here.
           }
           pauseUntil = t + 0.35 + Math.random() * 0.55;
           const hasFood = foodPiles.some(f => !f.eaten);
@@ -1690,7 +1693,7 @@ function mountPet3D(container, p) {
             if (!inTrick && t >= playTrick.next) {
               playTrick.active = true;
               playTrick.start = t;
-              playTrick.kind = Math.random() < 0.55 ? 'flip' : 'spin';
+              playTrick.kind = 'spin';                              // yaw only — flips dropped
               // Airtime from projectile motion: τ_total = 2·v0/g
               playTrick.v0 = tune.trickV0;
               playTrick.duration = (2 * playTrick.v0) / 9.8;
@@ -1699,22 +1702,15 @@ function mountPet3D(container, p) {
 
             if (inTrick) {
               const τ = t - playTrick.start;                       // airtime so far
-              // Projectile arc: real y = v0·τ − ½·g·τ² (m, m/s, m/s²)
-              const y = Math.max(0, playTrick.v0 * τ - 0.5 * 9.8 * τ * τ);
-              petGroup.position.y += y;
-              // Full 2π rotation over the airtime
+              // Projectile arc: real y = v0·τ − ½·g·τ²
+              const projY = Math.max(0, playTrick.v0 * τ - 0.5 * 9.8 * τ * τ);
               const k = τ / playTrick.duration;                    // 0..1
-              if (playTrick.kind === 'flip') {
-                // Front flip about pitch axis — preserve facing yaw underneath
-                facing.rotation.x = -k * Math.PI * 2;
-              } else {
-                // Yaw spin — on top of currentFacing
-                facing.rotation.y = currentFacing + k * Math.PI * 2;
-              }
-              // End of trick — clear rotation so the next walk frame is clean
+              // Yaw spin only — full 2π rotation over the airtime, no ground-
+              // clip risk since rotation is about the vertical axis.
+              petGroup.position.y += projY;
+              facing.rotation.y = currentFacing + k * Math.PI * 2;
               if (τ >= playTrick.duration) {
                 playTrick.active = false;
-                facing.rotation.x = 0;
                 facing.rotation.y = currentFacing;
               }
             } else {
@@ -1823,6 +1819,34 @@ function mountPet3D(container, p) {
       }
     }
 
+    // ===== Drop-food animation (per-pile fall + landing squash) =====
+    for (const pile of foodPiles) {
+      if (!pile.dropping) continue;
+      const k = Math.min(1, (t - pile.dropStart) / pile.dropDur);
+      // Quadratic ease-in for gravity-like fall (slow at top, fast on landing)
+      pile.group.position.y = 4 * (1 - k * k);
+      if (k > 0.92) {
+        const u = (k - 0.92) / 0.08;
+        const sq = Math.sin(u * Math.PI);                 // 0→1→0 squish
+        pile.group.scale.set(1 + sq * 0.22, 1 - sq * 0.26, 1 + sq * 0.22);
+      } else {
+        pile.group.scale.set(1, 1, 1);
+      }
+      if (k >= 1) {
+        pile.dropping = false;
+        pile.group.position.y = 0;
+        pile.group.scale.set(1, 1, 1);
+      }
+    }
+
+    // ===== Bit reaction hop (set when dropFood is called) =====
+    if (t < bitReactionUntil) {
+      const remaining = bitReactionUntil - t;
+      const phase = 1 - remaining / 0.55;                 // 0→1 over the window
+      const arc = Math.sin(phase * Math.PI);              // 0→1→0
+      petGroup.position.y += arc * 0.24;
+    }
+
     renderer.render(scene, camera);
     requestAnimationFrame(tick);
   }
@@ -1869,6 +1893,26 @@ function mountPet3D(container, p) {
   ro.observe(container);
 
   const handle = {
+    // Drop a fresh food pile from above. Spawns at (x, 4, z), animates to
+    // the floor with a landing squash, triggers Bit's excitement hop, and
+    // forces Bit to target the new pile immediately.
+    dropFood: (x, z) => {
+      if (!mounted) return false;
+      const FX = Math.max(-FLOOR_HALF + 0.3, Math.min(FLOOR_HALF - 0.3, x));
+      const FZ = Math.max(-FLOOR_HALF + 0.3, Math.min(FLOOR_HALF - 0.3, z));
+      const pileGroup = _makeFoodPile();
+      pileGroup.position.set(FX, 4.0, FZ);
+      scene.add(pileGroup);
+      const pile = {
+        group: pileGroup, x: FX, z: FZ, eaten: false,
+        dropStart: t, dropDur: 0.50, dropping: true,
+      };
+      foodPiles.push(pile);
+      bitReactionUntil = t + 0.55;                        // quick excitement hop
+      target = { x: FX, z: FZ, foodIdx: foodPiles.length - 1 };
+      pauseUntil = 0;
+      return true;
+    },
     dispose: () => {
       mounted = false;
       try { io.disconnect(); } catch(_) {}
@@ -2056,7 +2100,14 @@ function renderPetCard(state, p) {
     </div>
 
     <div class="mt-3 flex items-center justify-between gap-2 flex-wrap">
-      <button class="btn !py-1.5 !px-3 text-[12.5px]" data-pet-lifecycle>👁 Preview all life stages</button>
+      <div class="flex gap-2 flex-wrap">
+        <button class="btn !py-1.5 !px-3 text-[12.5px]"
+                data-pet-drop-food
+                ${p.foodPilesAvailable > 0 ? '' : 'disabled style="opacity:0.45;cursor:not-allowed"'}>
+          🥕 Drop food${p.foodPilesAvailable > 0 ? ` <span class="numeric ml-1">×${p.foodPilesAvailable}</span>` : ''}
+        </button>
+        <button class="btn !py-1.5 !px-3 text-[12.5px]" data-pet-lifecycle>👁 Preview all life stages</button>
+      </div>
       <div class="text-[10.5px] muted">Stage: ${esc(p.stage)}${p.stage === 'adult' ? ' · ' + esc(p.body) : ''}</div>
     </div>
 
@@ -2182,8 +2233,8 @@ function renderDashboard(state, hub) {
         <h1 class="font-display text-2xl sm:text-3xl font-semibold mt-1 leading-tight">${esc(name)}<span class="muted font-normal"> — let's continue.</span></h1>
         <div class="text-xs muted mt-2 mobile-hide">Cue: <span class="text-[color:var(--text)]">${esc(state.user.when_cue || 'set in profile')}</span></div>
         <div class="flex gap-2 mt-4 flex-wrap">
-          ${next ? `<a class="btn btn-primary max-w-full" href="#category/${next.cat.id}/${next.mod.id}" id="primary-cta" style="overflow:hidden"><span class="truncate inline-block max-w-[260px] sm:max-w-[400px] align-middle">Continue · ${esc(next.lesson.name)}</span><span class="ml-1">→</span><span class="ml-2 dim text-[10px] hidden sm:inline">J</span></a>` : `<a class="btn btn-primary" href="#flashcards">Review flashcards →</a>`}
-          <a class="btn max-w-full" href="#games/${todaysGame.id}" id="todays-game" style="overflow:hidden"><span class="truncate inline-block max-w-[200px] sm:max-w-[400px] align-middle">Today's game: ${esc(todaysGame.name)}</span><span class="ml-2 dim text-[10px] hidden sm:inline">G</span></a>
+          ${next ? `<a class="btn btn-primary max-w-full" href="#category/${next.cat.id}/${next.mod.id}" id="primary-cta" style="overflow:hidden;padding:0.6rem 1.25rem"><span class="truncate inline-block max-w-[260px] sm:max-w-[400px] align-middle">Continue · ${esc(next.lesson.name)}</span><span class="ml-2">→</span><span class="ml-2 dim text-[10px] hidden sm:inline">J</span></a>` : `<a class="btn btn-primary" href="#flashcards">Review flashcards →</a>`}
+          <a class="btn max-w-full" href="#games/${todaysGame.id}" id="todays-game" style="overflow:hidden;padding:0.6rem 1.25rem"><span class="truncate inline-block max-w-[200px] sm:max-w-[400px] align-middle">Today's game: ${esc(todaysGame.name)}</span><span class="ml-2 dim text-[10px] hidden sm:inline">G</span></a>
           ${topGap && topGap.weight >= 8 && topGap.pct < 0.5 ? `<a class="btn max-w-full mobile-hide" href="#category/${topGap.id}" style="color:var(--warn);border-color:rgba(255,195,107,0.4);overflow:hidden"><span class="truncate inline-block max-w-[200px] sm:max-w-[400px] align-middle">⚠ Close gap · ${esc(topGap.name)}</span></a>` : ''}
         </div>
       </div>
@@ -2216,10 +2267,43 @@ function renderDashboard(state, hub) {
   requestAnimationFrame(() => {
     const host = petCard.querySelector('#pet-room-3d-host');
     if (host) {
-      // Pass the persisted lastTickDate up so window/picture rotation stays stable
-      const pp = { ...pet, lastTickDate: state.pet && state.pet.lastTickDate };
-      try { mountPet3D(host, pp); }
+      // Pass the persisted lastTickDate up so window/picture rotation stays
+      // stable. autoSpawnFood:false → the dashboard scene starts empty; piles
+      // only appear when the user clicks "Drop food".
+      const pp = { ...pet, lastTickDate: state.pet && state.pet.lastTickDate, autoSpawnFood: false };
+      let petHandle;
+      try { petHandle = mountPet3D(host, pp); }
       catch (err) { console.warn('[pet3d] mount failed, falling back:', err); }
+
+      // Wire the drop-food button to the mounted scene.
+      const dropBtn = petCard.querySelector('[data-pet-drop-food]');
+      if (dropBtn && petHandle && typeof petHandle.dropFood === 'function') {
+        dropBtn.addEventListener('click', () => {
+          const st = APP && APP.getState ? APP.getState() : state;
+          const PILE_XP = 10;
+          const todayXP = st.todayXP || 0;
+          const eaten   = (st.pet && st.pet.eatenTodayXP) || 0;
+          const avail   = Math.min(8, Math.floor(Math.max(0, todayXP - eaten) / PILE_XP));
+          if (avail <= 0) return;
+          // Random floor position, kept well inside the walls
+          const fx = (Math.random() * 2 - 1) * 2.0;
+          const fz = (Math.random() * 2 - 1) * 2.0;
+          petHandle.dropFood(fx, fz);
+          // Debit the food bank so the count is consistent across remounts.
+          st.pet.eatenTodayXP = eaten + PILE_XP;
+          if (typeof GAMI !== 'undefined' && GAMI.saveImmediate) GAMI.saveImmediate(st);
+          // Update button state in place
+          const newAvail = avail - 1;
+          if (newAvail <= 0) {
+            dropBtn.disabled = true;
+            dropBtn.style.opacity = '0.45';
+            dropBtn.style.cursor = 'not-allowed';
+            dropBtn.innerHTML = '🥕 Drop food';
+          } else {
+            dropBtn.innerHTML = `🥕 Drop food <span class="numeric ml-1">×${newAvail}</span>`;
+          }
+        });
+      }
     }
   });
 
