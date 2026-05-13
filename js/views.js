@@ -2358,19 +2358,49 @@ function renderQuotesCard() {
     ">“</div>
 
     <div class="relative">
-      <div class="mb-4" style="
-        font-size: 10px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.22em;
-        color: var(--muted);
-      ">Quote of the Day</div>
+      <div class="flex items-center justify-between mb-4">
+        <div style="
+          font-size: 10px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.22em;
+          color: var(--muted);
+        ">Quote of the Day</div>
+        <button id="quote-shuffle" title="New quote" aria-label="Show a different quote" style="
+          width: 30px; height: 30px;
+          border-radius: 999px;
+          border: 1px solid var(--hairline);
+          background: transparent;
+          color: var(--muted);
+          display: inline-flex; align-items: center; justify-content: center;
+          font-size: 14px;
+          transition: all 0.18s ease;
+          cursor: pointer;
+        ">↻</button>
+      </div>
 
-      <div id="quote-featured">
+      <div id="quote-featured" style="transition: opacity 0.22s ease;">
         ${renderFeatured(featured)}
       </div>
     </div>
   `;
+
+  // Wire the shuffle: cycles to a new random quote with a brief fade.
+  requestAnimationFrame(() => {
+    const shuffleBtn = card.querySelector('#quote-shuffle');
+    const featuredEl = card.querySelector('#quote-featured');
+    let lastIdx = QUOTES.indexOf(featured);
+    if (shuffleBtn) shuffleBtn.addEventListener('click', () => {
+      featuredEl.style.opacity = '0';
+      setTimeout(() => {
+        let i = lastIdx;
+        while (i === lastIdx && QUOTES.length > 1) i = Math.floor(Math.random() * QUOTES.length);
+        lastIdx = i;
+        featuredEl.innerHTML = renderFeatured(QUOTES[i]);
+        featuredEl.style.opacity = '1';
+      }, 200);
+    });
+  });
   return card;
 }
 
