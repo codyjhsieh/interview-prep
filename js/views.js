@@ -204,51 +204,126 @@ function _petSpriteSVG(stage, body, activity, fedToday) {
   return `<svg viewBox="0 0 112 112" width="112" height="112" shape-rendering="crispEdges">${rects.join('')}${overlay}</svg>`;
 }
 
+// Activity props rendered into the room as their own SVG sprites. Each
+// returns an SVG snippet positioned via CSS in the parent .pet-room.
+const PET_PROPS = {
+  // Food bowl — present during 'beg' (empty) and 'eat' (with food)
+  bowl: (full) => `
+    <svg viewBox="0 0 32 16" width="44" height="22" shape-rendering="crispEdges">
+      ${full ? '<rect x="6" y="2" width="20" height="3" fill="#C7780E"/>' : ''}
+      ${full ? '<rect x="8" y="0" width="16" height="2" fill="#E6A03B"/>' : ''}
+      <rect x="4"  y="5"  width="24" height="2" fill="#8B6F47"/>
+      <rect x="2"  y="7"  width="28" height="6" fill="#6B5436"/>
+      <rect x="0"  y="13" width="32" height="2" fill="#4E3D26"/>
+    </svg>`,
+  // Bed — present during sleep
+  bed: () => `
+    <svg viewBox="0 0 48 18" width="64" height="24" shape-rendering="crispEdges">
+      <rect x="0"  y="8"  width="48" height="8" fill="#7849E0"/>
+      <rect x="0"  y="6"  width="48" height="2" fill="#9C75E8"/>
+      <rect x="2"  y="2"  width="14" height="4" fill="#D6C9F0"/>
+      <rect x="2"  y="0"  width="14" height="2" fill="#E5DEF7"/>
+      <rect x="0"  y="16" width="48" height="2" fill="#5A36B0"/>
+    </svg>`,
+  // Dumbbell — present during workout
+  dumbbell: () => `
+    <svg viewBox="0 0 32 12" width="44" height="16" shape-rendering="crispEdges">
+      <rect x="0"  y="2"  width="6"  height="8" fill="#475467"/>
+      <rect x="6"  y="4"  width="20" height="4" fill="#94A3B8"/>
+      <rect x="26" y="2"  width="6"  height="8" fill="#475467"/>
+      <rect x="0"  y="0"  width="6"  height="2" fill="#1F2937"/>
+      <rect x="26" y="0"  width="6"  height="2" fill="#1F2937"/>
+    </svg>`,
+  // Ball — present during play
+  ball: () => `
+    <svg viewBox="0 0 14 14" width="22" height="22" shape-rendering="crispEdges">
+      <rect x="3" y="0" width="8"  height="2" fill="#D7384C"/>
+      <rect x="1" y="2" width="12" height="2" fill="#D7384C"/>
+      <rect x="0" y="4" width="14" height="6" fill="#D7384C"/>
+      <rect x="1" y="10" width="12" height="2" fill="#D7384C"/>
+      <rect x="3" y="12" width="8"  height="2" fill="#D7384C"/>
+      <rect x="3" y="4" width="2"  height="2" fill="#FF8898"/>
+      <rect x="5" y="3" width="2"  height="2" fill="#FF8898"/>
+    </svg>`,
+  // Wall pic — always present, decoration
+  pic: () => `
+    <svg viewBox="0 0 18 14" width="28" height="22" shape-rendering="crispEdges">
+      <rect x="0"  y="0"  width="18" height="14" fill="#7A4E1A"/>
+      <rect x="2"  y="2"  width="14" height="10" fill="#C8E2F0"/>
+      <rect x="4"  y="4"  width="10" height="6" fill="#5BA585"/>
+      <rect x="4"  y="9"  width="10" height="1" fill="#3A7A60"/>
+      <rect x="13" y="3"  width="2"  height="2" fill="#F5DDB5"/>
+    </svg>`,
+  // Window — alt decoration
+  window: () => `
+    <svg viewBox="0 0 20 16" width="32" height="26" shape-rendering="crispEdges">
+      <rect x="0" y="0" width="20" height="16" fill="#5A6373"/>
+      <rect x="2" y="2" width="16" height="12" fill="#A8D8F0"/>
+      <rect x="9" y="2" width="2"  height="12" fill="#5A6373"/>
+      <rect x="2" y="7" width="16" height="2"  fill="#5A6373"/>
+    </svg>`,
+};
+
 function renderPetCard(state, p) {
   const card = el('div','card pet-card overflow-hidden');
-  // Status line: what is the pet doing right now
   const statusLine = {
-    'egg-wobble': `${p.name} hatches tomorrow`,
-    'walk':       `${p.name} is wandering around`,
-    'idle':       `${p.name} is hanging out`,
-    'eat':        `${p.name} is eating! +1 day`,
-    'sleep':      `${p.name} is napping`,
-    'play':       `${p.name} is playing`,
-    'workout':    `${p.name} is at the gym 💪`,
-    'cough':      `${p.name} is sick — feed soon!`,
-    'beg':        `${p.name} is starving — hit your XP goal`,
-    'droop':      `${p.name} is sad — needs you`,
+    'walk':    `${p.name} is wandering around`,
+    'idle':    `${p.name} is hanging out`,
+    'eat':     `${p.name} is eating! +1 day`,
+    'sleep':   `${p.name} is napping`,
+    'play':    `${p.name} is playing`,
+    'workout': `${p.name} is at the gym 💪`,
+    'cough':   `${p.name} is sick — feed soon!`,
+    'beg':     `${p.name} is starving — hit your XP goal`,
+    'droop':   `${p.name} is sad — needs you`,
   }[p.activity] || `${p.name} is here`;
 
-  const stageLabel = p.stage === 'egg' ? 'Egg'
-                   : p.stage === 'baby' ? `Baby · day ${p.ageDays}`
+  const stageLabel = p.stage === 'baby' ? `Baby · day ${p.ageDays}`
                    : p.stage === 'teen' ? `Teen · day ${p.ageDays}`
                    : `Adult · day ${p.ageDays}`;
+  const bodyLabel = p.stage === 'adult' ? ` · ${p.body}` : '';
 
-  const bodyLabel = p.stage === 'adult' ? ` (${p.body})` : '';
-
-  // Bar helper
   const bar = (val, color) => `<div class="bar h-1 rounded-full overflow-hidden" style="background:rgba(15,23,42,0.06)"><i style="width:${val}%;background:${color};display:block;height:100%"></i></div>`;
+
+  // Decide which prop(s) to show in the room based on activity
+  const props = [];
+  if (p.activity === 'eat')     props.push({ html: PET_PROPS.bowl(true),   className: 'pet-prop-bowl' });
+  if (p.activity === 'beg')     props.push({ html: PET_PROPS.bowl(false),  className: 'pet-prop-bowl' });
+  if (p.activity === 'sleep')   props.push({ html: PET_PROPS.bed(),        className: 'pet-prop-bed' });
+  if (p.activity === 'workout') props.push({ html: PET_PROPS.dumbbell(),   className: 'pet-prop-dumbbell' });
+  if (p.activity === 'play')    props.push({ html: PET_PROPS.ball(),       className: 'pet-prop-ball' });
+
+  // Wall decor — always present, alternates daily
+  const wallDecor = (parseInt((state.pet.lastTickDate || '').replaceAll('-',''), 10) % 2 === 0)
+    ? { html: PET_PROPS.pic(), className: 'pet-wall-pic' }
+    : { html: PET_PROPS.window(), className: 'pet-wall-window' };
+
+  const petPositionClass = p.activity === 'walk' ? 'pet-walking'
+                          : p.activity === 'sleep' ? 'pet-on-bed'
+                          : (p.activity === 'idle' || p.activity === 'eat' || p.activity === 'beg' || p.activity === 'workout') ? 'pet-bobbing'
+                          : '';
 
   card.innerHTML = `
     <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
       <div>
-        <h3 class="font-display font-semibold text-lg">${esc(p.name)} <span class="text-xs muted font-normal ml-1">${stageLabel}${bodyLabel}</span></h3>
+        <h3 class="font-display font-semibold text-lg">${esc(p.name)}'s room <span class="text-xs muted font-normal ml-1">${stageLabel}${bodyLabel}</span></h3>
         <div class="text-[12.5px] muted mt-0.5">${esc(statusLine)}</div>
       </div>
       ${p.deathCount > 0 ? `<div class="text-[10.5px] muted" title="Total times your pet has died">🪦 × ${p.deathCount}</div>` : ''}
     </div>
 
-    <div class="flex items-center gap-4 flex-wrap">
-      <div class="pet-play-area relative" style="width:160px; height:128px; border-radius:12px; background:linear-gradient(180deg, rgba(46,111,224,0.04), rgba(14,163,113,0.05)); border:1px solid var(--hairline); overflow:hidden;">
-        <div class="pet-sprite ${p.activity === 'walk' ? 'pet-walking' : ''} ${p.activity === 'idle' || p.activity === 'eat' || p.activity === 'beg' ? 'pet-bobbing' : ''}"
-             style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); transform-origin:bottom center;">
+    <div class="flex items-stretch gap-4 flex-wrap">
+      <div class="pet-room relative">
+        <div class="pet-room-wall"></div>
+        <div class="pet-room-floor"></div>
+        <div class="${wallDecor.className} pet-wall-decor">${wallDecor.html}</div>
+        ${props.map(pr => `<div class="${pr.className} pet-prop">${pr.html}</div>`).join('')}
+        <div class="pet-sprite ${petPositionClass}">
           ${_petSpriteSVG(p.stage, p.body, p.activity, p.fedToday)}
         </div>
-        ${p.stage === 'egg' ? '<div class="absolute bottom-1 left-0 right-0 text-center text-[10px] muted">tap-tap...</div>' : ''}
       </div>
 
-      <div class="flex-1 min-w-[150px] space-y-2">
+      <div class="flex-1 min-w-[150px] space-y-2 self-center">
         <div>
           <div class="flex justify-between text-[11px] muted mb-0.5"><span>Health</span><span class="numeric">${p.health}/100</span></div>
           ${bar(p.health, p.health >= 60 ? 'var(--accent)' : p.health >= 30 ? 'var(--warn)' : 'var(--bad)')}
@@ -257,17 +332,21 @@ function renderPetCard(state, p) {
           <div class="flex justify-between text-[11px] muted mb-0.5"><span>Fullness</span><span class="numeric">${p.fullness}/100</span></div>
           ${bar(p.fullness, p.fullness >= 50 ? 'var(--accent)' : 'var(--warn)')}
         </div>
-        ${p.stage !== 'egg' && p.stage !== 'baby' ? `
+        ${p.stage !== 'baby' ? `
         <div>
           <div class="flex justify-between text-[11px] muted mb-0.5"><span>Fitness</span><span class="numeric">${p.fitness}/100</span></div>
           ${bar(p.fitness, 'var(--sde)')}
+        </div>
+        <div>
+          <div class="flex justify-between text-[11px] muted mb-0.5"><span>Fatness</span><span class="numeric">${p.fatness}/100</span></div>
+          ${bar(p.fatness, 'var(--warn)')}
         </div>` : ''}
       </div>
     </div>
 
     <div class="mt-3 pt-3 border-t border-[color:var(--hairline)]">
       ${p.fedToday
-        ? `<div class="text-[12.5px]" style="color:var(--accent)">✓ Fed today (${p.todayXP}/${p.goal} XP). ${p.justFed ? `<b>Just fed!</b>` : 'Pet is happy.'}</div>`
+        ? `<div class="text-[12.5px]" style="color:var(--accent)">✓ Fed today (${p.todayXP}/${p.goal} XP). ${p.justFed ? `<b>Just fed!</b>` : `${esc(p.name)} is happy.`}${p.todayXP >= p.goal * 1.5 ? ' Bonus workout earned 💪' : ''}</div>`
         : `<div class="flex items-center justify-between gap-2 flex-wrap">
              <div class="text-[12.5px]">
                <b>${p.xpToFeed} XP</b> to feed ${esc(p.name)} <span class="muted">(${p.todayXP}/${p.goal})</span>
@@ -1044,10 +1123,14 @@ function renderLesson(state, lessonId, sourceEl) {
   }
   if (!lesson) return null;
 
+  // Wrap starts FULLY TRANSPARENT (no backdrop blur, no color) so its
+  // appearance can't create a one-frame flash before the FLIP begins.
+  // The backdrop fades + blurs IN over 380ms in parallel with the card morph.
   const wrap = el('div','fixed inset-0 z-40 grid place-items-center p-4');
-  wrap.style.background = 'rgba(248,249,252,0.55)';
-  wrap.style.backdropFilter = 'blur(24px) saturate(180%)';
-  wrap.style.webkitBackdropFilter = 'blur(24px) saturate(180%)';
+  wrap.style.background = 'rgba(248,249,252,0)';
+  wrap.style.backdropFilter = 'blur(0px) saturate(100%)';
+  wrap.style.webkitBackdropFilter = 'blur(0px) saturate(100%)';
+  wrap.style.transition = 'background 0.36s var(--spring-settle), backdrop-filter 0.36s var(--spring-settle), -webkit-backdrop-filter 0.36s var(--spring-settle)';
   const card = el('div','card elevated max-w-2xl w-full max-h-[90vh] overflow-y-auto');
   card.style.padding = '1.5rem 1.7rem';
   const done = !!state.completedLessons[lessonId];
@@ -1123,6 +1206,15 @@ function renderLesson(state, lessonId, sourceEl) {
   // window._lastClickSource if not passed explicitly.
   const src = sourceEl || window._lastClickSource;
   flipMorphIn(card, src);
+
+  // Fade the backdrop blur in alongside the FLIP. Doing it via requestAnimationFrame
+  // ensures the transition is applied AFTER the initial transparent state is painted
+  // (otherwise the CSS transition wouldn't trigger — there'd be no "from" state).
+  requestAnimationFrame(() => {
+    wrap.style.background = 'rgba(248,249,252,0.55)';
+    wrap.style.backdropFilter = 'blur(24px) saturate(180%)';
+    wrap.style.webkitBackdropFilter = 'blur(24px) saturate(180%)';
+  });
 
   // When the lesson's interaction fires its engagement signal, unlock buttons.
   const status = card.querySelector('#engagement-status');

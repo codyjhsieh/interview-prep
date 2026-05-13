@@ -400,7 +400,7 @@ function ensureDailyQuests(state, pool) {
 
 function _newPet(name = 'Bit') {
   return {
-    stage: 'egg',
+    stage: 'baby',
     ageDays: 0,
     health: 100,
     fullness: 80,
@@ -438,8 +438,7 @@ function _petTick(p, today) {
     Object.assign(p, _newPet(oldName));
     p.deathCount = deaths;
   }
-  // Stage progression by age
-  if (p.stage === 'egg' && p.ageDays >= 1) p.stage = 'baby';
+  // Stage progression by age (no egg — baby is the starting stage)
   if (p.stage === 'baby' && p.ageDays >= 3) p.stage = 'teen';
   if (p.stage === 'teen' && p.ageDays >= 8) p.stage = 'adult';
   return p;
@@ -447,7 +446,6 @@ function _petTick(p, today) {
 
 // Compute body-shape descriptor for the adult stage (and partly for teen).
 function _petBody(p) {
-  if (p.stage === 'egg')  return 'egg';
   if (p.stage === 'baby') return 'baby';
   if (p.fitness > 60 && p.fatness < 25) return 'jacked';
   if (p.fatness > 55)                   return 'chubby';
@@ -459,7 +457,6 @@ function _petBody(p) {
 // doesn't flip every render but does change day to day. Mood/stat overrides
 // activity (e.g. sick beats walk).
 function _petActivity(p, today, justFed) {
-  if (p.stage === 'egg')          return 'egg-wobble';
   if (justFed)                    return 'eat';
   if (p.health < 30)              return 'cough';
   if (p.fullness < 25)            return 'beg';
