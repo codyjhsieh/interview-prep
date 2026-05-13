@@ -600,7 +600,24 @@ function mountPet3D(container, p) {
     sad: 0xB9A8C9, sick: 0xA8AAB5,
   };
   const mood = _moodForActivity(p.activity, p.fedToday);
-  const petColor = moodColors[mood] || moodColors.content;
+  const baseColor = moodColors[mood] || moodColors.content;
+  // Per-stage color tint — each life stage has its own visual signature.
+  // baby → pastel/lighter, teen → slightly cooler, adult variants distinct.
+  const stageTints = {
+    baby:   { r: 1.18, g: 1.10, b: 1.18 },   // pastel — lighter, slight pink
+    teen:   { r: 1.04, g: 1.06, b: 1.02 },   // standard, slight green lean
+    normal: { r: 1.00, g: 1.00, b: 1.00 },
+    fit:    { r: 0.90, g: 1.00, b: 1.12 },   // cooler blue — athletic
+    jacked: { r: 1.10, g: 0.92, b: 0.82 },   // warm orange — solid
+    chubby: { r: 1.12, g: 1.00, b: 0.82 },   // warm amber — rounder vibe
+  };
+  const tint = stageTints[p.stage === 'baby' ? 'baby'
+                        : p.stage === 'teen' ? 'teen'
+                        : (p.body || 'normal')] || stageTints.normal;
+  const tintedR = Math.min(255, Math.round(((baseColor >> 16) & 0xff) * tint.r));
+  const tintedG = Math.min(255, Math.round(((baseColor >> 8)  & 0xff) * tint.g));
+  const tintedB = Math.min(255, Math.round((baseColor & 0xff) * tint.b));
+  const petColor = (tintedR << 16) | (tintedG << 8) | tintedB;
   const petMat = new T.MeshStandardMaterial({ color: petColor, flatShading: true, roughness: 0.65 });
 
   /* ---- Bit's rig ----
@@ -655,46 +672,42 @@ function mountPet3D(container, p) {
   head.castShadow = true;
   headGroup.add(head);
 
-  // Ears — each in its own pivot so we can swing them independently
-  const earMat = new T.MeshStandardMaterial({ color: petColor, flatShading: true, roughness: 0.65 });
-  const earGeo = new T.ConeGeometry(headR * 0.22, headR * 0.5, 4);
-  function makeEar(side) {
-    const grp = new T.Group();
-    const m = new T.Mesh(earGeo, earMat);
-    m.castShadow = true;
-    m.position.y = headR * 0.25;
-    grp.add(m);
-    grp.position.set(side * headR * 0.55, headR * 1.25, 0);
-    grp.rotation.z = side * -0.12 * Math.PI;
-    return grp;
-  }
-  const earGroupL = makeEar(-1);
-  const earGroupR = makeEar( 1);
-  headGroup.add(earGroupL); headGroup.add(earGroupR);
+  // (No ears — simpler, cleaner silhouette. Ear-twitch animation channel
+  // is still allocated below but its writes go to a null-mesh dummy.)
+  const earGroupL = new T.Group();
+  const earGroupR = new T.Group();
 
-  // Eyes — white sphere + dark pupil (pupil is a separate child so we can
-  // offset it for eye-dart without moving the white sclera).
-  const eyeWhiteMat = new T.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.2 });
-  const eyeDarkMat  = new T.MeshStandardMaterial({ color: 0x0F172A, roughness: 0.15 });
-  const eyeWhiteGeo = new T.SphereGeometry(headR * 0.22 * eyeScale, 12, 10);
-  const eyePupilGeo = new T.SphereGeometry(headR * 0.10 * eyeScale, 8, 6);
+  // Eyes — white sclera with a black pupil that protrudes from its surface
+  // (so the pupil reads clearly at the iso camera angle, not as a faint
+  // shadow inside the white). The pupil is its own child so eye-dart can
+  // offset it without moving the sclera.
+  // MeshBasicMaterial for the pupil = pure black, no lighting falloff, no
+  // confusion against the body colour at glancing angles.
+  const eyeWhiteMat = new T.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.25, metalness: 0 });
+  const eyeDarkMat  = new T.MeshBasicMaterial({ color: 0x000000 });
+  const scleraR = headR * 0.24 * eyeScale;
+  const pupilR  = headR * 0.085 * eyeScale;   // ~35% of sclera — cute, not over-filled
+  const eyeWhiteGeo = new T.SphereGeometry(scleraR, 14, 12);
+  const eyePupilGeo = new T.SphereGeometry(pupilR,  10, 8);
   const eyeY = headR * 0.85;
-  const eyeOff = headR * 0.35;
-  const eyeFront = headR * 0.86;
+  const eyeOff = headR * 0.32;
+  const eyeFront = headR * 0.84;
   function makeEye(side) {
     const grp = new T.Group();
     grp.position.set(side * eyeOff, eyeY, eyeFront);
-    grp.userData.baseScaleY = 1;     // for blink animation
+    grp.userData.baseScaleY = 1;
     const white = new T.Mesh(eyeWhiteGeo, eyeWhiteMat);
     grp.add(white);
+    // Pupil center sits ALMOST on the sclera's front surface so the front
+    // half of the pupil sphere is clearly visible as a black dot.
     const pupil = new T.Mesh(eyePupilGeo, eyeDarkMat);
-    pupil.position.z = headR * 0.13;
+    pupil.position.z = scleraR * 0.78;
     pupil.userData.basePos = pupil.position.clone();
     grp.userData.pupil = pupil;
     grp.add(pupil);
-    // Sparkle
-    const spark = new T.Mesh(new T.SphereGeometry(headR * 0.035, 6, 4), new T.MeshBasicMaterial({ color: 0xFFFFFF }));
-    spark.position.set(headR * 0.06, headR * 0.04, headR * 0.17);
+    // Sparkle — tiny white catchlight on the pupil for cuteness
+    const spark = new T.Mesh(new T.SphereGeometry(pupilR * 0.32, 6, 4), new T.MeshBasicMaterial({ color: 0xFFFFFF }));
+    spark.position.set(pupilR * 0.4, pupilR * 0.4, scleraR * 0.95);
     grp.add(spark);
     return grp;
   }
@@ -1242,6 +1255,78 @@ function mountPet3D(container, p) {
   return handle;
 }
 
+/* Lifecycle preview modal — cycle through all 6 stage/body variants in
+ * a single 3D scene. Mount/dispose happens per stage change so we don't
+ * keep 6 WebGL contexts alive. */
+function openPetLifecyclePreview() {
+  const stages = [
+    { stage: 'baby',  body: 'baby',   label: 'Baby',          sub: 'Days 0–2 · big head, big eyes, no feet — chibi mode.' },
+    { stage: 'teen',  body: 'teen',   label: 'Teen',          sub: 'Days 3–7 · proportions shift toward adult.' },
+    { stage: 'adult', body: 'normal', label: 'Adult · Normal',sub: 'Days 8+ default body. Form between −15 and +15.' },
+    { stage: 'adult', body: 'fit',    label: 'Adult · Fit',   sub: 'Form > +15 — hitting 1.5× XP regularly. Taller, leaner.' },
+    { stage: 'adult', body: 'jacked', label: 'Adult · Jacked',sub: 'Form > +25 — many overshoot days. Broad shoulders.' },
+    { stage: 'adult', body: 'chubby', label: 'Adult · Chubby',sub: 'Form < −25 — fed but no exercise. Wider, rounder.' },
+  ];
+  let idx = 0;
+  const wrap = el('div','fixed inset-0 z-50 grid place-items-center p-4');
+  wrap.style.background = 'rgba(248,249,252,0.55)';
+  wrap.style.backdropFilter = 'blur(24px) saturate(180%)';
+  wrap.style.webkitBackdropFilter = 'blur(24px) saturate(180%)';
+  const card = el('div','card elevated max-w-lg w-full');
+  card.style.padding = '1.4rem 1.5rem';
+
+  function paint() {
+    const s = stages[idx];
+    card.innerHTML = `
+      <div class="flex items-start justify-between gap-3 mb-2">
+        <div>
+          <div class="text-xs muted uppercase tracking-wider">Life stage preview</div>
+          <h2 class="font-display text-2xl font-semibold mt-0.5">${esc(s.label)}</h2>
+          <div class="text-[12.5px] muted mt-1">${esc(s.sub)}</div>
+        </div>
+        <button class="text-2xl muted hover:text-[color:var(--text)]" data-close-lc aria-label="Close">×</button>
+      </div>
+      <div id="lifecycle-room" class="pet-room-3d" style="height: 240px; width: 100%; margin: 12px auto 0"></div>
+      <div class="flex items-center justify-between gap-2 mt-4 flex-wrap">
+        <button class="btn !py-1.5 !px-3" data-lc-prev>← Previous</button>
+        <div class="text-xs muted numeric">${idx + 1} of ${stages.length}</div>
+        <button class="btn btn-primary !py-1.5 !px-3" data-lc-next>Next →</button>
+      </div>
+      <div class="text-[11px] muted mt-3 dim text-center">Each stage shows Bit walking and feeding the same way they do on the dashboard.</div>
+    `;
+    const host = card.querySelector('#lifecycle-room');
+    requestAnimationFrame(() => {
+      mountPet3D(host, {
+        name: 'Bit', stage: s.stage, body: s.body,
+        activity: 'walk', fedToday: true,
+        ageDays: s.stage === 'baby' ? 1 : s.stage === 'teen' ? 5 : 12,
+        foodPilesAvailable: 0, pileXP: 10,
+        lastTickDate: new Date().toISOString().slice(0,10),
+      });
+    });
+    card.querySelector('[data-lc-prev]').addEventListener('click', () => {
+      idx = (idx - 1 + stages.length) % stages.length; cleanup(); paint();
+    });
+    card.querySelector('[data-lc-next]').addEventListener('click', () => {
+      idx = (idx + 1) % stages.length; cleanup(); paint();
+    });
+    card.querySelector('[data-close-lc]').addEventListener('click', close);
+  }
+  function cleanup() {
+    const host = card.querySelector('#lifecycle-room');
+    if (host && _PET_MOUNTS.has(host)) {
+      try { _PET_MOUNTS.get(host).dispose(); } catch(_) {}
+      _PET_MOUNTS.delete(host);
+    }
+  }
+  function close() { cleanup(); wrap.remove(); }
+  wrap.addEventListener('click', e => { if (e.target === wrap) close(); });
+  wrap.appendChild(card);
+  document.body.appendChild(wrap);
+  paint();
+  ANIM.viewIn && ANIM.viewIn(card);
+}
+
 function renderPetCard(state, p) {
   const card = el('div','card pet-card overflow-hidden');
   // Status line — blunter when health is low.
@@ -1316,6 +1401,11 @@ function renderPetCard(state, p) {
              <a href="#curriculum" class="btn btn-primary !py-1.5 !px-3 text-[12.5px]">Go earn XP →</a>
            </div>
            <div class="bar mt-2"><i style="width:${p.xpProgress}%"></i></div>`}
+    </div>
+
+    <div class="mt-3 flex items-center justify-between gap-2 flex-wrap">
+      <button class="btn !py-1.5 !px-3 text-[12.5px]" data-pet-lifecycle>👁 Preview all life stages</button>
+      <div class="text-[10.5px] muted">Stage: ${esc(p.stage)}${p.stage === 'adult' ? ' · ' + esc(p.body) : ''}</div>
     </div>
 
     <details class="mt-3">
@@ -3442,5 +3532,6 @@ return {
   renderCompanies, renderCompany, renderFlashcards, renderInfographics,
   renderCoverage, renderProfile, renderSources, renderMocks, renderStories,
   renderPrep, renderReview, renderMockInterview,
+  openPetLifecyclePreview,
 };
 })();

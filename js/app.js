@@ -185,6 +185,11 @@ function bindEvents() {
       modal?.remove();
       return;
     }
+    // Pet — preview all life stages
+    if (e.target?.closest && e.target.closest('[data-pet-lifecycle]')) {
+      VIEWS.openPetLifecyclePreview();
+      return;
+    }
     // Skip — mark complete with 0 XP, then optionally advance to next
     const skipId = e.target?.dataset?.skip;
     if (skipId) {
