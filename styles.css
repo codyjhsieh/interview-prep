@@ -296,12 +296,16 @@ header.sticky > *, main > header > * { position: relative; z-index: 1; }
     inset 1px 0 0 rgba(255,255,255,0.55),
     inset -1px 0 0 rgba(255,255,255,0.30),
     var(--sh-card);
+  /* Spring physics on interactive transitions — uses the previously-
+   * defined Liquid Glass tokens (entrance overshoots, settle decelerates).
+   * box-shadow + background still use linear ease since those don't
+   * benefit from overshoot. */
   transition:
-    transform 0.2s var(--ease),
-    box-shadow 0.25s var(--ease),
+    transform 0.42s var(--spring-overshoot),
+    box-shadow 0.28s var(--spring-settle),
     background 0.4s var(--ease),
-    backdrop-filter 0.45s var(--ease),
-    -webkit-backdrop-filter 0.45s var(--ease);
+    backdrop-filter 0.45s var(--spring-settle),
+    -webkit-backdrop-filter 0.45s var(--spring-settle);
   overflow: hidden;
   isolation: isolate;
 }
