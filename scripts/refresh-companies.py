@@ -184,6 +184,33 @@ CANDIDATES = [
   ("mosaic","Mosaic","ashby","mosaic","fintech","Strategic finance platform","Series C","$45M","Founders Fund",["Founders Fund","Y Combinator"],"FP&A software for CFOs. Modeling + integrations."),
   ("monte-carlo","Monte Carlo","ashby","montecarlodata","devtools","Data observability","Series D","$236M","ICONIQ",["ICONIQ","Accel","Salesforce Ventures"],"Data reliability platform. Lineage, anomaly detection, integrations."),
   ("forge","Forge","ashby","forge","fintech","Private-markets liquidity","Public","$240M pre-IPO","Tiger",["NYSE","Tiger","FTV"],"Private secondary marketplace. Markets infra + compliance."),
+
+  # ── Second expansion batch — pushes the verified count toward doubling ─
+  ("middesk","Middesk","ashby","middesk","fintech","KYB / business identity infra","Series B","$57M","Sequoia",["Sequoia","Accel"],"Business identity verification for fintech. Identity graph + compliance."),
+  ("pinwheel","Pinwheel","greenhouse","pinwheelapi","fintech","Payroll API","Series B","$77M","GGV",["GGV","Coatue","First Round"],"Payroll connectivity infra. Income/employment data, direct-deposit switching."),
+  ("mistral","Mistral AI","lever","mistral","ai","Open-weights LLM platform","Series B","$1B+","Andreessen Horowitz",["a16z","General Catalyst","Lightspeed"],"Open-source frontier models. Strong systems + applied research culture."),
+  ("commure","Commure","ashby","commure","health","AI healthcare ops platform","Series D","$870M+","General Catalyst",["GC","Sequoia"],"Health-system operations AI. Heavy enterprise deploys; FDE-flavored."),
+  ("spotify","Spotify","lever","spotify","media","Audio streaming (NYSE)","Public","$540M pre-IPO","TCV",["NYSE","TCV","DST"],"Public co. Audio infra + recs + ads + creator tools."),
+  ("point72","Point72","greenhouse","point72","fintech","Quant + multi-strat hedge fund","Private","Self-funded","Private",["Private"],"Steve Cohen's quant firm. Trading systems + ML + low-latency infra."),
+  ("jump-trading","Jump Trading","greenhouse","jumptrading","fintech","Proprietary trading firm","Private","Self-funded","Private",["Private"],"Quant trading. HFT, C++, low-latency networking, crypto infra."),
+  ("virtu","Virtu Financial","greenhouse","virtu","fintech","Market maker (NASDAQ)","Public","$402M pre-IPO","Silver Lake",["NASDAQ","Silver Lake"],"Public market maker. HFT, market-data, low-latency systems."),
+  ("secureframe","Secureframe","lever","secureframe","saas","Compliance automation","Series C","$78M","Accel",["Accel","Kleiner","Y Combinator"],"SOC2/ISO/HIPAA automation. Compliance + integrations."),
+  ("asana","Asana","greenhouse","asana","saas","Work management (NYSE)","Public","$453M pre-IPO","Founders Fund",["NYSE","Founders Fund","Benchmark"],"Public co. Work-graph platform + AI features."),
+  ("iterable","Iterable","greenhouse","iterable","saas","Cross-channel marketing platform","Series E","$342M","Silver Lake",["Silver Lake","Index","CRV"],"Customer messaging + journey orchestration. Data plumbing + segmentation."),
+  ("braze","Braze","greenhouse","braze","saas","Customer engagement (NASDAQ)","Public","$175M pre-IPO","ICONIQ",["NASDAQ","ICONIQ","Battery"],"Public co. Cross-channel CRM messaging at scale."),
+  ("knock","Knock","ashby","knock","devtools","Notifications-as-a-service","Series A","$15M","Lightspeed",["Lightspeed","Afore"],"Notification API for product teams. Event-driven infra + integrations."),
+  ("extend","Extend","ashby","extend","fintech","Virtual card platform","Series B","$54M","Point72",["Point72","B Capital"],"Virtual card issuing + spend mgmt for fintechs. Card networks + ledger."),
+  ("chime","Chime","greenhouse","chime","fintech","Consumer neobank (NASDAQ)","Public","$2.3B pre-IPO","DST",["NASDAQ","DST","Tiger"],"Public co. Consumer banking at scale. Money movement + UX."),
+  ("kustomer","Kustomer","ashby","kustomer","saas","CRM platform for support","Series F","$174M","Tiger",["Tiger","Coatue"],"Modern support CRM. Unified customer record + automation + AI."),
+
+  # ── Third expansion batch — ad-tech, HFT, more NYC consumer + AI infra ─
+  ("doubleverify","DoubleVerify","greenhouse","doubleverify","saas","Ad measurement (NYSE)","Public","$345M pre-IPO","Providence",["NYSE","Providence"],"Public co. Ad verification + analytics infra."),
+  ("wealthfront","Wealthfront","lever","wealthfront","fintech","Robo-advisor + cash mgmt","Late stage","$205M","Greylock",["Greylock","Index"],"Robo-advisor + banking. Algorithms + compliance + UX."),
+  ("stash","Stash","greenhouse","stashinvest","fintech","Investing for everyday people","Series G","$427M","T. Rowe Price",["T. Rowe Price","Goodwater","Coatue"],"Consumer fintech for retail investors. Markets + fractional shares + banking."),
+  ("bombas","Bombas","greenhouse","bombas","consumer","Mission-driven apparel DTC","Series C","$23M","Great Hill",["Great Hill"],"DTC apparel. Logistics, e-commerce, subscriptions, marketing tech."),
+  ("lovable","Lovable","ashby","lovable","ai","AI app generator","Series A","$15M","Creandum",["Creandum","byFounders"],"AI builder for apps. Frontier model integration + product engineering."),
+  ("fireworks","Fireworks AI","greenhouse","fireworksai","ai","Fast inference for open models","Series B","$77M","Sequoia",["Sequoia","Benchmark","NVIDIA"],"Production inference platform for open-weights models. Systems + perf."),
+  ("logrocket","LogRocket","lever","logrocket","devtools","Frontend session replay + obs","Series C","$76M","Battery",["Battery","Matrix"],"Frontend observability + session replay. JS infra + analytics."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -218,6 +245,15 @@ DOMAINS = {
   "the-trade-desk":"thetradedesk.com","lyft":"lyft.com","reddit":"reddit.com",
   "jane-street":"janestreet.com","mosaic":"mosaic.tech",
   "monte-carlo":"montecarlodata.com","forge":"forgeglobal.com",
+  "middesk":"middesk.com","pinwheel":"pinwheelapi.com","mistral":"mistral.ai",
+  "commure":"commure.com","spotify":"spotify.com","point72":"point72.com",
+  "jump-trading":"jumptrading.com","virtu":"virtu.com",
+  "secureframe":"secureframe.com","asana":"asana.com","iterable":"iterable.com",
+  "braze":"braze.com","knock":"knock.app","extend":"paywithextend.com",
+  "chime":"chime.com","kustomer":"kustomer.com",
+  "doubleverify":"doubleverify.com","wealthfront":"wealthfront.com",
+  "stash":"stash.com","bombas":"bombas.com","lovable":"lovable.dev",
+  "fireworks":"fireworks.ai","logrocket":"logrocket.com",
 }
 
 
@@ -237,6 +273,9 @@ def fetch(ats, slug):
   if ats == "greenhouse":
     d = curl_json(f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs")
     return d.get("jobs", []) if d else []
+  if ats == "lever":
+    d = curl_json(f"https://api.lever.co/v0/postings/{slug}?mode=json")
+    return d if isinstance(d, list) else []
   return []
 
 
@@ -257,11 +296,19 @@ def filter_jobs(ats, raw):
       secs = [s.get("location","") for s in (j.get("secondaryLocations") or [])]
       is_nyc = bool(NYC.search(primary)) or any(NYC.search(s) for s in secs)
       url = j.get("jobUrl") or j.get("applyUrl")
-    else:
+    elif ats == "greenhouse":
       title = (j.get("title") or "").strip()
       loc = (j.get("location") or {}).get("name","") or ""
       is_nyc = bool(NYC.search(loc))
       url = j.get("absolute_url")
+    else:  # lever
+      title = (j.get("text") or "").strip()
+      cat = j.get("categories") or {}
+      loc = cat.get("location","") or ""
+      all_locs = cat.get("allLocations") or []
+      blob = loc + " " + " ".join(all_locs if isinstance(all_locs, list) else [])
+      is_nyc = bool(NYC.search(blob))
+      url = j.get("hostedUrl") or j.get("applyUrl")
     if not is_nyc: continue
     if not title or TITLE_EXCLUDE.search(title): continue
     if not TITLE_INCLUDE.search(title): continue
