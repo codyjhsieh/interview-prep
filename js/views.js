@@ -250,6 +250,72 @@ function renderDashboard(state, hub) {
   `;
   container.appendChild(heat);
 
+  // Where you struggle most — derived from SRS wrong-queue + low-ease concepts
+  const struggle = GAMI.struggleStats(state, CATEGORIES, MODULES);
+  if (struggle.totals.totalWrong > 0 || struggle.totals.lowEaseLessons > 0) {
+    const topCats = struggle.byCategory.slice(0, 3);
+    const topLessons = struggle.byLesson.slice(0, 4);
+    const maxSev = Math.max(1, ...topCats.map(c => c.severity));
+    const struggleCard = el('div','card');
+    struggleCard.innerHTML = `
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <h3 class="font-display font-semibold text-lg">Where you struggle most</h3>
+        <span class="text-xs muted mobile-hide">${struggle.totals.totalWrong} wrong · ${struggle.totals.stickyWrong} sticky · ${struggle.totals.lowEaseLessons} low-ease concepts</span>
+      </div>
+      ${topCats.length === 0 ? `<div class="text-sm muted">No struggle data yet — take a mock interview or quiz to see this fill in.</div>` : `
+      <div class="space-y-3">
+        ${topCats.map(c => {
+          const w = Math.round(c.severity / maxSev * 100);
+          const color = c.severity >= 6 ? 'var(--bad)' : c.severity >= 3 ? 'var(--warn)' : 'var(--sde)';
+          return `
+            <a href="#category/${c.catId}" class="block hover:opacity-90">
+              <div class="flex items-center justify-between text-sm mb-1">
+                <span>${c.catIcon} <b>${esc(c.catName)}</b></span>
+                <span class="text-xs numeric" style="color:${color}">${c.wrongCount} wrong${c.stickyCount ? ` · ${c.stickyCount} sticky` : ''}${c.lowEaseCount ? ` · ${c.lowEaseCount} low-ease` : ''}</span>
+              </div>
+              <div class="bar"><i style="width:${w}%; background:${color}"></i></div>
+            </a>`;
+        }).join('')}
+      </div>
+      ${topLessons.length ? `
+      <div class="mt-4 pt-3 border-t border-[color:var(--hairline)]">
+        <div class="text-xs muted uppercase tracking-wider mb-2">Stickiest concepts</div>
+        <div class="space-y-1.5">
+          ${topLessons.map(l => `
+            <div class="flex items-center justify-between text-[13px] gap-2">
+              <a href="#" class="hover:text-accent-400 truncate" data-open-lesson="${l.lessonId}">${esc(l.lessonName)}</a>
+              <span class="text-[11px] muted shrink-0">${l.ease != null ? `ease ${l.ease.toFixed(2)}` : `${l.severity.toFixed(0)} pts`}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>` : ''}
+      <div class="flex gap-2 mt-4 flex-wrap">
+        <a class="btn btn-primary" href="#review/missed">Drill missed (SRS) →</a>
+        <a class="btn" href="#mock/practice">Practice mock →</a>
+      </div>
+      `}
+    `;
+    container.appendChild(struggleCard);
+    // Wire deep-link openers for the stickiest-concepts list
+    struggleCard.querySelectorAll('[data-open-lesson]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const lid = a.dataset.openLesson;
+        const wrap = renderLesson(state, lid);
+        if (wrap) { /* lesson modal handles its own close */ }
+      });
+    });
+  } else {
+    // No struggle data yet — still show the practice-mock entry point
+    const cta = el('div','card thin');
+    cta.innerHTML = `
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="text-[13px] muted">Want extra reps? Run an unlimited practice mock over topics you haven't completed.</div>
+        <a class="btn" href="#mock/practice">Practice mock →</a>
+      </div>`;
+    container.appendChild(cta);
+  }
+
   // Category progress
   const catProg = el('div','card');
   catProg.innerHTML = `
@@ -1561,6 +1627,39 @@ function _pickMockTopics(state) {
   return picked;
 }
 
+// Practice-mode topic picker — true random, prefers UNCOMPLETED tier-1 concepts.
+// Used by #mock/practice for unlimited reps on topics the user hasn't reviewed.
+function _pickPracticeTopics(state, excludeIds = []) {
+  const tier1 = CATEGORIES.filter(c => c.tier === 1).map(c => c.id);
+  const exclude = new Set(excludeIds);
+  const allConcepts = MODULES.flatMap(m =>
+    m.lessons
+      .filter(l => l.type === 'concept' && l.interactive && !exclude.has(l.id))
+      .map(l => ({ lesson: l, mod: m, cat: m.cat }))
+  ).filter(x => tier1.includes(x.cat));
+  const uncompleted = allConcepts.filter(x => !state.completedLessons[x.lesson.id]);
+  // Prefer uncompleted; if fewer than 3 available, fall back to any tier-1 concept
+  let pool = uncompleted.length >= 3 ? uncompleted : allConcepts;
+  // True random (Math.random — fresh each call, no seeding)
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const picked = [];
+  const usedCats = new Set();
+  for (const c of shuffled) {
+    if (usedCats.has(c.cat)) continue;
+    picked.push(c); usedCats.add(c.cat);
+    if (picked.length === 3) break;
+  }
+  // If we couldn't satisfy one-per-distinct-category, allow repeats
+  if (picked.length < 3) {
+    for (const c of shuffled) {
+      if (picked.find(p => p.lesson.id === c.lesson.id)) continue;
+      picked.push(c);
+      if (picked.length === 3) break;
+    }
+  }
+  return picked;
+}
+
 // Hardness heuristic for category-quiz items: prefer scenario-framed
 // questions with longer explanations and balanced option lengths
 function _isMediumHard(q) {
@@ -1596,21 +1695,55 @@ function _pickTestQuestions(topics) {
   return out;
 }
 
-function renderMockInterview(state, hub) {
+function renderMockInterview(state, hub, mode) {
   const today = GAMI.todayKey();
-  // Reset stale state if it's a new day
-  if (!state.activeMockInterview || state.activeMockInterview.date !== today) {
-    state.activeMockInterview = {
+  const isPractice = mode === 'practice';
+  const sessionKey = isPractice ? 'activeMockPractice' : 'activeMockInterview';
+
+  // Daily mode: reset stale state if it's a new day.
+  // Practice mode: reset when completed (so each visit starts a fresh practice session),
+  // but resume an in-progress one if the user reloaded mid-session.
+  const existing = state[sessionKey];
+  const stale = isPractice
+    ? (!existing || existing.completed)
+    : (!existing || existing.date !== today);
+  if (stale) {
+    state[sessionKey] = {
       date: today,
-      phase: 'briefing',     // briefing | review-0 | review-1 | review-2 | test | results
+      mode: isPractice ? 'practice' : 'daily',
+      sessionId: isPractice ? `prac-${Date.now()}` : `daily-${today}`,
+      phase: 'briefing',
       currentTopic: 0,
-      testAnswers: [],       // [{ qIdx, picked, correct, topicIdx }, ...]
+      testAnswers: [],
       completed: false,
+      // Practice mode locks in its randomly-picked topics in state so reload doesn't reshuffle
+      topicIds: isPractice ? _pickPracticeTopics(state).map(x => x.lesson.id) : null,
     };
     GAMI.saveImmediate(state);
   }
-  const session = state.activeMockInterview;
-  const topics = _pickMockTopics(state);
+  const session = state[sessionKey];
+
+  // Resolve topic objects from ids (practice) or seeded picker (daily)
+  let topics;
+  if (isPractice && Array.isArray(session.topicIds)) {
+    topics = session.topicIds
+      .map(lid => {
+        for (const m of MODULES) {
+          const l = m.lessons.find(x => x.id === lid);
+          if (l) return { lesson: l, mod: m, cat: m.cat };
+        }
+        return null;
+      })
+      .filter(Boolean);
+    // If somehow we have fewer than 3 (e.g., a lesson was removed), re-roll
+    if (topics.length < 3) {
+      topics = _pickPracticeTopics(state);
+      session.topicIds = topics.map(x => x.lesson.id);
+      GAMI.saveImmediate(state);
+    }
+  } else {
+    topics = _pickMockTopics(state);
+  }
   if (topics.length < 3) {
     hub.innerHTML = `<div class="card"><div class="muted">Not enough tier-1 concept lessons to run a mock interview. Add more concepts first.</div></div>`;
     return;
@@ -1633,8 +1766,10 @@ function renderMockInterview(state, hub) {
     container.innerHTML = `
       <div>
         <a href="#dashboard" class="text-xs muted hover:text-accent-400">← Back to dashboard</a>
-        <h1 class="font-display text-3xl font-semibold mt-2">Mock interview</h1>
-        <p class="muted text-sm mt-1 max-w-xl">3 topics, picked deterministically for today. You'll review each topic + do its activity, then sit a 6-question medium-hard exam pulling from the same three areas. ≈ ${totalMin} min.</p>
+        <h1 class="font-display text-3xl font-semibold mt-2">Mock interview${isPractice ? ' · practice' : ''}</h1>
+        <p class="muted text-sm mt-1 max-w-xl">${isPractice
+          ? `Practice run — 3 topics from areas you haven't completed yet. Unlimited reps, no daily-quest progress (the daily mock counts separately). ≈ ${totalMin} min.`
+          : `3 topics, picked deterministically for today. You'll review each topic + do its activity, then sit a 6-question medium-hard exam pulling from the same three areas. ≈ ${totalMin} min.`}</p>
       </div>
       <div class="grid sm:grid-cols-3 gap-4">
         ${topics.map((t, i) => {
@@ -1793,7 +1928,8 @@ function renderMockInterview(state, hub) {
         if (q.id) {
           GAMI.recordWrongAnswer(state, {
             id: q.id, q: q.q, options: q.options, correct: q.correct,
-            explain: q.explain || '', cat: q.cat || 'general', source: 'mock-' + today,
+            explain: q.explain || '', cat: q.cat || 'general',
+            source: (isPractice ? 'mock-practice-' : 'mock-daily-') + session.sessionId,
           });
         }
       }
@@ -1858,13 +1994,13 @@ function renderMockInterview(state, hub) {
       return { topic: t, total: ts.length, correct: tc };
     });
 
-    // Award XP + bump quest progress (only once per session)
+    // Award XP. Daily mode bumps the daily quest; practice mode does not.
     if (!session.completed) {
-      const baseXp = correct * 15;
-      const passBonus = pct >= 80 ? 60 : pct >= 60 ? 30 : 0;
+      const baseXp = correct * (isPractice ? 8 : 15);   // practice XP is smaller to discourage farming
+      const passBonus = pct >= 80 ? (isPractice ? 25 : 60) : pct >= 60 ? (isPractice ? 12 : 30) : 0;
       const totalXp = baseXp + passBonus;
-      GAMI.awardXP(state, totalXp, 'mock-interview');
-      GAMI.bumpQuestProgress(state, 'mock');
+      GAMI.awardXP(state, totalXp, isPractice ? 'mock-practice' : 'mock-interview');
+      if (!isPractice) GAMI.bumpQuestProgress(state, 'mock');
       session.completed = true;
       session.finalScore = correct;
       session.finalPct = pct;
@@ -1872,7 +2008,7 @@ function renderMockInterview(state, hub) {
       GAMI.saveImmediate(state);
       APP.afterStateChange();
       ANIM.confettiBurst && ANIM.confettiBurst(pct >= 80 ? 'l' : 'm');
-      ANIM.toast && ANIM.toast({ icon:'🎯', title:`+${totalXp} XP`, body:`Mock exam · ${correct}/${total}` });
+      ANIM.toast && ANIM.toast({ icon:'🎯', title:`+${totalXp} XP`, body:`${isPractice ? 'Practice ' : ''}Mock exam · ${correct}/${total}` });
     }
 
     container.innerHTML = `
@@ -1906,17 +2042,32 @@ function renderMockInterview(state, hub) {
 
       <div class="card thin">
         <div class="text-[13px] leading-relaxed muted">
-          <b style="color:var(--text)">What happens next.</b> Any question you got wrong is now in your SRS wrong-answer queue and will resurface on schedule. Tomorrow's mock interview will pick a different 3 topics. The daily quest will refresh at midnight.
+          <b style="color:var(--text)">What happens next.</b> Any question you got wrong is now in your SRS wrong-answer queue and will resurface on schedule. ${isPractice
+            ? 'Run another practice mock below to drill different topics — unlimited.'
+            : 'Tomorrow\'s daily mock will pick a different 3 topics. The daily quest refreshes at midnight.'}
         </div>
       </div>
 
       <div class="flex gap-2 flex-wrap">
         <a class="btn btn-primary" href="#dashboard">← Back to dashboard</a>
         ${session.testAnswers.some(a => !a.correct)
-          ? `<a class="btn" href="#review/missed">Review missed questions →</a>`
+          ? `<a class="btn" href="#review/missed">Review missed →</a>`
           : ''}
+        <a class="btn ${isPractice ? 'btn-primary' : ''}" id="mi-practice-again" href="#mock/practice">
+          ${isPractice ? 'Run another practice mock →' : 'Run a practice mock (uncompleted topics) →'}
+        </a>
       </div>
     `;
+    // If we're already in practice mode and the user clicks "Run another," we
+    // need to clear the current practice session so a new one starts.
+    const again = container.querySelector('#mi-practice-again');
+    if (again && isPractice) {
+      again.addEventListener('click', (e) => {
+        state.activeMockPractice = null;
+        GAMI.saveImmediate(state);
+        // Let the default navigation fire — app.js will re-init the session
+      });
+    }
   }
 }
 

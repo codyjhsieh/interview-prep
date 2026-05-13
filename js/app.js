@@ -90,7 +90,7 @@ function render() {
     case 'flashcards':   VIEWS.renderFlashcards(state, hub); break;
     case 'stories':      VIEWS.renderStories(state, hub); break;
     case 'mocks':        VIEWS.renderMocks(state, hub); break;
-    case 'mock':         VIEWS.renderMockInterview(state, hub); break;
+    case 'mock':         VIEWS.renderMockInterview(state, hub, a); break;
     case 'games':        a ? GAMES.renderGame(state, hub, a) : GAMES.renderGamesIndex(state, hub); break;
     case 'infographics': VIEWS.renderInfographics(state, hub); break;
     case 'coverage':     VIEWS.renderCoverage(state, hub); break;

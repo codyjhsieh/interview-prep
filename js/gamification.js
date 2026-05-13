@@ -334,17 +334,134 @@ function logFreeRecall(state, lessonId, text, selfRated) {
 }
 
 /* ---------- Daily quests ---------- */
+// Quest ids that should always appear in today's quest list (always shown,
+// not subject to the random pool). Mock interview is core to the daily prep
+// loop so users get the rep every day.
+const PINNED_QUEST_IDS = ['q-mock'];
+
 function ensureDailyQuests(state, pool) {
   const today = todayKey();
   if (state.dailyQuests.date === today && state.dailyQuests.quests.length) return state;
-  // Pick 3 random quests, deterministic per day (so reload doesn't reshuffle)
+  // Always-on quests go first; remaining slots are filled randomly (deterministic per day)
+  const pinned = pool.filter(q => PINNED_QUEST_IDS.includes(q.id));
+  const remaining = pool.filter(q => !PINNED_QUEST_IDS.includes(q.id));
   const seed = parseInt(today.replaceAll('-',''), 10);
-  const shuffled = [...pool].sort((a,b) => ((seed * (a.id.charCodeAt(0)+1)) % 7) - ((seed * (b.id.charCodeAt(0)+1)) % 7));
+  const shuffled = [...remaining].sort((a,b) => ((seed * (a.id.charCodeAt(0)+1)) % 7) - ((seed * (b.id.charCodeAt(0)+1)) % 7));
+  const slate = [...pinned, ...shuffled.slice(0, Math.max(0, 3 - pinned.length))];
   state.dailyQuests = {
     date: today,
-    quests: shuffled.slice(0, 3).map(q => ({ ...q, progress: 0, done: false }))
+    quests: slate.map(q => ({ ...q, progress: 0, done: false }))
   };
   return state;
+}
+
+/* ---------- Struggle stats ----------
+ * Aggregates signals that point to "where this user struggles":
+ *   1. Wrong-answer queue counts per category (raw + per-lesson)
+ *   2. Concept-review low-ease lessons (SM-2 ease < 2.0 = repeated failure)
+ *   3. Repeat-wrong count per question (>1 attempt = sticky struggle)
+ * Returns:
+ *   { byCategory: [{ catId, wrongCount, lowEaseCount, severity }],
+ *     byLesson:   [{ lessonId, cat, ease, reps, lessonName, severity }],
+ *     totals:     { totalWrong, stickyWrong, lowEaseLessons } }
+ *
+ * Severity is wrongCount + 2*lowEaseCount + repeatBonus, designed so
+ * "high volume" and "repeat failures" both count, with repeat weighted higher. */
+function struggleStats(state, categories, modules) {
+  const lessonNameById = {};
+  const lessonCatById = {};
+  for (const m of modules) {
+    for (const l of m.lessons) {
+      lessonNameById[l.id] = l.name;
+      lessonCatById[l.id]  = m.cat;
+    }
+  }
+  const wrongByCat = {};
+  let totalWrong = 0;
+  let stickyWrong = 0;          // a question missed > 1 time
+  for (const q of Object.values(state.missedQuestions || {})) {
+    const cat = q.cat || 'general';
+    if (!wrongByCat[cat]) wrongByCat[cat] = { wrongCount: 0, stickyCount: 0 };
+    wrongByCat[cat].wrongCount += 1;
+    totalWrong += 1;
+    if ((q.attempts || 1) > 1) {
+      wrongByCat[cat].stickyCount += 1;
+      stickyWrong += 1;
+    }
+  }
+  const lowEaseLessons = [];
+  for (const [lessonId, r] of Object.entries(state.conceptReviews || {})) {
+    if (r.ease != null && r.ease < 2.0) {
+      lowEaseLessons.push({
+        lessonId,
+        ease: r.ease,
+        reps: r.reps || 0,
+        lessonName: lessonNameById[lessonId] || lessonId,
+        cat: lessonCatById[lessonId] || 'general',
+      });
+    }
+  }
+  const lowEaseByCat = {};
+  for (const l of lowEaseLessons) {
+    lowEaseByCat[l.cat] = (lowEaseByCat[l.cat] || 0) + 1;
+  }
+  // Build per-category aggregate
+  const allCats = new Set([
+    ...Object.keys(wrongByCat),
+    ...Object.keys(lowEaseByCat),
+  ]);
+  const byCategory = [...allCats].map(catId => {
+    const w = wrongByCat[catId] || { wrongCount: 0, stickyCount: 0 };
+    const le = lowEaseByCat[catId] || 0;
+    const severity = w.wrongCount + 2 * le + w.stickyCount;
+    const catMeta = (categories || []).find(c => c.id === catId);
+    return {
+      catId,
+      catName: catMeta ? catMeta.name : catId,
+      catIcon: catMeta ? catMeta.icon : '•',
+      wrongCount: w.wrongCount,
+      stickyCount: w.stickyCount,
+      lowEaseCount: le,
+      severity,
+    };
+  }).sort((a, b) => b.severity - a.severity);
+
+  // Per-lesson struggles: combine low-ease + per-lesson wrong count
+  const wrongByLesson = {};
+  for (const q of Object.values(state.missedQuestions || {})) {
+    // Wrong-answer records have `source` like "concept-rag-3" or "mock-..."
+    const m = q.source && q.source.match(/^concept-(.+)$/);
+    if (m) {
+      const lid = m[1];
+      wrongByLesson[lid] = (wrongByLesson[lid] || 0) + 1;
+    }
+  }
+  const lessonSeverity = {};
+  for (const l of lowEaseLessons) {
+    lessonSeverity[l.lessonId] = (lessonSeverity[l.lessonId] || { ...l, severity: 0 });
+    lessonSeverity[l.lessonId].severity += (3.0 - l.ease) * 5; // bigger gap from neutral ease = worse
+  }
+  for (const [lid, n] of Object.entries(wrongByLesson)) {
+    if (!lessonSeverity[lid]) {
+      lessonSeverity[lid] = {
+        lessonId: lid,
+        cat: lessonCatById[lid] || 'general',
+        ease: null, reps: 0,
+        lessonName: lessonNameById[lid] || lid,
+        severity: 0,
+      };
+    }
+    lessonSeverity[lid].severity += n * 2;
+  }
+  const byLesson = Object.values(lessonSeverity)
+    .filter(l => l.severity > 0)
+    .sort((a, b) => b.severity - a.severity);
+
+  return {
+    byCategory,
+    byLesson,
+    totals: { totalWrong, stickyWrong, lowEaseLessons: lowEaseLessons.length },
+  };
 }
 
 function bumpQuestProgress(state, kind, amount=1) {
@@ -413,6 +530,7 @@ return {
   scheduleConceptReview, dueConceptReviews, totalConceptReviewsCount,
   logFreeRecall,
   ensureDailyQuests, bumpQuestProgress,
+  struggleStats,
   checkBadges,
   coverage,
   xpForLevel, levelFromXP, levelProgress,
