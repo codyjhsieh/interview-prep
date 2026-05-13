@@ -3174,36 +3174,164 @@ function renderLesson(state, lessonId, sourceEl) {
 }
 
 /* ====================== COMPANIES ====================== */
+
+/* User-profile fit scoring.
+ *
+ * The profile below drives a probability-of-offer heuristic that ranks
+ * companies and individual roles for THIS user. Edit `USER_PROFILE`
+ * (or, eventually, expose it in the Profile screen) to recalibrate.
+ *
+ * The current profile: EECS @ Berkeley '19 → Amazon (3y) → 1y gap →
+ * AI Engineer @ BrainPOP (6mo, fired) → 2y gap. So: strong school +
+ * strong big-tech background, but a 2-year recent gap and a short
+ * fired stint — which (a) hurts elite-bar process-heavy companies a
+ * lot (FAANG, top frontier-AI labs) and (b) helps early-stage
+ * builder-mode companies that index on raw chops + recent shipping
+ * over linear pedigree.
+ *
+ * The scores are not predictions of actual outcomes — they're a
+ * relative ranking to focus applications on companies where the
+ * profile is least likely to be auto-screened.
+ */
+const USER_PROFILE = {
+  summary: "EECS @ UC Berkeley '19 · Amazon 3y · BrainPOP AI Engineer 6mo · 2y gap",
+  hasAiExperience: true,
+  hasLongGap: true,
+  hadFire: true,
+};
+
+function companyFitScore(c) {
+  let s = 50;
+
+  // Vertical: AI background plays best in AI / devtools / infra.
+  if (c.vertical === 'ai') s += 12;
+  else if (c.vertical === 'devtools' || c.vertical === 'infra') s += 7;
+  else if (c.vertical === 'fintech') s += 3;
+  else if (c.vertical === 'health' || c.vertical === 'saas') s += 1;
+
+  // Stage: earlier is more forgiving of a 2y gap + a short fired stint.
+  const stage = (c.stage || '').toLowerCase();
+  if (/series a/.test(stage) || /seed/.test(stage)) s += 16;
+  else if (/series b/.test(stage)) s += 11;
+  else if (/series c/.test(stage)) s += 5;
+  else if (/series d|series e/.test(stage)) s -= 2;
+  else if (/series f|late|take-private/.test(stage)) s -= 8;
+  else if (/public/.test(stage)) s -= 12;
+
+  // Size of raise — very high raised cos run a heavier process.
+  const r = c.raised || '';
+  const num = parseFloat(r.replace(/[^\d.]/g, '')) || 0;
+  if (r.includes('B') && num >= 1) s -= 10;
+  else if (r.includes('B')) s -= 5;
+  else if (num >= 500) s -= 4;
+  else if (num <= 50) s += 4;
+
+  // Elite-bar penalty: places where 2y gap + a short fire is functionally
+  // screen-out at the resume stage.
+  const elite = new Set([
+    'openai','anthropic','stripe','figma','notion',
+    'cognition','cursor','perplexity','cohere',
+  ]);
+  if (elite.has(c.id)) s -= 20;
+
+  // Founding-role available = builder-first hiring; gap matters less.
+  if ((c.jobs || []).some(j => j.level === 'founding')) s += 10;
+
+  return Math.max(5, Math.min(95, Math.round(s)));
+}
+
+function roleFitScore(c, j) {
+  let s = companyFitScore(c);
+  if (j.level === 'founding') s += 6;
+  const t = (j.title || '').toLowerCase();
+  if (/ai engineer|ml engineer|machine[\s-]learning|applied ai/.test(t)) s += 6;
+  if (/forward[\s-]deployed|\bfde\b/.test(t)) s += 4;
+  if (j.level === 'senior') s += 2;
+  return Math.max(5, Math.min(95, Math.round(s)));
+}
+
+function fitTier(score) {
+  if (score >= 72) return { label: 'Strong fit',  cls: 'fit-strong'  };
+  if (score >= 58) return { label: 'Worth trying', cls: 'fit-worth'   };
+  if (score >= 42) return { label: 'Long shot',   cls: 'fit-long'    };
+  return                   { label: 'Tough bar',   cls: 'fit-tough'   };
+}
+
+function fitBadgeHTML(score) {
+  const tier = fitTier(score);
+  // Tier label is exposed via title (tooltip) but not rendered inline —
+  // the badge color already conveys tier, the number conveys precision.
+  return `<span class="fit-badge ${tier.cls}" title="${esc(tier.label)} · ${score}/100">
+    <span class="fit-num">${score}</span>
+  </span>`;
+}
+
 function renderCompanies(state, hub) {
   const container = el('div','fade-in space-y-4');
   const verifiedAt = window.DATA && window.DATA.COMPANIES_VERIFIED_AT;
   const totalJobs = COMPANIES.reduce((s, c) => s + (c.jobs ? c.jobs.length : 0), 0);
   // Build dynamic vertical filters from the data so we don't hard-code.
   const verticals = Array.from(new Set(COMPANIES.map(c => c.vertical)));
-  const filterTabs = ['all', ...verticals]
+  const verticalTabs = ['all', ...verticals]
     .map(v => `<div class="tab${v==='all' ? ' active' : ''}" data-vfilter="${esc(v)}">${v === 'all' ? 'All' : esc(verticalLabel[v] || v)}</div>`)
     .join('');
+  const levelTabs = `
+    <div class="tab active" data-lfilter="all">All levels</div>
+    <div class="tab" data-lfilter="founding">Founding</div>
+    <div class="tab" data-lfilter="senior">Senior</div>
+    <div class="tab" data-lfilter="mid">Mid</div>`;
+
   container.innerHTML = `
     <div>
       <h1 class="font-display text-2xl sm:text-3xl font-semibold">Companies</h1>
-      <p class="muted text-sm mt-1">${COMPANIES.length} startups, ${totalJobs} live NYC engineering postings. Verified ${esc(verifiedAt || 'recently')}. Type to filter — press <kbd class="px-1 rounded border border-[color:var(--border-2)] font-mono text-[10px]">/</kbd> to focus.</p>
+      <p class="muted text-sm mt-1">${COMPANIES.length} startups, ${totalJobs} live NYC engineering postings. Verified ${esc(verifiedAt || 'recently')}. Ranked by fit for your background — sorted highest first.</p>
     </div>
-    <div class="flex items-center gap-3 flex-wrap">
+
+    <div class="fit-strip card" style="padding:10px 14px">
+      <div class="text-[11px] uppercase tracking-wider muted mb-1" style="letter-spacing:0.22em">Ranking for</div>
+      <div class="text-[13px]">${esc(USER_PROFILE.summary)}</div>
+    </div>
+
+    <div class="flex items-center gap-2 flex-wrap">
+      <div class="tabs" id="co-mode">
+        <div class="tab active" data-mode="companies">Companies <span class="ml-1 muted text-[10px] font-mono">${COMPANIES.length}</span></div>
+        <div class="tab" data-mode="roles">Individual roles <span class="ml-1 muted text-[10px] font-mono">${totalJobs}</span></div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 flex-wrap">
       <input id="co-search" type="search" placeholder="Search companies, roles, or investors…" class="flex-1 min-w-[200px] max-w-md"/>
-      <div class="tabs flex-wrap">${filterTabs}</div>
+      <div class="tabs" id="co-vfilter">${verticalTabs}</div>
+      <div class="tabs hidden" id="co-lfilter">${levelTabs}</div>
     </div>
+
     <div id="co-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    <div id="co-rolelist" class="hidden space-y-1.5"></div>
   `;
   hub.appendChild(container);
 
-  const grid = container.querySelector('#co-grid');
-  let curFilter = 'all';
-  let curQuery = '';
-  function paint() {
+  const grid     = container.querySelector('#co-grid');
+  const rolelist = container.querySelector('#co-rolelist');
+  const lfilter  = container.querySelector('#co-lfilter');
+  let curMode    = 'companies';
+  let curVFilter = 'all';
+  let curLFilter = 'all';
+  let curQuery   = '';
+
+  // Pre-score every company and every role so sort is fast on repaints.
+  const scoredCos = COMPANIES.map(c => ({ ...c, _fit: companyFitScore(c) }))
+    .sort((a, b) => b._fit - a._fit);
+  const scoredRoles = [];
+  COMPANIES.forEach(c => (c.jobs || []).forEach(j => {
+    scoredRoles.push({ ...j, _company: c, _fit: roleFitScore(c, j) });
+  }));
+  scoredRoles.sort((a, b) => b._fit - a._fit);
+
+  function paintCompanies() {
     grid.innerHTML = '';
     const q = curQuery.trim().toLowerCase();
-    COMPANIES
-      .filter(c => curFilter === 'all' || c.vertical === curFilter)
+    scoredCos
+      .filter(c => curVFilter === 'all' || c.vertical === curVFilter)
       .filter(c => {
         if (!q) return true;
         const hay = (c.name+' '+c.sub+' '+(c.notes||'')+' '+(c.badges||[]).join(' ')+' '+(c.lead||'')+' '+(c.jobs||[]).map(j=>j.title).join(' ')).toLowerCase();
@@ -3219,7 +3347,7 @@ function renderCompanies(state, hub) {
         const badges = (c.badges || []).slice(0, 3)
           .map(b => `<span class="chip chip-funding">${esc(b)}</span>`).join('');
         const previewJobs = (c.jobs || []).slice(0, 3);
-        const totalJobs = (c.jobs || []).length;
+        const total = (c.jobs || []).length;
         const jobsHTML = previewJobs.map(j => {
           const lvl = j.level || 'mid';
           const lvlDot = lvl === 'founding'
@@ -3227,7 +3355,6 @@ function renderCompanies(state, hub) {
             : (lvl === 'senior'
               ? '<span class="role-dot" style="background:#0EA371"></span>'
               : '<span class="role-dot" style="background:#94A3B8"></span>');
-          // Truncate long titles in the preview; full title visible on hover/click-thru.
           return `
             <a href="${esc(j.url)}" target="_blank" rel="noopener noreferrer"
                onclick="event.stopPropagation()"
@@ -3236,10 +3363,7 @@ function renderCompanies(state, hub) {
               <span class="role-arrow muted">↗</span>
             </a>`;
         }).join('');
-        // Companies have UP TO 3 roles in `jobs` but may have many more open
-        // — `totalRoles` is the verified count at the source. Show overflow
-        // when the company has more roles than we're previewing.
-        const fullCount = c.totalRoles || totalJobs;
+        const fullCount = c.totalRoles || total;
         const extras = Math.max(0, fullCount - previewJobs.length);
         const overflowLabel = extras > 0
           ? `<div class="text-[11px] mt-1.5 flex items-center justify-between"><span class="muted">+${extras} more open NYC role${extras === 1 ? '' : 's'}</span><span style="color:var(--accent)" class="font-medium">View all →</span></div>`
@@ -3250,33 +3374,114 @@ function renderCompanies(state, hub) {
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 justify-between flex-wrap">
                 <div class="font-display font-semibold text-lg truncate">${esc(c.name)}</div>
-                <span class="pill ${verticalPill[c.vertical] || 'pill-dev'}">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
+                ${fitBadgeHTML(c._fit)}
               </div>
               <div class="text-xs muted mt-0.5 truncate">${esc(c.sub)}</div>
               <div class="text-[11px] mt-1.5 flex items-center gap-1.5 flex-wrap">
+                <span class="pill ${verticalPill[c.vertical] || 'pill-dev'}" style="font-size:10px;padding:1px 6px">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
                 <span class="font-mono tabular-nums" style="color:var(--accent)">${esc(c.raised || '')}</span>
                 <span class="dim">·</span>
                 <span class="muted">${esc(c.stage || '')}</span>
-                ${c.lead ? `<span class="dim">·</span><span class="muted truncate" style="max-width:120px">${esc(c.lead)}</span>` : ''}
               </div>
             </div>
           </div>
           <div class="flex flex-wrap gap-1 mt-2.5">${badges}</div>
-          <div class="mt-3 pt-3 border-t border-[color:var(--hairline)] space-y-1.5">
-            ${jobsHTML}
-          </div>
+          <div class="mt-3 pt-3 border-t border-[color:var(--hairline)] space-y-1.5">${jobsHTML}</div>
           ${overflowLabel}
         `;
         grid.appendChild(cardEl);
       });
-    ANIM.stagger(grid.children, { stagger: 0.025 });
+    ANIM.stagger(grid.children, { stagger: 0.02 });
+  }
+
+  function paintRoles() {
+    rolelist.innerHTML = '';
+    const q = curQuery.trim().toLowerCase();
+    const filtered = scoredRoles.filter(r => {
+      if (curVFilter !== 'all' && r._company.vertical !== curVFilter) return false;
+      if (curLFilter !== 'all' && r.level !== curLFilter) return false;
+      if (!q) return true;
+      const hay = (r.title + ' ' + r._company.name + ' ' + r._company.sub + ' ' + (r._company.badges||[]).join(' ')).toLowerCase();
+      return hay.includes(q);
+    });
+    if (filtered.length === 0) {
+      rolelist.innerHTML = '<div class="muted text-sm py-6 text-center">No roles match your filters.</div>';
+      return;
+    }
+    // Cap render to 250 rows for performance; show how many are hidden.
+    const cap = 250;
+    const head = `<div class="text-[11px] muted">${filtered.length} role${filtered.length===1?'':'s'} matched, sorted by fit${filtered.length>cap?` (showing top ${cap})`:''}</div>`;
+    const rows = filtered.slice(0, cap).map(r => {
+      const c = r._company;
+      const domain = COMPANY_DOMAINS[c.id];
+      const logoMini = domain
+        ? `<img src="https://logo.clearbit.com/${domain}" alt="${esc(c.name)}" style="width:24px;height:24px;border-radius:6px;flex-shrink:0;object-fit:cover" onerror="this.style.display='none'"/>`
+        : `<div class="role-row-letter">${esc(c.name[0])}</div>`;
+      const lvl = r.level || 'mid';
+      const lvlClass = lvl === 'founding' ? 'pill-ai' : (lvl === 'senior' ? 'pill-both' : 'pill-dev');
+      const lvlLabel = lvl === 'founding' ? 'Founding' : (lvl === 'senior' ? 'Senior' : 'Mid');
+      return `
+        <a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer" class="role-row">
+          ${logoMini}
+          <div class="role-row-text">
+            <div class="role-row-title truncate">${esc(r.title)}</div>
+            <div class="role-row-co truncate">
+              <span class="font-medium">${esc(c.name)}</span>
+              <span class="dim mx-1">·</span>
+              <span class="muted">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
+              <span class="dim mx-1">·</span>
+              <span class="muted">${esc(c.stage || '')}</span>
+              <span class="dim mx-1">·</span>
+              <span style="color:var(--accent)" class="font-mono">${esc(c.raised || '')}</span>
+            </div>
+          </div>
+          <span class="pill ${lvlClass}" style="font-size:10px">${lvlLabel}</span>
+          ${fitBadgeHTML(r._fit)}
+          <span style="color:var(--accent)">↗</span>
+        </a>`;
+    }).join('');
+    rolelist.innerHTML = head + '<div class="space-y-1.5 mt-2">' + rows + '</div>';
+  }
+
+  function paint() {
+    if (curMode === 'companies') {
+      grid.classList.remove('hidden');
+      rolelist.classList.add('hidden');
+      lfilter.classList.add('hidden');
+      paintCompanies();
+    } else {
+      grid.classList.add('hidden');
+      rolelist.classList.remove('hidden');
+      lfilter.classList.remove('hidden');
+      paintRoles();
+    }
   }
   paint();
-  container.querySelectorAll('[data-vfilter]').forEach(tab => {
+
+  // Mode toggle
+  container.querySelectorAll('#co-mode .tab').forEach(tab => {
     tab.addEventListener('click', () => {
-      container.querySelectorAll('[data-vfilter]').forEach(t => t.classList.remove('active'));
+      container.querySelectorAll('#co-mode .tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      curFilter = tab.dataset.vfilter;
+      curMode = tab.dataset.mode;
+      paint();
+    });
+  });
+  // Vertical filter
+  container.querySelectorAll('#co-vfilter .tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      container.querySelectorAll('#co-vfilter .tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      curVFilter = tab.dataset.vfilter;
+      paint();
+    });
+  });
+  // Level filter (only meaningful in Roles mode)
+  container.querySelectorAll('#co-lfilter .tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      container.querySelectorAll('#co-lfilter .tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      curLFilter = tab.dataset.lfilter;
       paint();
     });
   });
@@ -3297,6 +3502,7 @@ function renderCompany(state, hub, id) {
     : esc(c.name[0]);
 
   const badges = (c.badges || []).map(b => `<span class="chip chip-funding">${esc(b)}</span>`).join('');
+  const companyFit = companyFitScore(c);
   const jobsHTML = (c.jobs || []).map(j => {
     const lvl = j.level || 'mid';
     const lvlLabel = lvl === 'founding' ? 'Founding' : (lvl === 'senior' ? 'Senior' : 'Mid');
@@ -3309,6 +3515,7 @@ function renderCompany(state, hub, id) {
           <div class="text-[11px] muted mt-0.5">Direct posting · opens in new tab</div>
         </div>
         <span class="pill ${lvlClass}">${lvlLabel}</span>
+        ${fitBadgeHTML(roleFitScore(c, j))}
         <span style="color:var(--accent)">↗</span>
       </a>`;
   }).join('');
@@ -3322,6 +3529,7 @@ function renderCompany(state, hub, id) {
           <div class="flex items-center gap-3 flex-wrap">
             <h1 class="font-display text-2xl font-semibold">${esc(c.name)}</h1>
             <span class="pill ${verticalPill[c.vertical] || 'pill-dev'}">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
+            ${fitBadgeHTML(companyFit)}
           </div>
           <div class="muted text-sm mt-0.5">${esc(c.sub)}</div>
           <div class="text-[12px] mt-2 flex items-center gap-2 flex-wrap">

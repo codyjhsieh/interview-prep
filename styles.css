@@ -1300,6 +1300,61 @@ code, pre, .font-mono {
 .job-row { background: rgba(255,255,255,0.45); text-decoration: none; }
 .job-row:hover { background: rgba(255,255,255,0.75); transform: translateY(-1px); }
 
+/* Fit badge — probability-of-offer indicator. Color reflects tier. */
+.fit-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  border: 1px solid currentColor;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  white-space: nowrap;
+}
+.fit-badge .fit-num   { font-family: var(--font-mono, ui-monospace, monospace); font-weight: 600; }
+.fit-badge .fit-tier  { font-weight: 500; opacity: 0.85; }
+.fit-strong { color: #0B8A60; }   /* green   */
+.fit-worth  { color: #0B6FC1; }   /* blue    */
+.fit-long   { color: #C7780E; }   /* amber   */
+.fit-tough  { color: #B22B3D; }   /* red     */
+
+/* The "Ranking for" header strip on the Companies page. */
+.fit-strip {
+  background: linear-gradient(180deg, rgba(11,138,96,0.08), rgba(11,138,96,0.02));
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--hairline));
+}
+
+/* Individual-roles list row (the flat list shown when Roles tab active). */
+.role-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.50);
+  border: 1px solid var(--hairline);
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.18s var(--ease), border-color 0.18s var(--ease), transform 0.18s var(--ease);
+}
+.role-row:hover {
+  background: rgba(255,255,255,0.82);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--hairline));
+  transform: translateY(-1px);
+}
+.role-row-letter {
+  width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+  background: var(--hl-faint); display: grid; place-items: center;
+  font-size: 11px; font-weight: 600; color: var(--muted);
+}
+.role-row-text  { flex: 1 1 0; min-width: 0; }
+.role-row-title { font-size: 13.5px; font-weight: 500; }
+.role-row-co    { font-size: 11px; color: var(--muted); margin-top: 1px; }
+@media (max-width: 640px) {
+  .role-row { gap: 8px; padding: 8px 10px; }
+  .role-row-title { font-size: 13px; }
+  .role-row .fit-badge .fit-tier { display: none; } /* tight layout */
+}
+
 /* Role preview pills shown on each company card (up to 3 per card). */
 .role-pill {
   display: flex;
