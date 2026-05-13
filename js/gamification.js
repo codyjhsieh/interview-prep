@@ -398,14 +398,29 @@ function ensureDailyQuests(state, pool) {
  *     lastFedDate, lastTickDate, deathCount, name }
  */
 
+/* ---------- Pet — simplified to 2 metrics ----------
+ *
+ *   vitality (0..100)  — health + fullness combined. Death at 0.
+ *   form    (-50..+50) — body axis. Negative = chubby. Positive = jacked.
+ *
+ * XP → pet rules:
+ *   Hit daily goal           →  vitality +25 (cap 100); marked fed today
+ *   Hit ≥1.5× daily goal     →  form += +6 (jacked path) — counts as exercise
+ *   Hit ≥1.0× but <1.5×      →  form += -2 (chubby drift — fed without exercise)
+ *   Miss daily goal          →  vitality -30 per day; form decays toward 0 by 1
+ *   vitality < 30            →  pet appears sick (cough activity)
+ *   vitality < 50            →  pet begs (empty food bowl in room)
+ *   vitality = 0             →  pet dies, respawns as baby tomorrow; deaths++
+ *   form > +25               →  body = "jacked" (>+15 = "fit")
+ *   form < -25               →  body = "chubby"
+ */
+
 function _newPet(name = 'Bit') {
   return {
     stage: 'baby',
     ageDays: 0,
-    health: 100,
-    fullness: 80,
-    fitness: 10,
-    fatness: 0,
+    vitality: 80,
+    form: 0,
     lastFedDate: null,
     lastTickDate: todayKey(),
     deathCount: 0,
@@ -413,55 +428,74 @@ function _newPet(name = 'Bit') {
   };
 }
 
-// Daily-tick: applies degradation for each day elapsed since lastTickDate.
-// Idempotent — safe to call multiple times per day; only fires for new days.
+// Migrate old (4-metric or egg-stage) state shape to new (2-metric) shape.
+// Idempotent — running it twice does nothing. Also fills in any missing
+// fields a long-offline user might be missing entirely.
+function _migratePet(p) {
+  // Egg → baby (we no longer have an egg stage)
+  if (p.stage === 'egg') {
+    p.stage = 'baby';
+    p.ageDays = Math.max(0, p.ageDays || 0);
+  }
+  // Old 4-metric shape → 2-metric
+  if (p.vitality == null) {
+    if (p.health != null || p.fullness != null) {
+      p.vitality = Math.round(((p.health || 100) + (p.fullness || 80)) / 2);
+      p.form = Math.round((p.fitness || 0) - (p.fatness || 0));
+    } else {
+      p.vitality = 80;
+      p.form = 0;
+    }
+    p.form = Math.max(-50, Math.min(50, p.form));
+    delete p.health; delete p.fullness; delete p.fitness; delete p.fatness;
+  }
+  // Safety fills (in case state was hand-edited or partially corrupted)
+  if (p.lastTickDate == null) p.lastTickDate = todayKey();
+  if (p.deathCount == null)   p.deathCount = 0;
+  if (p.name == null)         p.name = 'Bit';
+  if (p.ageDays == null)      p.ageDays = 0;
+  if (p.stage == null)        p.stage = 'baby';
+  return p;
+}
+
 function _petTick(p, today) {
   if (p.lastTickDate === today) return p;
   let daysElapsed = daysBetween(p.lastTickDate || today, today);
   if (daysElapsed <= 0) { p.lastTickDate = today; return p; }
-  daysElapsed = Math.min(daysElapsed, 30);  // cap to avoid wild swings on long absences
+  daysElapsed = Math.min(daysElapsed, 30);
   for (let i = 0; i < daysElapsed; i++) {
-    // Each day where the user didn't feed on that calendar day = miss
-    p.fullness = Math.max(0, p.fullness - 30);
-    p.fitness  = Math.max(0, p.fitness - 3);
-    p.fatness  = Math.max(0, p.fatness - 4);
-    // Health drop if not fed yesterday (we approximate with fullness state)
-    if (p.fullness < 30) p.health = Math.max(0, p.health - 25);
+    p.vitality = Math.max(0, p.vitality - 30);
+    // Form decays toward 0 at 1/day
+    if (p.form > 0)      p.form = Math.max(0, p.form - 1);
+    else if (p.form < 0) p.form = Math.min(0, p.form + 1);
     p.ageDays += 1;
-    if (p.health === 0) break;
+    if (p.vitality === 0) break;
   }
   p.lastTickDate = today;
-  // Death + respawn as egg
-  if (p.health === 0) {
+  if (p.vitality === 0) {
     const oldName = p.name;
     const deaths = (p.deathCount || 0) + 1;
     Object.assign(p, _newPet(oldName));
     p.deathCount = deaths;
   }
-  // Stage progression by age (no egg — baby is the starting stage)
   if (p.stage === 'baby' && p.ageDays >= 3) p.stage = 'teen';
   if (p.stage === 'teen' && p.ageDays >= 8) p.stage = 'adult';
   return p;
 }
 
-// Compute body-shape descriptor for the adult stage (and partly for teen).
 function _petBody(p) {
   if (p.stage === 'baby') return 'baby';
-  if (p.fitness > 60 && p.fatness < 25) return 'jacked';
-  if (p.fatness > 55)                   return 'chubby';
-  if (p.fitness > 30 && p.fatness < 40) return 'fit';
+  if (p.form >  25) return 'jacked';
+  if (p.form >  15) return 'fit';
+  if (p.form < -25) return 'chubby';
   return 'normal';
 }
 
-// Pick today's activity — deterministic per (today, ageDays) so the pet
-// doesn't flip every render but does change day to day. Mood/stat overrides
-// activity (e.g. sick beats walk).
 function _petActivity(p, today, justFed) {
   if (justFed)                    return 'eat';
-  if (p.health < 30)              return 'cough';
-  if (p.fullness < 25)            return 'beg';
-  if (p.fitness > 70)             return 'workout';
-  // Deterministic random based on date hash
+  if (p.vitality < 30)            return 'cough';
+  if (p.vitality < 50)            return 'beg';
+  if (p.form > 35)                return 'workout';
   const seed = parseInt(today.replaceAll('-', ''), 10) + (p.ageDays * 7);
   const pool = ['walk', 'idle', 'sleep', 'play', 'walk', 'idle'];
   return pool[seed % pool.length];
@@ -469,27 +503,22 @@ function _petActivity(p, today, justFed) {
 
 function petState(state) {
   if (!state.pet || !state.pet.stage) state.pet = _newPet();
+  _migratePet(state.pet);
   const today = todayKey();
   const goal = (state.user && state.user.goal) || 60;
   const todayXP = state.todayXP || 0;
 
-  // 1) Apply any daily ticks since last render (degradation / death / staging)
   _petTick(state.pet, today);
   const p = state.pet;
 
-  // 2) Feed today if XP goal met AND we haven't fed today
-  const justFed = (todayXP >= goal) && p.lastFedDate !== today && p.stage !== 'egg';
+  const justFed = (todayXP >= goal) && p.lastFedDate !== today;
   if (justFed) {
-    p.fullness = Math.min(100, p.fullness + 60);
-    p.health   = Math.min(100, p.health + 12);
+    p.vitality = Math.min(100, p.vitality + 25);
     p.lastFedDate = today;
-    // Bulk metabolism: did the user push past 1.5× goal? (exercise)
     if (todayXP >= goal * 1.5) {
-      p.fitness = Math.min(100, p.fitness + 12);
-      p.fatness = Math.max(0, p.fatness - 3);
+      p.form = Math.min(50, p.form + 6);   // exercise path → jacked
     } else {
-      // Fed but not exercising → fatten slightly
-      p.fatness = Math.min(100, p.fatness + 8);
+      p.form = Math.max(-50, p.form - 2);  // fed-but-sedentary → chubby
     }
   }
 
@@ -498,10 +527,8 @@ function petState(state) {
     stage: p.stage,
     body: _petBody(p),
     activity: _petActivity(p, today, justFed),
-    health: p.health,
-    fullness: p.fullness,
-    fitness: p.fitness,
-    fatness: p.fatness,
+    vitality: p.vitality,
+    form: p.form,
     ageDays: p.ageDays,
     deathCount: p.deathCount || 0,
     fedToday: p.lastFedDate === today,

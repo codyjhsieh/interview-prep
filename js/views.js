@@ -325,28 +325,33 @@ function renderPetCard(state, p) {
 
       <div class="flex-1 min-w-[150px] space-y-2 self-center">
         <div>
-          <div class="flex justify-between text-[11px] muted mb-0.5"><span>Health</span><span class="numeric">${p.health}/100</span></div>
-          ${bar(p.health, p.health >= 60 ? 'var(--accent)' : p.health >= 30 ? 'var(--warn)' : 'var(--bad)')}
-        </div>
-        <div>
-          <div class="flex justify-between text-[11px] muted mb-0.5"><span>Fullness</span><span class="numeric">${p.fullness}/100</span></div>
-          ${bar(p.fullness, p.fullness >= 50 ? 'var(--accent)' : 'var(--warn)')}
+          <div class="flex justify-between text-[11px] muted mb-0.5">
+            <span>Vitality</span>
+            <span class="numeric">${p.vitality}/100${p.vitality < 30 ? ' · sick' : ''}</span>
+          </div>
+          ${bar(p.vitality, p.vitality >= 60 ? 'var(--accent)' : p.vitality >= 30 ? 'var(--warn)' : 'var(--bad)')}
         </div>
         ${p.stage !== 'baby' ? `
         <div>
-          <div class="flex justify-between text-[11px] muted mb-0.5"><span>Fitness</span><span class="numeric">${p.fitness}/100</span></div>
-          ${bar(p.fitness, 'var(--sde)')}
-        </div>
-        <div>
-          <div class="flex justify-between text-[11px] muted mb-0.5"><span>Fatness</span><span class="numeric">${p.fatness}/100</span></div>
-          ${bar(p.fatness, 'var(--warn)')}
+          <div class="flex justify-between text-[11px] muted mb-0.5">
+            <span>Body</span>
+            <span class="numeric" style="text-transform:capitalize">${p.body}</span>
+          </div>
+          <!-- Form bar: -50 chubby ... 0 normal ... +50 jacked. Indicator at center 0. -->
+          <div class="relative h-1 rounded-full" style="background:rgba(15,23,42,0.06)">
+            <div class="absolute top-0 bottom-0" style="left:50%; width:1px; background:var(--hairline)"></div>
+            <div class="absolute top-0 bottom-0 rounded-full" style="${p.form >= 0
+              ? `left:50%; width:${(p.form/50)*50}%; background:var(--sde)`
+              : `right:50%; width:${(-p.form/50)*50}%; background:var(--warn)`}"></div>
+          </div>
+          <div class="flex justify-between text-[10px] dim mt-0.5"><span>Chubby</span><span>Jacked</span></div>
         </div>` : ''}
       </div>
     </div>
 
     <div class="mt-3 pt-3 border-t border-[color:var(--hairline)]">
       ${p.fedToday
-        ? `<div class="text-[12.5px]" style="color:var(--accent)">✓ Fed today (${p.todayXP}/${p.goal} XP). ${p.justFed ? `<b>Just fed!</b>` : `${esc(p.name)} is happy.`}${p.todayXP >= p.goal * 1.5 ? ' Bonus workout earned 💪' : ''}</div>`
+        ? `<div class="text-[12.5px]" style="color:var(--accent)">✓ Fed today (${p.todayXP}/${p.goal} XP). ${p.justFed ? `<b>Just fed!</b>` : `${esc(p.name)} is happy.`}${p.todayXP >= p.goal * 1.5 ? ' Bonus workout 💪' : ''}</div>`
         : `<div class="flex items-center justify-between gap-2 flex-wrap">
              <div class="text-[12.5px]">
                <b>${p.xpToFeed} XP</b> to feed ${esc(p.name)} <span class="muted">(${p.todayXP}/${p.goal})</span>
@@ -355,6 +360,17 @@ function renderPetCard(state, p) {
            </div>
            <div class="bar mt-2"><i style="width:${p.xpProgress}%"></i></div>`}
     </div>
+
+    <details class="mt-3">
+      <summary class="text-[11px] muted cursor-pointer hover:opacity-80">How feeding works ▾</summary>
+      <ul class="list-muted mt-2 text-[11.5px]" style="font-size:11.5px">
+        <li><b>Hit ${p.goal} XP today</b> → ${esc(p.name)} eats: vitality +25 cap 100</li>
+        <li><b>Hit ${Math.round(p.goal*1.5)} XP today</b> → ${esc(p.name)} works out: body shifts toward Jacked (+6)</li>
+        <li><b>Hit ${p.goal} but not ${Math.round(p.goal*1.5)}</b> → body drifts toward Chubby (-2)</li>
+        <li><b>Miss the goal</b> → vitality -30 per day; body drifts back to Normal</li>
+        <li><b>Vitality 0</b> → ${esc(p.name)} dies and respawns as a baby tomorrow</li>
+      </ul>
+    </details>
   `;
   return card;
 }
@@ -550,6 +566,13 @@ function renderDashboard(state, hub) {
   `;
   container.appendChild(hero);
 
+  // 8-bit tamagotchi — sits directly under the hero, the first thing the
+  // user sees after the welcome card. Fed by hitting daily XP goal.
+  const pet = GAMI.petState(state);
+  GAMI.saveImmediate(state);
+  const petCard = renderPetCard(state, pet);
+  container.appendChild(petCard);
+
   // Stats row
   const stats = el('div','grid grid-cols-2 sm:grid-cols-4 gap-4');
   stats.innerHTML = `
@@ -577,12 +600,6 @@ function renderDashboard(state, hub) {
     </div>
   `;
   container.appendChild(stats);
-
-  // 8-bit tamagotchi — fed by hitting daily XP goal, dies if neglected
-  const pet = GAMI.petState(state);
-  GAMI.saveImmediate(state);   // persist the daily-tick / feed result
-  const petCard = renderPetCard(state, pet);
-  container.appendChild(petCard);
 
   // SRS review tiles — surface only when there's something due / queued
   if (missedTotal > 0 || conceptReviewsTotal > 0) {
