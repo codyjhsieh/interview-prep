@@ -104,7 +104,7 @@ window.QUOTES = (function () {
     'The Gita\'s answer to "what if I fail." Nothing put into the practice is lost — even partial effort accumulates as protection. The line refutes the all-or-nothing trap that kills most ambitious projects.');
   add('Better one\'s own duty, though imperfectly performed, than the duty of another well performed.', 'Bhagavad Gita', 'Bhagavad Gita 3.35', gutId(2388), 'c.2c BC',
     'Krishna on svadharma — your own path. Performing someone else\'s work flawlessly counts less than performing your own work badly, because the alignment is the point. A defense against impressive misdirection — most career drift starts as "let me just take this great-looking thing."');
-  add('All that we are is the result of what we have thought.', 'The Buddha', 'Dhammapada 1', gut('Dhammapada'), 'c.3c BC',
+  add('All that we are is the result of what we have thought.', 'The Buddha', 'Dhammapada 1', gutId(2017), 'c.3c BC',
     'Opening verse of the Dhammapada, the Buddha\'s collected sayings. The argument is causal: character is the accumulation of habitual thought. The leverage point for changing who you are is what you choose to dwell on.');
   add('A journey of a thousand miles begins beneath one\'s feet.', 'Lao Tzu', 'Tao Te Ching 64', gutId(216), 'c.4c BC',
     'The original first-step quote, often mistranslated as "begins with a single step" — but the Chinese says "beneath one\'s feet": the journey is already happening, exactly where you are standing now.');
@@ -126,24 +126,24 @@ window.QUOTES = (function () {
   add('Confine yourself to the present.', 'Marcus Aurelius', 'Meditations 7.29', gutId(2680), 'c.170',
     'A repeated Stoic exercise compressed to three words. The past is gone, the future does not exist yet, and the only place where work happens is now. The entire weight of attention training in three words.');
 
-  add('It is not what happens to you, but how you react to it that matters.', 'Epictetus', 'Enchiridion 5', gut('Epictetus enchiridion'), 'c.125',
+  add('It is not what happens to you, but how you react to it that matters.', 'Epictetus', 'Enchiridion 5', gutId(45109), 'c.125',
     'Epictetus was born a slave in Rome and lame for life; he had unique authority to argue that external circumstance is not the controlling variable. The Enchiridion ("handbook") is a student\'s field manual — every aphorism is a tool, not theory.');
-  add('First say to yourself what you would be; and then do what you have to do.', 'Epictetus', 'Discourses III.23', gut('Epictetus discourses'), 'c.108',
+  add('First say to yourself what you would be; and then do what you have to do.', 'Epictetus', 'Discourses III.23', gutId(10661), 'c.108',
     'Identity-first sequencing. Define the kind of person you intend to be, then derive the actions from that. The opposite of "I\'ll figure out who I am from what I happen to do." The role is the cause, the actions the effect — every job applicant struggling with positioning needs this.');
-  add('No great thing is created suddenly, any more than a bunch of grapes or a fig.', 'Epictetus', 'Discourses I.15', gut('Epictetus discourses'), 'c.108',
+  add('No great thing is created suddenly, any more than a bunch of grapes or a fig.', 'Epictetus', 'Discourses I.15', gutId(10661), 'c.108',
     'A biological analogy. Fruit needs to bud, set, ripen; trying to skip stages destroys the result. The original argument against shortcuts — and the original consolation that the slow visible nothing of months 1–12 is in fact the thing.');
-  add('If you wish to be a writer, write.', 'Epictetus', 'Discourses II.18', gut('Epictetus discourses'), 'c.108',
+  add('If you wish to be a writer, write.', 'Epictetus', 'Discourses II.18', gutId(10661), 'c.108',
     'Epictetus collapses years of would-be philosophizing into one instruction. You become the thing by doing the thing — there is no preparatory phase that is not also the practice. Apply to founder/applicant: if you wish to ship, ship.');
-  add('Difficulties are things that show a person what they are.', 'Epictetus', 'Discourses I.24', gut('Epictetus discourses'), 'c.108',
+  add('Difficulties are things that show a person what they are.', 'Epictetus', 'Discourses I.24', gutId(10661), 'c.108',
     'In Stoic thought, hardship functions as a diagnostic tool — it surfaces what character is actually there underneath comfortable defaults. The line reframes adversity from punishment to information.');
 
-  add('We suffer more often in imagination than in reality.', 'Seneca', 'Letters from a Stoic XIII', gut('Seneca letters from a stoic'), 'c.65',
+  add('We suffer more often in imagination than in reality.', 'Seneca', 'Letters from a Stoic XIII', gutId(56075), 'c.65',
     'Seneca\'s letter to his friend Lucilius on fearfulness. Most of the catastrophes we anticipate never arrive, but we live the cost of them in advance. The line is permission to stop pre-paying for futures that may not happen — directly applicable to every "what if they say no" rejection-fear loop.');
-  add('It is not the man who has too little, but the man who craves more, that is poor.', 'Seneca', 'Letters from a Stoic II', gut('Seneca letters from a stoic'), 'c.65',
+  add('It is not the man who has too little, but the man who craves more, that is poor.', 'Seneca', 'Letters from a Stoic II', gutId(56075), 'c.65',
     'Seneca was one of Rome\'s richest men — he could write this with full credibility. Poverty is a state of want, not amount. The exit from poverty is contentment with what you have, not further acquisition.');
-  add('Begin at once to live, and count each separate day as a separate life.', 'Seneca', 'Letters from a Stoic CI', gut('Seneca letters from a stoic'), 'c.65',
+  add('Begin at once to live, and count each separate day as a separate life.', 'Seneca', 'Letters from a Stoic CI', gutId(56075), 'c.65',
     'Written after a friend\'s sudden death. The reframe: stop treating today as preparation for some future life. Today IS a life — the only one you have right now.');
-  add('Most powerful is he who has himself in his own power.', 'Seneca', 'Letters from a Stoic XC', gut('Seneca letters from a stoic'), 'c.65',
+  add('Most powerful is he who has himself in his own power.', 'Seneca', 'Letters from a Stoic XC', gutId(56075), 'c.65',
     'Seneca\'s definition of mastery. External power — over slaves, armies, money — is contingent. Self-command is the only kind that cannot be taken from you.');
   // Removed in 2026-05 audit: "A gem cannot be polished without friction…" and
   // "Difficulties strengthen the mind, as labor does the body." are widely
@@ -156,17 +156,17 @@ window.QUOTES = (function () {
   // Removed in 2026-05 audit: "In the midst of chaos, there is also
   // opportunity" is universally attributed to Sun Tzu online but appears
   // nowhere in The Art of War — modern fabrication.
-  add('To see what is right and not do it is want of courage.', 'Confucius', 'Analects 2.24', gut('Analects of Confucius'), 'c.500 BC',
+  add('To see what is right and not do it is want of courage.', 'Confucius', 'Analects 2.24', gutId(3330), 'c.500 BC',
     'Confucius collapses moral reasoning into action. Knowing what is right isn\'t the achievement — doing it is. Cowardice here isn\'t fear of danger; it\'s failure to act on what you already know.');
-  add('The superior man is modest in his speech but exceeds in his actions.', 'Confucius', 'Analects 14.27', gut('Analects of Confucius'), 'c.500 BC',
+  add('The superior man is modest in his speech but exceeds in his actions.', 'Confucius', 'Analects 14.27', gutId(3330), 'c.500 BC',
     'A deliberate inversion of the common pattern (talk big, deliver small). Confucian quietness isn\'t humility for its own sake — it\'s the discipline of letting the work speak.');
 
   /* ── HERACLITUS / SOCRATES / BOETHIUS / MACHIAVELLI ───────────────── */
   add('A man\'s character is his fate.', 'Heraclitus', 'Fragment 119', wiki('Heraclitus'), 'c.500 BC',
     'Heraclitus reduces destiny from external decree to internal pattern. The way you habitually choose IS the future you\'ll end up in. The line lands as both warning and license.');
-  add('The unexamined life is not worth living.', 'Socrates (in Plato)', 'Apology 38a', gut('Plato Apology'), 'c.399 BC',
+  add('The unexamined life is not worth living.', 'Socrates (in Plato)', 'Apology 38a', gutId(1656), 'c.399 BC',
     'Socrates is on trial for his life and is asked whether he would accept exile in exchange for shutting up. He answers no — without inquiry, life isn\'t worth more than its biology. The line stakes the price of examining things at any cost.');
-  add('Nothing is miserable unless you think it so; and nothing brings happiness unless you are content with it.', 'Boethius', 'The Consolation of Philosophy II', gut('Consolation of Philosophy Boethius'), 524,
+  add('Nothing is miserable unless you think it so; and nothing brings happiness unless you are content with it.', 'Boethius', 'The Consolation of Philosophy II', gutId(14328), 524,
     'Boethius wrote the Consolation in prison awaiting execution. Lady Philosophy visits him in his cell and walks him through the recognition that Fortune is volatile — the only stable ground is your relationship to your portion.');
   add('Never was anything great achieved without danger.', 'Niccolò Machiavelli', 'The Prince VI', gutId(1232), 1532,
     'Chapter 6, on princes who acquired power through their own ability rather than fortune or inheritance. Machiavelli observes that no transformative figure ever climbed without putting themselves in real jeopardy — the danger isn\'t a side effect of greatness, it\'s a precondition.');
@@ -183,9 +183,9 @@ window.QUOTES = (function () {
   add('We know what we are, but know not what we may be.', 'William Shakespeare', 'Hamlet IV.v', gutId(100), 1603,
     'Present identity is knowable, future capacity isn\'t. You can\'t predict what you\'ll become; you can only run the experiment.');
 
-  add('The mind is its own place, and in itself can make a heaven of hell, a hell of heaven.', 'John Milton', 'Paradise Lost I.254–255', gut('Paradise Lost Milton'), 1667,
+  add('The mind is its own place, and in itself can make a heaven of hell, a hell of heaven.', 'John Milton', 'Paradise Lost I.254–255', gutId(26), 1667,
     'Satan, newly fallen and stranded in the burning lake of Hell, refusing to be broken. Milton lets him say what the Stoics also said: external circumstance does not determine internal state. The mind makes the meaning.');
-  add('Awake, arise, or be forever fallen.', 'John Milton', 'Paradise Lost I.330', gut('Paradise Lost Milton'), 1667,
+  add('Awake, arise, or be forever fallen.', 'John Milton', 'Paradise Lost I.330', gutId(26), 1667,
     'Satan rallying his stunned legions after the fall from Heaven. The construction is binary — no third option between getting up and lying defeated. The pure imperative form of recovery.');
 
   add('Consider your origin; you were not born to live like brutes, but to follow virtue and knowledge.', 'Dante Alighieri', 'Inferno XXVI.118–120', gutId(8800), 1320,
@@ -207,7 +207,7 @@ window.QUOTES = (function () {
   add('Everyone thinks of changing the world, but no one thinks of changing himself.', 'Leo Tolstoy', 'Three Methods of Reform', wiki('Leo Tolstoy'), 1900,
     'From a late pamphlet on social reform. Every external reform movement fails to the degree it skips the internal one. You are the only person you have direct authority to change.');
 
-  add('Better to sink in boundless deeps than float on vulgar shoals.', 'Herman Melville', 'Mardi: and a Voyage Thither', gut('Melville Mardi'), 1849,
+  add('Better to sink in boundless deeps than float on vulgar shoals.', 'Herman Melville', 'Mardi: and a Voyage Thither', gutId(13720), 1849,
     'From the philosophical sea-novel Mardi, three years before Moby-Dick. Melville stakes his ambition: the risk of total failure on a deep attempt is preferable to safe mediocrity. The founder\'s motto.');
   add('I know not all that may be coming, but be it what it will, I\'ll go to it laughing.', 'Herman Melville', 'Moby-Dick, Ch. 39', gutId(2701), 1851,
     'Stubb, the unflappable second mate of the Pequod, expressing his temperament alone on deck. Meet what is coming on your own terms, regardless of what it is.');
@@ -217,11 +217,11 @@ window.QUOTES = (function () {
   add('All human wisdom is summed up in these two words: Wait and Hope.', 'Alexandre Dumas', 'The Count of Monte Cristo (closing line)', gutId(1184), 1844,
     'The very last sentence of the novel. After 1,200 pages, Edmond Dantès leaves this maxim as his entire inheritance to the young couple he leaves behind. Waiting alone is passive, hope alone is naive — both together are the discipline.');
 
-  add('Trust thyself: every heart vibrates to that iron string.', 'Ralph Waldo Emerson', 'Self-Reliance', gut('Emerson Self-Reliance'), 1841,
+  add('Trust thyself: every heart vibrates to that iron string.', 'Ralph Waldo Emerson', 'Self-Reliance', gutId(16643), 1841,
     'Emerson\'s 1841 manifesto against secondhand opinion. The "iron string" image — the one tuning everyone\'s instrument — argues that the deepest signal in you is also the most universally true.');
-  add('Whoso would be a man must be a nonconformist.', 'Ralph Waldo Emerson', 'Self-Reliance', gut('Emerson Self-Reliance'), 1841,
+  add('Whoso would be a man must be a nonconformist.', 'Ralph Waldo Emerson', 'Self-Reliance', gutId(16643), 1841,
     'Emerson\'s direct framing: maturity isn\'t about fitting in. The line installs nonconformity as a developmental milestone, not a temperament.');
-  add('A foolish consistency is the hobgoblin of little minds.', 'Ralph Waldo Emerson', 'Self-Reliance', gut('Emerson Self-Reliance'), 1841,
+  add('A foolish consistency is the hobgoblin of little minds.', 'Ralph Waldo Emerson', 'Self-Reliance', gutId(16643), 1841,
     'Emerson\'s permission to update. Being consistent with last year\'s positions for the sake of consistency is a small-mind trap; growth requires contradicting your former self in public.');
   add('I went to the woods because I wished to live deliberately, to front only the essential facts of life.', 'Henry David Thoreau', 'Walden II', gutId(205), 1854,
     'Opening of "Where I Lived, and What I Lived For." Strip life to its load-bearing elements and see what they actually are when nothing decorative is in the way.');
@@ -231,31 +231,31 @@ window.QUOTES = (function () {
     'When the world seems to be improving or deteriorating, often what\'s actually different is you. The line places agency back inside the observer.');
 
   /* ── NIETZSCHE / SCHOPENHAUER / KIERKEGAARD ────────────────────────── */
-  add('He who has a why to live for can bear almost any how.', 'Friedrich Nietzsche', 'Twilight of the Idols I.12', wiki('Twilight of the Idols'), 1889,
+  add('He who has a why to live for can bear almost any how.', 'Friedrich Nietzsche', 'Twilight of the Idols I.12', gutId(52263), 1889,
     'Nietzsche\'s aphoristic opening to the book. Meaning is what makes suffering bearable. The how — the long unglamorous grind — follows the why.');
-  add('What does not kill me makes me stronger.', 'Friedrich Nietzsche', 'Twilight of the Idols I.8', wiki('Twilight of the Idols'), 1889,
+  add('What does not kill me makes me stronger.', 'Friedrich Nietzsche', 'Twilight of the Idols I.8', gutId(52263), 1889,
     'The original of the cliché, written by a man with chronic migraines, near-blindness, and within a year of his complete mental breakdown. Read against his biography it isn\'t glib — it\'s the formula he was personally trying to live by while collapsing.');
-  add('You must have chaos within you to give birth to a dancing star.', 'Friedrich Nietzsche', 'Thus Spoke Zarathustra, Prologue 5', gut('Thus Spake Zarathustra Nietzsche'), 1883,
+  add('You must have chaos within you to give birth to a dancing star.', 'Friedrich Nietzsche', 'Thus Spoke Zarathustra, Prologue 5', gutId(1998), 1883,
     'Zarathustra contrasts the "last man" (comfortable, settled) with the higher type that still has internal turbulence. The chaos isn\'t a problem to be solved — it\'s the prerequisite for creation.');
-  add('My formula for human greatness is amor fati: that one wants nothing to be different, not forward, not backward, not in all eternity.', 'Friedrich Nietzsche', 'Ecce Homo II.10', wiki('Ecce Homo (book)'), 1888,
+  add('My formula for human greatness is amor fati: that one wants nothing to be different, not forward, not backward, not in all eternity.', 'Friedrich Nietzsche', 'Ecce Homo II.10', gutId(52190), 1888,
     'Nietzsche, weeks before his collapse, naming his life formula. Amor fati goes past acceptance: not just enduring what is, but wanting it. The hardest stance, because it forbids wishing the past were different.');
-  add('The secret of reaping the greatest fruitfulness and the greatest enjoyment from existence is to live dangerously.', 'Friedrich Nietzsche', 'The Gay Science §283', wiki('The Gay Science'), 1882,
+  add('The secret of reaping the greatest fruitfulness and the greatest enjoyment from existence is to live dangerously.', 'Friedrich Nietzsche', 'The Gay Science §283', gutId(52881), 1882,
     'Section 283, titled "Preparatory men." Nietzsche calls for a generation that will choose risk over comfort — build cities on Vesuvius, send ships into uncharted seas. The canonical defense of voluntary stakes.');
-  add('He who fights with monsters should be careful lest he thereby become a monster.', 'Friedrich Nietzsche', 'Beyond Good and Evil §146', gut('Beyond Good and Evil Nietzsche'), 1886,
+  add('He who fights with monsters should be careful lest he thereby become a monster.', 'Friedrich Nietzsche', 'Beyond Good and Evil §146', gutId(4363), 1886,
     'Nietzsche\'s warning to whoever sets out to oppose an evil: the means contaminate the means-user. Watch what the competitive fight is making you into.');
 
-  add('Talent hits a target no one else can hit; genius hits a target no one else can see.', 'Arthur Schopenhauer', 'The World as Will and Representation', wiki('The World as Will and Representation'), 1819,
+  add('Talent hits a target no one else can hit; genius hits a target no one else can see.', 'Arthur Schopenhauer', 'The World as Will and Representation', gutId(38427), 1819,
     'Schopenhauer\'s distinction between virtuosity and originality. Hitting a known target with skill is talent; defining a target nobody else has perceived is the harder, lonelier thing — and the only way to differentiated outcome.');
 
   add('Life can only be understood backwards; but it must be lived forwards.', 'Søren Kierkegaard', 'Papers and Journals', wiki('Søren Kierkegaard'), 1843,
     'From Kierkegaard\'s personal journals. The asymmetry: meaning resolves in retrospect but choice happens prospectively. The motivation is to act without the resolution, knowing it won\'t arrive until later.');
 
   /* ── CONRAD / HARDY / JAMES ────────────────────────────────────────── */
-  add('A man\'s only safety lies in his own private endurance.', 'Joseph Conrad', 'Lord Jim, Ch. 16', gut('Lord Jim Conrad'), 1900,
+  add('A man\'s only safety lies in his own private endurance.', 'Joseph Conrad', 'Lord Jim, Ch. 16', gutId(5658), 1900,
     'Marlow narrating Jim\'s slow rebuild after he abandoned ship and his honor. There is no external honor that survives without an internal practice underneath it.');
-  add('Every successful man I know has had to learn it. He must concentrate himself on the next thing, the present.', 'Thomas Hardy', 'Jude the Obscure, Part VI', gut('Jude the Obscure Hardy'), 1895,
+  add('Every successful man I know has had to learn it. He must concentrate himself on the next thing, the present.', 'Thomas Hardy', 'Jude the Obscure, Part VI', gutId(153), 1895,
     'Hardy\'s diagnosis of the failure mode that breaks his protagonist Jude: dispersed attention across grand future ambitions instead of fierce attention on the immediate task.');
-  add('Live all you can; it\'s a mistake not to.', 'Henry James', 'The Ambassadors, Book V', gut('The Ambassadors James'), 1903,
+  add('Live all you can; it\'s a mistake not to.', 'Henry James', 'The Ambassadors, Book V', gutId(432), 1903,
     'Strether, the middle-aged American emissary sent to Paris to retrieve a wayward son, says this in a garden to the young man he\'s supposed to bring home. The warning of a man who feels he didn\'t.');
 
   /* ── 20c EUROPEAN ──────────────────────────────────────────────────── */
@@ -401,7 +401,7 @@ window.QUOTES = (function () {
   add('To live a life is not as simple as to cross a field.', 'Boris Pasternak', 'Doctor Zhivago', wiki('Doctor Zhivago (novel)'), 1957,
     'A Russian proverb Pasternak places as a closing line in Yuri Zhivago\'s notebook of poems. The full life is non-linear, full of accidents and reversals — and the line refuses the fantasy of a direct path.');
 
-  add('To work is to find oneself again after every defeat.', 'Knut Hamsun', 'Growth of the Soil', gut('Growth of the Soil Hamsun'), 1917,
+  add('To work is to find oneself again after every defeat.', 'Knut Hamsun', 'Growth of the Soil', gutId(4571), 1917,
     'Isak, the homesteader who clears a farm out of bare Norwegian heath in Hamsun\'s Nobel-winning novel. Work isn\'t a route to comfort, it\'s the way you come back to yourself after each setback.');
 
   /* ── SALTER / BELLOW / MURDOCH / DELILLO / MORRISON ────────────────── */
@@ -469,9 +469,9 @@ window.QUOTES = (function () {
     'Miłosz\'s book on the intellectual collaborations with Stalinism in postwar Poland. The asymmetric leverage of telling the truth in a room committed to lying — a single sentence does enormous work.');
 
   /* ── RILKE / KOESTLER / CORTÁZAR / MURAKAMI / DE BOTTON / HOPKINS ──── */
-  add('Have patience with everything unresolved in your heart and try to love the questions themselves.', 'Rainer Maria Rilke', 'Letters to a Young Poet, Letter 4', gut('Rilke Letters Young Poet'), 1903,
+  add('Have patience with everything unresolved in your heart and try to love the questions themselves.', 'Rainer Maria Rilke', 'Letters to a Young Poet, Letter 4', gutId(29473), 1903,
     'Rilke at 27, advising the 19-year-old officer-cadet Franz Kappus. The discipline of staying in the question rather than rushing to the answer — because the answers don\'t arrive until you\'ve fully lived the questions.');
-  add('Perhaps all the dragons in our lives are princesses who are only waiting to see us act, just once, with beauty and courage.', 'Rainer Maria Rilke', 'Letters to a Young Poet, Letter 8', gut('Rilke Letters Young Poet'), 1904,
+  add('Perhaps all the dragons in our lives are princesses who are only waiting to see us act, just once, with beauty and courage.', 'Rainer Maria Rilke', 'Letters to a Young Poet, Letter 8', gutId(29473), 1904,
     'Letter 8, to the same young poet. The things we are afraid of often contain something else waiting — but only if we approach them rather than flee. The transformation is gated on the act.');
 
   add('A writer\'s ambition should be to trade a hundred contemporary readers for ten readers in ten years\' time and for one reader in a hundred years\' time.', 'Arthur Koestler', 'The Act of Creation', wiki('Arthur Koestler'), 1964,
@@ -503,17 +503,17 @@ window.QUOTES = (function () {
     'Johnson\'s Vietnam novel, near the end. The only consolation available in transition: every exit is also an entry into something. Track both directions.');
 
   /* ── PROCRASTINATION & EXTREME WORK ETHIC ──────────────────────────── */
-  add('While we are postponing, life speeds by.', 'Seneca', 'Letters from a Stoic I', gut('Seneca letters from a stoic'), 'c.65',
+  add('While we are postponing, life speeds by.', 'Seneca', 'Letters from a Stoic I', gutId(56075), 'c.65',
     'The opening letter of the entire collection — Seneca\'s first message to Lucilius is about time. The full passage instructs holding every hour in your grasp and lays out the central scandal of human life: most of it leaks out through the very act of putting things off until later. Letter I exists to set the stakes for the next 123.');
-  add('How long are you going to wait before you demand the best of yourself?', 'Epictetus', 'Discourses, Book III, Ch. XXIII', gut('Epictetus discourses'), 'c.108',
+  add('How long are you going to wait before you demand the best of yourself?', 'Epictetus', 'Discourses, Book III, Ch. XXIII', gutId(10661), 'c.108',
     'Epictetus to a student who keeps deferring his own discipline. The whole rebuke continues: you are no longer a child; you are now a full-grown man — what makes you think tomorrow\'s self will be more capable than today\'s, if today\'s won\'t even start? The exact line for every "I\'ll send the cold emails next week."');
   add('You could be good today. But instead you choose tomorrow.', 'Marcus Aurelius', 'Meditations 4.17 (Hays trans.)', gutId(2680), 'c.170',
     'Marcus catching himself in the same postponement his Stoic teachers warned against. The line is the diagnosis of why goals stay unreached: not lack of ability, but a habitual choice to start at some later, unspecified moment.');
   add('Take on the difficult while it is yet easy; do the great while it is yet small.', 'Lao Tzu', 'Tao Te Ching 63', gutId(216), 'c.4c BC',
     'The Tao Te Ching\'s anti-procrastination chapter. Problems compound exponentially when ignored — the small one you could solve today becomes the unsolvable one in six months. The line is the original "pay the small cost now to avoid the catastrophic cost later."');
-  add('If thou shouldst lay up even a little upon a little, and shouldst do this often, soon would even this become great.', 'Hesiod', 'Works and Days, lines 361–362', gut('Hesiod Works and Days'), 'c.700 BC',
+  add('If thou shouldst lay up even a little upon a little, and shouldst do this often, soon would even this become great.', 'Hesiod', 'Works and Days, lines 361–362', gutId(348), 'c.700 BC',
     'Hesiod\'s practical agricultural poem to his shiftless brother Perses. The line is one of the oldest written formulations of compounding: deposits that look trivial become enormous if you make them habitually. The patience-of-grain calculation that every long-build career rests on.');
-  add('The song that I came to sing remains unsung to this day. I have spent my days in stringing and in unstringing my instrument.', 'Rabindranath Tagore', 'Gitanjali, Song XIII', gut('Gitanjali Tagore'), 1910,
+  add('The song that I came to sing remains unsung to this day. I have spent my days in stringing and in unstringing my instrument.', 'Rabindranath Tagore', 'Gitanjali, Song XIII', gutId(7164), 1910,
     'From Tagore\'s collection of devotional poems that won him the Nobel Prize. The poet laments the universal failure mode: endlessly preparing — tuning the instrument, drafting the plan, sharpening the pencil — while the actual work remains undone. The cleanest single line against tooling-as-procrastination ever written.');
   // Removed in 2026-05 audit:
   //  • "And the day came when the risk to remain tight in a bud…" is
@@ -522,39 +522,39 @@ window.QUOTES = (function () {
   //  • "It is never too late to be what you might have been" is universally
   //    attributed to George Eliot but appears nowhere in her novels,
   //    letters, or essays — modern fabrication.
-  add('To strive, to seek, to find, and not to yield.', 'Alfred, Lord Tennyson', 'Ulysses (closing line)', gut('Tennyson poems'), 1842,
+  add('To strive, to seek, to find, and not to yield.', 'Alfred, Lord Tennyson', 'Ulysses (closing line)', gutId(8601), 1842,
     'The final line of Tennyson\'s dramatic monologue, spoken by an aged Ulysses preparing one last voyage from Ithaca after he\'s grown bored of retirement. Four verbs, no comma after the last one, no admission that yielding is even on the table. The exact temperament the long grind demands.');
   add('All you have to do is write one true sentence. Write the truest sentence that you know.', 'Ernest Hemingway', 'A Moveable Feast', wiki('A Moveable Feast'), 1964,
     'Hemingway\'s memoir of his apprentice years in 1920s Paris, written in the last decade of his life. When stuck at a blank page, this is the protocol he prescribes — not "write something good," not "have an idea," just one true sentence. The most precise operational instruction for getting unstuck ever published.');
   add('Spend it all, shoot it, play it, lose it, all, right away, every time. Do not hoard what seems good for a later place in the book or for another book; give it, give it all, give it now.', 'Annie Dillard', 'The Writing Life, Ch. 4', wiki('Annie Dillard'), 1989,
     'Dillard\'s instruction to writers, but the principle is universal: the impulse to save your best idea for a more important occasion is the impulse that kills the current work. The advice is to deploy every resource now, on this attempt, every time.');
-  add('When you have faults, do not fear to abandon them.', 'Confucius', 'Analects 1.8', gut('Analects of Confucius'), 'c.500 BC',
+  add('When you have faults, do not fear to abandon them.', 'Confucius', 'Analects 1.8', gutId(3330), 'c.500 BC',
     'A line from the first book of the Analects. The two failures stacked: having the fault, and refusing to drop it once seen. Confucius treats the second as the larger failure — knowing yourself well enough to identify a flaw is half the work, and refusing to act on the knowledge wastes the half you\'ve done.');
   add('Maybe I did not live as I ought to have done.', 'Leo Tolstoy', 'The Death of Ivan Ilyich, Ch. IX', gutId(53792), 1886,
     'Ivan Ilyich, an upper-middle-class Russian judge, dying in his forties of an undefined illness, confronts the question he has avoided his whole career: was the comfortable conventional life he chose actually the right one? The novella exists to make this question physically unbearable — and to ask it of the reader before the dying scene arrives.');
-  add('If you hear a voice within you say "you cannot paint," then by all means paint, and that voice will be silenced.', 'Vincent van Gogh', 'The Letters of Vincent van Gogh (letter to Theo, October 1884)', wiki('Letters of Vincent van Gogh'), 1884,
+  add('If you hear a voice within you say "you cannot paint," then by all means paint, and that voice will be silenced.', 'Vincent van Gogh', 'The Letters of Vincent van Gogh (letter to Theo, October 1884)', gutId(30988), 1884,
     'Van Gogh in a letter to his brother Theo, a year into the painting career he started at 27 after failing as a missionary and an art dealer. The cleanest action-defeats-doubt formulation in any language — you don\'t silence the inner critic by debating it, you silence it by working.');
-  add('The powerful play goes on, and you may contribute a verse.', 'Walt Whitman', 'O Me! O Life! (Leaves of Grass)', gut('Leaves of Grass Whitman'), 1892,
+  add('The powerful play goes on, and you may contribute a verse.', 'Walt Whitman', 'O Me! O Life! (Leaves of Grass)', gutId(1322), 1892,
     'From the deathbed edition of Leaves of Grass, Whitman\'s response in his own poem to the question of what one life amounts to amid the immensity of everything. The answer is small and specific: the play is already on, and your contribution is one verse — but the verse only exists if you actually write it.');
   add('There is no greater agony than bearing an untold story inside you.', 'Maya Angelou', 'I Know Why the Caged Bird Sings', wiki('I Know Why the Caged Bird Sings'), 1969,
     'Angelou\'s first autobiography, on her childhood in Stamps, Arkansas. The line names the specific cost of unexpression — what stays inside you when you don\'t do the work doesn\'t go neutral, it festers. The motivation reads inverted: get it out, because the inside is not a safe storage location.');
-  add('How many books, how many works, did the indolence of one or two hours sketch out, only to be smothered by procrastination!', 'Pliny the Younger', 'Letters, Book III', gut('Pliny Letters'), 'c.100',
+  add('How many books, how many works, did the indolence of one or two hours sketch out, only to be smothered by procrastination!', 'Pliny the Younger', 'Letters, Book III', gutId(2811), 'c.100',
     'Pliny, the Roman senator and tireless letter-writer, on the catalogue of unfinished works he and his correspondents accumulate. Two hours of action would have started them. Centuries\' worth of evidence on what kills almost every project: not difficulty, but delay.');
   add('There is nothing more frightful than ignorance in action.', 'Johann Wolfgang von Goethe', 'Maxims and Reflections', wiki('Johann Wolfgang von Goethe'), 1833,
     'From Goethe\'s collected aphorisms. The line cuts against pure "just do something" advice — the dangerous case is action without understanding, which compounds errors at full speed. Read together with the rest of Goethe: the answer is not to slow the action but to deepen the seeing while you act.');
-  add('Produce! Produce! Were it but the pitifullest infinitesimal fraction of a Product, produce it in God\'s name! \'Tis the utmost thou hast in thee; out with it then.', 'Thomas Carlyle', 'Sartor Resartus, Book II, Ch. IX', gut('Sartor Resartus Carlyle'), 1836,
+  add('Produce! Produce! Were it but the pitifullest infinitesimal fraction of a Product, produce it in God\'s name! \'Tis the utmost thou hast in thee; out with it then.', 'Thomas Carlyle', 'Sartor Resartus, Book II, Ch. IX', gutId(1051), 1836,
     'Carlyle\'s strange philosophical novel, in the chapter "The Everlasting Yea." The full force of the passage is the demand that output is the moral imperative — whatever you have inside you, however small, get it OUT of you and into the world. The single most forceful work-ethic passage in 19th-century literature.');
-  add('Blessed is he who has found his work; let him ask no other blessedness.', 'Thomas Carlyle', 'Past and Present, Book III, Ch. XI', gut('Past and Present Carlyle'), 1843,
+  add('Blessed is he who has found his work; let him ask no other blessedness.', 'Thomas Carlyle', 'Past and Present, Book III, Ch. XI', gutId(13534), 1843,
     'Carlyle\'s book contrasting medieval communal labor with industrial 19th-century alienation. The line is his maxim for living: locate the work that is yours, and consider yourself already wealthy. The motivation lands as both diagnosis (most discontent is not having found your work) and reward (once you find it, you no longer need anything else).');
-  add('Success is to be measured not so much by the position that one has reached in life as by the obstacles which he has overcome while trying to succeed.', 'Booker T. Washington', 'Up From Slavery, Ch. III', gut('Up From Slavery Washington'), 1901,
+  add('Success is to be measured not so much by the position that one has reached in life as by the obstacles which he has overcome while trying to succeed.', 'Booker T. Washington', 'Up From Slavery, Ch. III', gutId(2376), 1901,
     'Washington\'s autobiography of his rise from slavery to founding the Tuskegee Institute. The line repositions success as a function of resistance overcome, not absolute altitude — and is written by a man with unique authority to make that claim.');
   add('Life is either a daring adventure or nothing.', 'Helen Keller', 'The Open Door', wiki('Helen Keller'), 1957,
     'Helen Keller — deaf and blind from nineteen months old — wrote this near the end of her life. The binary is total: there is no in-between of cautious half-living. Read against her biography it isn\'t bravado; it\'s the operating system of a woman who had every reason to settle for nothing and chose otherwise.');
-  add('Optimism is the faith that leads to achievement. Nothing can be done without hope and confidence.', 'Helen Keller', 'Optimism: An Essay', gut('Optimism Helen Keller'), 1903,
+  add('Optimism is the faith that leads to achievement. Nothing can be done without hope and confidence.', 'Helen Keller', 'Optimism: An Essay', gutId(38117), 1903,
     'From Keller\'s book-length essay on optimism, published when she was 23. Her argument: optimism isn\'t a temperament, it\'s the precondition for action — without belief that effort can produce result, no effort gets made. The faith is operational, not decorative.');
   add('If you\'re going to try, go all the way. Otherwise, don\'t even start.', 'Charles Bukowski', 'Roll the Dice (in What Matters Most Is How Well You Walk Through the Fire)', wiki('Charles Bukowski'), 1999,
     'From Bukowski\'s posthumous poetry collection. The full poem catalogues what going all the way costs — relationships, security, sanity — and concludes anyway. The line refuses the half-measure that most ambitious people default to: it\'s either total commitment or stay out.');
-  add('Welcome, O life! I go to encounter for the millionth time the reality of experience and to forge in the smithy of my soul the uncreated conscience of my race.', 'James Joyce', 'A Portrait of the Artist as a Young Man (closing line)', gut('Portrait of the Artist as a Young Man Joyce'), 1916,
+  add('Welcome, O life! I go to encounter for the millionth time the reality of experience and to forge in the smithy of my soul the uncreated conscience of my race.', 'James Joyce', 'A Portrait of the Artist as a Young Man (closing line)', gutId(4217), 1916,
     'Stephen Dedalus\'s final diary entry, the very last line of the novel, written as he prepares to leave Ireland for Paris and begin his real artistic work. Welcome is the operative word — he\'s addressing the difficulty of what comes next, not bracing against it.');
 
   return Q;
