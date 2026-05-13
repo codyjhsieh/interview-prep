@@ -62,6 +62,86 @@ function setActiveNav(routeId) {
   });
   const r = ROUTES.find(x => x.id === routeId);
   document.getElementById('route-title').textContent = r ? r.label : '';
+  // Sync the floating mobile tab bar selection + animated pill.
+  setActiveTabbar(routeId);
+}
+
+/* ─── Liquid Glass mobile tab bar ───────────────────────────────────────
+ * Five primary routes surface as tabs; the rest live in the sidebar.
+ * The active "pill" indicator is absolutely positioned and animated via
+ * transform/width when the route changes (CSS transition with
+ * --spring-overshoot easing). Minimize-on-scroll listens to window
+ * scrollY: when the user scrolls down >12px, body.nav-minimized goes on;
+ * scrolling up by 8px+ takes it off. */
+const TABBAR_ROUTES = [
+  { id: 'dashboard',  label: 'Today',      icon: 'layout-dashboard' },
+  { id: 'curriculum', label: 'Curriculum', icon: 'book-open' },
+  { id: 'flashcards', label: 'Cards',      icon: 'layers' },
+  { id: 'games',      label: 'Games',      icon: 'target' },
+  { id: 'companies',  label: 'Companies',  icon: 'building' },
+];
+
+function buildTabbar() {
+  const bar = document.getElementById('liquid-tabbar');
+  if (!bar) return;
+  // Pill indicator first so it sits behind the tab buttons in z-order.
+  bar.innerHTML = `<span class="tab-pill" aria-hidden="true"></span>` +
+    TABBAR_ROUTES.map(r => `
+      <a class="tab-item" href="#${r.id}" data-route="${r.id}" aria-label="${escapeHtml(r.label)}">
+        ${(window.VIEWS && VIEWS.iconHTML) ? VIEWS.iconHTML(r.icon, { size: 20 }) : ''}
+        <span class="tab-label">${escapeHtml(r.label)}</span>
+      </a>
+    `).join('');
+}
+
+function setActiveTabbar(routeId) {
+  const bar = document.getElementById('liquid-tabbar');
+  if (!bar) return;
+  const items = bar.querySelectorAll('.tab-item');
+  let activeEl = null;
+  items.forEach(a => {
+    const on = a.dataset.route === routeId;
+    a.classList.toggle('active', on);
+    if (on) activeEl = a;
+  });
+  // Animate the pill — measure the active tab's position relative to the
+  // bar's content box (after padding) and move the pill there. CSS handles
+  // the spring transition; we just write the new transform + width.
+  const pill = bar.querySelector('.tab-pill');
+  if (!pill) return;
+  if (!activeEl) {                              // route isn't in the tab bar
+    pill.style.opacity = '0';
+    return;
+  }
+  pill.style.opacity = '1';
+  // offsetLeft/Width are relative to the offsetParent (the bar itself).
+  requestAnimationFrame(() => {
+    pill.style.transform = `translateX(${activeEl.offsetLeft}px)`;
+    pill.style.width = `${activeEl.offsetWidth}px`;
+  });
+}
+
+/* Minimize-on-scroll — debounce via rAF, threshold-based hysteresis so
+ * the bar doesn't flicker on small scroll movements. */
+let lastScrollY = 0;
+let scrollRafQueued = false;
+function onScrollMinimize() {
+  if (scrollRafQueued) return;
+  scrollRafQueued = true;
+  requestAnimationFrame(() => {
+    scrollRafQueued = false;
+    const y = window.scrollY || document.documentElement.scrollTop || 0;
+    const dy = y - lastScrollY;
+    // Always show at the very top of the page
+    if (y < 24) {
+      document.body.classList.remove('nav-minimized');
+    } else if (dy > 6) {                        // scrolled down a bit → hide
+      document.body.classList.add('nav-minimized');
+    } else if (dy < -6) {                       // scrolled up → reveal
+      document.body.classList.remove('nav-minimized');
+    }
+    lastScrollY = y;
+  });
 }
 
 function parseHash() {
@@ -419,6 +499,7 @@ function findNextLessonAfter(currentId) {
 function init() {
   try {
     buildSidebar();
+    buildTabbar();
     bindEvents();
     bindMobileNav();
     bindKeyboard();
@@ -428,6 +509,16 @@ function init() {
     window.addEventListener('visibilitychange', () => GAMI.saveImmediate(state));
     window.addEventListener('beforeunload', () => GAMI.saveImmediate(state));
     setInterval(() => GAMI.saveImmediate(state), 20000);
+
+    // Liquid Glass tab bar — minimize-on-scroll. Passive listener for
+    // jank-free scroll handling; the work is rAF-throttled.
+    window.addEventListener('scroll', onScrollMinimize, { passive: true });
+    // Recompute the active pill's position on viewport resize (the tab
+    // widths can change when the bar is constrained by the viewport).
+    window.addEventListener('resize', () => {
+      const { route } = parseHash();
+      setActiveTabbar(route);
+    }, { passive: true });
 
     // (Removed: pointer-tracked --mx/--my CSS var updater. The glass
     // pointer-tracked specular highlight caused too much paint thrash
