@@ -15,6 +15,31 @@ function el(tag, cls, html) {
 }
 function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+/* iconHTML(name, opts) — inline a Lucide SVG icon via CSS mask so it
+ * picks up the surrounding text color via currentColor. Files live in
+ * assets/icons/ and were downloaded from the Lucide icon set
+ * (ISC-licensed). The mask technique keeps the icons crisp at any size
+ * and respects color theming without inlining the full SVG markup. */
+function iconHTML(name, opts) {
+  opts = opts || {};
+  const size = opts.size || 18;
+  const url = `assets/icons/${esc(name)}.svg`;
+  // The mask declarations are duplicated so older WebKit picks up the
+  // -webkit-mask path. background-color: currentColor is what makes the
+  // icon adopt the parent text color.
+  const style = [
+    'display:inline-block',
+    `width:${size}px`,
+    `height:${size}px`,
+    'background-color:currentColor',
+    `-webkit-mask:url('${url}') no-repeat center/contain`,
+    `mask:url('${url}') no-repeat center/contain`,
+    'vertical-align:-3px',
+    'flex-shrink:0',
+  ].join(';');
+  return `<span class="icon icon-${esc(name)}" style="${style}" aria-hidden="true"></span>`;
+}
+
 /* =========================================================================
  * 8-bit tamagotchi — life-sim companion fed by hitting the daily XP goal.
  *
@@ -2032,7 +2057,7 @@ function renderPetCard(state, p) {
     'eat':     `${p.name} is eating! +1 day alive`,
     'sleep':   `${p.name} is napping`,
     'play':    `${p.name} is playing`,
-    'workout': `${p.name} is at the gym 💪`,
+    'workout': `${p.name} is at the gym`,
     'sick':    `${p.name} is wheezing and dying — feed NOW`,
     'beg':     `${p.name} is starving — hit your XP goal or watch it die`,
     'droop':   `${p.name} is sad — needs you`,
@@ -2054,7 +2079,7 @@ function renderPetCard(state, p) {
         <h3 class="font-display font-semibold text-lg">${esc(p.name)}'s room <span class="text-xs muted font-normal ml-1">${stageLabel}${bodyLabel}</span></h3>
         <div class="text-[12.5px] muted mt-0.5">${esc(statusLine)}</div>
       </div>
-      ${p.deathCount > 0 ? `<div class="text-[10.5px] muted" title="Total times you let your pet die">🪦 × ${p.deathCount}</div>` : ''}
+      ${p.deathCount > 0 ? `<div class="text-[10.5px] muted inline-flex items-center gap-1" title="Total times you let your pet die">${iconHTML('skull', {size: 13})} × ${p.deathCount}</div>` : ''}
     </div>
 
     <div class="pet-grid">
@@ -2093,17 +2118,17 @@ function renderPetCard(state, p) {
         </div>
         <div class="text-[12px]" style="color:${p.fedToday ? 'var(--accent)' : 'inherit'}">
           ${p.fedToday
-            ? `✓ Goal hit${p.todayXP >= p.goal * 1.5 ? ' · workout bonus 💪' : ''}`
+            ? `✓ Goal hit${p.todayXP >= p.goal * 1.5 ? ' · workout bonus' : ''}`
             : `<b>${p.xpToFeed} XP</b> to today's goal`}
         </div>
         <div class="flex flex-wrap gap-2 pt-1">
           <button class="btn btn-primary !py-1.5 !px-3 text-[12.5px]"
                   data-pet-drop-food
                   ${p.foodPilesAvailable > 0 ? '' : 'disabled style="opacity:0.45;cursor:not-allowed"'}>
-            🥕 Drop food${p.foodPilesAvailable > 0 ? ` <span class="numeric ml-1">×${p.foodPilesAvailable}</span>` : ''}
+            <span class="inline-flex items-center gap-1.5">${iconHTML('carrot', {size: 14})} Drop food${p.foodPilesAvailable > 0 ? ` <span class="numeric ml-1">×${p.foodPilesAvailable}</span>` : ''}</span>
           </button>
           <a href="#curriculum" class="btn !py-1.5 !px-3 text-[12.5px]">Earn XP →</a>
-          <button class="btn !py-1.5 !px-3 text-[12.5px]" data-pet-lifecycle>👁 Stages</button>
+          <button class="btn !py-1.5 !px-3 text-[12.5px]" data-pet-lifecycle><span class="inline-flex items-center gap-1.5">${iconHTML('eye', {size: 14})} Stages</span></button>
         </div>
       </div>
     </div>
@@ -2117,7 +2142,7 @@ function renderPetCard(state, p) {
         <li><b>Hit ${p.goal} but not ${Math.round(p.goal*1.5)}</b> → fed but sedentary: drifts toward <b>Chubby</b> (-2)</li>
         <li><b>Skip a day</b> → vitality <span style="color:var(--bad)">-30</span>; body drifts back to Normal</li>
         <li><b>3 skipped days in a row</b> → vitality hits zero. ${esc(p.name)} <b style="color:var(--bad)">starves to death</b> in its little isometric room while you do absolutely nothing about it.</li>
-        <li><b>Death =</b> all stats reset, streak gone, a new baby pet hatches tomorrow morning to start over. Your 🪦 counter goes up forever. There is no resurrection.</li>
+        <li><b>Death =</b> all stats reset, streak gone, a new baby pet hatches tomorrow morning to start over. Your skull counter goes up forever. There is no resurrection.</li>
       </ul>
     </details>
   `;
@@ -2217,7 +2242,7 @@ function renderDashboard(state, hub) {
   hero.innerHTML = `
     ${showCueNudge ? `
       <div class="rounded-md p-3 mb-4 flex items-start gap-2" style="background:rgba(46,111,224,0.06); border:1px solid rgba(46,111,224,0.25)">
-        <span style="color:var(--sde); font-size:14px">⏰</span>
+        <span style="color:var(--sde); display:inline-flex; align-items:center">${iconHTML('clock', {size: 14})}</span>
         <div class="flex-1">
           <div class="text-[11px] uppercase tracking-wider" style="color:var(--sde); font-weight:600; letter-spacing:0.08em">Your when-then cue</div>
           <div class="text-[13.5px] mt-0.5">${esc(state.user.when_cue)}</div>
@@ -2299,9 +2324,9 @@ function renderDashboard(state, hub) {
             dropBtn.disabled = true;
             dropBtn.style.opacity = '0.45';
             dropBtn.style.cursor = 'not-allowed';
-            dropBtn.innerHTML = '🥕 Drop food';
+            dropBtn.innerHTML = `<span class="inline-flex items-center gap-1.5">${iconHTML('carrot', {size: 14})} Drop food</span>`;
           } else {
-            dropBtn.innerHTML = `🥕 Drop food <span class="numeric ml-1">×${newAvail}</span>`;
+            dropBtn.innerHTML = `<span class="inline-flex items-center gap-1.5">${iconHTML('carrot', {size: 14})} Drop food <span class="numeric ml-1">×${newAvail}</span></span>`;
           }
         });
       }
@@ -2313,7 +2338,7 @@ function renderDashboard(state, hub) {
   stats.innerHTML = `
     <div class="card !p-4">
       <div class="text-xs text-slate-400 uppercase tracking-wide">Streak</div>
-      <div class="text-3xl font-bold mt-1 flex items-center gap-1">🔥 <span class="float">${state.streak.count}</span></div>
+      <div class="text-3xl font-bold mt-1 flex items-center gap-2"><span style="color:var(--warn); display:inline-flex">${iconHTML('flame', {size: 28})}</span> <span class="float">${state.streak.count}</span></div>
       <div class="text-xs text-slate-500 mt-1 mobile-hide">${state.streak.freezeAvailable} freeze${state.streak.freezeAvailable===1?'':'s'} available</div>
     </div>
     <div class="card !p-4">
@@ -2393,7 +2418,7 @@ function renderDashboard(state, hub) {
       ${quests.map(q => {
         const pct = Math.round(q.progress/q.target*100);
         const inner = `
-          <div class="text-xl">${q.done?'✅':'🎯'}</div>
+          <div style="color:${q.done ? 'var(--accent)' : 'var(--muted)'}; display:inline-flex">${q.done ? iconHTML('check', {size: 20}) : iconHTML('target', {size: 20})}</div>
           <div class="flex-1 min-w-0">
             <div class="font-medium text-sm flex items-center justify-between gap-2">
               <span class="truncate">${esc(q.name)}</span>
@@ -2416,7 +2441,7 @@ function renderDashboard(state, hub) {
   if (next) {
     nextCard.innerHTML = `
       <div class="text-xs uppercase tracking-wide text-slate-400 mb-1">Next up</div>
-      <div class="text-sm text-slate-500 mb-2">${next.cat.icon} ${esc(next.cat.name)}</div>
+      <div class="text-sm text-slate-500 mb-2 inline-flex items-center gap-1.5">${iconHTML(next.cat.icon, {size: 16})} ${esc(next.cat.name)}</div>
       <div class="font-semibold mb-2">${esc(next.lesson.name)}</div>
       <div class="text-xs text-slate-400 mb-3">${esc(next.mod.intro || '').slice(0, 110)}…</div>
       <button class="btn btn-primary w-full" data-action="goto" data-route="#category/${next.cat.id}/${next.mod.id}">Start →</button>
@@ -2516,7 +2541,7 @@ function renderDashboard(state, hub) {
       ${cov.categories.map(c => `
         <div>
           <div class="flex items-center justify-between text-sm mb-1">
-            <a href="#category/${c.id}" class="hover:text-accent-400 transition">${c.icon} ${esc(c.name)} <span class="text-xs text-slate-500 mobile-hide">· weight ${c.weight}%</span></a>
+            <a href="#category/${c.id}" class="hover:text-accent-400 transition inline-flex items-center gap-1.5">${iconHTML(c.icon, {size: 16})} ${esc(c.name)} <span class="text-xs text-slate-500 mobile-hide">· weight ${c.weight}%</span></a>
             <span class="text-xs font-mono">${c.done}/${c.total}</span>
           </div>
           <div class="bar"><i style="width:${Math.round(c.pct*100)}%"></i></div>
@@ -2902,7 +2927,7 @@ function renderCurriculum(state, hub) {
         card.href = `#category/${c.id}`;
         card.innerHTML = `
           <div class="flex items-start justify-between">
-            <div class="text-2xl">${c.icon}</div>
+            <div class="text-accent-400">${iconHTML(c.icon, {size: 28})}</div>
             <span class="pill pill-${c.track === 'both' ? 'both' : c.track}">${c.track.toUpperCase()}</span>
           </div>
           <div class="font-display font-semibold text-lg mt-3">${esc(c.name)}</div>
@@ -2950,7 +2975,7 @@ function renderCategory(state, hub, catId, openModuleId) {
       <a href="#curriculum" class="text-xs muted hover:text-white">← All categories</a>
       <div class="flex items-end justify-between flex-wrap gap-2 mt-2">
         <div class="min-w-0">
-          <h1 class="font-display text-2xl sm:text-3xl font-semibold">${cat.icon} ${esc(cat.name)}</h1>
+          <h1 class="font-display text-2xl sm:text-3xl font-semibold inline-flex items-center gap-2">${iconHTML(cat.icon, {size: 26})} ${esc(cat.name)}</h1>
           <p class="muted mt-1 text-sm max-w-3xl mobile-hide">${esc(cat.blurb)}</p>
           <div class="text-xs muted mt-2 mobile-hide">Total time · <span class="text-[color:var(--text)] numeric">${formatTime(categoryTime(cat.id))}</span> · Remaining · <span class="text-[color:var(--text)] numeric">${formatTime(categoryRemainingTime(cat.id, state))}</span></div>
         </div>
@@ -3249,7 +3274,7 @@ function renderCompany(state, hub, id) {
         <div class="space-y-2">
           ${focusCats.map((cat,i) => `
             <a href="#category/${cat.id}" class="flex items-center gap-3 p-2 rounded-lg hover:bg-ink-700/40 transition">
-              <div class="w-8 h-8 grid place-items-center rounded-lg bg-ink-700/60">${cat.icon}</div>
+              <div class="w-8 h-8 grid place-items-center rounded-lg bg-ink-700/60">${iconHTML(cat.icon, {size: 18})}</div>
               <div class="flex-1">
                 <div class="text-sm font-medium">${esc(cat.name)}</div>
                 <div class="text-xs text-slate-400">${esc(cat.blurb).slice(0,90)}…</div>
@@ -3329,7 +3354,7 @@ function renderFlashcards(state, hub) {
     fc.innerHTML = `
       <div class="flashcard-inner">
         <div class="flashcard-face">
-          <div class="text-xs uppercase tracking-wide text-slate-400 mb-3">${CATEGORIES.find(c=>c.id===card.cat)?.icon || ''} ${card.cat}</div>
+          <div class="text-xs uppercase tracking-wide text-slate-400 mb-3 inline-flex items-center gap-1.5">${(() => { const _c = CATEGORIES.find(c => c.id === card.cat); return _c ? iconHTML(_c.icon, {size: 14}) : ''; })()} ${card.cat}</div>
           <div class="text-xl font-display font-semibold leading-snug">${esc(card.q)}</div>
           <div class="absolute bottom-5 right-6 text-xs text-slate-500">Click to reveal</div>
         </div>
@@ -3356,7 +3381,7 @@ function renderFlashcards(state, hub) {
         const q = parseInt(b.dataset.rate, 10);
         const r = GAMI.reviewCard(state, card.id, q);
         APP.afterStateChange();
-        ANIM.toast({ icon: q===1?'😬':q===4?'⚡':'👍', title:`+${r.xpGained} XP${r.bonusLabel||''}`, body: q===1?'Rescheduled tomorrow.':'Logged.' });
+        ANIM.toast({ icon: q===1 ? iconHTML('refresh-cw',{size:18}) : q===4 ? iconHTML('zap',{size:18}) : iconHTML('check',{size:18}), title:`+${r.xpGained} XP${r.bonusLabel||''}`, body: q===1?'Rescheduled tomorrow.':'Logged.' });
         GAMI.bumpQuestProgress(state, 'flashcard');
         idx++;
         paint();
@@ -3497,7 +3522,7 @@ function renderCoverage(state, hub) {
           const ok = lcount >= expected;
           return `
           <div class="flex items-center justify-between text-sm py-1.5 border-b border-ink-700/40 last:border-0">
-            <span>${c.icon} ${esc(c.name)} <span class="text-xs text-slate-500">· weight ${c.weight}%</span></span>
+            <span class="inline-flex items-center gap-1.5">${iconHTML(c.icon, {size: 16})} ${esc(c.name)} <span class="text-xs text-slate-500">· weight ${c.weight}%</span></span>
             <span class="${ok?'text-accent-400':'text-rose-400'} font-mono text-xs">${lcount} lessons / target ≥${expected} ${ok?'✓':'⚠'}</span>
           </div>`;
         }).join('')}
@@ -3510,7 +3535,7 @@ function renderCoverage(state, hub) {
       <div class="space-y-2">
         ${gaps.map(c => `
           <a href="#category/${c.id}" class="flex items-center justify-between p-2 rounded-lg hover:bg-ink-700/40 transition">
-            <span>${c.icon} ${esc(c.name)}</span>
+            <span class="inline-flex items-center gap-1.5">${iconHTML(c.icon, {size: 16})} ${esc(c.name)}</span>
             <span class="text-xs font-mono text-rose-400">${Math.round(c.pct*100)}% · weight ${c.weight}%</span>
           </a>
         `).join('')}
@@ -3522,7 +3547,7 @@ function renderCoverage(state, hub) {
       <div class="space-y-2 mt-3">
         ${weakSpots.map(c => `
           <a href="#category/${c.id}" class="flex items-center justify-between p-2 rounded-lg hover:bg-ink-700/40 transition">
-            <span>${c.icon} ${esc(c.name)}</span>
+            <span class="inline-flex items-center gap-1.5">${iconHTML(c.icon, {size: 16})} ${esc(c.name)}</span>
             <span class="text-xs font-mono text-warm-400">${Math.round(c.pct*100)}%</span>
           </a>
         `).join('')}
@@ -3773,7 +3798,7 @@ function renderStories(state, hub) {
         if (wasFreshDraft) {
           const r = GAMI.awardXP(state, 30, 'story');
           GAMI.bumpQuestProgress(state, 'story');
-          ANIM.toast({ icon:'⭐', title:`+${r.xpGained} XP${r.bonusLabel||''}`, body:'First draft saved.' });
+          ANIM.toast({ icon: iconHTML('star', {size: 18}), title:`+${r.xpGained} XP${r.bonusLabel||''}`, body:'First draft saved.' });
         }
         GAMI.saveImmediate(state);
         APP.afterStateChange();
@@ -4123,7 +4148,7 @@ function renderMockInterview(state, hub, mode) {
           return `
           <div class="card">
             <div class="flex items-start justify-between">
-              <div class="text-2xl">${cat ? cat.icon : '📘'}</div>
+              <div class="text-accent-400">${cat ? iconHTML(cat.icon, {size: 22}) : iconHTML('book-open', {size: 22})}</div>
               <span class="text-[10px] muted uppercase tracking-wider">Topic ${i+1}</span>
             </div>
             <div class="text-xs muted mt-2">${esc(cat ? cat.name : t.cat)}</div>
@@ -4356,7 +4381,7 @@ function renderMockInterview(state, hub, mode) {
       GAMI.saveImmediate(state);
       APP.afterStateChange();
       ANIM.confettiBurst && ANIM.confettiBurst(pct >= 80 ? 'l' : 'm');
-      ANIM.toast && ANIM.toast({ icon:'🎯', title:`+${totalXp} XP`, body:`${isPractice ? 'Practice ' : ''}Mock exam · ${correct}/${total}` });
+      ANIM.toast && ANIM.toast({ icon: iconHTML('target', {size: 18}), title:`+${totalXp} XP`, body:`${isPractice ? 'Practice ' : ''}Mock exam · ${correct}/${total}` });
     }
 
     container.innerHTML = `
@@ -4378,7 +4403,7 @@ function renderMockInterview(state, hub, mode) {
             return `
               <div>
                 <div class="flex items-center justify-between text-sm mb-1">
-                  <span>${cat ? cat.icon : ''} <b>${esc(p.topic.lesson.name)}</b></span>
+                  <span class="inline-flex items-center gap-1.5">${cat ? iconHTML(cat.icon, {size: 14}) : ''} <b>${esc(p.topic.lesson.name)}</b></span>
                   <span class="numeric" style="color:${color}">${p.correct}/${p.total}</span>
                 </div>
                 <div class="bar"><i style="width:${pPct}%; background:${color}"></i></div>
@@ -4425,5 +4450,6 @@ return {
   renderCoverage, renderProfile, renderSources, renderMocks, renderStories,
   renderPrep, renderReview, renderMockInterview,
   openPetLifecyclePreview,
+  iconHTML,                       // exposed so app.js/animations.js toasts can use Lucide too
 };
 })();

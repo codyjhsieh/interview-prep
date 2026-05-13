@@ -177,8 +177,11 @@ function awardXP(state, amount, reason) {
     state.pet.lastFeedToastDate = today;
     const petName = (state.pet && state.pet.name) || 'Bit';
     if (typeof window !== 'undefined' && window.ANIM && window.ANIM.toast) {
+      // Inline Lucide carrot SVG (kept as a literal string here because
+      // gamification.js can run before views.js exports iconHTML).
+      const carrotIcon = '<span class="icon" style="display:inline-block;width:18px;height:18px;background-color:currentColor;-webkit-mask:url(\'assets/icons/carrot.svg\') no-repeat center/contain;mask:url(\'assets/icons/carrot.svg\') no-repeat center/contain;vertical-align:-3px"></span>';
       window.ANIM.toast({
-        icon: '🥕',
+        icon: carrotIcon,
         title: `${petName} is hungry`,
         body: 'You hit today\'s XP goal — head to the dashboard and drop food.',
         href: '#dashboard',

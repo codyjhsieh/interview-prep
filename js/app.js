@@ -78,30 +78,44 @@ function render() {
 
   const { route, a, b } = parseHash();
   const hub = document.getElementById('view');
-  hub.innerHTML = '';
   setActiveNav(route);
 
-  switch (route) {
-    case 'dashboard':    VIEWS.renderDashboard(state, hub); break;
-    case 'curriculum':   VIEWS.renderCurriculum(state, hub); break;
-    case 'category':     VIEWS.renderCategory(state, hub, a, b); break;
-    case 'companies':    VIEWS.renderCompanies(state, hub); break;
-    case 'company':      VIEWS.renderCompany(state, hub, a); break;
-    case 'flashcards':   VIEWS.renderFlashcards(state, hub); break;
-    case 'stories':      VIEWS.renderStories(state, hub); break;
-    case 'mocks':        VIEWS.renderMocks(state, hub); break;
-    case 'mock':         VIEWS.renderMockInterview(state, hub, a); break;
-    case 'games':        a ? GAMES.renderGame(state, hub, a) : GAMES.renderGamesIndex(state, hub); break;
-    case 'infographics': VIEWS.renderInfographics(state, hub); break;
-    case 'coverage':     VIEWS.renderCoverage(state, hub); break;
-    case 'prep':         VIEWS.renderPrep(state, hub, a || 'stories'); break;
-    case 'review':       VIEWS.renderReview(state, hub, a || 'missed'); break;
-    case 'sources':      VIEWS.renderSources(state, hub); break;
-    case 'profile':      VIEWS.renderProfile(state, hub); break;
-    default:             VIEWS.renderDashboard(state, hub);
+  // The actual DOM swap — wrapped so View Transitions can snapshot before/
+  // after states for a smooth morph between routes.
+  const swap = () => {
+    hub.innerHTML = '';
+    switch (route) {
+      case 'dashboard':    VIEWS.renderDashboard(state, hub); break;
+      case 'curriculum':   VIEWS.renderCurriculum(state, hub); break;
+      case 'category':     VIEWS.renderCategory(state, hub, a, b); break;
+      case 'companies':    VIEWS.renderCompanies(state, hub); break;
+      case 'company':      VIEWS.renderCompany(state, hub, a); break;
+      case 'flashcards':   VIEWS.renderFlashcards(state, hub); break;
+      case 'stories':      VIEWS.renderStories(state, hub); break;
+      case 'mocks':        VIEWS.renderMocks(state, hub); break;
+      case 'mock':         VIEWS.renderMockInterview(state, hub, a); break;
+      case 'games':        a ? GAMES.renderGame(state, hub, a) : GAMES.renderGamesIndex(state, hub); break;
+      case 'infographics': VIEWS.renderInfographics(state, hub); break;
+      case 'coverage':     VIEWS.renderCoverage(state, hub); break;
+      case 'prep':         VIEWS.renderPrep(state, hub, a || 'stories'); break;
+      case 'review':       VIEWS.renderReview(state, hub, a || 'missed'); break;
+      case 'sources':      VIEWS.renderSources(state, hub); break;
+      case 'profile':      VIEWS.renderProfile(state, hub); break;
+      default:             VIEWS.renderDashboard(state, hub);
+    }
+    updateHeader();
+  };
+
+  // View Transitions API — Chrome 111+, Safari 18+. When supported, the
+  // browser snapshots the old DOM, calls swap(), snapshots the new DOM,
+  // and cross-fades them. With matching view-transition-name on elements
+  // in old and new DOM, those elements morph (FLIP). Fallback: just swap.
+  if (typeof document.startViewTransition === 'function') {
+    document.startViewTransition(swap);
+  } else {
+    swap();
+    ANIM.viewIn(hub.firstElementChild);                // legacy fade-in
   }
-  updateHeader();
-  ANIM.viewIn(hub.firstElementChild);
 }
 
 function afterStateChange() {
@@ -147,12 +161,12 @@ function startFocusSession(focusMin = 50, breakMin = 10) {
     if (secsLeft <= 0) {
       ANIM.confettiBurst('s');
       if (phase === 'focus') {
-        ANIM.toast({ icon:'☕', title:'Focus block done', body:`Take a ${breakMin}-min break — research-backed.` });
+        ANIM.toast({ icon: VIEWS.iconHTML('coffee', {size: 18}), title:'Focus block done', body:`Take a ${breakMin}-min break — research-backed.` });
         const r = GAMI.awardXP(state, 25, 'focus');
         afterStateChange();
         phase = 'break'; secsLeft = breakMin * 60;
       } else {
-        ANIM.toast({ icon:'🚀', title:'Break done', body:'Back to it. Next focus block started.' });
+        ANIM.toast({ icon: VIEWS.iconHTML('rocket', {size: 18}), title:'Break done', body:'Back to it. Next focus block started.' });
         phase = 'focus'; secsLeft = focusMin * 60;
       }
     }
@@ -281,7 +295,7 @@ function bindEvents() {
       }
       afterStateChange();
       buildSidebar();
-      ANIM.toast({ icon:'💾', title:'Saved' });
+      ANIM.toast({ icon: VIEWS.iconHTML('save', {size: 18}), title:'Saved' });
       return;
     }
     if (e.target.id === 'mock-form') {
@@ -300,7 +314,7 @@ function bindEvents() {
       state.mocks.push(m);
       const r = GAMI.awardXP(state, 60, 'mock');
       ANIM.confettiBurst('m');
-      ANIM.toast({ icon:'🎯', title:`+${r.xpGained} XP${r.bonusLabel||''}`, body:'Mock logged.' });
+      ANIM.toast({ icon: VIEWS.iconHTML('target', {size: 18}), title:`+${r.xpGained} XP${r.bonusLabel||''}`, body:'Mock logged.' });
       afterStateChange();
       render();
       return;
@@ -320,7 +334,7 @@ function bindEvents() {
       if (fresh) {
         const r = GAMI.awardXP(state, 30, 'story');
         GAMI.bumpQuestProgress(state, 'story');
-        ANIM.toast({ icon:'⭐', title:`+${r.xpGained} XP${r.bonusLabel||''}`, body:'Story saved.' });
+        ANIM.toast({ icon: VIEWS.iconHTML('star', {size: 18}), title:`+${r.xpGained} XP${r.bonusLabel||''}`, body:'Story saved.' });
       } else {
         ANIM.toast({ icon:'💾', title:'Updated' });
       }

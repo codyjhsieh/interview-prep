@@ -251,58 +251,58 @@ const EXTRA_QUIZZES = {
 const CATEGORIES = [
   // ─── Tier 1 · Technical core ──────────────────────────────────────────
   {
-    id: 'ai',     name: 'AI / LLM Production',         icon: '🤖',
+    id: 'ai',     name: 'AI / LLM Production',         icon: 'cpu',
     weight: 17, track: 'both', tier: 1, roi: 5,
     blurb: 'Highest-ROI technical category for 2026. Most candidates have <20 hours of production-AI prep — every hour here has direct interview-question impact. RAG, evals, prompts, agents, fine-tune vs RAG decisions.',
   },
   {
-    id: 'decomp', name: 'Decomposition & Case Study', icon: '🧩',
+    id: 'decomp', name: 'Decomposition & Case Study', icon: 'puzzle',
     weight: 18, track: 'fde', tier: 1, roi: 5,
     blurb: 'Most-asked FDE round + biggest learning gap for candidates. The Palantir-pioneered round now standard at OpenAI, Anthropic, Scale. They grade how you think, not your answer.',
   },
   {
-    id: 'sysd',   name: 'System Design',                icon: '🏗️',
+    id: 'sysd',   name: 'System Design',                icon: 'building-2',
     weight: 13, track: 'both', tier: 1, roi: 4,
     blurb: 'Classic FAANG primitives PLUS FDE-specific (multi-tenancy, webhooks, SSO/SAML/OIDC, VPC deploys, compliance). FDE-flavored designs are novel even for senior SWEs.',
   },
   {
-    id: 'coding', name: 'Coding & Algorithms',          icon: '⌨️',
+    id: 'coding', name: 'Coding & Algorithms',          icon: 'code',
     weight: 15, track: 'both', tier: 1, roi: 3,
     blurb: 'LeetCode-medium difficulty wrapped in customer scenarios. ROI is moderate-per-hour because most candidates have already done extensive LeetCode prep elsewhere — but failure here is binary. Use as a refresher.',
   },
 
   // ─── Tier 2 · Technical supporting ────────────────────────────────────
   {
-    id: 'data',   name: 'SQL & Data Engineering',       icon: '🗄️',
+    id: 'data',   name: 'SQL & Data Engineering',       icon: 'database',
     weight: 8,  track: 'both', tier: 2, roi: 3,
     blurb: 'Window functions, JOIN edge cases, indexes, OLAP/OLTP, pipelines, CDC. Strong gap for many SWEs; weak gap for data-track candidates.',
   },
   {
-    id: 'cloud',  name: 'Cloud, DevOps & Integrations', icon: '☁️',
+    id: 'cloud',  name: 'Cloud, DevOps & Integrations', icon: 'cloud',
     weight: 6,  track: 'both', tier: 2, roi: 3,
     blurb: 'AWS/GCP basics + the FDE-specific add-ons (SAML/OIDC/SCIM, OAuth, compliance lingo, observability). The "integration wall" is where most AI deploys actually fail.',
   },
 
   // ─── Tier 3 · Interpersonal / context ─────────────────────────────────
   {
-    id: 'client', name: 'Client Simulation',            icon: '🎭',
+    id: 'client', name: 'Client Simulation',            icon: 'users-round',
     weight: 9,  track: 'fde', tier: 3, roi: 4,
     blurb: 'High-ROI per hour when this round is in your loop — but binary by company. Live roleplays: failed demo, hostile stakeholder, missed deadline. ADO framework.',
   },
   {
-    id: 'behav',  name: 'Behavioral / Values',          icon: '💬',
+    id: 'behav',  name: 'Behavioral / Values',          icon: 'message-circle',
     weight: 8,  track: 'both', tier: 3, roi: 3,
     blurb: 'STAR with Action-weighted answers + 5 required FDE stories. Most candidates have generic STAR prep; the senior signal is specificity + the Palantir failure-story bar.',
   },
   {
-    id: 'domain', name: 'Domain & Industry Vertical',   icon: '🏷️',
+    id: 'domain', name: 'Domain & Industry Vertical',   icon: 'tag',
     weight: 4,  track: 'fde', tier: 3, roi: 2,
     blurb: 'AI-first vs hospitality vs marketplace vs devtools vs fintech. Low ROI for general prep; HIGH ROI when you\'re interviewing at a specific company in that vertical.',
   },
 
   // ─── Tier 4 · Cumulative habit ────────────────────────────────────────
   {
-    id: 'meta',   name: 'Meta-Skills & Habits',         icon: '🧠',
+    id: 'meta',   name: 'Meta-Skills & Habits',         icon: 'brain',
     weight: 2,  track: 'both', tier: 4, roi: 2,
     blurb: 'Low per-hour ROI but compounds. Habit formation, mock cadence, pipeline mechanics, negotiation, resume/portfolio signal. Pipeline strategy moves more outcomes than any single concept.',
   },
