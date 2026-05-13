@@ -8020,7 +8020,7 @@ const COMPANIES = [
     sub:"Audio streaming (NYSE)",
     stage:"Public", raised:"$540M pre-IPO", lead:"TCV",
     badges:["NYSE", "TCV", "DST"],
-    totalRoles:30,
+    totalRoles:28,
     notes:"Public co. Audio infra + recs + ads + creator tools.",
     jobs:[
       { title:"Senior Backend Engineer - Music", url:"https://jobs.lever.co/spotify/05c0fde5-9553-4b1a-95ea-2b46f0e670bb", level:"senior" },
@@ -8035,7 +8035,6 @@ const COMPANIES = [
       { title:"Senior Machine Learning Engineer, Personalization, Rewards", url:"https://jobs.lever.co/spotify/2581943f-52cd-4967-b2bd-c1a0354fa422", level:"senior" },
       { title:"Senior Software Engineer - Platform Infrastructure", url:"https://jobs.lever.co/spotify/8b10d06e-0102-4306-831e-4949cb1cc753", level:"senior" },
       { title:"Backend Engineer  - Data Infrastructure", url:"https://jobs.lever.co/spotify/66492688-d5b0-4cf8-b1a4-4a715157edd9", level:"mid" },
-      { title:"Backend Engineer -  Music Mission", url:"https://jobs.lever.co/spotify/19c5ea15-6f4d-425a-911c-c3f0ae086f8f", level:"mid" },
       { title:"Backend Engineer - Ads Measurement", url:"https://jobs.lever.co/spotify/805d36ed-624c-41d4-9eaa-6f4bff7f53e3", level:"mid" },
       { title:"Backend Engineer - Music", url:"https://jobs.lever.co/spotify/0f8f7921-bcb4-444c-8ceb-4d3fa6459493", level:"mid" },
       { title:"Backend Engineer, Music", url:"https://jobs.lever.co/spotify/52fe2b49-3c85-4479-b1db-2c5ab74cbcfc", level:"mid" },
@@ -8047,7 +8046,6 @@ const COMPANIES = [
       { title:"Machine Learning Engineer", url:"https://jobs.lever.co/spotify/e200d025-4cff-4eb8-afa4-6680e31c43a2", level:"mid" },
       { title:"Machine Learning Engineer", url:"https://jobs.lever.co/spotify/e68ad741-4c4e-4b06-ae11-9cf1e36dd40f", level:"mid" },
       { title:"Machine Learning Engineer - Personalization", url:"https://jobs.lever.co/spotify/dfbf550d-b099-4dd9-9228-15d921e46516", level:"mid" },
-      { title:"Machine Learning Engineer - Personalization, Horizon", url:"https://jobs.lever.co/spotify/24a1c98b-bbb7-4651-a6a3-2a1df910652e", level:"mid" },
       { title:"Machine Learning Engineer - Subscriptions", url:"https://jobs.lever.co/spotify/57247883-9d9f-44cb-aabc-d63553da53c2", level:"mid" },
       { title:"Machine Learning Engineer I, Personalization , Minesweeper", url:"https://jobs.lever.co/spotify/fd79c3f5-1b2c-47c0-a3c6-4972b559e1c1", level:"mid" },
       { title:"Machine Learning Engineer, Personalization, Minesweeper", url:"https://jobs.lever.co/spotify/de3f6a47-4d75-4512-8351-b362f1d1c32e", level:"mid" },
@@ -8554,7 +8552,17 @@ const COMPANIES = [
     jobs:[
       { title:"Product Engineer", url:"https://jobs.ashbyhq.com/warp/655962db-5fbe-40cc-a072-9522295b3cbc", level:"mid" }
     ] },
+  { id:"output", name:"Output", vertical:"saas",
+    sub:"Music production software",
+    stage:"Series A", raised:"$45M", lead:"Goldman Sachs",
+    badges:["Goldman Sachs", "Marker"],
+    totalRoles:1,
+    notes:"Music-production software (Arcade, Portal). Audio infra, ML for music, DAW integrations.",
+    jobs:[
+      { title:"Machine Learning Engineer (NYC)", url:"https://jobs.ashbyhq.com/output/557f7dfe-6342-4e20-a817-8e95852ed124", level:"mid" }
+    ] },
 ];
+
 
 
 
@@ -8968,7 +8976,7 @@ const COMPANY_DOMAINS = {
   metropolis:'metropolis.io', 'opus-training':'opus.so', partiful:'partiful.com',
   plot:'plotai.com', qloo:'qloo.com', sandbar:'sandbar.ai',
   sequence:'sequence.app', slate:'slate.com', sola:'sola.ai',
-  suno:'suno.com', warp:'warp.dev',
+  suno:'suno.com', warp:'warp.dev', output:'output.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */

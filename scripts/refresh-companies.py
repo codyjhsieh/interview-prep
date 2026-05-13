@@ -242,6 +242,7 @@ CANDIDATES = [
   ("sola","Sola","ashby","sola","ai","AI agents for service businesses","Series A","$30M","Lightspeed",["Lightspeed","FirstMark"],"Forward-deployed AI for vertical services (legal, real estate, etc). Customer-deploy heavy."),
   ("suno","Suno","ashby","suno","ai","AI music generation","Series B","$125M","Lightspeed",["Lightspeed","Founder Collective","Nat Friedman"],"Generative music at scale. Audio pipelines, copyright/moderation, eval on subjective quality."),
   ("warp","Warp","ashby","warp","ai","AI-native terminal","Series B","$73M","Sequoia",["Sequoia","GV"],"Reimagined terminal with AI. Heavy on developer experience, latency, prompt design for code."),
+  ("output","Output","ashby","output","saas","Music production software","Series A","$45M","Goldman Sachs",["Goldman Sachs","Marker"],"Music-production software (Arcade, Portal). Audio infra, ML for music, DAW integrations."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -294,6 +295,7 @@ DOMAINS = {
   "opus-training":"opus.so","partiful":"partiful.com","plot":"plotai.com",
   "qloo":"qloo.com","sandbar":"sandbar.ai","sequence":"sequence.app",
   "slate":"slate.com","sola":"sola.ai","suno":"suno.com","warp":"warp.dev",
+  "output":"output.com",
 }
 
 

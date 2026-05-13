@@ -578,8 +578,73 @@ function _sunPhysicsParams(forceHour) {
       if (o !== null && !isNaN(parseFloat(o))) h = parseFloat(o);
     } catch (_) {}
   }
+  // Helper: linear interpolate between two hex colors (0xRRGGBB).
+  const lerpHex = (a, b, t) => {
+    const ar = (a >> 16) & 0xff, ag = (a >> 8) & 0xff, ab = a & 0xff;
+    const br = (b >> 16) & 0xff, bg = (b >> 8) & 0xff, bb = b & 0xff;
+    const r = Math.round(ar + (br - ar) * t);
+    const g = Math.round(ag + (bg - ag) * t);
+    const bl = Math.round(ab + (bb - ab) * t);
+    return (r << 16) | (g << 8) | bl;
+  };
+  // Smoothstep eases the lerp at both ends so the dusk crossfade reads
+  // like real twilight (slow start, fast middle, slow end).
+  const smoothstep = (t) => t * t * (3 - 2 * t);
+
+  // Compute sunset palette + position (used directly between 16:30–17:30,
+  // and lerped from across the 17:30–18:30 dusk window).
+  const sunsetState = () => {
+    const tNorm = (h - 6) / 12;
+    const angle = tNorm * Math.PI;
+    const R = 5;
+    const elev = Math.sin(angle);
+    return {
+      sunPos: [Math.cos(angle) * R, Math.sin(angle) * 5 + 9, -10],
+      sunColor: 0xff8048,
+      sunIntensity: 0.55 + elev * 0.5,
+      ambColor: 0xff9c70,
+      ambIntensity: 0.6,
+      skyColor: 0xff8d54,
+      floorTint: 0xffd8b8,
+    };
+  };
+  // Night palette + moon position.
+  const nightState = () => {
+    const nightT = (h < 6) ? (h + 6) / 12 : (Math.max(h, 18) - 18) / 12;
+    const angle = nightT * Math.PI;
+    const R = 5;
+    return {
+      sunPos: [-Math.cos(angle) * R, Math.sin(angle) * 5 + 5, -10],
+      sunColor: 0x8aa6cc,
+      sunIntensity: 0.32,
+      ambColor: 0x2e3b5e,
+      ambIntensity: 0.38,
+      skyColor: 0x1e2c4a,
+      floorTint: 0x90a0c0,
+    };
+  };
+
   let phase, sunPos, sunColor, sunIntensity, ambColor, ambIntensity, skyColor, floorTint;
-  if (h >= 6 && h < 18) {
+  if (h >= 17.5 && h < 18.5) {
+    // Dusk crossfade — smoothly blend sunset → night across one hour
+    // (17:30 → 18:30) so the transition feels like real twilight rather
+    // than a hard cut at 18:00.
+    phase = 'dusk';
+    const t = smoothstep((h - 17.5) / 1.0);
+    const a = sunsetState();
+    const b = nightState();
+    sunPos = [
+      a.sunPos[0] * (1 - t) + b.sunPos[0] * t,
+      a.sunPos[1] * (1 - t) + b.sunPos[1] * t,
+      a.sunPos[2] * (1 - t) + b.sunPos[2] * t,
+    ];
+    sunColor     = lerpHex(a.sunColor,  b.sunColor,  t);
+    sunIntensity = a.sunIntensity * (1 - t) + b.sunIntensity * t;
+    ambColor     = lerpHex(a.ambColor,  b.ambColor,  t);
+    ambIntensity = a.ambIntensity * (1 - t) + b.ambIntensity * t;
+    skyColor     = lerpHex(a.skyColor,  b.skyColor,  t);
+    floorTint    = lerpHex(a.floorTint, b.floorTint, t);
+  } else if (h >= 6 && h < 17.5) {
     // Daytime — sun arcs east → west. Tighter arc than physically realistic
     // so the ray projected through the window always lands ON the room
     // floor (window y=3, floor=0 → small denominator amplifies x position
@@ -602,14 +667,10 @@ function _sunPhysicsParams(forceHour) {
       ambIntensity = 0.55;
       skyColor = 0xffd0a0;
       floorTint = 0xffeed8;
-    } else if (h >= 16.5) {                      // sunset
+    } else if (h >= 16.5) {                      // sunset (16:30–17:30)
       phase = 'sunset';
-      sunColor = 0xff8048;
-      sunIntensity = 0.55 + elev * 0.5;
-      ambColor = 0xff9c70;
-      ambIntensity = 0.6;
-      skyColor = 0xff8d54;
-      floorTint = 0xffd8b8;
+      const s = sunsetState();
+      ({ sunColor, sunIntensity, ambColor, ambIntensity, skyColor, floorTint } = s);
     } else {                                     // midday
       phase = 'day';
       sunColor = 0xfff4d8;
@@ -620,25 +681,13 @@ function _sunPhysicsParams(forceHour) {
       floorTint = 0xffffff;
     }
   } else {
-    // Night — moonlight from a parallel arc, dim cool blue.
-    // Y baseline raised to 5 (always ABOVE the window at Y=3) so the ray
-    // ALWAYS angles downward into the room — no more nights with no
-    // moonbeam because moon was below the window.
+    // Night (after dusk completes at 18:30, until 06:00 next morning).
+    // Moonlight from a parallel arc, dim cool blue. Y baseline raised to 5
+    // (always ABOVE the window at Y=3) so the ray ALWAYS angles downward
+    // into the room — no more nights with no moonbeam.
     phase = (h < 6) ? 'night' : 'late';
-    const nightT = (h < 6) ? (h + 6) / 12 : (h - 18) / 12;
-    const angle = nightT * Math.PI;
-    const R = 5;
-    sunPos = [
-      -Math.cos(angle) * R,
-       Math.sin(angle) * 5 + 5,    // min Y = 5 (above window), peak 10
-      -10,
-    ];
-    sunColor = 0x8aa6cc;
-    sunIntensity = 0.32;
-    ambColor = 0x2e3b5e;          // deep cool, dim
-    ambIntensity = 0.38;
-    skyColor = 0x1e2c4a;          // dark night sky (the outside is dark!)
-    floorTint = 0x90a0c0;
+    const n = nightState();
+    ({ sunPos, sunColor, sunIntensity, ambColor, ambIntensity, skyColor, floorTint } = n);
   }
   return { phase, hour: h, sunPos, sunColor, sunIntensity, ambColor, ambIntensity, skyColor, floorTint };
 }
@@ -702,7 +751,8 @@ function mountPet3D(container, p) {
   scene.add(skirt);
 
   // Walls take their tint from the time-of-day so midday cream, afternoon
-  // warmth, sunset amber, and night cool-gray all read differently.
+  // warmth, sunset amber, dusk muted-purple, and night cool-gray all read
+  // differently.
   const wallColorByPhase = {
     dawn:   0xF6DCC4,   // soft peach
     day:    0xF2E2C6,   // bright cream — midday baseline
@@ -710,13 +760,31 @@ function mountPet3D(container, p) {
     night:  0x4F5A77,   // cool dim
     late:   0x4F5A77,
   };
+  // Dusk wall = lerp between sunset and night wall colors, matching the
+  // sun-phase crossfade window (17:30 → 18:30).
+  function wallForDusk() {
+    const t = Math.max(0, Math.min(1, (tod.hour - 17.5) / 1.0));
+    const ts = t * t * (3 - 2 * t);                       // smoothstep
+    const a = wallColorByPhase.sunset, b = wallColorByPhase.night;
+    const r = Math.round(((a >> 16) & 0xff) * (1 - ts) + ((b >> 16) & 0xff) * ts);
+    const g = Math.round(((a >> 8)  & 0xff) * (1 - ts) + ((b >> 8)  & 0xff) * ts);
+    const bl = Math.round((a & 0xff) * (1 - ts) + (b & 0xff) * ts);
+    return (r << 16) | (g << 8) | bl;
+  }
   const wallColor = (tod.phase === 'day' && tod.hour >= 14)
     ? 0xEFD8B8                                          // afternoon, warmer
-    : (wallColorByPhase[tod.phase] || 0xF2E2C6);
+    : tod.phase === 'dusk'
+      ? wallForDusk()
+      : (wallColorByPhase[tod.phase] || 0xF2E2C6);
   // Two-tone walls — the side wall reads as in shadow vs. the back wall so the
   // room has actual depth instead of looking like flat cardboard. Shadow ratio
-  // is gentler at night (less directional sun) than during the day.
-  const shadowK = (tod.phase === 'night' || tod.phase === 'late') ? 0.88 : 0.74;
+  // is gentler at night (less directional sun) than during the day, and
+  // interpolates during dusk.
+  const shadowK = (tod.phase === 'night' || tod.phase === 'late')
+    ? 0.88
+    : tod.phase === 'dusk'
+      ? (0.74 + (0.88 - 0.74) * ((tod.hour - 17.5) / 1.0))
+      : 0.74;
   const _wallShade = (rgb, k) => {
     const r = Math.round(((rgb >> 16) & 0xff) * k);
     const g = Math.round(((rgb >> 8)  & 0xff) * k);
