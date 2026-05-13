@@ -93,13 +93,13 @@ const TABBAR_ROUTES = [
   { id: 'dashboard',  label: 'Today',      icon: 'layout-dashboard' },
   { id: 'curriculum', label: 'Curriculum', icon: 'book-open' },
   { id: 'flashcards', label: 'Cards',      icon: 'layers' },
-  { id: 'games',      label: 'Games',      icon: 'target' },
+  { id: 'companies',  label: 'Companies',  icon: 'building' },
   { id: 'more',       label: 'More',       icon: 'sparkles', isMore: true },
 ];
-/* Secondary routes that live in the "More" sheet. Companies moves here
- * because games + cards are higher-frequency for active prep. */
+/* Secondary routes that live in the "More" sheet. Games moves here —
+ * Companies (live NYC postings) is higher-frequency for active prep. */
 const TABBAR_MORE_ROUTES = [
-  { id: 'companies',   label: 'Companies',    icon: 'building' },
+  { id: 'games',       label: 'Games',        icon: 'target' },
   { id: 'stories',     label: 'STAR Bank',    icon: 'scroll-text' },
   { id: 'mocks',       label: 'Mock log',     icon: 'clock' },
   { id: 'coverage',    label: 'Coverage',     icon: 'list-checks' },

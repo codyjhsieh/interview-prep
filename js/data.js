@@ -6932,89 +6932,403 @@ The negotiation conversation usually takes 2-3 rounds over a week. Stay friendly
 },
 ];
 
-/* ---------- COMPANIES ---------- */
+/* ---------- COMPANIES ----------
+ * NYC-hiring board: companies with $5M+ disclosed VC/accelerator funding
+ * that have at least one ACTIVE engineering posting located in New York
+ * (HQ doesn't have to be NYC — only the posting). Verified 2026-05-13
+ * against each company's live Ashby / Greenhouse / Lever public ATS
+ * JSON. URLs link directly to the posting (not aggregators).
+ *
+ * Schema: { id, name, vertical, sub, stage, raised, lead, badges[],
+ *           totalRoles, notes, jobs[{ title, url, level }] }
+ *  - totalRoles is the count of matching NYC engineering postings the
+ *    company had open on verification day; `jobs` is the top 3 only.
+ *  - jobs[].level is "founding" | "senior" | "mid"
+ */
+const COMPANIES_VERIFIED_AT = '2026-05-13';
 const COMPANIES = [
-  { id:'deepgram',  name:'Deepgram',        vertical:'ai',       sub:'Speech AI / STT',
-    focus:['ai','sysd','cloud','coding'],
-    notes:'Real-time speech recognition. Expect low-latency systems thinking, streaming protocols, audio pipelines. Production AI eval discipline is a core signal.',
-    sample:['Design a streaming STT pipeline handling 10k concurrent sessions.','How do you eval an ASR model on accented English?','Debug: WER spikes on Tuesday in a single customer\'s traffic.'] },
-  { id:'dorsia',    name:'Dorsia',          vertical:'hospitality', sub:'Membership dining',
-    focus:['data','sysd','behav','domain'],
-    notes:'Membership-based restaurant booking. SQL + reservation-inventory mechanics + payments + mobile UX. Customer empathy with operators.',
-    sample:['Schema for a multi-venue reservation system with deposit-required slots.','How would you prevent double-booking under high concurrency?','Find members who haven\'t booked in 90 days and have >2 cancellations.'] },
-  { id:'bikky',     name:'Bikky',           vertical:'hospitality', sub:'Restaurant data platform',
-    focus:['data','sysd','cloud','domain'],
-    notes:'Unifies POS data across Toast/Square/Olo. Heavy SQL, integration engineering, data quality, customer-facing dashboards.',
-    sample:['Reconcile order data when the same order arrives from POS and 3rd-party delivery.','Compute item-level menu mix LTM with discount allocation.','Pipeline shows Tuesday DQ regressions — investigate.'] },
-  { id:'airgoods',  name:'Airgoods',        vertical:'marketplace', sub:'B2B grocery / CPG',
-    focus:['sysd','data','behav','domain'],
-    notes:'Wholesale CPG marketplace. Two-sided liquidity, search/catalog, payments, inventory sync.',
-    sample:['Design product-catalog dedupe across vendor SKUs.','How would you handle out-of-stock during checkout?','Build a buyer cold-start recommendation list.'] },
-  { id:'blackbird', name:'Blackbird Labs',  vertical:'hospitality', sub:'Loyalty / payments',
-    focus:['sysd','cloud','data','domain'],
-    notes:'Restaurant loyalty + on-chain rewards. Payments rails, identity, hospitality UX, integrations with POS.',
-    sample:['Design a points ledger that survives chargebacks.','Reconcile on-chain rewards with off-chain POS data.','Onboard a 100-venue chain in <2 weeks.'] },
-  { id:'sevenrooms',name:'SevenRooms',      vertical:'hospitality', sub:'Hospitality CRM',
-    focus:['data','sysd','coding','domain'],
-    notes:'Reservation + guest CRM for restaurants/hotels. SQL screen is heavy. Multi-tenant, integrations with OpenTable/Resy/POS.',
-    sample:['Top-N guests by lifetime spend per venue with tiebreaker.','Design availability sync between SevenRooms and OpenTable.','Bug: VIP tags missing on import — debug the ETL.'] },
-  { id:'instawork', name:'Instawork',       vertical:'marketplace', sub:'Hourly-work marketplace',
-    focus:['sysd','coding','data','domain'],
-    notes:'Hourly worker ↔ business matching. Matching algorithms, mobile-first, supply/demand balance, fraud.',
-    sample:['Design the matching algorithm for shift offers.','How do you cold-start a new metro with no workers?','Detect shift-cancellation fraud patterns.'] },
-  { id:'resortpass',name:'ResortPass',      vertical:'marketplace', sub:'Day-pass hotels',
-    focus:['sysd','data','behav','domain'],
-    notes:'Day-pass hotel amenity marketplace. Inventory management, dynamic pricing, hospitality partners.',
-    sample:['Design hotel-side inventory + pricing controls.','How would you handle no-shows and overbooking?','Compute pool capacity utilization by hour.'] },
-  { id:'nory',      name:'Nory',            vertical:'hospitality', sub:'Restaurant ops AI',
-    focus:['ai','data','sysd','domain'],
-    notes:'AI for hospitality operations — forecasting, scheduling, inventory. ML + SQL + customer-facing dashboards.',
-    sample:['Forecast next-week\'s covers for a venue with seasonality + events.','Design a staff-scheduling system that handles labor laws across 5 markets.','Why did your forecast miss by 30% last weekend?'] },
-  { id:'hang',      name:'Hang',            vertical:'hospitality', sub:'Loyalty / membership',
-    focus:['sysd','data','cloud','domain'],
-    notes:'Membership/loyalty platform with web3 elements. Integration breadth, payments, customer dashboards.',
-    sample:['Design tier-based rewards with grandfathered legacy tiers.','How do you migrate a brand from another loyalty platform?','Detect points-farming abuse.'] },
-  { id:'loopai',    name:'Loop AI',         vertical:'ai',       sub:'AI agents for logistics',
-    focus:['ai','sysd','client','decomp'],
-    notes:'AI agents for freight / logistics ops. Agent design, eval discipline, customer-facing deployments.',
-    sample:['Design eval suite for a freight-audit agent.','How does the agent bound itself from costly errors?','Walk through your first 30 days deploying for a top-5 carrier.'] },
-  { id:'qloo',      name:'Qloo',            vertical:'ai',       sub:'Taste / cultural AI API',
-    focus:['ai','sysd','data','coding'],
-    notes:'Cross-domain taste graph API. Recommender systems, API design, latency.',
-    sample:['Design a low-latency lookalike API at 100M users.','How would you eval taste-prediction quality?','Cold-start: new user, one signal — how do you recommend?'] },
-  { id:'mirage',    name:'Mirage',          vertical:'ai',       sub:'AI 3D worldbuilding',
-    focus:['ai','coding','sysd','domain'],
-    notes:'AI for 3D world / scene generation. Long-running inference, multimodal, GPU pool design.',
-    sample:['Design async GPU job queue with progress streaming.','How do you eval scene-coherence quality?','User cancels a 5-min generation at 90% — what happens?'] },
-  { id:'runway',    name:'Runway',          vertical:'ai',       sub:'AI video generation',
-    focus:['ai','sysd','coding','client'],
-    notes:'Generative video. Long inference, content moderation, customer-facing studio UX. Heavy on multimodal eval and product sense.',
-    sample:['Design content-moderation pre/post-generation.','How would you reduce user wait time perceived?','Handle a viral spike that 10×s GPU demand overnight.'] },
-  { id:'suno',      name:'Suno',            vertical:'ai',       sub:'AI music generation',
-    focus:['ai','sysd','coding','domain'],
-    notes:'Generative music. Audio pipelines, copyright/moderation, eval on subjective quality.',
-    sample:['Design fingerprinting for copyright similarity.','How do you eval "this sounds good"?','Latency target: under 30s per 2-min track — what do you optimize?'] },
-  { id:'credal',    name:'Credal',          vertical:'devtools', sub:'Enterprise LLM gateway',
-    focus:['ai','cloud','sysd','behav'],
-    notes:'Enterprise AI gateway — auth, audit, redaction, model routing. RAG + governance.',
-    sample:['Design PII redaction in a streaming response.','Multi-model routing with cost/quality SLOs.','How does an enterprise security team review your product?'] },
-  { id:'tavily',    name:'Tavily',          vertical:'devtools', sub:'AI-native search API',
-    focus:['ai','sysd','coding','cloud'],
-    notes:'Search API optimized for agents. Retrieval, latency, eval. RAG-adjacent.',
-    sample:['Design search ranking that\'s tuned for LLM consumption.','How is "agent search" different from web search?','Eval: what makes a search result "agent-useful"?'] },
-  { id:'warp',      name:'Warp',            vertical:'devtools', sub:'AI-native terminal',
-    focus:['ai','coding','sysd','domain'],
-    notes:'Reimagined terminal with AI. Heavy on developer experience, latency, prompt design for code.',
-    sample:['Design completion latency under 80ms with model assistance.','How does the agent decide to ask vs act?','Handle a destructive command (rm -rf) safely.'] },
-  { id:'coast',     name:'Coast',           vertical:'fintech',  sub:'Fleet expense cards',
-    focus:['sysd','data','cloud','domain'],
-    notes:'Fleet/fuel/expense cards for SMBs. Ledger, fraud, PCI, integrations with fuel networks.',
-    sample:['Design double-entry ledger for $-impacting events.','Detect card-skimming fraud patterns in fuel data.','Onboard a 500-truck fleet with messy data.'] },
-  { id:'felicity',  name:'Felicity',        vertical:'ai',       sub:'AI startup (verify role specifics in JD)',
-    focus:['ai','decomp','client','behav'],
-    notes:'Early-stage AI startup. Expect heavy decomposition / case-study weight, breadth over specialization, comfort with ambiguity.',
-    sample:['Open-ended customer-deploy scenario.','Build the first eval set for a new product surface.','Why this company specifically?'] },
+  { id:"openai", name:"OpenAI", vertical:"ai",
+    sub:"GPT / ChatGPT / API",
+    stage:"Late stage", raised:"$57B+", lead:"Microsoft",
+    badges:["Microsoft", "Thrive", "Khosla"],
+    totalRoles:18,
+    notes:"FDE-style 'solutions' work + applied research. Bar is extreme; emphasizes shipping + safety judgment.",
+    jobs:[
+      { title:"Software Engineer, Developer Productivity", url:"https://jobs.ashbyhq.com/openai/2cba0d45-7a4f-4f38-ac73-3f8633bf0349", level:"mid" },
+      { title:"Software Engineer, Security Observability", url:"https://jobs.ashbyhq.com/openai/1e4e9985-babf-4bd9-8fe8-a2016250780d", level:"mid" },
+      { title:"Software Engineer, Agent Infrastructure", url:"https://jobs.ashbyhq.com/openai/c1316397-25bb-4add-9e9d-0e3ea8ba929a", level:"mid" }
+    ] },
+  { id:"anthropic", name:"Anthropic", vertical:"ai",
+    sub:"Claude \u2014 AI safety lab",
+    stage:"Series F", raised:"$18B+", lead:"Amazon",
+    badges:["Amazon", "Google", "Spark"],
+    totalRoles:40,
+    notes:"Heavy values screen; expect ethical-dilemma and downside-risk questions. Applied-AI eng roles are FDE-flavored.",
+    jobs:[
+      { title:"Senior Software Engineer, Full-stack", url:"https://job-boards.greenhouse.io/anthropic/jobs/5174743008", level:"senior" },
+      { title:"Senior+ Software Engineer, Research Tools", url:"https://job-boards.greenhouse.io/anthropic/jobs/4981828008", level:"senior" },
+      { title:"Senior / Staff+ Software Engineer, Voice Platform", url:"https://job-boards.greenhouse.io/anthropic/jobs/5172245008", level:"senior" }
+    ] },
+  { id:"scaleai", name:"Scale AI", vertical:"ai",
+    sub:"AI data + evals + RLHF",
+    stage:"Series F", raised:"$1.6B", lead:"Accel",
+    badges:["Accel", "Index", "Founders Fund"],
+    totalRoles:17,
+    notes:"Data pipelines for AI labs + DoD. FDE work for enterprise deploys; long async eval workflows.",
+    jobs:[
+      { title:"Senior AI Infrastructure Engineer, Model Serving Platform", url:"https://job-boards.greenhouse.io/scaleai/jobs/4520320005", level:"senior" },
+      { title:"Senior AI Infrastructure Engineer - Training Platform", url:"https://job-boards.greenhouse.io/scaleai/jobs/4689751005", level:"senior" },
+      { title:"Senior Forward Deployed AI Engineer, Enterprise", url:"https://job-boards.greenhouse.io/scaleai/jobs/4597399005", level:"senior" }
+    ] },
+  { id:"figma", name:"Figma", vertical:"saas",
+    sub:"Collaborative design (Adobe-acquired then unwound)",
+    stage:"Pre-IPO", raised:"$333M", lead:"Index",
+    badges:["Index", "Sequoia", "Greylock"],
+    totalRoles:15,
+    notes:"Multiplayer collaboration at scale. CRDT, real-time infra, design tooling depth.",
+    jobs:[
+      { title:"Data Engineer", url:"https://boards.greenhouse.io/figma/jobs/5220003004?gh_jid=5220003004", level:"mid" },
+      { title:"Data Platform Engineer", url:"https://boards.greenhouse.io/figma/jobs/5840332004?gh_jid=5840332004", level:"mid" },
+      { title:"Sales AI Engineer", url:"https://boards.greenhouse.io/figma/jobs/5991176004?gh_jid=5991176004", level:"mid" }
+    ] },
+  { id:"notion", name:"Notion", vertical:"saas",
+    sub:"Connected workspace + AI",
+    stage:"Series C", raised:"$343M", lead:"Index",
+    badges:["Sequoia", "Index", "Coatue"],
+    totalRoles:7,
+    notes:"Block-based docs + LLM features. Schema design, perf, AI eval.",
+    jobs:[
+      { title:"Software Engineer, Datastore", url:"https://jobs.ashbyhq.com/notion/3fbcf972-52d5-4475-8720-040025c6f7da", level:"mid" },
+      { title:"Forward Deployed Engineer, GTM", url:"https://jobs.ashbyhq.com/notion/10437426-14c8-4c45-8075-67959ce80393", level:"mid" },
+      { title:"Software Engineer, Product Infrastructure", url:"https://jobs.ashbyhq.com/notion/d41b635b-c17b-4efd-89fd-fdb2ddb62e9a", level:"mid" }
+    ] },
+  { id:"hebbia", name:"Hebbia", vertical:"ai",
+    sub:"AI for asset managers + finance",
+    stage:"Series B", raised:"$161M", lead:"Andreessen Horowitz",
+    badges:["a16z", "Index", "Peter Thiel"],
+    totalRoles:9,
+    notes:"Multi-step agents over long-form finance docs. Eval discipline, retrieval depth.",
+    jobs:[
+      { title:"Backend Engineer, Agent Collaboration Platform", url:"https://job-boards.greenhouse.io/hebbia/jobs/4584764005", level:"mid" },
+      { title:"Backend Engineer, Agents", url:"https://job-boards.greenhouse.io/hebbia/jobs/4584766005", level:"mid" },
+      { title:"Backend Engineer, Growth and Data", url:"https://job-boards.greenhouse.io/hebbia/jobs/4584761005", level:"mid" }
+    ] },
+  { id:"decagon", name:"Decagon", vertical:"ai",
+    sub:"AI customer-support agents",
+    stage:"Series C", raised:"$240M", lead:"Bain Capital Ventures",
+    badges:["Bain", "a16z", "Accel"],
+    totalRoles:4,
+    notes:"Enterprise AI agents. FDE-heavy: deploy alongside customer success.",
+    jobs:[
+      { title:"Senior Software Engineer, Enterprise Product", url:"https://jobs.ashbyhq.com/decagon/dc7c3b51-5be0-4890-a481-5bb200df48eb", level:"senior" },
+      { title:"Senior Software Engineer, Agent Orchestration", url:"https://jobs.ashbyhq.com/decagon/762ee436-6acc-4700-9927-0e73d6dc4123", level:"senior" },
+      { title:"Senior Software Engineer, Infrastructure", url:"https://jobs.ashbyhq.com/decagon/a4796fbc-b45c-4e1b-b1d2-1a17c0b4fa7a", level:"senior" }
+    ] },
+  { id:"credal", name:"Credal", vertical:"ai",
+    sub:"Enterprise LLM gateway",
+    stage:"Series A", raised:"$20M", lead:"Spark",
+    badges:["Spark", "YC W23"],
+    totalRoles:5,
+    notes:"Auth, audit, redaction, routing. RAG + governance for regulated buyers.",
+    jobs:[
+      { title:"Founding Frontend/UX Software Engineer", url:"https://jobs.ashbyhq.com/credal/5d192321-a846-4877-aa71-8ebf0a8ca955", level:"founding" },
+      { title:"Founding Software Engineer, Backend Infrastructure", url:"https://jobs.ashbyhq.com/credal/9a492c8f-60e4-42e7-abff-0a8a36aece91", level:"founding" },
+      { title:"Infra, Cloud & Backend Software Engineer", url:"https://jobs.ashbyhq.com/credal/772f0196-ae79-42aa-bb3e-5c2c3c172992", level:"mid" }
+    ] },
+  { id:"mirage", name:"Mirage", vertical:"ai",
+    sub:"AI 3D worldbuilding",
+    stage:"Series A", raised:"$15M", lead:"Founders Fund",
+    badges:["Founders Fund"],
+    totalRoles:5,
+    notes:"3D scene generation. Multimodal, GPU pool design, long-running inference.",
+    jobs:[
+      { title:"Software Engineer, Applied AI", url:"https://jobs.ashbyhq.com/mirage/f5899886-1bad-410d-b9eb-eeabfa312f6c", level:"mid" },
+      { title:"Software Engineer, Web Product", url:"https://jobs.ashbyhq.com/mirage/961e9a66-7574-4e0a-bff1-95312b7d6cab", level:"mid" },
+      { title:"Software Engineer, iOS", url:"https://jobs.ashbyhq.com/mirage/7ea89586-fa45-4ada-828d-8dc74ed0eb9c", level:"mid" }
+    ] },
+  { id:"tavily", name:"Tavily", vertical:"ai",
+    sub:"Search API for AI agents",
+    stage:"Series A", raised:"$30M", lead:"Insight Partners",
+    badges:["Insight", "YC W24"],
+    totalRoles:1,
+    notes:"Retrieval API for agents. Ranking + eval. RAG-adjacent.",
+    jobs:[
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/tavily/1999e01d-f9e3-4f43-a097-812c0800fb0f", level:"mid" }
+    ] },
+  { id:"modal", name:"Modal Labs", vertical:"infra",
+    sub:"Serverless cloud for AI",
+    stage:"Series A", raised:"$23M", lead:"Redpoint",
+    badges:["Redpoint", "Lux"],
+    totalRoles:10,
+    notes:"Container runtime, serverless GPU. Systems-heavy.",
+    jobs:[
+      { title:"Member of Technical Staff - Systems", url:"https://jobs.ashbyhq.com/modal/9b33ebe7-e829-4f03-97ba-5c94dbd7daf6", level:"mid" },
+      { title:"Member of Technical Staff - Product (Frontend)", url:"https://jobs.ashbyhq.com/modal/dd84cf88-1f13-4f39-b371-237e103fce34", level:"mid" },
+      { title:"Forward Deployed Engineer - ML", url:"https://jobs.ashbyhq.com/modal/9fadb51f-ce11-41b1-84d5-470e66cc8ee9", level:"mid" }
+    ] },
+  { id:"normal-computing", name:"Normal Computing", vertical:"ai",
+    sub:"Probabilistic AI for enterprise",
+    stage:"Series A", raised:"$14M", lead:"First Spark",
+    badges:["First Spark"],
+    totalRoles:3,
+    notes:"Probabilistic compute approach to enterprise AI.",
+    jobs:[
+      { title:"Product Engineer", url:"https://jobs.ashbyhq.com/normalcomputing/6228a7ca-2a62-47ce-99dd-08bed646db94", level:"mid" },
+      { title:"AI Engineer", url:"https://jobs.ashbyhq.com/normalcomputing/e81b27d7-9505-40fb-859c-0dcc2f404a3f", level:"mid" },
+      { title:"Software Engineer, Backend", url:"https://jobs.ashbyhq.com/normalcomputing/4f4b2088-b42c-40fc-93de-c692624dfebf", level:"mid" }
+    ] },
+  { id:"distyl", name:"Distyl", vertical:"ai",
+    sub:"AI for Fortune 500 deployments",
+    stage:"Series A", raised:"$30M", lead:"Lightspeed",
+    badges:["Lightspeed", "Coatue"],
+    totalRoles:6,
+    notes:"FDE-heavy: deploy AI inside banks, telcos.",
+    jobs:[
+      { title:"Software Engineer - Back End", url:"https://jobs.ashbyhq.com/distyl/a906a364-236d-4c41-a844-dced0c394936", level:"mid" },
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/distyl/ec9e338a-4040-4aa2-b049-424cd343f5f5", level:"mid" },
+      { title:"Forward Deployed Architect", url:"https://jobs.ashbyhq.com/distyl/325786b8-76a3-43bc-841b-726cebc4aea3", level:"mid" }
+    ] },
+  { id:"sierra", name:"Sierra", vertical:"ai",
+    sub:"AI agents for consumer brands",
+    stage:"Series A", raised:"$110M", lead:"Sequoia",
+    badges:["Sequoia", "Benchmark"],
+    totalRoles:2,
+    notes:"Bret Taylor's agent co. Customer-deploy heavy.",
+    jobs:[
+      { title:"Software Engineer, Agent", url:"https://jobs.ashbyhq.com/sierra/e9f5fdb6-91ee-4c55-9230-41ec8865650e", level:"mid" },
+      { title:"Software Engineer, Agent - Healthcare", url:"https://jobs.ashbyhq.com/sierra/eb3ee157-3d2a-412a-88a2-e2cfc5647a66", level:"mid" }
+    ] },
+  { id:"cognition", name:"Cognition", vertical:"ai",
+    sub:"Devin \u2014 autonomous SWE agent",
+    stage:"Series A", raised:"$196M", lead:"Founders Fund",
+    badges:["Founders Fund", "8VC"],
+    totalRoles:1,
+    notes:"Autonomous code agent. Agent reliability + eval depth.",
+    jobs:[
+      { title:"Product Engineer", url:"https://jobs.ashbyhq.com/cognition/439404bb-3185-4d22-b6df-4a5e39a510d6", level:"mid" }
+    ] },
+  { id:"glean", name:"Glean", vertical:"ai",
+    sub:"Enterprise AI search",
+    stage:"Series F", raised:"$615M", lead:"Altimeter",
+    badges:["Sequoia", "Lightspeed", "Kleiner"],
+    totalRoles:1,
+    notes:"Enterprise search + chat over corp docs. Retrieval at scale.",
+    jobs:[
+      { title:"Founding Forward Deployed Engineer", url:"https://job-boards.greenhouse.io/gleanwork/jobs/4659412005", level:"founding" }
+    ] },
+  { id:"elevenlabs", name:"ElevenLabs", vertical:"ai",
+    sub:"Voice AI / TTS",
+    stage:"Series C", raised:"$281M", lead:"Andreessen Horowitz",
+    badges:["a16z", "Sequoia", "Nat Friedman"],
+    totalRoles:4,
+    notes:"Voice synthesis API. Audio infra, real-time streaming.",
+    jobs:[
+      { title:"Full-Stack Engineer (Back-End Leaning)", url:"https://jobs.ashbyhq.com/elevenlabs/c7d59014-b918-4c15-ae33-79f5c9f2cf9f", level:"mid" },
+      { title:"Full-Stack Engineer (Front-End Leaning)", url:"https://jobs.ashbyhq.com/elevenlabs/ada7cd2c-8b9f-4f19-a88b-7c2ca1be1fde", level:"mid" },
+      { title:"Forward Deployed Engineer - Software Engineer", url:"https://jobs.ashbyhq.com/elevenlabs/6c4c57c1-ec72-42ba-af3a-eb7aebbde2e6", level:"mid" }
+    ] },
+  { id:"rilla", name:"Rilla", vertical:"ai",
+    sub:"AI for field-sales coaching",
+    stage:"Series A", raised:"$24M", lead:"Sequoia",
+    badges:["Sequoia"],
+    totalRoles:6,
+    notes:"Speech AI for outside sales. ASR, summarization, ranking.",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/rilla/6f4e6ca1-efe7-4f25-af69-59f78981ef70", level:"senior" },
+      { title:"Senior Software Engineer, Mobile", url:"https://jobs.ashbyhq.com/rilla/a48fe94a-63a8-442b-9da5-25a3f36f0a94", level:"senior" },
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/rilla/37228ca3-4e4a-4e3c-9414-d8a2046ff496", level:"mid" }
+    ] },
+  { id:"stripe", name:"Stripe", vertical:"fintech",
+    sub:"Payments + financial infra",
+    stage:"Late stage / private", raised:"$8.7B", lead:"Sequoia",
+    badges:["Sequoia", "a16z", "General Catalyst"],
+    totalRoles:8,
+    notes:"Payments at planet scale. Distributed systems, idempotency, money.",
+    jobs:[
+      { title:"Backend Engineer, AI Security", url:"https://stripe.com/jobs/search?gh_jid=7826765", level:"mid" },
+      { title:"Backend Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7235875", level:"mid" },
+      { title:"Forward Deployed Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7230452", level:"mid" }
+    ] },
+  { id:"ramp", name:"Ramp", vertical:"fintech",
+    sub:"Corporate cards + finance ops",
+    stage:"Series E", raised:"$1.3B", lead:"Founders Fund",
+    badges:["Founders Fund", "Sequoia", "Stripe"],
+    totalRoles:21,
+    notes:"Ledger, fraud, integrations at scale. High autonomy bar.",
+    jobs:[
+      { title:"Senior Software Engineer | GTM Platform, Frontend", url:"https://jobs.ashbyhq.com/ramp/1540a41f-d88f-4c89-9b08-5b9fade1ee81", level:"senior" },
+      { title:"Software Engineer, Frontend", url:"https://jobs.ashbyhq.com/ramp/4e64ab86-4e30-403b-b1b9-41dc052570ce", level:"mid" },
+      { title:"Software Engineer, Data Platform", url:"https://jobs.ashbyhq.com/ramp/bca0346c-b843-4795-96df-6091f51e421b", level:"mid" }
+    ] },
+  { id:"brex", name:"Brex", vertical:"fintech",
+    sub:"Corporate cards + spend mgmt",
+    stage:"Series D", raised:"$1.5B", lead:"DST",
+    badges:["Y Combinator", "DST", "Greenoaks"],
+    totalRoles:5,
+    notes:"Cards, banking, expense. PCI, ledger, large eng org.",
+    jobs:[
+      { title:"Senior Software Engineer, Frontend", url:"https://www.brex.com/careers/8501052002?gh_jid=8501052002", level:"senior" },
+      { title:"Senior Software Engineer, Full Stack", url:"https://www.brex.com/careers/8472634002?gh_jid=8472634002", level:"senior" },
+      { title:"Senior Software Engineer, Product", url:"https://www.brex.com/careers/8465003002?gh_jid=8465003002", level:"senior" }
+    ] },
+  { id:"mercury", name:"Mercury", vertical:"fintech",
+    sub:"Banking for startups",
+    stage:"Series C", raised:"$152M", lead:"CRV",
+    badges:["CRV", "a16z", "Coatue"],
+    totalRoles:8,
+    notes:"Banking UX + ops. Compliance, money movement.",
+    jobs:[
+      { title:"Senior Backend Engineer - Product", url:"https://job-boards.greenhouse.io/mercury/jobs/5520964004", level:"senior" },
+      { title:"Senior Full-Stack Engineer", url:"https://job-boards.greenhouse.io/mercury/jobs/5493086004", level:"senior" },
+      { title:"Senior Infrastructure Engineer", url:"https://job-boards.greenhouse.io/mercury/jobs/5832466004", level:"senior" }
+    ] },
+  { id:"plaid", name:"Plaid", vertical:"fintech",
+    sub:"Banking API + financial data",
+    stage:"Series D", raised:"$734M", lead:"Altimeter",
+    badges:["Altimeter", "a16z", "Index"],
+    totalRoles:5,
+    notes:"Bank-data connectivity infra. Integration breadth, reliability.",
+    jobs:[
+      { title:"Senior Software Engineer, Backend", url:"https://jobs.ashbyhq.com/plaid/51d7f702-e76c-4305-b3d4-50d270ec7d1c", level:"senior" },
+      { title:"Senior Software Engineer, Full Stack", url:"https://jobs.ashbyhq.com/plaid/24f357ee-b2fc-4f86-bab9-d10ecfb99003", level:"senior" },
+      { title:"Senior Machine Learning Engineer - Embedded Insights", url:"https://jobs.ashbyhq.com/plaid/9d6855e9-3b05-4dc6-820e-3227201c494b", level:"senior" }
+    ] },
+  { id:"alloy", name:"Alloy", vertical:"fintech",
+    sub:"Identity decisioning for fintech",
+    stage:"Series C", raised:"$207M", lead:"Lightspeed",
+    badges:["Lightspeed", "Avenir"],
+    totalRoles:2,
+    notes:"KYC/AML infra. Identity graph, compliance UX.",
+    jobs:[
+      { title:"Senior Software Engineer, Advance", url:"https://www.alloy.com/about/jobs/detail?gh_jid=8538706002&gh_jid=8538706002", level:"senior" },
+      { title:"Senior Software Engineer, Platform", url:"https://www.alloy.com/about/jobs/detail?gh_jid=8538688002&gh_jid=8538688002", level:"senior" }
+    ] },
+  { id:"gusto", name:"Gusto", vertical:"fintech",
+    sub:"Payroll / HR for SMBs",
+    stage:"Series E", raised:"$716M", lead:"Generation",
+    badges:["Generation", "Kleiner", "Yc"],
+    totalRoles:3,
+    notes:"Payroll engine + benefits. Compliance, money movement, multi-state tax.",
+    jobs:[
+      { title:"Senior Data Engineer", url:"https://job-boards.greenhouse.io/gusto/jobs/7357541", level:"senior" },
+      { title:"Senior Software Engineer, Data Platform", url:"https://job-boards.greenhouse.io/gusto/jobs/7357569", level:"senior" },
+      { title:"Legal AI Engineer (Contractor)", url:"https://job-boards.greenhouse.io/gusto/jobs/7848767", level:"mid" }
+    ] },
+  { id:"datadog", name:"Datadog", vertical:"devtools",
+    sub:"Cloud monitoring (NASDAQ)",
+    stage:"Public", raised:"$148M pre-IPO", lead:"Index",
+    badges:["NASDAQ", "Index", "OpenView"],
+    totalRoles:5,
+    notes:"Public co. Time-series infra, alerting, observability depth.",
+    jobs:[
+      { title:"Senior AI Engineer - APM Experiences", url:"https://careers.datadoghq.com/detail/7415266/?gh_jid=7415266", level:"senior" },
+      { title:"Senior Software Engineer - AI Code Gen - Agent Engineer", url:"https://careers.datadoghq.com/detail/7107875/?gh_jid=7107875", level:"senior" },
+      { title:"Senior Software Engineer - Bits AI SRE", url:"https://careers.datadoghq.com/detail/7899164/?gh_jid=7899164", level:"senior" }
+    ] },
+  { id:"mongodb", name:"MongoDB", vertical:"devtools",
+    sub:"Document database (NASDAQ)",
+    stage:"Public", raised:"$311M pre-IPO", lead:"Sequoia",
+    badges:["NASDAQ", "Sequoia", "Union Square"],
+    totalRoles:8,
+    notes:"Public co. Database internals, distributed systems.",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://www.mongodb.com/careers/job/?gh_jid=7816572", level:"senior" },
+      { title:"Senior Software Engineer, Atlas Clusters", url:"https://www.mongodb.com/careers/job/?gh_jid=7736191", level:"senior" },
+      { title:"Senior Software Engineer, Atlas Clusters Platform", url:"https://www.mongodb.com/careers/job/?gh_jid=7890652", level:"senior" }
+    ] },
+  { id:"cockroach-labs", name:"Cockroach Labs", vertical:"devtools",
+    sub:"Distributed SQL database",
+    stage:"Series F", raised:"$633M", lead:"Greenoaks",
+    badges:["Greenoaks", "Benchmark", "Index"],
+    totalRoles:1,
+    notes:"Distributed SQL. Consensus, MVCC, query planning.",
+    jobs:[
+      { title:"Member of Technical Staff (Storage)", url:"https://www.cockroachlabs.com/careers/job/?gh_jid=7663160", level:"mid" }
+    ] },
+  { id:"vercel", name:"Vercel", vertical:"devtools",
+    sub:"Frontend cloud / Next.js",
+    stage:"Series E", raised:"$563M", lead:"Accel",
+    badges:["Accel", "GV", "Bedrock"],
+    totalRoles:8,
+    notes:"Edge platform + Next.js. CDN, build, runtime.",
+    jobs:[
+      { title:"Forward-Deployed Engineer", url:"https://job-boards.greenhouse.io/vercel/jobs/5752684004", level:"mid" },
+      { title:"Software Engineer, AI Gateway", url:"https://job-boards.greenhouse.io/vercel/jobs/5798406004", level:"mid" },
+      { title:"Software Engineer, AI SDK", url:"https://job-boards.greenhouse.io/vercel/jobs/5474915004", level:"mid" }
+    ] },
+  { id:"stainless", name:"Stainless", vertical:"devtools",
+    sub:"Best-in-class SDK generation",
+    stage:"Series A", raised:"$25M", lead:"a16z",
+    badges:["a16z", "Sequoia"],
+    totalRoles:2,
+    notes:"SDK generation from OpenAPI. Compiler/codegen, DX depth.",
+    jobs:[
+      { title:"Product Engineer", url:"https://jobs.ashbyhq.com/stainlessapi/f4ace98b-a683-49a1-a1d9-0dd8f2d0d541", level:"mid" },
+      { title:"Software Engineer, Generalist", url:"https://jobs.ashbyhq.com/stainlessapi/41c56e31-5515-48d7-a872-e775ee5c682e", level:"mid" }
+    ] },
+  { id:"whatnot", name:"Whatnot", vertical:"marketplace",
+    sub:"Live shopping marketplace",
+    stage:"Series E", raised:"$745M", lead:"DST",
+    badges:["a16z", "DST", "YC W20"],
+    totalRoles:11,
+    notes:"Real-time live shopping. Streaming, payments, trust & safety.",
+    jobs:[
+      { title:"Data Engineer", url:"https://jobs.ashbyhq.com/whatnot/9fd6fef1-619f-48dd-97b0-c91063432df3", level:"mid" },
+      { title:"Data Engineer, Notifications", url:"https://jobs.ashbyhq.com/whatnot/0dec38f8-1e8c-44e8-b158-518c2f9ed9a1", level:"mid" },
+      { title:"Machine Learning Engineer, Fraud", url:"https://jobs.ashbyhq.com/whatnot/5d6dc8c4-4e0c-4a6a-8bfd-194917564cf2", level:"mid" }
+    ] },
+  { id:"attentive", name:"Attentive", vertical:"saas",
+    sub:"SMS marketing platform",
+    stage:"Series E", raised:"$863M", lead:"Coatue",
+    badges:["Coatue", "Bain", "Sequoia"],
+    totalRoles:2,
+    notes:"Conversational SMS. Messaging infra, deliverability, analytics.",
+    jobs:[
+      { title:"Senior Machine Learning Engineer", url:"https://job-boards.greenhouse.io/attentive/jobs/4120595009", level:"senior" },
+      { title:"Senior Software Engineer, Onsite Customer Growth", url:"https://job-boards.greenhouse.io/attentive/jobs/4227854009", level:"senior" }
+    ] },
+  { id:"squarespace", name:"Squarespace", vertical:"saas",
+    sub:"Website builder (was NYSE \u2014 taken private)",
+    stage:"Take-private", raised:"$278M pre-IPO", lead:"Permira",
+    badges:["Permira", "General Atlantic"],
+    totalRoles:3,
+    notes:"Hosting, builder, payments at scale.",
+    jobs:[
+      { title:"Senior Software Engineer - Java", url:"http://www.squarespace.com/about/careers?gh_jid=7743370", level:"senior" },
+      { title:"Senior Software Engineer, Java (Domains)", url:"http://www.squarespace.com/about/careers?gh_jid=7669610", level:"senior" },
+      { title:"Software Engineer - Delivery Platform", url:"http://www.squarespace.com/about/careers?gh_jid=7789058", level:"mid" }
+    ] },
+  { id:"talkspace", name:"Talkspace", vertical:"health",
+    sub:"Online therapy (NASDAQ)",
+    stage:"Public", raised:"$110M pre-IPO", lead:"Norwest",
+    badges:["NASDAQ", "Norwest"],
+    totalRoles:1,
+    notes:"Telehealth platform \u2014 therapy networks, intake, claims.",
+    jobs:[
+      { title:"Senior Data Engineer", url:"https://www.talkspace.com/careers/job?gh_jid=5831816004", level:"senior" }
+    ] },
+  { id:"dorsia", name:"Dorsia", vertical:"hospitality",
+    sub:"Membership dining + reservations",
+    stage:"Series B", raised:"$32M", lead:"Caffeinated Capital",
+    badges:["Caffeinated", "Tribe"],
+    totalRoles:2,
+    notes:"Multi-venue reservations. SQL + payments + UX.",
+    jobs:[
+      { title:"Product Engineer", url:"https://job-boards.greenhouse.io/dorsia/jobs/4754917007", level:"mid" },
+      { title:"Product Engineer, Growth", url:"https://job-boards.greenhouse.io/dorsia/jobs/5030496007", level:"mid" }
+    ] },
+  { id:"resortpass", name:"ResortPass", vertical:"marketplace",
+    sub:"Day-pass hotel marketplace",
+    stage:"Series B", raised:"$56M", lead:"Charlesbank",
+    badges:["Charlesbank", "Declaration"],
+    totalRoles:2,
+    notes:"Inventory + pricing for hotel amenities.",
+    jobs:[
+      { title:"Senior Software Engineer, Frontend", url:"https://job-boards.greenhouse.io/resortpass/jobs/5037441007", level:"senior" },
+      { title:"Software Engineer - Full Stack", url:"https://job-boards.greenhouse.io/resortpass/jobs/5059472007", level:"mid" }
+    ] },
 ];
+
 
 /* ---------- INFOGRAPHICS ---------- */
 const INFOGRAPHICS = [
@@ -7376,13 +7690,20 @@ const IMAGE_REFS = [
 
 /* ---------- COMPANY DOMAINS (for Clearbit public logo CDN) ---------- */
 const COMPANY_DOMAINS = {
-  deepgram:'deepgram.com',     dorsia:'dorsia.com',         bikky:'bikky.com',
-  airgoods:'airgoods.com',     blackbird:'blackbird.xyz',   sevenrooms:'sevenrooms.com',
-  instawork:'instawork.com',   resortpass:'resortpass.com', nory:'nory.ai',
-  hang:'hang.xyz',             loopai:'loop.com',           qloo:'qloo.com',
-  mirage:'mirage.app',         runway:'runwayml.com',       suno:'suno.com',
-  credal:'credal.ai',          tavily:'tavily.com',         warp:'warp.dev',
-  coast:'coastpay.com',        felicity:'felicityhealth.com',
+  openai:'openai.com',         anthropic:'anthropic.com',   scaleai:'scale.com',
+  figma:'figma.com',           notion:'notion.so',          hebbia:'hebbia.com',
+  decagon:'decagon.ai',        credal:'credal.ai',          mirage:'mirage.app',
+  tavily:'tavily.com',         modal:'modal.com',           distyl:'distyl.ai',
+  sierra:'sierra.ai',          cognition:'cognition.ai',    glean:'glean.com',
+  elevenlabs:'elevenlabs.io',  rilla:'rillavoice.com',      stripe:'stripe.com',
+  ramp:'ramp.com',             brex:'brex.com',             mercury:'mercury.com',
+  plaid:'plaid.com',           alloy:'alloy.com',           gusto:'gusto.com',
+  datadog:'datadoghq.com',     mongodb:'mongodb.com',       vercel:'vercel.com',
+  stainless:'stainless.com',   whatnot:'whatnot.com',       attentive:'attentive.com',
+  squarespace:'squarespace.com', talkspace:'talkspace.com', dorsia:'dorsia.com',
+  resortpass:'resortpass.com', runway:'runwayml.com',
+  'normal-computing':'normalcomputing.com',
+  'cockroach-labs':'cockroachlabs.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */
@@ -8398,7 +8719,7 @@ MODULES.forEach(m => m.lessons.forEach(l => {
 }));
 
 return {
-  CATEGORIES, MODULES, COMPANIES, INFOGRAPHICS, DAILY_QUESTS, BADGES,
+  CATEGORIES, MODULES, COMPANIES, COMPANIES_VERIFIED_AT, INFOGRAPHICS, DAILY_QUESTS, BADGES,
   FLASHCARDS, SOURCES, IMAGE_REFS, COMPANY_DOMAINS, GAMES, QUIZ_QUESTIONS, ROLEPLAY,
   CATEGORY_QUIZZES
 };

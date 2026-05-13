@@ -97,7 +97,10 @@
    * cascade is a no-op until JS lights it up. The .card rule uses
    * color-mix(...) to blend a slight pull toward the substrate. */
   --card-tint:         transparent;
-  --card-tint-mix:     14%;
+  --card-tint-mix:     7%;     /* lowered from 14% — kept subtle so the
+                                  ambient-well color doesn't visibly tint
+                                  cards green/rose/blue depending on
+                                  scroll position. */
 
   /* Spring transition (Apple-style overshoot) */
   --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1199,7 +1202,16 @@ code, pre, .font-mono {
     inset 0 1px 0 rgba(255,255,255,0.92),
     inset 0 -1px 0 var(--hairline),
     0 1px 2px rgba(15,23,42,0.04);
+  /* Always scroll horizontally instead of wrapping — wrapping with many
+   * vertical filters caused the labels to overlap visually on the
+   * Companies page. */
+  flex-wrap: nowrap !important;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs .tab { white-space: nowrap; flex-shrink: 0; }
 .tab {
   padding: 0.45rem 0.95rem;
   font-size: 12.5px;
@@ -1275,6 +1287,38 @@ code, pre, .font-mono {
   margin: 2px 2px 2px 0;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
+}
+/* Funding-badge chip — accent-tinted to read as a signal, not a tag. */
+.chip-funding {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--hairline));
+  color: color-mix(in srgb, var(--accent) 80%, var(--text));
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+/* Live-job row inside a company detail page. */
+.job-row { background: rgba(255,255,255,0.45); text-decoration: none; }
+.job-row:hover { background: rgba(255,255,255,0.75); transform: translateY(-1px); }
+
+/* Role preview pills shown on each company card (up to 3 per card). */
+.role-pill {
+  display: flex;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid var(--hairline);
+  color: var(--text);
+  text-decoration: none;
+  transition: background 0.18s var(--ease), border-color 0.18s var(--ease);
+}
+.role-pill:hover {
+  background: rgba(255,255,255,0.82);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--hairline));
+}
+.role-pill .role-arrow { font-size: 10px; opacity: 0; transition: opacity 0.18s; }
+.role-pill:hover .role-arrow { opacity: 1; color: var(--accent); }
+.role-dot {
+  width: 6px; height: 6px; border-radius: 999px; flex-shrink: 0;
 }
 
 /* =========================================================================

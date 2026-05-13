@@ -2174,9 +2174,14 @@ function highlightCodeIn(root) {
 
 const verticalPill = {
   ai: 'pill-ai', hospitality: 'pill-hosp', marketplace: 'pill-mkt',
-  devtools: 'pill-dev', fintech: 'pill-both'
+  devtools: 'pill-dev', fintech: 'pill-both',
+  saas: 'pill-dev', infra: 'pill-dev', health: 'pill-hosp',
 };
-const verticalLabel = { ai:'AI', hospitality:'Hospitality', marketplace:'Marketplace', devtools:'Dev Tools', fintech:'Fintech' };
+const verticalLabel = {
+  ai:'AI', hospitality:'Hospitality', marketplace:'Marketplace',
+  devtools:'Dev Tools', fintech:'Fintech',
+  saas:'SaaS', infra:'Infra', health:'Health',
+};
 
 /* ====================== DASHBOARD ====================== */
 function renderDashboard(state, hub) {
@@ -3171,21 +3176,21 @@ function renderLesson(state, lessonId, sourceEl) {
 /* ====================== COMPANIES ====================== */
 function renderCompanies(state, hub) {
   const container = el('div','fade-in space-y-4');
+  const verifiedAt = window.DATA && window.DATA.COMPANIES_VERIFIED_AT;
+  const totalJobs = COMPANIES.reduce((s, c) => s + (c.jobs ? c.jobs.length : 0), 0);
+  // Build dynamic vertical filters from the data so we don't hard-code.
+  const verticals = Array.from(new Set(COMPANIES.map(c => c.vertical)));
+  const filterTabs = ['all', ...verticals]
+    .map(v => `<div class="tab${v==='all' ? ' active' : ''}" data-vfilter="${esc(v)}">${v === 'all' ? 'All' : esc(verticalLabel[v] || v)}</div>`)
+    .join('');
   container.innerHTML = `
     <div>
       <h1 class="font-display text-2xl sm:text-3xl font-semibold">Companies</h1>
-      <p class="muted text-sm mt-1">${COMPANIES.length} targets. Type to filter — press <kbd class="px-1 rounded border border-[color:var(--border-2)] font-mono text-[10px]">/</kbd> to focus.</p>
+      <p class="muted text-sm mt-1">${COMPANIES.length} startups, ${totalJobs} live NYC engineering postings. Verified ${esc(verifiedAt || 'recently')}. Type to filter — press <kbd class="px-1 rounded border border-[color:var(--border-2)] font-mono text-[10px]">/</kbd> to focus.</p>
     </div>
     <div class="flex items-center gap-3 flex-wrap">
-      <input id="co-search" type="search" placeholder="Search companies…" class="flex-1 min-w-[200px] max-w-md"/>
-      <div class="tabs flex-wrap">
-        <div class="tab active" data-vfilter="all">All</div>
-        <div class="tab" data-vfilter="ai">AI</div>
-        <div class="tab" data-vfilter="hospitality">Hospitality</div>
-        <div class="tab" data-vfilter="marketplace">Marketplace</div>
-        <div class="tab" data-vfilter="devtools">Dev Tools</div>
-        <div class="tab" data-vfilter="fintech">Fintech</div>
-      </div>
+      <input id="co-search" type="search" placeholder="Search companies, roles, or investors…" class="flex-1 min-w-[200px] max-w-md"/>
+      <div class="tabs flex-wrap">${filterTabs}</div>
     </div>
     <div id="co-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
   `;
@@ -3199,7 +3204,11 @@ function renderCompanies(state, hub) {
     const q = curQuery.trim().toLowerCase();
     COMPANIES
       .filter(c => curFilter === 'all' || c.vertical === curFilter)
-      .filter(c => !q || (c.name+' '+c.sub+' '+c.notes).toLowerCase().includes(q))
+      .filter(c => {
+        if (!q) return true;
+        const hay = (c.name+' '+c.sub+' '+(c.notes||'')+' '+(c.badges||[]).join(' ')+' '+(c.lead||'')+' '+(c.jobs||[]).map(j=>j.title).join(' ')).toLowerCase();
+        return hay.includes(q);
+      })
       .forEach(c => {
         const cardEl = el('a','card card-glow block');
         cardEl.href = `#company/${c.id}`;
@@ -3207,21 +3216,56 @@ function renderCompanies(state, hub) {
         const logo = domain
           ? `<img src="https://logo.clearbit.com/${domain}" alt="${esc(c.name)} logo" onerror="this.style.display='none';this.parentElement.textContent='${esc(c.name[0])}'" />`
           : esc(c.name[0]);
+        const badges = (c.badges || []).slice(0, 3)
+          .map(b => `<span class="chip chip-funding">${esc(b)}</span>`).join('');
+        const previewJobs = (c.jobs || []).slice(0, 3);
+        const totalJobs = (c.jobs || []).length;
+        const jobsHTML = previewJobs.map(j => {
+          const lvl = j.level || 'mid';
+          const lvlDot = lvl === 'founding'
+            ? '<span class="role-dot" style="background:#7849E0"></span>'
+            : (lvl === 'senior'
+              ? '<span class="role-dot" style="background:#0EA371"></span>'
+              : '<span class="role-dot" style="background:#94A3B8"></span>');
+          // Truncate long titles in the preview; full title visible on hover/click-thru.
+          return `
+            <a href="${esc(j.url)}" target="_blank" rel="noopener noreferrer"
+               onclick="event.stopPropagation()"
+               class="role-pill flex items-center gap-2 text-[12px]" title="${esc(j.title)}">
+              ${lvlDot}<span class="truncate flex-1 min-w-0">${esc(j.title)}</span>
+              <span class="role-arrow muted">↗</span>
+            </a>`;
+        }).join('');
+        // Companies have UP TO 3 roles in `jobs` but may have many more open
+        // — `totalRoles` is the verified count at the source. Show overflow
+        // when the company has more roles than we're previewing.
+        const fullCount = c.totalRoles || totalJobs;
+        const extras = Math.max(0, fullCount - previewJobs.length);
+        const overflowLabel = extras > 0
+          ? `<div class="text-[11px] mt-1.5 flex items-center justify-between"><span class="muted">+${extras} more open NYC role${extras === 1 ? '' : 's'}</span><span style="color:var(--accent)" class="font-medium">View all →</span></div>`
+          : `<div class="text-[11px] mt-1.5 flex items-center justify-end"><span style="color:var(--accent)" class="font-medium">View →</span></div>`;
         cardEl.innerHTML = `
           <div class="flex items-start gap-3">
             <div class="co-logo">${logo}</div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 justify-between flex-wrap">
-                <div class="font-display font-semibold text-lg">${esc(c.name)}</div>
-                <span class="pill ${verticalPill[c.vertical]}">${verticalLabel[c.vertical]}</span>
+                <div class="font-display font-semibold text-lg truncate">${esc(c.name)}</div>
+                <span class="pill ${verticalPill[c.vertical] || 'pill-dev'}">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
               </div>
-              <div class="text-xs muted mt-0.5">${esc(c.sub)}</div>
+              <div class="text-xs muted mt-0.5 truncate">${esc(c.sub)}</div>
+              <div class="text-[11px] mt-1.5 flex items-center gap-1.5 flex-wrap">
+                <span class="font-mono tabular-nums" style="color:var(--accent)">${esc(c.raised || '')}</span>
+                <span class="dim">·</span>
+                <span class="muted">${esc(c.stage || '')}</span>
+                ${c.lead ? `<span class="dim">·</span><span class="muted truncate" style="max-width:120px">${esc(c.lead)}</span>` : ''}
+              </div>
             </div>
           </div>
-          <p class="text-sm muted mt-3 leading-relaxed line-clamp-3">${esc(c.notes)}</p>
-          <div class="flex flex-wrap gap-1 mt-3">
-            ${c.focus.slice(0,4).map(f => { const cat = CATEGORIES.find(x => x.id === f); return cat ? `<span class="chip">${esc(cat.name)}</span>` : ''; }).join('')}
+          <div class="flex flex-wrap gap-1 mt-2.5">${badges}</div>
+          <div class="mt-3 pt-3 border-t border-[color:var(--hairline)] space-y-1.5">
+            ${jobsHTML}
           </div>
+          ${overflowLabel}
         `;
         grid.appendChild(cardEl);
       });
@@ -3247,51 +3291,60 @@ function renderCompany(state, hub, id) {
   state.companySeen[id] = true;
 
   const container = el('div','fade-in space-y-5');
-  const focusCats = c.focus.map(fid => CATEGORIES.find(x => x.id === fid)).filter(Boolean);
   const domain = COMPANY_DOMAINS[c.id];
   const logo = domain
     ? `<img src="https://logo.clearbit.com/${domain}" alt="${esc(c.name)} logo" onerror="this.style.display='none';this.parentElement.textContent='${esc(c.name[0])}'" />`
     : esc(c.name[0]);
+
+  const badges = (c.badges || []).map(b => `<span class="chip chip-funding">${esc(b)}</span>`).join('');
+  const jobsHTML = (c.jobs || []).map(j => {
+    const lvl = j.level || 'mid';
+    const lvlLabel = lvl === 'founding' ? 'Founding' : (lvl === 'senior' ? 'Senior' : 'Mid');
+    const lvlClass = lvl === 'founding' ? 'pill-ai' : (lvl === 'senior' ? 'pill-both' : 'pill-dev');
+    return `
+      <a href="${esc(j.url)}" target="_blank" rel="noopener noreferrer"
+         class="job-row flex items-center gap-3 p-3 rounded-xl border border-[color:var(--hairline)] hover:border-[color:var(--accent)] transition">
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-medium truncate">${esc(j.title)}</div>
+          <div class="text-[11px] muted mt-0.5">Direct posting · opens in new tab</div>
+        </div>
+        <span class="pill ${lvlClass}">${lvlLabel}</span>
+        <span style="color:var(--accent)">↗</span>
+      </a>`;
+  }).join('');
+
   container.innerHTML = `
-    <a href="#companies" class="text-xs muted hover:text-white">← All companies</a>
+    <a href="#companies" class="text-xs muted hover:text-[color:var(--text)]">← All companies</a>
     <div class="card elevated">
       <div class="flex items-start gap-4 flex-wrap">
         <div class="co-logo" style="width:56px;height:56px">${logo}</div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-3 flex-wrap">
             <h1 class="font-display text-2xl font-semibold">${esc(c.name)}</h1>
-            <span class="pill ${verticalPill[c.vertical]}">${verticalLabel[c.vertical]}</span>
+            <span class="pill ${verticalPill[c.vertical] || 'pill-dev'}">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
           </div>
           <div class="muted text-sm mt-0.5">${esc(c.sub)}</div>
+          <div class="text-[12px] mt-2 flex items-center gap-2 flex-wrap">
+            <span class="font-mono tabular-nums font-medium" style="color:var(--accent)">${esc(c.raised || '')}</span>
+            <span class="dim">·</span>
+            <span class="muted">${esc(c.stage || '')}</span>
+            ${c.lead ? `<span class="dim">·</span><span class="muted">led by ${esc(c.lead)}</span>` : ''}
+          </div>
+          <div class="flex flex-wrap gap-1 mt-2.5">${badges}</div>
         </div>
       </div>
-      <p class="mt-4 leading-relaxed text-[14.5px]">${esc(c.notes)}</p>
+      <p class="mt-4 leading-relaxed text-[14.5px]">${esc(c.notes || '')}</p>
     </div>
 
-    <div class="grid lg:grid-cols-2 gap-4">
+    ${(c.jobs && c.jobs.length) ? `
       <div class="card">
-        <h3 class="font-display font-semibold text-lg mb-3">Prep emphasis</h3>
-        <div class="space-y-2">
-          ${focusCats.map((cat,i) => `
-            <a href="#category/${cat.id}" class="flex items-center gap-3 p-2 rounded-lg hover:bg-ink-700/40 transition">
-              <div class="w-8 h-8 grid place-items-center rounded-lg bg-ink-700/60">${iconHTML(cat.icon, {size: 18})}</div>
-              <div class="flex-1">
-                <div class="text-sm font-medium">${esc(cat.name)}</div>
-                <div class="text-xs text-slate-400">${esc(cat.blurb).slice(0,90)}…</div>
-              </div>
-              <div class="text-xs text-slate-500">#${i+1}</div>
-            </a>
-          `).join('')}
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <h3 class="font-display font-semibold text-lg">Live NYC engineering postings</h3>
+          <span class="text-[11px] muted">${c.jobs.length} verified · direct links</span>
         </div>
-      </div>
-      <div class="card">
-        <h3 class="font-display font-semibold text-lg mb-3">Illustrative interview prompts</h3>
-        <p class="text-xs text-slate-500 mb-3">Patterns reported for ${esc(c.name)} or its vertical in public 2026 interview discussions. Verify the latest JD before relying on specific phrasing.</p>
-        <ol class="list-decimal list-inside space-y-2 text-sm text-slate-300">
-          ${c.sample.map(s => `<li>${esc(s)}</li>`).join('')}
-        </ol>
-      </div>
-    </div>
+        <div class="space-y-2">${jobsHTML}</div>
+        <p class="text-[11px] muted mt-3">Postings verified live on ${esc((window.DATA && window.DATA.COMPANIES_VERIFIED_AT) || 'recently')}. If a link is dead, the role was filled or pulled since verification.</p>
+      </div>` : ''}
   `;
   hub.appendChild(container);
 }

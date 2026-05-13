@@ -61,10 +61,15 @@
     return substrateColor(behind);
   }
 
-  /* Write --card-tint onto the card. Use rAF batching so we never block
-   * the layout pipeline mid-frame. */
+  /* Write --card-tint onto the card. Sampled once per card lifetime —
+   * resampling on every scroll caused the substrate (the drifting
+   * ambient colour wells behind the page) to push cards visibly green
+   * or gray as they entered the viewport. Once tinted, the card stays
+   * stable. */
   function applyTint(card) {
     if (!card || !card.isConnected) return;
+    if (card.dataset.tintApplied) return;        // one-shot per element
+    card.dataset.tintApplied = '1';
     requestAnimationFrame(() => {
       const color = sampleSubstrate(card);
       if (color) card.style.setProperty('--card-tint', color);
@@ -99,11 +104,13 @@
     }
   });
 
-  /* Re-sample on viewport entry (the ambient colour wells drift, so the
-   * substrate at a card's position changes when it scrolls into view). */
+  /* IntersectionObserver kicks the *initial* sample for off-screen cards
+   * (e.g. items below the fold on first render). Since applyTint is
+   * one-shot per element, this only fires once per card — no more
+   * scroll-driven color flicker. */
   const io = ('IntersectionObserver' in window) ? new IntersectionObserver((entries) => {
     for (const e of entries) {
-      if (e.isIntersecting) applyTint(e.target);
+      if (e.isIntersecting && !e.target.dataset.tintApplied) applyTint(e.target);
     }
   }, { threshold: 0.05 }) : null;
 
