@@ -639,14 +639,17 @@ function mountPet3D(container, p) {
    *         cheeks, mouth, sparkles
    */
 
-  // Stage / body geometry parameters — minimalist silhouette family
+  // Stage / body geometry parameters — EXTREME silhouettes, each is a
+  // genuinely distinct shape, not a tiny variation of the same blob.
   let bw, bh, bd, headR, hasFeet = true, eyeScale = 1;
-  if (p.stage === 'baby')         { bw = 0.65; bh = 0.55; bd = 0.65; headR = 0.82; hasFeet = false; eyeScale = 1.15; }
-  else if (p.stage === 'teen')    { bw = 0.85; bh = 0.85; bd = 0.85; headR = 0.7;  eyeScale = 1.0; }
-  else if (p.body === 'jacked')   { bw = 1.35; bh = 1.05; bd = 0.85; headR = 0.65; eyeScale = 0.92; }
-  else if (p.body === 'fit')      { bw = 0.9;  bh = 1.15; bd = 0.85; headR = 0.68; eyeScale = 0.95; }
-  else if (p.body === 'chubby')   { bw = 1.3;  bh = 0.78; bd = 1.2;  headR = 0.72; eyeScale = 1.0; }
-  else                            { bw = 0.95; bh = 0.95; bd = 0.95; headR = 0.7;  eyeScale = 1.0; }
+  let hasShoulders = false;   // jacked-only — adds deltoid bumps
+  let hasBelly = false;       // chubby-only — adds a forward belly bump
+  if (p.stage === 'baby')         { bw = 0.55; bh = 0.42; bd = 0.55; headR = 1.0;  hasFeet = false; eyeScale = 1.45; }
+  else if (p.stage === 'teen')    { bw = 0.75; bh = 1.10; bd = 0.75; headR = 0.62; eyeScale = 0.95; }
+  else if (p.body === 'jacked')   { bw = 1.70; bh = 1.25; bd = 0.90; headR = 0.60; eyeScale = 0.85; hasShoulders = true; }
+  else if (p.body === 'fit')      { bw = 0.80; bh = 1.50; bd = 0.75; headR = 0.60; eyeScale = 0.90; }
+  else if (p.body === 'chubby')   { bw = 1.55; bh = 0.70; bd = 1.50; headR = 0.78; eyeScale = 1.05; hasBelly = true; }
+  else                            { bw = 1.00; bh = 1.00; bd = 1.00; headR = 0.70; eyeScale = 1.00; }
 
   const petGroup = new T.Group();
   const facing = new T.Group();
@@ -661,6 +664,33 @@ function mountPet3D(container, p) {
   body.castShadow = true;
   bodyGroup.add(body);
   bodyGroup.userData.baseScaleY = 1;     // for breath
+
+  // Jacked-only — visible deltoid + chest geometry. Two icosahedron bumps
+  // perched on the top shoulders of the body, plus a chest plate.
+  if (hasShoulders) {
+    const shoulderGeo = new T.IcosahedronGeometry(0.32, 1);
+    const shoulderL = new T.Mesh(shoulderGeo, petMat);
+    const shoulderR = new T.Mesh(shoulderGeo, petMat);
+    shoulderL.position.set(-bw * 0.50, bh * 0.92, 0);
+    shoulderR.position.set( bw * 0.50, bh * 0.92, 0);
+    shoulderL.scale.set(1, 0.9, 1);
+    shoulderR.scale.set(1, 0.9, 1);
+    shoulderL.castShadow = true; shoulderR.castShadow = true;
+    bodyGroup.add(shoulderL); bodyGroup.add(shoulderR);
+    // Chest plate — flatter cuboid on the front of body
+    const chest = new T.Mesh(new T.BoxGeometry(bw * 0.78, bh * 0.32, 0.18), petMat);
+    chest.position.set(0, bh * 0.62, bd * 0.42);
+    chest.castShadow = true;
+    bodyGroup.add(chest);
+  }
+  // Chubby-only — round belly bump on the front, bigger than the body itself
+  if (hasBelly) {
+    const belly = new T.Mesh(new T.IcosahedronGeometry(0.42, 1), petMat);
+    belly.scale.set(1.0, 0.85, 0.85);
+    belly.position.set(0, bh * 0.45, bd * 0.42);
+    belly.castShadow = true;
+    bodyGroup.add(belly);
+  }
 
   // HEAD group — nods + forward-bobs during walk; eyes/ears children of this
   const headGroup = new T.Group();
@@ -1099,31 +1129,56 @@ function mountPet3D(container, p) {
           const [lx, nvl] = _dampSpring(facing.rotation.x, leanVel, -0.06, dt, 80, 11);
           facing.rotation.x = lx; leanVel = nvl;
 
-          // GAIT — phase advances per step. Cycle: ~0.45s per step at speed 1.05.
-          gait += dt / 0.45;
-          if (gait >= 1) gait -= 1;
-          // Body cycloid bob — peaks at midstance (gait near 0.25 and 0.75)
-          const bodyBob = Math.abs(Math.sin(gait * Math.PI * 2));
-          petGroup.position.y = Ease.bob(gait * 2 % 1) * 0.075;
+          // GAIT — locked to distance traveled, not time, so feet never slide.
+          // One full cycle (2 steps) covers STRIDE_LEN world units.
+          const STRIDE_LEN = 0.85;
+          gait += step / STRIDE_LEN;
+          while (gait >= 1) gait -= 1;
 
-          // Feet — alternating parabolic arc. Left foot leads on phase 0..0.5, right on 0.5..1.
+          // Body bob — peaks at midstance of each step. One cycle of gait =
+          // two body bumps (one per foot landing).
+          petGroup.position.y = Ease.bob((gait * 2) % 1) * 0.085;
+
+          // Feet — proper walk cycle:
+          //   Left  foot phase = gait           (0..1)
+          //   Right foot phase = (gait + 0.5)   (0..1, offset half a cycle)
+          // For each foot:
+          //   phase 0..0.5  = SWING  — foot lifts in arc + moves FORWARD
+          //   phase 0.5..1  = STANCE — foot on ground, moves BACKWARD relative
+          //                            to body (because body is moving forward)
           if (footL && footR) {
-            const lP = (gait * 2) % 1;        // left foot phase
-            const rP = ((gait * 2) + 1) % 1;  // right foot phase, offset π
-            // Only lift when in "swing" half of the half-cycle
-            const lLift = lP < 1 ? Ease.arc(lP) * 0.16 : 0;
-            const rLift = rP < 1 ? Ease.arc(rP) * 0.16 : 0;
-            footL.position.y = footL.userData.baseY + lLift;
-            footR.position.y = footR.userData.baseY + rLift;
-            // Forward stride — foot translates in Z by ±0.08
-            footL.position.z = bd * 0.18 + (lP - 0.5) * 0.12;
-            footR.position.z = bd * 0.18 + (rP - 0.5) * 0.12;
+            const STEP_LEN = 0.22;
+            const LIFT_H   = 0.16;
+            function footAt(phase, sideX) {
+              const baseZ = bd * 0.18;
+              if (phase < 0.5) {
+                // Swing — lift in arc, translate forward
+                const u = phase * 2;                // 0..1 inside swing
+                return {
+                  y: 0.06 + Ease.arc(u) * LIFT_H,
+                  z: baseZ + (u - 0.5) * STEP_LEN,  // -½ → +½ stride
+                };
+              } else {
+                // Stance — on ground, translate backward (body moves forward)
+                const u = (phase - 0.5) * 2;        // 0..1 inside stance
+                return {
+                  y: 0.06,
+                  z: baseZ + (0.5 - u) * STEP_LEN,  // +½ → -½
+                };
+              }
+            }
+            const lP = gait;
+            const rP = (gait + 0.5) % 1;
+            const lPos = footAt(lP, -1);
+            const rPos = footAt(rP,  1);
+            footL.position.y = lPos.y;  footL.position.z = lPos.z;
+            footR.position.y = rPos.y;  footR.position.z = rPos.z;
           }
 
-          // Head forward-bob — slight pitch on each step (look ahead)
+          // Head forward-bob — slight pitch matching the step cadence
           headGroup.rotation.x = Math.sin(gait * Math.PI * 4) * 0.04;
 
-          // Ear lag — ears swing slightly opposite to head rotation, with delay
+          // (Ear lag — channels still write to empty Groups; safe no-op)
           const earLagTarget = -headGroup.rotation.x * 1.6;
           earGroupL.rotation.x += (earLagTarget - earGroupL.rotation.x) * Math.min(1, dt * 9);
           earGroupR.rotation.x += (earLagTarget - earGroupR.rotation.x) * Math.min(1, dt * 9);
