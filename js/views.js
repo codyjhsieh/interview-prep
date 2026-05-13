@@ -537,19 +537,35 @@ function _shortAngle(from, to) {
  * Sun position is calibrated so the window (at world (~1, 3, -4)) receives
  * direct light during the day and the sun visibly tracks east → west.
  */
-function _sunPhysicsParams() {
+function _sunPhysicsParams(forceHour) {
   const now = new Date();
-  const h = now.getHours() + now.getMinutes() / 60;
+  let h;
+  if (forceHour != null) {
+    // Explicit override (used by lifecycle preview to show different hours
+    // per stage). Wins over both wall-clock AND URL param.
+    h = forceHour;
+  } else {
+    h = now.getHours() + now.getMinutes() / 60;
+    // URL test param ?petTime=23 only applies when no explicit forceHour.
+    try {
+      const params = new URLSearchParams(location.search);
+      const o = params.get('petTime');
+      if (o !== null && !isNaN(parseFloat(o))) h = parseFloat(o);
+    } catch (_) {}
+  }
   let phase, sunPos, sunColor, sunIntensity, ambColor, ambIntensity, skyColor, floorTint;
   if (h >= 6 && h < 18) {
-    // Daytime — sun arcs across the sky from east (sunrise) to west (sunset)
-    const tNorm = (h - 6) / 12;                  // 0 sunrise → 1 sunset
+    // Daytime — sun arcs east → west. Tighter arc than physically realistic
+    // so the ray projected through the window always lands ON the room
+    // floor (window y=3, floor=0 → small denominator amplifies x position
+    // wildly when sun is at the horizon, so we keep sun y > 8 always).
+    const tNorm = (h - 6) / 12;
     const angle = tNorm * Math.PI;
-    const R = 14;                                // sun arc radius
+    const R = 5;
     sunPos = [
-       Math.cos(angle) * R,                       // east (+x) → west (-x)
-       Math.sin(angle) * (R * 0.95) + 1.5,        // 0 at horizon → R near noon
-      -10 - Math.abs(Math.cos(angle)) * 2,         // pulled back behind wall, varies subtly
+       Math.cos(angle) * R,
+       Math.sin(angle) * 5 + 9,                   // baseline 9, peak 14
+      -10,
     ];
     const elev = Math.sin(angle);                // 0 at horizon, 1 at zenith
 
@@ -579,22 +595,25 @@ function _sunPhysicsParams() {
       floorTint = 0xffffff;
     }
   } else {
-    // Night — moonlight from a parallel arc, dim cool blue
+    // Night — moonlight from a parallel arc, dim cool blue.
+    // Y baseline raised to 5 (always ABOVE the window at Y=3) so the ray
+    // ALWAYS angles downward into the room — no more nights with no
+    // moonbeam because moon was below the window.
     phase = (h < 6) ? 'night' : 'late';
     const nightT = (h < 6) ? (h + 6) / 12 : (h - 18) / 12;
     const angle = nightT * Math.PI;
-    const R = 10;
+    const R = 5;
     sunPos = [
       -Math.cos(angle) * R,
-       Math.sin(angle) * (R * 0.7) + 1,
+       Math.sin(angle) * 5 + 5,    // min Y = 5 (above window), peak 10
       -10,
     ];
-    sunColor = 0x7a96c4;     // moonlight blue
-    sunIntensity = 0.35;
-    ambColor = 0x3a4870;     // cool deep blue ambient
-    ambIntensity = 0.45;
-    skyColor = 0x1a2540;     // dark night sky
-    floorTint = 0xa0b0d0;
+    sunColor = 0x8aa6cc;
+    sunIntensity = 0.32;
+    ambColor = 0x2e3b5e;          // deep cool, dim
+    ambIntensity = 0.38;
+    skyColor = 0x1e2c4a;          // dark night sky (the outside is dark!)
+    floorTint = 0x90a0c0;
   }
   return { phase, hour: h, sunPos, sunColor, sunIntensity, ambColor, ambIntensity, skyColor, floorTint };
 }
@@ -623,7 +642,9 @@ function mountPet3D(container, p) {
   camera.lookAt(0, 1.5, 0);
 
   // ---- Lights with real time-of-day sun physics ----
-  const tod = _sunPhysicsParams();
+  // p.forceHour (optional, 0..24) overrides wall-clock — used by the
+  // lifecycle preview to show different stages at different times of day.
+  const tod = _sunPhysicsParams(p.forceHour);
   scene.add(new T.AmbientLight(tod.ambColor, tod.ambIntensity));
   const sun = new T.DirectionalLight(tod.sunColor, tod.sunIntensity);
   sun.position.set(tod.sunPos[0], tod.sunPos[1], tod.sunPos[2]);
@@ -666,12 +687,13 @@ function mountPet3D(container, p) {
   wallSide.receiveShadow = true;
   scene.add(wallSide);
 
-  // Wall decor: alternating picture/window. Daily seeded.
-  const wallDecorIsWindow = (parseInt((p.lastTickDate || '').replaceAll('-','')) % 2 === 0);
+  // Wall decor: the window is always rendered (it's the time-of-day light
+  // source — without it there's no sun/moon beam). Picture-frame variant
+  // dropped: it provided no signal and broke the beam every other day.
+  const wallDecorIsWindow = true;
   if (wallDecorIsWindow) {
-    // Window pane EMITS the current sky color — looks like real daylight
-    // (or moonlight) glowing through. Emissive intensity is high enough that
-    // the pane visually reads as a light source even at night.
+    // Window pane glows the current sky color — the pane itself reads as
+    // a light source.
     const skyHex = tod.skyColor;
     const isDay = tod.phase === 'day' || tod.phase === 'dawn' || tod.phase === 'sunset';
     const win = new T.Mesh(
@@ -679,7 +701,7 @@ function mountPet3D(container, p) {
       new T.MeshStandardMaterial({
         color: skyHex,
         emissive: skyHex,
-        emissiveIntensity: isDay ? 0.65 : 0.35,
+        emissiveIntensity: isDay ? 0.75 : 0.6,
         roughness: 0.3,
       })
     );
@@ -688,76 +710,109 @@ function mountPet3D(container, p) {
     const frame = new T.Mesh(new T.BoxGeometry(1.75, 1.45, 0.04), new T.MeshStandardMaterial({ color: 0x5A6373 }));
     frame.position.set(1.0, 3.0, -FLOOR_W/2 + 0.10);
     scene.add(frame);
-    // Sun/moon are CONCEPTUALLY in the background (outside the room),
-    // not rendered inside the window pane. What you SEE inside the room
-    // is their light passing through — a colored floor patch where the
-    // rays land, plus an angled volumetric beam from window to patch.
-    // Calculate the ray's landing point on the floor based on sun pos.
-    const windowCenter = new T.Vector3(1, 3, -FLOOR_W/2 + 0.12);
+    // (No sun/moon disc inside the window — they're conceptually outside.
+    // Light coming through the window is represented by the beam + floor
+    // patch only.)
+    // Sun/moon conceptually outside (background). Their light enters the
+    // room AT the disc's position in the window and continues to the floor.
+    //
+    // Algorithm (single source of truth so disc + beam + landing all align):
+    //   1. Compute disc position inside window from moon-arc coordinates
+    //   2. Beam STARTS at the disc (slightly in front of window pane)
+    //   3. Ray direction = (disc - moon), normalized. Continue past disc
+    //      into the room until it hits the floor (y=0).
+    //   4. Landing = where that ray hits the floor, clamped to floor bounds.
+    const windowZ = -FLOOR_W/2 + 0.12;
+    const windowX = 1, windowY = 3;
     const sunWorld = new T.Vector3(tod.sunPos[0], tod.sunPos[1], tod.sunPos[2]);
-    // Ray direction = from sun toward window center, continuing into the room.
-    const rayDir = windowCenter.clone().sub(sunWorld).normalize();
+    // Disc position inside the window — same formula used to render moon mesh
+    const discXOff = Math.max(-0.55, Math.min(0.55, tod.sunPos[0] / 6 * 0.55));
+    const discYOff = Math.max(-0.45, Math.min(0.45, (tod.sunPos[1] - 5) / 6 * 0.4));
+    const discPos = new T.Vector3(windowX + discXOff, windowY + discYOff, windowZ + 0.04);
+    // Ray direction = from sun through the disc, continuing into the room
+    const rayDir = discPos.clone().sub(sunWorld).normalize();
     let beamReaches = false;
     let landPos = new T.Vector3();
     if (rayDir.y < -0.04) {
-      // Continue the ray past the window plane until it hits the floor (y=0)
-      const distFromSunToFloor = (0 - sunWorld.y) / rayDir.y;
-      // The point on the floor where the ray would land if unobstructed
+      const distFromDiscToFloor = (0 - discPos.y) / rayDir.y;
       landPos.set(
-        sunWorld.x + rayDir.x * distFromSunToFloor,
+        discPos.x + rayDir.x * distFromDiscToFloor,
         0,
-        sunWorld.z + rayDir.z * distFromSunToFloor,
+        discPos.z + rayDir.z * distFromDiscToFloor,
       );
-      // Light only reaches the floor if (a) the ray actually enters via the
-      // window (within window bounds) and (b) the landing point is on the
-      // floor (within FLOOR_W/2). For simplicity, just clamp to floor.
-      beamReaches = Math.abs(landPos.x) < FLOOR_W/2 - 0.5 &&
-                    Math.abs(landPos.z) < FLOOR_W/2 - 0.5 &&
-                    tod.sunIntensity > 0.45;
+      const halfFloor = FLOOR_W/2 - 0.6;
+      landPos.x = Math.max(-halfFloor, Math.min(halfFloor, landPos.x));
+      landPos.z = Math.max(-halfFloor, Math.min(halfFloor, landPos.z));
+      beamReaches = true;
     }
     if (beamReaches) {
-      // 1) Bright floor patch where the ray lands — additive blend so it
-      //    brightens whatever's underneath without becoming a flat color block.
-      const patch = new T.Mesh(
-        new T.PlaneGeometry(2.0, 1.8),
-        new T.MeshBasicMaterial({
-          color: tod.sunColor,
-          transparent: true,
-          opacity: Math.min(0.45, tod.sunIntensity * 0.42),
-          blending: T.AdditiveBlending,
-          depthWrite: false,
-        })
-      );
-      patch.position.set(landPos.x, 0.02, landPos.z);
-      patch.rotation.x = -Math.PI / 2;
-      patch.renderOrder = 1;
-      scene.add(patch);
+      const isNight = tod.phase === 'night' || tod.phase === 'late';
+      // Per-phase beam color (sunbeam: warm golds vs raw tod.sunColor which
+      // is tuned for the directional light, not the volumetric ray mesh).
+      let rayColor;
+      if (isNight)                       rayColor = 0xa8c0ee;
+      else if (tod.phase === 'dawn')     rayColor = 0xffd8a0;
+      else if (tod.phase === 'sunset')   rayColor = 0xffa860;
+      else                               rayColor = 0xfff0b8;
 
-      // 2) Volumetric beam — translucent rectangular prism from the window
-      //    pane down to the floor patch. Additive blend gives the "dust in
-      //    a sunbeam" feel without needing a real volumetric shader.
-      const start = new T.Vector3(1, 3, -FLOOR_W/2 + 0.18);
-      const end   = new T.Vector3(landPos.x, 0, landPos.z);
-      const beamVec = end.clone().sub(start);
-      const beamLen = beamVec.length();
-      const beam = new T.Mesh(
-        new T.BoxGeometry(1.4, beamLen, 1.2),
-        new T.MeshBasicMaterial({
-          color: tod.sunColor,
-          transparent: true,
-          opacity: Math.min(0.14, tod.sunIntensity * 0.12),
-          blending: T.AdditiveBlending,
-          depthWrite: false,
-        })
-      );
-      // Center the beam between window and patch, then rotate so its
-      // local +Y points from start to end.
-      beam.position.copy(start.clone().add(end).multiplyScalar(0.5));
-      beam.quaternion.setFromUnitVectors(
-        new T.Vector3(0, 1, 0),
-        beamVec.clone().normalize()
-      );
-      beam.renderOrder = 0;
+      // FRUSTUM BEAM — top face matches the window opening, bottom face
+      // matches the floor patch. We START from a BoxGeometry (which is the
+      // only geometry that's reliably rendered for this scene — custom
+      // BufferGeometry frustums vanish even with bounding spheres set) and
+      // then deform its 24 vertices so the top maps to the window opening
+      // and the bottom maps to the floor landing rectangle.
+      const winFront = -FLOOR_W/2 + 0.16;
+      const wxL = 1 - 0.78, wxR = 1 + 0.78;
+      const wyB = 3 - 0.62, wyT = 3 + 0.62;
+      const patchW = 2.0, patchD = 1.8;
+      const halfPW = patchW / 2, halfPD = patchD / 2;
+      const fxL = landPos.x - halfPW, fxR = landPos.x + halfPW;
+      const fzB = landPos.z - halfPD, fzT = landPos.z + halfPD;
+      const beamFloorY = 0.06;
+      const beamGeo = new T.BoxGeometry(1, 1, 1);
+      const pos = beamGeo.attributes.position;
+      // Box has 24 vertices (4 per face). Each starts at ±0.5 on each axis.
+      // bx sign → which side of the trapezoid (left vs right).
+      // by sign → which end (top = window, bottom = floor).
+      // bz sign → secondary axis: at top it's window y, at bottom it's
+      //           floor z.
+      for (let i = 0; i < pos.count; i++) {
+        const bx = pos.getX(i), by = pos.getY(i), bz = pos.getZ(i);
+        let x, y, z;
+        if (by > 0) {
+          x = bx > 0 ? wxR : wxL;
+          y = bz > 0 ? wyT : wyB;
+          z = winFront;
+        } else {
+          x = bx > 0 ? fxR : fxL;
+          y = beamFloorY;
+          z = bz > 0 ? fzT : fzB;
+        }
+        pos.setXYZ(i, x, y, z);
+      }
+      pos.needsUpdate = true;
+      beamGeo.computeVertexNormals();
+      beamGeo.computeBoundingSphere();
+      beamGeo.computeBoundingBox();
+
+      // Opacity tracks sun/moon intensity — bright at noon, dim near
+      // sunrise/sunset, dimmer still at night when moonlight is the only
+      // source. Clamped so dawn doesn't go all the way to zero and noon
+      // doesn't blow out the room.
+      const beamOpacity = Math.max(0.07, Math.min(0.24, tod.sunIntensity * 0.20));
+      const beam = new T.Mesh(beamGeo, new T.MeshBasicMaterial({
+        color: rayColor,
+        transparent: true,
+        opacity: beamOpacity,
+        blending: T.NormalBlending,
+        depthWrite: false,
+        side: T.DoubleSide,
+        polygonOffset: true,
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1,
+      }));
+      beam.renderOrder = 1;
+      beam.frustumCulled = false;
       scene.add(beam);
     }
   } else {
@@ -1655,14 +1710,16 @@ function mountPet3D(container, p) {
  * a single 3D scene. Mount/dispose happens per stage change so we don't
  * keep 6 WebGL contexts alive. */
 function openPetLifecyclePreview() {
+  // Each stage is shown at a different hour so the user sees Bit across the
+  // full day cycle (dawn / morning / midday / afternoon / sunset / evening / night).
   const stages = [
-    { stage: 'baby',  body: 'baby',   label: 'Baby',          sub: 'Days 0–2 · big head, no feet, single curl. Chibi cute.' },
-    { stage: 'teen',  body: 'teen',   label: 'Teen',          sub: 'Days 3–7 · stretched + gangly + fin mohawk. Awkward phase.' },
-    { stage: 'adult', body: 'normal', label: 'Adult · Normal',sub: 'Days 8+ default. Cowlick tuft, normal proportions.' },
-    { stage: 'adult', body: 'fit',    label: 'Adult · Fit',   sub: 'Tall + lean + red headband. Form > +15 (1.5× XP regularly).' },
-    { stage: 'adult', body: 'jacked', label: 'Adult · Jacked',sub: 'Massive shoulders + chest plate + bicep bumps + white sweatband.' },
-    { stage: 'adult', body: 'chubby', label: 'Adult · Chubby',sub: 'Round, belly bump + little hat. Form < −25 (fed without exercise).' },
-    { stage: 'dead',  body: 'dead',   label: 'Death',         sub: 'Vitality hits 0. Tombstone in the room. Respawns as baby tomorrow.' },
+    { stage: 'baby',  body: 'baby',   hour: 7,   label: 'Baby · dawn',         sub: 'Days 0–2 · big head, big eyes. Just waking up.' },
+    { stage: 'teen',  body: 'teen',   hour: 10,  label: 'Teen · morning',      sub: 'Days 3–7 · stretched + gangly. Active morning.' },
+    { stage: 'adult', body: 'normal', hour: 12,  label: 'Adult · midday',      sub: 'Days 8+ default. Sun directly overhead.' },
+    { stage: 'adult', body: 'fit',    hour: 15,  label: 'Adult · Fit · afternoon', sub: 'Form > +15. Red athletic headband.' },
+    { stage: 'adult', body: 'jacked', hour: 17,  label: 'Adult · Jacked · sunset', sub: 'Form > +25. Broad shoulders, sweatband.' },
+    { stage: 'adult', body: 'chubby', hour: 19,  label: 'Adult · Chubby · evening', sub: 'Form < −25. Round belly, chef hat.' },
+    { stage: 'dead',  body: 'dead',   hour: 23,  label: 'Death · night',       sub: 'Vitality hits 0. Tombstone under moonlight.' },
   ];
   let idx = 0;
   const wrap = el('div','fixed inset-0 z-50 grid place-items-center p-4');
@@ -1699,6 +1756,7 @@ function openPetLifecyclePreview() {
         ageDays: s.stage === 'baby' ? 1 : s.stage === 'teen' ? 5 : 12,
         foodPilesAvailable: 0, pileXP: 10,
         lastTickDate: new Date().toISOString().slice(0,10),
+        forceHour: s.hour,
       });
     });
     card.querySelector('[data-lc-prev]').addEventListener('click', () => {
