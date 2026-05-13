@@ -153,6 +153,12 @@ function awardXP(state, amount, reason) {
   else if (roll < 0.09) { multiplier = 1.5; bonusLabel = ' (1.5× bonus)'; }
   const finalXP = Math.round(amount * multiplier);
 
+  // Track whether THIS award crossed the daily goal threshold so callers
+  // can surface a "Bit's hungry — feed time" toast without polling.
+  const goal = (state.user && state.user.goal) || 60;
+  const prevTodayXP = state.todayXP || 0;
+  const crossedFeedGoal = prevTodayXP < goal && (prevTodayXP + finalXP) >= goal;
+
   state.xp += finalXP;
   state.todayXP += finalXP;
   state.level = levelFromXP(state.xp);
@@ -165,7 +171,43 @@ function awardXP(state, amount, reason) {
   // cap history at 365
   if (state.history.length > 365) state.history.splice(0, state.history.length - 365);
 
-  return { state, xpGained: finalXP, bonusLabel, levelUp: undefined };
+  // Goal-crossed toast — Bit needs feeding. Once per day; subsequent
+  // crossings (after page reload, etc.) suppress via lastFeedToastDate.
+  if (crossedFeedGoal && state.pet && state.pet.lastFeedToastDate !== today) {
+    state.pet.lastFeedToastDate = today;
+    const petName = (state.pet && state.pet.name) || 'Bit';
+    if (typeof window !== 'undefined' && window.ANIM && window.ANIM.toast) {
+      window.ANIM.toast({
+        icon: '🥕',
+        title: `${petName} is hungry`,
+        body: 'You hit today\'s XP goal — head to the dashboard and drop food.',
+        href: '#dashboard',
+      });
+    }
+  }
+
+  return { state, xpGained: finalXP, bonusLabel, levelUp: undefined, crossedFeedGoal };
+}
+
+/* Manual feed — called when the user clicks "Drop food" and a pile spawns
+ * in the scene. Each pile is worth +8 vitality (capped at 100) and shifts
+ * body form by +1 if the user is on the workout path (todayXP > goal*1.5)
+ * else -1 (sedentary → chubby). This replaces the previous automatic
+ * vitality bump that fired the moment todayXP crossed the goal. */
+function feedPetWithPile(state) {
+  if (!state || !state.pet) return false;
+  const p = state.pet;
+  p.vitality = Math.min(100, (p.vitality || 0) + 8);
+  const today = todayKey();
+  p.lastFedDate = today;
+  const goal = (state.user && state.user.goal) || 60;
+  const todayXP = state.todayXP || 0;
+  if (todayXP >= goal * 1.5) {
+    p.form = Math.min(50, (p.form || 0) + 1);
+  } else {
+    p.form = Math.max(-50, (p.form || 0) - 1);
+  }
+  return true;
 }
 
 function logLessonComplete(state, lessonId, baseXP) {
@@ -555,21 +597,19 @@ function petState(state) {
     p.lastEatenDate = today;
   }
 
+  // justFed is purely a flag for the activity-selection function (so Bit
+  // briefly shows 'eat' on goal-crossing). It NO LONGER auto-increments
+  // vitality or form — those only change when the user explicitly drops
+  // food via the "Drop food" button, which calls feedPetWithPile().
   const justFed = (todayXP >= goal) && p.lastFedDate !== today;
-  if (justFed) {
-    p.vitality = Math.min(100, p.vitality + 25);
-    p.lastFedDate = today;
-    if (todayXP >= goal * 1.5) {
-      p.form = Math.min(50, p.form + 6);   // exercise path → jacked
-    } else {
-      p.form = Math.max(-50, p.form - 2);  // fed-but-sedentary → chubby
-    }
-  }
 
-  // Food piles: visualize remaining un-eaten XP. ~10 XP per pile, capped at 8.
+  // Food piles: every 10 XP earned (not yet spent on a drop) is one
+  // droppable pile. No cap — crossing the daily goal doesn't stop the
+  // user from earning more food. The user is in charge of when to drop;
+  // unspent XP just accumulates.
   const PILE_XP = 10;
   const uneatenXP = Math.max(0, todayXP - (p.eatenTodayXP || 0));
-  const foodPilesAvailable = Math.min(8, Math.floor(uneatenXP / PILE_XP));
+  const foodPilesAvailable = Math.floor(uneatenXP / PILE_XP);
 
   return {
     name: p.name,
@@ -762,7 +802,7 @@ function coverage(state, categories, modules) {
 
 return {
   STORAGE_KEY, load, save, saveImmediate, reset,
-  tickDay, awardXP, logLessonComplete,
+  tickDay, awardXP, logLessonComplete, feedPetWithPile,
   reviewCard, dueCards,
   recordWrongAnswer, reviewMissedQuestion, dueMissedQuestions, totalMissedCount,
   scheduleConceptReview, dueConceptReviews, totalConceptReviewsCount,

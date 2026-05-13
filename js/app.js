@@ -273,6 +273,12 @@ function bindEvents() {
       state.user.track = fd.get('track') || state.user.track;
       state.user.goal  = parseInt(fd.get('goal') || state.user.goal, 10);
       state.user.when_cue = fd.get('when_cue') || '';
+      // Pet name — kept on state.pet so the rename survives respawns.
+      const petName = (fd.get('pet_name') || '').toString().trim().slice(0, 24);
+      if (petName) {
+        if (!state.pet) state.pet = {};
+        state.pet.name = petName;
+      }
       afterStateChange();
       buildSidebar();
       ANIM.toast({ icon:'💾', title:'Saved' });

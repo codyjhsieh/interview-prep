@@ -2057,11 +2057,12 @@ function renderPetCard(state, p) {
       ${p.deathCount > 0 ? `<div class="text-[10.5px] muted" title="Total times you let your pet die">🪦 × ${p.deathCount}</div>` : ''}
     </div>
 
-    <div class="flex items-stretch gap-4 flex-wrap">
-      <!-- Three.js WebGL scene mounts inside this container -->
+    <div class="pet-grid">
+      <!-- LEFT: Three.js WebGL scene — Bit dominant -->
       <div class="pet-room-3d" id="pet-room-3d-host"></div>
 
-      <div class="flex-1 min-w-[150px] space-y-2 self-center">
+      <!-- RIGHT panel: all stats + interactions stacked -->
+      <div class="pet-panel pet-panel-right space-y-3 self-center">
         <div>
           <div class="flex justify-between text-[11px] muted mb-0.5">
             <span>Vitality</span>
@@ -2075,7 +2076,6 @@ function renderPetCard(state, p) {
             <span>Body</span>
             <span class="numeric" style="text-transform:capitalize">${p.body}</span>
           </div>
-          <!-- Form bar: -50 chubby ... 0 normal ... +50 jacked. Indicator at center 0. -->
           <div class="relative h-1 rounded-full" style="background:rgba(15,23,42,0.06)">
             <div class="absolute top-0 bottom-0" style="left:50%; width:1px; background:var(--hairline)"></div>
             <div class="absolute top-0 bottom-0 rounded-full" style="${p.form >= 0
@@ -2084,32 +2084,30 @@ function renderPetCard(state, p) {
           </div>
           <div class="flex justify-between text-[10px] dim mt-0.5"><span>Chubby</span><span>Jacked</span></div>
         </div>` : ''}
+        <div>
+          <div class="flex justify-between text-[11px] muted mb-0.5">
+            <span>Today's XP</span>
+            <span class="numeric">${p.todayXP}/${p.goal}</span>
+          </div>
+          <div class="bar"><i style="width:${p.xpProgress}%"></i></div>
+        </div>
+        <div class="text-[12px]" style="color:${p.fedToday ? 'var(--accent)' : 'inherit'}">
+          ${p.fedToday
+            ? `✓ Goal hit${p.todayXP >= p.goal * 1.5 ? ' · workout bonus 💪' : ''}`
+            : `<b>${p.xpToFeed} XP</b> to today's goal`}
+        </div>
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button class="btn btn-primary !py-1.5 !px-3 text-[12.5px]"
+                  data-pet-drop-food
+                  ${p.foodPilesAvailable > 0 ? '' : 'disabled style="opacity:0.45;cursor:not-allowed"'}>
+            🥕 Drop food${p.foodPilesAvailable > 0 ? ` <span class="numeric ml-1">×${p.foodPilesAvailable}</span>` : ''}
+          </button>
+          <a href="#curriculum" class="btn !py-1.5 !px-3 text-[12.5px]">Earn XP →</a>
+          <button class="btn !py-1.5 !px-3 text-[12.5px]" data-pet-lifecycle>👁 Stages</button>
+        </div>
       </div>
     </div>
 
-    <div class="mt-3 pt-3 border-t border-[color:var(--hairline)]">
-      ${p.fedToday
-        ? `<div class="text-[12.5px]" style="color:var(--accent)">✓ Fed today (${p.todayXP}/${p.goal} XP). ${p.justFed ? `<b>Just fed!</b>` : `${esc(p.name)} is happy.`}${p.todayXP >= p.goal * 1.5 ? ' Bonus workout 💪' : ''}</div>`
-        : `<div class="flex items-center justify-between gap-2 flex-wrap">
-             <div class="text-[12.5px]">
-               <b>${p.xpToFeed} XP</b> to feed ${esc(p.name)} <span class="muted">(${p.todayXP}/${p.goal})</span>
-             </div>
-             <a href="#curriculum" class="btn btn-primary !py-1.5 !px-3 text-[12.5px]">Go earn XP →</a>
-           </div>
-           <div class="bar mt-2"><i style="width:${p.xpProgress}%"></i></div>`}
-    </div>
-
-    <div class="mt-3 flex items-center justify-between gap-2 flex-wrap">
-      <div class="flex gap-2 flex-wrap">
-        <button class="btn !py-1.5 !px-3 text-[12.5px]"
-                data-pet-drop-food
-                ${p.foodPilesAvailable > 0 ? '' : 'disabled style="opacity:0.45;cursor:not-allowed"'}>
-          🥕 Drop food${p.foodPilesAvailable > 0 ? ` <span class="numeric ml-1">×${p.foodPilesAvailable}</span>` : ''}
-        </button>
-        <button class="btn !py-1.5 !px-3 text-[12.5px]" data-pet-lifecycle>👁 Preview all life stages</button>
-      </div>
-      <div class="text-[10.5px] muted">Stage: ${esc(p.stage)}${p.stage === 'adult' ? ' · ' + esc(p.body) : ''}</div>
-    </div>
 
     <details class="mt-3">
       <summary class="text-[11px] muted cursor-pointer hover:opacity-80">How feeding works ▾</summary>
@@ -2283,14 +2281,17 @@ function renderDashboard(state, hub) {
           const PILE_XP = 10;
           const todayXP = st.todayXP || 0;
           const eaten   = (st.pet && st.pet.eatenTodayXP) || 0;
-          const avail   = Math.min(8, Math.floor(Math.max(0, todayXP - eaten) / PILE_XP));
+          const avail   = Math.floor(Math.max(0, todayXP - eaten) / PILE_XP);
           if (avail <= 0) return;
           // Random floor position, kept well inside the walls
           const fx = (Math.random() * 2 - 1) * 2.0;
           const fz = (Math.random() * 2 - 1) * 2.0;
           petHandle.dropFood(fx, fz);
-          // Debit the food bank so the count is consistent across remounts.
+          // Debit the food bank + actually feed Bit (vitality + form). This
+          // is the ONLY path that changes vitality now — auto-feed on
+          // goal-cross was removed in gamification.petState.
           st.pet.eatenTodayXP = eaten + PILE_XP;
+          if (typeof GAMI !== 'undefined' && GAMI.feedPetWithPile) GAMI.feedPetWithPile(st);
           if (typeof GAMI !== 'undefined' && GAMI.saveImmediate) GAMI.saveImmediate(st);
           // Update button state in place
           const newAvail = avail - 1;
@@ -3585,6 +3586,10 @@ function renderProfile(state, hub) {
         <label class="block">
           <span class="text-xs text-slate-400">Anchor cue ("when X, then I study")</span>
           <input name="when_cue" value="${esc(state.user.when_cue)}" class="w-full bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 mt-1"/>
+        </label>
+        <label class="block">
+          <span class="text-xs text-slate-400">Your pet's name</span>
+          <input name="pet_name" maxlength="24" value="${esc(state.pet && state.pet.name || 'Bit')}" class="w-full bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 mt-1 focus:border-accent-500 focus:outline-none"/>
         </label>
         <div class="sm:col-span-2 flex gap-2">
           <button class="btn btn-primary" type="submit">Save</button>

@@ -76,6 +76,29 @@
   --r-lg: 28px;
   --r-xl: 36px;
 
+  /* Concentric corner system (Apple HIG: inner = outer − padding). Cards
+   * publish --r-outer and --card-padding; nested glass picks up --r-inner
+   * automatically so corners stay parallel. Floored at 6px so deeply nested
+   * elements never collapse to right angles. */
+  --r-outer:       var(--r);
+  --card-padding:  1.15rem;
+  --r-inner:       max(6px, calc(var(--r-outer) - var(--card-padding)));
+
+  /* Variable blur — let it animate per surface state (e.g., frosted ramp-up
+   * when a modal opens over the dashboard). Surfaces reference this token
+   * in their backdrop-filter instead of hardcoding 60px. */
+  --glass-blur:        60px;
+  --glass-saturate:    200%;
+  --glass-brightness:  1.08;
+  --glass-contrast:    1.02;
+
+  /* Adaptive substrate — JS samples each card's background and writes
+   * --card-tint with the dominant color. Defaults to transparent so the
+   * cascade is a no-op until JS lights it up. The .card rule uses
+   * color-mix(...) to blend a slight pull toward the substrate. */
+  --card-tint:         transparent;
+  --card-tint-mix:     14%;
+
   /* Spring transition (Apple-style overshoot) */
   --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease:   cubic-bezier(0.32, 0.72, 0, 1);
@@ -259,20 +282,45 @@ header.sticky > *, main > header > * { position: relative; z-index: 1; }
  * ========================================================================= */
 .card {
   position: relative;
-  background: var(--regular);
-  -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(1.08) contrast(1.02);
-  backdrop-filter: blur(60px) saturate(200%) brightness(1.08) contrast(1.02);
-  border-radius: var(--r);
-  padding: 1.15rem 1.3rem;
+  /* Adaptive substrate — color-mix pulls the glass slightly toward the
+   * background sampled by JS (see js/glass-adaptive.js). When --card-tint
+   * is transparent (default), the mix is a no-op and we get pure --regular. */
+  background: color-mix(in srgb, var(--regular) calc(100% - var(--card-tint-mix)), var(--card-tint) var(--card-tint-mix));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness)) contrast(var(--glass-contrast));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness)) contrast(var(--glass-contrast));
+  border-radius: var(--r-outer);
+  padding: var(--card-padding) 1.3rem;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.95),
     inset 0 -1px 0 rgba(15,23,42,0.06),
     inset 1px 0 0 rgba(255,255,255,0.55),
     inset -1px 0 0 rgba(255,255,255,0.30),
     var(--sh-card);
-  transition: transform 0.2s var(--ease), box-shadow 0.25s var(--ease), background 0.25s var(--ease);
+  transition:
+    transform 0.2s var(--ease),
+    box-shadow 0.25s var(--ease),
+    background 0.4s var(--ease),
+    backdrop-filter 0.45s var(--ease),
+    -webkit-backdrop-filter 0.45s var(--ease);
   overflow: hidden;
   isolation: isolate;
+}
+
+/* Concentric nesting — nested glass surfaces inherit a smaller radius so
+ * corners run parallel to the parent (Apple HIG rule). */
+.card .card,
+.card .btn {
+  --r-outer: var(--r-inner);
+}
+
+/* Frosted-on-modal-open — Apple's Liquid Glass ramps blur on the surfaces
+ * beneath an open sheet, signaling depth-stacking. We detect any modal
+ * mounted as a direct child of <body> via :has() and bump --glass-blur.
+ * The .card transition includes backdrop-filter, so the ramp animates. */
+body:has(> .fixed.inset-0[class*="z-4"]),
+body:has(> .fixed.inset-0[class*="z-5"]) {
+  --glass-blur: 84px;
+  --glass-saturate: 220%;
 }
 
 /* Top-edge specular gloss — static only, no animation, no pointer tracking */
@@ -335,6 +383,36 @@ header.sticky > *, main > header > * { position: relative; z-index: 1; }
  * the pet group along an isometric axis.
  * ========================================================================= */
 .pet-card { contain: layout style; }
+
+/* Pet card layout — desktop puts Bit on the left and all stats+actions
+ * stacked on the right. Mobile falls back to the original vertical stack
+ * (3D scene full-width on top, panel beneath). The 720px breakpoint
+ * matches Tailwind's `sm` so it behaves predictably with the rest of
+ * the dashboard cards. */
+.pet-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.pet-grid > .pet-room-3d { width: 100%; }
+.pet-grid > .pet-panel-right { width: 100%; }
+
+@media (min-width: 720px) {
+  .pet-grid {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 1.25rem;
+  }
+  .pet-grid > .pet-room-3d {
+    width: auto;
+    flex: 0 0 auto;
+  }
+  .pet-grid > .pet-panel-right {
+    width: auto;
+    flex: 1 1 0;
+    min-width: 180px;
+  }
+}
 
 .pet-room-3d {
   width: 260px; height: 180px;

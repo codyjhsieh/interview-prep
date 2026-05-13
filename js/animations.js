@@ -51,11 +51,21 @@ function celebrateLevelUp(newLevel) {
   toast({ icon:'🌟', title:`Level ${newLevel}!`, body:`You leveled up. Keep going.` });
 }
 
-function toast({ icon='✨', title='Nice', body='', timeout=3200 }) {
+function toast({ icon='✨', title='Nice', body='', timeout=3200, href='' }) {
   const wrap = document.getElementById('toasts');
   if (!wrap) return;
   const el = document.createElement('div');
   el.className = 'toast';
+  // If href is provided, make the whole toast clickable to navigate there
+  // (used by the "Bit's hungry" toast to jump to the dashboard).
+  if (href) {
+    el.style.cursor = 'pointer';
+    el.setAttribute('role', 'link');
+    el.setAttribute('tabindex', '0');
+    const go = () => { try { window.location.hash = href.replace(/^#/, ''); } catch (_) {} el.remove(); };
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') go(); });
+  }
   el.innerHTML = `<div class="icon">${icon}</div><div><div class="title">${title}</div>${body?`<div class="body">${body}</div>`:''}</div>`;
   wrap.appendChild(el);
   requestAnimationFrame(() => el.classList.add('show'));
