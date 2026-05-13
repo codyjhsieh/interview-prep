@@ -2433,14 +2433,12 @@ function renderQuotesCard() {
   requestAnimationFrame(() => {
     const shuffleBtn = card.querySelector('#quote-shuffle');
     const featuredEl = card.querySelector('#quote-featured');
-    let lastIdx = QUOTES.indexOf(featured);
     wireContext(featuredEl);
     if (shuffleBtn) shuffleBtn.addEventListener('click', () => {
       featuredEl.style.opacity = '0';
       setTimeout(() => {
-        let i = lastIdx;
-        while (i === lastIdx && QUOTES.length > 1) i = Math.floor(Math.random() * QUOTES.length);
-        lastIdx = i;
+        // Truly random — uniform pull, no guards. Re-picks happen.
+        const i = Math.floor(Math.random() * QUOTES.length);
         featuredEl.innerHTML = renderFeatured(QUOTES[i]);
         wireContext(featuredEl);
         featuredEl.style.opacity = '1';
