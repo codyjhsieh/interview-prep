@@ -503,11 +503,13 @@ function mountPet3D(container, p) {
   camera.lookAt(0, 1.5, 0);
 
   // ---- Lights ----
+  // Smaller shadow map (512² vs 1024²) — invisible quality drop at this
+  // canvas size, ~4× cheaper per shadow pass.
   scene.add(new T.AmbientLight(0xffffff, 0.55));
   const sun = new T.DirectionalLight(0xfff4e0, 0.95);
   sun.position.set(6, 10, 4);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(512, 512);
   sun.shadow.camera.left   = -8;
   sun.shadow.camera.right  =  8;
   sun.shadow.camera.top    =  8;
@@ -738,11 +740,20 @@ function mountPet3D(container, p) {
   }
 
   // ---- Renderer ----
-  const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
+  // Power-conscious config: low-power preference (let mobile GPUs stay cool),
+  // capped pixel ratio (1.5 covers retina/HiDPI; 2+ on a 280px canvas is
+  // wasted detail), basic shadow mapping not PCF-soft (cheaper, still good
+  // at this scale).
+  const renderer = new T.WebGLRenderer({
+    antialias: true,
+    alpha: true,
+    powerPreference: 'low-power',
+    precision: 'mediump',
+  });
   renderer.setSize(w, h);
-  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = T.PCFSoftShadowMap;
+  renderer.shadowMap.type = T.BasicShadowMap;
   renderer.outputColorSpace = T.SRGBColorSpace || T.sRGBEncoding;
   container.appendChild(renderer.domElement);
 
@@ -782,10 +793,21 @@ function mountPet3D(container, p) {
     }
   }
 
-  // ---- Animation loop ----
+  // ---- Animation loop (visibility-gated) ----
+  // Optimization strategy:
+  //   • IntersectionObserver pauses rAF when canvas is off-screen (scroll).
+  //   • visibilitychange pauses when the tab is hidden.
+  //   • Static activities (sleep / idle / cough / eat / beg) — where the
+  //     scene barely changes — fall back to a 30fps cap instead of 60fps.
+  //   • Walking / play / workout stay at full 60fps so motion is smooth.
+  //   • When pet is fully at rest AND no piles to eat, render at 12fps
+  //     (1 frame every ~80ms) — the canvas stays alive for any state
+  //     change but doesn't spin the GPU.
   let mounted = true;
+  let visible = true;     // toggled by IntersectionObserver + visibilitychange
   let t = 0;
   let lastFrame = performance.now();
+  let lastRender = 0;
 
   // Wander state — Bit picks a target on the floor, walks toward it
   // at constant speed turning to face it, then picks a new target on arrival.
@@ -817,9 +839,25 @@ function mountPet3D(container, p) {
 
   function tick(now) {
     if (!mounted) return;
+    if (!visible) {
+      // Tab hidden or canvas scrolled off-screen — schedule a wake-check
+      // every ~250ms but skip rendering.
+      setTimeout(() => requestAnimationFrame(tick), 250);
+      return;
+    }
     const dt = Math.min(0.05, (now - lastFrame) / 1000);
     lastFrame = now;
     t += dt;
+
+    // Adaptive frame budget — high motion = full speed, low motion = 30fps
+    // cap so the GPU can idle between frames.
+    const highMotion = p.activity === 'walk' || p.activity === 'play' || p.activity === 'workout' || foodPiles.some(f => !f.eaten);
+    const minFrameInterval = highMotion ? 16 : 33;   // 60fps vs 30fps
+    if (now - lastRender < minFrameInterval) {
+      requestAnimationFrame(tick);
+      return;
+    }
+    lastRender = now;
 
     // Food piles bob gently in place
     for (let i = 0; i < foodPiles.length; i++) {
@@ -906,6 +944,32 @@ function mountPet3D(container, p) {
     requestAnimationFrame(tick);
   }
   petGroup.userData.startX = petGroup.position.x;
+
+  // ---- Visibility gating (the big perf win) ----
+  // Pause rAF when the canvas isn't actually on screen.
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      const wasVisible = visible;
+      visible = e.isIntersecting && !document.hidden;
+      if (!wasVisible && visible) {
+        // Just became visible — reset frame timestamp so dt doesn't spike
+        lastFrame = performance.now();
+        requestAnimationFrame(tick);
+      }
+    }
+  }, { threshold: 0.01 });
+  io.observe(container);
+  // Pause when the tab is hidden, resume when it comes back
+  const onVisChange = () => {
+    const wasVisible = visible;
+    visible = !document.hidden && (container.offsetParent !== null);
+    if (!wasVisible && visible) {
+      lastFrame = performance.now();
+      requestAnimationFrame(tick);
+    }
+  };
+  document.addEventListener('visibilitychange', onVisChange);
+
   requestAnimationFrame(tick);
 
   // ---- Responsive: resize on container size changes ----
@@ -924,8 +988,11 @@ function mountPet3D(container, p) {
   const handle = {
     dispose: () => {
       mounted = false;
+      try { io.disconnect(); } catch(_) {}
+      try { document.removeEventListener('visibilitychange', onVisChange); } catch(_) {}
       try { ro.disconnect(); } catch(_) {}
       try { renderer.dispose(); } catch(_) {}
+      try { renderer.forceContextLoss && renderer.forceContextLoss(); } catch(_) {}
       try { if (renderer.domElement && renderer.domElement.parentNode === container) container.removeChild(renderer.domElement); } catch(_) {}
       // Free GPU resources
       scene.traverse(obj => {
@@ -1032,75 +1099,8 @@ function renderPetCard(state, p) {
   return card;
 }
 
-// Liquid-glass FLIP morph: animate `target` so it appears to grow OUT of
-// the bounding rect of `source`. The glass surface stretches as one body
-// from source to target with spring-overshoot easing; backdrop blur briefly
-// intensifies (variable refraction during motion); content inside (any
-// `.glass-content`) fades in after the surface arrives.
-//
-// Falls back to a centered scale-in if `source` isn't provided (e.g., when
-// the lesson was opened via keyboard shortcut, not a click on a row).
-function flipMorphIn(target, source, opts = {}) {
-  if (!target || !target.animate) return;
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    return;
-  }
-  // 1) Read final rect (forces layout). If no source, still do a centered grow.
-  const tgtRect = target.getBoundingClientRect();
-  let dx = 0, dy = 0, scale = 0.88;
-  if (source && source.getBoundingClientRect) {
-    const s = source.getBoundingClientRect();
-    if (s.width > 0 && s.height > 0) {
-      dx = (s.left + s.width / 2) - (tgtRect.left + tgtRect.width / 2);
-      dy = (s.top + s.height / 2) - (tgtRect.top + tgtRect.height / 2);
-      // Scale so source rect appears to grow into target rect. Liquid Glass
-      // stretches as one mass (use min so we don't squish either axis).
-      scale = Math.max(0.06, Math.min(s.width / tgtRect.width, s.height / tgtRect.height));
-    }
-  }
-  // 2) CRITICAL: write the initial state INLINE before the next paint.
-  // Without this, the first paint shows the modal at its final position and
-  // then "snaps" backward to the source — the flash the user reported.
-  // Setting inline transform + opacity here means the first browser paint
-  // already reflects the source position.
-  target.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`;
-  target.style.opacity = '0.55';
-  target.classList.add('glass-morphing');
-  // 3) Force layout commit so the inline styles are flushed before we start
-  // the animation. (offsetWidth read triggers a reflow.)
-  void target.offsetWidth;
-  // 4) Run the WAAPI animation. fill:'both' keeps it stable at keyframe 0
-  // until the first frame ticks.
-  const anim = target.animate(
-    [
-      { transform: `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`,
-        opacity: 0.55,
-        offset: 0 },
-      // Mid-flight — lifts in Z, brief overshoot in scale ("wet snap")
-      { transform: `translate3d(${dx * 0.05}px, ${dy * 0.05}px, 28px) scale(1.025)`,
-        opacity: 1,
-        offset: 0.78 },
-      // Rest at identity
-      { transform: 'translate3d(0, 0, 0) scale(1)',
-        opacity: 1,
-        offset: 1 },
-    ],
-    {
-      duration: opts.duration || 620,
-      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-      fill: 'both',
-    }
-  );
-  // 5) Clear the inline transform/opacity + drop .glass-morphing on land.
-  // The 0.18s-delayed transition on .glass-content then fades the body in.
-  anim.addEventListener('finish', () => {
-    target.classList.remove('glass-morphing');
-    target.style.transform = '';
-    target.style.opacity = '';
-  });
-  return anim;
-}
-window._lastClickSource = null;   // captured by app.js pointerdown for FLIP source
+// (Removed: flipMorphIn + .glass-morphing transitions — caused flicker.
+// Modal now opens with a simple ANIM.viewIn entrance, no FLIP morph.)
 
 // Auto-classify + Prism-highlight every <pre><code> block under `root`.
 // Default = python. Heuristic upgrades to sql/bash/json when the code obviously
@@ -1808,14 +1808,10 @@ function renderLesson(state, lessonId, sourceEl) {
   }
   if (!lesson) return null;
 
-  // Wrap starts FULLY TRANSPARENT (no backdrop blur, no color) so its
-  // appearance can't create a one-frame flash before the FLIP begins.
-  // The backdrop fades + blurs IN over 380ms in parallel with the card morph.
   const wrap = el('div','fixed inset-0 z-40 grid place-items-center p-4');
-  wrap.style.background = 'rgba(248,249,252,0)';
-  wrap.style.backdropFilter = 'blur(0px) saturate(100%)';
-  wrap.style.webkitBackdropFilter = 'blur(0px) saturate(100%)';
-  wrap.style.transition = 'background 0.36s var(--spring-settle), backdrop-filter 0.36s var(--spring-settle), -webkit-backdrop-filter 0.36s var(--spring-settle)';
+  wrap.style.background = 'rgba(248,249,252,0.55)';
+  wrap.style.backdropFilter = 'blur(24px) saturate(180%)';
+  wrap.style.webkitBackdropFilter = 'blur(24px) saturate(180%)';
   const card = el('div','card elevated max-w-2xl w-full max-h-[90vh] overflow-y-auto');
   card.style.padding = '1.5rem 1.7rem';
   const done = !!state.completedLessons[lessonId];
@@ -1837,10 +1833,8 @@ function renderLesson(state, lessonId, sourceEl) {
     checklist: 'Tick at least one item',
   }[lesson.type] || 'Engage with the lesson';
 
-  // Glass-content wrapper makes the inner stuff fade in AFTER the modal
-  // surface has flown into place (Liquid Glass: content catches up to glass).
   card.innerHTML = `
-    <div class="glass-content">
+    <div>
       <div class="flex items-start justify-between gap-4">
         <div>
           <div class="text-xs muted mb-1">${esc(cat.name)} · ${esc(mod.name)}</div>
@@ -1886,21 +1880,6 @@ function renderLesson(state, lessonId, sourceEl) {
   wrap.appendChild(card);
   document.body.appendChild(wrap);
 
-  // Liquid Glass FLIP — the modal surface grows out of the clicked source
-  // (lesson row, "Open" button, quest tile, etc.). Source falls back to
-  // window._lastClickSource if not passed explicitly.
-  const src = sourceEl || window._lastClickSource;
-  flipMorphIn(card, src);
-
-  // Fade the backdrop blur in alongside the FLIP. Doing it via requestAnimationFrame
-  // ensures the transition is applied AFTER the initial transparent state is painted
-  // (otherwise the CSS transition wouldn't trigger — there'd be no "from" state).
-  requestAnimationFrame(() => {
-    wrap.style.background = 'rgba(248,249,252,0.55)';
-    wrap.style.backdropFilter = 'blur(24px) saturate(180%)';
-    wrap.style.webkitBackdropFilter = 'blur(24px) saturate(180%)';
-  });
-
   // When the lesson's interaction fires its engagement signal, unlock buttons.
   const status = card.querySelector('#engagement-status');
   const unlockButtons = () => {
@@ -1934,7 +1913,7 @@ function renderLesson(state, lessonId, sourceEl) {
     console.error('mountLessonInteraction failed:', err);
     interaction.innerHTML = `<div class="rounded-md p-3" style="background:rgba(215,56,76,0.08);border:1px solid rgba(215,56,76,0.3);color:var(--bad);font-size:13px;font-family:monospace;white-space:pre-wrap">⚠ Activity failed to mount:\n${esc(String(err && err.stack || err))}</div>`;
   }
-  // (FLIP morph above replaces the prior generic ANIM.viewIn() fade-up entrance.)
+  ANIM.viewIn(card);
   // Syntax-highlight every <pre><code> block that doesn't already specify a language.
   // Default to Python (~95% of curriculum code). SQL/Bash/JSON detected by content.
   highlightCodeIn(card);

@@ -166,25 +166,17 @@ function stopFocusSession() {
 
 /* ---------- Global event delegation ---------- */
 function bindEvents() {
-  // Track the last clicked element so Liquid-Glass FLIP can grow the modal
-  // out of that source rect. Captured at pointerdown so we have it before
-  // any handler dispatches navigation.
-  document.addEventListener('pointerdown', e => {
-    window._lastClickSource = e.target?.closest?.('.lesson-row, [data-open], [data-lesson], a, button, .card') || e.target;
-  }, true);
-
   document.addEventListener('click', e => {
-    // Lesson open — pass the source (button or row) so the modal grows from it.
-    const openBtn = e.target?.closest?.('[data-open]');
-    if (openBtn) {
-      const src = e.target.closest('.lesson-row') || openBtn;
-      VIEWS.renderLesson(state, openBtn.dataset.open, src);
+    // Lesson open
+    const openId = e.target?.dataset?.open;
+    if (openId) {
+      VIEWS.renderLesson(state, openId);
       return;
     }
     // Lesson row click also opens
     const row = e.target.closest('[data-lesson]');
     if (row && !e.target.closest('button')) {
-      VIEWS.renderLesson(state, row.dataset.lesson, row);
+      VIEWS.renderLesson(state, row.dataset.lesson);
       return;
     }
     // Close lesson modal
@@ -412,27 +404,9 @@ function init() {
     window.addEventListener('beforeunload', () => GAMI.saveImmediate(state));
     setInterval(() => GAMI.saveImmediate(state), 20000);
 
-    // Liquid-glass pointer-tracked specular highlight.
-    // Updates --mx/--my CSS vars on the .card under the cursor so the
-    // ::before highlight follows the pointer with a soft falloff.
-    // rAF-throttled to one update per frame; skipped on touch + reduced-motion.
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      let pending = null;
-      document.addEventListener('pointermove', (e) => {
-        if (e.pointerType === 'touch') return;
-        if (pending !== null) return;
-        pending = requestAnimationFrame(() => {
-          pending = null;
-          const card = e.target && e.target.closest && e.target.closest('.card');
-          if (!card) return;
-          const rect = card.getBoundingClientRect();
-          const mx = ((e.clientX - rect.left) / rect.width) * 100;
-          const my = ((e.clientY - rect.top) / rect.height) * 100;
-          card.style.setProperty('--mx', mx + '%');
-          card.style.setProperty('--my', my + '%');
-        });
-      }, { passive: true });
-    }
+    // (Removed: pointer-tracked --mx/--my CSS var updater. The glass
+    // pointer-tracked specular highlight caused too much paint thrash
+    // when many cards were on-screen.)
     console.log('[FDE/SDE prep] loaded · state restored · auto-save on');
   } catch (err) {
     console.error('[FDE/SDE prep] init failed:', err);
