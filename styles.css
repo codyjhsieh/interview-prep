@@ -330,18 +330,24 @@ body:has(> .fixed.inset-0[class*="z-5"]) {
 /* Scene drop — the underlying <main> recedes when a modal opens. Combined
  * with the blur ramp above, this is the "sheet pushes the world back"
  * effect from iOS / macOS Liquid Glass. transform-origin keeps the top of
- * the page anchored so the header doesn't visually slide. */
+ * the page anchored so the header doesn't visually slide.
+ *
+ * IMPORTANT: will-change is intentionally NOT on the base rule. An always-
+ * on will-change:transform on <main> would make its descendant header's
+ * position:sticky operate within main's box instead of the viewport,
+ * which breaks the sticky behavior entirely. We only signal the GPU
+ * compositor when a modal is actually about to scale main. */
 main {
   transition:
     transform 0.42s var(--spring-settle),
     filter 0.42s var(--spring-settle);
   transform-origin: top center;
-  will-change: transform;
 }
 body:has(> .fixed.inset-0[class*="z-4"]) main,
 body:has(> .fixed.inset-0[class*="z-5"]) main {
   transform: scale(0.965) translateY(6px);
   filter: brightness(0.94);
+  will-change: transform, filter;
 }
 
 /* View Transitions API — Chrome 111+, Safari 18+. The browser cross-fades
