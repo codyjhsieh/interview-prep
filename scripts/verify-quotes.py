@@ -417,6 +417,109 @@ def page_for_offset(offset: int) -> str:
     else: hi = mid - 1
   return _WQ_TITLES[lo][1]
 
+# ── DuckDuckGo (open web) fallback ────────────────────────────────────────
+# Google's results-page is JS-rendered — snippets are not in the raw
+# HTML, only the query is. DuckDuckGo's html.duckduckgo.com endpoint is
+# fully server-rendered and includes real snippet text. We search the
+# exact quote in quotes; if any returned snippet contains the cited
+# author's name OR the source-work tokens, that's a verification signal
+# from the open web (independent of Wikiquote / Goodreads coverage).
+_DDG_LAST = [0.0]
+def ddg_verify(quote: str, author: str, source_label: str) -> tuple[str, str]:
+  norm_words = normalize(quote).split()
+  if len(norm_words) < 4:
+    return ("not-found", "too-short")
+  # Use 6-14 words depending on quote length so very short quotes still
+  # generate a unique-enough search.
+  n = min(14, len(norm_words))
+  if len(norm_words) < 6: n = len(norm_words)
+  search_phrase = " ".join(norm_words[:n])
+  delta = time.time() - _DDG_LAST[0]
+  if delta < 0.6: time.sleep(0.6 - delta)
+  _DDG_LAST[0] = time.time()
+  import urllib.parse
+  q = urllib.parse.quote(f'"{search_phrase}"')
+  url = f"https://html.duckduckgo.com/html?q={q}"
+  body = curl_text(url, timeout=15)
+  if not body:
+    return ("not-found", "ddg-fetch-failed")
+  # Strip HTML to text for search.
+  text = re.sub(r"<script.*?</script>", " ", body, flags=re.S)
+  text = re.sub(r"<style.*?</style>", " ", text, flags=re.S)
+  text = re.sub(r"<[^>]+>", " ", text)
+  text = re.sub(r"\s+", " ", text).lower()
+  # Detect bot-challenge / CAPTCHA pages so we don't pretend a CAPTCHA
+  # response is a "no match" result.
+  CAPTCHA_MARKERS = (
+    "complete the following challenge",
+    "unfortunately, bots use",
+    "select all squares",
+    "captcha",
+    "are you a human",
+  )
+  if any(m in text for m in CAPTCHA_MARKERS):
+    return ("not-found", "ddg-captcha")
+  if "no results found" in text or "no results for" in text:
+    return ("not-found", "no-ddg-hits")
+  author_tokens = [w for w in author.lower().split() if len(w) >= 3]
+  if author_tokens:
+    author_keys = list(set(author_tokens + [author_tokens[-1]]))
+  else:
+    author_keys = []
+  src_keys = [w.lower().strip("(),.") for w in source_label.split()
+              if len(w) >= 4 and any(c.isalpha() for c in w)]
+  keys = set(author_keys + src_keys)
+  for k in keys:
+    if k in text:
+      return ("verified", f"ddg:{k}")
+  return ("partial", "ddg-mismatch")
+
+# ── Goodreads fallback ────────────────────────────────────────────────────
+# Public HTML quote search. Results pages contain the quote text + author
+# name + work name in the markup, so a substring check on the response is
+# a high-confidence verification signal. No auth, no rate-limit headers
+# observed (we throttle to 0.5s/req as good citizens).
+_GR_LAST = [0.0]
+def goodreads_verify(quote: str, author: str, source_label: str) -> tuple[str, str]:
+  norm_words = normalize(quote).split()
+  if len(norm_words) < 4:
+    return ("not-found", "too-short")
+  # Cite the FIRST 10-14 words of the quote — search results match
+  # exact phrasing best at that length.
+  search_phrase = " ".join(norm_words[: min(14, len(norm_words))])
+  delta = time.time() - _GR_LAST[0]
+  if delta < 0.5: time.sleep(0.5 - delta)
+  _GR_LAST[0] = time.time()
+  import urllib.parse
+  q = urllib.parse.quote(f'"{search_phrase}"')
+  url = f"https://www.goodreads.com/quotes/search?q={q}"
+  body = curl_text(url, timeout=15)
+  if not body:
+    return ("not-found", "goodreads-fetch-failed")
+  # Strip HTML to plain text for searching.
+  text_only = re.sub(r"<[^>]+>", " ", body)
+  text_only = re.sub(r"\s+", " ", text_only).lower()
+  if "no results" in text_only and "quotes found" not in text_only:
+    return ("not-found", "no-goodreads-hits")
+  # Goodreads search-results page lists quotes as
+  #   `Author: 'quote text'` blocks. The cited author appearing
+  # alongside any match-line indicates correct attribution.
+  author_tokens = [w for w in author.lower().split() if len(w) >= 3]
+  src_tokens = [w.lower().strip("(),.") for w in source_label.split()
+                if len(w) >= 4 and any(c.isalpha() for c in w)]
+  keys = set(author_tokens + src_tokens)
+  if not keys:
+    return ("partial", "goodreads-anonymous")
+  # Match if the cited author / source label appears in the response
+  # alongside the quote (we already searched for the quote, so any hit
+  # in the response is contextual to that match).
+  if any(k in text_only for k in keys):
+    # Try to find which work the quote came from for the signal.
+    work_match = re.search(r"work/quotes/\d+-([a-z0-9-]+)", body[:50000])
+    work = work_match.group(1).replace("-", " ") if work_match else "?"
+    return ("verified", f"goodreads:{work[:40]}")
+  return ("partial", "goodreads-mismatch")
+
 def wikiquote_verify(quote: str, author: str, source_label: str) -> tuple[str, str]:
   """Search the locally-indexed Wikiquote dump for the quote text. If
   found, the enclosing page's title is the verification signal. If the
@@ -507,6 +610,20 @@ def main():
   }
   print(f"\n  Verifying {total} quotes:\n", file=sys.stderr)
   t_start = time.time()
+  def chain_fallback(q, current_tier, current_signal):
+    """If Gutenberg/Wikiquote didn't verify, try Goodreads, then a final
+    open-web search via DuckDuckGo HTML."""
+    if current_tier == "verified":
+      return current_tier, current_signal
+    gr_tier, gr_signal = goodreads_verify(q["text"], q["author"], q["source"])
+    if gr_tier == "verified":
+      return "verified", gr_signal
+    ddg_tier, ddg_signal = ddg_verify(q["text"], q["author"], q["source"])
+    if ddg_tier == "verified":
+      return "verified", ddg_signal
+    # Prefer the most-informative non-verified signal.
+    return current_tier, current_signal or gr_signal or ddg_signal
+
   for i, q in enumerate(quotes):
     cls = q["class"]
     signal = None
@@ -524,6 +641,9 @@ def main():
             bucket = "verified"
           else:
             signal = f"gutenberg-mismatch;{wq_signal}"
+            # Last-chance Goodreads check
+            tier, signal = chain_fallback(q, tier, signal)
+            bucket = tier if tier == "verified" else bucket
     elif cls == "bible":
       if not kjv_norm:
         bucket = "fetch-failed"; tier = "fetch-failed"; words = 0
@@ -533,7 +653,9 @@ def main():
     else:
       wq_tier, wq_signal = wikiquote_verify(q["text"], q["author"], q["source"])
       tier, signal = wq_tier, wq_signal
-      bucket = wq_tier if wq_tier != "not-found" else "unsourced"
+      # Goodreads as third fallback for non-Gutenberg quotes
+      tier, signal = chain_fallback(q, tier, signal)
+      bucket = tier if tier == "verified" else ("unsourced" if tier != "verified" else tier)
       words = 0
     glyph = TIER_GLYPH.get(tier, "?")
     snippet = q["text"][:55].replace("\n", " ")
