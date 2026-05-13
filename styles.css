@@ -1075,11 +1075,14 @@ table { display: block; max-width: 100%; overflow-x: auto; }
 
 /* Tiny phones (≤ 380px iPhone SE etc.) */
 @media (max-width: 380px) {
-  body { font-size: 14px; }
-  h1.font-display, .font-display.text-3xl, .font-display.text-2xl { font-size: 1.4rem; }
-  .card { padding: 0.85rem 0.9rem; }
-  .card .text-3xl { font-size: 1.35rem; }
-  .btn { font-size: 13px; padding: 0.5rem 0.8rem; }
+  /* Tiny phones (iPhone SE 1st gen, etc.) — proportionally smaller than the
+     ≤640px values but still readable; do NOT drop below 15px on body text. */
+  body { font-size: 15.5px; line-height: 1.6; }
+  h1.font-display, .font-display.text-3xl, .font-display.text-2xl { font-size: 1.5rem; }
+  .card { padding: 0.95rem 1rem; }
+  .card.elevated { padding: 1.05rem 1.1rem; }
+  .card .text-3xl { font-size: 1.4rem; }
+  .btn { font-size: 13.5px; padding: 0.5rem 0.85rem; }
   .ring { width: 84px; height: 84px; }
   /* Hero stats: stack to single column on smallest */
   .card .grid.grid-cols-2.sm\:grid-cols-4 {
@@ -1273,17 +1276,58 @@ blockquote {
 }
 
 @media (max-width: 640px) {
-  /* Tighten card padding so content breathes */
-  .card { padding: 1rem 1.05rem; }
-  .card.elevated { padding: 1.1rem 1.15rem; }
+  /* === Base typography: bigger and more breathing room on phones ===
+   * The body was 14.5px/1.55 inherited from the inlined critical CSS — readable
+   * on desktop but feels dense on small screens. iOS Safari + Android Chrome
+   * both render system body text at ~16px; matching that avoids the auto-zoom
+   * on input focus AND looks comfortable in long-form lesson bodies. */
+  html, body { font-size: 16px; line-height: 1.65; }
 
-  /* Headings: shrink hero/page titles slightly */
-  h1.font-display { font-size: 1.5rem; line-height: 1.15; }
-  h2.font-display { font-size: 1.25rem; line-height: 1.2; }
-  h3.font-display { font-size: 1rem; }
+  /* Card content gets a bit more padding so text doesn't crowd the edges */
+  .card { padding: 1.1rem 1.15rem; }
+  .card.elevated { padding: 1.25rem 1.3rem; }
 
-  /* Eyebrow labels are decorative — hide on phones to reduce noise */
-  .eyebrow { font-size: 9.5px; opacity: 0.6; }
+  /* Headings: keep the hierarchy but a little smaller than desktop.
+     Larger than the original mobile shrink — the prior 1.5rem hero felt cramped
+     given the page-title context. */
+  h1.font-display { font-size: 1.75rem; line-height: 1.2; }
+  h2.font-display { font-size: 1.4rem;  line-height: 1.25; }
+  h3.font-display { font-size: 1.125rem; line-height: 1.3; }
+
+  /* Eyebrow labels — readable, not tiny. Used to be 9.5px which was effectively
+     unreadable; bump to 11px and keep them visible. */
+  .eyebrow { font-size: 11px; opacity: 0.7; letter-spacing: 0.06em; }
+
+  /* Lesson body prose: bump to 15.5px and loosen leading. Code blocks too. */
+  .card p, .card li, .card .leading-relaxed { font-size: 15px; line-height: 1.65; }
+  pre, pre code { font-size: 13.5px !important; line-height: 1.55; }
+
+  /* Inline code chips stay readable */
+  code { font-size: 92%; }
+
+  /* Callout blocks: prose-comfortable size, generous line-height */
+  .callout { font-size: 14.5px; line-height: 1.6; padding: 12px 14px; }
+  .callout-label { font-size: 11.5px; }
+
+  /* Lesson-tables: cells need to scan on small screens */
+  .lesson-table { font-size: 14px; }
+  .lesson-table th { font-size: 11.5px; padding: 8px 8px; }
+  .lesson-table td { padding: 8px 8px; }
+
+  /* The dense small Tailwind sizes used across views.js bump UP on phones —
+     readability floor is 12.5px; lesson bodies and meaningful content go to
+     ≥15px. These overrides hit the common dense areas. */
+  .text-\[9px\], .text-\[9\.5px\], .text-\[10px\], .text-\[10\.5px\], .text-\[11px\] { font-size: 12.5px !important; }
+  .text-\[11\.5px\], .text-\[12px\], .text-\[12\.5px\] { font-size: 13.5px !important; }
+  .text-\[13px\], .text-\[13\.5px\] { font-size: 14.5px !important; }
+  .text-\[14px\], .text-\[14\.5px\] { font-size: 15.5px !important; }
+  .text-\[15px\], .text-\[15\.5px\] { font-size: 15.5px !important; }
+  .text-\[16px\], .text-\[16\.5px\], .text-\[17px\] { font-size: 16.5px !important; }
+  /* Tailwind's text-xs (12px) and text-sm (14px) get a bump too */
+  .text-xs { font-size: 13px !important; }
+  .text-sm { font-size: 15px !important; }
+  /* Bump font-mono numeric counters slightly so they aren't tiny */
+  .numeric { font-size: inherit; }
 
   /* Hide module intros under category-detail summaries (one less line per row) */
   details summary .text-xs.text-slate-400.mt-1 { display: none; }
@@ -1292,12 +1336,11 @@ blockquote {
   .lesson-row .text-xs.text-slate-500 > span:nth-child(-n+4) { display: none; }
   .lesson-row .text-xs.text-slate-500 > span.text-accent-400 { display: inline; }
 
-  /* Tab subtitle "Resets at midnight · variable XP bonuses" — hide */
-  .card .flex.items-center.justify-between > .text-xs.text-slate-400 { font-size: 10.5px; opacity: 0.5; }
+  /* Stat cards: the big number was fighting the smaller numbers for hierarchy.
+     Restore a clear gap — big number stays prominent but not overwhelming. */
+  .card .text-3xl.font-bold { font-size: 1.75rem; }
 
-  /* Reduce stat-card decoration: thinner number, no progress-bar (where present) */
-  .card .text-3xl.font-bold { font-size: 1.5rem; }
-
-  /* Quiz/category-list subtext: tighten line-height */
-  .leading-relaxed { line-height: 1.45; }
+  /* Lists inside lesson bodies need more spacing between items */
+  .list-muted { margin: 8px 0 8px 20px; }
+  .list-muted li { margin: 4px 0; line-height: 1.6; }
 }
