@@ -752,7 +752,7 @@ function renderLesson(state, lessonId) {
     <div id="lesson-interaction" class="mt-4 min-h-[2rem]"></div>
 
     <!-- Body always visible below the activity -->
-    <div class="mt-5 pt-5 border-t border-[color:var(--hairline)] leading-relaxed text-[14.5px]">
+    <div class="mt-5 pt-5 border-t border-[color:var(--hairline)] lesson-prose">
       <div class="eyebrow mb-2 mobile-hide">Reference · the full insight</div>
       ${lesson.body}
     </div>
@@ -1843,7 +1843,7 @@ function renderMockInterview(state, hub, mode) {
       </div>
       <div class="card elevated">
         <div id="mi-activity" class="min-h-[2rem]"></div>
-        <div class="mt-5 pt-5 border-t border-[color:var(--hairline)] leading-relaxed text-[14px]">
+        <div class="mt-5 pt-5 border-t border-[color:var(--hairline)] lesson-prose">
           <div class="eyebrow mb-2 mobile-hide">Reference · the full insight</div>
           ${t.lesson.body}
         </div>

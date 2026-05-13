@@ -1163,6 +1163,59 @@ code {
 }
 .list-muted li { margin: 2px 0; }
 
+/* =========================================================================
+ * .lesson-prose — long-form content inside a card.
+ * The lesson bodies use literal `<br><br>` as paragraph breaks (rather than
+ * <p> tags, because <p> can't legally contain <pre>/<ul>/<table>/<div>).
+ * To get real paragraph rhythm, we turn `<br> + <br>` into a block-level
+ * gap with vertical margin, and we give every block-level child its own
+ * generous breathing room. Mobile gets a heavier dose since that's where
+ * density bites hardest.
+ * ========================================================================= */
+.lesson-prose {
+  font-size: 15px;
+  line-height: 1.7;
+}
+.lesson-prose b, .lesson-prose strong { font-weight: 600; }
+
+/* Real paragraph spacing from <br><br> — adjacent <br> becomes a block-
+ * level gap, not just two line-heights. */
+.lesson-prose br + br {
+  display: block;
+  content: "";
+  margin-top: 0.55em;
+}
+/* Make block children breathe. We're forgiving of authored authors: code,
+ * lists, callouts, and tables all get clear above/below space. */
+.lesson-prose pre        { margin: 1.05em 0; }
+.lesson-prose ul,
+.lesson-prose ol         { margin: 0.95em 0 0.95em 22px; }
+.lesson-prose ul li,
+.lesson-prose ol li      { margin: 0.25em 0; }
+.lesson-prose .callout   { margin: 1.25em 0; }
+.lesson-prose .lesson-table { margin: 1.15em 0; }
+.lesson-prose img,
+.lesson-prose svg        { margin: 0.9em 0; }
+
+/* Constrain line-length to a comfortable reading measure on wide cards */
+.lesson-prose            { max-width: 72ch; }
+
+@media (max-width: 640px) {
+  .lesson-prose {
+    font-size: 16px;
+    line-height: 1.75;
+    max-width: 100%;
+  }
+  .lesson-prose br + br      { margin-top: 0.75em; }
+  .lesson-prose pre          { margin: 1.2em 0; font-size: 13.5px; line-height: 1.6; }
+  .lesson-prose ul,
+  .lesson-prose ol           { margin: 1.05em 0 1.05em 22px; }
+  .lesson-prose ul li,
+  .lesson-prose ol li        { margin: 0.4em 0; line-height: 1.65; }
+  .lesson-prose .callout     { margin: 1.4em 0; }
+  .lesson-prose .lesson-table{ margin: 1.3em 0; }
+}
+
 /* Callouts: warn / note / senior / depth. Used as
  * <div class="callout callout-senior">
  *   <div class="callout-label">Senior signal</div>
