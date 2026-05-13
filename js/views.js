@@ -735,57 +735,62 @@ function mountPet3D(container, p) {
   bodyGroup.add(body);
   bodyGroup.userData.baseScaleY = 1;     // for breath
 
-  // Jacked-only — visible deltoid + chest geometry. Two icosahedron bumps
-  // perched on the top shoulders of the body, plus a chest plate.
+  // === Body accessories — POSITIONS pushed outside the body sphere so
+  //     they actually protrude (rather than being buried inside it).
+  //     Body is an icosahedron of radius 0.55 scaled (bw, bh, bd), so its
+  //     surface in bodyGroup-coords is at ±0.55·{bw,bd} on x/z, and the
+  //     sphere extends y ∈ [0, bh·1.1]. ===
+
+  // Jacked-only — clearly-visible deltoid bumps + chest plate
   if (hasShoulders) {
-    const shoulderGeo = new T.IcosahedronGeometry(0.32, 1);
+    const shoulderGeo = new T.IcosahedronGeometry(0.34, 1);
     const shoulderL = new T.Mesh(shoulderGeo, petMat);
     const shoulderR = new T.Mesh(shoulderGeo, petMat);
-    shoulderL.position.set(-bw * 0.50, bh * 0.92, 0);
-    shoulderR.position.set( bw * 0.50, bh * 0.92, 0);
-    shoulderL.scale.set(1, 0.9, 1);
-    shoulderR.scale.set(1, 0.9, 1);
+    // Out to body surface in X, near body top in Y, slightly forward
+    shoulderL.position.set(-bw * 0.55, bh * 0.95, bd * 0.05);
+    shoulderR.position.set( bw * 0.55, bh * 0.95, bd * 0.05);
+    shoulderL.scale.set(1.1, 0.95, 1.1);
+    shoulderR.scale.set(1.1, 0.95, 1.1);
     shoulderL.castShadow = true; shoulderR.castShadow = true;
     bodyGroup.add(shoulderL); bodyGroup.add(shoulderR);
-    // Chest plate — flatter cuboid on the front of body
-    const chest = new T.Mesh(new T.BoxGeometry(bw * 0.78, bh * 0.32, 0.18), petMat);
-    chest.position.set(0, bh * 0.62, bd * 0.42);
+    // Chest plate — sits on the front surface of the body
+    const chest = new T.Mesh(new T.BoxGeometry(bw * 0.78, bh * 0.34, 0.18), petMat);
+    chest.position.set(0, bh * 0.65, bd * 0.56);   // z just past body front
     chest.castShadow = true;
     bodyGroup.add(chest);
   }
-  // Chubby-only — round belly bump on the front, bigger than the body itself
+  // Chubby-only — round belly bump clearly protruding forward
   if (hasBelly) {
     const belly = new T.Mesh(new T.IcosahedronGeometry(0.42, 1), petMat);
-    belly.scale.set(1.0, 0.85, 0.85);
-    belly.position.set(0, bh * 0.45, bd * 0.42);
+    belly.scale.set(1.0, 0.9, 0.85);
+    belly.position.set(0, bh * 0.45, bd * 0.62);   // pushed forward of body
     belly.castShadow = true;
     bodyGroup.add(belly);
   }
 
-  // Cute belly patch — lighter contrasting tummy color on the front of body.
-  // Skipped for baby (whole body is essentially the head) and chubby (already
-  // has a belly bump).
+  // Lighter belly patch — lighter contrasting tummy color sitting on the
+  // FRONT surface of the body (hemisphere protrudes outward).
   if (p.stage !== 'baby' && !hasBelly) {
     const bellyColor = _lighten(petColor, 1.35);
     const bellyMat = new T.MeshStandardMaterial({ color: bellyColor, flatShading: true, roughness: 0.7 });
-    const bellyPatch = new T.Mesh(new T.IcosahedronGeometry(0.30, 1), bellyMat);
-    bellyPatch.scale.set(bw * 0.62, bh * 0.55, 0.25);
-    bellyPatch.position.set(0, bh * 0.5, bd * 0.5);
+    const bellyPatch = new T.Mesh(new T.IcosahedronGeometry(0.26, 1), bellyMat);
+    bellyPatch.scale.set(bw * 0.7, bh * 0.6, 0.5);
+    bellyPatch.position.set(0, bh * 0.5, bd * 0.56);   // outside body front
     bodyGroup.add(bellyPatch);
   }
 
-  // Tail — small icosahedron behind the body, all adult stages.
+  // Tail — clearly behind the body
   if (p.stage === 'adult') {
     const tailMat = new T.MeshStandardMaterial({ color: _darken(petColor, 0.85), flatShading: true });
-    const tail = new T.Mesh(new T.IcosahedronGeometry(0.14, 1), tailMat);
-    tail.position.set(0, bh * 0.35, -bd * 0.52);
+    const tail = new T.Mesh(new T.IcosahedronGeometry(0.15, 1), tailMat);
+    tail.position.set(0, bh * 0.45, -bd * 0.62);   // outside body back
     tail.castShadow = true;
     bodyGroup.add(tail);
   }
 
-  // Jacked-only — bicep bumps on the sides
+  // Jacked-only — bicep bumps clearly outboard of the body
   if (hasShoulders) {
-    const bicepGeo = new T.IcosahedronGeometry(0.18, 1);
+    const bicepGeo = new T.IcosahedronGeometry(0.22, 1);
     const bicepL = new T.Mesh(bicepGeo, petMat);
     const bicepR = new T.Mesh(bicepGeo, petMat);
     bicepL.position.set(-bw * 0.78, bh * 0.55, 0);
@@ -804,41 +809,21 @@ function mountPet3D(container, p) {
   head.castShadow = true;
   headGroup.add(head);
 
-  // Stage-specific head accessory — distinguishes each life-stage at a glance.
-  // Head mesh sits centered at y = headR*0.8 with radius headR, so the head
-  // occupies y ∈ [-0.2, +1.8]*headR in headGroup coords. Cones go ON TOP
-  // (base at y = 1.8*headR). Torus headbands need major-radius > head's
-  // cross-section at that height to actually wrap visibly around the head.
-  const headDarkMat = new T.MeshStandardMaterial({ color: _darken(petColor, 0.55), flatShading: true });
+  // Stage-specific head accessory — no hair tufts. Only the adult-body
+  // variants get a visible piece of headwear (fit / jacked / chubby);
+  // baby, teen, normal stay clean-headed and are distinguished by
+  // proportions + color tints alone.
   const TOP_Y = headR * 1.8;
-  if (p.stage === 'baby') {
-    // Baby curl — twisted hair spike. Bigger + clearly on top.
-    const curlH = headR * 0.55;
-    const tuft = new T.Mesh(new T.ConeGeometry(headR * 0.16, curlH, 5), headDarkMat);
-    tuft.position.y = TOP_Y + curlH / 2;     // base sits ON the head, not inside
-    tuft.rotation.z = 0.35;
-    tuft.castShadow = true;
-    headGroup.add(tuft);
-  } else if (p.stage === 'teen') {
-    // Teen fin — tall, forward-leaning mohawk
-    const finH = headR * 0.80;
-    const fin = new T.Mesh(new T.ConeGeometry(headR * 0.20, finH, 4), headDarkMat);
-    fin.position.y = TOP_Y + finH / 2;
-    fin.rotation.x = -Math.PI * 0.10;
-    fin.castShadow = true;
-    headGroup.add(fin);
-  } else if (p.body === 'fit') {
-    // Athletic headband — RED torus wrapping around the head's forehead.
-    // Major radius slightly > head radius at this y so the tube actually
-    // pokes outside the sphere instead of vanishing inside it.
+  if (p.body === 'fit') {
+    // Athletic headband — RED torus around the forehead
     const bandMat = new T.MeshStandardMaterial({ color: 0xD7384C, flatShading: true, roughness: 0.5 });
     const band = new T.Mesh(new T.TorusGeometry(headR * 1.02, headR * 0.11, 6, 16), bandMat);
-    band.position.y = headR * 1.15;   // forehead level
+    band.position.y = headR * 1.15;
     band.rotation.x = Math.PI / 2;
     band.castShadow = true;
     headGroup.add(band);
   } else if (p.body === 'jacked') {
-    // White sweatband — same idea, brighter, slightly thicker.
+    // White sweatband — same shape, brighter, slightly thicker
     const bandMat = new T.MeshStandardMaterial({ color: 0xF8F4FF, flatShading: true, roughness: 0.6 });
     const band = new T.Mesh(new T.TorusGeometry(headR * 1.03, headR * 0.13, 6, 16), bandMat);
     band.position.y = headR * 1.10;
@@ -846,32 +831,20 @@ function mountPet3D(container, p) {
     band.castShadow = true;
     headGroup.add(band);
   } else if (p.body === 'chubby') {
-    // Cream chef's-hat dome — sits clearly on top of head
+    // Cream dome hat with a small red button on top
     const hatMat = new T.MeshStandardMaterial({ color: 0xF8E8C4, flatShading: true });
     const hatH = headR * 0.45;
     const hat = new T.Mesh(new T.IcosahedronGeometry(headR * 0.42, 1), hatMat);
-    hat.position.y = TOP_Y + (hatH / 2) - headR * 0.05;   // slight overlap with scalp
+    hat.position.y = TOP_Y + (hatH / 2) - headR * 0.05;
     hat.scale.set(1, 0.55, 1);
     hat.castShadow = true;
     headGroup.add(hat);
-    // Small button on top of hat for extra "ridiculous"
     const button = new T.Mesh(new T.IcosahedronGeometry(headR * 0.08, 0), new T.MeshStandardMaterial({ color: 0xD7384C, flatShading: true }));
     button.position.y = hat.position.y + headR * 0.25;
     headGroup.add(button);
-  } else {
-    // Normal adult — small forehead cowlick tuft
-    const tuftH = headR * 0.32;
-    const tuft = new T.Mesh(new T.ConeGeometry(headR * 0.11, tuftH, 4), headDarkMat);
-    tuft.position.set(headR * 0.20, TOP_Y + tuftH / 2 - headR * 0.05, 0);
-    tuft.rotation.z = -0.45;
-    tuft.castShadow = true;
-    headGroup.add(tuft);
   }
 
-  // (No ears — simpler, cleaner silhouette. Ear-twitch animation channel
-  // is still allocated below but its writes go to a null-mesh dummy.)
-  const earGroupL = new T.Group();
-  const earGroupR = new T.Group();
+  // (Ears removed entirely. No dummy groups, no animation channel.)
 
   // Eyes — white sclera with a black pupil that protrudes from its surface
   // (so the pupil reads clearly at the iso camera angle, not as a faint
@@ -911,16 +884,18 @@ function mountPet3D(container, p) {
   const eyeGroupR = makeEye( 1);
   headGroup.add(eyeGroupL); headGroup.add(eyeGroupR);
 
-  // Cheek spots
-  const cheekMat = new T.MeshStandardMaterial({ color: 0xFF9DAE, roughness: 0.6, transparent: true, opacity: 0.7 });
-  const cheekGeo = new T.SphereGeometry(headR * 0.13, 8, 6);
+  // Cheek spots — flat-ish discs on the front-sides of the head. Pushed
+  // PAST the head sphere (head center y=0.8·headR, radius headR → cheeks
+  // need distance > 1.0·headR from that center to be visible).
+  const cheekMat = new T.MeshStandardMaterial({ color: 0xFF9DAE, roughness: 0.6 });
+  const cheekGeo = new T.SphereGeometry(headR * 0.16, 10, 8);
   const cheekL = new T.Mesh(cheekGeo, cheekMat);
-  cheekL.position.set(-headR * 0.65, headR * 0.6, headR * 0.55);
-  cheekL.scale.set(1, 0.6, 0.3);
+  cheekL.position.set(-headR * 0.92, headR * 0.68, headR * 0.48);
+  cheekL.scale.set(1, 0.7, 0.5);
   headGroup.add(cheekL);
   const cheekR = new T.Mesh(cheekGeo, cheekMat);
-  cheekR.position.set( headR * 0.65, headR * 0.6, headR * 0.55);
-  cheekR.scale.set(1, 0.6, 0.3);
+  cheekR.position.set( headR * 0.92, headR * 0.68, headR * 0.48);
+  cheekR.scale.set(1, 0.7, 0.5);
   headGroup.add(cheekR);
 
   // Mouth — two thin boxes meeting at center for a small smile
@@ -1120,9 +1095,6 @@ function mountPet3D(container, p) {
   let blinkPhase = -1;
   let eyeDartTargetX = 0, eyeDartTargetY = 0, eyeDartCurX = 0, eyeDartCurY = 0;
   let nextEyeDartAt = 1.5 + Math.random() * 3;
-  let nextEarTwitchAt = 4 + Math.random() * 6;
-  let earTwitchPhase = -1;
-  let earTwitchSide = 0;
   let facingVel = 0;
   let leanVel = 0;
   let gait = 0;
@@ -1231,26 +1203,6 @@ function mountPet3D(container, p) {
     const pupR = eyeGroupR.userData.pupil;
     pupL.position.set(pupL.userData.basePos.x + eyeDartCurX, pupL.userData.basePos.y + eyeDartCurY, pupL.userData.basePos.z);
     pupR.position.set(pupR.userData.basePos.x + eyeDartCurX, pupR.userData.basePos.y + eyeDartCurY, pupR.userData.basePos.z);
-
-    // Ear twitch
-    if (earTwitchPhase < 0) {
-      if (t > nextEarTwitchAt) {
-        earTwitchSide = Math.random() < 0.5 ? -1 : 1;
-        earTwitchPhase = 0;
-        nextEarTwitchAt = t + 5 + Math.random() * 8;
-      }
-    } else {
-      earTwitchPhase += dt / 0.22;   // 220ms total
-      const k = earTwitchPhase < 0.4
-        ? Ease.outQuad(earTwitchPhase / 0.4) * 0.21       // out
-        : Ease.outQuad(1 - (earTwitchPhase - 0.4) / 0.6) * 0.21;  // back
-      const ear = earTwitchSide < 0 ? earGroupL : earGroupR;
-      ear.rotation.x = -k;
-      if (earTwitchPhase >= 1) {
-        earTwitchPhase = -1;
-        ear.rotation.x = 0;
-      }
-    }
 
     // ===== FOOD PILE BOB =====
     for (let i = 0; i < foodPiles.length; i++) {
@@ -1411,11 +1363,6 @@ function mountPet3D(container, p) {
 
           // Head forward-bob — slight pitch matching the step cadence
           headGroup.rotation.x = Math.sin(gait * Math.PI * 4) * 0.04;
-
-          // (Ear lag — channels still write to empty Groups; safe no-op)
-          const earLagTarget = -headGroup.rotation.x * 1.6;
-          earGroupL.rotation.x += (earLagTarget - earGroupL.rotation.x) * Math.min(1, dt * 9);
-          earGroupR.rotation.x += (earLagTarget - earGroupR.rotation.x) * Math.min(1, dt * 9);
         }
       }
     } else if (activity === 'idle' || activity === 'beg') {
