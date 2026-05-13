@@ -2008,6 +2008,12 @@ function renderDashboard(state, hub) {
   GAMI.saveImmediate(state);
   const petCard = renderPetCard(state, pet);
   container.appendChild(petCard);
+
+  // Daily manifesto — one curated quote from masterpiece novels / philosophy
+  // / holy texts. Cycles per visit; user can shuffle or browse the full set.
+  if (typeof QUOTES !== 'undefined' && QUOTES.length) {
+    container.appendChild(renderQuotesCard());
+  }
   // Mount the 3D scene now that the host div is attached + has dimensions.
   // Falls back gracefully (empty container) if Three.js isn't available.
   requestAnimationFrame(() => {
@@ -2295,6 +2301,77 @@ function renderDashboard(state, hub) {
 
 function totalLessonCount() {
   return MODULES.flatMap(m => m.lessons).length;
+}
+
+/* Quote of the Day card — one motivating line anchoring the dashboard.
+ *
+ * Design intent: stone tablet / monolith — serif italic, generous space,
+ * minimal chrome, big faded quotation mark in the background. The quote
+ * is deterministic per calendar day so visitors get one quote each day. */
+function renderQuotesCard() {
+  const card = el('div', 'card relative overflow-hidden quotes-card');
+  card.style.cssText = `padding: 36px 32px 28px;`;
+  // Deterministic per-day selection — same quote all day, changes at midnight.
+  const dayHash = parseInt(GAMI.todayKey().replaceAll('-',''), 10);
+  const featured = QUOTES[dayHash % QUOTES.length];
+  const renderFeatured = (q) => `
+    <blockquote class="quote-text" style="
+      font-family: Georgia, 'Times New Roman', 'Iowan Old Style', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(20px, 2.3vw, 28px);
+      line-height: 1.35;
+      letter-spacing: -0.005em;
+      max-width: 38em;
+      margin: 0;
+      color: var(--text);
+    ">${esc(q.text)}</blockquote>
+    <div class="mt-6 flex items-baseline gap-3 flex-wrap">
+      <span class="quote-author" style="
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+      ">${esc(q.author)}</span>
+      <span class="dim" style="font-size:11px">·</span>
+      <a href="${esc(q.url)}" target="_blank" rel="noopener noreferrer" class="quote-source hover:text-accent-400" style="
+        font-size: 12px;
+        font-style: italic;
+        color: var(--muted);
+        text-decoration: none;
+      ">${esc(q.source)}${q.year ? `, ${esc(String(q.year))}` : ''} ↗</a>
+    </div>
+  `;
+  card.innerHTML = `
+    <!-- Decorative oversized opening quote glyph in the background -->
+    <div aria-hidden="true" style="
+      position: absolute;
+      top: -36px;
+      left: 10px;
+      font-family: Georgia, serif;
+      font-size: 220px;
+      line-height: 1;
+      color: rgba(255,255,255,0.045);
+      pointer-events: none;
+      user-select: none;
+      font-weight: 700;
+    ">“</div>
+
+    <div class="relative">
+      <div class="mb-4" style="
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.22em;
+        color: var(--muted);
+      ">Quote of the Day</div>
+
+      <div id="quote-featured">
+        ${renderFeatured(featured)}
+      </div>
+    </div>
+  `;
+  return card;
 }
 
 /* Time helpers — sum lesson minutes for various scopes */
