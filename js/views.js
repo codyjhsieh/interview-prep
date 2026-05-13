@@ -143,7 +143,7 @@ function _isoFace(stage, body, mood, activity, ox, oz, headY, headW) {
       <line x1="${(e1[0]-1.4).toFixed(1)}" y1="${e1[1].toFixed(1)}" x2="${(e1[0]+1.4).toFixed(1)}" y2="${e1[1].toFixed(1)}" stroke="${pal.eye}" stroke-width="0.8" stroke-linecap="square"/>
       <line x1="${(e2[0]-1.4).toFixed(1)}" y1="${e2[1].toFixed(1)}" x2="${(e2[0]+1.4).toFixed(1)}" y2="${e2[1].toFixed(1)}" stroke="${pal.eye}" stroke-width="0.8" stroke-linecap="square"/>`;
   }
-  if (activity === 'cough') {
+  if (activity === 'sick') {
     // X eyes
     return `
       <line x1="${(e1[0]-1).toFixed(1)}" y1="${(e1[1]-1).toFixed(1)}" x2="${(e1[0]+1).toFixed(1)}" y2="${(e1[1]+1).toFixed(1)}" stroke="${pal.eye}" stroke-width="0.7"/>
@@ -165,7 +165,7 @@ function _isoFace(stage, body, mood, activity, ox, oz, headY, headW) {
 
 function _moodForActivity(activity, fedToday) {
   if (activity === 'eat')      return 'thrilled';
-  if (activity === 'cough' || activity === 'sick')  return 'sick';
+  if (activity === 'sick' || activity === 'sick')  return 'sick';
   if (activity === 'beg')      return 'hungry';
   if (activity === 'droop')    return 'sad';
   if (activity === 'workout')  return 'thrilled';
@@ -180,7 +180,7 @@ function _petSpriteSVG(stage, body, activity, fedToday) {
   // Open mouth for eat
   const eating = activity === 'eat';
   // Sick: cross eyes (X)
-  const sick = activity === 'cough';
+  const sick = activity === 'sick';
   // Mouth shape (draw separately via mood)
   const mood = _moodForActivity(activity, fedToday);
   const pal = PET_PALETTE[mood] || PET_PALETTE.content;
@@ -676,13 +676,37 @@ function mountPet3D(container, p) {
   skirt.position.y = 0.02;
   scene.add(skirt);
 
-  const wallMat = new T.MeshStandardMaterial({ color: 0xF2E2C6, roughness: 0.9 });
+  // Walls take their tint from the time-of-day so midday cream, afternoon
+  // warmth, sunset amber, and night cool-gray all read differently.
+  const wallColorByPhase = {
+    dawn:   0xF6DCC4,   // soft peach
+    day:    0xF2E2C6,   // bright cream — midday baseline
+    sunset: 0xE8B894,   // warm amber
+    night:  0x4F5A77,   // cool dim
+    late:   0x4F5A77,
+  };
+  const wallColor = (tod.phase === 'day' && tod.hour >= 14)
+    ? 0xEFD8B8                                          // afternoon, warmer
+    : (wallColorByPhase[tod.phase] || 0xF2E2C6);
+  // Two-tone walls — the side wall reads as in shadow vs. the back wall so the
+  // room has actual depth instead of looking like flat cardboard. Shadow ratio
+  // is gentler at night (less directional sun) than during the day.
+  const shadowK = (tod.phase === 'night' || tod.phase === 'late') ? 0.88 : 0.74;
+  const _wallShade = (rgb, k) => {
+    const r = Math.round(((rgb >> 16) & 0xff) * k);
+    const g = Math.round(((rgb >> 8)  & 0xff) * k);
+    const b = Math.round((rgb & 0xff) * k);
+    return (r << 16) | (g << 8) | b;
+  };
+  const wallMatBack = new T.MeshStandardMaterial({ color: wallColor, roughness: 0.9 });
+  const wallMatSide = new T.MeshStandardMaterial({ color: _wallShade(wallColor, shadowK), roughness: 0.9 });
+  const wallMat = wallMatBack;                          // kept for any downstream reference
   const WALL_H = 5;
-  const wallBack = new T.Mesh(new T.BoxGeometry(FLOOR_W, WALL_H, 0.2), wallMat);
+  const wallBack = new T.Mesh(new T.BoxGeometry(FLOOR_W, WALL_H, 0.2), wallMatBack);
   wallBack.position.set(0, WALL_H/2, -FLOOR_W/2);
   wallBack.receiveShadow = true;
   scene.add(wallBack);
-  const wallSide = new T.Mesh(new T.BoxGeometry(0.2, WALL_H, FLOOR_W), wallMat);
+  const wallSide = new T.Mesh(new T.BoxGeometry(0.2, WALL_H, FLOOR_W), wallMatSide);
   wallSide.position.set(-FLOOR_W/2, WALL_H/2, 0);
   wallSide.receiveShadow = true;
   scene.add(wallSide);
@@ -825,28 +849,34 @@ function mountPet3D(container, p) {
   }
 
   // ---- Pet body ----
-  const moodColors = {
-    thrilled: 0x7CCDA8, content: 0x9CC7E6, hungry: 0xE6C28D,
-    sad: 0xB9A8C9, sick: 0xA8AAB5,
+  // bodyHue is the persistent identity color picked at birth/respawn —
+  // each life starts with a fresh hue from a curated palette. Mood + stage
+  // gently modulate brightness/saturation around that signature.
+  const baseColor = (typeof p.bodyHue === 'number') ? p.bodyHue : 0x9CC7E6;
+  const moodShift = {
+    thrilled: 1.10,   // brighter when happy
+    content:  1.00,
+    hungry:   0.92,
+    sad:      0.85,
+    sick:     0.70,   // markedly dimmer when ill
   };
   const mood = _moodForActivity(p.activity, p.fedToday);
-  const baseColor = moodColors[mood] || moodColors.content;
-  // Per-stage color tint — each life stage has its own visual signature.
-  // baby → pastel/lighter, teen → slightly cooler, adult variants distinct.
+  const moodMul = moodShift[mood] != null ? moodShift[mood] : 1.0;
+  // Per-stage tint — life-stage signature kept on top of the bodyHue.
   const stageTints = {
-    baby:   { r: 1.18, g: 1.10, b: 1.18 },   // pastel — lighter, slight pink
-    teen:   { r: 1.04, g: 1.06, b: 1.02 },   // standard, slight green lean
+    baby:   { r: 1.12, g: 1.08, b: 1.12 },
+    teen:   { r: 1.04, g: 1.06, b: 1.02 },
     normal: { r: 1.00, g: 1.00, b: 1.00 },
-    fit:    { r: 0.90, g: 1.00, b: 1.12 },   // cooler blue — athletic
-    jacked: { r: 1.10, g: 0.92, b: 0.82 },   // warm orange — solid
-    chubby: { r: 1.12, g: 1.00, b: 0.82 },   // warm amber — rounder vibe
+    fit:    { r: 0.94, g: 1.00, b: 1.08 },
+    jacked: { r: 1.08, g: 0.94, b: 0.86 },
+    chubby: { r: 1.10, g: 1.00, b: 0.86 },
   };
   const tint = stageTints[p.stage === 'baby' ? 'baby'
                         : p.stage === 'teen' ? 'teen'
                         : (p.body || 'normal')] || stageTints.normal;
-  const tintedR = Math.min(255, Math.round(((baseColor >> 16) & 0xff) * tint.r));
-  const tintedG = Math.min(255, Math.round(((baseColor >> 8)  & 0xff) * tint.g));
-  const tintedB = Math.min(255, Math.round((baseColor & 0xff) * tint.b));
+  const tintedR = Math.min(255, Math.round(((baseColor >> 16) & 0xff) * tint.r * moodMul));
+  const tintedG = Math.min(255, Math.round(((baseColor >> 8)  & 0xff) * tint.g * moodMul));
+  const tintedB = Math.min(255, Math.round((baseColor & 0xff) * tint.b * moodMul));
   const petColor = (tintedR << 16) | (tintedG << 8) | tintedB;
   const petMat = new T.MeshStandardMaterial({ color: petColor, flatShading: true, roughness: 0.65 });
 
@@ -1197,13 +1227,28 @@ function mountPet3D(container, p) {
     scene.add(wR);
     petGroup.position.set(1.5, 0, 0);
   }
+  // Ball + physics state — non-null only when activity === 'play'. The tick
+  // loop integrates gravity, ground/wall collisions, rolling friction, and
+  // an elastic kick when Bit's body sphere overlaps it.
+  let playBall = null;
+  let ballPhys = null;
   if (p.activity === 'play') {
     const ballMat = new T.MeshStandardMaterial({ color: 0xD7384C, roughness: 0.4 });
-    const ball = new T.Mesh(new T.SphereGeometry(0.35, 16, 12), ballMat);
-    ball.position.set(-1.6, 0.35, 1.4);
-    ball.castShadow = true;
-    scene.add(ball);
-    petGroup.position.set(-0.5, 0, 1.0);
+    playBall = new T.Mesh(new T.SphereGeometry(0.35, 20, 14), ballMat);
+    playBall.position.set(-1.4, 0.35, 1.2);
+    playBall.castShadow = true; playBall.receiveShadow = true;
+    scene.add(playBall);
+    ballPhys = {
+      vx: 0, vy: 0, vz: 0,        // m/s
+      radius: 0.35,
+      // Material constants — rubber ball numbers from real physics tables
+      restitutionY: 0.62,         // vertical bounce (energy retained on floor hit)
+      restitutionXZ: 0.74,        // wall bounce (less loss to friction)
+      gravity: 9.8,               // m/s²
+      airDrag: 0.10,              // linear drag coefficient
+      rollFriction: 1.4,          // ground-contact damping (1/s)
+      kickAt: 0,                  // throttle: no kick within 250ms of last
+    };
   }
 
   // ---- Renderer ----
@@ -1313,6 +1358,9 @@ function mountPet3D(container, p) {
   let leanVel = 0;
   let gait = 0;
   const oneShot = { kind: null, start: 0, duration: 0 };
+  // Schedule state for play-mode "trick" hops (flips + spins). v0/duration
+  // derived from projectile motion when the trick fires.
+  const playTrick = { active: false, kind: null, start: 0, v0: 0, duration: 0, next: 0 };
 
   // Tap interaction: Bit looks at the camera briefly (0.7s), then walks to
   // wherever the user tapped on the floor. Tap location is raycast to the
@@ -1428,7 +1476,12 @@ function mountPet3D(container, p) {
 
     // ===== PER-STATE BEHAVIOR =====
     const activity = p.activity;
-    const walking = activity === 'walk' || foodPiles.some(f => !f.eaten) || queuedWalkTarget;
+    // Bit moves under his own steam whenever he's walking, playing, or
+    // eating (eating is just walking + a one-shot chomp at each food pile;
+    // after the last pile he should keep wandering, not freeze). Also when
+    // food is on the floor or the user tapped a spot.
+    const walking = activity === 'walk' || activity === 'play' || activity === 'eat'
+                  || foodPiles.some(f => !f.eaten) || queuedWalkTarget;
 
     // Look-at-camera: the HEAD swivels independently of the body. Body
     // stays put; only headGroup.rotation changes. Clamp to ±70° (natural
@@ -1460,8 +1513,78 @@ function mountPet3D(container, p) {
       pauseUntil = 0;
     }
 
+    // ===== BALL PHYSICS (play only) =====
+    // Projectile motion with linear air drag, ground bounce w/ restitution,
+    // wall bounces clamped to the SAME room boundaries Bit observes
+    // (±FLOOR_HALF), rolling friction on the ground, and elastic kick when
+    // Bit's body sphere collides with the ball.
+    if (playBall && ballPhys) {
+      const r = ballPhys.radius;
+      // Gravity
+      ballPhys.vy -= ballPhys.gravity * dt;
+      // Air drag (linear) — proportional to velocity, opposite direction
+      const dragK = Math.exp(-ballPhys.airDrag * dt);
+      ballPhys.vx *= dragK; ballPhys.vy *= dragK; ballPhys.vz *= dragK;
+      // Integrate position
+      playBall.position.x += ballPhys.vx * dt;
+      playBall.position.y += ballPhys.vy * dt;
+      playBall.position.z += ballPhys.vz * dt;
+      // Ground bounce — y = r is rest position
+      if (playBall.position.y < r) {
+        playBall.position.y = r;
+        if (ballPhys.vy < 0) ballPhys.vy = -ballPhys.vy * ballPhys.restitutionY;
+        if (Math.abs(ballPhys.vy) < 0.4) ballPhys.vy = 0;
+        // Rolling friction kicks in on ground contact
+        const fricK = Math.exp(-ballPhys.rollFriction * dt);
+        ballPhys.vx *= fricK; ballPhys.vz *= fricK;
+        if (Math.abs(ballPhys.vx) < 0.05) ballPhys.vx = 0;
+        if (Math.abs(ballPhys.vz) < 0.05) ballPhys.vz = 0;
+      }
+      // Wall bounces — same boundary Bit uses, less ball radius for contact
+      const WALL = FLOOR_HALF - 0.05;
+      if (playBall.position.x >  WALL - r) { playBall.position.x =  WALL - r; if (ballPhys.vx > 0) ballPhys.vx = -ballPhys.vx * ballPhys.restitutionXZ; }
+      if (playBall.position.x < -WALL + r) { playBall.position.x = -WALL + r; if (ballPhys.vx < 0) ballPhys.vx = -ballPhys.vx * ballPhys.restitutionXZ; }
+      if (playBall.position.z >  WALL - r) { playBall.position.z =  WALL - r; if (ballPhys.vz > 0) ballPhys.vz = -ballPhys.vz * ballPhys.restitutionXZ; }
+      if (playBall.position.z < -WALL + r) { playBall.position.z = -WALL + r; if (ballPhys.vz < 0) ballPhys.vz = -ballPhys.vz * ballPhys.restitutionXZ; }
+      // Rolling rotation — angular velocity = v/r about axis perpendicular
+      // to horizontal motion (rolling without slipping). axis = up × v.
+      const horizSpeed = Math.sqrt(ballPhys.vx*ballPhys.vx + ballPhys.vz*ballPhys.vz);
+      if (horizSpeed > 0.01) {
+        const angSpeed = horizSpeed / r;
+        const ax = -ballPhys.vz / horizSpeed;
+        const az =  ballPhys.vx / horizSpeed;
+        playBall.rotateOnWorldAxis(new T.Vector3(ax, 0, az), angSpeed * dt);
+      }
+      // Collision with Bit's body — sphere-sphere overlap test
+      const BIT_R = 0.55;
+      const cdx = playBall.position.x - petGroup.position.x;
+      const cdz = playBall.position.z - petGroup.position.z;
+      const cdist = Math.sqrt(cdx*cdx + cdz*cdz);
+      const minDist = BIT_R + r;
+      if (cdist < minDist && cdist > 0.001 && (t - ballPhys.kickAt) > 0.25) {
+        // De-overlap — push ball out along the contact normal
+        const overlap = minDist - cdist;
+        const nx = cdx / cdist, nz = cdz / cdist;
+        playBall.position.x += nx * overlap;
+        playBall.position.z += nz * overlap;
+        // Kick speed = base + scaled by Bit's current walk speed
+        const baseKick = 3.6;
+        const kickV = baseKick + (activity === 'play' ? 1.4 : 0.8);
+        ballPhys.vx = nx * kickV;
+        ballPhys.vz = nz * kickV;
+        // Small upward pop on the kick (real soccer touch behavior)
+        ballPhys.vy = 1.4 + Math.random() * 0.6;
+        ballPhys.kickAt = t;
+      }
+      // During play, Bit always chases the ball — target tracks it.
+      if (activity === 'play' && t > pauseUntil) {
+        target = { x: playBall.position.x, z: playBall.position.z, foodIdx: -1 };
+      }
+    }
+
     if (walking) {
-      const speed = 1.05;
+      // Slightly faster while playing — Bit is excited.
+      const speed = activity === 'play' ? 1.35 : 1.05;
       if (t < pauseUntil) {
         // Standing between targets — fast breath echo (panting after walk)
         petGroup.position.y *= 0.85;
@@ -1539,6 +1662,75 @@ function mountPet3D(container, p) {
           // two body bumps (one per foot landing).
           petGroup.position.y = Ease.bob((gait * 2) % 1) * 0.085;
 
+          // PLAY overlay — combines a continuous bouncy gait with occasional
+          // "trick" hops. Tricks use real projectile motion:
+          //   y(τ) = v0·τ − ½·g·τ²
+          // so the apex/airtime/landing all follow the same physics rule as
+          // the ball. During the airtime of a trick, Bit rotates a full
+          // 2π either about the yaw axis (spin) or the pitch axis (front
+          // flip). Triggered every ~2.4 s plus jitter so it stays surprising.
+          if (activity === 'play') {
+            const stageKey = p.stage === 'baby' ? 'baby'
+                           : p.stage === 'teen' ? 'teen'
+                           : (p.body || 'normal');
+            const tune = ({
+              baby:   { freq: 2.6, height: 0.09, wagAmp: 0.18, trickV0: 3.0 },
+              teen:   { freq: 2.0, height: 0.13, wagAmp: 0.14, trickV0: 3.5 },
+              normal: { freq: 1.9, height: 0.14, wagAmp: 0.14, trickV0: 3.8 },
+              fit:    { freq: 2.1, height: 0.18, wagAmp: 0.16, trickV0: 4.4 },
+              jacked: { freq: 1.5, height: 0.20, wagAmp: 0.10, trickV0: 4.6 },
+              chubby: { freq: 1.4, height: 0.07, wagAmp: 0.08, trickV0: 2.6 },
+            }[stageKey]) || { freq: 1.9, height: 0.14, wagAmp: 0.14, trickV0: 3.8 };
+
+            // Schedule next trick on first entry to play.
+            if (playTrick.next === 0) playTrick.next = t + 1.2 + Math.random() * 1.4;
+
+            // Time since the active trick started (if any).
+            const inTrick = playTrick.active && (t - playTrick.start) < playTrick.duration;
+            if (!inTrick && t >= playTrick.next) {
+              playTrick.active = true;
+              playTrick.start = t;
+              playTrick.kind = Math.random() < 0.55 ? 'flip' : 'spin';
+              // Airtime from projectile motion: τ_total = 2·v0/g
+              playTrick.v0 = tune.trickV0;
+              playTrick.duration = (2 * playTrick.v0) / 9.8;
+              playTrick.next = t + playTrick.duration + 1.4 + Math.random() * 1.4;
+            }
+
+            if (inTrick) {
+              const τ = t - playTrick.start;                       // airtime so far
+              // Projectile arc: real y = v0·τ − ½·g·τ² (m, m/s, m/s²)
+              const y = Math.max(0, playTrick.v0 * τ - 0.5 * 9.8 * τ * τ);
+              petGroup.position.y += y;
+              // Full 2π rotation over the airtime
+              const k = τ / playTrick.duration;                    // 0..1
+              if (playTrick.kind === 'flip') {
+                // Front flip about pitch axis — preserve facing yaw underneath
+                facing.rotation.x = -k * Math.PI * 2;
+              } else {
+                // Yaw spin — on top of currentFacing
+                facing.rotation.y = currentFacing + k * Math.PI * 2;
+              }
+              // End of trick — clear rotation so the next walk frame is clean
+              if (τ >= playTrick.duration) {
+                playTrick.active = false;
+                facing.rotation.x = 0;
+                facing.rotation.y = currentFacing;
+              }
+            } else {
+              // Continuous bouncy gait between tricks. sin^1.6 gives the
+              // apex a slight "hang time" feel — reads as real jump physics.
+              const phase = (t * tune.freq) % 1;
+              const arc = Math.pow(Math.max(0, Math.sin(phase * Math.PI)), 1.6);
+              petGroup.position.y += arc * tune.height;
+              // Excited side-to-side facing wag at 2× the hop rate.
+              const wag = Math.sin(t * tune.freq * Math.PI * 2) * tune.wagAmp;
+              facing.rotation.y = currentFacing + wag;
+              // Secondary head lift at apex — adds life without lag glitches.
+              headGroup.position.y = headGroup.userData.baseY + headBob + arc * 0.03;
+            }
+          }
+
           // Feet — proper walk cycle:
           //   Left  foot phase = gait           (0..1)
           //   Right foot phase = (gait + 0.5)   (0..1, offset half a cycle)
@@ -1596,14 +1788,8 @@ function mountPet3D(container, p) {
       bodyGroup.scale.y = breath - squat * 0.4;
       // Slight forward lean during squat
       facing.rotation.x = -squat * 0.6;
-    } else if (activity === 'play') {
-      // Hop — parabolic arc per bounce
-      const hopPhase = (t * 1.6) % 1;
-      petGroup.position.y = Ease.arc(hopPhase) * 0.32;
-      // Wiggle on each landing
-      facing.rotation.y = currentFacing + Math.sin(t * 3.2) * 0.35;
-    } else if (activity === 'cough' || activity === 'eat') {
-      if (activity === 'cough') {
+    } else if (activity === 'sick' || activity === 'eat') {
+      if (activity === 'sick') {
         const startX = petGroup.userData.startX || 0;
         petGroup.position.x = startX + Math.sin(t * 14) * 0.035;
         bodyGroup.scale.y = breath - Math.abs(Math.sin(t * 14)) * 0.06;
@@ -1746,17 +1932,28 @@ function openPetLifecyclePreview() {
         <div class="text-xs muted numeric">${idx + 1} of ${stages.length}</div>
         <button class="btn btn-primary !py-1.5 !px-3" data-lc-next>Next →</button>
       </div>
-      <div class="text-[11px] muted mt-3 dim text-center">Each stage shows Bit walking and feeding the same way they do on the dashboard.</div>
+      <div class="text-[11px] muted mt-3 dim text-center">Each stage shows Bit doing a random activity — re-open to roll again.</div>
     `;
     const host = card.querySelector('#lifecycle-room');
+    // Pick a random activity for variety in the preview — dead always shows
+    // the tombstone, sleep is reserved for night phases, sick is only
+    // surfaced for the "stale" preview hours. Most stages get walk/play.
+    const _activityPool = (() => {
+      if (s.stage === 'dead') return ['walk'];          // unused — tombstone shown
+      if (s.hour >= 22 || s.hour < 6) return ['sleep'];
+      return ['walk', 'walk', 'walk', 'play', 'eat'];   // 3:1:1 walk:play:eat
+    })();
+    const _activity = _activityPool[Math.floor(Math.random() * _activityPool.length)];
     requestAnimationFrame(() => {
       mountPet3D(host, {
         name: 'Bit', stage: s.stage, body: s.body,
-        activity: 'walk', fedToday: true,
+        activity: _activity, fedToday: true,
         ageDays: s.stage === 'baby' ? 1 : s.stage === 'teen' ? 5 : 12,
-        foodPilesAvailable: 0, pileXP: 10,
+        // Show 1 food pile when activity is "eat" so Bit has something to consume
+        foodPilesAvailable: _activity === 'eat' ? 1 : 0, pileXP: 10,
         lastTickDate: new Date().toISOString().slice(0,10),
         forceHour: s.hour,
+        bodyHue: 0x9CC7E6,                              // preview keeps a stable color
       });
     });
     card.querySelector('[data-lc-prev]').addEventListener('click', () => {
@@ -1792,7 +1989,7 @@ function renderPetCard(state, p) {
     'sleep':   `${p.name} is napping`,
     'play':    `${p.name} is playing`,
     'workout': `${p.name} is at the gym 💪`,
-    'cough':   `${p.name} is wheezing and dying — feed NOW`,
+    'sick':    `${p.name} is wheezing and dying — feed NOW`,
     'beg':     `${p.name} is starving — hit your XP goal or watch it die`,
     'droop':   `${p.name} is sad — needs you`,
   }[p.activity] || `${p.name} is here`;

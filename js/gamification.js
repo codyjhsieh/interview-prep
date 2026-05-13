@@ -415,6 +415,28 @@ function ensureDailyQuests(state, pool) {
  *   form < -25               →  body = "chubby"
  */
 
+/* A small curated palette of pleasant body hues. Every time Bit is born
+ * (first spawn OR respawn after death), one of these is chosen at random
+ * so each life feels visually distinct. */
+const _PET_HUES = [
+  0x8FD9B6,  // mint
+  0xF6A65A,  // peach
+  0xB5A6E8,  // lavender
+  0x6BC7DA,  // sky teal
+  0xE88FB0,  // rose
+  0xE6D572,  // gold
+  0x9BD8A7,  // grass
+  0xD9938F,  // coral
+  0x7DB8F0,  // sky blue
+  0xC998E8,  // lilac
+  0xE8AC5A,  // amber
+  0x8FE0CC,  // seafoam
+];
+
+function _randomHue() {
+  return _PET_HUES[Math.floor(Math.random() * _PET_HUES.length)];
+}
+
 function _newPet(name = 'Bit') {
   return {
     stage: 'baby',
@@ -427,6 +449,7 @@ function _newPet(name = 'Bit') {
     name,
     eatenTodayXP: 0,        // XP-worth that Bit has visually eaten today
     lastEatenDate: null,    // resets eatenTodayXP each day
+    bodyHue: _randomHue(),  // fresh body color per life
   };
 }
 
@@ -459,6 +482,7 @@ function _migratePet(p) {
   if (p.stage == null)        p.stage = 'baby';
   if (p.eatenTodayXP == null) p.eatenTodayXP = 0;
   if (p.lastEatenDate == null) p.lastEatenDate = null;
+  if (p.bodyHue == null)      p.bodyHue = _randomHue();
   return p;
 }
 
@@ -496,23 +520,21 @@ function _petBody(p) {
 }
 
 function _petActivity(p, today, justFed) {
-  if (justFed)                    return 'eat';
-  if (p.vitality < 30)            return 'cough';
-  if (p.vitality < 50)            return 'beg';
-  // Time-of-day biases the activity pool. Hard-locks for late-night / early
-  // morning (asleep) and only triggers workouts during daytime when fit.
+  // Simplified to five polished states:
+  //   walk  → default during waking hours (dominant)
+  //   play  → occasional burst of hopping
+  //   sleep → late night / early morning
+  //   eat   → transient, when goal hit + not yet fed today
+  //   sick  → low vitality, visual cue to feed
+  if (justFed)            return 'eat';
+  if (p.vitality < 25)    return 'sick';
   const h = new Date().getHours();
-  if (h < 6 || h >= 22)           return 'sleep';
-  if (p.form > 35 && h >= 8 && h < 19) return 'workout';
-  let pool;
-  if (h < 8)        pool = ['idle', 'idle', 'walk'];                   // waking up
-  else if (h < 12)  pool = ['walk', 'walk', 'play', 'idle'];           // morning — active
-  else if (h < 17)  pool = ['walk', 'play', 'walk', 'play', 'idle'];   // afternoon — most active
-  else if (h < 20)  pool = ['walk', 'idle', 'walk', 'idle'];           // evening — chill
-  else              pool = ['idle', 'sleep', 'idle'];                  // late — winding down
-  // Cycle through pool every ~4 hours so re-renders within a window stay stable
+  if (h < 6 || h >= 22)   return 'sleep';
+  // ~20% of 4-hour windows roll into play; the rest is walk so Bit is
+  // visibly moving most of the time the user looks at him.
   const seed = parseInt(today.replaceAll('-', ''), 10) + (p.ageDays * 7) + Math.floor(h / 4);
-  return pool[seed % pool.length];
+  if (seed % 5 === 0)     return 'play';
+  return 'walk';
 }
 
 function petState(state) {
@@ -559,6 +581,7 @@ function petState(state) {
     ageDays: p.ageDays,
     deathCount: p.deathCount || 0,
     fedToday: p.lastFedDate === today,
+    bodyHue: p.bodyHue,
     justFed,
     goal,
     todayXP,
