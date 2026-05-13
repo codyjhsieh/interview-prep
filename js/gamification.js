@@ -625,15 +625,51 @@ function _petBody(p) {
   return 'normal';
 }
 
-function _petActivity(p, today, justFed) {
+/* Live continuous-decay spectrum.
+ *
+ * The stored `p.vitality` only updates at calendar rollover (see _petTick).
+ * For display + activity-selection, we compute a *live* vitality that drops
+ * smoothly through the day based on how far behind goal pace the user is
+ * AT THIS MOMENT. The math is designed so that at midnight rollover the
+ * live value matches the stored value's next-day delta exactly:
+ *
+ *   pendingPenalty = (1 - todayXP/goal) × 30 × (hours-into-day / 24)
+ *   liveVitality   = max(0, p.vitality − pendingPenalty)
+ *
+ * At t=0 (start of day):   penalty = 0          → live = stored
+ * At t=12h, 0 XP:          penalty = 15         → live = stored − 15
+ * At t=24h (rollover), 0 XP: penalty = 30       → matches _petTick's
+ *                                                  scaled-shortfall rule
+ * At any t with XP ≥ goal: penalty = 0          → live = stored
+ *
+ * So the displayed number ticks down continuously while the user is
+ * behind pace, recovers the moment they hit the goal, and the rollover
+ * commit is consistent with what was on screen the night before.
+ */
+function _liveVitality(p, todayXP, goal) {
+  if (!p || p.vitality == null) return 0;
+  const now = new Date();
+  const hourFraction = (now.getHours() * 3600
+                     + now.getMinutes() * 60
+                     + now.getSeconds()) / 86400;
+  const xpRatio = Math.min(1, (todayXP || 0) / (goal || 60));
+  const pendingPenalty = (1 - xpRatio) * 30 * hourFraction;
+  return Math.max(0, Math.round(p.vitality - pendingPenalty));
+}
+
+function _petActivity(p, today, justFed, liveVitality) {
   // Simplified to five polished states:
   //   walk  → default during waking hours (dominant)
   //   play  → occasional burst of hopping
   //   sleep → late night / early morning
   //   eat   → transient, when goal hit + not yet fed today
   //   sick  → low vitality, visual cue to feed
+  // Activity branches on the LIVE vitality (the continuously-decaying
+  // display value) so Bit can drift into 'sick' mid-day as the user
+  // falls behind pace — not just at midnight rollover.
+  const v = (liveVitality != null) ? liveVitality : p.vitality;
   if (justFed)            return 'eat';
-  if (p.vitality < 25)    return 'sick';
+  if (v < 25)             return 'sick';
   const h = new Date().getHours();
   if (h < 6 || h >= 22)   return 'sleep';
   // ~20% of 4-hour windows roll into play; the rest is walk so Bit is
@@ -675,12 +711,14 @@ function petState(state) {
   const uneatenXP = Math.max(0, todayXP - (p.eatenTodayXP || 0));
   const foodPilesAvailable = Math.floor(uneatenXP / PILE_XP);
 
+  const liveVit = _liveVitality(p, todayXP, goal);
   return {
     name: p.name,
     stage: p.stage,
     body: _petBody(p),
-    activity: _petActivity(p, today, justFed),
-    vitality: p.vitality,
+    activity: _petActivity(p, today, justFed, liveVit),
+    vitality: liveVit,                  // continuously-decaying display value
+    vitalityStored: p.vitality,         // raw value persisted between days
     form: p.form,
     ageDays: p.ageDays,
     deathCount: p.deathCount || 0,
