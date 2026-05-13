@@ -1477,6 +1477,56 @@ code, pre, .font-mono {
 .job-row { background: rgba(255,255,255,0.45); text-decoration: none; }
 .job-row:hover { background: rgba(255,255,255,0.75); transform: translateY(-1px); }
 
+/* ── Job-applications stepper (single visual button with two click halves) ── */
+.app-stepper {
+  display: inline-flex;
+  align-items: stretch;
+  height: 38px;
+  background: var(--accent);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.32),
+    inset 0 -1px 0 rgba(15,23,42,0.18),
+    0 1px 2px rgba(15,23,42,0.10),
+    0 4px 12px -4px rgba(15,23,42,0.18);
+  overflow: hidden;
+  isolation: isolate;
+}
+.app-stepper-half {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 0 16px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s var(--ease);
+  font-family: inherit;
+}
+.app-stepper-half:hover:not(:disabled) {
+  background: rgba(255,255,255,0.18);
+}
+.app-stepper-half:active:not(:disabled) {
+  background: rgba(0,0,0,0.10);
+}
+.app-stepper-half:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+.app-stepper-plus  { font-size: 22px; padding-right: 18px; }
+.app-stepper-minus { font-size: 22px; padding-left: 18px; }
+.app-stepper-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 6px 0;
+  background: rgba(255,255,255,0.30);
+}
+
 /* Fit badge — probability-of-offer indicator. Color reflects tier. */
 .fit-badge {
   display: inline-flex; align-items: center; gap: 6px;

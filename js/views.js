@@ -2223,15 +2223,17 @@ function renderJobAppsCard(state) {
         <div class="text-xs muted uppercase tracking-wider">Job applications today</div>
         <div class="text-3xl font-bold mt-1 numeric">${count} <span class="text-sm muted font-normal">/ ${target}</span></div>
       </div>
-      <div class="flex items-center gap-1.5">
-        <button class="btn btn-ghost !py-1.5 !px-3" data-app-remove
+      <!-- Single stepper control: one visual pill with a divider, − on
+           the left, + on the right. Two click targets, one button. -->
+      <div class="app-stepper" role="group" aria-label="Adjust job application count">
+        <button type="button" class="app-stepper-half app-stepper-minus"
+                data-app-remove
                 aria-label="Undo last application"
-                ${canRemove ? '' : 'disabled style="opacity:0.4;cursor:not-allowed"'}>
-          <span class="inline-flex items-center" style="font-size:18px;line-height:1">−</span>
-        </button>
-        <button class="btn btn-primary" data-app-add>
-          <span class="inline-flex items-center gap-1.5">${iconHTML('check', {size: 14})} Log application</span>
-        </button>
+                ${canRemove ? '' : 'disabled'}>−</button>
+        <span class="app-stepper-divider" aria-hidden="true"></span>
+        <button type="button" class="app-stepper-half app-stepper-plus"
+                data-app-add
+                aria-label="Log application">+</button>
       </div>
     </div>
     <div class="bar mt-3"><i style="width:${pct}%; transition: width 0.4s var(--spring-overshoot)"></i></div>
