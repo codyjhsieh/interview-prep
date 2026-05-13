@@ -255,24 +255,15 @@ function reviewCard(state, cardId, quality /* 1..4 */) {
 /* Job-application log. Each entry awards XP via the normal awardXP path
  * so it counts toward today's total + vitality + streak. Per-app XP is
  * calibrated to `goal / 20` (so 10 apps == half the daily goal) with a
- * floor of 1 XP.
- *
- * opts: { company?, role?, url? }  — all fields optional. */
-function logJobApp(state, opts = {}) {
+ * floor of 1 XP. No metadata captured — it's a pure counter. */
+function logJobApp(state) {
   tickDay(state);
   if (!Array.isArray(state.jobApps)) state.jobApps = [];
   const goal = (state.user && state.user.goal) || 60;
   const perAppXP = Math.max(1, Math.round(goal / 20));
-  const entry = {
-    date:    todayKey(),
-    ts:      Date.now(),
-    company: (opts.company || '').slice(0, 80),
-    role:    (opts.role    || '').slice(0, 80),
-    url:     (opts.url     || '').slice(0, 500),
-    xp:      perAppXP,
-  };
+  const entry = { date: todayKey(), ts: Date.now(), xp: perAppXP };
   state.jobApps.push(entry);
-  // Cap retained history to keep state size bounded (~1y of heavy use).
+  // Cap retained history (~1y of heavy use) to keep state size bounded.
   if (state.jobApps.length > 1000) state.jobApps.splice(0, state.jobApps.length - 1000);
   const award = awardXP(state, perAppXP, 'app');
   return { entry, ...award };
