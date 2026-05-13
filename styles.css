@@ -119,6 +119,13 @@
 
 * { box-sizing: border-box; }
 html, body { background: var(--bg); color: var(--text); }
+
+/* Hide the browser scrollbar app-wide. Scrolling still works (wheel,
+ * trackpad, keys, touch); only the rendered scrollbar UI is removed. */
+html { scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+*::-webkit-scrollbar { width: 0; height: 0; }
+* { scrollbar-width: none; }
 body {
   font: 14.5px/1.55 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -251,10 +258,9 @@ body::after {
  * Header — chrome material (MAX liquid glass)
  * ========================================================================= */
 header.sticky, main > header {
-  /* Explicit position; !important to ensure nothing later in the cascade
-   * (a Tailwind utility, a one-off inline style, etc.) un-sticks it. */
-  position: sticky !important;
-  top: 0 !important;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
   z-index: 30;
   background: var(--chrome);
   -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(1.08) contrast(1.03);
@@ -263,7 +269,6 @@ header.sticky, main > header {
     inset 0 1px 0 rgba(255,255,255,0.95),
     inset 0 -1px 0 var(--hairline);
   border-bottom: none !important;
-  position: relative;
 }
 header.sticky::after, main > header::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -379,25 +384,33 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
 
 @keyframes vt-fade-in  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes vt-fade-out { from { opacity: 1; } to { opacity: 0; } }
+/* Crossfade with `mix-blend-mode: plus-lighter` so the old + new snapshots
+ * sum to opacity 1 at every midpoint (instead of dipping to ~0.75 with
+ * normal blend, which reads as a fade-through-black flicker). The fade
+ * timing is intentionally short so route swaps feel snappy. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.22s;
+  animation-duration: 0.18s;
   animation-timing-function: var(--spring-settle);
   animation-fill-mode: both;
-  mix-blend-mode: normal;
+  mix-blend-mode: plus-lighter;
 }
 ::view-transition-old(root) { animation-name: vt-fade-out; }
 ::view-transition-new(root) { animation-name: vt-fade-in; }
 
-/* Nav elements transition imperceptibly — same DOM node before/after,
- * so the only thing the browser is interpolating is the .active class
- * change (color). Fast + smooth. */
+/* Nav elements: keep the snapshot fully visible throughout the route
+ * swap. The bar and sidebar are the SAME DOM nodes before/after — the
+ * only diff is the .active class (which is updated synchronously
+ * BEFORE startViewTransition, so OLD and NEW snapshots are identical).
+ * Pin both pseudos at opacity 1 so the NEW snapshot fully covers OLD
+ * with no fade — the user sees the live bar unchanged. */
+@keyframes vt-stable { from, to { opacity: 1; } }
 ::view-transition-old(liquid-tabbar),
 ::view-transition-new(liquid-tabbar),
 ::view-transition-old(docked-sidebar),
 ::view-transition-new(docked-sidebar) {
-  animation-duration: 0.18s;
-  animation-timing-function: var(--spring-settle);
+  animation: vt-stable 0.18s linear both;
+  mix-blend-mode: normal;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -592,6 +605,18 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
 }
 #liquid-tabbar .tab-item.active .tab-label {
   font-weight: 600;
+}
+/* Icon pop on activation — iOS 26 plays a brief spring-overshoot scale
+ * when a tab becomes selected. Adds the "dynamic" feel without a
+ * separate moving pill indicator. The transition lives on the icon so
+ * the inactive→active transition animates, but the icon settles back
+ * to 1.0 at rest. */
+#liquid-tabbar .tab-item .icon {
+  transition: transform 0.42s var(--spring-overshoot);
+  transform: scale(1);
+}
+#liquid-tabbar .tab-item.active .icon {
+  transform: scale(1.14);
 }
 /* Press feedback — spring-snap, asymmetric origin under the touch.
  * Pointer-coords are written to --press-x by JS; falls back to center
@@ -1485,8 +1510,12 @@ input::placeholder, textarea::placeholder { color: var(--dim); }
  *   - Hero / heatmap / focus-bar sized down
  * ========================================================================= */
 
-/* ===== Global anti-overflow guardrails — apply at ALL widths but most-load-bearing on mobile ===== */
-html, body { overflow-x: hidden; max-width: 100%; }
+/* ===== Global anti-overflow guardrails — apply at ALL widths but most-load-bearing on mobile =====
+ * NOTE: use `overflow-x: clip` (not `hidden`). `hidden` implicitly forces
+ * `overflow-y: auto` per CSS spec, which makes <html>/<body> a scroll
+ * container and breaks `position: sticky` from pinning to the viewport.
+ * `clip` prevents overflow without establishing a scroll context. */
+html, body { overflow-x: clip; max-width: 100%; }
 * { min-width: 0; }            /* allow flex children to shrink below content width */
 img, svg, video, canvas { max-width: 100%; height: auto; }
 table { display: block; max-width: 100%; overflow-x: auto; }
