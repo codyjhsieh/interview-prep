@@ -425,6 +425,8 @@ function _newPet(name = 'Bit') {
     lastTickDate: todayKey(),
     deathCount: 0,
     name,
+    eatenTodayXP: 0,        // XP-worth that Bit has visually eaten today
+    lastEatenDate: null,    // resets eatenTodayXP each day
   };
 }
 
@@ -455,6 +457,8 @@ function _migratePet(p) {
   if (p.name == null)         p.name = 'Bit';
   if (p.ageDays == null)      p.ageDays = 0;
   if (p.stage == null)        p.stage = 'baby';
+  if (p.eatenTodayXP == null) p.eatenTodayXP = 0;
+  if (p.lastEatenDate == null) p.lastEatenDate = null;
   return p;
 }
 
@@ -511,6 +515,14 @@ function petState(state) {
   _petTick(state.pet, today);
   const p = state.pet;
 
+  // Reset the "eaten today" counter when the calendar day rolls over.
+  // This is independent of _petTick so it fires even on the same day if
+  // state was loaded from an earlier session.
+  if (p.lastEatenDate !== today) {
+    p.eatenTodayXP = 0;
+    p.lastEatenDate = today;
+  }
+
   const justFed = (todayXP >= goal) && p.lastFedDate !== today;
   if (justFed) {
     p.vitality = Math.min(100, p.vitality + 25);
@@ -521,6 +533,11 @@ function petState(state) {
       p.form = Math.max(-50, p.form - 2);  // fed-but-sedentary → chubby
     }
   }
+
+  // Food piles: visualize remaining un-eaten XP. ~10 XP per pile, capped at 8.
+  const PILE_XP = 10;
+  const uneatenXP = Math.max(0, todayXP - (p.eatenTodayXP || 0));
+  const foodPilesAvailable = Math.min(8, Math.floor(uneatenXP / PILE_XP));
 
   return {
     name: p.name,
@@ -537,6 +554,9 @@ function petState(state) {
     todayXP,
     xpToFeed: Math.max(0, goal - todayXP),
     xpProgress: Math.min(100, Math.round((todayXP / goal) * 100)),
+    eatenTodayXP: p.eatenTodayXP || 0,
+    foodPilesAvailable,
+    pileXP: PILE_XP,
   };
 }
 

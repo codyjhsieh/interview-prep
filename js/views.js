@@ -746,22 +746,72 @@ function mountPet3D(container, p) {
   renderer.outputColorSpace = T.SRGBColorSpace || T.sRGBEncoding;
   container.appendChild(renderer.domElement);
 
+  // ---- Food piles in the room ----
+  // Each pile of XP-food is a small mound of 3 spheres. Bit walks to the
+  // nearest pile, eats it on contact (pile vanishes; eatenTodayXP += pileXP).
+  // Positions are deterministically scattered around the floor.
+  const FLOOR_HALF = 2.8;
+  const foodPiles = [];  // [{ mesh, x, z, eaten:false }]
+  if (p.foodPilesAvailable > 0) {
+    // Seeded RNG for stable positions across re-renders the same day
+    const dateSeed = parseInt((p.lastTickDate || '20260101').replaceAll('-',''), 10);
+    function rand(i) {
+      const x = Math.sin(dateSeed + i * 9301) * 43758.5453;
+      return x - Math.floor(x);
+    }
+    const foodMat = new T.MeshStandardMaterial({ color: 0xC7780E, flatShading: true, roughness: 0.7 });
+    const foodMatDark = new T.MeshStandardMaterial({ color: 0x8E5408, flatShading: true, roughness: 0.7 });
+    for (let i = 0; i < p.foodPilesAvailable; i++) {
+      const px = (rand(i * 2) * 2 - 1) * FLOOR_HALF;
+      const pz = (rand(i * 2 + 1) * 2 - 1) * FLOOR_HALF;
+      // Pile = 3 small icosahedrons clustered
+      const pileGroup = new T.Group();
+      const k0 = new T.Mesh(new T.IcosahedronGeometry(0.13, 0), foodMat);
+      const k1 = new T.Mesh(new T.IcosahedronGeometry(0.11, 0), foodMatDark);
+      const k2 = new T.Mesh(new T.IcosahedronGeometry(0.10, 0), foodMat);
+      k0.position.set(0, 0.13, 0);
+      k1.position.set(0.10, 0.11, 0.04);
+      k2.position.set(-0.08, 0.11, -0.05);
+      k0.castShadow = k1.castShadow = k2.castShadow = true;
+      pileGroup.add(k0); pileGroup.add(k1); pileGroup.add(k2);
+      pileGroup.position.set(px, 0, pz);
+      // Subtle idle bob via random Y-offset per pile (visual variety)
+      pileGroup.userData.baseY = 0;
+      scene.add(pileGroup);
+      foodPiles.push({ group: pileGroup, x: px, z: pz, eaten: false });
+    }
+  }
+
   // ---- Animation loop ----
   let mounted = true;
   let t = 0;
   let lastFrame = performance.now();
 
-  // Wander state — Bit picks a random target on the floor, walks toward it
+  // Wander state — Bit picks a target on the floor, walks toward it
   // at constant speed turning to face it, then picks a new target on arrival.
-  // Speed and pause are gentle so it looks like real ambient wandering.
-  const FLOOR_HALF = 2.8;         // keep slightly inside the 8×8 floor
-  function _newTarget() {
+  // If food piles exist, the target IS the nearest food pile; on arrival
+  // the pile is "eaten" (removed from scene) and state.pet.eatenTodayXP
+  // is incremented + persisted.
+  function _newRandomTarget() {
     return {
       x: (Math.random() * 2 - 1) * FLOOR_HALF,
       z: (Math.random() * 2 - 1) * FLOOR_HALF,
+      foodIdx: -1,   // -1 = random spot, otherwise index into foodPiles
     };
   }
-  let target = _newTarget();
+  function _nearestFoodTarget() {
+    let bestIdx = -1, bestDist = Infinity;
+    for (let i = 0; i < foodPiles.length; i++) {
+      if (foodPiles[i].eaten) continue;
+      const dx = foodPiles[i].x - petGroup.position.x;
+      const dz = foodPiles[i].z - petGroup.position.z;
+      const d  = Math.sqrt(dx*dx + dz*dz);
+      if (d < bestDist) { bestDist = d; bestIdx = i; }
+    }
+    if (bestIdx < 0) return _newRandomTarget();
+    return { x: foodPiles[bestIdx].x, z: foodPiles[bestIdx].z, foodIdx: bestIdx };
+  }
+  let target = foodPiles.length > 0 ? _nearestFoodTarget() : _newRandomTarget();
   let pauseUntil = 0;
   let currentFacing = 0;   // current rotation.y, lerp-smoothed each frame
 
@@ -771,38 +821,70 @@ function mountPet3D(container, p) {
     lastFrame = now;
     t += dt;
 
+    // Food piles bob gently in place
+    for (let i = 0; i < foodPiles.length; i++) {
+      if (!foodPiles[i].eaten) {
+        foodPiles[i].group.position.y = Math.sin(t * 2 + i * 1.7) * 0.025;
+        foodPiles[i].group.rotation.y = (i * 0.4) + Math.sin(t * 0.6 + i) * 0.05;
+      }
+    }
+
     const activity = p.activity;
-    if (activity === 'walk') {
+    // Force walking mode if there's food on the floor — Bit can't ignore it
+    const walking = activity === 'walk' || foodPiles.some(f => !f.eaten);
+    if (walking) {
       // Wander: move toward target. If we got there or paused too long, pick a new one.
       if (t < pauseUntil) {
-        // Standing still between targets — gentle idle bob
         petGroup.position.y = Math.sin(t * 3) * 0.04;
       } else {
         const dx = target.x - petGroup.position.x;
         const dz = target.z - petGroup.position.z;
         const dist = Math.sqrt(dx*dx + dz*dz);
-        if (dist < 0.18) {
-          // Arrived — wait a bit, then pick a new target. Random pause length.
-          pauseUntil = t + 0.6 + Math.random() * 1.4;
-          target = _newTarget();
+        if (dist < 0.22) {
+          // Arrived. If this was a food pile, eat it.
+          if (target.foodIdx >= 0 && !foodPiles[target.foodIdx].eaten) {
+            const pile = foodPiles[target.foodIdx];
+            pile.eaten = true;
+            // Crunch animation: collapse to floor + fade, then remove
+            const pileGroup = pile.group;
+            const eatStart = t;
+            const eatAnim = () => {
+              if (!mounted) return;
+              const k = Math.min(1, (performance.now() - now) / 360 + (t - eatStart) * 2.8);
+              pileGroup.scale.set(1 - k, Math.max(0, 1 - k * 1.6), 1 - k);
+              if (k < 1) requestAnimationFrame(eatAnim);
+              else {
+                scene.remove(pileGroup);
+                pileGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+              }
+            };
+            eatAnim();
+            // Persist eaten state — mutate the actual state.pet so it survives reload
+            try {
+              const st = APP.getState();
+              if (st && st.pet) {
+                st.pet.eatenTodayXP = (st.pet.eatenTodayXP || 0) + (p.pileXP || 10);
+                if (typeof GAMI !== 'undefined' && GAMI.saveImmediate) GAMI.saveImmediate(st);
+              }
+            } catch (_) {}
+          }
+          // Pause briefly, then pick next target (food first, else random)
+          pauseUntil = t + 0.4 + Math.random() * 0.6;
+          const hasFood = foodPiles.some(f => !f.eaten);
+          target = hasFood ? _nearestFoodTarget() : _newRandomTarget();
         } else {
-          // Move toward target at constant speed
-          const speed = 1.05; // world units / sec
+          const speed = 1.05;
           const step = Math.min(dist, speed * dt);
           const nx = dx / dist;
           const nz = dz / dist;
           petGroup.position.x += nx * step;
           petGroup.position.z += nz * step;
-          // Face the direction of motion. atan2(dx, dz) gives angle around Y.
           const targetAngle = Math.atan2(nx, nz);
-          // Smooth turn — interpolate currentFacing toward targetAngle.
-          // Handle wraparound (shortest-path).
           let delta = targetAngle - currentFacing;
           while (delta >  Math.PI) delta -= Math.PI * 2;
           while (delta < -Math.PI) delta += Math.PI * 2;
           currentFacing += delta * Math.min(1, dt * 8);
           facing.rotation.y = currentFacing;
-          // Walk bob — small vertical bounce per step
           petGroup.position.y = Math.abs(Math.sin(t * 9)) * 0.08;
         }
       }
