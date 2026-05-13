@@ -1148,7 +1148,7 @@ function mountPet3D(container, p) {
       const tx = Math.max(-FLOOR_HALF, Math.min(FLOOR_HALF, _tapHit.x));
       const tz = Math.max(-FLOOR_HALF, Math.min(FLOOR_HALF, _tapHit.z));
       lookAtCameraStart = t;
-      lookAtCameraUntil = t + 0.7;             // look at camera for 0.7s
+      lookAtCameraUntil = t + 1.4;             // look at camera for 1.4s
       pauseUntil = lookAtCameraUntil;          // hold position during look
       queuedWalkTarget = { x: tx, z: tz, foodIdx: -1 };
     }
@@ -1264,28 +1264,26 @@ function mountPet3D(container, p) {
     const activity = p.activity;
     const walking = activity === 'walk' || foodPiles.some(f => !f.eaten) || queuedWalkTarget;
 
-    // Look-at-camera: ONLY the head turns (not the body). Clamped to ±45°
-    // horizontal + small upward tilt — within natural neck range, never a
-    // full-body 180°. After 0.7s the head springs back to neutral.
+    // Look-at-camera: the HEAD swivels independently of the body. Body
+    // stays put; only headGroup.rotation changes. Clamp to ±70° (natural
+    // owl-ish neck) + a clear upward pitch so the eyes meet the camera.
     if (lookingAtCam) {
-      // World-space angle from Bit to camera, then make it RELATIVE to body
       const dxc = camera.position.x - petGroup.position.x;
       const dzc = camera.position.z - petGroup.position.z;
       const camAngle = Math.atan2(dxc, dzc);
       let headRel = _shortAngle(currentFacing, camAngle);
-      const NECK_LIMIT = Math.PI / 4;       // 45°
+      const NECK_LIMIT = Math.PI * (70/180);      // 70°
       if (headRel >  NECK_LIMIT) headRel =  NECK_LIMIT;
       if (headRel < -NECK_LIMIT) headRel = -NECK_LIMIT;
-      // Pitch — small upward tilt to "look up at camera"
-      const pitch = -0.22;
-      // Lerp head rotation toward target (no spring overshoot — we want it
-      // to settle precisely, no bobble).
-      headGroup.rotation.y += (headRel - headGroup.rotation.y) * Math.min(1, dt * 8);
-      headGroup.rotation.x += (pitch - headGroup.rotation.x) * Math.min(1, dt * 8);
-    } else if (headGroup.rotation.y !== 0 || headGroup.rotation.x !== 0) {
+      // Pitch — clearly tilts up toward camera (camera is at y=7 vs Bit ≈0.5)
+      const pitch = -0.38;
+      // Faster lerp so the head lands inside the look window (1.4s)
+      headGroup.rotation.y += (headRel - headGroup.rotation.y) * Math.min(1, dt * 14);
+      headGroup.rotation.x += (pitch  - headGroup.rotation.x) * Math.min(1, dt * 14);
+    } else if (Math.abs(headGroup.rotation.y) > 0.002 || Math.abs(headGroup.rotation.x) > 0.002) {
       // Spring head back to neutral after the look
-      headGroup.rotation.y += (0 - headGroup.rotation.y) * Math.min(1, dt * 7);
-      headGroup.rotation.x += (0 - headGroup.rotation.x) * Math.min(1, dt * 7);
+      headGroup.rotation.y += (0 - headGroup.rotation.y) * Math.min(1, dt * 10);
+      headGroup.rotation.x += (0 - headGroup.rotation.x) * Math.min(1, dt * 10);
       if (Math.abs(headGroup.rotation.y) < 0.002) headGroup.rotation.y = 0;
       if (Math.abs(headGroup.rotation.x) < 0.002) headGroup.rotation.x = 0;
     }
