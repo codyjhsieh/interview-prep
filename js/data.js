@@ -1387,7 +1387,140 @@ The corollary: there should always be a <b>kill-switch</b>. A button, a feature 
          ['Agent calls a tool you never intended for it',  'Action allowlist (LLM can only call listed tools)'],
        ],
        explain:'Each control maps to a specific failure class. None alone is enough — you need the full stack. The senior signal is naming all five when asked "how would you ship an agent safely?"'}},
-    {id:'ag-4', type:'question', name:'Q: Multi-agent system fails. Where do you look first?', xp:10, time:6,
+    {id:'ag-4', type:'concept', name:'Structured outputs — JSON Schema as your security boundary', xp:12, time:11,
+     body:`In 2026, every production agent uses <b>structured outputs</b>: the model is constrained to emit JSON that matches a JSON Schema. This isn't about prompt engineering or hoping the model gets it right — the provider's grammar-constrained decoding enforces it at the token level.
+<br><br>
+<b>Why this matters.</b> Before structured outputs, an agent that called <code>charge_card</code> with <code>{"amount": "fifty bucks"}</code> would crash your handler. Even temp=0 doesn't guarantee valid JSON across runs. Structured outputs make invalid JSON literally impossible — the next token sampler only considers tokens that keep the output schema-valid.
+<br><br>
+<b>OpenAI — strict JSON Schema mode:</b>
+<pre><code>from openai import OpenAI
+client = OpenAI()
+
+# Define the tool with strict:true — enables grammar-constrained decoding
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "refund",
+        "strict": True,                       # ← the magic flag
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "amount_usd":      {"type": "number"},
+                "idempotency_key": {"type": "string"},
+                "reason":          {"type": "string"},
+            },
+            "required": ["amount_usd", "idempotency_key", "reason"],
+            "additionalProperties": False,    # MUST be false in strict mode
+        },
+    },
+}]
+resp = client.chat.completions.create(model="gpt-4.1", messages=[...], tools=tools)
+# resp.choices[0].message.tool_calls[0].function.arguments is GUARANTEED valid JSON</code></pre>
+<b>Anthropic — same concept, different shape:</b>
+<pre><code>import anthropic
+client = anthropic.Anthropic()
+resp = client.messages.create(
+    model="claude-sonnet-4-6",
+    tools=[{
+        "name": "refund",
+        "description": "Issue a refund",
+        "input_schema": {           # ← Anthropic calls it input_schema, not parameters
+            "type": "object",
+            "properties": {
+                "amount_usd":      {"type": "number"},
+                "idempotency_key": {"type": "string"},
+                "reason":          {"type": "string"},
+            },
+            "required": ["amount_usd", "idempotency_key", "reason"],
+        },
+    }],
+    messages=[...],
+)
+# resp.content[i].type == "tool_use" → resp.content[i].input is the dict</code></pre>
+<b>JSON-not-tool outputs:</b> if you want the model's reply itself (not a tool call) to be JSON, use <code>response_format={"type":"json_schema", "json_schema":{...}}</code> on OpenAI, or wrap in tool-use on Anthropic.
+<br><br>
+<b>The interview trap:</b> "I use temp=0 and string-format my prompt nicely" is a junior answer. The senior answer is: <i>"Structured outputs at the API level. Validation is enforced before the bytes ever leave the model. I still validate server-side as defense in depth, but the LLM cannot emit syntactically invalid JSON."</i>
+<br><br>
+<b>Still validate.</b> Schema validity ≠ semantic validity. The model can return <code>amount_usd: -50</code> or <code>amount_usd: 999999</code>. Bounds, allowlists, and policy checks belong server-side, after parsing.`,
+     interactive:{ type:'findbug',
+       prompt:'OpenAI structured-output tool spec — one line silently breaks strict mode. Find it.',
+       codeLines:[
+         'tools = [{',
+         '  "type": "function",',
+         '  "function": {',
+         '    "name": "refund",',
+         '    "strict": True,',
+         '    "parameters": {',
+         '      "type": "object",',
+         '      "properties": {',
+         '        "amount_usd":      {"type": "number"},',
+         '        "idempotency_key": {"type": "string"},',
+         '      },',
+         '      "required": ["amount_usd"],',
+         '    },',
+         '  },',
+         '}]',
+       ],
+       correctLine:12,
+       cat:'ai',
+       explain:'In strict mode, OpenAI requires (a) every property to be listed in "required" and (b) "additionalProperties": false. Line 12 only lists amount_usd as required (skipping idempotency_key), AND the schema is missing additionalProperties: false entirely. Either omission causes the API to reject the tool registration with an InvalidSchema error.'}},
+
+    {id:'ag-5', type:'concept', name:'Tool-call format wars — OpenAI vs Anthropic vs MCP', xp:12, time:10,
+     body:`Every major LLM provider has invented its own tool-calling format. By 2026, three matter: <b>OpenAI</b>'s function-calling, <b>Anthropic</b>'s tool-use, and <b>MCP</b> (Model Context Protocol) — Anthropic's open standard for dynamic tool discovery across providers and runtimes. A senior FDE knows the differences cold because they shape your integration code.
+<br><br>
+<b>OpenAI function-calling:</b>
+<pre><code># Request
+tools = [{ "type": "function",
+           "function": {"name":"x", "parameters": {...JSON Schema...}} }]
+# Response (assistant turn with tool_calls)
+{"role":"assistant",
+ "tool_calls":[{"id":"call_abc","type":"function",
+                "function":{"name":"x","arguments":"{...stringified JSON...}"}}]}
+# You reply with role:"tool", tool_call_id:"call_abc", content:"result"</code></pre>
+<b>Anthropic tool-use:</b>
+<pre><code># Request — "tools" at top level, parameters key is "input_schema"
+tools = [{ "name":"x", "description":"...", "input_schema": {...JSON Schema...} }]
+# Response — content blocks; type="tool_use" carries the call
+{"role":"assistant",
+ "content":[{"type":"text","text":"..."},
+            {"type":"tool_use","id":"toolu_abc","name":"x","input":{...dict...}}]}
+# You reply with content:[{"type":"tool_result","tool_use_id":"toolu_abc","content":"result"}]</code></pre>
+<b>Three key differences candidates miss:</b>
+<ul style="margin:6px 0 6px 18px;color:var(--muted)">
+  <li><b>Arguments shape.</b> OpenAI = stringified JSON (you call <code>json.loads(arguments)</code>). Anthropic = parsed dict already. Forgetting to parse breaks tool dispatch.</li>
+  <li><b>Schema key.</b> OpenAI nests it under <code>function.parameters</code>; Anthropic puts it at <code>input_schema</code>. Cross-provider abstractions need to map this.</li>
+  <li><b>Response shape.</b> OpenAI uses a separate <code>tool_calls</code> array; Anthropic interleaves text + tool_use blocks in <code>content</code>. Iterate by block type, not array index.</li>
+</ul>
+<b>MCP (Model Context Protocol)</b> is Anthropic's open spec, now adopted by many runtimes (Claude Desktop, IDE integrations, agent frameworks). Instead of hard-coding tools in your prompt, you connect to an <b>MCP server</b> that advertises tools at runtime. The LLM sees a dynamically-discovered tool list. Think of it as USB-C for LLM tools: one protocol, many providers.
+<pre><code># MCP server (Python) — advertises a tool the LLM can discover
+from mcp.server import Server
+from mcp.types import Tool, TextContent
+
+srv = Server("refund-tools")
+
+@srv.list_tools()
+async def list_tools():
+    return [Tool(name="refund",
+                 description="Issue a refund (validated server-side)",
+                 inputSchema={...JSON Schema...})]
+
+@srv.call_tool()
+async def call_tool(name, args):
+    if name == "refund":
+        return [TextContent(type="text", text=str(execute_refund(args)))]</code></pre>
+<b>Interview move:</b> when asked "how do you integrate with multiple LLM providers?", the senior answer is: <i>"Abstract over the format differences. Or use MCP — it's becoming the lingua franca for tool discovery and a key for adapting to whichever model wins long-term."</i>`,
+     interactive:{ type:'whyexplain',
+       prompt:'Why does an Anthropic-trained candidate sometimes write broken code when they switch to OpenAI tool-calling (or vice versa)?',
+       modelAnswer:'The two formats look similar but differ on three things that cause silent bugs. (1) OpenAI returns tool arguments as a JSON-encoded STRING ("arguments" is a string you must json.loads); Anthropic returns them as a parsed dict ("input" is already a dict). Code that does args["x"] on OpenAI without parsing first crashes. (2) The schema lives under different keys — OpenAI puts it at function.parameters, Anthropic at input_schema. (3) Response shape differs — OpenAI has a tool_calls array; Anthropic interleaves text + tool_use blocks in content, so you iterate by content[i].type rather than indexing. A "minor format port" can silently call the wrong tool or pass undefined arguments. The fix is a thin adapter layer that normalizes both into one internal shape, or using MCP which standardizes the discovery + dispatch.',
+       rubric:[
+         'Notes OpenAI arguments are string vs Anthropic dict',
+         'Notes parameters vs input_schema key differences',
+         'Notes the response structure: tool_calls array vs interleaved content blocks',
+         'Mentions MCP as the cross-provider standard',
+       ],
+       cat:'ai'}},
+
+    {id:'ag-6', type:'question', name:'Q: Multi-agent system fails. Where do you look first?', xp:10, time:6,
      body:'Trace the full conversation graph: which agent picked up the task, what context it had, what tools it called, what each tool returned. 80% of multi-agent failures are context loss between handoffs — the receiving agent doesn\'t have what the sending agent assumed it would.'},
   ]
 },
@@ -4008,6 +4141,127 @@ SAML is verbose and old, but every legacy enterprise IdP supports it. If your cu
          ['Startup that wants the cheapest viable option',           'Multi-tenant SaaS (no PrivateLink even)'],
        ],
        explain:'Match deploy shape to compliance posture + customer willingness-to-pay. Each shape up the ladder is ~3× more expensive for you to operate.'}},
+    {id:'fd-7', type:'concept', name:'Event sourcing + CQRS — when the log IS the database', xp:12, time:12,
+     body:`Most apps store <i>current state</i> in a database. <b>Event sourcing</b> stores the immutable sequence of <i>events</i> that produced the state. Current state is computed by replaying events. Why bother? Three reasons FDE interviewers care about: auditability, time-travel, and rebuilds.
+<br><br>
+<b>The classic case: a customer refund ledger.</b> Compliance demands you prove every dollar movement. With event sourcing, the audit trail IS the database. You can\'t lose it without losing the system.
+<pre><code># Each event is append-only — never updated, never deleted
+class Event:
+    id: int; ts: int; aggregate_id: str; type: str; payload: dict
+
+# Domain events for a customer balance:
+# RefundIssued       — money in
+# ChargeProcessed    — money out
+# AdjustmentApplied  — manual correction (with auditor_id)
+# ChargebackRecorded — disputed charge
+
+# Current balance = fold events:
+def balance_for(customer_id, events):
+    return sum(
+        e.payload["amount"] * (1 if e.type in ("RefundIssued","AdjustmentApplied") else -1)
+        for e in events if e.aggregate_id == customer_id
+    )</code></pre>
+<b>Snapshots solve the "replay is slow" problem.</b> Every 1000 events, persist a snapshot of derived state. To read the current state, load the latest snapshot + replay only events after it. Linear cost stays bounded.
+<br><br>
+<b>CQRS (Command Query Responsibility Segregation)</b> is the partner pattern. <b>Commands</b> (mutations) append to the event log. <b>Queries</b> read from <b>projections</b> — denormalized read models built by consuming events. Each projection is optimized for one query shape.
+<pre><code># Write side — events go to the log
+event_store.append(Event(type="RefundIssued",
+                         aggregate_id=customer_id,
+                         payload={"amount": 50.00}))
+
+# Read side — projections rebuilt from events
+class CustomerBalanceProjection:
+    def apply(self, event):
+        if event.type == "RefundIssued":
+            self.db.execute("UPDATE balances SET amount = amount + ? WHERE customer_id = ?",
+                            event.payload["amount"], event.aggregate_id)
+
+class AuditReportProjection:
+    def apply(self, event):
+        self.db.insert("audit_rows", {**event.payload, "event_type": event.type, "ts": event.ts})
+# Same event stream → many specialized views, each fast to query.</code></pre>
+<b>What you gain.</b>
+<ul style="margin:6px 0 6px 18px;color:var(--muted)">
+  <li><b>Time travel.</b> "What was the balance on March 14?" → fold events up to that timestamp.</li>
+  <li><b>Bug recovery.</b> Found a calculation bug in March? Fix the projection code, rebuild from the log. The events are still correct.</li>
+  <li><b>Audit by construction.</b> Every state change has a timestamped, immutable provenance record. Compliance auditors love this.</li>
+  <li><b>New views are cheap.</b> Need a "refunds by region" report? Build a new projection that consumes the same event stream.</li>
+</ul>
+<b>What you pay.</b>
+<ul style="margin:6px 0 6px 18px;color:var(--muted)">
+  <li><b>Eventual consistency.</b> The read model can lag the write log by milliseconds to seconds. Not safe for "did this just succeed?" reads — those go to the event store directly.</li>
+  <li><b>Schema evolution is hard.</b> Events are immutable; once you log them, you can\'t change their shape without versioning logic.</li>
+  <li><b>Operational complexity.</b> Two storage systems (log + projection DBs) instead of one.</li>
+</ul>
+<b>When to reach for it.</b> Audit-heavy domains (fintech, healthcare, government), high-stakes workflows where wrong state is unrecoverable, or systems where multiple consumers need different views of the same source-of-truth. <b>When not to.</b> Simple CRUD on a small team — the operational burden isn\'t worth it. The mature FDE answer recognizes both sides.`,
+     interactive:{ type:'whyexplain',
+       prompt:'A customer says "we found a bug — our refund calc was off by sales-tax for the last 3 months. Can you fix the data?" With event sourcing, the recovery is dramatically easier than with a normal DB. Why?',
+       modelAnswer:'In a normal CRUD DB, you\'d have to back out the bad rows somehow — but you don\'t know which rows were affected by the bug vs intentional adjustments. Often you can\'t reconstruct the right answer at all. With event sourcing, the events (RefundIssued, ChargeProcessed, etc.) are stored unchanged — only the PROJECTION code that derived "current balance" was buggy. You fix the projection logic, replay the event log into a fresh projection table, and the corrected balances appear. The events were always correct; only the derivation was wrong. This bug-recoverability is the #1 reason regulated industries pay the operational overhead of event sourcing.',
+       rubric:[
+         'Identifies events as the immutable source of truth',
+         'Distinguishes events from projections / derived state',
+         'Explains that fixing the projection + replaying recovers state',
+         'Notes regular CRUD can\'t recover because original data was overwritten',
+       ],
+       cat:'sysd'}},
+
+    {id:'fd-8', type:'concept', name:'gRPC vs REST vs GraphQL — pick the wire format', xp:12, time:10,
+     body:`"Should this be a REST or gRPC API?" comes up in every senior-level system design round at AI / infra companies. The answer isn\'t about preference — it\'s about who\'s calling, what payload, and what tooling they have.
+<br><br>
+<b>REST (JSON over HTTP/1.1 or HTTP/2):</b> The default for external APIs. Human-readable, every language has a client, browsers do it natively, HTTP caching works, every observability tool understands it.
+<br><br>
+<b>gRPC (Protobuf over HTTP/2):</b> Binary, schema-first, code-generated clients. Built for internal service-to-service. Smaller payloads (5-10× smaller than equivalent JSON), faster parsing, streaming RPCs included, contracts enforced at compile time.
+<br><br>
+<b>GraphQL:</b> A query language; one endpoint, the client picks fields. Solves the "n+1 round trips for one screen" problem on slow networks. Comes with operational cost (resolver complexity, caching is harder).
+<br><br>
+<b>The decision framework:</b>
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0">
+<thead><tr style="border-bottom:1px solid var(--hairline)"><th style="text-align:left;padding:6px">Question</th><th style="text-align:left;padding:6px">Choose</th></tr></thead>
+<tbody>
+<tr><td style="padding:6px">External / public API, consumed from browsers + many languages</td><td style="padding:6px"><b>REST</b></td></tr>
+<tr><td style="padding:6px">Internal microservice talking to another internal service, both you control</td><td style="padding:6px"><b>gRPC</b></td></tr>
+<tr><td style="padding:6px">High-throughput ML model serving (e.g., TensorFlow Serving, Triton)</td><td style="padding:6px"><b>gRPC</b> (streaming + binary)</td></tr>
+<tr><td style="padding:6px">Mobile app on flaky cellular, complex screen with many entities</td><td style="padding:6px"><b>GraphQL</b></td></tr>
+<tr><td style="padding:6px">Public webhook delivery to customer endpoints</td><td style="padding:6px"><b>REST</b> (no special client needed)</td></tr>
+<tr><td style="padding:6px">Bidirectional streaming (chat, voice, telemetry)</td><td style="padding:6px"><b>gRPC</b> (or WebSocket for browsers)</td></tr>
+</tbody></table>
+<b>A grPC service in 30 lines:</b>
+<pre><code># refund.proto — the contract
+syntax = "proto3";
+service RefundService {
+    rpc IssueRefund (RefundRequest) returns (RefundReply);
+    rpc StreamLedger (LedgerQuery)  returns (stream LedgerEntry);   // server-streaming
+}
+message RefundRequest {
+    string customer_id      = 1;
+    double amount_usd       = 2;
+    string idempotency_key  = 3;
+}
+message RefundReply { string charge_id = 1; }
+
+# Python client — generated from the .proto, type-safe + 5x smaller wire payload
+import grpc, refund_pb2_grpc, refund_pb2
+channel = grpc.secure_channel("refunds.internal:443", grpc.ssl_channel_credentials())
+stub = refund_pb2_grpc.RefundServiceStub(channel)
+resp = stub.IssueRefund(refund_pb2.RefundRequest(
+    customer_id="c123", amount_usd=50.00, idempotency_key="k-xyz"))</code></pre>
+<b>The trap interviewers love:</b> "We should use gRPC for our public-facing API because it's faster." Wrong answer — browsers can\'t natively speak gRPC (you need gRPC-Web with a proxy), and your customers don\'t want to generate stubs from your .proto. <b>External = REST</b> almost always. <b>Internal high-volume = gRPC.</b>
+<br><br>
+<b>Mature signal:</b> mention <b>contract testing</b>. With gRPC, the .proto IS the contract — break it and the compile fails. With REST, you need OpenAPI / Pact to enforce the same guarantee, and you have to actually run those checks in CI.`,
+     interactive:{ type:'cloze',
+       prompt:'A streaming-AI startup needs a service that takes audio chunks and returns transcript chunks in real time. Which protocol + pattern?',
+       before:'# The protocol choice matters: binary, streaming, internal/external.\n# Pick the line that completes the design:\n\nservice TranscriptionService {\n    ',
+       after:'\n}',
+       options:[
+         'rpc Transcribe (AudioRequest) returns (TranscriptReply);          // unary REST-style',
+         'rpc Transcribe (stream AudioChunk) returns (stream TranscriptChunk);  // bidi-streaming gRPC',
+         'rpc Transcribe (AudioRequest) returns (stream TranscriptChunk);   // server-streaming only',
+         'GET /transcribe?audio=...  HTTP/1.1                              // REST',
+       ],
+       correct:1,
+       cat:'sysd',
+       explain:'Real-time transcription needs the CLIENT to send audio as it arrives AND the SERVER to send transcripts as they\'re produced — that\'s bidi-streaming, native to gRPC. Option A serializes the whole call as request/response (latency = full audio duration). Option C streams replies but blocks on the request, so the model can\'t start until upload completes. REST/HTTP can do server-sent events but not full duplex without WebSocket. gRPC bidi is the right primitive — and is exactly what Deepgram-style services use internally.'}},
+
     {id:'fd-5', type:'question', name:'Q: Customer\'s legacy ERP has no API', xp:10, time:8,
      body:'Reverse-priority approach: (1) Does it have an SDK or middleware? (2) Database direct (read replica, never primary). (3) Flat-file batch export over SFTP. (4) Last resort: RPA / UI scraping. Document data freshness SLA for each.'},
     {id:'fd-6', type:'question', name:'Q: Design a customer-facing eval/monitoring system', xp:15, time:12,
@@ -4552,6 +4806,114 @@ The right pattern: tier 1 + tier 2 + tier 3 on every pipeline stage. Tier 4 + ti
        explain:'Schema → volume → freshness → distribution → referential. The first three are cheap and catch loud failures; the last two are expensive but catch subtle data quality issues.'}},
     {id:'pp-3', type:'question', name:'Q: Tuesday DQ regression', xp:15, time:10,
      body:'Investigate: is there a Tuesday upstream job? A weekly customer file drop? A timezone bug at midnight Sunday UTC? Walk through SQL on row counts by day, by source, by validity. Then propose a monitoring rule that would have caught it earlier.'},
+  ]
+},
+{
+  cat:'data', id:'data-warehouse', name:'OLAP engines + streaming — picking the stack',
+  intro:'Real ELT-stack questions need a decision tree, not nomenclature. "1TB of sales data, dashboard every 6h, $X budget" — what do you reach for? And when does batch lose to streaming?',
+  lessons:[
+    {id:'wh-1', type:'concept', name:'OLAP engines compared — Snowflake / BigQuery / ClickHouse / DuckDB', xp:12, time:11,
+     body:`Most candidates say "columnar warehouse" and stop. The actual decision is across cost model, ops burden, scaling shape, and ecosystem fit. Here\'s the 2026 senior take.
+<br><br>
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0">
+<thead><tr style="border-bottom:1px solid var(--hairline)">
+  <th style="text-align:left;padding:6px">Engine</th><th style="text-align:left;padding:6px">Cost model</th><th style="text-align:left;padding:6px">Ops</th><th style="text-align:left;padding:6px">Best for</th>
+</tr></thead>
+<tbody>
+<tr><td style="padding:6px"><b>Snowflake</b></td><td style="padding:6px">Per-query compute (warehouse units)</td><td style="padding:6px">None — fully managed</td><td style="padding:6px">Analyst-heavy teams; large customer base; mature SQL features (time travel, zero-copy clones)</td></tr>
+<tr><td style="padding:6px"><b>BigQuery</b></td><td style="padding:6px">Per-byte-scanned (or slot reservations)</td><td style="padding:6px">None — GCP-native</td><td style="padding:6px">Spiky workloads; teams on GCP; massive scale; ML integration</td></tr>
+<tr><td style="padding:6px"><b>ClickHouse</b></td><td style="padding:6px">Self-hosted or Cloud per-vCPU</td><td style="padding:6px">High self-host, low Cloud</td><td style="padding:6px">Time-series &amp; observability; cost-sensitive at scale; ultra-low p99 (10ms ranges)</td></tr>
+<tr><td style="padding:6px"><b>DuckDB</b></td><td style="padding:6px">Free, single-process</td><td style="padding:6px">None — embedded</td><td style="padding:6px">Local analytics; "just point at a parquet file"; embedded in pipelines; one-user OLAP</td></tr>
+</tbody></table>
+
+<b>How to pick — three decision axes:</b>
+<br><br>
+<b>1. Scale curve.</b> If you\'re sub-1TB, DuckDB on a workstation runs faster than Snowflake (no network round trip). 1-100TB → Snowflake or BigQuery shine. 100TB+ at low latency → ClickHouse (you\'ll pay for it in ops).
+<br><br>
+<b>2. Query pattern.</b> Big, infrequent ad-hoc queries → BigQuery (you only pay for what you scan). Steady high-QPS dashboards (>10 QPS) → Snowflake or ClickHouse beats BigQuery on cost-per-query. Sub-100ms p99 → ClickHouse.
+<br><br>
+<b>3. Team & ecosystem.</b> Existing dbt + Snowflake team → Snowflake. Already on GCP with BigQuery quotas → BigQuery. Hire a dedicated DBA → ClickHouse. Solo data scientist → DuckDB.
+<pre><code># DuckDB — analytic SQL with zero infra. Reads parquet straight from S3.
+import duckdb
+con = duckdb.connect()
+con.sql("""
+  SELECT region, SUM(revenue_usd) AS total
+  FROM 's3://my-bucket/sales/year=2026/*.parquet'
+  WHERE order_date &gt;= DATE '2026-01-01'
+  GROUP BY region ORDER BY total DESC
+""").show()
+
+# ClickHouse — same query, sub-second on a billion-row table with a date index
+# CREATE TABLE sales (order_date Date, region String, revenue_usd Float64)
+# ENGINE = MergeTree() ORDER BY (order_date, region);
+SELECT region, SUM(revenue_usd) AS total
+FROM sales
+WHERE order_date &gt;= '2026-01-01'
+GROUP BY region ORDER BY total DESC
+SETTINGS max_threads = 8;</code></pre>
+<b>The interview trap:</b> "Snowflake is always best." Sometimes the answer is <i>"For this volume and query pattern, DuckDB embedded in our pipeline reads parquet from S3 directly — no warehouse needed."</i> That\'s a senior signal.`,
+     interactive:{ type:'whyexplain',
+       prompt:'Customer A: 800 GB of clickstream, 50+ analysts running unpredictable queries, on GCP. Customer B: 4 TB of trade-execution data, 6 dashboards refreshing every 5 min, needs sub-100ms p99 for "are we behind the market?" alerts. What\'s the right OLAP engine for each?',
+       modelAnswer:'Customer A → BigQuery. They\'re already on GCP (zero-friction integration), the workload is unpredictable ad-hoc queries from many analysts (BigQuery\'s per-byte-scanned pricing favors infrequent large queries over steady small ones), and 800 GB is well within its sweet spot. Snowflake also works but adds cross-cloud setup. Customer B → ClickHouse. Trade-execution data is time-series with a clear date/symbol index pattern; ClickHouse\'s MergeTree engine + sparse index hits sub-100ms p99 on multi-TB tables when queries are properly filtered. Snowflake/BigQuery would be 5-10× more expensive at this query rate and slower p99. The clinching detail: B has only 6 known queries — you can tune ClickHouse\'s sort key for them specifically. Don\'t default to "Snowflake = best;" pick by query pattern, scale, and ecosystem.',
+       rubric:[
+         'Customer A → BigQuery, with reasoning about ad-hoc + GCP-native',
+         'Customer B → ClickHouse, with reasoning about p99 latency + time-series',
+         'Names cost / pattern / ecosystem as the decision axes',
+       ],
+       cat:'data'}},
+
+    {id:'wh-2', type:'concept', name:'Streaming basics — Kafka, exactly-once, windowing', xp:12, time:12,
+     body:`Batch (Airflow, dbt, scheduled jobs) is the default. <b>Streaming</b> is when freshness matters more than completeness: fraud detection, real-time dashboards, alerts, multi-system enrichment. The mental model for FDE rounds:
+<br><br>
+<b>Kafka in one paragraph.</b> A distributed append-only log. Producers publish messages to <b>topics</b> partitioned by key. Consumers subscribe and read at their own pace, tracking their <b>offset</b>. Messages live in the log for hours or days, so multiple consumers can re-read independently. Partitioning is the scale unit — more partitions = more parallel consumers.
+<pre><code># Producer — emit a click event keyed by user_id (so same user lands on same partition)
+from kafka import KafkaProducer
+import json
+
+p = KafkaProducer(bootstrap_servers="kafka:9092",
+                  value_serializer=lambda v: json.dumps(v).encode())
+p.send("clicks", key=user_id.encode(),
+       value={"user_id": user_id, "page": "/checkout", "ts": now()})
+p.flush()
+
+# Consumer — enrich each click with the user profile (a JOIN across streams)
+from kafka import KafkaConsumer
+c = KafkaConsumer("clicks", group_id="enricher-v1",
+                  value_deserializer=lambda v: json.loads(v.decode()),
+                  enable_auto_commit=False)             # we'll commit manually after processing
+for msg in c:
+    click = msg.value
+    profile = profile_cache.get(click["user_id"])       # local KV cache or stream-state
+    write_enriched({**click, "tier": profile.tier})
+    c.commit_async()                                    # advance offset only after success</code></pre>
+<b>Three things every senior candidate names:</b>
+<br><br>
+<b>1. Exactly-once is a lie at the network boundary — design for at-least-once + idempotency.</b> Kafka guarantees at-least-once delivery; the consumer can crash after writing but before committing the offset, causing a re-deliver. The fix is <b>idempotent consumers</b>: use the message key (or hash of payload) as a dedupe key in the downstream store. Don\'t chase "exactly-once" — chase "at-least-once + idempotent."
+<br><br>
+<b>2. Windowing — tumbling vs sliding vs session.</b> "Average click-rate per minute" needs a window over the stream.
+<ul style="margin:6px 0 6px 18px;color:var(--muted)">
+  <li><b>Tumbling</b> windows: fixed-size, non-overlapping (12:00-12:01, 12:01-12:02). Simplest; cheap memory.</li>
+  <li><b>Sliding</b> windows: fixed-size, overlapping (every second a new "last 60s" window). Smoother metrics; more compute.</li>
+  <li><b>Session</b> windows: bounded by gaps in activity. Good for "session length" or "anomaly burst" detection.</li>
+</ul>
+<b>3. Late arrivals + watermarks.</b> If a click event arrives 30 seconds late (mobile network), do you include it in the 12:00 window or discard? You set a <b>watermark</b>: "we'll wait up to N seconds for late events, then close the window." Flink/Kafka Streams expose this directly; in custom Python you implement it as bounded buffer.
+<br><br>
+<b>Streaming joins.</b> The hardest part. To join "click stream" with "user profile stream" you keep recent profile state in the consumer's local KV (RocksDB-backed in Flink). On every click, lookup-by-user. New profile update → invalidate the cache entry. This pattern (stream-table join) is what Kafka Streams, Flink, and Materialize were built for. Junior candidates try to do it with batch jobs and miss freshness windows.`,
+     interactive:{ type:'findbug',
+       prompt:'This Kafka consumer enriches clicks with profiles. Under crash recovery it can silently lose data. Which line creates the gap?',
+       codeLines:[
+         'c = KafkaConsumer("clicks", group_id="enricher",',
+         '                  enable_auto_commit=True,',
+         '                  auto_commit_interval_ms=1000)',
+         'for msg in c:',
+         '    click = msg.value',
+         '    profile = profile_cache.get(click["user_id"])',
+         '    write_enriched_to_warehouse({**click, "tier": profile.tier})',
+         '    # We did everything we needed; loop continues',
+       ],
+       correctLine:2,
+       cat:'data',
+       explain:'enable_auto_commit=True commits offsets on a timer (every 1s), INDEPENDENT of whether write_enriched_to_warehouse succeeded. If a crash hits between the commit and the warehouse write, you lose those events on restart — offset already advanced. Fix: enable_auto_commit=False, then call c.commit_async() AFTER the warehouse write succeeds. This converts "at-most-once" to "at-least-once," which combined with downstream idempotency (use the Kafka message offset or msg_id as dedupe key) gets you effectively-exactly-once.'}},
   ]
 },
 
