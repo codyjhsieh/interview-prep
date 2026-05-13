@@ -6191,12 +6191,13 @@ const INFOGRAPHICS = [
 
 /* ---------- DAILY QUEST POOL ---------- */
 const DAILY_QUESTS = [
-  { id:'q-flash5',   name:'Review 5 flashcards',          xp:30, kind:'flashcard', target:5  },
-  { id:'q-lesson1',  name:'Complete 1 lesson',            xp:25, kind:'lesson',    target:1  },
-  { id:'q-drill1',   name:'Do 1 drill (practice prompt)', xp:40, kind:'drill',     target:1  },
-  { id:'q-decomp1',  name:'Decomposition prompt out loud',xp:45, kind:'decomp',    target:1  },
-  { id:'q-story',    name:'Refine 1 STAR story',          xp:30, kind:'story',     target:1  },
-  { id:'q-coding',   name:'Solve 1 coding question',      xp:35, kind:'coding',    target:1  },
+  { id:'q-flash5',   name:'Review 5 flashcards',          xp:30,  kind:'flashcard', target:5  },
+  { id:'q-lesson1',  name:'Complete 1 lesson',            xp:25,  kind:'lesson',    target:1  },
+  { id:'q-drill1',   name:'Do 1 drill (practice prompt)', xp:40,  kind:'drill',     target:1  },
+  { id:'q-decomp1',  name:'Decomposition prompt out loud',xp:45,  kind:'decomp',    target:1  },
+  { id:'q-story',    name:'Refine 1 STAR story',          xp:30,  kind:'story',     target:1  },
+  { id:'q-coding',   name:'Solve 1 coding question',      xp:35,  kind:'coding',    target:1  },
+  { id:'q-mock',     name:'Mock interview (3 topics)',    xp:120, kind:'mock',      target:1  },
 ];
 
 /* ---------- BADGES ---------- */

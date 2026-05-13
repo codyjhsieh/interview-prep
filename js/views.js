@@ -187,6 +187,7 @@ function renderDashboard(state, hub) {
       case 'decomp':    return '#category/decomp';
       case 'story':     return '#prep/stories';
       case 'coding':    return '#category/coding';
+      case 'mock':      return '#mock';
       default:          return '#curriculum';
     }
   };
@@ -1515,10 +1516,414 @@ function renderReview(state, hub, mode='missed') {
   });
 }
 
+/* =========================================================================
+ * MOCK INTERVIEW — daily quest
+ * Pick 3 tier-1 topics deterministically by date, walk through review +
+ * activity for each, then sit a 6-question medium-hard mock test.
+ * The test pulls scenario-based questions (filtered for difficulty cues
+ * like length, "best"/"why"/"when" framings, longer explanations).
+ * ========================================================================= */
+
+// Seeded shuffle so today's mock interview is deterministic
+function _mockSeededShuffle(arr, seed) {
+  const out = [...arr];
+  let s = seed;
+  for (let i = out.length - 1; i > 0; i--) {
+    s = (s * 1103515245 + 12345) & 0x7fffffff;
+    const j = s % (i + 1);
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+// Pick 3 lessons from 3 different tier-1 categories, deterministic per day
+function _pickMockTopics(state) {
+  const today = GAMI.todayKey();
+  const seed = parseInt(today.replaceAll('-', ''), 10);
+  // Tier-1 categories: technical core (ai, decomp, sysd, coding)
+  const tier1 = CATEGORIES.filter(c => c.tier === 1).map(c => c.id);
+  // Candidate lessons: concept-type with an `interactive` activity, in a tier-1 category
+  const candidates = MODULES.flatMap(m =>
+    m.lessons
+      .filter(l => l.type === 'concept' && l.interactive)
+      .map(l => ({ lesson: l, mod: m, cat: m.cat }))
+  ).filter(x => tier1.includes(x.cat));
+  const shuffled = _mockSeededShuffle(candidates, seed);
+  // Greedy pick: one per distinct category, up to 3
+  const picked = [];
+  const usedCats = new Set();
+  for (const c of shuffled) {
+    if (usedCats.has(c.cat)) continue;
+    picked.push(c);
+    usedCats.add(c.cat);
+    if (picked.length === 3) break;
+  }
+  return picked;
+}
+
+// Hardness heuristic for category-quiz items: prefer scenario-framed
+// questions with longer explanations and balanced option lengths
+function _isMediumHard(q) {
+  if (!q || !q.q || !q.options || !q.explain) return false;
+  const explainLen = q.explain.length;
+  const promptLen = q.q.length;
+  const cuesHard = /\bbest\b|\bwhy\b|\bwhen\b|\bsenior\b|\bworst-case\b|\btradeoff\b|\bedge case\b|\bproduction\b|\bdebug\b|\bfail\b/i.test(q.q);
+  // Reject obvious-correct length-bias (correct option way longer than wrong avg)
+  const lens = q.options.map(o => o.length);
+  const cl = lens[q.correct] || 0;
+  const wl = lens.filter((_, i) => i !== q.correct);
+  const avgWrong = wl.reduce((s, n) => s + n, 0) / Math.max(1, wl.length);
+  const lengthBalanced = cl <= 1.6 * avgWrong;
+  return (explainLen >= 90 || promptLen >= 80 || cuesHard) && lengthBalanced;
+}
+
+// Pull 2 medium-hard questions per topic from the category bank
+function _pickTestQuestions(topics) {
+  const out = [];
+  const seed = parseInt(GAMI.todayKey().replaceAll('-', ''), 10);
+  topics.forEach((t, ti) => {
+    const bank = (DATA.CATEGORY_QUIZZES[t.cat] || []).filter(_isMediumHard);
+    // Fallback to whole category bank if too few pass the filter
+    const pool = bank.length >= 2 ? bank : (DATA.CATEGORY_QUIZZES[t.cat] || []);
+    const shuffled = _mockSeededShuffle(pool, seed + ti * 31);
+    const picked = shuffled.slice(0, 2).map(q => ({
+      ...q,
+      _topicIdx: ti,
+      cat: t.cat,
+    }));
+    out.push(...picked);
+  });
+  return out;
+}
+
+function renderMockInterview(state, hub) {
+  const today = GAMI.todayKey();
+  // Reset stale state if it's a new day
+  if (!state.activeMockInterview || state.activeMockInterview.date !== today) {
+    state.activeMockInterview = {
+      date: today,
+      phase: 'briefing',     // briefing | review-0 | review-1 | review-2 | test | results
+      currentTopic: 0,
+      testAnswers: [],       // [{ qIdx, picked, correct, topicIdx }, ...]
+      completed: false,
+    };
+    GAMI.saveImmediate(state);
+  }
+  const session = state.activeMockInterview;
+  const topics = _pickMockTopics(state);
+  if (topics.length < 3) {
+    hub.innerHTML = `<div class="card"><div class="muted">Not enough tier-1 concept lessons to run a mock interview. Add more concepts first.</div></div>`;
+    return;
+  }
+
+  const container = el('div', 'fade-in space-y-5');
+  hub.appendChild(container);
+  paint();
+
+  function paint() {
+    if (session.phase === 'briefing')    return paintBriefing();
+    if (session.phase.startsWith('review-')) return paintReview(parseInt(session.phase.split('-')[1], 10));
+    if (session.phase === 'test')        return paintTest();
+    if (session.phase === 'results')     return paintResults();
+  }
+
+  // ── Phase 1: briefing ─────────────────────────────────────────────────
+  function paintBriefing() {
+    const totalMin = topics.reduce((s, t) => s + (t.lesson.time || 8), 0) + 12; // +12 for the test
+    container.innerHTML = `
+      <div>
+        <a href="#dashboard" class="text-xs muted hover:text-accent-400">← Back to dashboard</a>
+        <h1 class="font-display text-3xl font-semibold mt-2">Mock interview</h1>
+        <p class="muted text-sm mt-1 max-w-xl">3 topics, picked deterministically for today. You'll review each topic + do its activity, then sit a 6-question medium-hard exam pulling from the same three areas. ≈ ${totalMin} min.</p>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-4">
+        ${topics.map((t, i) => {
+          const cat = CATEGORIES.find(c => c.id === t.cat);
+          return `
+          <div class="card">
+            <div class="flex items-start justify-between">
+              <div class="text-2xl">${cat ? cat.icon : '📘'}</div>
+              <span class="text-[10px] muted uppercase tracking-wider">Topic ${i+1}</span>
+            </div>
+            <div class="text-xs muted mt-2">${esc(cat ? cat.name : t.cat)}</div>
+            <div class="font-semibold mt-1 text-[14.5px] leading-snug">${esc(t.lesson.name)}</div>
+            <div class="text-xs muted mt-2">${t.lesson.time || 8} min</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="card thin">
+        <div class="text-[12.5px] muted leading-relaxed">
+          <b style="color:var(--text)">How it works.</b> For each topic you'll read the body and complete the embedded activity (free-recall → interactive → self-rate). After all three, the mock exam pulls scenario-framed questions from those areas, with subtle distractors and a tighter time budget than a normal quiz. The exam is intentionally medium-hard — no "definition recall" gimmes.
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn btn-primary" id="mi-start">Start mock interview →</button>
+        <a class="btn btn-ghost" href="#dashboard">Cancel</a>
+      </div>
+    `;
+    container.querySelector('#mi-start').addEventListener('click', () => {
+      session.phase = 'review-0';
+      session.currentTopic = 0;
+      GAMI.saveImmediate(state);
+      paint();
+    });
+  }
+
+  // ── Phase 2: review each topic (3 sub-phases) ────────────────────────
+  function paintReview(idx) {
+    const t = topics[idx];
+    const cat = CATEGORIES.find(c => c.id === t.cat);
+    container.innerHTML = `
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <div class="text-xs muted uppercase tracking-wider">Topic ${idx+1} of 3 · ${esc(cat ? cat.name : t.cat)}</div>
+          <h2 class="font-display text-2xl font-semibold mt-1 leading-tight">${esc(t.lesson.name)}</h2>
+        </div>
+        <div class="flex gap-1 items-center">
+          ${[0,1,2].map(i => `<span class="w-8 h-1.5 rounded-full" style="background:${i<=idx?'var(--accent)':'var(--hairline)'}"></span>`).join('')}
+        </div>
+      </div>
+      <div class="card elevated">
+        <div id="mi-activity" class="min-h-[2rem]"></div>
+        <div class="mt-5 pt-5 border-t border-[color:var(--hairline)] leading-relaxed text-[14px]">
+          <div class="eyebrow mb-2 mobile-hide">Reference · the full insight</div>
+          ${t.lesson.body}
+        </div>
+        <div class="mt-6 flex items-center justify-between gap-2 flex-wrap">
+          <div class="text-xs muted" id="mi-status">○ Complete the activity to advance to the next topic</div>
+          <button class="btn btn-primary" id="mi-advance" disabled style="opacity:0.5;pointer-events:none">
+            ${idx < 2 ? `Topic ${idx+2} →` : 'Start the mock exam →'}
+          </button>
+        </div>
+      </div>
+    `;
+    const advanceBtn = container.querySelector('#mi-advance');
+    const statusEl = container.querySelector('#mi-status');
+    const stage = container.querySelector('#mi-activity');
+    const unlock = () => {
+      advanceBtn.disabled = false;
+      advanceBtn.style.opacity = '';
+      advanceBtn.style.pointerEvents = '';
+      statusEl.innerHTML = '<span style="color:var(--accent)">✓ Engagement recorded — advance when ready</span>';
+    };
+    try {
+      window.GAMES.mountLessonInteraction(stage, state, t.lesson, t.cat, { onEngaged: unlock });
+    } catch (err) {
+      console.error('mi activity mount failed:', err);
+      stage.innerHTML = `<div style="color:var(--bad)">Activity failed to load — clicking the advance button will let you proceed.</div>`;
+      unlock();
+    }
+    advanceBtn.addEventListener('click', () => {
+      if (idx < 2) session.phase = 'review-' + (idx + 1);
+      else        session.phase = 'test';
+      GAMI.saveImmediate(state);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      paint();
+    });
+  }
+
+  // ── Phase 3: mock test — 6 medium-hard questions, sequential, 40s/q ──
+  function paintTest() {
+    if (!session.testQuestions) {
+      session.testQuestions = _pickTestQuestions(topics);
+      session.testAnswers = [];
+      session.testStartTs = Date.now();
+      GAMI.saveImmediate(state);
+    }
+    const questions = session.testQuestions;
+    if (!questions || questions.length === 0) {
+      // Fallback if banks are empty
+      container.innerHTML = `<div class="card"><div class="muted">Couldn't assemble a test — too few category questions for these topics. Marking complete.</div></div>`;
+      session.phase = 'results';
+      paint();
+      return;
+    }
+
+    const SECONDS_PER_Q = 40; // medium-hard cadence — more thinking room than Lightning Quiz
+    const total = questions.length;
+    let cur = session.testAnswers.length; // resume if user reloaded
+    let timeLeft = SECONDS_PER_Q * (total - cur);
+    let timerId = null;
+
+    function renderQ() {
+      if (cur >= total) { clearInterval(timerId); session.phase = 'results'; GAMI.saveImmediate(state); paint(); return; }
+      const q = questions[cur];
+      const timeLabel = timeLeft >= 60 ? Math.floor(timeLeft/60)+':'+String(timeLeft%60).padStart(2,'0') : timeLeft+'s';
+      const score = session.testAnswers.filter(a => a.correct).length;
+      container.innerHTML = `
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <div class="text-xs muted uppercase tracking-wider">Mock exam</div>
+            <div class="text-[13px] muted mt-0.5">Question ${cur+1} of ${total} · <span class="numeric" style="color:var(--warn)" id="mi-timer">${timeLabel}</span></div>
+          </div>
+          <div class="text-xs numeric">Score <span style="color:var(--accent)">${score}</span></div>
+        </div>
+        <div class="bar"><i style="width:${(cur/total*100).toFixed(0)}%"></i></div>
+        <div class="card elevated">
+          <div class="text-[10.5px] muted mb-2 uppercase tracking-wider">${esc(q.cat || 'general')} · Topic ${(q._topicIdx ?? 0) + 1}</div>
+          <div class="font-medium text-[15.5px] leading-snug mb-4">${esc(q.q)}</div>
+          <div class="grid gap-2" id="mi-opts">
+            ${q.options.map((o, i) => `
+              <button class="btn justify-start text-left !py-2.5 w-full" data-pick="${i}">
+                <span class="dim mr-2 numeric">${String.fromCharCode(65+i)}.</span> ${esc(o)}
+              </button>
+            `).join('')}
+          </div>
+          <div id="mi-fb" class="hidden mt-4"></div>
+        </div>
+      `;
+      container.querySelectorAll('[data-pick]').forEach(b => {
+        b.addEventListener('click', () => pick(parseInt(b.dataset.pick, 10), b));
+      });
+    }
+
+    function pick(i, btn) {
+      const q = questions[cur];
+      const isRight = i === q.correct;
+      if (isRight) {
+        btn.style.borderColor = 'var(--accent)';
+        btn.style.color = 'var(--accent)';
+      } else {
+        btn.style.borderColor = 'var(--bad)';
+        btn.style.color = 'var(--bad)';
+        ANIM.shake && ANIM.shake(btn);
+        const right = container.querySelector(`[data-pick="${q.correct}"]`);
+        if (right) { right.style.borderColor = 'var(--accent)'; right.style.color = 'var(--accent)'; }
+        // Mock exam wrong answers DO enter the SRS wrong-queue
+        if (q.id) {
+          GAMI.recordWrongAnswer(state, {
+            id: q.id, q: q.q, options: q.options, correct: q.correct,
+            explain: q.explain || '', cat: q.cat || 'general', source: 'mock-' + today,
+          });
+        }
+      }
+      container.querySelectorAll('[data-pick]').forEach(b => b.disabled = true);
+      session.testAnswers.push({ qIdx: cur, picked: i, correct: isRight, topicIdx: q._topicIdx ?? 0 });
+      GAMI.saveImmediate(state);
+      const fb = container.querySelector('#mi-fb');
+      fb.classList.remove('hidden');
+      fb.innerHTML = `
+        <div class="text-[13px] leading-relaxed" style="color:${isRight?'var(--accent)':'var(--bad)'}">
+          ${isRight ? '✓ Correct.' : '✗ ' + esc(q.options[q.correct]) + ' was the right answer.'}
+        </div>
+        <div class="text-[13px] muted mt-2 leading-relaxed">${esc(q.explain || '')}</div>
+        <div class="mt-3 text-right">
+          <button class="btn btn-primary" id="mi-next">${cur+1 < total ? 'Next →' : 'See results →'}</button>
+        </div>
+      `;
+      fb.querySelector('#mi-next').addEventListener('click', () => {
+        cur++;
+        renderQ();
+      });
+    }
+
+    renderQ();
+    timerId = setInterval(() => {
+      timeLeft--;
+      const el = container.querySelector('#mi-timer');
+      if (el) {
+        const label = timeLeft >= 60 ? Math.floor(timeLeft/60)+':'+String(timeLeft%60).padStart(2,'0') : timeLeft+'s';
+        el.textContent = label;
+        if (timeLeft < 10) el.style.color = 'var(--bad)';
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerId);
+        // Auto-end: record any unanswered as wrong, advance to results
+        while (session.testAnswers.length < total) {
+          const q = questions[session.testAnswers.length];
+          session.testAnswers.push({ qIdx: session.testAnswers.length, picked: -1, correct: false, topicIdx: q._topicIdx ?? 0 });
+        }
+        session.phase = 'results';
+        GAMI.saveImmediate(state);
+        paint();
+      }
+    }, 1000);
+  }
+
+  // ── Phase 4: results ─────────────────────────────────────────────────
+  function paintResults() {
+    const answers = session.testAnswers || [];
+    const total = (session.testQuestions || []).length;
+    const correct = answers.filter(a => a.correct).length;
+    const pct = total ? Math.round(correct / total * 100) : 0;
+    const verdict = pct >= 80 ? { tag:'Strong pass', color:'var(--accent)' }
+                  : pct >= 60 ? { tag:'Pass — keep grinding', color:'var(--sde)' }
+                  : pct >= 40 ? { tag:'Borderline — review weak topics', color:'var(--warn)' }
+                              : { tag:'Below bar — rework basics', color:'var(--bad)' };
+
+    // Per-topic breakdown
+    const perTopic = topics.map((t, i) => {
+      const ts = answers.filter(a => a.topicIdx === i);
+      const tc = ts.filter(a => a.correct).length;
+      return { topic: t, total: ts.length, correct: tc };
+    });
+
+    // Award XP + bump quest progress (only once per session)
+    if (!session.completed) {
+      const baseXp = correct * 15;
+      const passBonus = pct >= 80 ? 60 : pct >= 60 ? 30 : 0;
+      const totalXp = baseXp + passBonus;
+      GAMI.awardXP(state, totalXp, 'mock-interview');
+      GAMI.bumpQuestProgress(state, 'mock');
+      session.completed = true;
+      session.finalScore = correct;
+      session.finalPct = pct;
+      session.xpAwarded = totalXp;
+      GAMI.saveImmediate(state);
+      APP.afterStateChange();
+      ANIM.confettiBurst && ANIM.confettiBurst(pct >= 80 ? 'l' : 'm');
+      ANIM.toast && ANIM.toast({ icon:'🎯', title:`+${totalXp} XP`, body:`Mock exam · ${correct}/${total}` });
+    }
+
+    container.innerHTML = `
+      <div class="card elevated text-center">
+        <div class="text-xs uppercase tracking-wider muted mb-2">Mock exam complete</div>
+        <div class="text-6xl font-display font-bold" style="color:${verdict.color}">${correct}<span class="text-2xl muted">/${total}</span></div>
+        <div class="text-sm mt-1" style="color:${verdict.color}">${pct}% · ${verdict.tag}</div>
+        <div class="bar mt-4 max-w-xs mx-auto"><i style="width:${pct}%"></i></div>
+        <div class="text-xs muted mt-3">+${session.xpAwarded || 0} XP earned · daily mock quest complete</div>
+      </div>
+
+      <div class="card">
+        <h3 class="font-display font-semibold text-lg mb-3">Per-topic breakdown</h3>
+        <div class="space-y-3">
+          ${perTopic.map((p, i) => {
+            const cat = CATEGORIES.find(c => c.id === p.topic.cat);
+            const pPct = p.total ? Math.round(p.correct / p.total * 100) : 0;
+            const color = pPct >= 75 ? 'var(--accent)' : pPct >= 50 ? 'var(--warn)' : 'var(--bad)';
+            return `
+              <div>
+                <div class="flex items-center justify-between text-sm mb-1">
+                  <span>${cat ? cat.icon : ''} <b>${esc(p.topic.lesson.name)}</b></span>
+                  <span class="numeric" style="color:${color}">${p.correct}/${p.total}</span>
+                </div>
+                <div class="bar"><i style="width:${pPct}%; background:${color}"></i></div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="card thin">
+        <div class="text-[13px] leading-relaxed muted">
+          <b style="color:var(--text)">What happens next.</b> Any question you got wrong is now in your SRS wrong-answer queue and will resurface on schedule. Tomorrow's mock interview will pick a different 3 topics. The daily quest will refresh at midnight.
+        </div>
+      </div>
+
+      <div class="flex gap-2 flex-wrap">
+        <a class="btn btn-primary" href="#dashboard">← Back to dashboard</a>
+        ${session.testAnswers.some(a => !a.correct)
+          ? `<a class="btn" href="#review/missed">Review missed questions →</a>`
+          : ''}
+      </div>
+    `;
+  }
+}
+
 return {
   renderDashboard, renderCurriculum, renderCategory, renderLesson,
   renderCompanies, renderCompany, renderFlashcards, renderInfographics,
   renderCoverage, renderProfile, renderSources, renderMocks, renderStories,
-  renderPrep, renderReview,
+  renderPrep, renderReview, renderMockInterview,
 };
 })();
