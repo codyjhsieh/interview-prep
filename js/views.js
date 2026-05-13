@@ -1116,24 +1116,45 @@ function mountPet3D(container, p) {
   let currentFacing = 0;   // current rotation.y, lerp-smoothed each frame
 
   // ---- Ambient animation state (always running, independent of activity) ----
-  // Blink: random next-blink time, then a 90ms close window.
   let nextBlinkAt = 2 + Math.random() * 4;
-  let blinkPhase = -1;   // -1 = not blinking, 0..1 = in blink
-  // Eye dart: pupil targets a random offset every 3-6 seconds, easeInOutCubic transition.
+  let blinkPhase = -1;
   let eyeDartTargetX = 0, eyeDartTargetY = 0, eyeDartCurX = 0, eyeDartCurY = 0;
   let nextEyeDartAt = 1.5 + Math.random() * 3;
-  // Ear twitch: random ear gets a +12° rotation pulse every ~5-10s
   let nextEarTwitchAt = 4 + Math.random() * 6;
-  let earTwitchPhase = -1;       // -1 = idle, else 0..1
-  let earTwitchSide = 0;         // -1 = L, +1 = R
-  // Facing rotation via damped spring (no more lerp snaps)
+  let earTwitchPhase = -1;
+  let earTwitchSide = 0;
   let facingVel = 0;
-  // Walk forward-lean (anticipation)
   let leanVel = 0;
-  // Walk gait phase 0..1 (one full step = 0.5 of cycle)
   let gait = 0;
-  // Sticky activity state for one-shot animations (eat chomp, etc.)
   const oneShot = { kind: null, start: 0, duration: 0 };
+
+  // Tap interaction: Bit looks at the camera briefly (0.7s), then walks to
+  // wherever the user tapped on the floor. Tap location is raycast to the
+  // floor plane and clamped to FLOOR_HALF so Bit never walks past the room.
+  let lookAtCameraUntil = 0;
+  let lookAtCameraStart = 0;
+  let queuedWalkTarget = null;
+  const _tapRay = new T.Raycaster();
+  const _tapNDC = new T.Vector2();
+  const _floorPlane = new T.Plane(new T.Vector3(0, 1, 0), 0);
+  const _tapHit = new T.Vector3();
+  function onTap(e) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    _tapNDC.x = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+    _tapNDC.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    _tapRay.setFromCamera(_tapNDC, camera);
+    if (_tapRay.ray.intersectPlane(_floorPlane, _tapHit)) {
+      // Clamp tap location to floor boundaries — never walk past the room
+      const tx = Math.max(-FLOOR_HALF, Math.min(FLOOR_HALF, _tapHit.x));
+      const tz = Math.max(-FLOOR_HALF, Math.min(FLOOR_HALF, _tapHit.z));
+      lookAtCameraStart = t;
+      lookAtCameraUntil = t + 0.7;             // look at camera for 0.7s
+      pauseUntil = lookAtCameraUntil;          // hold position during look
+      queuedWalkTarget = { x: tx, z: tz, foodIdx: -1 };
+    }
+  }
+  renderer.domElement.style.cursor = 'pointer';
+  renderer.domElement.addEventListener('pointerdown', onTap, { passive: true });
 
   function tick(now) {
     if (!mounted) return;
@@ -1181,7 +1202,24 @@ function mountPet3D(container, p) {
       }
     }
 
-    // Eye dart
+    // Look-at-camera (tap): pupils nudge toward camera, eyes briefly widen.
+    // SMALL offset — within normal eye range, not pinned to extreme corner.
+    const lookingAtCam = t < lookAtCameraUntil;
+    if (lookingAtCam) {
+      eyeDartTargetX = headR * 0.03;
+      eyeDartTargetY = headR * 0.035;
+      nextEyeDartAt = lookAtCameraUntil + 0.4;
+      const sinceTap = t - lookAtCameraStart;
+      let widen = 0;
+      if (sinceTap < 0.11)      widen = Ease.outQuad(sinceTap / 0.11) * 0.14;
+      else if (sinceTap < 0.22) widen = 0.14 - Ease.outQuad((sinceTap - 0.11) / 0.11) * 0.14;
+      if (blinkPhase < 0) {
+        eyeGroupL.scale.y = 1 + widen;
+        eyeGroupR.scale.y = 1 + widen;
+      }
+    }
+
+    // Eye dart (skipped while lookAtCamera is overriding the target)
     if (t > nextEyeDartAt) {
       eyeDartTargetX = (Math.random() * 2 - 1) * headR * 0.07;
       eyeDartTargetY = (Math.random() * 2 - 1) * headR * 0.04;
@@ -1224,7 +1262,39 @@ function mountPet3D(container, p) {
 
     // ===== PER-STATE BEHAVIOR =====
     const activity = p.activity;
-    const walking = activity === 'walk' || foodPiles.some(f => !f.eaten);
+    const walking = activity === 'walk' || foodPiles.some(f => !f.eaten) || queuedWalkTarget;
+
+    // Look-at-camera: ONLY the head turns (not the body). Clamped to ±45°
+    // horizontal + small upward tilt — within natural neck range, never a
+    // full-body 180°. After 0.7s the head springs back to neutral.
+    if (lookingAtCam) {
+      // World-space angle from Bit to camera, then make it RELATIVE to body
+      const dxc = camera.position.x - petGroup.position.x;
+      const dzc = camera.position.z - petGroup.position.z;
+      const camAngle = Math.atan2(dxc, dzc);
+      let headRel = _shortAngle(currentFacing, camAngle);
+      const NECK_LIMIT = Math.PI / 4;       // 45°
+      if (headRel >  NECK_LIMIT) headRel =  NECK_LIMIT;
+      if (headRel < -NECK_LIMIT) headRel = -NECK_LIMIT;
+      // Pitch — small upward tilt to "look up at camera"
+      const pitch = -0.22;
+      // Lerp head rotation toward target (no spring overshoot — we want it
+      // to settle precisely, no bobble).
+      headGroup.rotation.y += (headRel - headGroup.rotation.y) * Math.min(1, dt * 8);
+      headGroup.rotation.x += (pitch - headGroup.rotation.x) * Math.min(1, dt * 8);
+    } else if (headGroup.rotation.y !== 0 || headGroup.rotation.x !== 0) {
+      // Spring head back to neutral after the look
+      headGroup.rotation.y += (0 - headGroup.rotation.y) * Math.min(1, dt * 7);
+      headGroup.rotation.x += (0 - headGroup.rotation.x) * Math.min(1, dt * 7);
+      if (Math.abs(headGroup.rotation.y) < 0.002) headGroup.rotation.y = 0;
+      if (Math.abs(headGroup.rotation.x) < 0.002) headGroup.rotation.x = 0;
+    }
+    // Look phase ended → walk to tapped spot
+    if (!lookingAtCam && queuedWalkTarget) {
+      target = queuedWalkTarget;
+      queuedWalkTarget = null;
+      pauseUntil = 0;
+    }
 
     if (walking) {
       const speed = 1.05;
@@ -1459,6 +1529,7 @@ function mountPet3D(container, p) {
       try { io.disconnect(); } catch(_) {}
       try { document.removeEventListener('visibilitychange', onVisChange); } catch(_) {}
       try { ro.disconnect(); } catch(_) {}
+      try { renderer.domElement && renderer.domElement.removeEventListener('pointerdown', onTap); } catch(_) {}
       try { renderer.dispose(); } catch(_) {}
       try { renderer.forceContextLoss && renderer.forceContextLoss(); } catch(_) {}
       try { if (renderer.domElement && renderer.domElement.parentNode === container) container.removeChild(renderer.domElement); } catch(_) {}
