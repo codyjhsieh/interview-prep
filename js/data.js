@@ -1532,7 +1532,19 @@ def bfs(graph, start):
     {id:'g-3', type:'question', name:'Q: Infection spread', xp:15, time:12,
      body:'Multi-source BFS from initially infected nodes. Time = level number. Variant: with quarantine wall — which edge do you cut first? (Greedy: cut edge to the highest-degree uninfected component.)'},
     {id:'g-4', type:'drill', name:'Drill: write BFS in Python in 4 min', xp:10, time:5,
-     body:'from collections import deque. Write graph as dict-of-lists, run BFS from node 0, return level dict. Time yourself.'},
+     body:`from collections import deque. Write graph as dict-of-lists, run BFS from node 0, return level dict. Time yourself. Reference answer:
+<pre><code>from collections import deque
+
+def bfs_levels(graph, start):
+    levels = {start: 0}
+    q = deque([start])
+    while q:
+        node = q.popleft()
+        for nb in graph[node]:
+            if nb not in levels:                  # mark visited at enqueue
+                levels[nb] = levels[node] + 1
+                q.append(nb)
+    return levels</code></pre>`},
     {id:'g-5', type:'concept', name:'DFS — recursion, backtracking, and when to use it over BFS', xp:12, time:9,
      body:`DFS goes <i>deep</i> before <i>wide</i>. You go down one path as far as possible, hit a dead end, back up, try the next path. The recursive template:
 <pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline);white-space:pre">def dfs(node, visited):
@@ -1938,13 +1950,62 @@ The hard part is recognizing the pattern. Once you see "next/previous greater/sm
   intro:'Customer-wrapped favorites: dedupe events, anagram-cluster log lines, first non-repeating click event, sliding-window rate limit.',
   lessons:[
     {id:'h-1', type:'question', name:'Q: Two-sum / pair-sum to target', xp:10, time:8,
-     body:'O(n) with hash map storing complements. Followups: return all pairs (sorted, deduped), pair-sum-closest-to-target (sort + two pointers).'},
+     body:`O(n) with hash map storing complements. Followups: return all pairs (sorted, deduped), pair-sum-closest-to-target (sort + two pointers).
+<pre><code>def twoSum(nums, target):
+    seen = {}                          # value -> index
+    for i, x in enumerate(nums):
+        if target - x in seen:
+            return [seen[target - x], i]
+        seen[x] = i
+    return []</code></pre>`},
     {id:'h-2', type:'question', name:'Q: First non-repeating character', xp:10, time:6,
-     body:'Two passes. First builds count map. Second returns first char with count=1. O(n) time, O(k) space where k=alphabet size. Followup: streaming — use ordered dict + freq table.'},
+     body:`Two passes. First builds count map. Second returns first char with count=1. O(n) time, O(k) space where k=alphabet size. Followup: streaming — use ordered dict + freq table.
+<pre><code>from collections import Counter
+def firstUnique(s):
+    counts = Counter(s)
+    for i, ch in enumerate(s):
+        if counts[ch] == 1:
+            return i
+    return -1</code></pre>`},
     {id:'h-3', type:'question', name:'Q: LRU cache, O(1) get/put', xp:15, time:15,
-     body:'Hash map + doubly-linked list. Map: key → node. List ordered most-recent → least-recent. On get/put: detach node, insert at head, evict tail when over capacity. <b>This shows up in 30%+ of FDE coding rounds.</b>'},
+     body:`Hash map + doubly-linked list. Map: key → node. List ordered most-recent → least-recent. On get/put: detach node, insert at head, evict tail when over capacity. <b>This shows up in 30%+ of FDE coding rounds.</b>
+<pre><code>class Node:
+    __slots__ = ("k", "v", "prev", "next")
+    def __init__(self, k, v): self.k, self.v = k, v; self.prev = self.next = None
+
+class LRUCache:
+    def __init__(self, cap):
+        self.cap = cap
+        self.map = {}
+        self.head, self.tail = Node(0, 0), Node(0, 0)  # sentinels
+        self.head.next = self.tail; self.tail.prev = self.head
+
+    def _detach(self, n):
+        n.prev.next = n.next; n.next.prev = n.prev
+    def _push_front(self, n):
+        n.prev = self.head; n.next = self.head.next
+        self.head.next.prev = n; self.head.next = n
+
+    def get(self, key):
+        if key not in self.map: return -1
+        n = self.map[key]; self._detach(n); self._push_front(n)
+        return n.v
+
+    def put(self, key, val):
+        if key in self.map:
+            n = self.map[key]; n.v = val; self._detach(n); self._push_front(n); return
+        if len(self.map) == self.cap:
+            lru = self.tail.prev; self._detach(lru); del self.map[lru.k]
+        n = Node(key, val); self.map[key] = n; self._push_front(n)</code></pre>`},
     {id:'h-4', type:'question', name:'Q: Max sum sliding window of size k', xp:10, time:8,
-     body:'Initial window sum, then slide: add right, subtract left. O(n). Variant: longest substring without repeats — variable-size window with hash set.'},
+     body:`Initial window sum, then slide: add right, subtract left. O(n). Variant: longest substring without repeats — variable-size window with hash set.
+<pre><code>def maxSumWindow(nums, k):
+    s = sum(nums[:k])
+    best = s
+    for i in range(k, len(nums)):
+        s += nums[i] - nums[i - k]      # slide: add right, drop left
+        best = max(best, s)
+    return best</code></pre>`},
   ]
 },
 {
@@ -1952,13 +2013,84 @@ The hard part is recognizing the pattern. Once you see "next/previous greater/sm
   intro:'AI-first companies (Deepgram, Tavily, Credal, OpenAI) routinely substitute LC puzzles with real-world tasks: parse 1GB JSON, dedupe events, retry with backoff.',
   lessons:[
     {id:'p-1', type:'question', name:'Q: Parse & clean a 1GB JSONL file', xp:15, time:12,
-     body:'Stream line-by-line (don\'t json.load). For each line: try-except, validate schema, normalize keys, write to clean.jsonl. Track stats: total, valid, invalid (by reason). State assumption: file may have trailing partial line.'},
+     body:`Stream line-by-line (don\'t json.load). For each line: try-except, validate schema, normalize keys, write to clean.jsonl. Track stats: total, valid, invalid (by reason). State assumption: file may have trailing partial line.
+<pre><code>import json
+from collections import Counter
+
+def clean_jsonl(in_path, out_path):
+    stats = Counter()
+    with open(in_path) as fin, open(out_path, "w") as fout:
+        for i, line in enumerate(fin):
+            stats["total"] += 1
+            line = line.strip()
+            if not line:
+                stats["empty"] += 1; continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                stats["malformed"] += 1; continue
+            if not isinstance(rec, dict) or "id" not in rec:
+                stats["missing_id"] += 1; continue
+            rec = {k.lower().strip(): v for k, v in rec.items()}   # normalize keys
+            fout.write(json.dumps(rec) + "\\n")
+            stats["valid"] += 1
+    return stats</code></pre>`},
     {id:'p-2', type:'question', name:'Q: Retry-with-backoff decorator', xp:10, time:10,
-     body:'Exponential backoff with jitter (avoid thundering herd). Distinguish retryable (429, 503, timeout) from terminal (400, 401). Cap total retries AND total elapsed wall-time. Log each attempt.'},
+     body:`Exponential backoff with jitter (avoid thundering herd). Distinguish retryable (429, 503, timeout) from terminal (400, 401). Cap total retries AND total elapsed wall-time. Log each attempt.
+<pre><code>import time, random, functools, logging
+
+RETRYABLE = {429, 502, 503, 504}
+
+def retry(max_attempts=5, base=0.5, cap=30, max_wall=60):
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            start = time.time()
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    return fn(*args, **kwargs)
+                except HTTPError as e:
+                    if e.status not in RETRYABLE: raise   # 4xx -> don\'t retry
+                    if attempt == max_attempts: raise
+                    if time.time() - start &gt; max_wall: raise
+                    delay = min(cap, base * (2 ** (attempt - 1)))
+                    delay = delay * (0.5 + random.random())          # ±50% jitter
+                    logging.info(f"retry {attempt} after {delay:.2f}s")
+                    time.sleep(delay)
+        return wrapper
+    return decorator</code></pre>`},
     {id:'p-3', type:'question', name:'Q: Flatten a nested list of arbitrary depth', xp:8, time:6,
-     body:'Recursion or stack. Watch for stack-overflow on pathological depth — switch to iterative with explicit stack for production.'},
+     body:`Recursion or stack. Watch for stack-overflow on pathological depth — switch to iterative with explicit stack for production.
+<pre><code># Iterative — stack-safe for any depth
+def flatten(nested):
+    out, stack = [], [iter(nested)]
+    while stack:
+        try:
+            x = next(stack[-1])
+        except StopIteration:
+            stack.pop(); continue
+        if isinstance(x, list):
+            stack.append(iter(x))
+        else:
+            out.append(x)
+    return out</code></pre>`},
     {id:'p-4', type:'question', name:'Q: Thread-safe singleton', xp:8, time:6,
-     body:'Double-checked locking + class-level lock, or just use a module (Python modules are singletons by import). Risk: subclassing, testability — singletons fight DI. Often the right answer in an interview is "I\'d avoid this pattern; here\'s the alternative."'},
+     body:`Double-checked locking + class-level lock, or just use a module (Python modules are singletons by import). Risk: subclassing, testability — singletons fight DI. Often the right answer in an interview is "I\'d avoid this pattern; here\'s the alternative."
+<pre><code>import threading
+
+class Singleton:
+    _instance = None
+    _lock = threading.Lock()
+
+    def __new__(cls):
+        if cls._instance is None:            # fast path — no lock
+            with cls._lock:
+                if cls._instance is None:    # check AGAIN inside the lock
+                    cls._instance = super().__new__(cls)
+        return cls._instance
+
+# Pythonic alternative — modules ARE singletons; just import the state
+# from app.config import shared_config       # singleton by virtue of import</code></pre>`},
   ]
 },
 {
@@ -1994,7 +2126,25 @@ The five problems where reaching for a heap is the right move:
        correct:1,
        explain:'Bounded min-heap of size K = the canonical streaming top-K solution. O(N log K) time, O(K) memory — vs O(N log N) and O(N) for the sort approach.'}},
     {id:'m-2', type:'question', name:'Q: Cycle detection in linked list', xp:8, time:6,
-     body:'Floyd\'s tortoise + hare. O(n) time, O(1) space. Followup: find cycle start (reset slow to head, advance both 1 step).'},
+     body:`Floyd\'s tortoise + hare. O(n) time, O(1) space. Followup: find cycle start (reset slow to head, advance both 1 step).
+<pre><code>def hasCycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast: return True
+    return False
+
+def cycleStart(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next; fast = fast.next.next
+        if slow is fast:                      # they meet inside the cycle
+            slow = head
+            while slow is not fast:
+                slow = slow.next; fast = fast.next
+            return slow                       # cycle entry node
+    return None</code></pre>`},
     {id:'m-3', type:'concept', name:'Dynamic programming — recognizing when to use it', xp:12, time:8,
      body:`DP intimidates candidates because they\'re told to "see the recurrence." A better starting question is: <b>does this problem have the two DP signatures?</b>
 <br><br>
@@ -2033,7 +2183,30 @@ The three common DP shapes:
        correct:1,
        explain:'The two signatures — overlapping subproblems and optimal substructure — are what define DP. Naming both signatures aloud in an interview is the senior move.'}},
     {id:'m-4', type:'question', name:'Q: Trie insert / search', xp:8, time:8,
-     body:'Each node = dict[char→node] + is_word flag. Insert is O(len). Search is O(len). Use for autocomplete, spell-check, dictionary problems.'},
+     body:`Each node = dict[char→node] + is_word flag. Insert is O(len). Search is O(len). Use for autocomplete, spell-check, dictionary problems.
+<pre><code>class Trie:
+    def __init__(self):
+        self.root = {}
+
+    def insert(self, word):
+        node = self.root
+        for ch in word:
+            node = node.setdefault(ch, {})
+        node["$"] = True                  # marks end-of-word
+
+    def search(self, word):
+        node = self.root
+        for ch in word:
+            if ch not in node: return False
+            node = node[ch]
+        return node.get("$", False)
+
+    def startsWith(self, prefix):
+        node = self.root
+        for ch in prefix:
+            if ch not in node: return False
+            node = node[ch]
+        return True                       # for autocomplete walk node\'s subtree</code></pre>`},
   ]
 },
 {
