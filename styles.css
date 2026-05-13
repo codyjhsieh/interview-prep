@@ -251,11 +251,10 @@ body::after {
  * Header — chrome material (MAX liquid glass)
  * ========================================================================= */
 header.sticky, main > header {
-  /* Explicit position so we don't depend on Tailwind's .sticky utility
-   * resolving correctly — and so this rule is the single source of
-   * truth for the header's positioning. */
-  position: sticky;
-  top: 0;
+  /* Explicit position; !important to ensure nothing later in the cascade
+   * (a Tailwind utility, a one-off inline style, etc.) un-sticks it. */
+  position: sticky !important;
+  top: 0 !important;
   z-index: 30;
   background: var(--chrome);
   -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(1.08) contrast(1.03);
@@ -360,7 +359,24 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
  * snapshots of the old + new DOM around the route swap. We use a pure
  * opacity crossfade with matched durations and standard ease so there's
  * no double-overshoot or scale/translate jitter on top of the fade.
- * Apple's own view-transitions for sheets are similarly minimal. */
+ *
+ * IMPORTANT: persistent navigation elements (the floating tab bar, the
+ * sticky header, the docked sidebar) get their own view-transition-name
+ * so the browser DOESN'T re-snapshot them as part of root. Without this,
+ * both old + new snapshots include the nav with its old-vs-new active
+ * tab, which during the crossfade reads as the active pill moving
+ * between positions. With the names below, the nav is treated as a
+ * continuous element across route changes — it stays put. */
+/* Persistent nav elements get their own view-transition-name so they
+ * don't get caught in the root crossfade (which would re-snapshot them
+ * with the old vs new active state and read as the pill jumping).
+ * NOTE: NOT applying this to the header — view-transition-name on a
+ * position:sticky element caused the header to lose its sticky behavior
+ * in WebKit. The header is small and re-snapshotting it during the
+ * root crossfade is fine — the transition is opacity-only anyway. */
+#liquid-tabbar { view-transition-name: liquid-tabbar; }
+#sidebar       { view-transition-name: docked-sidebar; }
+
 @keyframes vt-fade-in  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes vt-fade-out { from { opacity: 1; } to { opacity: 0; } }
 ::view-transition-old(root),
@@ -368,15 +384,27 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
   animation-duration: 0.22s;
   animation-timing-function: var(--spring-settle);
   animation-fill-mode: both;
-  /* Avoid the default mix-blend; reduces the "double image" flash that
-   * shows up when both snapshots overlap with the spring curve. */
   mix-blend-mode: normal;
 }
 ::view-transition-old(root) { animation-name: vt-fade-out; }
 ::view-transition-new(root) { animation-name: vt-fade-in; }
+
+/* Nav elements transition imperceptibly — same DOM node before/after,
+ * so the only thing the browser is interpolating is the .active class
+ * change (color). Fast + smooth. */
+::view-transition-old(liquid-tabbar),
+::view-transition-new(liquid-tabbar),
+::view-transition-old(docked-sidebar),
+::view-transition-new(docked-sidebar) {
+  animation-duration: 0.18s;
+  animation-timing-function: var(--spring-settle);
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root),
-  ::view-transition-new(root) {
+  ::view-transition-new(root),
+  ::view-transition-old(liquid-tabbar),
+  ::view-transition-new(liquid-tabbar) {
     animation-duration: 0.06s;
     animation-timing-function: linear;
   }
