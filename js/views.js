@@ -471,11 +471,17 @@ const PET_PROPS = {
  * ========================================================================= */
 const _PET_MOUNTS = new WeakMap();   // container → { dispose }
 
-// Darken a 0xRRGGBB color by a factor (0..1) for foot/shadow shading.
+// Darken/lighten a 0xRRGGBB color by a factor (1.0 = no change).
 function _darken(hex, factor) {
-  const r = ((hex >> 16) & 0xff) * factor;
-  const g = ((hex >> 8) & 0xff) * factor;
-  const b = (hex & 0xff) * factor;
+  const r = Math.max(0, ((hex >> 16) & 0xff) * factor);
+  const g = Math.max(0, ((hex >> 8)  & 0xff) * factor);
+  const b = Math.max(0,  (hex & 0xff) * factor);
+  return (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(b);
+}
+function _lighten(hex, factor) {
+  const r = Math.min(255, ((hex >> 16) & 0xff) * factor);
+  const g = Math.min(255, ((hex >> 8)  & 0xff) * factor);
+  const b = Math.min(255,  (hex & 0xff) * factor);
   return (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(b);
 }
 
@@ -620,6 +626,70 @@ function mountPet3D(container, p) {
   const petColor = (tintedR << 16) | (tintedG << 8) | tintedB;
   const petMat = new T.MeshStandardMaterial({ color: petColor, flatShading: true, roughness: 0.65 });
 
+  // ---- Death state (lifecycle preview only) — tombstone instead of pet ----
+  if (p.stage === 'dead') {
+    const tombMat = new T.MeshStandardMaterial({ color: 0x6b7280, flatShading: true, roughness: 0.85 });
+    const tombDarkMat = new T.MeshStandardMaterial({ color: 0x4b5563, flatShading: true, roughness: 0.85 });
+    // Main slab
+    const slab = new T.Mesh(new T.BoxGeometry(1.4, 1.6, 0.22), tombMat);
+    slab.position.set(0, 0.8, 0);
+    slab.castShadow = true;
+    scene.add(slab);
+    // Rounded top (half-sphere flattened in z)
+    const top = new T.Mesh(new T.SphereGeometry(0.7, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), tombMat);
+    top.position.set(0, 1.6, 0);
+    top.scale.set(1, 1, 0.31);
+    top.castShadow = true;
+    scene.add(top);
+    // "RIP" engraving — two thin horizontal slabs in darker stone
+    const ripMat = new T.MeshStandardMaterial({ color: 0x2a2e34, flatShading: true });
+    const rip1 = new T.Mesh(new T.BoxGeometry(0.55, 0.16, 0.04), ripMat);
+    rip1.position.set(0, 1.15, 0.13);
+    scene.add(rip1);
+    const rip2 = new T.Mesh(new T.BoxGeometry(0.6, 0.06, 0.04), ripMat);
+    rip2.position.set(0, 0.45, 0.13);
+    scene.add(rip2);
+    // Base mound / earth
+    const mound = new T.Mesh(new T.BoxGeometry(2.0, 0.18, 1.0), tombDarkMat);
+    mound.position.set(0, 0.09, 0);
+    mound.receiveShadow = true;
+    scene.add(mound);
+    // Small flower as a memorial — colorful note in a grim scene
+    const flowerStemMat = new T.MeshStandardMaterial({ color: 0x3D8466 });
+    const stem = new T.Mesh(new T.BoxGeometry(0.05, 0.45, 0.05), flowerStemMat);
+    stem.position.set(0.65, 0.32, 0.35);
+    scene.add(stem);
+    const flowerHead = new T.Mesh(new T.IcosahedronGeometry(0.10, 0), new T.MeshStandardMaterial({ color: 0xD7384C, flatShading: true }));
+    flowerHead.position.set(0.65, 0.6, 0.35);
+    scene.add(flowerHead);
+
+    // Render once. No animation loop needed (totally static scene); the
+    // visibility / dispose plumbing below still runs.
+    const renderer = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power', precision: 'mediump' });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = T.BasicShadowMap;
+    container.appendChild(renderer.domElement);
+    renderer.render(scene, camera);
+    const handle = {
+      dispose: () => {
+        try { renderer.dispose(); } catch(_) {}
+        try { renderer.forceContextLoss && renderer.forceContextLoss(); } catch(_) {}
+        try { if (renderer.domElement.parentNode === container) container.removeChild(renderer.domElement); } catch(_) {}
+        scene.traverse(obj => {
+          if (obj.geometry) obj.geometry.dispose();
+          if (obj.material) {
+            if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+            else obj.material.dispose();
+          }
+        });
+      }
+    };
+    _PET_MOUNTS.set(container, handle);
+    return handle;
+  }
+
   /* ---- Bit's rig ----
    * Named sub-groups so each part can be animated independently
    * (breathing on bodyGroup, blinks on eyes, ear lag on each ear, etc.)
@@ -692,6 +762,38 @@ function mountPet3D(container, p) {
     bodyGroup.add(belly);
   }
 
+  // Cute belly patch — lighter contrasting tummy color on the front of body.
+  // Skipped for baby (whole body is essentially the head) and chubby (already
+  // has a belly bump).
+  if (p.stage !== 'baby' && !hasBelly) {
+    const bellyColor = _lighten(petColor, 1.35);
+    const bellyMat = new T.MeshStandardMaterial({ color: bellyColor, flatShading: true, roughness: 0.7 });
+    const bellyPatch = new T.Mesh(new T.IcosahedronGeometry(0.30, 1), bellyMat);
+    bellyPatch.scale.set(bw * 0.62, bh * 0.55, 0.25);
+    bellyPatch.position.set(0, bh * 0.5, bd * 0.5);
+    bodyGroup.add(bellyPatch);
+  }
+
+  // Tail — small icosahedron behind the body, all adult stages.
+  if (p.stage === 'adult') {
+    const tailMat = new T.MeshStandardMaterial({ color: _darken(petColor, 0.85), flatShading: true });
+    const tail = new T.Mesh(new T.IcosahedronGeometry(0.14, 1), tailMat);
+    tail.position.set(0, bh * 0.35, -bd * 0.52);
+    tail.castShadow = true;
+    bodyGroup.add(tail);
+  }
+
+  // Jacked-only — bicep bumps on the sides
+  if (hasShoulders) {
+    const bicepGeo = new T.IcosahedronGeometry(0.18, 1);
+    const bicepL = new T.Mesh(bicepGeo, petMat);
+    const bicepR = new T.Mesh(bicepGeo, petMat);
+    bicepL.position.set(-bw * 0.78, bh * 0.55, 0);
+    bicepR.position.set( bw * 0.78, bh * 0.55, 0);
+    bicepL.castShadow = true; bicepR.castShadow = true;
+    bodyGroup.add(bicepL); bodyGroup.add(bicepR);
+  }
+
   // HEAD group — nods + forward-bobs during walk; eyes/ears children of this
   const headGroup = new T.Group();
   headGroup.position.y = bh + headR * 0.05;
@@ -701,6 +803,55 @@ function mountPet3D(container, p) {
   head.position.y = headR * 0.8;
   head.castShadow = true;
   headGroup.add(head);
+
+  // Stage-specific head accessory — distinguishes each life-stage at a glance.
+  const headDarkMat = new T.MeshStandardMaterial({ color: _darken(petColor, 0.55), flatShading: true });
+  if (p.stage === 'baby') {
+    // Baby curl — single twisted spike on top, like a baby's hair curl
+    const tuft = new T.Mesh(new T.ConeGeometry(headR * 0.13, headR * 0.45, 5), headDarkMat);
+    tuft.position.y = headR * 1.65;
+    tuft.rotation.z = 0.25;
+    tuft.castShadow = true;
+    headGroup.add(tuft);
+  } else if (p.stage === 'teen') {
+    // Teen fin — taller, slightly angled forward like an awkward mohawk
+    const fin = new T.Mesh(new T.ConeGeometry(headR * 0.16, headR * 0.68, 4), headDarkMat);
+    fin.position.y = headR * 1.7;
+    fin.rotation.x = -Math.PI * 0.10;
+    fin.castShadow = true;
+    headGroup.add(fin);
+  } else if (p.body === 'fit') {
+    // Athletic headband — torus around the head
+    const bandMat = new T.MeshStandardMaterial({ color: 0xD7384C, flatShading: true, roughness: 0.5 });
+    const band = new T.Mesh(new T.TorusGeometry(headR * 0.88, headR * 0.09, 6, 14), bandMat);
+    band.position.y = headR * 0.95;
+    band.rotation.x = Math.PI / 2;
+    band.castShadow = true;
+    headGroup.add(band);
+  } else if (p.body === 'jacked') {
+    // Sweatband + slight forehead vein-like ridge
+    const bandMat = new T.MeshStandardMaterial({ color: 0xF2EAFB, flatShading: true });
+    const band = new T.Mesh(new T.TorusGeometry(headR * 0.88, headR * 0.10, 6, 14), bandMat);
+    band.position.y = headR * 0.95;
+    band.rotation.x = Math.PI / 2;
+    band.castShadow = true;
+    headGroup.add(band);
+  } else if (p.body === 'chubby') {
+    // Chubby — small chef's-hat-like dome on top
+    const hatMat = new T.MeshStandardMaterial({ color: 0xF5DDB5, flatShading: true });
+    const hat = new T.Mesh(new T.IcosahedronGeometry(headR * 0.35, 1), hatMat);
+    hat.position.y = headR * 1.55;
+    hat.scale.set(1, 0.6, 1);
+    hat.castShadow = true;
+    headGroup.add(hat);
+  } else {
+    // Normal adult — small forehead tuft like a cowlick
+    const tuft = new T.Mesh(new T.ConeGeometry(headR * 0.10, headR * 0.28, 4), headDarkMat);
+    tuft.position.set(headR * 0.18, headR * 1.6, 0);
+    tuft.rotation.z = -0.4;
+    tuft.castShadow = true;
+    headGroup.add(tuft);
+  }
 
   // (No ears — simpler, cleaner silhouette. Ear-twitch animation channel
   // is still allocated below but its writes go to a null-mesh dummy.)
@@ -1315,12 +1466,13 @@ function mountPet3D(container, p) {
  * keep 6 WebGL contexts alive. */
 function openPetLifecyclePreview() {
   const stages = [
-    { stage: 'baby',  body: 'baby',   label: 'Baby',          sub: 'Days 0–2 · big head, big eyes, no feet — chibi mode.' },
-    { stage: 'teen',  body: 'teen',   label: 'Teen',          sub: 'Days 3–7 · proportions shift toward adult.' },
-    { stage: 'adult', body: 'normal', label: 'Adult · Normal',sub: 'Days 8+ default body. Form between −15 and +15.' },
-    { stage: 'adult', body: 'fit',    label: 'Adult · Fit',   sub: 'Form > +15 — hitting 1.5× XP regularly. Taller, leaner.' },
-    { stage: 'adult', body: 'jacked', label: 'Adult · Jacked',sub: 'Form > +25 — many overshoot days. Broad shoulders.' },
-    { stage: 'adult', body: 'chubby', label: 'Adult · Chubby',sub: 'Form < −25 — fed but no exercise. Wider, rounder.' },
+    { stage: 'baby',  body: 'baby',   label: 'Baby',          sub: 'Days 0–2 · big head, no feet, single curl. Chibi cute.' },
+    { stage: 'teen',  body: 'teen',   label: 'Teen',          sub: 'Days 3–7 · stretched + gangly + fin mohawk. Awkward phase.' },
+    { stage: 'adult', body: 'normal', label: 'Adult · Normal',sub: 'Days 8+ default. Cowlick tuft, normal proportions.' },
+    { stage: 'adult', body: 'fit',    label: 'Adult · Fit',   sub: 'Tall + lean + red headband. Form > +15 (1.5× XP regularly).' },
+    { stage: 'adult', body: 'jacked', label: 'Adult · Jacked',sub: 'Massive shoulders + chest plate + bicep bumps + white sweatband.' },
+    { stage: 'adult', body: 'chubby', label: 'Adult · Chubby',sub: 'Round, belly bump + little hat. Form < −25 (fed without exercise).' },
+    { stage: 'dead',  body: 'dead',   label: 'Death',         sub: 'Vitality hits 0. Tombstone in the room. Respawns as baby tomorrow.' },
   ];
   let idx = 0;
   const wrap = el('div','fixed inset-0 z-50 grid place-items-center p-4');
