@@ -44,6 +44,9 @@ const DEFAULT_STATE = {
   companySeen: {},               // companyId -> true
   visitedSources: false,
   rewardsRoll: 0,                // variable-reward seed bump
+  /* Job-application log — each entry awards XP via awardXP at log time.
+     Calibrated so 10 apps = half the daily XP goal (per-app = goal/20). */
+  jobApps: [],                   // [{ date, ts, company, role, url, xp }]
 };
 
 /* ---------- Persistence ---------- */
@@ -247,6 +250,32 @@ function reviewCard(state, cardId, quality /* 1..4 */) {
   // XP based on quality
   const xpMap = { 1: 5, 2: 10, 3: 15, 4: 20 };
   return awardXP(state, xpMap[quality] || 10, 'flashcard');
+}
+
+/* Job-application log. Each entry awards XP via the normal awardXP path
+ * so it counts toward today's total + vitality + streak. Per-app XP is
+ * calibrated to `goal / 20` (so 10 apps == half the daily goal) with a
+ * floor of 1 XP.
+ *
+ * opts: { company?, role?, url? }  — all fields optional. */
+function logJobApp(state, opts = {}) {
+  tickDay(state);
+  if (!Array.isArray(state.jobApps)) state.jobApps = [];
+  const goal = (state.user && state.user.goal) || 60;
+  const perAppXP = Math.max(1, Math.round(goal / 20));
+  const entry = {
+    date:    todayKey(),
+    ts:      Date.now(),
+    company: (opts.company || '').slice(0, 80),
+    role:    (opts.role    || '').slice(0, 80),
+    url:     (opts.url     || '').slice(0, 500),
+    xp:      perAppXP,
+  };
+  state.jobApps.push(entry);
+  // Cap retained history to keep state size bounded (~1y of heavy use).
+  if (state.jobApps.length > 1000) state.jobApps.splice(0, state.jobApps.length - 1000);
+  const award = awardXP(state, perAppXP, 'app');
+  return { entry, ...award };
 }
 
 function dueCards(state, allCards, limit=20) {
@@ -904,7 +933,7 @@ function coverage(state, categories, modules) {
 
 return {
   STORAGE_KEY, load, save, saveImmediate, reset,
-  tickDay, awardXP, logLessonComplete, feedPetWithPile,
+  tickDay, awardXP, logLessonComplete, logJobApp, feedPetWithPile,
   reviewCard, dueCards,
   recordWrongAnswer, reviewMissedQuestion, dueMissedQuestions, totalMissedCount,
   scheduleConceptReview, dueConceptReviews, totalConceptReviewsCount,

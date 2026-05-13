@@ -2196,6 +2196,93 @@ const verticalLabel = {
 };
 
 /* ====================== DASHBOARD ====================== */
+/* Compact job-application logger card for the dashboard.
+ *
+ * Each click of "+1" calls GAMI.logJobApp which pushes an entry into
+ * state.jobApps AND awards XP through the normal awardXP path — so logged
+ * applications count toward today's total, vitality, and the streak.
+ *
+ * XP per app is calibrated so 10 apps = half the user's daily goal
+ * (per-app = goal / 20, floor 1). The widget shows count today, progress
+ * toward 10, the optional details form (collapsed), and the last 5 of
+ * today's logged apps.
+ */
+function renderJobAppsCard(state) {
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const apps     = Array.isArray(state.jobApps) ? state.jobApps : [];
+  const todays   = apps.filter(j => j.date === todayKey);
+  const count    = todays.length;
+  const goal     = (state.user && state.user.goal) || 60;
+  const perApp   = Math.max(1, Math.round(goal / 20));
+  const target   = 10;                      // 10 apps = half goal
+  const pct      = Math.min(100, Math.round((count / target) * 100));
+
+  const card = el('div', 'card');
+  card.innerHTML = `
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+      <div class="min-w-0">
+        <div class="text-xs muted uppercase tracking-wider">Job applications today</div>
+        <div class="text-3xl font-bold mt-1 numeric">${count} <span class="text-sm muted font-normal">/ ${target}</span></div>
+      </div>
+      <button class="btn btn-primary" data-app-add>
+        <span class="inline-flex items-center gap-1.5">${iconHTML('check', {size: 14})} Log application</span>
+      </button>
+    </div>
+    <div class="bar mt-3"><i style="width:${pct}%; transition: width 0.4s var(--spring-overshoot)"></i></div>
+    <div class="text-xs muted mt-2">
+      Each app = <span class="font-mono numeric" style="color:var(--accent)">+${perApp}</span> XP toward Bit's daily goal of <span class="numeric">${goal}</span>. <strong>10 = half goal.</strong>
+    </div>
+    <details class="mt-3" data-app-details>
+      <summary class="text-xs muted cursor-pointer hover:text-[color:var(--text)] select-none">Add company / role / URL (optional) ▾</summary>
+      <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <input type="text" data-app-company placeholder="Company" class="text-xs" maxlength="80"/>
+        <input type="text" data-app-role    placeholder="Role"    class="text-xs" maxlength="80"/>
+        <input type="url"  data-app-url     placeholder="Posting URL" class="text-xs" maxlength="500"/>
+      </div>
+    </details>
+    ${todays.length > 0 ? `
+      <div class="mt-3 pt-3 border-t border-[color:var(--hairline)] space-y-1 max-h-32 overflow-y-auto">
+        ${todays.slice(-8).reverse().map(j => `
+          <div class="text-[11px] flex items-center justify-between gap-2">
+            <span class="muted truncate flex-1 min-w-0">
+              ${j.company || j.role
+                ? `${esc(j.company || '—')}${j.role ? ' · ' + esc(j.role) : ''}`
+                : '<em class="dim">untitled</em>'}
+            </span>
+            ${j.url
+              ? `<a href="${esc(j.url)}" target="_blank" rel="noopener noreferrer" class="muted hover:text-[color:var(--accent)] flex-shrink-0">↗</a>`
+              : '<span class="dim">·</span>'}
+          </div>
+        `).join('')}
+      </div>` : ''}
+  `;
+
+  card.querySelector('[data-app-add]').addEventListener('click', () => {
+    const st = (window.APP && window.APP.getState) ? window.APP.getState() : state;
+    const company = card.querySelector('[data-app-company]')?.value.trim() || '';
+    const role    = card.querySelector('[data-app-role]')?.value.trim()    || '';
+    const url     = card.querySelector('[data-app-url]')?.value.trim()     || '';
+    const { xpGained } = GAMI.logJobApp(st, { company, role, url });
+    GAMI.saveImmediate(st);
+    // Clear the inputs but keep the disclosure open if it was open.
+    ['[data-app-company]', '[data-app-role]', '[data-app-url]']
+      .forEach(s => { const i = card.querySelector(s); if (i) i.value = ''; });
+    // Re-render in place with the new state
+    const next = renderJobAppsCard(st);
+    card.replaceWith(next);
+    if (window.ANIM && window.ANIM.toast) {
+      window.ANIM.toast({
+        title: 'Application logged',
+        body:  `+${xpGained} XP — ${target - (count + 1) > 0
+          ? `${target - (count + 1)} more to half goal`
+          : 'half goal reached'}.`,
+      });
+    }
+  });
+
+  return card;
+}
+
 function renderDashboard(state, hub) {
   const cov = GAMI.coverage(state, CATEGORIES, MODULES);
   const lvlInfo = GAMI.levelProgress(state.xp);
@@ -2377,6 +2464,11 @@ function renderDashboard(state, hub) {
     </div>
   `;
   container.appendChild(stats);
+
+  // Job-application logger — compact card that lets the user tick off
+  // applications. Each click awards XP via the normal path; 10 apps
+  // covers half the daily goal.
+  container.appendChild(renderJobAppsCard(state));
 
   // SRS review tiles — surface only when there's something due / queued
   if (missedTotal > 0 || conceptReviewsTotal > 0) {
