@@ -2341,6 +2341,37 @@ function renderQuotesCard() {
         text-decoration: none;
       ">${esc(q.source)}${q.year ? `, ${esc(String(q.year))}` : ''} ↗</a>
     </div>
+    ${q.context ? `
+      <div class="quote-context-wrap mt-4">
+        <button class="quote-context-toggle" style="
+          font-size: 10.5px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.16em;
+          color: var(--muted);
+          background: transparent;
+          border: none;
+          padding: 6px 0;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+        " aria-expanded="false">
+          <span class="quote-context-caret" style="display:inline-block;transition:transform 0.2s ease">▸</span>
+          <span>Context</span>
+        </button>
+        <div class="quote-context-body" style="
+          display: none;
+          margin-top: 8px;
+          max-width: 38em;
+          padding: 14px 16px;
+          border-left: 2px solid var(--hairline);
+          font-size: 13.5px;
+          line-height: 1.55;
+          color: var(--muted);
+        ">${esc(q.context)}</div>
+      </div>
+    ` : ''}
   `;
   card.innerHTML = `
     <!-- Decorative oversized opening quote glyph in the background -->
@@ -2385,11 +2416,25 @@ function renderQuotesCard() {
     </div>
   `;
 
-  // Wire the shuffle: cycles to a new random quote with a brief fade.
+  // Wire the shuffle (cycles to a new random quote with a brief fade) and
+  // the context toggle (expands the hyperspecific background blurb).
+  const wireContext = (root) => {
+    const toggle = root.querySelector('.quote-context-toggle');
+    const body   = root.querySelector('.quote-context-body');
+    const caret  = root.querySelector('.quote-context-caret');
+    if (!toggle || !body) return;
+    toggle.addEventListener('click', () => {
+      const open = body.style.display === 'block';
+      body.style.display = open ? 'none' : 'block';
+      if (caret) caret.style.transform = open ? 'rotate(0deg)' : 'rotate(90deg)';
+      toggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+    });
+  };
   requestAnimationFrame(() => {
     const shuffleBtn = card.querySelector('#quote-shuffle');
     const featuredEl = card.querySelector('#quote-featured');
     let lastIdx = QUOTES.indexOf(featured);
+    wireContext(featuredEl);
     if (shuffleBtn) shuffleBtn.addEventListener('click', () => {
       featuredEl.style.opacity = '0';
       setTimeout(() => {
@@ -2397,6 +2442,7 @@ function renderQuotesCard() {
         while (i === lastIdx && QUOTES.length > 1) i = Math.floor(Math.random() * QUOTES.length);
         lastIdx = i;
         featuredEl.innerHTML = renderFeatured(QUOTES[i]);
+        wireContext(featuredEl);
         featuredEl.style.opacity = '1';
       }, 200);
     });
