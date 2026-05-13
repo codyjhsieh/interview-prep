@@ -403,6 +403,28 @@ function init() {
     window.addEventListener('visibilitychange', () => GAMI.saveImmediate(state));
     window.addEventListener('beforeunload', () => GAMI.saveImmediate(state));
     setInterval(() => GAMI.saveImmediate(state), 20000);
+
+    // Liquid-glass pointer-tracked specular highlight.
+    // Updates --mx/--my CSS vars on the .card under the cursor so the
+    // ::before highlight follows the pointer with a soft falloff.
+    // rAF-throttled to one update per frame; skipped on touch + reduced-motion.
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let pending = null;
+      document.addEventListener('pointermove', (e) => {
+        if (e.pointerType === 'touch') return;
+        if (pending !== null) return;
+        pending = requestAnimationFrame(() => {
+          pending = null;
+          const card = e.target && e.target.closest && e.target.closest('.card');
+          if (!card) return;
+          const rect = card.getBoundingClientRect();
+          const mx = ((e.clientX - rect.left) / rect.width) * 100;
+          const my = ((e.clientY - rect.top) / rect.height) * 100;
+          card.style.setProperty('--mx', mx + '%');
+          card.style.setProperty('--my', my + '%');
+        });
+      }, { passive: true });
+    }
     console.log('[FDE/SDE prep] loaded · state restored · auto-save on');
   } catch (err) {
     console.error('[FDE/SDE prep] init failed:', err);

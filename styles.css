@@ -23,11 +23,13 @@
   --bg-2:         #F1F3F8;
   --canvas-tint:  #FBFCFE;
 
-  /* Glass materials (translucent over the tinted canvas) */
-  --thin:    rgba(255, 255, 255, 0.55);
-  --regular: rgba(255, 255, 255, 0.72);
-  --thick:   rgba(255, 255, 255, 0.88);
-  --chrome:  rgba(252, 253, 255, 0.78);
+  /* Glass materials (translucent over the tinted canvas).
+   * Lower alphas = more visible refraction of the canvas + tinted shadows
+   * behind. Calibrated so backdrop-filter does the heavy lifting. */
+  --thin:    rgba(255, 255, 255, 0.42);
+  --regular: rgba(255, 255, 255, 0.58);
+  --thick:   rgba(255, 255, 255, 0.78);
+  --chrome:  rgba(252, 253, 255, 0.68);
 
   /* Edge highlights & shadows (light-mode appropriate) */
   --hl-strong: rgba(255, 255, 255, 0.95);
@@ -235,72 +237,185 @@ header.sticky > *, main > header > * { position: relative; z-index: 1; }
  *  - Inner fresnel ring (light pickup on inside of border)
  *  - Soft compress-on-press
  * ========================================================================= */
+/* =========================================================================
+ * .card — Apple Liquid Glass 2026 implementation
+ *
+ * Layer architecture:
+ *   ::before  — top-edge specular gloss + mouse-tracked highlight
+ *   ::after   — diagonal sheen + bottom-depth + ambient idle sweep
+ *   border    — chromatic rim (subtle RGB shift on the edge highlight)
+ *
+ * Interactions:
+ *   idle      — ultra-slow ambient sheen sweep (12s loop) so cards feel alive
+ *   hover     — 3D tilt via perspective, brightness up, glow expands
+ *   active    — scale + brightness pulse (the "press" tactile cue)
+ *   :first-paint — entrance fade-up via .card animation
+ *
+ * Performance: contained via isolation + will-change on hover only.
+ * Mouse-tracked highlight uses CSS vars --mx/--my set by JS pointer handler.
+ * ========================================================================= */
 .card {
   position: relative;
   background: var(--regular);
-  -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(1.08) contrast(1.02);
-  backdrop-filter: blur(60px) saturate(200%) brightness(1.08) contrast(1.02);
+  -webkit-backdrop-filter: blur(72px) saturate(220%) brightness(1.10) contrast(1.04);
+  backdrop-filter: blur(72px) saturate(220%) brightness(1.10) contrast(1.04);
   border-radius: var(--r);
   padding: 1.15rem 1.3rem;
   box-shadow:
-    /* Inner fresnel ring — light gathered just inside the border */
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    inset 0 -1px 0 rgba(15,23,42,0.06),
-    inset 1px 0 0 rgba(255,255,255,0.55),
-    inset -1px 0 0 rgba(255,255,255,0.30),
-    /* Outer hairline + diffuse drop */
+    /* Inner fresnel ring — chromatic rim light (slight cyan-magenta split
+     * mimics real refraction at glass edges) */
+    inset 0  1px 0 rgba(255,255,255,0.98),
+    inset 0 -1px 0 rgba(15,23,42,0.07),
+    inset 1px 0 0 rgba(230,240,255,0.65),
+    inset -1px 0 0 rgba(255,235,250,0.45),
+    /* Outer diffuse drop */
     var(--sh-card);
   transition:
-    transform 0.4s var(--spring),
-    box-shadow 0.35s var(--ease),
-    background 0.25s var(--ease),
+    transform 0.5s var(--spring),
+    box-shadow 0.4s var(--ease),
+    background 0.3s var(--ease),
     backdrop-filter 0.4s var(--ease);
   overflow: hidden;
   isolation: isolate;
+  transform-style: preserve-3d;
+  /* CSS vars updated by pointer handler in app.js — drives the moving spec */
+  --mx: 50%;
+  --my: 50%;
+  --glint-opacity: 0;
 }
-/* Layer 1: top-edge specular gloss */
+
+/* Layer 1: top-edge specular gloss + mouse-tracked highlight.
+ * The radial-gradient at (--mx, --my) follows the pointer with a soft falloff
+ * so the card has a "wet" specular that moves with the cursor. */
 .card::before {
   content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.00) 25%),
-    radial-gradient(ellipse 90% 25% at 50% 0%, rgba(255,255,255,0.55), transparent 75%),
-    radial-gradient(ellipse 60% 12% at 80% 0%, rgba(255,255,255,0.35), transparent 70%);
+    /* Mouse-tracked glint — only visible when --glint-opacity is non-zero */
+    radial-gradient(circle 220px at var(--mx) var(--my),
+      rgba(255,255,255,calc(0.55 * var(--glint-opacity))),
+      transparent 60%),
+    /* Static top-edge gloss */
+    linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(255,255,255,0.00) 28%),
+    radial-gradient(ellipse 90% 25% at 50% 0%, rgba(255,255,255,0.62), transparent 75%),
+    radial-gradient(ellipse 60% 12% at 80% 0%, rgba(255,255,255,0.40), transparent 70%);
   z-index: 0;
   mix-blend-mode: screen;
+  transition: background 0.18s linear;
 }
-/* Layer 2: diagonal sheen + subtle bottom edge depth */
+
+/* Layer 2: diagonal sheen + bottom-depth + the ambient sweep that loops
+ * very slowly on idle (12s) to make cards feel alive without distracting. */
 .card::after {
   content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
   background:
-    linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 35%, transparent 65%, rgba(15,23,42,0.025) 100%),
-    radial-gradient(ellipse 70% 18% at 50% 100%, rgba(15,23,42,0.05), transparent 70%);
+    /* Slow ambient sweep — animated via @keyframes glass-sweep below */
+    linear-gradient(115deg,
+      transparent 0%,
+      transparent 35%,
+      rgba(255,255,255,0.22) 50%,
+      transparent 65%,
+      transparent 100%),
+    /* Static diagonal sheen */
+    linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 35%, transparent 65%, rgba(15,23,42,0.03) 100%),
+    /* Bottom-edge depth shadow */
+    radial-gradient(ellipse 70% 18% at 50% 100%, rgba(15,23,42,0.06), transparent 70%);
+  background-size: 280% 280%, 100% 100%, 100% 100%;
+  background-position: -100% -100%, 0 0, 0 0;
+  animation: glass-sweep 16s ease-in-out infinite;
   z-index: 0;
 }
-/* Card content sits above the gloss layers */
+
+@keyframes glass-sweep {
+  /* Slow ambient sweep — almost imperceptible, but cards never feel static */
+  0%, 100% { background-position: -110% -110%, 0 0, 0 0; }
+  50%      { background-position: 210% 210%, 0 0, 0 0; }
+}
+
+/* Card content sits above the glass layers */
 .card > * { position: relative; z-index: 1; }
 
-.card:active {
-  transform: scale(0.997);
-  transition-duration: 0.1s, 0.1s, 0.1s, 0.1s;
-}
+/* Hover — true 3D tilt + brightness up + glow expands.
+ * The translate3d on Z makes the card feel like it lifts in space. */
 .card:hover {
-  transform: translateY(-2px);
+  transform: perspective(900px) translate3d(0, -3px, 6px) rotateX(0.6deg);
   background: var(--thick);
+  --glint-opacity: 1;
   box-shadow:
-    inset 0 1px 0 var(--hl-strong),
-    inset 0 -1px 0 var(--hairline),
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(15,23,42,0.07),
+    inset 1px 0 0 rgba(230,240,255,0.75),
+    inset -1px 0 0 rgba(255,235,250,0.55),
     var(--sh-lift);
+}
+
+/* Press — quick brightness pulse + scale-down for tactile feedback */
+.card:active {
+  transform: perspective(900px) translate3d(0, 0, 0) scale(0.992);
+  transition-duration: 0.12s, 0.12s, 0.12s, 0.12s;
+  -webkit-backdrop-filter: blur(72px) saturate(230%) brightness(1.16) contrast(1.05);
+  backdrop-filter: blur(72px) saturate(230%) brightness(1.16) contrast(1.05);
+}
+
+/* Card-glow — accent halo on hover, used on primary CTAs and highlights */
+.card-glow {
+  transition: transform 0.5s var(--spring), box-shadow 0.4s var(--ease),
+              background 0.3s var(--ease), backdrop-filter 0.4s var(--ease);
 }
 .card-glow:hover {
   box-shadow:
-    inset 0 1px 0 var(--hl-strong),
-    inset 0 -1px 0 var(--hairline),
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(15,23,42,0.07),
+    inset 1px 0 0 rgba(230,240,255,0.75),
+    inset -1px 0 0 rgba(255,235,250,0.55),
     var(--sh-lift),
     var(--sh-glow-accent);
 }
-.card.elevated { box-shadow: inset 0 1px 0 var(--hl-strong), inset 0 -1px 0 var(--hairline), var(--sh-lift); }
+
+/* Variants */
+.card.elevated {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(15,23,42,0.07),
+    inset 1px 0 0 rgba(230,240,255,0.65),
+    inset -1px 0 0 rgba(255,235,250,0.45),
+    var(--sh-lift);
+}
 .card.thick { background: var(--thick); }
-.card.thin  { background: var(--thin); }
+.card.thin  {
+  background: var(--thin);
+  -webkit-backdrop-filter: blur(50px) saturate(180%) brightness(1.05);
+  backdrop-filter: blur(50px) saturate(180%) brightness(1.05);
+}
+
+/* Entrance animation — cards fade up + scale in on first paint.
+ * Triggered by ANIM.viewIn() adding the .fade-in class on the container,
+ * but also fires automatically for fresh cards via this @keyframes. */
+@keyframes glass-card-enter {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.fade-in > .card,
+.fade-in .card:not(.no-enter) {
+  animation: glass-card-enter 0.55s var(--spring) backwards;
+}
+
+/* Modal cards: stay still on hover (they're already the focused surface,
+ * tilting them while the user scrolls/reads would be jarring). */
+.fixed.inset-0 .card,
+.fixed.inset-0 .card:hover,
+.fixed.inset-0 .card:active {
+  transform: none;
+}
+.fixed.inset-0 .card::after {
+  animation: none;   /* no ambient sweep inside modals */
+}
+
+/* Reduce motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .card, .card::after { animation: none !important; }
+  .card:hover { transform: translateY(-2px); }
+  .card:active { transform: scale(0.995); }
+}
 
 .divider { height: 1px; background: var(--hairline); margin: 0.95rem 0; }
 
