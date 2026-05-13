@@ -688,18 +688,37 @@ function mountPet3D(container, p) {
     const frame = new T.Mesh(new T.BoxGeometry(1.75, 1.45, 0.04), new T.MeshStandardMaterial({ color: 0x5A6373 }));
     frame.position.set(1.0, 3.0, -FLOOR_W/2 + 0.10);
     scene.add(frame);
-    // Sun/moon disc visible through the window — its X position tracks the
-    // sun's horizontal angle so the user can see the time of day at a glance.
+    // Sun / moon disc visible through the window. Sits IN FRONT of the
+    // window pane (z slightly closer to camera than the pane), with
+    // renderOrder forced so it never z-fights with the emissive sky.
+    // Color, size, and glow shift with time of day.
+    const isNight = tod.phase === 'night' || tod.phase === 'late';
+    const sunR = isNight ? 0.18 : 0.30;
     const sunVis = new T.Mesh(
-      new T.SphereGeometry(0.16, 12, 8),
+      new T.SphereGeometry(sunR, 16, 12),
       new T.MeshBasicMaterial({ color: tod.sunColor })
     );
-    // Place sun disc within window bounds. Sun X varies ±0.55 within window
-    // width based on horizontal position in sky (sunPos[0] ∈ ~[-14,14]).
     const sunXInWindow  = Math.max(-0.55, Math.min(0.55, tod.sunPos[0] / 14 * 0.55));
     const sunYInWindow  = Math.max(-0.45, Math.min(0.45, (tod.sunPos[1] - 5) / 14 * 0.5));
-    sunVis.position.set(1.0 + sunXInWindow, 3.0 + sunYInWindow, -FLOOR_W/2 + 0.14);
+    sunVis.position.set(1.0 + sunXInWindow, 3.0 + sunYInWindow, -FLOOR_W/2 + 0.18);
+    sunVis.renderOrder = 5;
+    sunVis.material.depthTest = false;
     scene.add(sunVis);
+    // Glow halo around the sun/moon — bigger, dimmer, additive blend
+    const halo = new T.Mesh(
+      new T.SphereGeometry(sunR * 2.4, 16, 12),
+      new T.MeshBasicMaterial({
+        color: tod.sunColor,
+        transparent: true,
+        opacity: isNight ? 0.18 : 0.30,
+        depthTest: false,
+        blending: T.AdditiveBlending,
+      })
+    );
+    halo.position.copy(sunVis.position);
+    halo.position.z -= 0.01;     // slight bias so sun draws on top of halo
+    halo.renderOrder = 4;
+    scene.add(halo);
   } else {
     const pic = new T.Mesh(new T.BoxGeometry(1.2, 1.4, 0.05), new T.MeshStandardMaterial({ color: 0x5BA585 }));
     pic.position.set(1.0, 3.0, -FLOOR_W/2 + 0.12);
@@ -1060,8 +1079,10 @@ function mountPet3D(container, p) {
     pillow.position.set(-0.8, 0.49, 1.2);
     pillow.castShadow = true;
     scene.add(pillow);
-    petGroup.position.set(0.2, 0.4, 1.2);
-    petGroup.rotation.z = Math.PI / 2.6;
+    // Position Bit ON the bed surface; rotation is handled per-frame by
+    // the animation tick via facing.rotation.z (do NOT also rotate petGroup
+    // here — that would double-rotate Bit ~138° and bury him in the mattress).
+    petGroup.position.set(0.2, 0.6, 1.2);
   }
   if (p.activity === 'workout') {
     const barMat = new T.MeshStandardMaterial({ color: 0x94A3B8, metalness: 0.6, roughness: 0.3 });
