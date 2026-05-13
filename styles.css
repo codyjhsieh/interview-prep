@@ -440,15 +440,19 @@ code, pre, .font-mono {
  * Pills — colored fills on light bg
  * ========================================================================= */
 .pill {
-  display: inline-flex; align-items: center; gap: 0.3rem;
-  padding: 2px 9px;
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 4px 11px;
   border-radius: 999px;
-  font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  line-height: 1.3;
   background: var(--hl-faint);
   border: 1px solid var(--hairline);
   color: var(--muted);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
+}
+@media (max-width: 640px) {
+  .pill { padding: 5px 12px; font-size: 11.5px; gap: 0.4rem; }
 }
 .pill-fde  { color: var(--accent); border-color: rgba(14,163,113,0.30); background: var(--accent-fill); }
 .pill-sde  { color: var(--sde);    border-color: rgba(46,111,224,0.30); background: var(--sde-fill); }
@@ -567,7 +571,7 @@ code, pre, .font-mono {
 /* CSS-only ring — no SVG bounding box, perfectly circular */
 .ring {
   position: relative;
-  width: 120px; height: 120px;
+  width: 124px; height: 124px;
   border-radius: 50%;
   display: grid; place-items: center;
   background:
@@ -579,6 +583,7 @@ code, pre, .font-mono {
     inset 0 0 0 1px rgba(15,23,42,0.04),
     0 0 18px -2px rgba(14,163,113, calc(var(--pct, 0) * 0.004));
   transition: background 0.8s var(--ease);
+  flex-shrink: 0;
 }
 .ring::before {
   content: ''; position: absolute; inset: 9px;
@@ -589,6 +594,32 @@ code, pre, .font-mono {
 .ring > .ring-inner {
   position: relative; z-index: 1;
   text-align: center;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px;
+  padding: 0 6px;
+}
+/* Force the inner percentage + label to fit inside the ring regardless of
+ * any global Tailwind text-size overrides (mobile readability bumps would
+ * otherwise crash through the inner circle). */
+.ring > .ring-inner > .text-2xl { font-size: 26px !important; line-height: 1.05; }
+.ring > .ring-inner > div:last-child {
+  font-size: 10.5px !important;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .ring { width: 112px; height: 112px; }
+  .ring > .ring-inner > .text-2xl { font-size: 24px !important; }
+  .ring > .ring-inner > div:last-child { font-size: 10px !important; }
+}
+@media (max-width: 380px) {
+  .ring { width: 96px; height: 96px; }
+  .ring::before { inset: 7px; }
+  .ring > .ring-inner > .text-2xl { font-size: 21px !important; }
+  .ring > .ring-inner > div:last-child { font-size: 9.5px !important; letter-spacing: 0.06em; }
 }
 
 /* =========================================================================
@@ -1083,7 +1114,7 @@ table { display: block; max-width: 100%; overflow-x: auto; }
   .card.elevated { padding: 1.05rem 1.1rem; }
   .card .text-3xl { font-size: 1.4rem; }
   .btn { font-size: 13.5px; padding: 0.5rem 0.85rem; }
-  .ring { width: 84px; height: 84px; }
+  /* .ring is now sized in its own media-query block above */
   /* Hero stats: stack to single column on smallest */
   .card .grid.grid-cols-2.sm\:grid-cols-4 {
     grid-template-columns: 1fr;

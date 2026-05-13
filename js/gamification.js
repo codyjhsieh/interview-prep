@@ -341,16 +341,33 @@ const PINNED_QUEST_IDS = ['q-mock'];
 
 function ensureDailyQuests(state, pool) {
   const today = todayKey();
-  if (state.dailyQuests.date === today && state.dailyQuests.quests.length) return state;
+  // Rebuild today's slate when (a) it's a new day, (b) the list is empty, or
+  // (c) any pinned quest is missing from the existing slate. (c) handles the
+  // case where the pinned set changed since the user's state was last saved
+  // — without it, returning users would never see new pinned quests.
+  const existingIds = new Set((state.dailyQuests.quests || []).map(q => q.id));
+  const allPinnedPresent = PINNED_QUEST_IDS.every(id => existingIds.has(id));
+  if (state.dailyQuests.date === today &&
+      state.dailyQuests.quests.length &&
+      allPinnedPresent) {
+    return state;
+  }
   // Always-on quests go first; remaining slots are filled randomly (deterministic per day)
   const pinned = pool.filter(q => PINNED_QUEST_IDS.includes(q.id));
   const remaining = pool.filter(q => !PINNED_QUEST_IDS.includes(q.id));
   const seed = parseInt(today.replaceAll('-',''), 10);
   const shuffled = [...remaining].sort((a,b) => ((seed * (a.id.charCodeAt(0)+1)) % 7) - ((seed * (b.id.charCodeAt(0)+1)) % 7));
   const slate = [...pinned, ...shuffled.slice(0, Math.max(0, 3 - pinned.length))];
+  // Preserve existing progress on any quest that survives into the new slate
+  const oldById = Object.fromEntries((state.dailyQuests.quests || []).map(q => [q.id, q]));
   state.dailyQuests = {
     date: today,
-    quests: slate.map(q => ({ ...q, progress: 0, done: false }))
+    quests: slate.map(q => {
+      const prior = oldById[q.id];
+      return prior
+        ? { ...q, progress: prior.progress || 0, done: prior.done || false, _earned: prior._earned }
+        : { ...q, progress: 0, done: false };
+    })
   };
   return state;
 }
