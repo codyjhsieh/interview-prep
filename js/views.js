@@ -471,6 +471,14 @@ const PET_PROPS = {
  * ========================================================================= */
 const _PET_MOUNTS = new WeakMap();   // container → { dispose }
 
+// Darken a 0xRRGGBB color by a factor (0..1) for foot/shadow shading.
+function _darken(hex, factor) {
+  const r = ((hex >> 16) & 0xff) * factor;
+  const g = ((hex >> 8) & 0xff) * factor;
+  const b = (hex & 0xff) * factor;
+  return (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(b);
+}
+
 function mountPet3D(container, p) {
   if (!container || !window.THREE) return null;
   // Dispose any prior mount on this container
@@ -561,44 +569,115 @@ function mountPet3D(container, p) {
   const petColor = moodColors[mood] || moodColors.content;
   const petMat = new T.MeshStandardMaterial({ color: petColor, flatShading: true, roughness: 0.65 });
 
-  // Body cuboid — sized by stage/body
-  let bw = 1.0, bh = 1.0, bd = 1.0;
-  let hwHead = 0.85;
-  if (p.stage === 'baby')              { bw = 0.85; bh = 0.85; bd = 0.85; hwHead = 0.85; }
-  else if (p.body === 'jacked')        { bw = 1.4;  bh = 1.0;  bd = 0.85; hwHead = 0.75; }
-  else if (p.body === 'fit')           { bw = 1.0;  bh = 1.1;  bd = 0.85; hwHead = 0.78; }
-  else if (p.body === 'chubby')        { bw = 1.35; bh = 0.9;  bd = 1.25; hwHead = 0.85; }
-  else                                  { bw = 1.0;  bh = 1.0;  bd = 0.95; hwHead = 0.85; }
+  /* ---- Cute Bit body: toddler proportions (oversized head), low-poly
+     IcosahedronGeometry for visible facets, white-with-pupil eyes,
+     little ears, pink cheek spots. ---- */
+  // Cuter proportions — head is dominant
+  let bw = 0.95, bh = 0.85, bd = 0.95;
+  let headR = 0.7;  // head radius
+  if (p.stage === 'baby')         { bw = 0.7;  bh = 0.55; bd = 0.7;  headR = 0.78; }
+  else if (p.body === 'jacked')   { bw = 1.35; bh = 1.0;  bd = 0.85; headR = 0.65; }
+  else if (p.body === 'fit')      { bw = 1.0;  bh = 1.1;  bd = 0.85; headR = 0.65; }
+  else if (p.body === 'chubby')   { bw = 1.3;  bh = 0.8;  bd = 1.2;  headR = 0.7; }
 
   const petGroup = new T.Group();
-  const body = new T.Mesh(new T.BoxGeometry(bw, bh, bd), petMat);
-  body.position.y = bh / 2;
+  // The pet has a "forward" axis along +Z; we set rotation.y to face direction.
+  const facing = new T.Group();   // contains body+head+features; rotates as a unit
+  petGroup.add(facing);
+
+  // Body — slightly rounded (use IcosahedronGeometry detail 1 = 80 faces, low-poly)
+  // Actually use BoxGeometry but with bigger Y radius for soft "egg" shape via scale
+  const body = new T.Mesh(new T.IcosahedronGeometry(0.55, 1), petMat);
+  body.scale.set(bw, bh, bd);
+  body.position.y = bh * 0.55;
   body.castShadow = true;
-  body.receiveShadow = false;
-  petGroup.add(body);
+  facing.add(body);
 
-  const head = new T.Mesh(new T.BoxGeometry(hwHead, hwHead, hwHead), petMat);
-  head.position.y = bh + hwHead / 2;
+  // Head — separate, larger, low-poly icosahedron for visible facets
+  const head = new T.Mesh(new T.IcosahedronGeometry(headR, 1), petMat);
+  head.position.y = bh + headR * 0.85;
   head.castShadow = true;
-  petGroup.add(head);
+  facing.add(head);
 
-  // Eyes — small dark cubes on the front face of the head
-  const eyeMat = new T.MeshStandardMaterial({ color: 0x0F172A, roughness: 0.3 });
-  const eyeGeo = new T.BoxGeometry(0.13, 0.13, 0.05);
-  const eyeL = new T.Mesh(eyeGeo, eyeMat);
-  const eyeR = new T.Mesh(eyeGeo, eyeMat);
-  const eyeY = bh + hwHead * 0.62;
-  const eyeOffset = hwHead * 0.22;
-  const eyeZ = hwHead / 2 + 0.02;
-  eyeL.position.set(-eyeOffset, eyeY, eyeZ);
-  eyeR.position.set( eyeOffset, eyeY, eyeZ);
-  petGroup.add(eyeL); petGroup.add(eyeR);
+  // Two little ears on top — small flat-shaded cones tilted out
+  const earMat = new T.MeshStandardMaterial({ color: petColor, flatShading: true, roughness: 0.65 });
+  const earGeo = new T.ConeGeometry(headR * 0.22, headR * 0.5, 4);
+  const earL = new T.Mesh(earGeo, earMat);
+  const earR = new T.Mesh(earGeo, earMat);
+  const earY = bh + headR * 1.4;
+  earL.position.set(-headR * 0.55, earY, 0);
+  earR.position.set( headR * 0.55, earY, 0);
+  earL.rotation.z =  Math.PI * 0.12;
+  earR.rotation.z = -Math.PI * 0.12;
+  earL.castShadow = true; earR.castShadow = true;
+  facing.add(earL); facing.add(earR);
 
-  // Mouth — thin dark cube
-  const mouthMat = new T.MeshStandardMaterial({ color: 0x1F2937 });
-  const mouth = new T.Mesh(new T.BoxGeometry(0.22, 0.04, 0.04), mouthMat);
-  mouth.position.set(0, bh + hwHead * 0.38, hwHead / 2 + 0.02);
-  petGroup.add(mouth);
+  // Eyes — white spheres with dark pupils. Bigger = cuter.
+  const eyeWhiteMat = new T.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.2 });
+  const eyeDarkMat  = new T.MeshStandardMaterial({ color: 0x0F172A, roughness: 0.15 });
+  const eyeWhiteGeo = new T.SphereGeometry(headR * 0.22, 12, 10);
+  const eyePupilGeo = new T.SphereGeometry(headR * 0.10, 8, 6);
+  const eyeY = bh + headR * 0.95;
+  const eyeOff = headR * 0.35;
+  const eyeFront = headR * 0.86;
+  // Left eye
+  const eyeWL = new T.Mesh(eyeWhiteGeo, eyeWhiteMat);
+  eyeWL.position.set(-eyeOff, eyeY, eyeFront);
+  facing.add(eyeWL);
+  const eyePL = new T.Mesh(eyePupilGeo, eyeDarkMat);
+  eyePL.position.set(-eyeOff, eyeY, eyeFront + headR * 0.13);
+  facing.add(eyePL);
+  // Right eye
+  const eyeWR = new T.Mesh(eyeWhiteGeo, eyeWhiteMat);
+  eyeWR.position.set( eyeOff, eyeY, eyeFront);
+  facing.add(eyeWR);
+  const eyePR = new T.Mesh(eyePupilGeo, eyeDarkMat);
+  eyePR.position.set( eyeOff, eyeY, eyeFront + headR * 0.13);
+  facing.add(eyePR);
+
+  // Eye sparkles — tiny white dots offset to one side for "light catch"
+  const sparkGeo = new T.SphereGeometry(headR * 0.035, 6, 4);
+  const sparkMat = new T.MeshBasicMaterial({ color: 0xFFFFFF });
+  const sparkL = new T.Mesh(sparkGeo, sparkMat);
+  sparkL.position.set(-eyeOff + headR * 0.06, eyeY + headR * 0.04, eyeFront + headR * 0.17);
+  facing.add(sparkL);
+  const sparkR = new T.Mesh(sparkGeo, sparkMat);
+  sparkR.position.set( eyeOff + headR * 0.06, eyeY + headR * 0.04, eyeFront + headR * 0.17);
+  facing.add(sparkR);
+
+  // Cheek spots — small pink discs on the sides of the face
+  const cheekMat = new T.MeshStandardMaterial({ color: 0xFF9DAE, roughness: 0.6, transparent: true, opacity: 0.7 });
+  const cheekGeo = new T.SphereGeometry(headR * 0.13, 8, 6);
+  const cheekL = new T.Mesh(cheekGeo, cheekMat);
+  cheekL.position.set(-headR * 0.65, bh + headR * 0.7, headR * 0.55);
+  cheekL.scale.set(1, 0.6, 0.3);
+  facing.add(cheekL);
+  const cheekR = new T.Mesh(cheekGeo, cheekMat);
+  cheekR.position.set( headR * 0.65, bh + headR * 0.7, headR * 0.55);
+  cheekR.scale.set(1, 0.6, 0.3);
+  facing.add(cheekR);
+
+  // Mouth — small smile shape via two thin boxes meeting at center
+  const mouthMat = new T.MeshStandardMaterial({ color: 0x4A2E1C });
+  const mouthGeo = new T.BoxGeometry(headR * 0.18, headR * 0.04, headR * 0.04);
+  const mL = new T.Mesh(mouthGeo, mouthMat);
+  const mR = new T.Mesh(mouthGeo, mouthMat);
+  const mouthY = bh + headR * 0.62;
+  mL.position.set(-headR * 0.09, mouthY, eyeFront + headR * 0.02);
+  mL.rotation.z =  Math.PI * 0.12;
+  mR.position.set( headR * 0.09, mouthY, eyeFront + headR * 0.02);
+  mR.rotation.z = -Math.PI * 0.12;
+  facing.add(mL); facing.add(mR);
+
+  // Tiny feet — two small boxes peeking out from under the body
+  const footMat = new T.MeshStandardMaterial({ color: _darken(petColor, 0.7), flatShading: true });
+  const footGeo = new T.BoxGeometry(bw * 0.28, 0.12, bd * 0.4);
+  const footL = new T.Mesh(footGeo, footMat);
+  const footR = new T.Mesh(footGeo, footMat);
+  footL.position.set(-bw * 0.22, 0.06, bd * 0.25);
+  footR.position.set( bw * 0.22, 0.06, bd * 0.25);
+  footL.castShadow = true; footR.castShadow = true;
+  facing.add(footL); facing.add(footR);
 
   scene.add(petGroup);
 
@@ -670,9 +749,21 @@ function mountPet3D(container, p) {
   // ---- Animation loop ----
   let mounted = true;
   let t = 0;
-  const startX = petGroup.position.x;
-  const startZ = petGroup.position.z;
   let lastFrame = performance.now();
+
+  // Wander state — Bit picks a random target on the floor, walks toward it
+  // at constant speed turning to face it, then picks a new target on arrival.
+  // Speed and pause are gentle so it looks like real ambient wandering.
+  const FLOOR_HALF = 2.8;         // keep slightly inside the 8×8 floor
+  function _newTarget() {
+    return {
+      x: (Math.random() * 2 - 1) * FLOOR_HALF,
+      z: (Math.random() * 2 - 1) * FLOOR_HALF,
+    };
+  }
+  let target = _newTarget();
+  let pauseUntil = 0;
+  let currentFacing = 0;   // current rotation.y, lerp-smoothed each frame
 
   function tick(now) {
     if (!mounted) return;
@@ -682,32 +773,57 @@ function mountPet3D(container, p) {
 
     const activity = p.activity;
     if (activity === 'walk') {
-      // Walk a square path around the floor
-      const period = 10;
-      const phase = (t % period) / period;
-      const px = 2.5 * Math.cos(phase * Math.PI * 2);
-      const pz = 2.5 * Math.sin(phase * Math.PI * 2);
-      petGroup.position.x = px;
-      petGroup.position.z = pz;
-      petGroup.rotation.y = Math.atan2(-Math.sin(phase * Math.PI * 2), Math.cos(phase * Math.PI * 2)) + Math.PI/2;
-      petGroup.position.y = Math.abs(Math.sin(t * 8)) * 0.08;
+      // Wander: move toward target. If we got there or paused too long, pick a new one.
+      if (t < pauseUntil) {
+        // Standing still between targets — gentle idle bob
+        petGroup.position.y = Math.sin(t * 3) * 0.04;
+      } else {
+        const dx = target.x - petGroup.position.x;
+        const dz = target.z - petGroup.position.z;
+        const dist = Math.sqrt(dx*dx + dz*dz);
+        if (dist < 0.18) {
+          // Arrived — wait a bit, then pick a new target. Random pause length.
+          pauseUntil = t + 0.6 + Math.random() * 1.4;
+          target = _newTarget();
+        } else {
+          // Move toward target at constant speed
+          const speed = 1.05; // world units / sec
+          const step = Math.min(dist, speed * dt);
+          const nx = dx / dist;
+          const nz = dz / dist;
+          petGroup.position.x += nx * step;
+          petGroup.position.z += nz * step;
+          // Face the direction of motion. atan2(dx, dz) gives angle around Y.
+          const targetAngle = Math.atan2(nx, nz);
+          // Smooth turn — interpolate currentFacing toward targetAngle.
+          // Handle wraparound (shortest-path).
+          let delta = targetAngle - currentFacing;
+          while (delta >  Math.PI) delta -= Math.PI * 2;
+          while (delta < -Math.PI) delta += Math.PI * 2;
+          currentFacing += delta * Math.min(1, dt * 8);
+          facing.rotation.y = currentFacing;
+          // Walk bob — small vertical bounce per step
+          petGroup.position.y = Math.abs(Math.sin(t * 9)) * 0.08;
+        }
+      }
     } else if (activity === 'idle' || activity === 'beg' || activity === 'eat') {
       petGroup.position.y = Math.sin(t * 3) * 0.05;
     } else if (activity === 'sleep') {
       petGroup.position.y = 0.4 + Math.sin(t * 1.4) * 0.025;
     } else if (activity === 'workout') {
-      // Squat pulse
       petGroup.position.y = -Math.abs(Math.sin(t * 4)) * 0.18;
     } else if (activity === 'play') {
       petGroup.position.y = Math.abs(Math.sin(t * 6)) * 0.18;
-      petGroup.rotation.y = Math.sin(t * 2) * 0.4;
+      facing.rotation.y = Math.sin(t * 2) * 0.4;
     } else if (activity === 'cough') {
+      const startX = petGroup.userData.startX || 0;
       petGroup.position.x = startX + Math.sin(t * 12) * 0.04;
     }
 
     renderer.render(scene, camera);
     requestAnimationFrame(tick);
   }
+  petGroup.userData.startX = petGroup.position.x;
   requestAnimationFrame(tick);
 
   // ---- Responsive: resize on container size changes ----
