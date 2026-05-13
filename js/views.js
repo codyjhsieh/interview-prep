@@ -884,19 +884,7 @@ function mountPet3D(container, p) {
   const eyeGroupR = makeEye( 1);
   headGroup.add(eyeGroupL); headGroup.add(eyeGroupR);
 
-  // Cheek spots — flat-ish discs on the front-sides of the head. Pushed
-  // PAST the head sphere (head center y=0.8·headR, radius headR → cheeks
-  // need distance > 1.0·headR from that center to be visible).
-  const cheekMat = new T.MeshStandardMaterial({ color: 0xFF9DAE, roughness: 0.6 });
-  const cheekGeo = new T.SphereGeometry(headR * 0.16, 10, 8);
-  const cheekL = new T.Mesh(cheekGeo, cheekMat);
-  cheekL.position.set(-headR * 0.92, headR * 0.68, headR * 0.48);
-  cheekL.scale.set(1, 0.7, 0.5);
-  headGroup.add(cheekL);
-  const cheekR = new T.Mesh(cheekGeo, cheekMat);
-  cheekR.position.set( headR * 0.92, headR * 0.68, headR * 0.48);
-  cheekR.scale.set(1, 0.7, 0.5);
-  headGroup.add(cheekR);
+  // (Cheek spots removed.)
 
   // Mouth — two thin boxes meeting at center for a small smile
   const mouthMat = new T.MeshStandardMaterial({ color: 0x4A2E1C });
