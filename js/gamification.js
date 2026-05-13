@@ -255,18 +255,43 @@ function reviewCard(state, cardId, quality /* 1..4 */) {
 /* Job-application log. Each entry awards XP via the normal awardXP path
  * so it counts toward today's total + vitality + streak. Per-app XP is
  * calibrated to `goal / 20` (so 10 apps == half the daily goal) with a
- * floor of 1 XP. No metadata captured — it's a pure counter. */
+ * floor of 1 XP. No metadata captured — it's a pure counter.
+ *
+ * The actual `xpGained` (including any random-multiplier bonus from
+ * awardXP) is what we store on the entry, so unlogging via
+ * `removeLastJobApp` can subtract exactly that amount back out. */
 function logJobApp(state) {
   tickDay(state);
   if (!Array.isArray(state.jobApps)) state.jobApps = [];
   const goal = (state.user && state.user.goal) || 60;
   const perAppXP = Math.max(1, Math.round(goal / 20));
-  const entry = { date: todayKey(), ts: Date.now(), xp: perAppXP };
+  const award = awardXP(state, perAppXP, 'app');
+  const entry = { date: todayKey(), ts: Date.now(), xp: award.xpGained };
   state.jobApps.push(entry);
   // Cap retained history (~1y of heavy use) to keep state size bounded.
   if (state.jobApps.length > 1000) state.jobApps.splice(0, state.jobApps.length - 1000);
-  const award = awardXP(state, perAppXP, 'app');
   return { entry, ...award };
+}
+
+/* Undo the most recent job application logged TODAY. Subtracts the
+ * entry's xp back out of state.xp / state.todayXP / history, and
+ * recomputes level. Returns null if there's nothing to undo. */
+function removeLastJobApp(state) {
+  if (!Array.isArray(state.jobApps) || state.jobApps.length === 0) return null;
+  const today = todayKey();
+  let idx = -1;
+  for (let i = state.jobApps.length - 1; i >= 0; i--) {
+    if (state.jobApps[i].date === today) { idx = i; break; }
+  }
+  if (idx === -1) return null;
+  const [removed] = state.jobApps.splice(idx, 1);
+  const xp = removed.xp || 0;
+  state.xp      = Math.max(0, (state.xp      || 0) - xp);
+  state.todayXP = Math.max(0, (state.todayXP || 0) - xp);
+  state.level   = levelFromXP(state.xp);
+  const hentry  = (state.history || []).find(h => h.date === today);
+  if (hentry) hentry.xp = Math.max(0, (hentry.xp || 0) - xp);
+  return { removed, xpRemoved: xp };
 }
 
 function dueCards(state, allCards, limit=20) {
@@ -924,7 +949,7 @@ function coverage(state, categories, modules) {
 
 return {
   STORAGE_KEY, load, save, saveImmediate, reset,
-  tickDay, awardXP, logLessonComplete, logJobApp, feedPetWithPile,
+  tickDay, awardXP, logLessonComplete, logJobApp, removeLastJobApp, feedPetWithPile,
   reviewCard, dueCards,
   recordWrongAnswer, reviewMissedQuestion, dueMissedQuestions, totalMissedCount,
   scheduleConceptReview, dueConceptReviews, totalConceptReviewsCount,

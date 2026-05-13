@@ -2215,6 +2215,7 @@ function renderJobAppsCard(state) {
   const target   = 10;                      // 10 apps = half goal
   const pct      = Math.min(100, Math.round((count / target) * 100));
 
+  const canRemove = count > 0;
   const card = el('div', 'card');
   card.innerHTML = `
     <div class="flex items-center justify-between gap-3 flex-wrap">
@@ -2222,9 +2223,16 @@ function renderJobAppsCard(state) {
         <div class="text-xs muted uppercase tracking-wider">Job applications today</div>
         <div class="text-3xl font-bold mt-1 numeric">${count} <span class="text-sm muted font-normal">/ ${target}</span></div>
       </div>
-      <button class="btn btn-primary" data-app-add>
-        <span class="inline-flex items-center gap-1.5">${iconHTML('check', {size: 14})} Log application</span>
-      </button>
+      <div class="flex items-center gap-1.5">
+        <button class="btn btn-ghost !py-1.5 !px-3" data-app-remove
+                aria-label="Undo last application"
+                ${canRemove ? '' : 'disabled style="opacity:0.4;cursor:not-allowed"'}>
+          <span class="inline-flex items-center" style="font-size:18px;line-height:1">−</span>
+        </button>
+        <button class="btn btn-primary" data-app-add>
+          <span class="inline-flex items-center gap-1.5">${iconHTML('check', {size: 14})} Log application</span>
+        </button>
+      </div>
     </div>
     <div class="bar mt-3"><i style="width:${pct}%; transition: width 0.4s var(--spring-overshoot)"></i></div>
     <div class="text-xs muted mt-2">
@@ -2236,8 +2244,7 @@ function renderJobAppsCard(state) {
     const st = (window.APP && window.APP.getState) ? window.APP.getState() : state;
     const { xpGained } = GAMI.logJobApp(st);
     GAMI.saveImmediate(st);
-    const next = renderJobAppsCard(st);
-    card.replaceWith(next);
+    card.replaceWith(renderJobAppsCard(st));
     if (window.ANIM && window.ANIM.toast) {
       const remaining = target - (count + 1);
       window.ANIM.toast({
@@ -2246,6 +2253,23 @@ function renderJobAppsCard(state) {
       });
     }
   });
+
+  const removeBtn = card.querySelector('[data-app-remove]');
+  if (removeBtn && canRemove) {
+    removeBtn.addEventListener('click', () => {
+      const st = (window.APP && window.APP.getState) ? window.APP.getState() : state;
+      const result = GAMI.removeLastJobApp(st);
+      if (!result) return;
+      GAMI.saveImmediate(st);
+      card.replaceWith(renderJobAppsCard(st));
+      if (window.ANIM && window.ANIM.toast) {
+        window.ANIM.toast({
+          title: 'Application undone',
+          body:  `-${result.xpRemoved} XP refunded.`,
+        });
+      }
+    });
+  }
 
   return card;
 }
