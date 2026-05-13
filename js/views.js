@@ -747,6 +747,9 @@ function mountPet3D(container, p) {
     // Window pane glows the current sky color — the pane itself reads as
     // a light source.
     const skyHex = tod.skyColor;
+    // Day = anything above the horizon (sun arc). Dusk drops below the
+    // horizon mid-window so it sits with night for the window-emissive
+    // brightness pick.
     const isDay = tod.phase === 'day' || tod.phase === 'dawn' || tod.phase === 'sunset';
     const win = new T.Mesh(
       new T.BoxGeometry(1.6, 1.3, 0.05),
@@ -798,14 +801,18 @@ function mountPet3D(container, p) {
       beamReaches = true;
     }
     if (beamReaches) {
-      const isNight = tod.phase === 'night' || tod.phase === 'late';
-      // Per-phase beam color (sunbeam: warm golds vs raw tod.sunColor which
-      // is tuned for the directional light, not the volumetric ray mesh).
-      let rayColor;
-      if (isNight)                       rayColor = 0xa8c0ee;
-      else if (tod.phase === 'dawn')     rayColor = 0xffd8a0;
-      else if (tod.phase === 'sunset')   rayColor = 0xffa860;
-      else                               rayColor = 0xfff0b8;
+      // Beam color = a brightened tint of the actual lerped sun/moon
+      // color (tod.sunColor). The directional sunColor itself is tuned
+      // for the light source, not the volumetric ray mesh — so we push
+      // its luminance up so the beam reads cleanly against the floor at
+      // all hours (including dusk + dawn where sunColor is dim).
+      const _brighten = (c, amt) => {
+        const r = Math.min(255, Math.round(((c >> 16) & 0xff) + 255 * amt));
+        const g = Math.min(255, Math.round(((c >>  8) & 0xff) + 255 * amt));
+        const b = Math.min(255, Math.round((c & 0xff)         + 255 * amt));
+        return (r << 16) | (g << 8) | b;
+      };
+      const rayColor = _brighten(tod.sunColor, 0.18);
 
       // FRUSTUM BEAM — top face matches the window opening, bottom face
       // matches the floor patch. We START from a BoxGeometry (which is the
@@ -1968,16 +1975,18 @@ function mountPet3D(container, p) {
  * a single 3D scene. Mount/dispose happens per stage change so we don't
  * keep 6 WebGL contexts alive. */
 function openPetLifecyclePreview() {
-  // Each stage is shown at a different hour so the user sees Bit across the
-  // full day cycle (dawn / morning / midday / afternoon / sunset / evening / night).
+  // Each stage is shown at a different hour so the user sees Bit across
+  // the full continuous-spectrum day cycle (dawn → morning → midday →
+  // golden hour → sunset → dusk → night). Hours are chosen to land in
+  // visually distinct keyframe bands of the new 24-hour spectrum.
   const stages = [
-    { stage: 'baby',  body: 'baby',   hour: 7,   label: 'Baby · dawn',         sub: 'Days 0–2 · big head, big eyes. Just waking up.' },
-    { stage: 'teen',  body: 'teen',   hour: 10,  label: 'Teen · morning',      sub: 'Days 3–7 · stretched + gangly. Active morning.' },
-    { stage: 'adult', body: 'normal', hour: 12,  label: 'Adult · midday',      sub: 'Days 8+ default. Sun directly overhead.' },
-    { stage: 'adult', body: 'fit',    hour: 15,  label: 'Adult · Fit · afternoon', sub: 'Form > +15. Red athletic headband.' },
-    { stage: 'adult', body: 'jacked', hour: 17,  label: 'Adult · Jacked · sunset', sub: 'Form > +25. Broad shoulders, sweatband.' },
-    { stage: 'adult', body: 'chubby', hour: 19,  label: 'Adult · Chubby · evening', sub: 'Form < −25. Round belly, chef hat.' },
-    { stage: 'dead',  body: 'dead',   hour: 23,  label: 'Death · night',       sub: 'Vitality hits 0. Tombstone under moonlight.' },
+    { stage: 'baby',  body: 'baby',   hour: 6.5,  label: 'Baby · dawn',             sub: 'Days 0–2 · big head, big eyes. Just waking up.' },
+    { stage: 'teen',  body: 'teen',   hour: 10,   label: 'Teen · morning',          sub: 'Days 3–7 · stretched + gangly. Active morning.' },
+    { stage: 'adult', body: 'normal', hour: 12,   label: 'Adult · midday',          sub: 'Days 8+ default. Sun directly overhead.' },
+    { stage: 'adult', body: 'fit',    hour: 15,   label: 'Adult · Fit · afternoon', sub: 'Form > +15. Red athletic headband.' },
+    { stage: 'adult', body: 'jacked', hour: 17,   label: 'Adult · Jacked · sunset', sub: 'Form > +25. Broad shoulders, sweatband.' },
+    { stage: 'adult', body: 'chubby', hour: 18.3, label: 'Adult · Chubby · dusk',   sub: 'Form < −25. Round belly, chef hat. Twilight crossfade.' },
+    { stage: 'dead',  body: 'dead',   hour: 22,   label: 'Death · night',           sub: 'Vitality hits 0. Tombstone under moonlight.' },
   ];
   let idx = 0;
   const wrap = el('div','fixed inset-0 z-50 grid place-items-center p-4');
