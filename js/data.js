@@ -6941,8 +6941,9 @@ The negotiation conversation usually takes 2-3 rounds over a week. Stay friendly
  *
  * Schema: { id, name, vertical, sub, stage, raised, lead, badges[],
  *           totalRoles, notes, jobs[{ title, url, level }] }
- *  - totalRoles is the count of matching NYC engineering postings the
- *    company had open on verification day; `jobs` is the top 3 only.
+ *  - totalRoles == jobs.length (we now store the full set, not just
+ *    the top 3 — the card preview slices to 3, detail shows all).
+ *  - jobs are sorted: founding > senior > mid.
  *  - jobs[].level is "founding" | "senior" | "mid"
  */
 const COMPANIES_VERIFIED_AT = '2026-05-13';
@@ -6956,7 +6957,22 @@ const COMPANIES = [
     jobs:[
       { title:"Software Engineer, Developer Productivity", url:"https://jobs.ashbyhq.com/openai/2cba0d45-7a4f-4f38-ac73-3f8633bf0349", level:"mid" },
       { title:"Software Engineer, Security Observability", url:"https://jobs.ashbyhq.com/openai/1e4e9985-babf-4bd9-8fe8-a2016250780d", level:"mid" },
-      { title:"Software Engineer, Agent Infrastructure", url:"https://jobs.ashbyhq.com/openai/c1316397-25bb-4add-9e9d-0e3ea8ba929a", level:"mid" }
+      { title:"Software Engineer, Agent Infrastructure", url:"https://jobs.ashbyhq.com/openai/c1316397-25bb-4add-9e9d-0e3ea8ba929a", level:"mid" },
+      { title:"Software Engineer, Compute - Storage", url:"https://jobs.ashbyhq.com/openai/7649205e-20dc-4bb4-9358-69474a851132", level:"mid" },
+      { title:"Forward Deployed Engineer (FDE) - NYC", url:"https://jobs.ashbyhq.com/openai/cf31f5f6-4e67-4695-808c-9cdd2e1fa3b1", level:"mid" },
+      { title:"Software Engineer, Identity Infrastructure Engineering", url:"https://jobs.ashbyhq.com/openai/551b0d0d-46c2-42fb-bb05-46e2fba8d4db", level:"mid" },
+      { title:"Software Engineer, Infrastructure Security", url:"https://jobs.ashbyhq.com/openai/98ad9beb-4f91-496c-bd16-ac0b2a8d5bb2", level:"mid" },
+      { title:"Forward Deployed Software Engineer - NYC", url:"https://jobs.ashbyhq.com/openai/533c0fc9-b773-476d-9f96-a0528efbab0e", level:"mid" },
+      { title:"Frontend Engineer, Dotcom (Marketing)", url:"https://jobs.ashbyhq.com/openai/ffc3f648-a39d-4403-ad16-e8d38c88d572", level:"mid" },
+      { title:"iOS Software Engineer, ChatGPT Engineering", url:"https://jobs.ashbyhq.com/openai/295506f0-c4f7-4890-af93-08d4384a3330", level:"mid" },
+      { title:"Frontend Engineer, ChatGPT Engineering", url:"https://jobs.ashbyhq.com/openai/5bde9af5-df78-460e-ae9c-5c49ac778640", level:"mid" },
+      { title:"Platform Engineer, Forward Deployed Engineering (FDE) - NYC", url:"https://jobs.ashbyhq.com/openai/45ab8896-06bd-4c8e-bb76-914483d5d180", level:"mid" },
+      { title:"Learning Systems Data Engineer", url:"https://jobs.ashbyhq.com/openai/9c55e073-886d-466a-86a3-435a291e19d2", level:"mid" },
+      { title:"Software Engineer, Delivery / CD", url:"https://jobs.ashbyhq.com/openai/e14fc37c-7ae5-4a6b-ba0d-a36860cf9bb2", level:"mid" },
+      { title:"Technical Deployment Lead, Forward Deployed Engineering (FDE) - NYC", url:"https://jobs.ashbyhq.com/openai/9f2e4897-be7d-40a1-804d-37e6608f506b", level:"mid" },
+      { title:"Software Engineer, Codex Core Agents", url:"https://jobs.ashbyhq.com/openai/7ade7a12-845c-4e3a-af23-c028420bd181", level:"mid" },
+      { title:"Applied AI Engineer, Codex Core Agent", url:"https://jobs.ashbyhq.com/openai/577e6673-0a4a-491b-9a0d-facbdd3bdf3c", level:"mid" },
+      { title:"Software Engineer, Compute Infrastructure", url:"https://jobs.ashbyhq.com/openai/ca300a6d-a2a7-4580-aad7-323fbdfee7b1", level:"mid" }
     ] },
   { id:"anthropic", name:"Anthropic", vertical:"ai",
     sub:"Claude \u2014 AI safety lab",
@@ -6967,7 +6983,44 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Software Engineer, Full-stack", url:"https://job-boards.greenhouse.io/anthropic/jobs/5174743008", level:"senior" },
       { title:"Senior+ Software Engineer, Research Tools", url:"https://job-boards.greenhouse.io/anthropic/jobs/4981828008", level:"senior" },
-      { title:"Senior / Staff+ Software Engineer, Voice Platform", url:"https://job-boards.greenhouse.io/anthropic/jobs/5172245008", level:"senior" }
+      { title:"Senior / Staff+ Software Engineer, Voice Platform", url:"https://job-boards.greenhouse.io/anthropic/jobs/5172245008", level:"senior" },
+      { title:"Staff / Senior Software Engineer, Compute Capacity", url:"https://job-boards.greenhouse.io/anthropic/jobs/5126702008", level:"senior" },
+      { title:"Analytics Data Engineer", url:"https://job-boards.greenhouse.io/anthropic/jobs/4956672008", level:"mid" },
+      { title:"Applied AI Engineer, Beneficial Deployments", url:"https://job-boards.greenhouse.io/anthropic/jobs/5068226008", level:"mid" },
+      { title:"Applied AI Engineer, Enterprise Tech", url:"https://job-boards.greenhouse.io/anthropic/jobs/5057647008", level:"mid" },
+      { title:"Applied AI Engineer, Life Sciences (Beneficial Deployments)", url:"https://job-boards.greenhouse.io/anthropic/jobs/5111942008", level:"mid" },
+      { title:"Forward Deployed Engineer, Applied AI", url:"https://job-boards.greenhouse.io/anthropic/jobs/4985877008", level:"mid" },
+      { title:"Forward Deployed Engineer, Federal Civilian", url:"https://job-boards.greenhouse.io/anthropic/jobs/5079562008", level:"mid" },
+      { title:"Full-Stack Software Engineer, Reinforcement Learning", url:"https://job-boards.greenhouse.io/anthropic/jobs/5186067008", level:"mid" },
+      { title:"Infrastructure Engineer, Sandboxing", url:"https://job-boards.greenhouse.io/anthropic/jobs/5030680008", level:"mid" },
+      { title:"IT Systems Engineer, Corporate Systems & Infrastructure", url:"https://job-boards.greenhouse.io/anthropic/jobs/4887952008", level:"mid" },
+      { title:"IT Systems Engineer, Enterprise SaaS", url:"https://job-boards.greenhouse.io/anthropic/jobs/5161882008", level:"mid" },
+      { title:"Machine Learning Systems Engineer, Research Tools", url:"https://job-boards.greenhouse.io/anthropic/jobs/4952079008", level:"mid" },
+      { title:"Machine Learning Systems Engineer, RL Engineering", url:"https://job-boards.greenhouse.io/anthropic/jobs/4952051008", level:"mid" },
+      { title:"Model Quality Software Engineer, Claude Code", url:"https://job-boards.greenhouse.io/anthropic/jobs/5098025008", level:"mid" },
+      { title:"Security Software Engineer, Detection & Response Platform", url:"https://job-boards.greenhouse.io/anthropic/jobs/4595463008", level:"mid" },
+      { title:"Security Software Engineer, Platform Integration", url:"https://job-boards.greenhouse.io/anthropic/jobs/5209776008", level:"mid" },
+      { title:"Software Engineer, Account Abuse", url:"https://job-boards.greenhouse.io/anthropic/jobs/5123039008", level:"mid" },
+      { title:"Software Engineer, Compute Efficiency", url:"https://job-boards.greenhouse.io/anthropic/jobs/5108982008", level:"mid" },
+      { title:"Software Engineer, Cybersecurity Products", url:"https://job-boards.greenhouse.io/anthropic/jobs/5063007008", level:"mid" },
+      { title:"Software Engineer, Human Data Interface", url:"https://job-boards.greenhouse.io/anthropic/jobs/5109273008", level:"mid" },
+      { title:"Software Engineer, Research Data Platform", url:"https://job-boards.greenhouse.io/anthropic/jobs/5191226008", level:"mid" },
+      { title:"Software Engineer, Safeguards", url:"https://job-boards.greenhouse.io/anthropic/jobs/4951844008", level:"mid" },
+      { title:"Software Engineer, Sandboxing", url:"https://job-boards.greenhouse.io/anthropic/jobs/5083039008", level:"mid" },
+      { title:"Software Engineer, Sandboxing (Systems)", url:"https://job-boards.greenhouse.io/anthropic/jobs/5025591008", level:"mid" },
+      { title:"Software Engineer, Systems - Claude Code", url:"https://job-boards.greenhouse.io/anthropic/jobs/5218395008", level:"mid" },
+      { title:"Software Engineer, UI Platform", url:"https://job-boards.greenhouse.io/anthropic/jobs/4673416008", level:"mid" },
+      { title:"Staff+ Software Engineer, Backend", url:"https://job-boards.greenhouse.io/anthropic/jobs/5174755008", level:"mid" },
+      { title:"Staff+ Software Engineer, Databases", url:"https://job-boards.greenhouse.io/anthropic/jobs/5151069008", level:"mid" },
+      { title:"Staff+ Software Engineer, Developer Productivity", url:"https://job-boards.greenhouse.io/anthropic/jobs/5110511008", level:"mid" },
+      { title:"Staff+ Software Engineer, Full-stack", url:"https://job-boards.greenhouse.io/anthropic/jobs/5174747008", level:"mid" },
+      { title:"Staff+ Software Engineer, Platform", url:"https://job-boards.greenhouse.io/anthropic/jobs/5157847008", level:"mid" },
+      { title:"Staff+ Software Engineer, Privacy", url:"https://job-boards.greenhouse.io/anthropic/jobs/5159146008", level:"mid" },
+      { title:"Staff+ Software Engineer, Public Sector", url:"https://job-boards.greenhouse.io/anthropic/jobs/5205704008", level:"mid" },
+      { title:"Staff + Sr. Software Engineer, AI Reliability", url:"https://job-boards.greenhouse.io/anthropic/jobs/5113224008", level:"senior" },
+      { title:"Staff + Sr. Software Engineer, Inference", url:"https://job-boards.greenhouse.io/anthropic/jobs/4951696008", level:"senior" },
+      { title:"Staff + Sr. Software Engineer, Inference Deployment", url:"https://job-boards.greenhouse.io/anthropic/jobs/5111745008", level:"senior" },
+      { title:"UI Software Engineer, Claude.ai Consumer Product", url:"https://job-boards.greenhouse.io/anthropic/jobs/5026097008", level:"mid" }
     ] },
   { id:"scaleai", name:"Scale AI", vertical:"ai",
     sub:"AI data + evals + RLHF",
@@ -6978,7 +7031,21 @@ const COMPANIES = [
     jobs:[
       { title:"Senior AI Infrastructure Engineer, Model Serving Platform", url:"https://job-boards.greenhouse.io/scaleai/jobs/4520320005", level:"senior" },
       { title:"Senior AI Infrastructure Engineer - Training Platform", url:"https://job-boards.greenhouse.io/scaleai/jobs/4689751005", level:"senior" },
-      { title:"Senior Forward Deployed AI Engineer, Enterprise", url:"https://job-boards.greenhouse.io/scaleai/jobs/4597399005", level:"senior" }
+      { title:"Senior Forward Deployed AI Engineer, Enterprise", url:"https://job-boards.greenhouse.io/scaleai/jobs/4597399005", level:"senior" },
+      { title:"Senior Forward Deployed Data Scientist/Engineer", url:"https://job-boards.greenhouse.io/scaleai/jobs/4636227005", level:"senior" },
+      { title:"Senior Machine Learning Engineer - Model Evaluations, Public Sector", url:"https://job-boards.greenhouse.io/scaleai/jobs/4631848005", level:"senior" },
+      { title:"Senior Machine Learning Engineer, Public Sector", url:"https://job-boards.greenhouse.io/scaleai/jobs/4281519005", level:"senior" },
+      { title:"Senior Software Engineer, Connectivity", url:"https://job-boards.greenhouse.io/scaleai/jobs/4654275005", level:"senior" },
+      { title:"Senior Software Engineer,  Full-Stack \u2013 Scale GP", url:"https://job-boards.greenhouse.io/scaleai/jobs/4637484005", level:"senior" },
+      { title:"Senior Software Engineer, GenAI", url:"https://job-boards.greenhouse.io/scaleai/jobs/4591298005", level:"senior" },
+      { title:"Senior Software Engineer, Public Sector", url:"https://job-boards.greenhouse.io/scaleai/jobs/4674911005", level:"senior" },
+      { title:"Applied AI Engineer, Enterprise GenAI", url:"https://job-boards.greenhouse.io/scaleai/jobs/4514173005", level:"mid" },
+      { title:"Forward Deployed Engineer, GenAI", url:"https://job-boards.greenhouse.io/scaleai/jobs/4593571005", level:"mid" },
+      { title:"Infrastructure Software Engineer, Enterprise GenAI", url:"https://job-boards.greenhouse.io/scaleai/jobs/4665557005", level:"mid" },
+      { title:"Mission Software Engineer, Public Sector", url:"https://job-boards.greenhouse.io/scaleai/jobs/4481921005", level:"mid" },
+      { title:"Software Engineer, ARC Team", url:"https://job-boards.greenhouse.io/scaleai/jobs/4673771005", level:"mid" },
+      { title:"Software Engineer, Enterprise AI", url:"https://job-boards.greenhouse.io/scaleai/jobs/4513943005", level:"mid" },
+      { title:"Software Engineer, Frontier AI Infrastructure", url:"https://job-boards.greenhouse.io/scaleai/jobs/4363623005", level:"mid" }
     ] },
   { id:"figma", name:"Figma", vertical:"saas",
     sub:"Collaborative design (Adobe-acquired then unwound)",
@@ -6989,7 +7056,19 @@ const COMPANIES = [
     jobs:[
       { title:"Data Engineer", url:"https://boards.greenhouse.io/figma/jobs/5220003004?gh_jid=5220003004", level:"mid" },
       { title:"Data Platform Engineer", url:"https://boards.greenhouse.io/figma/jobs/5840332004?gh_jid=5840332004", level:"mid" },
-      { title:"Sales AI Engineer", url:"https://boards.greenhouse.io/figma/jobs/5991176004?gh_jid=5991176004", level:"mid" }
+      { title:"Sales AI Engineer", url:"https://boards.greenhouse.io/figma/jobs/5991176004?gh_jid=5991176004", level:"mid" },
+      { title:"Software Engineer, AI Platforms", url:"https://boards.greenhouse.io/figma/jobs/5691886004?gh_jid=5691886004", level:"mid" },
+      { title:"Software Engineer, AI Product", url:"https://boards.greenhouse.io/figma/jobs/5551730004?gh_jid=5551730004", level:"mid" },
+      { title:"Software Engineer, C++", url:"https://boards.greenhouse.io/figma/jobs/5552530004?gh_jid=5552530004", level:"mid" },
+      { title:"Software Engineer, Code Platform", url:"https://boards.greenhouse.io/figma/jobs/5759501004?gh_jid=5759501004", level:"mid" },
+      { title:"Software Engineer, Data Infrastructure", url:"https://boards.greenhouse.io/figma/jobs/5551686004?gh_jid=5551686004", level:"mid" },
+      { title:"Software Engineer, Developer Experience", url:"https://boards.greenhouse.io/figma/jobs/5790627004?gh_jid=5790627004", level:"mid" },
+      { title:"Software Engineer, Distributed Systems", url:"https://boards.greenhouse.io/figma/jobs/5552549004?gh_jid=5552549004", level:"mid" },
+      { title:"Software Engineer, Full Stack", url:"https://boards.greenhouse.io/figma/jobs/5691911004?gh_jid=5691911004", level:"mid" },
+      { title:"Software Engineer, Graphics & Media", url:"https://boards.greenhouse.io/figma/jobs/5552522004?gh_jid=5552522004", level:"mid" },
+      { title:"Software Engineer, Growth & Monetization", url:"https://boards.greenhouse.io/figma/jobs/5552560004?gh_jid=5552560004", level:"mid" },
+      { title:"Software Engineer, Machine Learning", url:"https://boards.greenhouse.io/figma/jobs/5551532004?gh_jid=5551532004", level:"mid" },
+      { title:"Software Engineer, Production Engineering", url:"https://boards.greenhouse.io/figma/jobs/5551649004?gh_jid=5551649004", level:"mid" }
     ] },
   { id:"notion", name:"Notion", vertical:"saas",
     sub:"Connected workspace + AI",
@@ -7000,7 +7079,11 @@ const COMPANIES = [
     jobs:[
       { title:"Software Engineer, Datastore", url:"https://jobs.ashbyhq.com/notion/3fbcf972-52d5-4475-8720-040025c6f7da", level:"mid" },
       { title:"Forward Deployed Engineer, GTM", url:"https://jobs.ashbyhq.com/notion/10437426-14c8-4c45-8075-67959ce80393", level:"mid" },
-      { title:"Software Engineer, Product Infrastructure", url:"https://jobs.ashbyhq.com/notion/d41b635b-c17b-4efd-89fd-fdb2ddb62e9a", level:"mid" }
+      { title:"Software Engineer, Product Infrastructure", url:"https://jobs.ashbyhq.com/notion/d41b635b-c17b-4efd-89fd-fdb2ddb62e9a", level:"mid" },
+      { title:"Software Engineer, Collections Experience", url:"https://jobs.ashbyhq.com/notion/5d8c1ec6-e9ea-416b-9715-880bf5037abc", level:"mid" },
+      { title:"Software Engineer, Mobile AI, iOS", url:"https://jobs.ashbyhq.com/notion/59fe8e68-edf9-4da9-9ce0-4d6333ed371f", level:"mid" },
+      { title:"Software Engineer, Trust", url:"https://jobs.ashbyhq.com/notion/66236b7e-2905-4a93-84a5-ed036a1a6581", level:"mid" },
+      { title:"Software Engineer, AI Dev Velocity", url:"https://jobs.ashbyhq.com/notion/c565d3b0-0dcf-4bcd-b29b-4168479ac78e", level:"mid" }
     ] },
   { id:"hebbia", name:"Hebbia", vertical:"ai",
     sub:"AI for asset managers + finance",
@@ -7011,7 +7094,13 @@ const COMPANIES = [
     jobs:[
       { title:"Backend Engineer, Agent Collaboration Platform", url:"https://job-boards.greenhouse.io/hebbia/jobs/4584764005", level:"mid" },
       { title:"Backend Engineer, Agents", url:"https://job-boards.greenhouse.io/hebbia/jobs/4584766005", level:"mid" },
-      { title:"Backend Engineer, Growth and Data", url:"https://job-boards.greenhouse.io/hebbia/jobs/4584761005", level:"mid" }
+      { title:"Backend Engineer, Growth and Data", url:"https://job-boards.greenhouse.io/hebbia/jobs/4584761005", level:"mid" },
+      { title:"Data Engineer", url:"https://job-boards.greenhouse.io/hebbia/jobs/4564848005", level:"mid" },
+      { title:"Forward Deployed Banker (AI Strategist)", url:"https://job-boards.greenhouse.io/hebbia/jobs/4683103005", level:"mid" },
+      { title:"Forward Deployed Engineer", url:"https://job-boards.greenhouse.io/hebbia/jobs/4679338005", level:"mid" },
+      { title:"Forward Deployed Investor (AI Strategist)", url:"https://job-boards.greenhouse.io/hebbia/jobs/4683104005", level:"mid" },
+      { title:"Platform Engineer, Document Intelligence", url:"https://job-boards.greenhouse.io/hebbia/jobs/4584750005", level:"mid" },
+      { title:"Software Engineer, Site Reliability", url:"https://job-boards.greenhouse.io/hebbia/jobs/4666955005", level:"mid" }
     ] },
   { id:"decagon", name:"Decagon", vertical:"ai",
     sub:"AI customer-support agents",
@@ -7022,7 +7111,8 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Software Engineer, Enterprise Product", url:"https://jobs.ashbyhq.com/decagon/dc7c3b51-5be0-4890-a481-5bb200df48eb", level:"senior" },
       { title:"Senior Software Engineer, Agent Orchestration", url:"https://jobs.ashbyhq.com/decagon/762ee436-6acc-4700-9927-0e73d6dc4123", level:"senior" },
-      { title:"Senior Software Engineer, Infrastructure", url:"https://jobs.ashbyhq.com/decagon/a4796fbc-b45c-4e1b-b1d2-1a17c0b4fa7a", level:"senior" }
+      { title:"Senior Software Engineer, Infrastructure", url:"https://jobs.ashbyhq.com/decagon/a4796fbc-b45c-4e1b-b1d2-1a17c0b4fa7a", level:"senior" },
+      { title:"Senior Software Engineer, Agents", url:"https://jobs.ashbyhq.com/decagon/cd95c25c-fdb7-4816-8a31-6d75e86adbe0", level:"senior" }
     ] },
   { id:"credal", name:"Credal", vertical:"ai",
     sub:"Enterprise LLM gateway",
@@ -7033,7 +7123,9 @@ const COMPANIES = [
     jobs:[
       { title:"Founding Frontend/UX Software Engineer", url:"https://jobs.ashbyhq.com/credal/5d192321-a846-4877-aa71-8ebf0a8ca955", level:"founding" },
       { title:"Founding Software Engineer, Backend Infrastructure", url:"https://jobs.ashbyhq.com/credal/9a492c8f-60e4-42e7-abff-0a8a36aece91", level:"founding" },
-      { title:"Infra, Cloud & Backend Software Engineer", url:"https://jobs.ashbyhq.com/credal/772f0196-ae79-42aa-bb3e-5c2c3c172992", level:"mid" }
+      { title:"Infra, Cloud & Backend Software Engineer", url:"https://jobs.ashbyhq.com/credal/772f0196-ae79-42aa-bb3e-5c2c3c172992", level:"mid" },
+      { title:"Full Stack Software Engineer", url:"https://jobs.ashbyhq.com/credal/529d3184-6b9b-46e9-85f6-632ecedaea4f", level:"mid" },
+      { title:"Forward Deployed Software Engineer", url:"https://jobs.ashbyhq.com/credal/ec8a560e-fe8b-4989-b24f-5946bbbb8ab4", level:"mid" }
     ] },
   { id:"mirage", name:"Mirage", vertical:"ai",
     sub:"AI 3D worldbuilding",
@@ -7044,7 +7136,9 @@ const COMPANIES = [
     jobs:[
       { title:"Software Engineer, Applied AI", url:"https://jobs.ashbyhq.com/mirage/f5899886-1bad-410d-b9eb-eeabfa312f6c", level:"mid" },
       { title:"Software Engineer, Web Product", url:"https://jobs.ashbyhq.com/mirage/961e9a66-7574-4e0a-bff1-95312b7d6cab", level:"mid" },
-      { title:"Software Engineer, iOS", url:"https://jobs.ashbyhq.com/mirage/7ea89586-fa45-4ada-828d-8dc74ed0eb9c", level:"mid" }
+      { title:"Software Engineer, iOS", url:"https://jobs.ashbyhq.com/mirage/7ea89586-fa45-4ada-828d-8dc74ed0eb9c", level:"mid" },
+      { title:"Software Engineer, Backend", url:"https://jobs.ashbyhq.com/mirage/bf453a91-677d-4c35-b75f-4add3a4b7933", level:"mid" },
+      { title:"Software Engineer, Early Career", url:"https://jobs.ashbyhq.com/mirage/cbf278fd-84ec-48d9-8052-b76abb035ac7", level:"mid" }
     ] },
   { id:"tavily", name:"Tavily", vertical:"ai",
     sub:"Search API for AI agents",
@@ -7064,7 +7158,14 @@ const COMPANIES = [
     jobs:[
       { title:"Member of Technical Staff - Systems", url:"https://jobs.ashbyhq.com/modal/9b33ebe7-e829-4f03-97ba-5c94dbd7daf6", level:"mid" },
       { title:"Member of Technical Staff - Product (Frontend)", url:"https://jobs.ashbyhq.com/modal/dd84cf88-1f13-4f39-b371-237e103fce34", level:"mid" },
-      { title:"Forward Deployed Engineer - ML", url:"https://jobs.ashbyhq.com/modal/9fadb51f-ce11-41b1-84d5-470e66cc8ee9", level:"mid" }
+      { title:"Forward Deployed Engineer - ML", url:"https://jobs.ashbyhq.com/modal/9fadb51f-ce11-41b1-84d5-470e66cc8ee9", level:"mid" },
+      { title:"Member of Technical Staff - ML Performance", url:"https://jobs.ashbyhq.com/modal/af17da5e-23ca-4802-854d-5f0546e1ed32", level:"mid" },
+      { title:"Member of Technical Staff - Python SDK", url:"https://jobs.ashbyhq.com/modal/265d6127-dd34-433b-819a-1f935572c7d8", level:"mid" },
+      { title:"Forward Deployed Engineer - Systems", url:"https://jobs.ashbyhq.com/modal/cbbbee50-3d3b-4873-8ae8-ff4b885b8e54", level:"mid" },
+      { title:"Member of Technical Staff - Product (Backend)", url:"https://jobs.ashbyhq.com/modal/a4b8b2b6-5d0c-4ba6-9256-b84be84fb79e", level:"mid" },
+      { title:"Member of Technical Staff - Platform Engineering", url:"https://jobs.ashbyhq.com/modal/84467a68-6876-4730-9d80-6c6f3d0c2d71", level:"mid" },
+      { title:"Member of Technical Staff - ML Training Systems", url:"https://jobs.ashbyhq.com/modal/89bfd784-071a-4dcc-a5ab-6ba9d5e53dad", level:"mid" },
+      { title:"Member of Technical Staff - Agent DX Research", url:"https://jobs.ashbyhq.com/modal/407cd498-eed3-46f0-b0f6-ef689c86696b", level:"mid" }
     ] },
   { id:"normal-computing", name:"Normal Computing", vertical:"ai",
     sub:"Probabilistic AI for enterprise",
@@ -7086,7 +7187,10 @@ const COMPANIES = [
     jobs:[
       { title:"Software Engineer - Back End", url:"https://jobs.ashbyhq.com/distyl/a906a364-236d-4c41-a844-dced0c394936", level:"mid" },
       { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/distyl/ec9e338a-4040-4aa2-b049-424cd343f5f5", level:"mid" },
-      { title:"Forward Deployed Architect", url:"https://jobs.ashbyhq.com/distyl/325786b8-76a3-43bc-841b-726cebc4aea3", level:"mid" }
+      { title:"Forward Deployed Architect", url:"https://jobs.ashbyhq.com/distyl/325786b8-76a3-43bc-841b-726cebc4aea3", level:"mid" },
+      { title:"Frontend Engineer, Product", url:"https://jobs.ashbyhq.com/distyl/147bb404-915d-44ec-b268-be02701872bc", level:"mid" },
+      { title:"AI Engineer, Evaluation", url:"https://jobs.ashbyhq.com/distyl/b0bb160e-498d-4f32-baaa-3b4974a3cbf2", level:"mid" },
+      { title:"AI Engineer", url:"https://jobs.ashbyhq.com/distyl/de4bdf84-bbe8-4a7c-8d5f-09492ad223f5", level:"mid" }
     ] },
   { id:"sierra", name:"Sierra", vertical:"ai",
     sub:"AI agents for consumer brands",
@@ -7125,7 +7229,8 @@ const COMPANIES = [
     jobs:[
       { title:"Full-Stack Engineer (Back-End Leaning)", url:"https://jobs.ashbyhq.com/elevenlabs/c7d59014-b918-4c15-ae33-79f5c9f2cf9f", level:"mid" },
       { title:"Full-Stack Engineer (Front-End Leaning)", url:"https://jobs.ashbyhq.com/elevenlabs/ada7cd2c-8b9f-4f19-a88b-7c2ca1be1fde", level:"mid" },
-      { title:"Forward Deployed Engineer - Software Engineer", url:"https://jobs.ashbyhq.com/elevenlabs/6c4c57c1-ec72-42ba-af3a-eb7aebbde2e6", level:"mid" }
+      { title:"Forward Deployed Engineer - Software Engineer", url:"https://jobs.ashbyhq.com/elevenlabs/6c4c57c1-ec72-42ba-af3a-eb7aebbde2e6", level:"mid" },
+      { title:"Full-Stack Engineer", url:"https://jobs.ashbyhq.com/elevenlabs/6a530871-b6c6-4783-ac6b-69cc3b084192", level:"mid" }
     ] },
   { id:"rilla", name:"Rilla", vertical:"ai",
     sub:"AI for field-sales coaching",
@@ -7136,7 +7241,10 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/rilla/6f4e6ca1-efe7-4f25-af69-59f78981ef70", level:"senior" },
       { title:"Senior Software Engineer, Mobile", url:"https://jobs.ashbyhq.com/rilla/a48fe94a-63a8-442b-9da5-25a3f36f0a94", level:"senior" },
-      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/rilla/37228ca3-4e4a-4e3c-9414-d8a2046ff496", level:"mid" }
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/rilla/37228ca3-4e4a-4e3c-9414-d8a2046ff496", level:"mid" },
+      { title:"Forward Deployed Engineer, Integrations", url:"https://jobs.ashbyhq.com/rilla/ec768352-6ddb-4d4b-8704-0c04c37fff13", level:"mid" },
+      { title:"Software Engineer, Applied AI", url:"https://jobs.ashbyhq.com/rilla/fad15157-b4cc-44ff-92b7-4afd4fe3388e", level:"mid" },
+      { title:"Software Engineer, Platform", url:"https://jobs.ashbyhq.com/rilla/dac348e8-dd09-4408-b6fe-d250bec1c057", level:"mid" }
     ] },
   { id:"stripe", name:"Stripe", vertical:"fintech",
     sub:"Payments + financial infra",
@@ -7147,7 +7255,12 @@ const COMPANIES = [
     jobs:[
       { title:"Backend Engineer, AI Security", url:"https://stripe.com/jobs/search?gh_jid=7826765", level:"mid" },
       { title:"Backend Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7235875", level:"mid" },
-      { title:"Forward Deployed Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7230452", level:"mid" }
+      { title:"Forward Deployed Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7230452", level:"mid" },
+      { title:"Frontend Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7656562", level:"mid" },
+      { title:"Fullstack Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7091959", level:"mid" },
+      { title:"Infrastructure Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7462961", level:"mid" },
+      { title:"Machine Learning Engineer, Stripe Assistant", url:"https://stripe.com/jobs/search?gh_jid=7629052", level:"mid" },
+      { title:"Software Engineer - Smart Contract, Bridge", url:"https://stripe.com/jobs/search?gh_jid=7507904", level:"mid" }
     ] },
   { id:"ramp", name:"Ramp", vertical:"fintech",
     sub:"Corporate cards + finance ops",
@@ -7158,7 +7271,25 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Software Engineer | GTM Platform, Frontend", url:"https://jobs.ashbyhq.com/ramp/1540a41f-d88f-4c89-9b08-5b9fade1ee81", level:"senior" },
       { title:"Software Engineer, Frontend", url:"https://jobs.ashbyhq.com/ramp/4e64ab86-4e30-403b-b1b9-41dc052570ce", level:"mid" },
-      { title:"Software Engineer, Data Platform", url:"https://jobs.ashbyhq.com/ramp/bca0346c-b843-4795-96df-6091f51e421b", level:"mid" }
+      { title:"Software Engineer, Data Platform", url:"https://jobs.ashbyhq.com/ramp/bca0346c-b843-4795-96df-6091f51e421b", level:"mid" },
+      { title:"Software Engineer, Stablecoin", url:"https://jobs.ashbyhq.com/ramp/d1183b00-6590-4fe4-a585-28d84e578fe3", level:"mid" },
+      { title:"University Grad | Software Engineer | Frontend", url:"https://jobs.ashbyhq.com/ramp/a1229aec-1105-4c47-8533-b912e732ed89", level:"mid" },
+      { title:"Software Engineer, Growth Platform", url:"https://jobs.ashbyhq.com/ramp/f5b60cf1-c0ec-42c1-89db-ece853e998ab", level:"mid" },
+      { title:"Software Engineer, Product Growth", url:"https://jobs.ashbyhq.com/ramp/0c9e3e0f-54df-4252-a17b-b506e954225b", level:"mid" },
+      { title:"Software Engineer, AI Forward Deployed", url:"https://jobs.ashbyhq.com/ramp/deca582c-a1d0-4705-9975-60aed81ba89f", level:"mid" },
+      { title:"Software Engineer, Core Product", url:"https://jobs.ashbyhq.com/ramp/5fe4c64e-9336-4384-9e6f-ff32eeb3fdae", level:"mid" },
+      { title:"Applied AI Engineer", url:"https://jobs.ashbyhq.com/ramp/d204e136-2749-42de-82b4-88a0dd352090", level:"mid" },
+      { title:"Software Engineer, Fraud & Identity", url:"https://jobs.ashbyhq.com/ramp/8fa367de-71ba-409e-befd-175a163acb1b", level:"mid" },
+      { title:"Software Engineer, Risk", url:"https://jobs.ashbyhq.com/ramp/5598f7b8-4ae2-4105-a2b4-2d0f55c54c40", level:"mid" },
+      { title:"Software Engineer, Accounting", url:"https://jobs.ashbyhq.com/ramp/ed2e9a94-f58e-4ff8-8853-afd977850d43", level:"mid" },
+      { title:"Software Engineer, Bill Pay & Procurement", url:"https://jobs.ashbyhq.com/ramp/2a4968ae-220c-471b-b890-a011de570bbb", level:"mid" },
+      { title:"Software Engineer, AI DevX", url:"https://jobs.ashbyhq.com/ramp/b42cce4b-8fa9-4e8d-892d-3a29a7afb909", level:"mid" },
+      { title:"Software Engineer, Ramp Travel", url:"https://jobs.ashbyhq.com/ramp/4bb1ccd6-cf0d-48a8-90f6-05d61617d0d4", level:"mid" },
+      { title:"Software Engineer, Agent Developer Platform", url:"https://jobs.ashbyhq.com/ramp/42527ca9-03b9-499e-a5c4-18e4245af138", level:"mid" },
+      { title:"Backend Engineer, Ops", url:"https://jobs.ashbyhq.com/ramp/7bfa613e-151c-469b-9973-c89ee3d14838", level:"mid" },
+      { title:"Software Engineer, Guest Travel", url:"https://jobs.ashbyhq.com/ramp/f2d10bdf-0906-47eb-96fb-0efe6f81d8a3", level:"mid" },
+      { title:"Software Engineer, Engineering Platform", url:"https://jobs.ashbyhq.com/ramp/198150d6-789a-4ef8-999f-93a49656d4f1", level:"mid" },
+      { title:"Software Engineer, Production Engineering", url:"https://jobs.ashbyhq.com/ramp/be496b52-cfbf-494e-b862-61fb4a188b24", level:"mid" }
     ] },
   { id:"brex", name:"Brex", vertical:"fintech",
     sub:"Corporate cards + spend mgmt",
@@ -7169,7 +7300,9 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Software Engineer, Frontend", url:"https://www.brex.com/careers/8501052002?gh_jid=8501052002", level:"senior" },
       { title:"Senior Software Engineer, Full Stack", url:"https://www.brex.com/careers/8472634002?gh_jid=8472634002", level:"senior" },
-      { title:"Senior Software Engineer, Product", url:"https://www.brex.com/careers/8465003002?gh_jid=8465003002", level:"senior" }
+      { title:"Senior Software Engineer, Product", url:"https://www.brex.com/careers/8465003002?gh_jid=8465003002", level:"senior" },
+      { title:"Software Engineer, Forward Deployed Agent Builder", url:"https://www.brex.com/careers/8523177002?gh_jid=8523177002", level:"mid" },
+      { title:"Software Engineer II, Backend", url:"https://www.brex.com/careers/8536424002?gh_jid=8536424002", level:"mid" }
     ] },
   { id:"mercury", name:"Mercury", vertical:"fintech",
     sub:"Banking for startups",
@@ -7180,7 +7313,12 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Backend Engineer - Product", url:"https://job-boards.greenhouse.io/mercury/jobs/5520964004", level:"senior" },
       { title:"Senior Full-Stack Engineer", url:"https://job-boards.greenhouse.io/mercury/jobs/5493086004", level:"senior" },
-      { title:"Senior Infrastructure Engineer", url:"https://job-boards.greenhouse.io/mercury/jobs/5832466004", level:"senior" }
+      { title:"Senior Infrastructure Engineer", url:"https://job-boards.greenhouse.io/mercury/jobs/5832466004", level:"senior" },
+      { title:"Senior Software Engineer - AI Engineering", url:"https://job-boards.greenhouse.io/mercury/jobs/5850044004", level:"senior" },
+      { title:"Senior Software Engineer - Banking Integration Platform", url:"https://job-boards.greenhouse.io/mercury/jobs/5791111004", level:"senior" },
+      { title:"Senior Software Engineer - Risk (AI & Automation)", url:"https://job-boards.greenhouse.io/mercury/jobs/5765913004", level:"senior" },
+      { title:"Senior Software Engineer - Stability", url:"https://job-boards.greenhouse.io/mercury/jobs/5969193004", level:"senior" },
+      { title:"Software Engineer - Product", url:"https://job-boards.greenhouse.io/mercury/jobs/5267749004", level:"mid" }
     ] },
   { id:"plaid", name:"Plaid", vertical:"fintech",
     sub:"Banking API + financial data",
@@ -7191,7 +7329,9 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Software Engineer, Backend", url:"https://jobs.ashbyhq.com/plaid/51d7f702-e76c-4305-b3d4-50d270ec7d1c", level:"senior" },
       { title:"Senior Software Engineer, Full Stack", url:"https://jobs.ashbyhq.com/plaid/24f357ee-b2fc-4f86-bab9-d10ecfb99003", level:"senior" },
-      { title:"Senior Machine Learning Engineer - Embedded Insights", url:"https://jobs.ashbyhq.com/plaid/9d6855e9-3b05-4dc6-820e-3227201c494b", level:"senior" }
+      { title:"Senior Machine Learning Engineer - Embedded Insights", url:"https://jobs.ashbyhq.com/plaid/9d6855e9-3b05-4dc6-820e-3227201c494b", level:"senior" },
+      { title:"Software Engineer, Backend", url:"https://jobs.ashbyhq.com/plaid/7e10c0b5-a09a-4e07-aaa8-899a7f82a0c9", level:"mid" },
+      { title:"Software Engineer, Full Stack", url:"https://jobs.ashbyhq.com/plaid/a9dc0810-546b-4773-9545-2862409e24b4", level:"mid" }
     ] },
   { id:"alloy", name:"Alloy", vertical:"fintech",
     sub:"Identity decisioning for fintech",
@@ -7223,7 +7363,9 @@ const COMPANIES = [
     jobs:[
       { title:"Senior AI Engineer - APM Experiences", url:"https://careers.datadoghq.com/detail/7415266/?gh_jid=7415266", level:"senior" },
       { title:"Senior Software Engineer - AI Code Gen - Agent Engineer", url:"https://careers.datadoghq.com/detail/7107875/?gh_jid=7107875", level:"senior" },
-      { title:"Senior Software Engineer - Bits AI SRE", url:"https://careers.datadoghq.com/detail/7899164/?gh_jid=7899164", level:"senior" }
+      { title:"Senior Software Engineer - Bits AI SRE", url:"https://careers.datadoghq.com/detail/7899164/?gh_jid=7899164", level:"senior" },
+      { title:"Senior Software Engineer, Community Open Source Engineering", url:"https://careers.datadoghq.com/detail/7555524/?gh_jid=7555524", level:"senior" },
+      { title:"Senior Software Engineer - Distributed Systems", url:"https://careers.datadoghq.com/detail/3851927/?gh_jid=3851927", level:"senior" }
     ] },
   { id:"mongodb", name:"MongoDB", vertical:"devtools",
     sub:"Document database (NASDAQ)",
@@ -7234,7 +7376,12 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Software Engineer", url:"https://www.mongodb.com/careers/job/?gh_jid=7816572", level:"senior" },
       { title:"Senior Software Engineer, Atlas Clusters", url:"https://www.mongodb.com/careers/job/?gh_jid=7736191", level:"senior" },
-      { title:"Senior Software Engineer, Atlas Clusters Platform", url:"https://www.mongodb.com/careers/job/?gh_jid=7890652", level:"senior" }
+      { title:"Senior Software Engineer, Atlas Clusters Platform", url:"https://www.mongodb.com/careers/job/?gh_jid=7890652", level:"senior" },
+      { title:"Senior Software Engineer, Atlas Stream Processing", url:"https://www.mongodb.com/careers/job/?gh_jid=7744398", level:"senior" },
+      { title:"Senior Software Engineer - Frontend", url:"https://www.mongodb.com/careers/job/?gh_jid=7650472", level:"senior" },
+      { title:"Senior Software Engineer, Server Security", url:"https://www.mongodb.com/careers/job/?gh_jid=7815677", level:"senior" },
+      { title:"Software Engineer 3, Backup", url:"https://www.mongodb.com/careers/job/?gh_jid=7779598", level:"mid" },
+      { title:"Software Engineer, Developer Productivity", url:"https://www.mongodb.com/careers/job/?gh_jid=7851388", level:"mid" }
     ] },
   { id:"cockroach-labs", name:"Cockroach Labs", vertical:"devtools",
     sub:"Distributed SQL database",
@@ -7254,7 +7401,12 @@ const COMPANIES = [
     jobs:[
       { title:"Forward-Deployed Engineer", url:"https://job-boards.greenhouse.io/vercel/jobs/5752684004", level:"mid" },
       { title:"Software Engineer, AI Gateway", url:"https://job-boards.greenhouse.io/vercel/jobs/5798406004", level:"mid" },
-      { title:"Software Engineer, AI SDK", url:"https://job-boards.greenhouse.io/vercel/jobs/5474915004", level:"mid" }
+      { title:"Software Engineer, AI SDK", url:"https://job-boards.greenhouse.io/vercel/jobs/5474915004", level:"mid" },
+      { title:"Software Engineer, CDN", url:"https://job-boards.greenhouse.io/vercel/jobs/5179639004", level:"mid" },
+      { title:"Software Engineer, Dashboard", url:"https://job-boards.greenhouse.io/vercel/jobs/5808568004", level:"mid" },
+      { title:"Software Engineer, Deployment Infrastructure", url:"https://job-boards.greenhouse.io/vercel/jobs/5633880004", level:"mid" },
+      { title:"Software Engineer, Growth", url:"https://job-boards.greenhouse.io/vercel/jobs/5613601004", level:"mid" },
+      { title:"Software Engineer, Workflows", url:"https://job-boards.greenhouse.io/vercel/jobs/5798416004", level:"mid" }
     ] },
   { id:"stainless", name:"Stainless", vertical:"devtools",
     sub:"Best-in-class SDK generation",
@@ -7275,7 +7427,15 @@ const COMPANIES = [
     jobs:[
       { title:"Data Engineer", url:"https://jobs.ashbyhq.com/whatnot/9fd6fef1-619f-48dd-97b0-c91063432df3", level:"mid" },
       { title:"Data Engineer, Notifications", url:"https://jobs.ashbyhq.com/whatnot/0dec38f8-1e8c-44e8-b158-518c2f9ed9a1", level:"mid" },
-      { title:"Machine Learning Engineer, Fraud", url:"https://jobs.ashbyhq.com/whatnot/5d6dc8c4-4e0c-4a6a-8bfd-194917564cf2", level:"mid" }
+      { title:"Machine Learning Engineer, Fraud", url:"https://jobs.ashbyhq.com/whatnot/5d6dc8c4-4e0c-4a6a-8bfd-194917564cf2", level:"mid" },
+      { title:"Machine Learning Engineer, Content and Navigation", url:"https://jobs.ashbyhq.com/whatnot/fc9888be-75e6-47f3-891f-814a666cfe0a", level:"mid" },
+      { title:"Software Engineer, Fraud", url:"https://jobs.ashbyhq.com/whatnot/31b68e8c-6edb-414f-bec0-5375c2b52332", level:"mid" },
+      { title:"Software Engineer, Payments", url:"https://jobs.ashbyhq.com/whatnot/22d4509c-42bd-4680-bb92-74f1a0cc9ba6", level:"mid" },
+      { title:"Software Engineer, Merchant Tooling", url:"https://jobs.ashbyhq.com/whatnot/19355c48-5f94-4abe-9458-12163838fbc7", level:"mid" },
+      { title:"Software Engineer, Trust & Risk", url:"https://jobs.ashbyhq.com/whatnot/abd1dc38-901a-49aa-8cdb-18de379c59c3", level:"mid" },
+      { title:"Software Engineer, Machine Learning Infrastructure", url:"https://jobs.ashbyhq.com/whatnot/5b592753-40a8-405e-8ced-35c311ff1354", level:"mid" },
+      { title:"Software Engineer, Data", url:"https://jobs.ashbyhq.com/whatnot/a906c895-a49e-4961-9b11-7cc23517204a", level:"mid" },
+      { title:"Software Engineer, Video", url:"https://jobs.ashbyhq.com/whatnot/67d4e32c-1f9d-497f-99b1-d5213e3ddcd3", level:"mid" }
     ] },
   { id:"attentive", name:"Attentive", vertical:"saas",
     sub:"SMS marketing platform",
@@ -7328,6 +7488,7 @@ const COMPANIES = [
       { title:"Software Engineer - Full Stack", url:"https://job-boards.greenhouse.io/resortpass/jobs/5059472007", level:"mid" }
     ] },
 ];
+
 
 
 /* ---------- INFOGRAPHICS ---------- */
