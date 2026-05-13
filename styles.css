@@ -251,6 +251,12 @@ body::after {
  * Header — chrome material (MAX liquid glass)
  * ========================================================================= */
 header.sticky, main > header {
+  /* Explicit position so we don't depend on Tailwind's .sticky utility
+   * resolving correctly — and so this rule is the single source of
+   * truth for the header's positioning. */
+  position: sticky;
+  top: 0;
+  z-index: 30;
   background: var(--chrome);
   -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(1.08) contrast(1.03);
   backdrop-filter: blur(60px) saturate(200%) brightness(1.08) contrast(1.03);
@@ -351,27 +357,27 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
 }
 
 /* View Transitions API — Chrome 111+, Safari 18+. The browser cross-fades
- * snapshots of the old + new DOM around the route swap; we just tune the
- * timing so it uses our Liquid Glass spring tokens instead of a default
- * 0.25s linear fade. */
-@keyframes vt-fade-in {
-  from { opacity: 0; transform: translateY(6px) scale(0.992); }
-  to   { opacity: 1; transform: none; }
-}
-@keyframes vt-fade-out {
-  from { opacity: 1; transform: none; }
-  to   { opacity: 0; transform: translateY(-4px) scale(0.998); }
-}
-::view-transition-old(root) {
-  animation: vt-fade-out 0.22s var(--spring-snap) both;
-}
+ * snapshots of the old + new DOM around the route swap. We use a pure
+ * opacity crossfade with matched durations and standard ease so there's
+ * no double-overshoot or scale/translate jitter on top of the fade.
+ * Apple's own view-transitions for sheets are similarly minimal. */
+@keyframes vt-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes vt-fade-out { from { opacity: 1; } to { opacity: 0; } }
+::view-transition-old(root),
 ::view-transition-new(root) {
-  animation: vt-fade-in 0.42s var(--spring-overshoot) both;
+  animation-duration: 0.22s;
+  animation-timing-function: var(--spring-settle);
+  animation-fill-mode: both;
+  /* Avoid the default mix-blend; reduces the "double image" flash that
+   * shows up when both snapshots overlap with the spring curve. */
+  mix-blend-mode: normal;
 }
+::view-transition-old(root) { animation-name: vt-fade-out; }
+::view-transition-new(root) { animation-name: vt-fade-in; }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root),
   ::view-transition-new(root) {
-    animation-duration: 0.08s;
+    animation-duration: 0.06s;
     animation-timing-function: linear;
   }
 }
