@@ -3209,12 +3209,15 @@ function companyFitScore(c) {
   // Late-stage process companies will gap-screen at the recruiter step.
   const stage = (c.stage || '').toLowerCase();
   if (/seed/.test(stage)) s += 22;
-  else if (/series a/.test(stage)) s += 18;
-  else if (/series b/.test(stage)) s += 11;
-  else if (/series c/.test(stage)) s += 3;
-  else if (/series d/.test(stage)) s -= 8;
-  else if (/series e/.test(stage)) s -= 12;
-  else if (/series f|late|take-private/.test(stage)) s -= 16;
+  else if (/series a\b/.test(stage)) s += 18;
+  else if (/series b\b/.test(stage)) s += 11;
+  else if (/series c\b/.test(stage)) s += 3;
+  else if (/series d\b/.test(stage)) s -= 8;
+  else if (/series e\b/.test(stage)) s -= 12;
+  // Series F+ (F, G, H, …) treated as late-stage; same penalty bucket as
+  // late / take-private. Without the explicit alternation we were missing
+  // Series G companies like Hopper, Navan, Carta.
+  else if (/series [fghij]\b|late|take-private/.test(stage)) s -= 16;
   else if (/public/.test(stage)) s -= 20;
 
   // Size of raise — bigger == more bureaucracy + pedigree filtering.
@@ -3236,8 +3239,15 @@ function companyFitScore(c) {
   ]);
   if (elite.has(c.id)) s -= 30;
 
-  // Mid-tier penalty: process-heavy but not frontier elite.
-  const heavy = new Set(['plaid','brex','mercury','datadog','mongodb','vercel','attentive','gusto','carta']);
+  // Mid-tier penalty: process-heavy but not frontier elite. Expanded
+  // after the fifth refresh to cover the new late-stage SaaS / hospitality
+  // / consumer-fintech entries whose recruiting funnels lean pedigree.
+  const heavy = new Set([
+    'plaid','brex','mercury','datadog','mongodb','vercel','attentive',
+    'gusto','carta','hopper','patreon','seatgeek','navan','block',
+    'metropolis','spotify','reddit','lyft','peloton','chime','robinhood',
+    'sofi','asana','iterable','braze','squarespace','talkspace','oscar',
+  ]);
   if (heavy.has(c.id)) s -= 8;
 
   // Founding-role bonus — builder-first hiring forgives gaps.

@@ -211,6 +211,37 @@ CANDIDATES = [
   ("lovable","Lovable","ashby","lovable","ai","AI app generator","Series A","$15M","Creandum",["Creandum","byFounders"],"AI builder for apps. Frontier model integration + product engineering."),
   ("fireworks","Fireworks AI","greenhouse","fireworksai","ai","Fast inference for open models","Series B","$77M","Sequoia",["Sequoia","Benchmark","NVIDIA"],"Production inference platform for open-weights models. Systems + perf."),
   ("logrocket","LogRocket","lever","logrocket","devtools","Frontend session replay + obs","Series C","$76M","Battery",["Battery","Matrix"],"Frontend observability + session replay. JS infra + analytics."),
+
+  # ── Fourth expansion: creative + hospitality + restaurant + creator-econ ─
+  ("patreon","Patreon","ashby","patreon","media","Membership platform for creators","Series F","$413M","Tiger",["Tiger","Index","Wellington"],"Creator monetization at scale. Subscriptions infra, payments, media tooling."),
+  ("hopper","Hopper","ashby","hopper","hospitality","Mobile-first travel booking + fintech","Series G","$750M","Goldman Sachs",["Goldman Sachs","Inovia","Capital One"],"Flights/hotels with fintech overlays (price-freeze, cancel-for-any-reason). Mobile + travel-data + ML pricing."),
+  ("hang","Hang","ashby","hang","hospitality","Loyalty + membership platform","Series A","$32M","Paradigm",["Paradigm","a16z"],"Membership / loyalty for brands. Payments, identity, integrations."),
+  ("block","Block","greenhouse","block","fintech","Square / Cash App / Afterpay (NYSE)","Public","$590M pre-IPO","Khosla",["NYSE","Khosla","Sequoia"],"Square / Cash App / Tidal / Afterpay parent. Payments + commerce + crypto."),
+  ("mighty-networks","Mighty Networks","greenhouse","mighty","saas","Community + course platform","Series B","$67M","Owl Ventures",["Owl Ventures","Intel Capital","Reach"],"Branded community + course platform for creators. Social graph + commerce."),
+  ("seatgeek","SeatGeek","greenhouse","seatgeek","marketplace","Live-events ticketing","Series E","$338M","Wellington",["Wellington","Accel","Causeway"],"Tickets marketplace + primary-issuer platform. Marketplace ranking, payments, integrations."),
+  ("beacons","Beacons","ashby","beacons","saas","Link-in-bio + creator monetization","Series A","$30M","Andreessen Horowitz",["a16z","Atelier"],"Link-in-bio + creator-commerce platform. Mobile + e-commerce + creator tooling."),
+  ("navan","Navan","greenhouse","tripactions","saas","Business travel + expense","Series G","$2B","Andreessen Horowitz",["a16z","Lightspeed","Greenoaks"],"Modern T&E platform (formerly TripActions). Travel inventory, expense, payments."),
+
+  # ── Fifth expansion: user-curated NYC list ────────────────────────────
+  ("airgoods","Airgoods","ashby","airgoods","marketplace","B2B grocery / CPG marketplace","Series A","$11M","Andreessen Horowitz",["a16z","BoxGroup"],"Wholesale CPG marketplace. Two-sided liquidity, catalog, payments."),
+  ("blee","Blee","ashby","blee","ai","AI for SMB ops","Seed","$8M","Sequoia Scout",["YC W24"],"Early-stage AI startup. Product-engineering culture, broad scope."),
+  ("camber","Camber","ashby","camber","ai","AI for healthcare data","Series A","$30M","Andreessen Horowitz",["a16z","Foundry"],"Healthcare data platform with AI. SQL + integrations + clinical workflow."),
+  ("crosby","Crosby","ashby","crosby","ai","AI legal agent","Seed","$10M","Sequoia",["Sequoia","YC"],"AI for legal contracts. Domain-specific LLM + agent workflows."),
+  ("flora","FLORA","ashby","flora","ai","AI creative studio","Series A","$15M","Andreessen Horowitz",["a16z"],"AI-native creative platform — boards / sketches / prompts. Multimodal + design-tool depth."),
+  ("general-context","General Context","ashby","general-context","ai","AI for enterprise context","Seed","$8M","Forerunner",["Forerunner","YC"],"Early-stage AI infra. Founding-engineer hiring; broad scope."),
+  ("glossgenius","GlossGenius","greenhouse","glossgenius","saas","Software for beauty + wellness pros","Series C","$93M","Bessemer",["Bessemer","Imaginary"],"SaaS for independent beauty/wellness pros. Booking + payments + marketing."),
+  ("loopai","Loop","greenhouse","loop","ai","AI agents for freight ops","Series B","$60M","Founders Fund",["Founders Fund","Index"],"Freight/logistics agents. Deploy with top carriers; agent eval + customer integration."),
+  ("metropolis","Metropolis","greenhouse","metropolis","ai","AI computer-vision parking","Series C","$1.7B","Eldridge",["Eldridge","RXR","3L"],"Computer-vision parking platform (acquired SP Plus). Edge AI, payments, infrastructure."),
+  ("opus-training","Opus Training","ashby","opus-training","saas","Mobile training for hourly workers","Series A","$25M","Tiger",["Tiger","Avenir"],"Hourly-worker training SaaS — built for restaurants + hospitality. Mobile-first."),
+  ("partiful","Partiful","ashby","partiful","consumer","Modern event-invite app","Series A","$20M","Andreessen Horowitz",["a16z","FirstMark"],"Mobile event invites + RSVPs. Social graph, mobile UX, identity."),
+  ("plot","Plot","ashby","plot","ai","Applied AI for SMBs","Seed","$10M","Andreessen Horowitz",["a16z"],"Early-stage applied-AI product. Senior engineering culture."),
+  ("qloo","Qloo","lever","qloo","ai","Taste / cultural AI API","Series C","$103M","AXA Venture Partners",["AXA","Tribeca"],"Cross-domain taste graph API. Recommender systems, API design, latency."),
+  ("sandbar","Sandbar","ashby","sandbar","ai","AI for compliance / fincrime","Series A","$22M","Felicis",["Felicis","Bain Capital Ventures"],"Anti-fincrime AI. ML + investigation tooling + bank integrations."),
+  ("sequence","Sequence","ashby","sequence","fintech","Personal-finance autopilot","Series A","$19M","Andreessen Horowitz",["a16z","FirstMark"],"Money-routing + automation for consumers. Payments, ledger, AI advice."),
+  ("slate","Slate","lever","slate","media","Content / publishing platform","Series A","$15M","Forerunner",["Forerunner"],"Modern content + publishing platform."),
+  ("sola","Sola","ashby","sola","ai","AI agents for service businesses","Series A","$30M","Lightspeed",["Lightspeed","FirstMark"],"Forward-deployed AI for vertical services (legal, real estate, etc). Customer-deploy heavy."),
+  ("suno","Suno","ashby","suno","ai","AI music generation","Series B","$125M","Lightspeed",["Lightspeed","Founder Collective","Nat Friedman"],"Generative music at scale. Audio pipelines, copyright/moderation, eval on subjective quality."),
+  ("warp","Warp","ashby","warp","ai","AI-native terminal","Series B","$73M","Sequoia",["Sequoia","GV"],"Reimagined terminal with AI. Heavy on developer experience, latency, prompt design for code."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -254,6 +285,15 @@ DOMAINS = {
   "doubleverify":"doubleverify.com","wealthfront":"wealthfront.com",
   "stash":"stash.com","bombas":"bombas.com","lovable":"lovable.dev",
   "fireworks":"fireworks.ai","logrocket":"logrocket.com",
+  "patreon":"patreon.com","hopper":"hopper.com","hang":"hang.xyz",
+  "block":"block.xyz","mighty-networks":"mightynetworks.com",
+  "seatgeek":"seatgeek.com","beacons":"beacons.ai","navan":"navan.com",
+  "airgoods":"airgoods.com","blee":"blee.com","camber":"camber.com",
+  "crosby":"crosby.ai","flora":"florafauna.ai","general-context":"generalcontext.com",
+  "glossgenius":"glossgenius.com","loopai":"loop.com","metropolis":"metropolis.io",
+  "opus-training":"opus.so","partiful":"partiful.com","plot":"plotai.com",
+  "qloo":"qloo.com","sandbar":"sandbar.ai","sequence":"sequence.app",
+  "slate":"slate.com","sola":"sola.ai","suno":"suno.com","warp":"warp.dev",
 }
 
 
