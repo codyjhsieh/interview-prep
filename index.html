@@ -117,29 +117,21 @@
 
 <div id="app" class="flex min-h-screen">
 
-  <!-- Sidebar (lg+: docked sticky; mobile: slide-over via .sidebar-nav rules) -->
-  <aside id="sidebar" class="sidebar-nav flex-col w-60 lg:w-56 shrink-0 border-r border-[color:var(--border)] sticky top-0 h-screen p-5 gap-1 z-40 bg-[color:var(--bg)]">
-    <div class="flex items-center justify-between px-1 mb-5">
-      <div>
-        <div class="font-semibold text-[15px] tracking-tight">FDE/SDE 2026</div>
-        <div class="text-[11px] muted mt-0.5">Interview prep</div>
-      </div>
-      <button id="sidebar-close" class="lg:hidden p-1 muted hover:text-white" aria-label="Close menu">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M6 18L18 6"/></svg>
-      </button>
+  <!-- Desktop-only docked sidebar (Liquid Glass material). Hidden on
+       mobile — mobile users get the floating tab bar below instead. -->
+  <aside id="sidebar" class="sidebar-nav flex-col w-60 lg:w-56 shrink-0 sticky top-0 h-screen p-4 gap-1 z-40">
+    <div class="px-1 mb-5">
+      <div class="font-semibold text-[15px] tracking-tight">FDE/SDE 2026</div>
+      <div class="text-[11px] muted mt-0.5">Interview prep</div>
     </div>
     <nav id="sidenav" class="flex-1 flex flex-col gap-0.5 overflow-y-auto"></nav>
-    <div id="sidebar-footer" class="border-t border-[color:var(--border)] pt-3 mt-3 text-[11px] muted"></div>
+    <div id="sidebar-footer" class="border-t border-[color:var(--hairline)] pt-3 mt-3 text-[11px] muted"></div>
   </aside>
-  <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 z-30 lg:hidden" style="display:none"></div>
 
   <!-- Main column -->
   <main class="flex-1 flex flex-col min-w-0 w-full">
     <header class="sticky top-0 z-20 bg-[color:var(--bg)] border-b border-[color:var(--border)]">
       <div class="px-3 sm:px-6 lg:px-8 py-3 flex items-center gap-2 sm:gap-3">
-        <button id="mobile-menu" class="lg:hidden p-2 -ml-1" aria-label="Open menu">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-        </button>
         <div id="route-title" class="font-medium text-[14.5px] truncate min-w-0"></div>
         <div class="ml-auto flex items-center gap-3 sm:gap-5 text-[12px] sm:text-[12.5px] muted shrink-0">
           <span title="Streak" class="hidden xs:inline"><span id="streak-count" class="text-[color:var(--text)] font-mono tabular-nums">0</span>d</span>
@@ -156,10 +148,6 @@
 
     <section id="view" class="flex-1 px-3 sm:px-6 lg:px-8 py-5 sm:py-7 max-w-6xl w-full mx-auto"></section>
 
-    <!-- Mobile Liquid Glass tab bar — floating, capsule, inset from edges.
-         Visible only on mobile (< lg). JS populates the items and animates
-         the active-pill indicator between them. -->
-    <nav id="liquid-tabbar" class="lg:hidden" aria-label="Primary"></nav>
     <footer class="px-4 sm:px-6 lg:px-8 py-5 text-[11px] muted">
       <div class="flex items-center gap-4 flex-wrap">
         <span>Progress saves locally.</span>
@@ -183,6 +171,11 @@
 </div>
 
 <div id="toasts" class="fixed top-16 right-3 sm:right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-[calc(100vw-1.5rem)]"></div>
+
+<!-- Mobile Liquid Glass tab bar — direct child of <body> so position:fixed
+     resolves against the viewport (NOT main, which has will-change: transform
+     and would otherwise become the containing block). Visible only on mobile. -->
+<nav id="liquid-tabbar" class="lg:hidden" aria-label="Primary"></nav>
 
 <script src="js/data.js"></script>
 <script src="js/quotes.js"></script>

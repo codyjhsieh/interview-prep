@@ -18,6 +18,17 @@ const ROUTES = [
   { id:'prep',       label:'Prep tools' },
 ];
 
+// Map sidebar route IDs to Lucide icon names so the desktop sidebar
+// matches the icon language of the bottom tab bar + categories.
+const SIDEBAR_ICONS = {
+  dashboard:  'layout-dashboard',
+  curriculum: 'book-open',
+  games:      'target',
+  flashcards: 'layers',
+  companies:  'building',
+  prep:       'scroll-text',
+};
+
 function buildSidebar() {
   const nav = document.getElementById('sidenav');
   if (!nav) return;
@@ -27,7 +38,9 @@ function buildSidebar() {
     a.href = '#' + r.id;
     a.className = 'nav-item';
     a.dataset.route = r.id;
-    a.innerHTML = `<span class="flex-1">${r.label}</span>`;
+    const iconName = SIDEBAR_ICONS[r.id] || 'layers';
+    const iconMarkup = (window.VIEWS && VIEWS.iconHTML) ? VIEWS.iconHTML(iconName, { size: 16 }) : '';
+    a.innerHTML = `${iconMarkup}<span class="flex-1">${r.label}</span>`;
     nav.appendChild(a);
   });
 
@@ -73,51 +86,100 @@ function setActiveNav(routeId) {
  * --spring-overshoot easing). Minimize-on-scroll listens to window
  * scrollY: when the user scrolls down >12px, body.nav-minimized goes on;
  * scrolling up by 8px+ takes it off. */
+/* Five primary routes on the bar + a "More" affordance for secondary
+ * routes (Profile, Stories, Mocks, Infographics, Sources, Review). The
+ * More tab opens a Liquid Glass sheet listing the overflow. */
 const TABBAR_ROUTES = [
   { id: 'dashboard',  label: 'Today',      icon: 'layout-dashboard' },
   { id: 'curriculum', label: 'Curriculum', icon: 'book-open' },
   { id: 'flashcards', label: 'Cards',      icon: 'layers' },
   { id: 'games',      label: 'Games',      icon: 'target' },
-  { id: 'companies',  label: 'Companies',  icon: 'building' },
+  { id: 'more',       label: 'More',       icon: 'sparkles', isMore: true },
+];
+/* Secondary routes that live in the "More" sheet. Companies moves here
+ * because games + cards are higher-frequency for active prep. */
+const TABBAR_MORE_ROUTES = [
+  { id: 'companies',   label: 'Companies',    icon: 'building' },
+  { id: 'stories',     label: 'STAR Bank',    icon: 'scroll-text' },
+  { id: 'mocks',       label: 'Mock log',     icon: 'clock' },
+  { id: 'coverage',    label: 'Coverage',     icon: 'list-checks' },
+  { id: 'infographics',label: 'Infographics', icon: 'sparkles' },
+  { id: 'sources',     label: 'Sources',      icon: 'book-marked' },
+  { id: 'profile',     label: 'Profile',      icon: 'users-round' },
 ];
 
 function buildTabbar() {
   const bar = document.getElementById('liquid-tabbar');
   if (!bar) return;
-  // Pill indicator first so it sits behind the tab buttons in z-order.
-  bar.innerHTML = `<span class="tab-pill" aria-hidden="true"></span>` +
-    TABBAR_ROUTES.map(r => `
-      <a class="tab-item" href="#${r.id}" data-route="${r.id}" aria-label="${escapeHtml(r.label)}">
-        ${(window.VIEWS && VIEWS.iconHTML) ? VIEWS.iconHTML(r.icon, { size: 20 }) : ''}
-        <span class="tab-label">${escapeHtml(r.label)}</span>
-      </a>
-    `).join('');
+  // Apple's iOS 26 tab bar uses color-only for active state — no separate
+  // pill / capsule behind the active icon. Active = accent text; inactive
+  // = muted text. The bar contracts in place when minimized; no morphing
+  // indicator needed since only the active tab remains visible.
+  bar.innerHTML = TABBAR_ROUTES.map(r => {
+    const isMore = !!r.isMore;
+    const tag    = isMore ? 'button' : 'a';
+    const attrs  = isMore
+      ? `type="button" data-more-toggle aria-label="${escapeHtml(r.label)}"`
+      : `href="#${r.id}" data-route="${r.id}" aria-label="${escapeHtml(r.label)}"`;
+    return `<${tag} class="tab-item" ${attrs}>
+      ${(window.VIEWS && VIEWS.iconHTML) ? VIEWS.iconHTML(r.icon, { size: 22 }) : ''}
+      <span class="tab-label">${escapeHtml(r.label)}</span>
+    </${tag}>`;
+  }).join('');
+
+  // Wire the More tab — opens a Liquid Glass sheet listing secondary routes.
+  const moreBtn = bar.querySelector('[data-more-toggle]');
+  if (moreBtn) moreBtn.addEventListener('click', openMoreSheet);
+}
+
+/* "More" sheet — Liquid Glass overlay sliding up from the bottom. Lists
+ * secondary routes as large tappable rows. Closes on outside-tap, on
+ * route-select, or on Esc. */
+function openMoreSheet() {
+  if (document.getElementById('more-sheet')) return;             // already open
+  const wrap = document.createElement('div');
+  wrap.id = 'more-sheet';
+  wrap.className = 'fixed inset-0 z-50';
+  wrap.innerHTML = `
+    <div class="more-sheet-scrim" data-close></div>
+    <div class="more-sheet-panel card" role="dialog" aria-label="More routes">
+      <div class="more-sheet-handle" aria-hidden="true"></div>
+      <div class="text-[11px] uppercase tracking-wider muted mb-3" style="letter-spacing:0.22em">More</div>
+      <div class="more-sheet-list">
+        ${TABBAR_MORE_ROUTES.map(r => `
+          <a class="more-sheet-row" href="#${r.id}" data-route="${r.id}">
+            <span class="more-sheet-icon">${(window.VIEWS && VIEWS.iconHTML) ? VIEWS.iconHTML(r.icon, { size: 18 }) : ''}</span>
+            <span class="more-sheet-label">${escapeHtml(r.label)}</span>
+            <span class="more-sheet-chevron">${(window.VIEWS && VIEWS.iconHTML) ? VIEWS.iconHTML('arrow-right', { size: 14 }) : '›'}</span>
+          </a>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+  requestAnimationFrame(() => wrap.classList.add('open'));         // trigger entrance
+  const close = () => {
+    wrap.classList.remove('open');
+    setTimeout(() => wrap.remove(), 320);
+    document.removeEventListener('keydown', onKey);
+  };
+  const onKey = (e) => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  wrap.addEventListener('click', (e) => {
+    if (e.target.closest('[data-close]')) { close(); return; }
+    const row = e.target.closest('.more-sheet-row');
+    if (row) {
+      // location.hash already changes via the <a href>; just close.
+      setTimeout(close, 120);
+    }
+  });
 }
 
 function setActiveTabbar(routeId) {
   const bar = document.getElementById('liquid-tabbar');
   if (!bar) return;
-  const items = bar.querySelectorAll('.tab-item');
-  let activeEl = null;
-  items.forEach(a => {
-    const on = a.dataset.route === routeId;
-    a.classList.toggle('active', on);
-    if (on) activeEl = a;
-  });
-  // Animate the pill — measure the active tab's position relative to the
-  // bar's content box (after padding) and move the pill there. CSS handles
-  // the spring transition; we just write the new transform + width.
-  const pill = bar.querySelector('.tab-pill');
-  if (!pill) return;
-  if (!activeEl) {                              // route isn't in the tab bar
-    pill.style.opacity = '0';
-    return;
-  }
-  pill.style.opacity = '1';
-  // offsetLeft/Width are relative to the offsetParent (the bar itself).
-  requestAnimationFrame(() => {
-    pill.style.transform = `translateX(${activeEl.offsetLeft}px)`;
-    pill.style.width = `${activeEl.offsetWidth}px`;
+  bar.querySelectorAll('.tab-item').forEach(a => {
+    a.classList.toggle('active', a.dataset.route === routeId);
   });
 }
 
@@ -513,12 +575,6 @@ function init() {
     // Liquid Glass tab bar — minimize-on-scroll. Passive listener for
     // jank-free scroll handling; the work is rAF-throttled.
     window.addEventListener('scroll', onScrollMinimize, { passive: true });
-    // Recompute the active pill's position on viewport resize (the tab
-    // widths can change when the bar is constrained by the viewport).
-    window.addEventListener('resize', () => {
-      const { route } = parseHash();
-      setActiveTabbar(route);
-    }, { passive: true });
 
     // (Removed: pointer-tracked --mx/--my CSS var updater. The glass
     // pointer-tracked specular highlight caused too much paint thrash
@@ -612,25 +668,11 @@ function showHelp() {
 }
 function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function bindMobileNav() {
-  const close = () => document.body.classList.remove('sidebar-open');
-  const toggle = () => document.body.classList.toggle('sidebar-open');
-  document.getElementById('mobile-menu')?.addEventListener('click', toggle);
-  document.getElementById('sidebar-close')?.addEventListener('click', close);
-  document.getElementById('sidebar-backdrop')?.addEventListener('click', close);
-  // Close on nav-item navigation
-  document.getElementById('sidenav')?.addEventListener('click', (e) => {
-    if (e.target.closest('a')) close();
-  });
-  // Close on Esc
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && document.body.classList.contains('sidebar-open')) close();
-  });
-  // Auto-close when viewport grows past lg breakpoint (e.g. rotate to landscape, resize)
-  const mq = window.matchMedia('(min-width: 1024px)');
-  const onChange = () => { if (mq.matches) close(); };
-  mq.addEventListener ? mq.addEventListener('change', onChange) : mq.addListener(onChange);
-}
+// Mobile nav is now the floating Liquid Glass tab bar (built by
+// buildTabbar). The legacy hamburger / slide-over sidebar has been
+// removed from the layout. This function is kept as a no-op so older
+// init paths still resolve; safe to delete later.
+function bindMobileNav() { /* no-op — see buildTabbar() */ }
 
 // Run init now if DOM already parsed, else when it is
 if (document.readyState === 'loading') {

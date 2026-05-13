@@ -445,123 +445,166 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
  *
  * Visible on mobile only (the lg+ sidebar handles desktop nav).
  * ========================================================================= */
+/* Mobile breakpoint: force-show the tab bar regardless of any Tailwind
+ * lg:hidden specificity quirks. Defensive — should never be needed in
+ * practice but locks the behavior in. */
+@media (max-width: 1023px) {
+  #liquid-tabbar { display: flex !important; }
+}
+@media (min-width: 1024px) {
+  #liquid-tabbar { display: none !important; }
+}
+
 #liquid-tabbar {
-  /* Floating, inset from screen edges. Bottom inset clears the iOS home
-   * indicator via env(safe-area-inset-bottom). */
+  /* Floating, capsule, inset. Center-anchored (left:50% + translateX)
+   * so the bar can grow/shrink in place from its center, which is how
+   * iOS 26 minimizes — contracts around the active tab without drifting
+   * off-axis. Width animates between full and compact-pill on minimize. */
   position: fixed;
-  left: 16px;
-  right: 16px;
+  left: 50%;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  width: calc(100vw - 32px);
+  max-width: 480px;
   z-index: 35;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
   gap: 4px;
-  padding: 6px;
-  height: 60px;
+  padding: 8px;
+  height: 68px;
   border-radius: 999px;                  /* full capsule */
-  /* Liquid Glass material — slightly heavier blur than cards because the
-   * nav floats above scrolling content and needs to stay readable. */
+  /* Apple's regularMaterial-equivalent — translucent, saturated, with
+   * the inner-highlight rim and drop shadow lift that defines Liquid
+   * Glass when floating over content. */
   background: color-mix(in srgb, var(--regular) 80%, var(--card-tint, transparent) 20%);
   -webkit-backdrop-filter: blur(40px) saturate(220%) brightness(1.08) contrast(1.04);
   backdrop-filter:        blur(40px) saturate(220%) brightness(1.08) contrast(1.04);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),    /* top inner highlight */
-    inset 0 -1px 0 rgba(15,23,42,0.06),       /* bottom inner shadow */
-    inset 1px 0 0 rgba(255,255,255,0.55),     /* left rim */
-    inset -1px 0 0 rgba(255,255,255,0.30),    /* right rim */
-    0 10px 32px -10px rgba(15,23,42,0.22),    /* drop shadow lift */
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 -1px 0 rgba(15,23,42,0.06),
+    inset 1px 0 0 rgba(255,255,255,0.55),
+    inset -1px 0 0 rgba(255,255,255,0.30),
+    0 10px 32px -10px rgba(15,23,42,0.22),
     0 2px 6px rgba(15,23,42,0.08);
+  /* All Apple Liquid Glass state transitions use the spring tokens —
+   * width + gap animate together to morph between expanded and minimized
+   * states. Animating gap alongside width prevents a jolt as
+   * justify-content switches to centered. */
   transition:
-    transform 0.42s var(--spring-overshoot),
+    transform 0.45s var(--spring-overshoot),
+    width 0.45s var(--spring-overshoot),
+    gap 0.45s var(--spring-overshoot),
     opacity 0.32s var(--spring-settle),
     backdrop-filter 0.45s var(--spring-settle),
     -webkit-backdrop-filter 0.45s var(--spring-settle);
-  will-change: transform, opacity;
+  transform: translateX(-50%);
+  will-change: transform, width, opacity;
   isolation: isolate;
 }
 
-/* The morphing active-pill indicator — absolutely positioned inside the
- * tab bar. JS measures the active tab's offsetLeft/Width on hashchange
- * and animates this pill's transform with the spring-overshoot token. */
-#liquid-tabbar .tab-pill {
-  position: absolute;
-  top: 6px;
-  bottom: 6px;
-  left: 0;
-  width: 0;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.45),
-    0 2px 8px -4px var(--accent);
-  transition:
-    transform 0.42s var(--spring-overshoot),
-    width 0.42s var(--spring-overshoot);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Each tab — flex column with icon + (optional) label. Icons only by
- * default; the active tab gets its label revealed below the icon. */
+/* Each tab — iOS 26 layout: icon above label, all tabs show labels in
+ * the expanded state. Apple's active-state cue is color-only (no
+ * background pill behind the icon) — inactive tabs use a low-opacity
+ * muted color, the active tab uses the accent color with full opacity
+ * and slightly heavier label. */
 #liquid-tabbar .tab-item {
   position: relative;
   z-index: 1;
   flex: 1 1 0;
   min-width: 0;
-  height: 48px;
+  max-width: 100px;
+  height: 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
-  color: var(--muted);
+  gap: 3px;
+  color: var(--text);
   font-size: 10.5px;
+  font-weight: 500;
   letter-spacing: 0.01em;
   text-decoration: none;
-  border-radius: 999px;
-  transition: color 0.32s var(--spring-settle);
+  border-radius: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.62;
+  overflow: hidden;
+  transition:
+    color 0.32s var(--spring-settle),
+    opacity 0.32s var(--spring-settle),
+    max-width 0.45s var(--spring-overshoot),
+    padding 0.45s var(--spring-overshoot);
 }
 #liquid-tabbar .tab-item .tab-label {
-  max-width: 0;
-  opacity: 0;
-  overflow: hidden;
+  font-weight: 500;
   white-space: nowrap;
-  font-weight: 600;
+  line-height: 1;
   transition:
-    max-width 0.42s var(--spring-overshoot),
-    opacity 0.32s var(--spring-settle);
+    max-height 0.32s var(--spring-settle),
+    opacity 0.28s var(--spring-settle),
+    margin 0.32s var(--spring-settle);
 }
 #liquid-tabbar .tab-item.active {
   color: var(--accent);
-}
-#liquid-tabbar .tab-item.active .tab-label {
-  max-width: 80px;
   opacity: 1;
 }
-/* Subtle press feedback — the touched tab scales slightly inward with
- * spring snap; doesn't disturb the pill morph. */
+#liquid-tabbar .tab-item.active .tab-label {
+  font-weight: 600;
+}
+/* Press feedback — spring-snap, asymmetric origin under the touch.
+ * Pointer-coords are written to --press-x by JS; falls back to center
+ * on keyboard activation. */
 #liquid-tabbar .tab-item:active {
   transform: scale(0.94);
   transition: transform 0.18s var(--spring-snap);
 }
 
-/* Minimize-on-scroll — JS toggles .nav-minimized on the body when the
- * user scrolls down. The bar shrinks toward its trailing edge, fades a
- * bit, and reduces blur slightly so it gets out of the way of content. */
+/* Minimize-on-scroll — matches Apple iOS 26 `tabBarMinimizeBehavior`.
+ * On scroll-down, the bar contracts in place around the active tab:
+ *   • Width animates from full to 64px (compact circular pill)
+ *   • Non-active tabs collapse to zero footprint (max-width AND flex
+ *     basis both zero, so they contribute no width and no leftover
+ *     space — required to keep the active icon perfectly centered)
+ *   • Bar's gap shrinks to 0 alongside, so residual gaps between
+ *     hidden items don't shift the active item off-axis
+ *   • justify-content switches to center so the active tab is
+ *     guaranteed centered regardless of its position in the bar
+ *   • Active tab's label hides (icon-only)
+ * Scroll-up or reaching the top of the page restores the full bar. */
 body.nav-minimized #liquid-tabbar {
-  transform: translateY(8px) scale(0.86);
-  transform-origin: bottom right;
-  opacity: 0.72;
-  -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.05);
-  backdrop-filter:        blur(28px) saturate(200%) brightness(1.05);
+  width: 64px;
+  gap: 0;
+  justify-content: center;
+  -webkit-backdrop-filter: blur(32px) saturate(200%) brightness(1.06);
+  backdrop-filter:        blur(32px) saturate(200%) brightness(1.06);
+}
+body.nav-minimized #liquid-tabbar .tab-item:not(.active) {
+  max-width: 0;
+  flex: 0 0 0;
+  padding-left: 0;
+  padding-right: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+body.nav-minimized #liquid-tabbar .tab-item.active {
+  flex: 0 0 auto;
+  max-width: none;
+  /* Symmetric horizontal margin keeps the icon perfectly centered
+   * inside the contracted pill, regardless of which tab was active. */
+  margin: 0 auto;
+}
+body.nav-minimized #liquid-tabbar .tab-item.active .tab-label {
+  max-height: 0;
+  opacity: 0;
+  margin: 0;
 }
 
-/* When a modal is open, the tab bar should also recede with the rest of
- * the scene (matches the existing main scale-down). */
+/* When a modal is open, the tab bar also recedes alongside <main>. */
 body:has(> .fixed.inset-0[class*="z-4"]) #liquid-tabbar,
 body:has(> .fixed.inset-0[class*="z-5"]) #liquid-tabbar {
-  transform: scale(0.92) translateY(4px);
+  transform: translateX(-50%) scale(0.92) translateY(4px);
   opacity: 0.6;
 }
 
@@ -583,6 +626,123 @@ body:has(> .fixed.inset-0[class*="z-5"]) #liquid-tabbar {
   body.nav-minimized #liquid-tabbar {
     transform: none;
   }
+}
+
+/* ─── More sheet (mobile overflow nav) ─────────────────────────────────
+ * Liquid Glass panel that slides up from the bottom. Hosts the secondary
+ * routes that don't fit in the tab bar. Closes on backdrop tap, Esc, or
+ * selecting a route. */
+#more-sheet { display: block; }
+.more-sheet-scrim {
+  position: absolute; inset: 0;
+  background: rgba(15, 23, 42, 0.20);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  backdrop-filter:        blur(8px) saturate(140%);
+  opacity: 0;
+  transition: opacity 0.28s var(--spring-settle);
+}
+#more-sheet.open .more-sheet-scrim { opacity: 1; }
+
+.more-sheet-panel {
+  position: absolute;
+  left: 12px; right: 12px;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  max-height: 72vh;
+  overflow-y: auto;
+  border-radius: 26px;
+  padding: 20px 18px 22px;
+  transform: translateY(110%);
+  transition: transform 0.42s var(--spring-overshoot);
+}
+#more-sheet.open .more-sheet-panel { transform: translateY(0); }
+
+.more-sheet-handle {
+  width: 36px; height: 4px;
+  border-radius: 999px;
+  background: var(--hairline-2);
+  margin: 0 auto 14px;
+}
+.more-sheet-list { display: flex; flex-direction: column; gap: 4px; }
+.more-sheet-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 14px;
+  border-radius: 16px;
+  color: var(--text);
+  font-size: 14.5px; font-weight: 500;
+  text-decoration: none;
+  transition:
+    background 0.24s var(--spring-settle),
+    transform 0.18s var(--spring-snap);
+}
+.more-sheet-row:hover { background: rgba(15,23,42,0.05); }
+.more-sheet-row:active { transform: scale(0.985); background: rgba(15,23,42,0.08); }
+.more-sheet-icon { color: var(--muted); display: inline-flex; align-items: center; }
+.more-sheet-label { flex: 1; }
+.more-sheet-chevron { color: var(--dim); display: inline-flex; align-items: center; }
+
+/* ─── Desktop sidebar — Liquid Glass nav, polished ─────────────────────
+ * Apple-style docked sidebar: Liquid Glass material, generous padding,
+ * pill-shape active indicator that morphs between items via the same
+ * --spring-overshoot easing the bottom tab bar uses. Hidden on mobile
+ * (tab bar takes over). */
+@media (max-width: 1023px) {
+  #sidebar { display: none !important; }
+}
+@media (min-width: 1024px) {
+  #sidebar.sidebar-nav {
+    /* Pull the sidebar into a floating-glass pane: small margin from
+     * viewport edges, full Liquid Glass material, concentric corners. */
+    margin: 12px 0 12px 12px;
+    height: calc(100vh - 24px);
+    border: none;
+    border-radius: 22px;
+    background: color-mix(in srgb, var(--regular) 88%, var(--card-tint, transparent) 12%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%) brightness(1.06);
+    backdrop-filter:        blur(50px) saturate(200%) brightness(1.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.95),
+      inset 0 -1px 0 rgba(15,23,42,0.06),
+      inset 1px 0 0 rgba(255,255,255,0.55),
+      inset -1px 0 0 rgba(255,255,255,0.30),
+      0 8px 24px -10px rgba(15,23,42,0.14);
+    isolation: isolate;
+  }
+}
+
+/* Per-item polish — nav-item gets pill rounding + smooth active state */
+#sidenav .nav-item {
+  position: relative;
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 13.5px; font-weight: 500;
+  text-decoration: none;
+  transition:
+    background 0.28s var(--spring-settle),
+    color 0.28s var(--spring-settle),
+    transform 0.2s var(--spring-snap);
+}
+#sidenav .nav-item:hover {
+  background: rgba(15,23,42,0.04);
+  color: var(--text);
+}
+#sidenav .nav-item.active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  font-weight: 600;
+}
+#sidenav .nav-item.active::before {
+  /* Accent rail on the left edge — concentric mini-pill */
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  width: 3px;
+  height: 60%;
+  border-radius: 999px;
+  background: var(--accent);
+  transform: translateY(-50%);
 }
 
 /* Pseudo-icon classes for lesson body content (where ✅/❌ used to live).
