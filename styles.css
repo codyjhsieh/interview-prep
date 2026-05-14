@@ -121,7 +121,15 @@
 }
 
 * { box-sizing: border-box; }
-html, body { background: var(--bg); color: var(--text); }
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  /* Disable iOS Safari's double-tap-to-zoom (and the 300 ms click
+     delay that comes with it). `manipulation` still allows pinch
+     zoom for accessibility — only the gesture-zoom on double-tap
+     is suppressed. */
+  touch-action: manipulation;
+}
 
 /* Hide the browser scrollbar app-wide. Scrolling still works (wheel,
  * trackpad, keys, touch); only the rendered scrollbar UI is removed. */
