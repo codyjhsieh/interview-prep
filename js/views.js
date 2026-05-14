@@ -4532,71 +4532,94 @@ function renderCompanies(state, hub) {
   }));
   scoredRoles.sort((a, b) => b._fit - a._fit);
 
+  // Build one company card. Pulled out of paintCompanies so the chunked
+  // renderer below can call it incrementally without duplicating logic.
+  function _buildCompanyCard(c) {
+    const cardEl = el('a','card card-glow block');
+    cardEl.href = `#company/${c.id}`;
+    const domain = COMPANY_DOMAINS[c.id];
+    const logo = domain
+      ? `<img src="https://logo.clearbit.com/${domain}" alt="${esc(c.name)} logo" loading="lazy" decoding="async" width="32" height="32" onerror="this.style.display='none';this.parentElement.textContent='${esc(c.name[0])}'" />`
+      : esc(c.name[0]);
+    const badges = (c.badges || []).slice(0, 3)
+      .map(b => `<span class="chip chip-funding">${esc(b)}</span>`).join('');
+    const previewJobs = (c.jobs || []).slice(0, 3);
+    const total = (c.jobs || []).length;
+    const jobsHTML = previewJobs.map(j => {
+      const lvl = j.level || 'mid';
+      const lvlDot = lvl === 'founding'
+        ? '<span class="role-dot" style="background:#7849E0"></span>'
+        : (lvl === 'senior'
+          ? '<span class="role-dot" style="background:#0EA371"></span>'
+          : '<span class="role-dot" style="background:#94A3B8"></span>');
+      return `
+        <a href="${esc(j.url)}" target="_blank" rel="noopener noreferrer"
+           onclick="event.stopPropagation()"
+           class="role-pill flex items-center gap-2 text-[12px]" title="${esc(j.title)}">
+          ${lvlDot}<span class="truncate flex-1 min-w-0">${esc(j.title)}</span>
+          <span class="role-arrow muted">↗</span>
+        </a>`;
+    }).join('');
+    const fullCount = c.totalRoles || total;
+    const extras = Math.max(0, fullCount - previewJobs.length);
+    const overflowLabel = extras > 0
+      ? `<div class="text-[11px] mt-1.5 flex items-center justify-between"><span class="muted">+${extras} more open NYC role${extras === 1 ? '' : 's'}</span><span style="color:var(--accent)" class="font-medium">View all →</span></div>`
+      : `<div class="text-[11px] mt-1.5 flex items-center justify-end"><span style="color:var(--accent)" class="font-medium">View →</span></div>`;
+    cardEl.innerHTML = `
+      <div class="flex items-start gap-3">
+        <div class="co-logo">${logo}</div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 justify-between flex-wrap">
+            <div class="font-display font-semibold text-lg truncate">${esc(c.name)}</div>
+            ${fitBadgeHTML(c._fit)}
+          </div>
+          <div class="text-xs muted mt-0.5 truncate">${esc(c.sub)}</div>
+          <div class="text-[11px] mt-1.5 flex items-center gap-1.5 flex-wrap">
+            <span class="pill ${verticalPill[c.vertical] || 'pill-dev'}" style="font-size:10px;padding:1px 6px">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
+            <span class="font-mono tabular-nums" style="color:var(--accent)">${esc(c.raised || '')}</span>
+            <span class="dim">·</span>
+            <span class="muted">${esc(c.stage || '')}</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-1 mt-2.5">${badges}</div>
+      <div class="mt-3 pt-3 border-t border-[color:var(--hairline)] space-y-1.5">${jobsHTML}</div>
+      ${overflowLabel}
+    `;
+    return cardEl;
+  }
+
   function paintCompanies() {
     grid.innerHTML = '';
     const q = curQuery.trim().toLowerCase();
-    scoredCos
+    const filtered = scoredCos
       .filter(c => curVFilter === 'all' || c.vertical === curVFilter)
       .filter(c => {
         if (!q) return true;
         const hay = (c.name+' '+c.sub+' '+(c.notes||'')+' '+(c.badges||[]).join(' ')+' '+(c.lead||'')+' '+(c.jobs||[]).map(j=>j.title).join(' ')).toLowerCase();
         return hay.includes(q);
-      })
-      .forEach(c => {
-        const cardEl = el('a','card card-glow block');
-        cardEl.href = `#company/${c.id}`;
-        const domain = COMPANY_DOMAINS[c.id];
-        const logo = domain
-          ? `<img src="https://logo.clearbit.com/${domain}" alt="${esc(c.name)} logo" onerror="this.style.display='none';this.parentElement.textContent='${esc(c.name[0])}'" />`
-          : esc(c.name[0]);
-        const badges = (c.badges || []).slice(0, 3)
-          .map(b => `<span class="chip chip-funding">${esc(b)}</span>`).join('');
-        const previewJobs = (c.jobs || []).slice(0, 3);
-        const total = (c.jobs || []).length;
-        const jobsHTML = previewJobs.map(j => {
-          const lvl = j.level || 'mid';
-          const lvlDot = lvl === 'founding'
-            ? '<span class="role-dot" style="background:#7849E0"></span>'
-            : (lvl === 'senior'
-              ? '<span class="role-dot" style="background:#0EA371"></span>'
-              : '<span class="role-dot" style="background:#94A3B8"></span>');
-          return `
-            <a href="${esc(j.url)}" target="_blank" rel="noopener noreferrer"
-               onclick="event.stopPropagation()"
-               class="role-pill flex items-center gap-2 text-[12px]" title="${esc(j.title)}">
-              ${lvlDot}<span class="truncate flex-1 min-w-0">${esc(j.title)}</span>
-              <span class="role-arrow muted">↗</span>
-            </a>`;
-        }).join('');
-        const fullCount = c.totalRoles || total;
-        const extras = Math.max(0, fullCount - previewJobs.length);
-        const overflowLabel = extras > 0
-          ? `<div class="text-[11px] mt-1.5 flex items-center justify-between"><span class="muted">+${extras} more open NYC role${extras === 1 ? '' : 's'}</span><span style="color:var(--accent)" class="font-medium">View all →</span></div>`
-          : `<div class="text-[11px] mt-1.5 flex items-center justify-end"><span style="color:var(--accent)" class="font-medium">View →</span></div>`;
-        cardEl.innerHTML = `
-          <div class="flex items-start gap-3">
-            <div class="co-logo">${logo}</div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 justify-between flex-wrap">
-                <div class="font-display font-semibold text-lg truncate">${esc(c.name)}</div>
-                ${fitBadgeHTML(c._fit)}
-              </div>
-              <div class="text-xs muted mt-0.5 truncate">${esc(c.sub)}</div>
-              <div class="text-[11px] mt-1.5 flex items-center gap-1.5 flex-wrap">
-                <span class="pill ${verticalPill[c.vertical] || 'pill-dev'}" style="font-size:10px;padding:1px 6px">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
-                <span class="font-mono tabular-nums" style="color:var(--accent)">${esc(c.raised || '')}</span>
-                <span class="dim">·</span>
-                <span class="muted">${esc(c.stage || '')}</span>
-              </div>
-            </div>
-          </div>
-          <div class="flex flex-wrap gap-1 mt-2.5">${badges}</div>
-          <div class="mt-3 pt-3 border-t border-[color:var(--hairline)] space-y-1.5">${jobsHTML}</div>
-          ${overflowLabel}
-        `;
-        grid.appendChild(cardEl);
       });
-    ANIM.stagger(grid.children, { stagger: 0.02 });
+    // Render the visible-above-fold chunk synchronously; defer the rest
+    // to subsequent animation frames so the tap → first-paint feels
+    // instant. Was a single 129-card forEach + a 129-tween GSAP stagger
+    // which together dominated mobile tap-to-paint time (~1 s).
+    const INITIAL = 18, CHUNK = 18;
+    const frag1 = document.createDocumentFragment();
+    for (let i = 0; i < Math.min(INITIAL, filtered.length); i++) {
+      frag1.appendChild(_buildCompanyCard(filtered[i]));
+    }
+    grid.appendChild(frag1);
+    let cursor = INITIAL;
+    const paintNext = () => {
+      if (cursor >= filtered.length) return;
+      const end = Math.min(cursor + CHUNK, filtered.length);
+      const f = document.createDocumentFragment();
+      for (let i = cursor; i < end; i++) f.appendChild(_buildCompanyCard(filtered[i]));
+      grid.appendChild(f);
+      cursor = end;
+      if (cursor < filtered.length) requestAnimationFrame(paintNext);
+    };
+    if (filtered.length > INITIAL) requestAnimationFrame(paintNext);
   }
 
   function paintRoles() {
@@ -4620,7 +4643,7 @@ function renderCompanies(state, hub) {
       const c = r._company;
       const domain = COMPANY_DOMAINS[c.id];
       const logoMini = domain
-        ? `<img src="https://logo.clearbit.com/${domain}" alt="${esc(c.name)}" style="width:24px;height:24px;border-radius:6px;flex-shrink:0;object-fit:cover" onerror="this.style.display='none'"/>`
+        ? `<img src="https://logo.clearbit.com/${domain}" alt="${esc(c.name)}" loading="lazy" decoding="async" width="24" height="24" style="width:24px;height:24px;border-radius:6px;flex-shrink:0;object-fit:cover" onerror="this.style.display='none'"/>`
         : `<div class="role-row-letter">${esc(c.name[0])}</div>`;
       const lvl = r.level || 'mid';
       const lvlClass = lvl === 'founding' ? 'pill-ai' : (lvl === 'senior' ? 'pill-both' : 'pill-dev');
