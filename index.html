@@ -44,7 +44,41 @@
   }
   /* Hide until critical CSS + Tailwind hydrate, to avoid a 1-frame flash */
   html:not(.ready) body { visibility: hidden; }
+
+  /* Sign-in lock — applied synchronously by the inline script below
+     when the user is unpaired (no sync code + no skip flag). Hides
+     the entire app chrome so nothing flashes before the Liquid Glass
+     gate fades in. renderLoginGate's dismiss handler removes the
+     class via a brief .lg-unlocking transition. */
+  html.lg-locked #app,
+  html.lg-locked #liquid-tabbar,
+  html.lg-locked #toasts,
+  html.lg-locked #focus-bar {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  html.lg-unlocking #app,
+  html.lg-unlocking #liquid-tabbar,
+  html.lg-unlocking #toasts,
+  html.lg-unlocking #focus-bar {
+    opacity: 1;
+    transition: opacity 0.45s ease-in;
+  }
 </style>
+
+<script>
+  // Synchronous sign-in lock check. Runs before any other script so
+  // the lg-locked class is on <html> from the very first paint. The
+  // login gate (rendered later by app.js) removes it on pair/skip.
+  (function () {
+    try {
+      if (!localStorage.getItem('fdeprep.syncCode.v1') &&
+          !localStorage.getItem('fdeprep.syncSkip.v1')) {
+        document.documentElement.classList.add('lg-locked');
+      }
+    } catch (_) {}
+  })();
+</script>
 
 <script>
   // Reveal the page once the inlined critical CSS is in effect.

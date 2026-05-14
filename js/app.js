@@ -726,17 +726,23 @@ function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt
 //   - the user hasn't explicitly opted out via "Use locally only"
 // Once paired or skipped, sync.js owns the rest (poll/push loop).
 function maybeShowLoginGate() {
+  const unlock = () => {
+    // No gate needed (or sync misconfigured) — make sure the UI shows.
+    document.documentElement.classList.remove('lg-locked');
+  };
   try {
-    if (!window.SYNC || !window.VIEWS || !window.VIEWS.renderLoginGate) return;
+    if (!window.SYNC || !window.VIEWS || !window.VIEWS.renderLoginGate) {
+      unlock(); return;
+    }
     const s = window.SYNC.status();
-    if (!s || !s.configured) return;
-    if (s.code) return;
-    if (localStorage.getItem('fdeprep.syncSkip.v1')) return;
+    if (!s || !s.configured) { unlock(); return; }
+    if (s.code) { unlock(); return; }
+    if (localStorage.getItem('fdeprep.syncSkip.v1')) { unlock(); return; }
     VIEWS.renderLoginGate(() => {
-      // After pair/skip — re-render so any merged remote state shows.
+      // After pair/skip — re-render so merged remote state shows.
       try { render(); } catch (_) {}
     });
-  } catch (_) {}
+  } catch (_) { unlock(); }
 }
 
 // Mobile nav is now the floating Liquid Glass tab bar (built by

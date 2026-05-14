@@ -4055,6 +4055,8 @@ function renderLoginGate(onDismiss) {
     const css = document.createElement('style');
     css.id = 'login-gate-css';
     css.textContent = `
+      /* (Lock rules live in index.html inline critical CSS so they
+         apply before the first paint — see html.lg-locked / .lg-unlocking) */
       @keyframes lg-bg-bloom {
         0%   { transform: translate(0,0)   scale(1);   opacity: 0.9; }
         50%  { transform: translate(-2%,1%) scale(1.04); opacity: 1;   }
@@ -4231,6 +4233,10 @@ function renderLoginGate(onDismiss) {
       </div>
     </div>
   `;
+  // Ensure the lock is applied (it usually already is, set by the
+  // inline script in index.html — but if renderLoginGate is invoked
+  // dynamically from Profile mid-session, set it here too).
+  document.documentElement.classList.add('lg-locked');
   document.body.appendChild(gate);
   // Trigger the gate fade-in on the next frame so the transition kicks in
   requestAnimationFrame(() => { gate.style.opacity = '1'; });
@@ -4250,7 +4256,14 @@ function renderLoginGate(onDismiss) {
     if (dismissing) return;
     dismissing = true;
     gate.classList.add('dismiss');
-    setTimeout(() => { gate.remove(); if (typeof onDismiss === 'function') onDismiss(); }, 380);
+    // Swap lock → unlocking so the app fades IN while the gate fades OUT.
+    document.documentElement.classList.remove('lg-locked');
+    document.documentElement.classList.add('lg-unlocking');
+    setTimeout(() => {
+      gate.remove();
+      document.documentElement.classList.remove('lg-unlocking');
+      if (typeof onDismiss === 'function') onDismiss();
+    }, 470);
   };
 
   const doPair = async () => {
