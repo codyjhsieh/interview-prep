@@ -2250,6 +2250,11 @@ function renderJobAppsCard(state) {
     const { xpGained } = GAMI.logJobApp(st);
     GAMI.saveImmediate(st);
     card.replaceWith(renderJobAppsCard(st));
+    // Refresh the header chips (Today XP / Level / streak) so the locally-
+    // visible numbers track the new state without waiting for next render.
+    if (window.APP && typeof window.APP.afterStateChange === 'function') {
+      try { window.APP.afterStateChange(); } catch (_) {}
+    }
     if (window.ANIM && window.ANIM.toast) {
       const remaining = target - (count + 1);
       window.ANIM.toast({
@@ -2267,6 +2272,9 @@ function renderJobAppsCard(state) {
       if (!result) return;
       GAMI.saveImmediate(st);
       card.replaceWith(renderJobAppsCard(st));
+      if (window.APP && typeof window.APP.afterStateChange === 'function') {
+        try { window.APP.afterStateChange(); } catch (_) {}
+      }
       if (window.ANIM && window.ANIM.toast) {
         window.ANIM.toast({
           title: 'Application undone',
@@ -2423,6 +2431,9 @@ function renderDashboard(state, hub) {
           st.pet.eatenTodayXP = eaten + PILE_XP;
           if (typeof GAMI !== 'undefined' && GAMI.feedPetWithPile) GAMI.feedPetWithPile(st);
           if (typeof GAMI !== 'undefined' && GAMI.saveImmediate) GAMI.saveImmediate(st);
+          if (window.APP && typeof window.APP.afterStateChange === 'function') {
+            try { window.APP.afterStateChange(); } catch (_) {}
+          }
           // Update button state in place
           const newAvail = avail - 1;
           if (newAvail <= 0) {

@@ -314,6 +314,10 @@ function afterStateChange() {
   GAMI.checkBadges(state, DATA.BADGES);
   GAMI.save(state);
   updateHeader();
+  // Refresh data-bearing cards in the current view (Today XP, Streak,
+  // Level, Lessons-done, Quests, NextUp, Heatmap) without a full
+  // re-render. Same surgical update used by the sync poll.
+  try { syncSurgicalUpdates(state); } catch (_) {}
 }
 
 /* ---------- Onboarding (auto, no welcome form) ---------- */
