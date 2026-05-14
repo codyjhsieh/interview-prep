@@ -841,7 +841,13 @@ return {
   // flash a naive innerHTML swap produces.
   setStateFromSync: (next) => {
     state = next;
-    GAMI.saveImmediate(state);
+    // CRITICAL: write to localStorage directly, NOT via GAMI.saveImmediate.
+    // sync.js wraps saveImmediate to debounce-push to remote. If we call
+    // the wrapped version here, each remote pull schedules a fresh push
+    // (with a new updatedAt), the other device polls and sees a "new"
+    // state, calls setStateFromSync, schedules a push, … forever. That
+    // ping-pong burns the 1000 KV-writes-per-day free tier in minutes.
+    try { localStorage.setItem('fdeprep.v1', JSON.stringify(state)); } catch (_) {}
     try { updateHeader(); } catch (_) {}
     // Guard: don't yank the view out from under an actively-typing
     // user. Header chips already updated above; rest can wait for nav.
