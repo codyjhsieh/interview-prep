@@ -502,9 +502,9 @@ function ensureDailyQuests(state, pool) {
  *                                on whether the user is on the workout path
  *   Hit ≥1.5× daily goal     →  form += +6 (jacked path) — counts as exercise
  *   Hit ≥1.0× but <1.5×      →  form += -2 (chubby drift — fed without exercise)
- *   PRIOR day = 0 XP         →  one-skip credit used (counter +1). On the
- *                                SECOND consecutive 0-XP day → death.
- *                                Any nonzero-XP day resets the counter.
+ *   PRIOR day = 0 XP         →  vitality -= 30  AND  skip counter += 1.
+ *                                On the SECOND consecutive 0-XP day,
+ *                                vitality = 0 → death.
  *   PRIOR day 0<XP<goal      →  vitality -= 30 × (1 − XP/goal)  (scaled
  *                                penalty) + skip counter resets to 0
  *   PRIOR day XP ≥ goal      →  no penalty + skip counter resets to 0
@@ -634,28 +634,27 @@ function _petTick(p, today, state) {
     for (let t = lastT; t < todayT; t += dayMs) {
       const dKey = new Date(t).toISOString().slice(0, 10);
       const dayXP = xpByDate[dKey] || 0;
+      // Vitality penalty is uniform across all sub-goal days (scaled by
+      // the shortfall); skip-credit logic is independent and only gates
+      // DEATH on the second consecutive 0-XP day.
+      if (dayXP < goal) {
+        const shortfall = (goal - dayXP) / goal;          // 0..1
+        const penalty = Math.round(30 * shortfall);       // 0..30
+        p.vitality = Math.max(0, p.vitality - penalty);
+      }
       if (dayXP === 0) {
         p.consecutiveSkipDays += 1;
         if (p.consecutiveSkipDays >= 2) {
-          // Second consecutive 0-XP day → death.
+          // Second consecutive 0-XP day → death (regardless of how
+          // much vitality remained after the proportional penalty).
           p.vitality = 0;
           break;
         }
-        // First skip — Bit survives, vitality unchanged this iteration.
       } else {
         // Any nonzero XP day resets the consecutive-skip counter.
         p.consecutiveSkipDays = 0;
-        if (dayXP < goal) {
-          // Partial-credit day — vitality drops proportional to the
-          // shortfall (matches the old unconditional -30/day cap when
-          // XP is barely-nonzero).
-          const shortfall = (goal - dayXP) / goal;        // 0..1
-          const penalty = Math.round(30 * shortfall);
-          p.vitality = Math.max(0, p.vitality - penalty);
-          if (p.vitality === 0) break;
-        }
-        // dayXP >= goal: no penalty. User kept up.
       }
+      if (p.vitality === 0) break;
     }
   } else if (!checkStarvation) {
     // Fallback for the grace-period case (brand-new pet, first day):
@@ -697,32 +696,33 @@ function _petBody(p) {
  * The stored `p.vitality` only updates at calendar rollover (see _petTick).
  * For display + activity-selection, we compute a *live* vitality that
  * smoothly approaches whatever the rollover commit would be IF today
- * continued on its current trajectory. Three regimes:
+ * continued on its current trajectory.
  *
- * 1.  todayXP > 0  (partial-credit day or already at goal)
+ * Vitality penalty is independent of the skip-credit logic — any sub-
+ * goal day (including a 0-XP day) drops vitality by 30 × shortfall.
+ * The skip credit only gates DEATH on the second consecutive 0-XP day.
+ *
+ * Two regimes:
+ *
+ * 1.  Normal trajectory (partial-credit or fresh-skip first-day)
  *     ───────────────────────────────────────────────────────────────
- *     Standard time-scaled penalty:
+ *     Standard time-scaled pending penalty:
  *       pendingPenalty = (1 - todayXP/goal) × 30 × (hours-into-day / 24)
- *     At t=0: penalty 0 → live = stored
- *     At t=24h, 0<XP<goal: penalty = 30·shortfall → matches _petTick
- *     At any time with XP ≥ goal: penalty = 0 → live = stored
- *     (The consecutive-skip counter will reset at midnight regardless,
- *      because nonzero XP breaks a skip run.)
+ *     At t=0:                penalty 0          → live = stored
+ *     At t=24h, todayXP = 0: penalty 30          → live = stored − 30
+ *     At t=24h, XP = goal:   penalty 0          → live = stored
  *
- * 2.  todayXP == 0  AND  p.consecutiveSkipDays == 0  (FIRST skip)
- *     ───────────────────────────────────────────────────────────────
- *     The "one free skip" rule applies — at midnight this just bumps
- *     consecutiveSkipDays to 1, vitality stays put. Live vitality
- *     stays at the stored value all day. (User can still see the
- *     consecutiveSkipDays count if surfaced in UI.)
+ *     This applies whether todayXP is 0 with a fresh skip credit or
+ *     anywhere between 0 and goal. The skip credit handles death
+ *     separately; vitality always declines on a sub-goal day.
  *
- * 3.  todayXP == 0  AND  p.consecutiveSkipDays >= 1  (SECOND skip)
+ * 2.  Death trajectory: todayXP == 0  AND  consecutiveSkipDays >= 1
  *     ───────────────────────────────────────────────────────────────
- *     Death trajectory — at midnight the rule fires `vitality = 0`.
- *     Live vitality drops linearly across the day from `stored` to 0,
- *     so the UI visibly counts down. If the user earns ANY XP mid-day
- *     this trajectory snaps back to regime 1 (penalty resumes from the
- *     standard partial-credit formula, no death).
+ *     The midnight commit will set vitality = 0 (second consecutive
+ *     skip). Live vitality drops linearly from `stored` toward 0
+ *     across the day. Earning ANY XP mid-day snaps trajectory back
+ *     to regime 1 — the skip counter will reset at midnight, no
+ *     death, vitality recovers visibly.
  */
 function _liveVitality(p, todayXP, goal) {
   if (!p || p.vitality == null) return 0;
@@ -731,17 +731,12 @@ function _liveVitality(p, todayXP, goal) {
                      + now.getMinutes() * 60
                      + now.getSeconds()) / 86400;
   const xp = todayXP || 0;
-  if (xp === 0) {
-    // Pure-skip trajectory today.
-    if ((p.consecutiveSkipDays || 0) === 0) {
-      // First-skip credit absorbs the day — vitality unchanged.
-      return p.vitality;
-    }
-    // Already used the skip credit; this is the second consecutive
-    // 0-XP day and ends in death at midnight. Smoothly count toward 0.
+  // Regime 2: pre-locked death trajectory (second consecutive skip).
+  if (xp === 0 && (p.consecutiveSkipDays || 0) >= 1) {
     return Math.max(0, Math.round(p.vitality * (1 - hourFraction)));
   }
-  // Standard partial-credit pending penalty (regime 1).
+  // Regime 1: standard partial-credit decay (also covers fresh first-skip
+  // days — vitality still drops, only DEATH is gated by the skip credit).
   const xpRatio = Math.min(1, xp / (goal || 60));
   const pendingPenalty = (1 - xpRatio) * 30 * hourFraction;
   return Math.max(0, Math.round(p.vitality - pendingPenalty));
