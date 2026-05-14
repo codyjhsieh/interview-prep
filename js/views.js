@@ -4015,7 +4015,8 @@ function renderSyncSection(sync) {
           <button class="btn btn-primary" data-sync-generate>Generate a code</button>
           <span class="muted text-[12px]">or</span>
           <input id="sync-code-input" placeholder="ENTER-CODE" maxlength="11"
-                 class="font-mono text-center" style="letter-spacing:0.18em; width:170px"/>
+                 autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false"
+                 class="font-mono text-center" style="letter-spacing:0.18em; width:170px; text-transform:uppercase"/>
           <button class="btn" data-sync-pair>Pair</button>
         </div>
         <div id="sync-status" class="text-[11.5px] muted mt-3" style="min-height:1em"></div>
@@ -4113,20 +4114,30 @@ function renderProfile(state, hub) {
       })());
     } catch (e) { setStatusText('error: ' + e.message); }
   });
-  const pairBtn = container.querySelector('[data-sync-pair]');
-  if (pairBtn) pairBtn.addEventListener('click', async () => {
+  const codeInput = container.querySelector('#sync-code-input');
+  if (codeInput) {
+    codeInput.addEventListener('input', (e) => {
+      const pos = e.target.selectionStart;
+      e.target.value = e.target.value.toUpperCase();
+      try { e.target.setSelectionRange(pos, pos); } catch (_) {}
+    });
+  }
+  const doPair = async () => {
     if (!window.SYNC) return;
-    const input = container.querySelector('#sync-code-input');
-    const raw = input ? input.value.trim() : '';
+    const raw = codeInput ? codeInput.value.trim() : '';
     if (!raw) { setStatusText('enter a code first'); return; }
     setStatusText('pairing…');
     try {
       const result = await window.SYNC.pair(raw);
       setStatusText(result.adopted ? 'adopted other device\'s state' : 'this device seeded the code');
-      // Re-render
       hub.innerHTML = '';
       VIEWS.renderProfile(APP.getState(), hub);
     } catch (e) { setStatusText('error: ' + e.message); }
+  };
+  const pairBtn = container.querySelector('[data-sync-pair]');
+  if (pairBtn) pairBtn.addEventListener('click', doPair);
+  if (codeInput) codeInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); doPair(); }
   });
   const unpairBtn = container.querySelector('[data-sync-unpair]');
   if (unpairBtn) unpairBtn.addEventListener('click', () => {
