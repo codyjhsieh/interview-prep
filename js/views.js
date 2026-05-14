@@ -2410,42 +2410,14 @@ function renderDashboard(state, hub) {
       let petHandle;
       try { petHandle = mountPet3D(host, pp); }
       catch (err) { console.warn('[pet3d] mount failed, falling back:', err); }
+      // Stash the handle on the host so sync's surgical update can
+      // re-attach the drop-food click handler after a pet-panel swap
+      // (where the old button — and its listener — gets discarded).
+      if (petHandle) host._petHandle = petHandle;
 
-      // Wire the drop-food button to the mounted scene.
-      const dropBtn = petCard.querySelector('[data-pet-drop-food]');
-      if (dropBtn && petHandle && typeof petHandle.dropFood === 'function') {
-        dropBtn.addEventListener('click', () => {
-          const st = APP && APP.getState ? APP.getState() : state;
-          const PILE_XP = 10;
-          const todayXP = st.todayXP || 0;
-          const eaten   = (st.pet && st.pet.eatenTodayXP) || 0;
-          const avail   = Math.floor(Math.max(0, todayXP - eaten) / PILE_XP);
-          if (avail <= 0) return;
-          // Random floor position, kept well inside the walls
-          const fx = (Math.random() * 2 - 1) * 2.0;
-          const fz = (Math.random() * 2 - 1) * 2.0;
-          petHandle.dropFood(fx, fz);
-          // Debit the food bank + actually feed Bit (vitality + form). This
-          // is the ONLY path that changes vitality now — auto-feed on
-          // goal-cross was removed in gamification.petState.
-          st.pet.eatenTodayXP = eaten + PILE_XP;
-          if (typeof GAMI !== 'undefined' && GAMI.feedPetWithPile) GAMI.feedPetWithPile(st);
-          if (typeof GAMI !== 'undefined' && GAMI.saveImmediate) GAMI.saveImmediate(st);
-          if (window.APP && typeof window.APP.afterStateChange === 'function') {
-            try { window.APP.afterStateChange(); } catch (_) {}
-          }
-          // Update button state in place
-          const newAvail = avail - 1;
-          if (newAvail <= 0) {
-            dropBtn.disabled = true;
-            dropBtn.style.opacity = '0.45';
-            dropBtn.style.cursor = 'not-allowed';
-            dropBtn.innerHTML = `<span class="inline-flex items-center gap-1.5">${iconHTML('carrot', {size: 14})} Drop food</span>`;
-          } else {
-            dropBtn.innerHTML = `<span class="inline-flex items-center gap-1.5">${iconHTML('carrot', {size: 14})} Drop food <span class="numeric ml-1">×${newAvail}</span></span>`;
-          }
-        });
-      }
+      // The drop-food click handler is registered via event delegation
+      // in app.js (bindEvents) so it survives sync-driven pet-panel
+      // swaps. It reads host._petHandle to find the scene.
     }
   });
 

@@ -400,6 +400,30 @@ function bindEvents() {
       VIEWS.openPetLifecyclePreview();
       return;
     }
+    // Pet — drop food. Delegated here (rather than inline in renderDashboard)
+    // so the handler survives sync-driven pet-panel swaps.
+    const dropFoodBtn = e.target?.closest && e.target.closest('[data-pet-drop-food]');
+    if (dropFoodBtn && !dropFoodBtn.disabled) {
+      const host = document.getElementById('pet-room-3d-host');
+      const petHandle = host && host._petHandle;
+      if (petHandle && typeof petHandle.dropFood === 'function') {
+        const st = APP.getState();
+        const PILE_XP = 10;
+        const todayXP = st.todayXP || 0;
+        const eaten = (st.pet && st.pet.eatenTodayXP) || 0;
+        const avail = Math.floor(Math.max(0, todayXP - eaten) / PILE_XP);
+        if (avail > 0) {
+          const fx = (Math.random() * 2 - 1) * 2.0;
+          const fz = (Math.random() * 2 - 1) * 2.0;
+          petHandle.dropFood(fx, fz);
+          st.pet.eatenTodayXP = eaten + PILE_XP;
+          if (typeof GAMI !== 'undefined' && GAMI.feedPetWithPile) GAMI.feedPetWithPile(st);
+          if (typeof GAMI !== 'undefined' && GAMI.saveImmediate) GAMI.saveImmediate(st);
+          afterStateChange();          // updates header + surgical refresh of cards (incl. pet)
+        }
+      }
+      return;
+    }
     // Skip — mark complete with 0 XP, then optionally advance to next
     const skipId = e.target?.dataset?.skip;
     if (skipId) {
@@ -781,10 +805,11 @@ function syncSurgicalUpdates(currentState) {
     if (!bufCard) continue;                  // no fresh version → leave alone
 
     if (key === 'pet') {
-      // Update only the text/bar values inside the pet card. Don't swap
-      // the whole card (would orphan the WebGL canvas + lose drop-food
-      // listener). The 3D scene picks up state changes via its own loop.
-      updatePetCardTextInPlace(liveCard, currentState);
+      // Refresh the right-side stats panel from the buffer's freshly-
+      // rendered version (header line + panel innerHTML). The 3D canvas
+      // is in the left-side host and stays untouched — animation loop
+      // and drop-food (now delegated) survive the swap.
+      updatePetCardInPlace(liveCard, bufCard);
       continue;
     }
 
@@ -794,21 +819,21 @@ function syncSurgicalUpdates(currentState) {
   }
 }
 
-// Pet text/bars get updated in place — selector-based, preserves canvas.
-function updatePetCardTextInPlace(live, state) {
-  if (!state.pet) return;
-  // Pet name in the h3
-  const h3 = live.querySelector('h3.font-display');
-  if (h3 && state.pet.name) {
-    const firstText = h3.firstChild;
-    if (firstText && firstText.nodeType === 3) firstText.nodeValue = state.pet.name + "'s room ";
-  }
-  // Vitality numeric + bar
-  const vit = (state.pet.vitality || 0);
-  const vitNum = live.querySelector('.pet-panel .numeric');
-  if (vitNum) vitNum.textContent = vit + '/100' + (vit < 30 ? ' · sick' : '');
-  const vitBar = live.querySelector('.pet-panel .bar > i, .pet-panel [style*="width"]');
-  if (vitBar) vitBar.style.width = Math.max(0, Math.min(100, vit)) + '%';
+// Pet update — replace the right-panel innerHTML with the freshly-rendered
+// version from the buffer. The left (3D canvas) host is preserved because
+// we don't touch it. Drop-food button on the swapped panel inherits the
+// delegated handler in bindEvents, so it keeps working.
+function updatePetCardInPlace(liveCard, bufCard) {
+  if (!liveCard || !bufCard) return;
+  // Update header line (status text changes with activity)
+  const liveHeader = liveCard.querySelector(':scope > div:first-child');
+  const bufHeader  = bufCard.querySelector(':scope > div:first-child');
+  if (liveHeader && bufHeader) liveHeader.innerHTML = bufHeader.innerHTML;
+  // Swap panel content
+  const livePanel = liveCard.querySelector('.pet-panel');
+  const bufPanel  = bufCard.querySelector('.pet-panel');
+  if (livePanel && bufPanel) livePanel.innerHTML = bufPanel.innerHTML;
+  // 3D host is left alone — canvas stays mounted, animation loop continues.
 }
 
 /*
