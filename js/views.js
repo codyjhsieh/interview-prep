@@ -3319,6 +3319,11 @@ function renderDashboard(state, hub) {
   const petCard = renderPetCard(state, pet);
   container.appendChild(petCard);
 
+  // Job-application logger — moved up here (above the daily quote) so
+  // the daily-grind tracker is visible alongside Bit, not buried below
+  // the stats grid.
+  container.appendChild(renderJobAppsCard(state));
+
   // Daily manifesto — one curated quote from masterpiece novels / philosophy
   // / holy texts. Cycles per visit; user can shuffle or browse the full set.
   if (typeof QUOTES !== 'undefined' && QUOTES.length) {
@@ -3379,11 +3384,6 @@ function renderDashboard(state, hub) {
     </div>
   `;
   container.appendChild(stats);
-
-  // Job-application logger — compact card that lets the user tick off
-  // applications. Each click awards XP via the normal path; 10 apps
-  // covers half the daily goal.
-  container.appendChild(renderJobAppsCard(state));
 
   // SRS review tiles — surface only when there's something due / queued
   if (missedTotal > 0 || conceptReviewsTotal > 0) {

@@ -268,14 +268,17 @@ header.sticky, main > header {
   background: var(--chrome);
   -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(1.08) contrast(1.03);
   backdrop-filter: blur(60px) saturate(200%) brightness(1.08) contrast(1.03);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    inset 0 -1px 0 var(--hairline);
+  /* Notch-seamless: dropped the inset 1px top highlight that was
+     drawing a hard white line exactly at the notch/header boundary.
+     Kept only the bottom hairline so the header still has a defined
+     edge against scrolling content. */
+  box-shadow: inset 0 -1px 0 var(--hairline);
   border-bottom: none !important;
-  /* Flow under the iPhone notch / Dynamic Island. The Liquid Glass
-     material fills the safe-area band; padding-top pushes the actual
-     header chrome below the notch so nothing is clipped. */
-  padding-top: env(safe-area-inset-top);
+  /* The Liquid Glass material flows up into the iPhone notch safe-area
+     band via padding-top: env(...). The padded area is part of the
+     header's box, so its translucent backdrop-filter + chrome bg fill
+     the notch region instead of leaving a bare body-bg strip. */
+  padding-top: env(safe-area-inset-top, 0px);
 }
 header.sticky::after, main > header::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
