@@ -56,62 +56,33 @@ window.SYNC = (function () {
   }
 
   /*
-   * Tiny live sync indicator — top-right of the header, under the
-   * profile button. Tells the user at a glance whether the polling
-   * loop is actually firing on this device. Three states:
-   *   - synced  (green dot)   — a push or pull just succeeded
-   *   - pulled  (green dot)   — fresh data merged in from remote
-   *   - polling (gray dot)    — loop is alive, no change
-   *   - offline (amber dot)   — fetch failed (network / CORS / quota)
-   *   - error   (red dot)     — HTTP non-OK
-   *   - paired / idle         — hidden (no activity yet)
-   * Click the dot to manually force-pull from remote.
+   * Live sync indicator — diffuse colored glow around the nav pill
+   * (mobile #liquid-tabbar and desktop #sidebar). Sets a data-sync
+   * attribute on <body> which CSS picks up to paint a box-shadow
+   * halo. Brief pulse on activity events (pulled / synced).
+   *
+   * States:
+   *   - synced  / pulled   — green glow pulse (fresh data flowed)
+   *   - polling / paired   — neutral (transparent / very faint)
+   *   - offline            — amber glow
+   *   - error              — red glow
+   *   - idle               — no attribute (hidden)
    */
-  let _dotEl = null;
-  function ensureLiveIndicator() {
-    if (_dotEl && document.body.contains(_dotEl)) return _dotEl;
-    _dotEl = document.createElement('button');
-    _dotEl.id = 'sync-live-dot';
-    _dotEl.type = 'button';
-    _dotEl.title = 'sync status — tap to force pull';
-    _dotEl.style.cssText = `
-      position: fixed;
-      top: calc(env(safe-area-inset-top, 0px) + 14px);
-      right: 56px;
-      width: 10px; height: 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(15,23,42,0.18);
-      background: #B8C0CC;
-      box-shadow: 0 1px 3px rgba(15,23,42,0.12);
-      cursor: pointer; padding: 0;
-      z-index: 30;
-      transition: background 0.25s ease, transform 0.18s ease, opacity 0.25s ease;
-      opacity: 0.55;
-    `;
-    _dotEl.addEventListener('click', () => { try { pollOnce(); } catch (_) {} });
-    document.body.appendChild(_dotEl);
-    return _dotEl;
-  }
   function paintLiveIndicator(s) {
     try {
-      const el = ensureLiveIndicator();
-      const palette = {
-        synced:  '#22c55e',
-        pulled:  '#0EA371',
-        polling: '#B8C0CC',
-        offline: '#F59E0B',
-        error:   '#EF4444',
-        paired:  '#B8C0CC',
-        idle:    'transparent',
-      };
-      el.style.background = palette[s] || '#B8C0CC';
-      el.style.opacity = (s === 'idle') ? '0' : (s === 'pulled' || s === 'synced' ? '1' : '0.55');
-      el.title = `sync: ${s} — tap to force pull (last updated ${new Date().toLocaleTimeString()})`;
-      // Brief pulse on activity events to make polls visible
+      if (!document.body) return;
+      if (s === 'idle' || !s) {
+        document.body.removeAttribute('data-sync');
+      } else {
+        document.body.setAttribute('data-sync', s);
+      }
+      // Brief pulse class on pulled/synced so the glow flares then settles
       if (s === 'pulled' || s === 'synced') {
-        el.style.transform = 'scale(1.6)';
-        clearTimeout(el._pulseTimer);
-        el._pulseTimer = setTimeout(() => { el.style.transform = 'scale(1)'; }, 280);
+        document.body.classList.add('sync-pulse');
+        clearTimeout(paintLiveIndicator._pulseTimer);
+        paintLiveIndicator._pulseTimer = setTimeout(() => {
+          document.body.classList.remove('sync-pulse');
+        }, 700);
       }
     } catch (_) {}
   }

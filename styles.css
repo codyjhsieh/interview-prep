@@ -489,7 +489,9 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
     inset 1px 0 0 rgba(255,255,255,0.55),
     inset -1px 0 0 rgba(255,255,255,0.30),
     0 10px 32px -10px rgba(15,23,42,0.22),
-    0 2px 6px rgba(15,23,42,0.08);
+    0 2px 6px rgba(15,23,42,0.08),
+    /* Sync-status diffuse glow — colored by body[data-sync] below */
+    0 0 var(--sync-glow-blur, 0px) var(--sync-glow-spread, 0px) var(--sync-glow-color, transparent);
   /* All Apple Liquid Glass state transitions use the spring tokens —
    * width + gap animate together to morph between expanded and minimized
    * states. Animating gap alongside width prevents a jolt as
@@ -499,12 +501,78 @@ body:has(> .fixed.inset-0[class*="z-5"]) main {
     width 0.45s var(--spring-overshoot),
     gap 0.45s var(--spring-overshoot),
     opacity 0.32s var(--spring-settle),
+    box-shadow 0.55s var(--spring-settle),
     backdrop-filter 0.45s var(--spring-settle),
     -webkit-backdrop-filter 0.45s var(--spring-settle);
   transform: translateX(-50%);
   will-change: transform, width, opacity;
   isolation: isolate;
 }
+
+/* ─── Sync-state glow ────────────────────────────────────────────────
+ * Diffuse halo around the nav pill (#liquid-tabbar on mobile;
+ * #sidebar on desktop) that signals live sync status at a glance.
+ * Toggled by sync.js via body[data-sync="<state>"]. The glow is
+ * implemented as the last box-shadow layer on each element above,
+ * via three CSS variables: --sync-glow-color / -blur / -spread.
+ *
+ * States:
+ *   polling / paired  — gentle gray (loop alive, no change)
+ *   synced  / pulled  — green (data just flowed) — with .sync-pulse
+ *                       flaring brighter for 700ms before settling
+ *   offline           — amber (fetch failed)
+ *   error             — red (HTTP non-OK / quota)
+ *   (no attribute)    — transparent (idle / unpaired)
+ */
+body[data-sync="polling"] #liquid-tabbar,
+body[data-sync="paired"]  #liquid-tabbar {
+  --sync-glow-color: rgba(140, 152, 168, 0.18);
+  --sync-glow-blur:  36px;
+  --sync-glow-spread: 2px;
+}
+body[data-sync="synced"] #liquid-tabbar,
+body[data-sync="pulled"] #liquid-tabbar {
+  --sync-glow-color: rgba(14, 163, 113, 0.42);
+  --sync-glow-blur:  48px;
+  --sync-glow-spread: 4px;
+}
+body.sync-pulse[data-sync="synced"] #liquid-tabbar,
+body.sync-pulse[data-sync="pulled"] #liquid-tabbar {
+  --sync-glow-color: rgba(14, 163, 113, 0.72);
+  --sync-glow-blur:  64px;
+  --sync-glow-spread: 8px;
+}
+body[data-sync="offline"] #liquid-tabbar {
+  --sync-glow-color: rgba(245, 158, 11, 0.45);
+  --sync-glow-blur:  44px;
+  --sync-glow-spread: 4px;
+}
+body[data-sync="error"] #liquid-tabbar {
+  --sync-glow-color: rgba(239, 68, 68, 0.50);
+  --sync-glow-blur:  48px;
+  --sync-glow-spread: 4px;
+}
+
+/* Sidebar (desktop) — apply the same halo. Bigger element, so wider blur. */
+body[data-sync="polling"] #sidebar,
+body[data-sync="paired"]  #sidebar {
+  box-shadow: inset -1px 0 0 rgba(15,23,42,0.06), 0 0 48px 2px rgba(140,152,168,0.16);
+}
+body[data-sync="synced"] #sidebar,
+body[data-sync="pulled"] #sidebar {
+  box-shadow: inset -1px 0 0 rgba(15,23,42,0.06), 0 0 64px 6px rgba(14,163,113,0.38);
+}
+body.sync-pulse[data-sync="synced"] #sidebar,
+body.sync-pulse[data-sync="pulled"] #sidebar {
+  box-shadow: inset -1px 0 0 rgba(15,23,42,0.06), 0 0 84px 10px rgba(14,163,113,0.65);
+}
+body[data-sync="offline"] #sidebar {
+  box-shadow: inset -1px 0 0 rgba(15,23,42,0.06), 0 0 56px 5px rgba(245,158,11,0.45);
+}
+body[data-sync="error"] #sidebar {
+  box-shadow: inset -1px 0 0 rgba(15,23,42,0.06), 0 0 64px 6px rgba(239,68,68,0.50);
+}
+#sidebar { transition: box-shadow 0.55s var(--spring-settle); }
 
 /* Each tab — iOS 26 layout: icon above label, all tabs show labels in
  * the expanded state. Apple's active-state cue is color-only (no
