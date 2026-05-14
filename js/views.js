@@ -2473,8 +2473,10 @@ function mountPet3D(container, p) {
     // Reset per-frame Z tilt at the top — baby's walk-waddle and the
     // sleep tip-over both write to it, so without a reset their values
     // bleed between activities (e.g. baby stays tilted when walk
-    // transitions to idle).
-    if (activity !== 'sleep') facing.rotation.z = 0;
+    // transitions to idle). Note: `activity` (const) is declared later
+    // in this tick, so reference p.activity directly here to avoid a
+    // TDZ ReferenceError.
+    if (p.activity !== 'sleep') facing.rotation.z = 0;
 
     // ===== AMBIENT (always-on) =====
     // Breathing — body Y scale oscillates 1.0..1.018 at 0.4 Hz, with a softer
