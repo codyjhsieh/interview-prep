@@ -47,6 +47,11 @@ const DEFAULT_STATE = {
   /* Job-application log — each entry awards XP via awardXP at log time.
      Calibrated so 10 apps = half the daily XP goal (per-app = goal/20). */
   jobApps: [],                   // [{ date, ts, company, role, url, xp }]
+  /* Tombstones for deleted job apps. Union-based sync can't otherwise
+     propagate deletions — both devices end up with the superset. When
+     removeLastJobApp removes a ts, we record it here so the other
+     device's merge filters it back out. Cleaned to entries < 30 days. */
+  jobAppsDeletedTs: {},          // { [ts:number]: deletedAt:number }
 };
 
 /* ---------- Persistence ---------- */
@@ -291,6 +296,15 @@ function removeLastJobApp(state) {
   state.level   = levelFromXP(state.xp);
   const hentry  = (state.history || []).find(h => h.date === today);
   if (hentry) hentry.xp = Math.max(0, (hentry.xp || 0) - xp);
+  // Tombstone the deleted ts so the other paired device's union merge
+  // filters this entry back out instead of resurrecting it.
+  if (!state.jobAppsDeletedTs) state.jobAppsDeletedTs = {};
+  if (removed && removed.ts != null) state.jobAppsDeletedTs[removed.ts] = Date.now();
+  // Garbage-collect tombstones older than 30 days
+  const cutoff = Date.now() - 30 * 86400000;
+  for (const k of Object.keys(state.jobAppsDeletedTs)) {
+    if ((state.jobAppsDeletedTs[k] || 0) < cutoff) delete state.jobAppsDeletedTs[k];
+  }
   return { removed, xpRemoved: xp };
 }
 

@@ -174,7 +174,10 @@ window.SYNC = (function () {
 
     // Append-only arrays
     merged.history = unionHistory(a.history, b.history);
-    merged.jobApps = unionByTs(a.jobApps, b.jobApps);
+    // Tombstone-aware union for jobApps so deletes on one device
+    // actually propagate to the other (plain union resurrects them).
+    merged.jobAppsDeletedTs = unionKeys(a.jobAppsDeletedTs, b.jobAppsDeletedTs);
+    merged.jobApps = unionByTsExcluding(a.jobApps, b.jobApps, merged.jobAppsDeletedTs);
     merged.mocks   = unionByTs(a.mocks,   b.mocks);
 
     // Keyed maps with timestamps — keep newer inner entry
@@ -235,6 +238,21 @@ window.SYNC = (function () {
     const out = [];
     for (const j of (la || []).concat(lb || [])) {
       if (!j || j.ts == null) continue;
+      if (seen.has(j.ts)) continue;
+      seen.add(j.ts);
+      out.push(j);
+    }
+    return out.sort((x, y) => (x.ts || 0) - (y.ts || 0));
+  }
+  // Like unionByTs but filters out any entry whose ts is present in the
+  // tombstones map. Used for jobApps so deletes propagate across devices.
+  function unionByTsExcluding(la, lb, tombstones) {
+    const seen = new Set();
+    const out = [];
+    const t = tombstones || {};
+    for (const j of (la || []).concat(lb || [])) {
+      if (!j || j.ts == null) continue;
+      if (t[j.ts]) continue;                    // tombstoned — skip
       if (seen.has(j.ts)) continue;
       seen.add(j.ts);
       out.push(j);
