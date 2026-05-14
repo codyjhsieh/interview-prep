@@ -1203,14 +1203,18 @@ function mountPet3D(container, p) {
       const tipY = baseY + dy * twigLen;
       const tipZ = baseZ + dz * twigLen;
       // Twig cylinder — 4-segment for cheap, thin radius
-      const twig = new T.Mesh(new T.CylinderGeometry(0.018, 0.030, twigLen, 4, 1), barkB);
+      // 3 radial segments (was 4) — twigs are 1.8cm radius; the extra
+      // segment has no visual contribution. Saves verts on 24 meshes.
+      const twig = new T.Mesh(new T.CylinderGeometry(0.018, 0.030, twigLen, 3, 1), barkB);
       twig.position.set((baseX + tipX) / 2, (baseY + tipY) / 2, (baseZ + tipZ) / 2);
       const tDir = new T.Vector3(dx, dy, dz).normalize();
       const up3 = new T.Vector3(0, 1, 0);
       const axis3 = new T.Vector3().crossVectors(up3, tDir).normalize();
       const ang3 = Math.acos(up3.dot(tDir));
       if (axis3.lengthSq() > 1e-6) twig.setRotationFromAxisAngle(axis3, ang3);
-      twig.castShadow = true;
+      // No castShadow on twigs (24 meshes, contribution invisible against
+      // the dense foliage shadow above).
+      twig.castShadow = false;
       bonsai.add(twig);
       // Each twig now seeds a CLUSTER of ~6-9 puffs (was 1-3), so the
       // foliage volume stays high despite fewer twig stems. Cluster
@@ -1243,7 +1247,12 @@ function mountPet3D(container, p) {
     // per-stone-per-mesh approach. With the doubled counts we're at
     // ~500-700 puffs; this stays at one draw call.
     if (foliagePuffs.length) {
-      const puffGeom = new T.IcosahedronGeometry(1.0, 0);   // unit sphere, scaled per-instance
+      // OctahedronGeometry(1, 0) = 8 triangles (vs IcosahedronGeometry's
+      // 20). At iso-camera scale + flat shading, the per-puff silhouette
+      // reads identically — the cost saving is 60% fewer triangles
+      // across the ~1100-instance canopy. Total foliage triangle count:
+      // 1100 × 8 = 8800 (was 22000).
+      const puffGeom = new T.OctahedronGeometry(1.0, 0);
       const puffMat  = new T.MeshStandardMaterial({ roughness: 0.9, flatShading: true });
       // Same wind treatment as the grass — vertex-shader injection so
       // the sway is GPU-only. Per-puff phase derived from instance world
@@ -1294,13 +1303,12 @@ function mountPet3D(container, p) {
       }
       puffInst.instanceMatrix.needsUpdate = true;
       if (puffInst.instanceColor) puffInst.instanceColor.needsUpdate = true;
-      puffInst.castShadow = true;
-      // CRITICAL: disable frustum culling. Three.js otherwise uses the
-      // source geometry's bounding sphere (radius 1, centered at origin)
-      // anchored to the InstancedMesh's origin — so when the canopy
-      // sits 2-7 units away from the world origin, the WHOLE foliage
-      // gets culled on most camera angles → invisible.
-      puffInst.frustumCulled = false;
+      // 1100-instance shadow-cast is one of the heaviest costs in the
+      // pasture scene — disable. The pet still has its own shadow on
+      // the ground, and the tree trunk segments still cast.
+      puffInst.castShadow = false;
+      puffInst.receiveShadow = false;
+      puffInst.frustumCulled = false;        // bbox-vs-source-geom culling fix
       scene.add(puffInst);
       // Register the foliage material so the tick loop bumps its uTime
       // each frame (sway).
@@ -1316,7 +1324,9 @@ function mountPet3D(container, p) {
       // instead of an even spray across the canopy.
       const APPLE_COUNT = Math.min(25, Math.floor(upperPuffs.length / 20));
       if (APPLE_COUNT > 0) {
-        const appleGeom = new T.IcosahedronGeometry(1.0, 0);
+        // Octahedron (8 tris) instead of Icosahedron (20). At apple size
+        // 0.22–0.35 the silhouette is identical from the iso camera.
+        const appleGeom = new T.OctahedronGeometry(1.0, 0);
         const appleMat  = new T.MeshStandardMaterial({ roughness: 0.6, flatShading: true, metalness: 0.05 });
         // Same wind injection as the foliage, so apples sway in sync.
         appleMat.onBeforeCompile = (shader) => {
@@ -1406,7 +1416,7 @@ function mountPet3D(container, p) {
         }
         appleInst.instanceMatrix.needsUpdate = true;
         if (appleInst.instanceColor) appleInst.instanceColor.needsUpdate = true;
-        appleInst.castShadow = true;
+        appleInst.castShadow = false;                          // tiny meshes, shadow not noticeable
         appleInst.frustumCulled = false;                       // same culling fix as foliage
         scene.add(appleInst);
         _grassMat.push(appleMat);
