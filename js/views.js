@@ -2470,6 +2470,12 @@ function mountPet3D(container, p) {
     }
     lastRender = now;
 
+    // Reset per-frame Z tilt at the top — baby's walk-waddle and the
+    // sleep tip-over both write to it, so without a reset their values
+    // bleed between activities (e.g. baby stays tilted when walk
+    // transitions to idle).
+    if (activity !== 'sleep') facing.rotation.z = 0;
+
     // ===== AMBIENT (always-on) =====
     // Breathing — body Y scale oscillates 1.0..1.018 at 0.4 Hz, with a softer
     // wave (cycloid-ish, not sin²) so the rhythm feels organic.
@@ -2774,6 +2780,13 @@ function mountPet3D(container, p) {
           // Body bob — peaks at midstance of each step. One cycle of gait =
           // two body bumps (one per foot landing).
           petGroup.position.y = Ease.bob((gait * 2) % 1) * 0.085;
+          // Baby waddle — no feet to telegraph motion, so a gentle
+          // side-to-side roll (Z tilt) tracking the gait cadence makes
+          // the walking direction visibly read. Higher amplitude than
+          // the teen/adult lean because the body is otherwise static.
+          if (!hasFeet) {
+            facing.rotation.z = Math.sin(gait * Math.PI * 2) * 0.16;
+          }
 
           // PLAY overlay — combines a continuous bouncy gait with occasional
           // "trick" hops. Tricks use real projectile motion:
