@@ -724,6 +724,36 @@ function showHelp() {
 function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 /*
+ * Surgical updates triggered by sync poll. For each card whose contents
+ * depend on synced state, find it by a stable [data-card="…"] selector
+ * and replace it with a freshly-rendered copy. Cards not on the current
+ * page are no-ops. Avoids the generic morph (which mis-aligns text nodes
+ * for some structures) and preserves 3D canvases / scroll position.
+ */
+function syncSurgicalUpdates(currentState) {
+  // Job-applications counter — render a fresh card and swap.
+  const liveJobApps = document.querySelector('[data-card="jobapps"]');
+  if (liveJobApps && window.VIEWS && typeof window.VIEWS.renderDashboard === 'function') {
+    // renderJobAppsCard is internal — use the closure helper exposed via
+    // an indirect call. Falls back to a tiny in-place text update.
+    if (typeof window.VIEWS.renderJobAppsCard === 'function') {
+      liveJobApps.replaceWith(window.VIEWS.renderJobAppsCard(currentState));
+    } else {
+      // Minimal fallback: just patch the visible count number.
+      const today = new Date().toISOString().slice(0, 10);
+      const count = (currentState.jobApps || []).filter(j => j.date === today).length;
+      const goal = (currentState.user && currentState.user.goal) || 60;
+      const target = 10;
+      const pct = Math.min(100, Math.round((count / target) * 100));
+      const countNode = liveJobApps.querySelector('.text-3xl.font-bold');
+      if (countNode && countNode.firstChild) countNode.firstChild.nodeValue = count + ' ';
+      const bar = liveJobApps.querySelector('.bar > i');
+      if (bar) bar.style.width = pct + '%';
+    }
+  }
+}
+
+/*
  * Minimal DOM morph. Mutates `target` so its children match `source`,
  * preserving node identity where structure matches.
  *
@@ -842,54 +872,16 @@ return {
   setStateFromSync: (next) => {
     state = next;
     // CRITICAL: write to localStorage directly, NOT via GAMI.saveImmediate.
-    // sync.js wraps saveImmediate to debounce-push to remote. If we call
-    // the wrapped version here, each remote pull schedules a fresh push
-    // (with a new updatedAt), the other device polls and sees a "new"
-    // state, calls setStateFromSync, schedules a push, … forever. That
-    // ping-pong burns the 1000 KV-writes-per-day free tier in minutes.
+    // sync.js wraps saveImmediate to debounce-push to remote. Calling
+    // the wrapped version here triggers a fresh push every poll → infinite
+    // ping-pong that burns the 1000 KV-writes/day free tier.
     try { localStorage.setItem('fdeprep.v1', JSON.stringify(state)); } catch (_) {}
     try { updateHeader(); } catch (_) {}
-    // Guard: don't yank the view out from under an actively-typing
-    // user. Header chips already updated above; rest can wait for nav.
-    const focused = document.activeElement;
-    const isTyping = focused && (
-      focused.tagName === 'INPUT' ||
-      focused.tagName === 'TEXTAREA' ||
-      focused.tagName === 'SELECT' ||
-      focused.isContentEditable
-    );
-    if (isTyping) return;
-    const view = document.getElementById('view');
-    if (!view) return;
-    // Surgical update: render the new view into a detached buffer,
-    // then morph the live DOM to match. Nodes that are structurally
-    // identical stay put; only changed text / attrs / inserted /
-    // removed nodes touch the DOM. Result: counters tick, list rows
-    // appear, stats change — no flash, no reflow of the whole view.
-    try {
-      const buf = document.createElement('section');
-      buf.className = view.className;
-      const { route, a, b } = parseHash();
-      // Only morph routes where re-rendering into a buffer is safe.
-      // Skipped: flashcards (swipe animation in flight), infographics
-      // and coverage (Chart.js mounts to canvases by ID — re-mounting
-      // would double-init), lesson / mock / games (interactive),
-      // stories (form input the user may be editing).
-      switch (route) {
-        case 'dashboard':    VIEWS.renderDashboard(state, buf); break;
-        case 'curriculum':   VIEWS.renderCurriculum(state, buf); break;
-        case 'category':     VIEWS.renderCategory(state, buf, a, b); break;
-        case 'companies':    VIEWS.renderCompanies(state, buf); break;
-        case 'company':      VIEWS.renderCompany(state, buf, a); break;
-        case 'mocks':        VIEWS.renderMocks(state, buf); break;
-        case 'prep':         VIEWS.renderPrep(state, buf, a || 'stories'); break;
-        case 'review':       VIEWS.renderReview(state, buf, a || 'missed'); break;
-        case 'sources':      VIEWS.renderSources(state, buf); break;
-        case 'profile':      VIEWS.renderProfile(state, buf); break;
-        default: return;
-      }
-      morphTree(view, buf);
-    } catch (_) { /* swallow — header already updated */ }
+    // Surgical per-card updates: find each card that depends on synced
+    // state and swap just its DOM. Avoids the brittle generic morph and
+    // doesn't disturb the rest of the view (scroll position, focus, 3D
+    // canvases). Each updater is a no-op if its card isn't on screen.
+    try { syncSurgicalUpdates(state); } catch (e) { console.warn('[sync] surgical update failed:', e); }
   },
 };
 })();

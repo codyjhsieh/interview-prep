@@ -2218,6 +2218,7 @@ function renderJobAppsCard(state) {
 
   const canRemove = count > 0;
   const card = el('div', 'card');
+  card.setAttribute('data-card', 'jobapps');     // stable selector for sync-driven surgical updates
   card.innerHTML = `
     <div class="flex items-center justify-between gap-3 flex-wrap">
       <div class="min-w-0">
@@ -5176,6 +5177,7 @@ return {
   renderCoverage, renderProfile, renderSources, renderMocks, renderStories,
   renderPrep, renderReview, renderMockInterview,
   renderLoginGate,
+  renderJobAppsCard,              // exposed for sync's surgical per-card updates
   openPetLifecyclePreview,
   iconHTML,                       // exposed so app.js/animations.js toasts can use Lucide too
 };
