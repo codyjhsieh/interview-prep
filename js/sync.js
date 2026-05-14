@@ -1,0 +1,355 @@
+/* sync.js — cross-device state sync via Cloudflare Worker + KV.
+ *
+ * No accounts, no email — pairing is by 8-char code (the code IS the
+ * credential). One device generates a code, the other enters it; both
+ * then share a single state blob via the Worker. Local state is the
+ * source of truth between sync events; remote state is fetched on a
+ * 5-second poll and merged in when newer.
+ *
+ * Hooks:
+ *   - On window load: if a code is stored, fetch remote and merge
+ *   - On every GAMI.saveImmediate(state): debounced PUT to remote
+ *   - Every 5 sec (when paired): GET remote; if newer, merge in
+ *   - On window focus: GET remote immediately so coming back from
+ *     another device feels instant
+ *
+ * Deploy:
+ *   1. cd cloudflare && wrangler deploy
+ *   2. Replace SYNC_ENDPOINT below with the deployed Worker URL
+ *   3. Re-deploy GH Pages (just push)
+ */
+
+window.SYNC = (function () {
+
+  // ── Configuration ───────────────────────────────────────────────────
+  //
+  // After deploying the Cloudflare Worker (see cloudflare/README.md),
+  // replace this URL with the one wrangler prints.
+  const SYNC_ENDPOINT = 'https://interview-prep-sync.example.workers.dev';
+
+  const CODE_KEY     = 'fdeprep.syncCode.v1';
+  const POLL_MS      = 5000;
+  const PUSH_DEBOUNCE_MS = 1000;
+  const STORAGE_KEY  = 'fdeprep.v1';            // matches GAMI.STORAGE_KEY
+
+  let pollTimer = null;
+  let pushTimer = null;
+  let pushPending = false;
+  let lastSeenRemoteUpdatedAt = 0;
+  let statusCb = null;
+  let lastStatus = 'idle';
+
+  // ── Helpers ─────────────────────────────────────────────────────────
+  const getCode   = () => localStorage.getItem(CODE_KEY);
+  const setCode   = (c) => localStorage.setItem(CODE_KEY, c);
+  const clearCode = () => localStorage.removeItem(CODE_KEY);
+
+  function isConfigured() {
+    return SYNC_ENDPOINT && !SYNC_ENDPOINT.includes('example.workers.dev');
+  }
+
+  function setStatus(s) {
+    lastStatus = s;
+    if (statusCb) try { statusCb(s); } catch (_) {}
+  }
+
+  function generateCode() {
+    // Crockford base32 minus visually-ambiguous chars (0, 1, I, O, U).
+    // 8 chars ≈ 40 bits of entropy — infeasible to brute-force on
+    // Cloudflare's request budget, but still short enough to read aloud.
+    const alphabet = '23456789ABCDEFGHJKLMNPQRSTVWXYZ';
+    let s = '';
+    const buf = new Uint32Array(8);
+    crypto.getRandomValues(buf);
+    for (let i = 0; i < 8; i++) s += alphabet[buf[i] % alphabet.length];
+    return s.slice(0, 4) + '-' + s.slice(4);
+  }
+
+  function normalizeCode(input) {
+    return (input || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  }
+
+  // ── Network ─────────────────────────────────────────────────────────
+  async function pushNow() {
+    if (!isConfigured()) return;
+    const code = getCode();
+    if (!code) return;
+    const state = window.APP && window.APP.getState ? window.APP.getState() : null;
+    if (!state) return;
+    state.updatedAt = Date.now();
+    try {
+      const res = await fetch(`${SYNC_ENDPOINT}/state/${normalizeCode(code)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state),
+      });
+      if (res.ok) {
+        lastSeenRemoteUpdatedAt = state.updatedAt;
+        setStatus('synced');
+      } else {
+        setStatus('error');
+      }
+    } catch (_) {
+      setStatus('offline');
+    }
+  }
+
+  async function pullNow() {
+    if (!isConfigured()) return null;
+    const code = getCode();
+    if (!code) return null;
+    try {
+      const res = await fetch(`${SYNC_ENDPOINT}/state/${normalizeCode(code)}`);
+      if (res.status === 404) return null;
+      if (!res.ok) { setStatus('error'); return null; }
+      return await res.json();
+    } catch (_) {
+      setStatus('offline');
+      return null;
+    }
+  }
+
+  // ── Merge ───────────────────────────────────────────────────────────
+  /*
+   * Two-device merge for the interview-prep state shape. The hard
+   * problem: each device may have made independent local writes since
+   * the last sync; we need to combine them without losing work.
+   *
+   * Strategy per field family:
+   *   - Append-only arrays (history, jobApps, mocks): union by ts/date,
+   *     summing/maxing values for same-key entries (history.xp).
+   *   - Keyed maps with inner timestamps (flashcards, missedQuestions,
+   *     conceptReviews, starStories): union keys; for overlapping keys,
+   *     keep the entry with the newer inner timestamp.
+   *   - Boolean / counter maps (badges, completedLessons, companySeen,
+   *     cueShownDates): plain key union (any presence wins).
+   *   - Pet: take the side with the higher lastTickDate / deathCount.
+   *   - Numeric monotonic stats (xp, level): max.
+   *   - Streak: take side with higher .count.
+   *   - "Today" values (todayXP, todayDate): take fresher side's pair
+   *     as a unit so they stay consistent.
+   *   - Everything else: take fresher side's value.
+   */
+  function mergeStates(a, b) {
+    if (!a) return b;
+    if (!b) return a;
+    const aT = a.updatedAt || 0, bT = b.updatedAt || 0;
+    const fresher = bT >= aT ? b : a;
+    const stale   = bT >= aT ? a : b;
+    const merged = { ...stale, ...fresher };
+
+    // Append-only arrays
+    merged.history = unionHistory(a.history, b.history);
+    merged.jobApps = unionByTs(a.jobApps, b.jobApps);
+    merged.mocks   = unionByTs(a.mocks,   b.mocks);
+
+    // Keyed maps with timestamps — keep newer inner entry
+    merged.flashcards       = mergeByInnerTs(a.flashcards,       b.flashcards,       'lastReviewed');
+    merged.missedQuestions  = mergeByInnerTs(a.missedQuestions,  b.missedQuestions,  'lastReviewed');
+    merged.conceptReviews   = mergeByInnerTs(a.conceptReviews,   b.conceptReviews,   'lastReviewed');
+    merged.starStories      = mergeByInnerTs(a.starStories,      b.starStories,      'updatedAt');
+
+    // Plain key-union maps
+    merged.completedLessons = unionKeys(a.completedLessons, b.completedLessons);
+    merged.badges           = unionKeys(a.badges,           b.badges);
+    merged.companySeen      = unionKeys(a.companySeen,      b.companySeen);
+    merged.cueShownDates    = unionKeys(a.cueShownDates,    b.cueShownDates);
+
+    // Free-recall: array-per-key, concat + dedupe by ts
+    merged.freeRecallAttempts = unionMapOfArrays(a.freeRecallAttempts, b.freeRecallAttempts);
+
+    // Pet: take whichever has the more recent lastTickDate; tie-break
+    // on higher deathCount (more advanced timeline). pet is treated as
+    // an atomic unit because its fields are tightly correlated.
+    merged.pet = pickPet(a.pet, b.pet);
+
+    // Streak: prefer higher count (monotonic per active day)
+    if ((a.streak?.count || 0) >= (b.streak?.count || 0)) merged.streak = a.streak;
+    else                                                    merged.streak = b.streak;
+
+    // Monotonic counters
+    merged.xp    = Math.max(a.xp    || 0, b.xp    || 0);
+    merged.level = Math.max(a.level || 0, b.level || 0);
+
+    // Today values come from the fresher side as a pair so they stay
+    // consistent (todayXP belongs to todayDate, not yesterday's).
+    merged.todayXP   = fresher.todayXP   || 0;
+    merged.todayDate = fresher.todayDate || null;
+
+    merged.updatedAt = Math.max(aT, bT);
+    return merged;
+  }
+
+  function unionHistory(la, lb) {
+    const map = {};
+    for (const h of (la || [])) if (h && h.date) map[h.date] = { ...h };
+    for (const h of (lb || [])) {
+      if (!h || !h.date) continue;
+      const cur = map[h.date];
+      if (!cur) { map[h.date] = { ...h }; continue; }
+      // Same-date conflict: take the max — both sides may have written
+      // independently; max is the most-progress interpretation.
+      cur.xp      = Math.max(cur.xp      || 0, h.xp      || 0);
+      cur.lessons = Math.max(cur.lessons || 0, h.lessons || 0);
+    }
+    return Object.values(map).sort((x, y) => x.date.localeCompare(y.date));
+  }
+
+  function unionByTs(la, lb) {
+    const seen = new Set();
+    const out = [];
+    for (const j of (la || []).concat(lb || [])) {
+      if (!j || j.ts == null) continue;
+      if (seen.has(j.ts)) continue;
+      seen.add(j.ts);
+      out.push(j);
+    }
+    return out.sort((x, y) => (x.ts || 0) - (y.ts || 0));
+  }
+
+  function unionKeys(a, b) {
+    return { ...(a || {}), ...(b || {}) };
+  }
+
+  function mergeByInnerTs(a, b, tsField) {
+    const out = { ...(a || {}) };
+    for (const k of Object.keys(b || {})) {
+      if (!out[k]) { out[k] = b[k]; continue; }
+      const at = out[k][tsField] || 0;
+      const bt = b[k][tsField]   || 0;
+      if (bt > at) out[k] = b[k];
+    }
+    return out;
+  }
+
+  function unionMapOfArrays(a, b) {
+    const out = { ...(a || {}) };
+    for (const k of Object.keys(b || {})) {
+      const ax = out[k] || [];
+      const bx = b[k]   || [];
+      const seen = new Set();
+      const merged = [];
+      for (const it of ax.concat(bx)) {
+        const key = it && it.ts != null ? it.ts : JSON.stringify(it);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        merged.push(it);
+      }
+      out[k] = merged;
+    }
+    return out;
+  }
+
+  function pickPet(a, b) {
+    if (!a) return b;
+    if (!b) return a;
+    const aT = (a.lastTickDate || '').replace(/-/g, '');
+    const bT = (b.lastTickDate || '').replace(/-/g, '');
+    if (aT !== bT) return aT > bT ? a : b;
+    // Tie-break: more deaths means a longer / more advanced timeline.
+    return (a.deathCount || 0) >= (b.deathCount || 0) ? a : b;
+  }
+
+  // ── Lifecycle ───────────────────────────────────────────────────────
+  function scheduleSync() {
+    pushPending = true;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(() => { pushPending = false; pushNow(); }, PUSH_DEBOUNCE_MS);
+  }
+
+  async function pollOnce() {
+    if (pushPending) return;                  // local changes queued — let the PUT settle first
+    const remote = await pullNow();
+    if (!remote) return;
+    const local = window.APP && window.APP.getState();
+    if (!local) return;
+    const remoteT = remote.updatedAt || 0;
+    if (remoteT <= (local.updatedAt || 0)) return;
+    if (remoteT <= lastSeenRemoteUpdatedAt) return;
+    const merged = mergeStates(local, remote);
+    lastSeenRemoteUpdatedAt = remoteT;
+    if (window.APP && window.APP.setState) window.APP.setState(merged);
+    else {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+      location.reload();
+    }
+    setStatus('pulled');
+  }
+
+  function startLoop() {
+    stopLoop();
+    if (!getCode() || !isConfigured()) return;
+    pollTimer = setInterval(pollOnce, POLL_MS);
+    pollOnce();
+    setStatus(getCode() ? 'paired' : 'idle');
+  }
+
+  function stopLoop() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = null;
+  }
+
+  // ── Public API ─────────────────────────────────────────────────────
+  /*
+   * pair(code): if remote already has a state under this code, adopt it
+   * (overwriting local). Otherwise, PUT the current local state up under
+   * the code — that device becomes the seed. Either way, start the loop.
+   */
+  async function pair(code) {
+    if (!isConfigured()) throw new Error('SYNC_ENDPOINT not configured');
+    const c = normalizeCode(code);
+    if (c.length < 6) throw new Error('Code must be at least 6 characters');
+    setCode(c);
+    const remote = await pullNow();
+    const local  = window.APP && window.APP.getState();
+    if (remote && local) {
+      const merged = mergeStates(local, remote);
+      if (window.APP && window.APP.setState) window.APP.setState(merged);
+      else { localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); location.reload(); }
+    } else if (local) {
+      await pushNow();
+    }
+    startLoop();
+    setStatus('paired');
+    return { code: c, adopted: !!remote };
+  }
+
+  function unpair() {
+    clearCode();
+    stopLoop();
+    setStatus('idle');
+  }
+
+  function status() {
+    return {
+      configured: isConfigured(),
+      endpoint:   SYNC_ENDPOINT,
+      code:       getCode(),
+      last:       lastStatus,
+    };
+  }
+
+  function init() {
+    // Wrap GAMI.saveImmediate so every local save triggers a debounced
+    // remote PUT (when paired).
+    if (window.GAMI && window.GAMI.saveImmediate && !window.GAMI.__syncWrapped) {
+      const orig = window.GAMI.saveImmediate;
+      window.GAMI.saveImmediate = function (state) {
+        orig.call(this, state);
+        if (getCode() && isConfigured()) scheduleSync();
+      };
+      window.GAMI.__syncWrapped = true;
+    }
+    // Start the pull loop if we already had a paired code.
+    if (getCode() && isConfigured()) startLoop();
+    // Pull on focus so coming back from another device feels instant.
+    window.addEventListener('focus', () => { if (getCode() && isConfigured()) pollOnce(); });
+  }
+
+  return {
+    init, pair, unpair, status, generateCode,
+    pushNow, pullNow,           // exposed for manual sync / testing
+    onStatusChange: (cb) => { statusCb = cb; },
+  };
+
+})();

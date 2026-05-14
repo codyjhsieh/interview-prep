@@ -1,0 +1,10 @@
+name = "interview-prep-sync"
+main = "worker.js"
+compatibility_date = "2026-05-01"
+
+# KV namespace for the state blobs. Create with:
+#   wrangler kv namespace create STATE
+# Then paste the returned `id` here (and remove this comment).
+[[kv_namespaces]]
+binding = "STATE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"

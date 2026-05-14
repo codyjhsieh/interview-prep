@@ -185,6 +185,11 @@
 <script src="js/games.js"></script>
 <script src="js/views.js"></script>
 <script src="js/app.js"></script>
+<!-- Cross-device sync via Cloudflare Worker + KV. Idle until paired
+     (no network calls). Wraps GAMI.saveImmediate to PUT remotely
+     and polls every 5s for changes from the other device. -->
+<script src="js/sync.js"></script>
+<script>window.SYNC && window.SYNC.init();</script>
 <!-- Liquid Glass: adaptive substrate tinting. Loads after app so cards
      are already in the DOM. Cards published after dashboard render are
      picked up by the module's MutationObserver. -->

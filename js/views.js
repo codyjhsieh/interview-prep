@@ -3980,11 +3980,70 @@ function renderCoverage(state, hub) {
 }
 
 /* ====================== PROFILE ====================== */
+/* Sync-between-devices section for the Profile page. The actual sync
+ * logic lives in js/sync.js — this is the UI surface that lets the
+ * user pair / unpair and shows the current sync status.
+ *
+ * Three states:
+ *   1. Sync endpoint not configured  → instructions (deploy + edit URL)
+ *   2. Endpoint configured, not paired → "Generate code" + "Enter code"
+ *   3. Endpoint configured, paired    → show code + status + Unpair
+ */
+function renderSyncSection(sync) {
+  if (!sync) return '';
+  if (!sync.configured) {
+    return `
+      <div class="card" style="border:1px dashed var(--hairline-2)">
+        <h3 class="font-display font-semibold text-lg mb-1">Sync between devices</h3>
+        <div class="text-[12.5px] muted">
+          Not configured. Deploy the Cloudflare Worker
+          (<code class="font-mono">cloudflare/README.md</code>),
+          paste the URL into <code class="font-mono">js/sync.js</code>,
+          re-push. Free tier, ~5 minutes one-time.
+        </div>
+      </div>`;
+  }
+  if (!sync.code) {
+    return `
+      <div class="card">
+        <h3 class="font-display font-semibold text-lg mb-1">Sync between devices</h3>
+        <p class="text-[12.5px] muted mb-3">
+          Pair this browser with another device by a short code. Both
+          devices then share progress + Bit in real time.
+        </p>
+        <div class="flex flex-wrap items-center gap-3">
+          <button class="btn btn-primary" data-sync-generate>Generate a code</button>
+          <span class="muted text-[12px]">or</span>
+          <input id="sync-code-input" placeholder="ENTER-CODE" maxlength="11"
+                 class="font-mono text-center" style="letter-spacing:0.18em; width:170px"/>
+          <button class="btn" data-sync-pair>Pair</button>
+        </div>
+        <div id="sync-status" class="text-[11.5px] muted mt-3" style="min-height:1em"></div>
+      </div>`;
+  }
+  return `
+    <div class="card">
+      <h3 class="font-display font-semibold text-lg mb-1">Sync between devices</h3>
+      <p class="text-[12.5px] muted mb-3">
+        Paired. Enter the code on another device to share progress.
+      </p>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="font-mono text-2xl tracking-[0.18em]" style="user-select:all">${esc(sync.code).replace(/(.{4})/, '$1-').replace(/(.{4})-(.{4})/,'$1-$2')}</div>
+        <button class="btn btn-ghost" data-sync-unpair>Unpair this device</button>
+      </div>
+      <div id="sync-status" class="text-[11.5px] muted mt-3" style="min-height:1em">${esc(sync.last || 'idle')}</div>
+    </div>`;
+}
+
 function renderProfile(state, hub) {
   const container = el('div','fade-in space-y-5');
   const earned = Object.keys(state.badges || {});
+  const sync = (window.SYNC && window.SYNC.status()) || null;
   container.innerHTML = `
     <h1 class="font-display text-3xl font-bold">Profile</h1>
+
+    ${renderSyncSection(sync)}
+
     <div class="card">
       <h3 class="font-display font-semibold text-lg mb-3">You</h3>
       <form id="profile-form" class="grid sm:grid-cols-2 gap-4">
@@ -4034,6 +4093,48 @@ function renderProfile(state, hub) {
     </div>
   `;
   hub.appendChild(container);
+
+  // ── Sync section bindings (if rendered) ──
+  const statusEl = container.querySelector('#sync-status');
+  const setStatusText = (s) => { if (statusEl) statusEl.textContent = s; };
+  if (window.SYNC) {
+    window.SYNC.onStatusChange((s) => setStatusText(s));
+  }
+  const genBtn = container.querySelector('[data-sync-generate]');
+  if (genBtn) genBtn.addEventListener('click', async () => {
+    if (!window.SYNC) return;
+    setStatusText('generating…');
+    const code = window.SYNC.generateCode();
+    try {
+      await window.SYNC.pair(code);
+      // Re-render this view to flip into "paired" state
+      VIEWS.renderProfile(APP.getState(), (function () {
+        hub.innerHTML = ''; return hub;
+      })());
+    } catch (e) { setStatusText('error: ' + e.message); }
+  });
+  const pairBtn = container.querySelector('[data-sync-pair]');
+  if (pairBtn) pairBtn.addEventListener('click', async () => {
+    if (!window.SYNC) return;
+    const input = container.querySelector('#sync-code-input');
+    const raw = input ? input.value.trim() : '';
+    if (!raw) { setStatusText('enter a code first'); return; }
+    setStatusText('pairing…');
+    try {
+      const result = await window.SYNC.pair(raw);
+      setStatusText(result.adopted ? 'adopted other device\'s state' : 'this device seeded the code');
+      // Re-render
+      hub.innerHTML = '';
+      VIEWS.renderProfile(APP.getState(), hub);
+    } catch (e) { setStatusText('error: ' + e.message); }
+  });
+  const unpairBtn = container.querySelector('[data-sync-unpair]');
+  if (unpairBtn) unpairBtn.addEventListener('click', () => {
+    if (!window.SYNC) return;
+    window.SYNC.unpair();
+    hub.innerHTML = '';
+    VIEWS.renderProfile(APP.getState(), hub);
+  });
 }
 
 /* ====================== SOURCES ====================== */

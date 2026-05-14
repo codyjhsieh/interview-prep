@@ -728,5 +728,14 @@ if (document.readyState === 'loading') {
   init();
 }
 
-return { render, afterStateChange, getState: () => state };
+return {
+  render, afterStateChange,
+  getState: () => state,
+  // Hard-replace local state (used by sync.js after a remote pull).
+  setState: (next) => {
+    state = next;
+    GAMI.saveImmediate(state);
+    render();
+  },
+};
 })();
