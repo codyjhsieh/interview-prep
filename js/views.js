@@ -1253,7 +1253,11 @@ function mountPet3D(container, p) {
       // across the ~1100-instance canopy. Total foliage triangle count:
       // 1100 × 8 = 8800 (was 22000).
       const puffGeom = new T.OctahedronGeometry(1.0, 0);
-      const puffMat  = new T.MeshStandardMaterial({ roughness: 0.9, flatShading: true });
+      // MeshLambertMaterial — diffuse-only lighting, no PBR. At the iso
+      // camera scale with flat shading the result is visually identical
+      // to MeshStandardMaterial, but ~50% cheaper per fragment, which
+      // matters for 1100 instances covering a large screen area.
+      const puffMat  = new T.MeshLambertMaterial({ flatShading: true });
       // Same wind treatment as the grass — vertex-shader injection so
       // the sway is GPU-only. Per-puff phase derived from instance world
       // position so the entire canopy ripples in unison with the field
@@ -1327,7 +1331,10 @@ function mountPet3D(container, p) {
         // Octahedron (8 tris) instead of Icosahedron (20). At apple size
         // 0.22–0.35 the silhouette is identical from the iso camera.
         const appleGeom = new T.OctahedronGeometry(1.0, 0);
-        const appleMat  = new T.MeshStandardMaterial({ roughness: 0.6, flatShading: true, metalness: 0.05 });
+        // Lambert for apples too — apples are dark red diffuse spheres at
+        // small screen size; the PBR metalness/roughness signal doesn't
+        // show up vs. a Lambert diffuse.
+        const appleMat  = new T.MeshLambertMaterial({ flatShading: true });
         // Same wind injection as the foliage, so apples sway in sync.
         appleMat.onBeforeCompile = (shader) => {
           shader.uniforms.uTime = { value: 0 };
