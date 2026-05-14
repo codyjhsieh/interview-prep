@@ -272,6 +272,10 @@ header.sticky, main > header {
     inset 0 1px 0 rgba(255,255,255,0.95),
     inset 0 -1px 0 var(--hairline);
   border-bottom: none !important;
+  /* Flow under the iPhone notch / Dynamic Island. The Liquid Glass
+     material fills the safe-area band; padding-top pushes the actual
+     header chrome below the notch so nothing is clipped. */
+  padding-top: env(safe-area-inset-top);
 }
 header.sticky::after, main > header::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -663,9 +667,16 @@ body:has(> .fixed.inset-0[class*="z-5"]) #liquid-tabbar {
   border-radius: 26px;
   padding: 20px 18px 22px;
   transform: translateY(110%);
+  /* Exit uses --spring-settle (decelerate into rest); entrance overrides
+     to --spring-overshoot below. Splitting the curves makes both
+     directions feel Apple-correct instead of bouncy-on-the-way-out. */
+  transition: transform 0.32s var(--spring-settle);
+  will-change: transform;
+}
+#more-sheet.open .more-sheet-panel {
+  transform: translateY(0);
   transition: transform 0.42s var(--spring-overshoot);
 }
-#more-sheet.open .more-sheet-panel { transform: translateY(0); }
 
 .more-sheet-handle {
   width: 36px; height: 4px;
@@ -681,12 +692,22 @@ body:has(> .fixed.inset-0[class*="z-5"]) #liquid-tabbar {
   color: var(--text);
   font-size: 14.5px; font-weight: 500;
   text-decoration: none;
+  /* Snappy press-IN (0.06s linear), gentle release (0.22s spring-settle).
+     iOS tap-highlight off so our own :active state isn't masked by the
+     gray flash. */
   transition:
-    background 0.24s var(--spring-settle),
-    transform 0.18s var(--spring-snap);
+    background 0.22s var(--spring-settle),
+    transform 0.22s var(--spring-settle);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
 }
 .more-sheet-row:hover { background: rgba(15,23,42,0.05); }
-.more-sheet-row:active { transform: scale(0.985); background: rgba(15,23,42,0.08); }
+.more-sheet-row:active {
+  transform: scale(0.97);
+  background: rgba(15,23,42,0.12);
+  transition: background 0.06s linear, transform 0.06s linear;
+}
 .more-sheet-icon { color: var(--muted); display: inline-flex; align-items: center; }
 .more-sheet-label { flex: 1; }
 .more-sheet-chevron { color: var(--dim); display: inline-flex; align-items: center; }

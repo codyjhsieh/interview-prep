@@ -183,8 +183,11 @@ function openMoreSheet() {
     if (e.target.closest('[data-close]')) { close(); return; }
     const row = e.target.closest('.more-sheet-row');
     if (row) {
-      // location.hash already changes via the <a href>; just close.
-      setTimeout(close, 120);
+      // The <a href> default already changed the hash → app router is
+      // rendering the new view. Close immediately so the sheet glides
+      // away in parallel with the view appearing beneath it. The 120ms
+      // pre-close delay we used to have made the interaction feel sticky.
+      close();
     }
   });
 }
