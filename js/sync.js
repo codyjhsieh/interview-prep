@@ -25,7 +25,7 @@ window.SYNC = (function () {
   //
   // After deploying the Cloudflare Worker (see cloudflare/README.md),
   // replace this URL with the one wrangler prints.
-  const SYNC_ENDPOINT = 'https://interview-prep-sync.example.workers.dev';
+  const SYNC_ENDPOINT = 'https://interview-prep-sync.codyjhsieh.workers.dev';
 
   const CODE_KEY     = 'fdeprep.syncCode.v1';
   const POLL_MS      = 5000;
