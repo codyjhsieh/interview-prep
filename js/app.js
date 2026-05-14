@@ -761,11 +761,22 @@ if (document.readyState === 'loading') {
 return {
   render, afterStateChange,
   getState: () => state,
-  // Hard-replace local state (used by sync.js after a remote pull).
+  // Hard-replace + full re-render. Used by the login gate after a pair
+  // (one-time event where a route refresh is appropriate).
   setState: (next) => {
     state = next;
     GAMI.saveImmediate(state);
     render();
+  },
+  // Soft-replace from sync poll: swap state in place, persist locally,
+  // refresh ONLY the header chips (streak / level / XP / daily bar /
+  // profile initial). No view re-render — that's what causes the flash
+  // every 5 seconds while polling. Cards in the current view stay as
+  // they were; the next navigation picks up the new state naturally.
+  setStateFromSync: (next) => {
+    state = next;
+    GAMI.saveImmediate(state);
+    try { updateHeader(); } catch (_) {}
   },
 };
 })();

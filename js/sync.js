@@ -268,11 +268,12 @@ window.SYNC = (function () {
     if (remoteT <= lastSeenRemoteUpdatedAt) return;
     const merged = mergeStates(local, remote);
     lastSeenRemoteUpdatedAt = remoteT;
-    if (window.APP && window.APP.setState) window.APP.setState(merged);
-    else {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-      location.reload();
-    }
+    // Use the SOFT setter so the live view doesn't flash on every
+    // poll. setStateFromSync swaps state + refreshes only the header
+    // chips; the current view's cards stay put until next navigation.
+    if (window.APP && window.APP.setStateFromSync) window.APP.setStateFromSync(merged);
+    else if (window.APP && window.APP.setState)    window.APP.setState(merged);
+    else                                           localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
     setStatus('pulled');
   }
 
@@ -304,8 +305,16 @@ window.SYNC = (function () {
     const local  = window.APP && window.APP.getState();
     if (remote && local) {
       const merged = mergeStates(local, remote);
+      // Stamp a fresh updatedAt so any other paired device's next poll
+      // is guaranteed to see this as newer.
+      merged.updatedAt = Date.now();
       if (window.APP && window.APP.setState) window.APP.setState(merged);
-      else { localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); location.reload(); }
+      else localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+      // Push merged state up SYNCHRONOUSLY before returning, so the
+      // other device's next 5s poll sees the union without waiting on
+      // the 1s debounce. Closes the race where the seeding device
+      // could otherwise miss the merge between pair() and the next push.
+      await pushNow();
     } else if (local) {
       await pushNow();
     }
