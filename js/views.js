@@ -697,20 +697,32 @@ function mountPet3D(container, p) {
   sun.shadow.camera.far    =  35;
   sun.shadow.bias = -0.0008;
   scene.add(sun);
-  // Tint the container background to match the sky (visible around the edges
-  // of the canvas if any, and through any transparent regions).
-  container.style.background = `linear-gradient(180deg, #${tod.skyColor.toString(16).padStart(6,'0')} 0%, #c49a6a 100%)`;
+  // When Bit gets buff (body === 'jacked'), they move out of the room
+  // into open pastures: grass underfoot, no walls, swaying grass blades,
+  // sky-to-horizon gradient.
+  const outdoor = (p.body === 'jacked');
 
-  // ---- Room: floor + 2 back walls ----
+  // Tint the container background to match the sky (visible around the edges
+  // of the canvas if any, and through any transparent regions). Pastures
+  // ground tint = grass green; indoor ground tint = wood floor.
+  const groundTintHex = outdoor ? '#86bf5e' : '#c49a6a';
+  container.style.background = `linear-gradient(180deg, #${tod.skyColor.toString(16).padStart(6,'0')} 0%, ${groundTintHex} 100%)`;
+
+  // ---- Floor: wood (indoor) vs. grass (outdoor pastures) ----
+  // Same footprint as the room so the iso camera framing stays put;
+  // the difference is the floor material, the absence of walls, and the
+  // grass field on top.
   const FLOOR_W = 8;
-  const floorMat = new T.MeshStandardMaterial({ color: 0xC49A6A, roughness: 0.85 });
+  const floorColor = outdoor ? 0x86BF5E : 0xC49A6A;
+  const floorMat = new T.MeshStandardMaterial({ color: floorColor, roughness: outdoor ? 0.95 : 0.85 });
   const floor = new T.Mesh(new T.BoxGeometry(FLOOR_W, 0.2, FLOOR_W), floorMat);
   floor.position.y = -0.1;
   floor.receiveShadow = true;
   scene.add(floor);
 
-  // Skirting around the floor — slightly darker thin ring
-  const skirtMat = new T.MeshStandardMaterial({ color: 0x7A5328, roughness: 0.8 });
+  // Skirting around the floor — darker ring under wood; deeper green under grass
+  const skirtColor = outdoor ? 0x5A8A3A : 0x7A5328;
+  const skirtMat = new T.MeshStandardMaterial({ color: skirtColor, roughness: 0.8 });
   const skirt = new T.Mesh(new T.BoxGeometry(FLOOR_W + 0.05, 0.04, FLOOR_W + 0.05), skirtMat);
   skirt.position.y = 0.02;
   scene.add(skirt);
@@ -730,19 +742,864 @@ function mountPet3D(container, p) {
   const wallMatSide = new T.MeshStandardMaterial({ color: _wallShade(wallColor, shadowK), roughness: 0.9 });
   const wallMat = wallMatBack;                          // kept for any downstream reference
   const WALL_H = 5;
-  const wallBack = new T.Mesh(new T.BoxGeometry(FLOOR_W, WALL_H, 0.2), wallMatBack);
-  wallBack.position.set(0, WALL_H/2, -FLOOR_W/2);
-  wallBack.receiveShadow = true;
-  scene.add(wallBack);
-  const wallSide = new T.Mesh(new T.BoxGeometry(0.2, WALL_H, FLOOR_W), wallMatSide);
-  wallSide.position.set(-FLOOR_W/2, WALL_H/2, 0);
-  wallSide.receiveShadow = true;
-  scene.add(wallSide);
+  // Outdoor pastures: no walls. Sky shows directly behind Bit; no window
+  // because the sun IS the sky.
+  if (!outdoor) {
+    const wallBack = new T.Mesh(new T.BoxGeometry(FLOOR_W, WALL_H, 0.2), wallMatBack);
+    wallBack.position.set(0, WALL_H/2, -FLOOR_W/2);
+    wallBack.receiveShadow = true;
+    scene.add(wallBack);
+    const wallSide = new T.Mesh(new T.BoxGeometry(0.2, WALL_H, FLOOR_W), wallMatSide);
+    wallSide.position.set(-FLOOR_W/2, WALL_H/2, 0);
+    wallSide.receiveShadow = true;
+    scene.add(wallSide);
+  }
+
+  // ---- Lush wind-swayed grass field (outdoor only) ----
+  //
+  // SOTA pattern (mirrors what Ghost of Tsushima / Horizon do):
+  //   • One InstancedMesh, ~3500 blades — single draw call.
+  //   • Each blade is a curved, tapered ribbon (7 verts, 5 tris) — looks
+  //     like a real grass blade vs. a card.
+  //   • Vertex-color gradient: dark at the base, bright at the tip
+  //     (fake AO + sun-bleached tip read).
+  //   • Per-instance color jitter via setColorAt (hue + brightness)
+  //     so the field isn't a flat color slab.
+  //   • Vertex shader injected via onBeforeCompile: 2 wind octaves +
+  //     1 gust octave, phase derived from instance world position so
+  //     ripples visibly sweep across the field. Bend factor = y³ so
+  //     blades curve like a real wind catch.
+  let _grassMat = null;          // exposed to the tick loop to bump uTime
+  if (outdoor) {
+    // Single-triangle tapered blade — 3 verts, 1 triangle. 7× cheaper
+    // than the curved 7-vert ribbon, and for wheatgrass (straight stalks)
+    // there's no visual loss. 3500 blades × 1 tri = 3500 tris total.
+    const bladePositions = new Float32Array([
+      -0.040, 0.00, 0.00,   // base L
+       0.040, 0.00, 0.00,   // base R
+       0.000, 1.00, 0.00,   // tip
+    ]);
+    // Wheatgrass gradient: warm olive at the base, sun-bleached gold tip
+    const bladeColors = new Float32Array([
+      0.40, 0.45, 0.18,
+      0.40, 0.45, 0.18,
+      0.85, 0.82, 0.42,
+    ]);
+    const bladeGeom = new T.BufferGeometry();
+    bladeGeom.setAttribute('position', new T.BufferAttribute(bladePositions, 3));
+    bladeGeom.setAttribute('color', new T.BufferAttribute(bladeColors, 3));
+    bladeGeom.setIndex([0, 1, 2]);
+    bladeGeom.computeVertexNormals();
+
+    // MeshLambertMaterial — cheaper than MeshStandardMaterial (no PBR,
+    // just diffuse) and still supports vertex colors + instance color +
+    // shader injection. Big perf win at 3500 blades on mobile GPUs.
+    const grassMat = new T.MeshLambertMaterial({
+      vertexColors: true,
+      side: T.DoubleSide,
+    });
+    grassMat.onBeforeCompile = (shader) => {
+      shader.uniforms.uTime   = { value: 0 };
+      // uPetPos = world (x,_,z) of Bit. The shader pushes blades whose
+      // base is within uPetRadius AWAY from this position so Bit's path
+      // visibly parts the grass. Uniform-only — no per-frame CPU cost.
+      shader.uniforms.uPetPos = { value: new T.Vector3(999, 0, 999) };
+      shader.vertexShader = 'uniform float uTime;\nuniform vec3 uPetPos;\n' + shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        `
+        #include <begin_vertex>
+        // Per-instance world position from the instanceMatrix.
+        vec3 _gPos = vec3(instanceMatrix[3][0], instanceMatrix[3][1], instanceMatrix[3][2]);
+        // Cubic bend — base totally pinned, almost all motion in the
+        // upper third (matches real grass that flexes at the tip).
+        float _gBend = position.y * position.y * position.y;
+        // Wind: slow base oscillator + fast gust, phase from world pos.
+        float _ph = _gPos.x * 0.55 + _gPos.z * 0.40;
+        float _wave = sin(uTime * 1.20 + _ph)       * 0.42;
+        float _gust = sin(uTime * 3.10 + _ph * 1.7) * 0.18;
+        float _sway = _wave + _gust;
+        transformed.x += _sway       * _gBend;
+        transformed.z += _sway * 0.4 * _gBend;
+        // Pet interaction: push the blade's top AWAY from Bit's feet
+        // within a small radius. Quadratic falloff so the parting is
+        // localised — far blades aren't affected. Multiplied by _gBend
+        // so only the upper portion of the blade flattens.
+        vec2 _petDelta = _gPos.xz - uPetPos.xz;
+        float _petDist = length(_petDelta);
+        const float PET_R = 0.65;
+        if (_petDist < PET_R) {
+          float _falloff = 1.0 - _petDist / PET_R;
+          float _push = _falloff * _falloff * 1.3;
+          vec2 _pushDir = _petDelta / max(_petDist, 0.001);
+          transformed.x += _pushDir.x * _push * _gBend;
+          transformed.z += _pushDir.y * _push * _gBend;
+        }
+        `
+      );
+      grassMat.userData.shader = shader;
+    };
+    _grassMat = [grassMat];
+
+    // High density — 7000 blades on the 8×8 pasture (~110 blades/m²,
+    // matches real lawn density at a perceptual level). With single-tri
+    // geometry + Lambert + a single draw call the cost is ~7k tris and
+    // one set-uniform per frame — well inside mobile GPU budget.
+    const COUNT = 7000;
+    const inst = new T.InstancedMesh(bladeGeom, grassMat, COUNT);
+    inst.frustumCulled = false;          // bounding sphere is too small (single blade); without this Three.js culls the whole field
+    inst.castShadow    = false;
+    inst.receiveShadow = false;
+    const dummy = new T.Object3D();
+    const _color = new T.Color();
+    // HSL palette tuned for wheatgrass: hue 0.13 (warm yellow-green) →
+    // 0.20 (olive). Lightness 0.42–0.62 for sun-touched variance.
+    for (let i = 0; i < COUNT; i++) {
+      // Uniform fill across the full square floor — blades go under Bit
+      // too (looks right for a lush field; Bit's shadow + body sits on
+      // top of them).
+      const bx = (Math.random() * 2 - 1) * (FLOOR_W / 2 - 0.25);
+      const bz = (Math.random() * 2 - 1) * (FLOOR_W / 2 - 0.25);
+      dummy.position.set(bx, 0, bz);
+      dummy.rotation.set(0, Math.random() * Math.PI * 2, (Math.random() * 2 - 1) * 0.14);
+      const sy = 0.45 + Math.random() * 0.55;       // 0.45 – 1.0 (height in world units)
+      const sx = 0.85 + Math.random() * 0.30;
+      dummy.scale.set(sx, sy, sx);
+      dummy.updateMatrix();
+      inst.setMatrixAt(i, dummy.matrix);
+      // Wheatgrass HSL: warm hues (0.13–0.20), mid sat, sun-touched lig.
+      const hue = 0.13 + Math.random() * 0.07;
+      const sat = 0.45 + Math.random() * 0.22;
+      const lig = 0.42 + Math.random() * 0.20;
+      _color.setHSL(hue, sat, lig);
+      inst.setColorAt(i, _color);
+    }
+    inst.instanceMatrix.needsUpdate = true;
+    if (inst.instanceColor) inst.instanceColor.needsUpdate = true;
+    scene.add(inst);
+
+    // Tint the floor warmer so it reads as soil under wheatgrass, not
+    // a green astroturf slab.
+    floorMat.color.setHex(0x9C8B53);
+    skirtMat.color.setHex(0x5F4F2A);
+  }
+
+  // ---- Polygonal bonsai-shaped tree (outdoor only, life-size) ------
+  //
+  // Inspired by the Moyogi (informal upright) bonsai style — iconic
+  // S-curve trunk + asymmetric tiered branches with dense canopy puffs.
+  // Scaled up to a real tree's height (~3 units tall) rather than a
+  // tabletop bonsai, so it reads as a mature shaped tree on the
+  // pasture. All low-poly + flatShading for the polygonal aesthetic.
+  //
+  // Trunk: 8 stacked cylinder segments along an S-curve, each rotated
+  //   and offset to give the gnarled "trained" silhouette.
+  // Branches: 5 tiered branches at varying heights, sweeping outward
+  //   then upward at the tips (classic bonsai "Branch upper-side"
+  //   gesture). Each branch tip has a multi-puff foliage cluster.
+  // Foliage: 5 main puffs + 5 satellite puffs, faceted icospheres,
+  //   three-tone hue jitter.
+  //
+  // Collision: 1.0-radius cylinder at the trunk base — pet walks around.
+  const _obstacles = [];          // [{ x, z, radius }] — pet steers around
+  if (outdoor) {
+    const bonsai = new T.Group();
+    // Trunk BASE pulled further into the back-RIGHT CORNER. The S-curve
+    // trunk sweeps LEFT + forward as it rises, so the canopy/apex still
+    // arches inward and shadows a wide central area of the pasture.
+    bonsai.position.set(2.6, 0, -2.4);
+    bonsai.rotation.y = 0;
+
+    const barkA = new T.MeshStandardMaterial({ color: 0x6B4225, roughness: 0.95, flatShading: true });
+    const barkB = new T.MeshStandardMaterial({ color: 0x4E2E16, roughness: 0.95, flatShading: true });
+
+    // Trunk: BIG bonsai-shape with an S-curve that lifts from the right
+    // edge of the pasture and arcs back over the center. Overall the
+    // trunk leans toward (-x, +z) (back toward origin from the offset
+    // base), but the lean is NOT monotone — there's a clear "pull-back"
+    // at i=3 where the trunk dips RIGHT before continuing left. That
+    // kink is what reads as the S character.
+    //
+    // Cumulative (leanX, leanZ) per joint:
+    //   i=0  ( 0.0,  0.0)  base
+    //   i=1  (-0.5,  0.2)  first left lean
+    //   i=2  (-0.6,  0.5)  small continuation
+    //   i=3  (-0.3,  0.5)  ← PULL-BACK (S kink — trunk dips right)
+    //   i=4  (-0.6,  0.6)  back to left
+    //   i=5  (-1.1,  1.0)  upward + outward
+    //   i=6  (-1.5,  1.3)  apex approach
+    //   i=7  (-1.8,  1.5)  apex (≈ over origin)
+    // Heights tuned so the LOWEST branch anchor (joints[2]) sits at
+    // y ≈ 2.60, well above Bit's ~1.8-unit adult height. No branches
+    // or foliage spawn from joints 0 or 1 — they're inside the "naked
+    // trunk" zone (legs + body of the tree, but no leaves where Bit
+    // walks).
+    const trunkSegs = [
+      { r0: 0.70, r1: 0.62, h: 1.35, leanX:  0.00, leanZ:  0.00 },   // base, straight (taller, "trunk only")
+      { r0: 0.62, r1: 0.55, h: 1.25, leanX: -0.50, leanZ:  0.20 },   // left lean ← (still trunk-only, no branches)
+      { r0: 0.55, r1: 0.48, h: 0.85, leanX: -0.10, leanZ:  0.30 },   // first branchable joint sits up here
+      { r0: 0.48, r1: 0.42, h: 0.80, leanX:  0.30, leanZ:  0.00 },   // S kink: pull-back →
+      { r0: 0.42, r1: 0.36, h: 0.75, leanX: -0.30, leanZ:  0.10 },   // resume left ←
+      { r0: 0.36, r1: 0.30, h: 0.70, leanX: -0.50, leanZ:  0.40 },   // climbing
+      { r0: 0.30, r1: 0.25, h: 0.62, leanX: -0.40, leanZ:  0.30 },   // approaching apex
+      { r0: 0.25, r1: 0.20, h: 0.55, leanX: -0.30, leanZ:  0.20 },   // apex over origin
+    ];
+    const trunkJoints = [{ x: 0, y: 0, z: 0 }];    // running tip-of-segment positions
+    for (let i = 0; i < trunkSegs.length; i++) {
+      const s = trunkSegs[i];
+      const base = trunkJoints[i];
+      const tip = { x: base.x + s.leanX, y: base.y + s.h, z: base.z + s.leanZ };
+      const dx = tip.x - base.x, dy = tip.y - base.y, dz = tip.z - base.z;
+      const len = Math.sqrt(dx*dx + dy*dy + dz*dz);
+      const midX = (base.x + tip.x) / 2;
+      const midY = (base.y + tip.y) / 2;
+      const midZ = (base.z + tip.z) / 2;
+      const geom = new T.CylinderGeometry(s.r1, s.r0, len, 7, 1);
+      const seg = new T.Mesh(geom, i % 2 === 0 ? barkA : barkB);
+      seg.position.set(midX, midY, midZ);
+      // Cylinder default axis is +Y; rotate toward the tip direction
+      const dir = new T.Vector3(dx, dy, dz).normalize();
+      const up = new T.Vector3(0, 1, 0);
+      const axis = new T.Vector3().crossVectors(up, dir).normalize();
+      const angle = Math.acos(up.dot(dir));
+      if (axis.lengthSq() > 1e-6) seg.setRotationFromAxisAngle(axis, angle);
+      seg.castShadow = true;
+      bonsai.add(seg);
+      trunkJoints.push(tip);
+    }
+
+    // Branches: tiered TRIANGULAR silhouette — long horizontal pads
+    // near the base, progressively shorter / smaller / more
+    // upward-pointing toward the apex (the "tsui-eda" arrangement).
+    //
+    // The TOP of the tree is densely branched: 4 short upper branches
+    // radiating in different directions from the upper-trunk joints
+    // form a lush "crown" around the apex, the way mature bonsai
+    // canopies do. Without this the top reads as a single lonely puff.
+    //
+    //   tier='low'  — lowest 2 branches, longest, big horizontal pads
+    //   tier='mid'  — middle 2 branches, medium pads
+    //   tier='high' — 4 short branches forming the crown
+    const branches = [
+      // Low: dramatic horizontal pads — the visual "shoulders".
+      // Scaled up so the lower silhouette stays balanced with the
+      // ~3× wider crown above.
+      { anchorIdx: 2, dir: [-1.00,  0.08,  0.35], length: 2.80, padR: 1.20, tier: 'low'  }, // FRONT-LEFT
+      { anchorIdx: 3, dir: [ 0.80,  0.10,  0.50], length: 2.30, padR: 1.00, tier: 'low'  }, // FRONT-RIGHT
+      // Mid: alternating sides, very horizontal
+      { anchorIdx: 4, dir: [-0.65,  0.15, -0.85], length: 3.80, padR: 1.05, tier: 'mid'  }, // BACK-LEFT
+      { anchorIdx: 5, dir: [ 0.85,  0.20,  0.40], length: 3.50, padR: 1.00, tier: 'mid'  }, // RIGHT
+      // High crown: 6 VERY LONG horizontal branches — ~3× the previous
+      // length — so the upper canopy spread far overshoots the trunk's
+      // centerline. Reaches across most of the pasture overhead.
+      { anchorIdx: 6, dir: [-0.90,  0.18,  0.55], length: 3.50, padR: 0.95, tier: 'high' }, // FAR FRONT-LEFT
+      { anchorIdx: 6, dir: [ 0.85,  0.16, -0.60], length: 3.30, padR: 0.92, tier: 'high' }, // FAR BACK-RIGHT
+      { anchorIdx: 6, dir: [ 0.30,  0.18,  0.95], length: 3.10, padR: 0.88, tier: 'high' }, // FAR FRONT
+      { anchorIdx: 7, dir: [-0.80,  0.22, -0.40], length: 2.90, padR: 0.85, tier: 'high' }, // BACK-LEFT
+      { anchorIdx: 7, dir: [ 0.55,  0.22,  0.85], length: 2.80, padR: 0.82, tier: 'high' }, // FRONT-RIGHT
+      { anchorIdx: 7, dir: [-0.45,  0.26, -0.85], length: 2.70, padR: 0.80, tier: 'high' }, // BACK
+    ];
+
+    // Foliage tones — three shades of trained-leaf green
+    const leafTones = [0x4E8B3A, 0x6BAA52, 0x3A6E2A, 0x80B860];
+
+    // All foliage puffs are collected into ONE list and rendered as a
+    // SINGLE InstancedMesh at the very end of the bonsai construction.
+    // This way doubling the per-pad stone count (was 8 + padR·6, now
+    // 16 + padR·12) doesn't multiply draw calls.
+    //
+    // Each entry: { x, y, z, r, scaleY, color, rotY }
+    //   x/y/z   — world position (note: positions are in bonsai-local
+    //             space here; the bonsai's offset is applied at instance
+    //             build time)
+    //   r       — base radius (scale.x and .z)
+    //   scaleY  — Y squish factor for the oblate pad shape
+    //   color   — hex tint
+    //   rotY    — random Y rotation for variety
+    const foliagePuffs = [];
+
+    function buildPad(centerX, centerY, centerZ, padR, tier) {
+      const padThickness = padR * 0.32;
+      // 2× denser pads — was 16 + padR·12, now 32 + padR·24.
+      const stoneCount = Math.round(32 + padR * 24);
+      // Central stone (large, oblate)
+      foliagePuffs.push({
+        x: centerX, y: centerY, z: centerZ,
+        r: padR * 0.6, scaleY: 0.55,
+        color: leafTones[Math.floor(Math.random() * leafTones.length)],
+        rotY: Math.random() * Math.PI,
+      });
+      // Rim stones around the perimeter
+      for (let s = 0; s < stoneCount; s++) {
+        const ang = (s / stoneCount) * Math.PI * 2 + Math.random() * 0.4;
+        const r   = padR * (0.55 + Math.random() * 0.40);
+        foliagePuffs.push({
+          x: centerX + Math.cos(ang) * r,
+          y: centerY + (Math.random() - 0.5) * padThickness * 0.7,
+          z: centerZ + Math.sin(ang) * r,
+          r: padR * (0.28 + Math.random() * 0.18),
+          scaleY: 0.50 + Math.random() * 0.20,
+          color: leafTones[Math.floor(Math.random() * leafTones.length)],
+          rotY: Math.random() * Math.PI,
+        });
+      }
+      // Lower pads get an under-layer for thickness — also doubled
+      if (tier === 'low') {
+        const underCount = Math.round(stoneCount * 1.2);   // doubled
+        for (let s = 0; s < underCount; s++) {
+          const ang = Math.random() * Math.PI * 2;
+          const r   = padR * (0.30 + Math.random() * 0.40);
+          foliagePuffs.push({
+            x: centerX + Math.cos(ang) * r,
+            y: centerY - padThickness * (0.45 + Math.random() * 0.20),
+            z: centerZ + Math.sin(ang) * r,
+            r: padR * (0.22 + Math.random() * 0.14),
+            scaleY: 0.5,
+            color: leafTones[Math.floor(Math.random() * leafTones.length)],
+            rotY: Math.random() * Math.PI,
+          });
+        }
+      }
+    }
+
+    // Helper to render a tapered cylinder between two world-space points.
+    const renderSeg = (a, c, r0, r1) => {
+      const dx = c.x - a.x, dy = c.y - a.y, dz = c.z - a.z;
+      const len = Math.sqrt(dx*dx + dy*dy + dz*dz);
+      const m = new T.Mesh(new T.CylinderGeometry(r1, r0, len, 6, 1), barkB);
+      m.position.set((a.x + c.x) / 2, (a.y + c.y) / 2, (a.z + c.z) / 2);
+      const dir2 = new T.Vector3(dx, dy, dz).normalize();
+      const up2 = new T.Vector3(0, 1, 0);
+      const axis2 = new T.Vector3().crossVectors(up2, dir2).normalize();
+      const ang2 = Math.acos(up2.dot(dir2));
+      if (axis2.lengthSq() > 1e-6) m.setRotationFromAxisAngle(axis2, ang2);
+      m.castShadow = true;
+      bonsai.add(m);
+    };
+    // Add a knot/joint bump at every interior bend so the branch reads
+    // as gnarled wood rather than smooth pipe.
+    const renderKnot = (p, r) => {
+      const k = new T.Mesh(new T.DodecahedronGeometry(r, 0), barkA);
+      k.position.set(p.x, p.y, p.z);
+      k.rotation.set(Math.random(), Math.random(), Math.random());
+      k.castShadow = true;
+      bonsai.add(k);
+    };
+
+    for (const b of branches) {
+      const base = trunkJoints[b.anchorIdx];
+      const d = new T.Vector3(b.dir[0], b.dir[1], b.dir[2]).normalize();
+      // Perpendicular axes for the zig-zag offsets — one horizontal,
+      // one vertical relative to the branch direction. Used so each
+      // segment offsets from the straight-line by a small amount in a
+      // direction perpendicular to the branch axis.
+      const perpH = new T.Vector3(-d.z, 0, d.x).normalize();
+      const perpV = new T.Vector3().crossVectors(d, perpH).normalize();
+
+      // 4 internal joints + base + tip = 5 segments along a zig-zag.
+      // Offsets alternate signs so the silhouette visibly bends rather
+      // than reading as a straight stick. Magnitude scales with branch
+      // length so longer branches show more character.
+      const L = b.length;
+      const zigMag = Math.min(0.22, 0.07 + L * 0.04);   // horizontal sway
+      const vMag   = Math.min(0.14, 0.04 + L * 0.025);  // vertical wobble
+      const joints = [];
+      // Joint at base
+      joints.push({ x: base.x, y: base.y, z: base.z });
+      // 3 interior joints with alternating horizontal + slight vertical kinks
+      const ts = [0.28, 0.55, 0.80];
+      const signs = [+1, -1, +0.4];
+      for (let i = 0; i < ts.length; i++) {
+        const t = ts[i];
+        const s = signs[i];
+        const sx = base.x + d.x * L * t + perpH.x * zigMag * s;
+        const sy = base.y + d.y * L * t + perpV.y * vMag * s - 0.04 * t * t;   // slight droop
+        const sz = base.z + d.z * L * t + perpH.z * zigMag * s;
+        joints.push({ x: sx, y: sy, z: sz });
+      }
+      // Final TIP — droops downward more pronounced for that "trained" feel
+      joints.push({
+        x: base.x + d.x * L,
+        y: base.y + d.y * L - 0.10,
+        z: base.z + d.z * L,
+      });
+
+      // Render each segment with progressive taper
+      const radii = [
+        { r0: 0.15, r1: 0.12 },
+        { r0: 0.12, r1: 0.09 },
+        { r0: 0.09, r1: 0.07 },
+        { r0: 0.07, r1: 0.05 },
+      ];
+      for (let i = 0; i < joints.length - 1; i++) {
+        renderSeg(joints[i], joints[i + 1], radii[i].r0, radii[i].r1);
+        // Knot at the interior joint after segment i
+        if (i < joints.length - 2) {
+          renderKnot(joints[i + 1], radii[i].r1 * 1.4);
+        }
+      }
+
+      // FLAT PAD at the branch tip — the bonsai-defining feature
+      const tip = joints[joints.length - 1];
+      buildPad(tip.x, tip.y + 0.05, tip.z, b.padR, b.tier);
+    }
+
+    // Apex crown — three overlapping pads at slightly different heights
+    // pack the top of the silhouette so the canopy reads as continuous
+    // foliage all the way up, not a stem with a tiny ball on top.
+    const trunkTip = trunkJoints[trunkJoints.length - 1];
+    buildPad(trunkTip.x,        trunkTip.y + 0.40, trunkTip.z,        0.75, 'mid');
+    buildPad(trunkTip.x - 0.25, trunkTip.y + 0.20, trunkTip.z + 0.20, 0.55, 'high');
+    buildPad(trunkTip.x + 0.20, trunkTip.y + 0.25, trunkTip.z - 0.18, 0.50, 'high');
+
+    // ---- Dense upper-half ramification ("hosokawari") ----------------
+    //
+    // Real mature bonsai have THOUSANDS of small twigs forming a
+    // continuous canopy surface. We can't afford that literally, so:
+    //   • 36 thin twig branches randomly distributed across the upper
+    //     trunk (joints 4-7) AND along the four main upper branches.
+    //   • Each twig is a short low-poly cylinder (4-segment, cheap).
+    //   • Each carries 1-2 small foliage puffs collected and batched
+    //     into a SINGLE InstancedMesh at the end → ~80 leaf clusters
+    //     for the cost of one draw call.
+    // Far fewer VISIBLE twig branches (reads cleaner — was 72, now 24)
+    // but each twig spawns more leaf puffs so the foliage volume stays
+    // up. Net effect: same/larger foliage cloud, ⅓ the woody twigs.
+    const twigCount = 24;
+    // Cache the upper-branch anchor + dir lookups
+    const upperBranches = branches.filter(b => b.anchorIdx >= 5);
+    for (let i = 0; i < twigCount; i++) {
+      // 60% sprout from along the upper trunk, 40% from along upper branches
+      let baseX, baseY, baseZ;
+      if (Math.random() < 0.6) {
+        // Linearly interpolate between two random upper joints (4..7)
+        const jA = 4 + Math.floor(Math.random() * 3);   // 4, 5, or 6
+        const jB = jA + 1;
+        const tlerp = Math.random();
+        baseX = trunkJoints[jA].x + (trunkJoints[jB].x - trunkJoints[jA].x) * tlerp;
+        baseY = trunkJoints[jA].y + (trunkJoints[jB].y - trunkJoints[jA].y) * tlerp;
+        baseZ = trunkJoints[jA].z + (trunkJoints[jB].z - trunkJoints[jA].z) * tlerp;
+      } else {
+        const ub = upperBranches[Math.floor(Math.random() * upperBranches.length)];
+        const ubBase = trunkJoints[ub.anchorIdx];
+        const ubDir = new T.Vector3(ub.dir[0], ub.dir[1], ub.dir[2]).normalize();
+        const tlerp = 0.35 + Math.random() * 0.55;
+        baseX = ubBase.x + ubDir.x * ub.length * tlerp;
+        baseY = ubBase.y + ubDir.y * ub.length * tlerp;
+        baseZ = ubBase.z + ubDir.z * ub.length * tlerp;
+      }
+      // Random direction biased OUTWARD (horizontal) so the crown
+      // spreads rather than pinching toward a point. Pitch mostly
+      // shallow (-0.1 .. +0.3 rad) — twigs grow sideways like real
+      // canopy ramification, not skyward.
+      const yaw = Math.random() * Math.PI * 2;
+      const pitch = -0.10 + Math.random() * 0.40;
+      const dx = Math.cos(yaw) * Math.cos(pitch);
+      const dy = Math.sin(pitch);
+      const dz = Math.sin(yaw) * Math.cos(pitch);
+      // Long horizontal twigs so the ramification visibly fills the
+      // 3× wider crown rather than clumping near each branch tip.
+      const twigLen = 0.80 + Math.random() * 0.90;
+      const tipX = baseX + dx * twigLen;
+      const tipY = baseY + dy * twigLen;
+      const tipZ = baseZ + dz * twigLen;
+      // Twig cylinder — 4-segment for cheap, thin radius
+      const twig = new T.Mesh(new T.CylinderGeometry(0.018, 0.030, twigLen, 4, 1), barkB);
+      twig.position.set((baseX + tipX) / 2, (baseY + tipY) / 2, (baseZ + tipZ) / 2);
+      const tDir = new T.Vector3(dx, dy, dz).normalize();
+      const up3 = new T.Vector3(0, 1, 0);
+      const axis3 = new T.Vector3().crossVectors(up3, tDir).normalize();
+      const ang3 = Math.acos(up3.dot(tDir));
+      if (axis3.lengthSq() > 1e-6) twig.setRotationFromAxisAngle(axis3, ang3);
+      twig.castShadow = true;
+      bonsai.add(twig);
+      // Each twig now seeds a CLUSTER of ~6-9 puffs (was 1-3), so the
+      // foliage volume stays high despite fewer twig stems. Cluster
+      // covers a small spherical zone around the twig tip.
+      const mainR = 0.26 + Math.random() * 0.18;
+      foliagePuffs.push({
+        x: tipX, y: tipY, z: tipZ,
+        r: mainR, scaleY: 0.75,
+        color: leafTones[Math.floor(Math.random() * leafTones.length)],
+        rotY: Math.random() * Math.PI,
+      });
+      const satCount = 5 + Math.floor(Math.random() * 4);    // 5-8 satellites per twig
+      for (let s = 0; s < satCount; s++) {
+        const sang = Math.random() * Math.PI * 2;
+        const off  = mainR * (0.55 + Math.random() * 0.85);
+        const ydrop = (Math.random() - 0.35) * mainR * 0.8;
+        foliagePuffs.push({
+          x: tipX + Math.cos(sang) * off,
+          y: tipY + ydrop,
+          z: tipZ + Math.sin(sang) * off,
+          r: mainR * (0.40 + Math.random() * 0.35),
+          scaleY: 0.75,
+          color: leafTones[Math.floor(Math.random() * leafTones.length)],
+          rotY: Math.random() * Math.PI,
+        });
+      }
+    }
+    // ---- Batch ALL foliage (pad stones + twig puffs + apex pads)
+    // into a single InstancedMesh. Saves hundreds of draw calls vs the
+    // per-stone-per-mesh approach. With the doubled counts we're at
+    // ~500-700 puffs; this stays at one draw call.
+    if (foliagePuffs.length) {
+      const puffGeom = new T.IcosahedronGeometry(1.0, 0);   // unit sphere, scaled per-instance
+      const puffMat  = new T.MeshStandardMaterial({ roughness: 0.9, flatShading: true });
+      // Same wind treatment as the grass — vertex-shader injection so
+      // the sway is GPU-only. Per-puff phase derived from instance world
+      // position so the entire canopy ripples in unison with the field
+      // below. Higher puffs sway more (exposed to wind).
+      puffMat.onBeforeCompile = (shader) => {
+        shader.uniforms.uTime = { value: 0 };
+        shader.vertexShader = 'uniform float uTime;\n' + shader.vertexShader.replace(
+          '#include <begin_vertex>',
+          `
+          #include <begin_vertex>
+          vec3 _fPos = vec3(instanceMatrix[3][0], instanceMatrix[3][1], instanceMatrix[3][2]);
+          // Higher puffs catch more wind. Floor (lowest foliage y≈2.6)
+          // still gets ~20% of the amplitude so the lower pads visibly
+          // move; apex sways at full magnitude.
+          float _fHeight = 0.2 + 0.8 * smoothstep(2.5, 6.5, _fPos.y);
+          float _fPh = _fPos.x * 0.35 + _fPos.z * 0.25;
+          // Dramatic sway — large amplitude wave + gust so the canopy
+          // visibly heaves in the breeze instead of barely twitching.
+          float _fWave = sin(uTime * 0.80 + _fPh)       * 0.45;
+          float _fGust = sin(uTime * 1.90 + _fPh * 1.4) * 0.18;
+          float _fSway = (_fWave + _fGust) * _fHeight;
+          transformed.x += _fSway;
+          transformed.z += _fSway * 0.5;
+          `
+        );
+        puffMat.userData.shader = shader;
+      };
+      const puffInst = new T.InstancedMesh(puffGeom, puffMat, foliagePuffs.length);
+      const dum = new T.Object3D();
+      const col = new T.Color();
+      for (let i = 0; i < foliagePuffs.length; i++) {
+        const p = foliagePuffs[i];
+        // Positions are bonsai-local (the buildPad/twig code uses
+        // joint-relative coords). Apply bonsai.position to lift the
+        // InstancedMesh into world space at scene root.
+        dum.position.set(
+          bonsai.position.x + p.x,
+          p.y,
+          bonsai.position.z + p.z,
+        );
+        dum.rotation.set(0, p.rotY, 0);
+        dum.scale.set(p.r, p.r * p.scaleY, p.r);
+        dum.updateMatrix();
+        puffInst.setMatrixAt(i, dum.matrix);
+        col.setHex(p.color);
+        puffInst.setColorAt(i, col);
+      }
+      puffInst.instanceMatrix.needsUpdate = true;
+      if (puffInst.instanceColor) puffInst.instanceColor.needsUpdate = true;
+      puffInst.castShadow = true;
+      // CRITICAL: disable frustum culling. Three.js otherwise uses the
+      // source geometry's bounding sphere (radius 1, centered at origin)
+      // anchored to the InstancedMesh's origin — so when the canopy
+      // sits 2-7 units away from the world origin, the WHOLE foliage
+      // gets culled on most camera angles → invisible.
+      puffInst.frustumCulled = false;
+      scene.add(puffInst);
+      // Register the foliage material so the tick loop bumps its uTime
+      // each frame (sway).
+      _grassMat.push(puffMat);
+
+      // ---- Apples ----------------------------------------------------
+      // Pick ~50 positions from the upper foliage puffs (y > 3) and
+      // hang a small red apple slightly below each. Share the same wind
+      // shader so apples sway with their surrounding leaves.
+      const upperPuffs = foliagePuffs.filter(p => p.y > 3.0);
+      // Halved apple density — was one apple per ~10 puffs (cap 50),
+      // now one per ~20 (cap 25). Apples feel like a deliberate accent
+      // instead of an even spray across the canopy.
+      const APPLE_COUNT = Math.min(25, Math.floor(upperPuffs.length / 20));
+      if (APPLE_COUNT > 0) {
+        const appleGeom = new T.IcosahedronGeometry(1.0, 0);
+        const appleMat  = new T.MeshStandardMaterial({ roughness: 0.6, flatShading: true, metalness: 0.05 });
+        // Same wind injection as the foliage, so apples sway in sync.
+        appleMat.onBeforeCompile = (shader) => {
+          shader.uniforms.uTime = { value: 0 };
+          shader.vertexShader = 'uniform float uTime;\n' + shader.vertexShader.replace(
+            '#include <begin_vertex>',
+            `
+            #include <begin_vertex>
+            vec3 _aPos = vec3(instanceMatrix[3][0], instanceMatrix[3][1], instanceMatrix[3][2]);
+            float _aHeight = 0.2 + 0.8 * smoothstep(2.5, 6.5, _aPos.y);
+            float _aPh = _aPos.x * 0.35 + _aPos.z * 0.25;
+            // Same big-wave + gust as the foliage, so apples sway in sync
+            // with their leaves (no parallax misalignment).
+            float _aWave = sin(uTime * 0.80 + _aPh)       * 0.45;
+            float _aGust = sin(uTime * 1.90 + _aPh * 1.4) * 0.18;
+            float _aSway = (_aWave + _aGust) * _aHeight;
+            transformed.x += _aSway;
+            transformed.z += _aSway * 0.5;
+            `
+          );
+          appleMat.userData.shader = shader;
+        };
+        const appleInst = new T.InstancedMesh(appleGeom, appleMat, APPLE_COUNT);
+        const appleDum = new T.Object3D();
+        const appleCol = new T.Color();
+        // Two apple-red tones for variety: ripe (deep red) + half-ripe.
+        const appleTones = [0xC0382B, 0x9F2A1F, 0xD05A3E];
+        // ---- Spatially uniform apple placement (stratified XZ grid) ----
+        // Picking random foliage puffs causes clumping wherever the puff
+        // density is high (each twig spawns 6-8 puffs in a small space).
+        // Instead, lay APPLE_COUNT positions on a jittered NxN grid that
+        // spans the upper-canopy bounding box, then snap each grid cell
+        // to its NEAREST upper puff. Result: apples are spread across
+        // the whole crown's XZ footprint, not piled at branch tips.
+        let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+        for (const p of upperPuffs) {
+          if (p.x < minX) minX = p.x;
+          if (p.x > maxX) maxX = p.x;
+          if (p.z < minZ) minZ = p.z;
+          if (p.z > maxZ) maxZ = p.z;
+        }
+        const N = Math.ceil(Math.sqrt(APPLE_COUNT));
+        const cellW = (maxX - minX) / N;
+        const cellH = (maxZ - minZ) / N;
+        const cells = [];
+        for (let cz = 0; cz < N; cz++) {
+          for (let cx = 0; cx < N; cx++) {
+            // Cell center + jitter (kept inside ±35% of cell so neighbour
+            // cells can't swap places — preserves uniformity)
+            const jx = (Math.random() - 0.5) * cellW * 0.7;
+            const jz = (Math.random() - 0.5) * cellH * 0.7;
+            cells.push({
+              x: minX + (cx + 0.5) * cellW + jx,
+              z: minZ + (cz + 0.5) * cellH + jz,
+            });
+          }
+        }
+        // Shuffle so when N²>APPLE_COUNT we don't deterministically drop
+        // the same corner each time.
+        for (let i = cells.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [cells[i], cells[j]] = [cells[j], cells[i]];
+        }
+        const chosen = cells.slice(0, APPLE_COUNT);
+        for (let i = 0; i < APPLE_COUNT; i++) {
+          const c = chosen[i];
+          // Find nearest upper puff to (c.x, c.z)
+          let best = upperPuffs[0], bestD = Infinity;
+          for (const p of upperPuffs) {
+            const dx = p.x - c.x, dz = p.z - c.z;
+            const d = dx*dx + dz*dz;
+            if (d < bestD) { bestD = d; best = p; }
+          }
+          appleDum.position.set(
+            bonsai.position.x + best.x + (Math.random() - 0.5) * 0.06,
+            best.y - best.r * (0.85 + Math.random() * 0.30),
+            bonsai.position.z + best.z + (Math.random() - 0.5) * 0.06,
+          );
+          appleDum.rotation.set(0, Math.random() * Math.PI * 2, 0);
+          // Apple radius 0.22 – 0.35 — readable from the iso camera.
+          const ar = 0.22 + Math.random() * 0.13;
+          appleDum.scale.set(ar, ar * 0.93, ar);
+          appleDum.updateMatrix();
+          appleInst.setMatrixAt(i, appleDum.matrix);
+          appleCol.setHex(appleTones[Math.floor(Math.random() * appleTones.length)]);
+          appleInst.setColorAt(i, appleCol);
+        }
+        appleInst.instanceMatrix.needsUpdate = true;
+        if (appleInst.instanceColor) appleInst.instanceColor.needsUpdate = true;
+        appleInst.castShadow = true;
+        appleInst.frustumCulled = false;                       // same culling fix as foliage
+        scene.add(appleInst);
+        _grassMat.push(appleMat);
+      }
+    }
+
+    // JIN (deadwood) — one bleached-white branch stub jutting from the
+    // mid-trunk. Iconic bonsai feature; signals age + survival.
+    const jinMat = new T.MeshStandardMaterial({ color: 0xCDBFA8, roughness: 0.95, flatShading: true });
+    const jinBase = trunkJoints[3];
+    const jin = new T.Mesh(new T.CylinderGeometry(0.04, 0.10, 0.55, 5, 1), jinMat);
+    // Position halfway out of the trunk, tilted slightly down
+    jin.position.set(jinBase.x + 0.30, jinBase.y + 0.10, jinBase.z - 0.05);
+    jin.rotation.z = -Math.PI / 2 + 0.5;
+    jin.rotation.y = 0.6;
+    jin.castShadow = true;
+    bonsai.add(jin);
+
+    // NEBARI — exposed root flare. Stylized as 8 chunky elongated knobs
+    // radiating outward at ground level. Critical bonsai-character cue.
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2 + Math.random() * 0.2;
+      const r0 = 0.20 + Math.random() * 0.08;
+      const r1 = 0.45 + Math.random() * 0.15;
+      const cx = Math.cos(a) * (r0 + r1) / 2;
+      const cz = Math.sin(a) * (r0 + r1) / 2;
+      const root = new T.Mesh(new T.CylinderGeometry(0.05 + Math.random() * 0.03, 0.10 + Math.random() * 0.04, r1 - r0, 5, 1), barkA);
+      root.position.set(cx, 0.08, cz);
+      root.rotation.z = Math.PI / 2;
+      root.rotation.y = -a;
+      root.castShadow = true;
+      bonsai.add(root);
+    }
+
+    // Mossy mound at the base — small flat green discs hugging the soil
+    // around the nebari. Sells the "cultivated, aged" feeling.
+    const mossMat = new T.MeshStandardMaterial({ color: 0x6F9B4D, roughness: 1.0, flatShading: true });
+    for (let i = 0; i < 18; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const r = 0.30 + Math.random() * 0.50;
+      const moss = new T.Mesh(new T.IcosahedronGeometry(0.10 + Math.random() * 0.06, 0), mossMat);
+      moss.position.set(Math.cos(a) * r, 0.05, Math.sin(a) * r);
+      moss.scale.set(1.2, 0.35, 1.2);
+      bonsai.add(moss);
+    }
+
+    // Pebble ring further out — soil/gravel boundary
+    const pebMat = new T.MeshStandardMaterial({ color: 0x9A8771, roughness: 0.95, flatShading: true });
+    for (let i = 0; i < 14; i++) {
+      const a = (i / 14) * Math.PI * 2 + Math.random() * 0.4;
+      const r = 0.80 + Math.random() * 0.20;
+      const peb = new T.Mesh(new T.DodecahedronGeometry(0.07 + Math.random() * 0.05, 0), pebMat);
+      peb.position.set(Math.cos(a) * r, 0.04, Math.sin(a) * r);
+      peb.rotation.y = Math.random() * Math.PI;
+      bonsai.add(peb);
+    }
+
+    scene.add(bonsai);
+
+    // Collision: pet steers around a 1.0-unit cylinder at the trunk base.
+    _obstacles.push({ x: bonsai.position.x, z: bonsai.position.z, radius: 1.0 });
+
+    // ---- Wooden picket fence around the pasture border ----
+    //
+    // Two-rail picket fence: ~36 vertical pickets per side, each a
+    // narrow chamfered box with a pointed tip. Connected by two
+    // horizontal rails (top + bottom). The pickets are batched into
+    // a single InstancedMesh per side, so the whole fence is 4 draws
+    // (one per side) + 8 rail meshes — cheap.
+    const fenceWood     = new T.MeshStandardMaterial({ color: 0xC5A37B, roughness: 0.85, flatShading: true });
+    const fenceWoodDark = new T.MeshStandardMaterial({ color: 0x9D7E5A, roughness: 0.9,  flatShading: true });
+    // Picket geometry: thin post with a softly-rounded top, pivoted
+    // at its base. Sized to come up to Bit's waist (~0.95 of his ~1.5
+    // height) so he can clearly see over but still reads as a fence.
+    // The "pointy" peak is gentle, ~10% of total height, so it doesn't
+    // come across as a spike row.
+    const PICKET_H = 0.95;
+    const PICKET_W = 0.09;
+    const picketGeom = new T.BufferGeometry();
+    const pw = PICKET_W / 2, ph = PICKET_H, pt = PICKET_W / 4;
+    // Body: tall flat box up to 90% of height, then a gentle 4-face
+    // hipped roof up to ph. The hipped tip is just a soft cap, not a
+    // spike — so the fence reads as a cottage picket, not a palisade.
+    const bodyTopY = ph * 0.90;
+    const verts = new Float32Array([
+      // bottom (0..3)
+      -pw, 0, -pw,   pw, 0, -pw,   pw, 0,  pw,  -pw, 0,  pw,
+      // body top (4..7)
+      -pw, bodyTopY, -pw,   pw, bodyTopY, -pw,   pw, bodyTopY,  pw,  -pw, bodyTopY,  pw,
+      // tip (8)
+       0, ph, 0,
+    ]);
+    const idx = [
+      // bottom (skip — buried)
+      // sides
+      0,1,5, 0,5,4,    // back
+      1,2,6, 1,6,5,    // right
+      2,3,7, 2,7,6,    // front
+      3,0,4, 3,4,7,    // left
+      // tip pyramid
+      4,5,8,  5,6,8,  6,7,8,  7,4,8,
+    ];
+    picketGeom.setAttribute('position', new T.BufferAttribute(verts, 3));
+    picketGeom.setIndex(idx);
+    picketGeom.computeVertexNormals();
+
+    const PICKETS_PER_SIDE = 18;
+    const FENCE_INSET = 0.04;          // slightly inside the floor edge
+    const halfFloor = FLOOR_W / 2 - FENCE_INSET;
+    const sides = [
+      { axis: 'x', sign:  1 },   // +z side (back)... wait — z direction
+      { axis: 'x', sign: -1 },
+      { axis: 'z', sign:  1 },
+      { axis: 'z', sign: -1 },
+    ];
+    // Place pickets along each side. Skip a couple in the middle of the
+    // FRONT side to suggest a gate gap (visual interest).
+    for (const side of sides) {
+      const inst = new T.InstancedMesh(picketGeom, fenceWood, PICKETS_PER_SIDE);
+      const dum = new T.Object3D();
+      const spacing = (FLOOR_W - 2 * FENCE_INSET) / (PICKETS_PER_SIDE - 1);
+      // Gate on the FRONT (camera-facing +z) edge so the opening reads
+      // clearly from the iso view.
+      const gateSide = (side.axis === 'z' && side.sign === 1);
+      const gateA = Math.floor(PICKETS_PER_SIDE / 2);
+      const gateB = gateA + 1;
+      let placed = 0;
+      for (let i = 0; i < PICKETS_PER_SIDE; i++) {
+        if (gateSide && (i === gateA || i === gateB)) continue;
+        const t0 = -halfFloor + i * spacing;
+        if (side.axis === 'x') {
+          dum.position.set(side.sign * halfFloor, 0, t0);
+          dum.rotation.set(0, Math.PI / 2, 0);
+        } else {
+          dum.position.set(t0, 0, side.sign * halfFloor);
+          dum.rotation.set(0, 0, 0);
+        }
+        dum.rotation.z = (Math.random() * 2 - 1) * 0.02;
+        dum.updateMatrix();
+        inst.setMatrixAt(placed++, dum.matrix);
+      }
+      inst.count = placed;
+      inst.instanceMatrix.needsUpdate = true;
+      inst.castShadow = true;
+      inst.receiveShadow = true;
+      scene.add(inst);
+
+      // Two horizontal rails per side at picket lower/upper third.
+      // For the gate side, render two SHORT rails leaving a gap aligned
+      // with the missing pickets — so the rails don't fly across the
+      // open gate.
+      const railLen = FLOOR_W - 2 * FENCE_INSET;
+      for (const railY of [0.22, 0.70]) {
+        const make = (cx, len, axis, sign, isAxisX) => {
+          const rail = new T.Mesh(new T.BoxGeometry(len, 0.06, 0.06), fenceWoodDark);
+          if (isAxisX) {
+            rail.position.set(sign * halfFloor, railY, cx);
+            rail.rotation.y = Math.PI / 2;
+          } else {
+            rail.position.set(cx, railY, sign * halfFloor);
+          }
+          rail.castShadow = true;
+          scene.add(rail);
+        };
+        if (gateSide) {
+          const gateMid = -halfFloor + (gateA + 0.5) * spacing;   // center between gateA and gateB
+          const gateHalf = spacing * 1.1;                          // half-width of the opening
+          // Left segment
+          const leftLen  = (gateMid - gateHalf) - (-halfFloor);
+          const leftMid  = (-halfFloor + (gateMid - gateHalf)) / 2;
+          if (leftLen > 0.05) make(leftMid, leftLen, side.axis, side.sign, side.axis === 'x');
+          // Right segment
+          const rightLen = halfFloor - (gateMid + gateHalf);
+          const rightMid = (halfFloor + (gateMid + gateHalf)) / 2;
+          if (rightLen > 0.05) make(rightMid, rightLen, side.axis, side.sign, side.axis === 'x');
+        } else {
+          make(0, railLen, side.axis, side.sign, side.axis === 'x');
+        }
+      }
+    }
+
+    // Register the fence as a perimeter wall — pet can't leave the floor.
+    // Implemented as four invisible line obstacles via half-plane clamps
+    // below in _newRandomTarget bounds (FLOOR_HALF already keeps it inside).
+    // No need to push into _obstacles; the bounded random target + step
+    // collision keep the pet inside the rails.
+  }
 
   // Wall decor: the window is always rendered (it's the time-of-day light
   // source — without it there's no sun/moon beam). Picture-frame variant
   // dropped: it provided no signal and broke the beam every other day.
-  const wallDecorIsWindow = true;
+  // Outdoor pastures: no window (no walls to mount it on).
+  const wallDecorIsWindow = !outdoor;
   if (wallDecorIsWindow) {
     // Window pane glows the current sky color — the pane itself reads as
     // a light source.
@@ -874,7 +1731,10 @@ function mountPet3D(container, p) {
       beam.frustumCulled = false;
       scene.add(beam);
     }
-  } else {
+  } else if (!outdoor) {
+    // Indoor fallback (picture frame instead of window — currently
+    // unreachable, kept for future expansion). Outdoor pastures get
+    // nothing on a non-existent wall.
     const pic = new T.Mesh(new T.BoxGeometry(1.2, 1.4, 0.05), new T.MeshStandardMaterial({ color: 0x5BA585 }));
     pic.position.set(1.0, 3.0, -FLOOR_W/2 + 0.12);
     scene.add(pic);
@@ -1369,12 +2229,25 @@ function mountPet3D(container, p) {
   // If food piles exist, the target IS the nearest food pile; on arrival
   // the pile is "eaten" (removed from scene) and state.pet.eatenTodayXP
   // is incremented + persisted.
+  // Reject points that fall inside any registered obstacle (e.g. the
+  // bonsai trunk in the outdoor pasture).
+  function _pointInsideObstacle(x, z) {
+    for (let i = 0; i < _obstacles.length; i++) {
+      const o = _obstacles[i];
+      const dx = x - o.x, dz = z - o.z;
+      if (dx * dx + dz * dz < o.radius * o.radius) return true;
+    }
+    return false;
+  }
   function _newRandomTarget() {
-    return {
-      x: (Math.random() * 2 - 1) * FLOOR_HALF,
-      z: (Math.random() * 2 - 1) * FLOOR_HALF,
-      foodIdx: -1,   // -1 = random spot, otherwise index into foodPiles
-    };
+    for (let tries = 0; tries < 8; tries++) {
+      const x = (Math.random() * 2 - 1) * FLOOR_HALF;
+      const z = (Math.random() * 2 - 1) * FLOOR_HALF;
+      if (!_pointInsideObstacle(x, z)) return { x, z, foodIdx: -1 };
+    }
+    // Fallback: take the last candidate even if inside; the walk-step
+    // collision logic below will deflect.
+    return { x: 0, z: 0, foodIdx: -1 };
   }
   function _nearestFoodTarget() {
     let bestIdx = -1, bestDist = Infinity;
@@ -1457,6 +2330,21 @@ function mountPet3D(container, p) {
     // wave (cycloid-ish, not sin²) so the rhythm feels organic.
     const breath = 1 + Math.sin(t * 0.4 * Math.PI * 2) * 0.018;
     bodyGroup.scale.y = breath;
+
+    // Wind-driven materials (outdoor only): grass, bonsai foliage, apples.
+    // All read a shared uTime; grass additionally consumes a uPetPos for
+    // the grass-parting effect. CPU cost per frame: one float uniform
+    // write per material + one vec3 copy for grass.
+    if (_grassMat) {
+      for (const m of _grassMat) {
+        const sh = m.userData && m.userData.shader;
+        if (!sh) continue;
+        if (sh.uniforms.uTime)   sh.uniforms.uTime.value = t;
+        if (sh.uniforms.uPetPos) sh.uniforms.uPetPos.value.set(
+          petGroup.position.x, 0, petGroup.position.z,
+        );
+      }
+    }
 
     // Head micro-bob — offset π/3 from breath, smaller amplitude
     const headBob = Math.sin(t * 0.62 * Math.PI * 2 + Math.PI/3) * 0.012;
@@ -1589,6 +2477,28 @@ function mountPet3D(container, p) {
       if (playBall.position.x < -WALL + r) { playBall.position.x = -WALL + r; if (ballPhys.vx < 0) ballPhys.vx = -ballPhys.vx * ballPhys.restitutionXZ; }
       if (playBall.position.z >  WALL - r) { playBall.position.z =  WALL - r; if (ballPhys.vz > 0) ballPhys.vz = -ballPhys.vz * ballPhys.restitutionXZ; }
       if (playBall.position.z < -WALL + r) { playBall.position.z = -WALL + r; if (ballPhys.vz < 0) ballPhys.vz = -ballPhys.vz * ballPhys.restitutionXZ; }
+      // Obstacle collisions (the bonsai trunk). Treat each obstacle as
+      // a vertical cylinder of {x, z, radius}; if the ball overlaps,
+      // push it back to the contact surface and reflect velocity along
+      // the outward normal.
+      for (let oi = 0; oi < _obstacles.length; oi++) {
+        const o = _obstacles[oi];
+        const odx = playBall.position.x - o.x;
+        const odz = playBall.position.z - o.z;
+        const od2 = odx * odx + odz * odz;
+        const minD = o.radius + r;
+        if (od2 < minD * minD && od2 > 1e-6) {
+          const od = Math.sqrt(od2);
+          const nx = odx / od, nz = odz / od;
+          playBall.position.x = o.x + nx * minD;
+          playBall.position.z = o.z + nz * minD;
+          const vDotN = ballPhys.vx * nx + ballPhys.vz * nz;
+          if (vDotN < 0) {
+            ballPhys.vx -= (1 + ballPhys.restitutionXZ) * vDotN * nx;
+            ballPhys.vz -= (1 + ballPhys.restitutionXZ) * vDotN * nz;
+          }
+        }
+      }
       // Rolling rotation — angular velocity = v/r about axis perpendicular
       // to horizontal motion (rolling without slipping). axis = up × v.
       const horizSpeed = Math.sqrt(ballPhys.vx*ballPhys.vx + ballPhys.vz*ballPhys.vz);
@@ -1675,8 +2585,28 @@ function mountPet3D(container, p) {
           const step = Math.min(dist, speed * dt);
           const nx = dx / dist;
           const nz = dz / dist;
-          petGroup.position.x += nx * step;
-          petGroup.position.z += nz * step;
+          let nextX = petGroup.position.x + nx * step;
+          let nextZ = petGroup.position.z + nz * step;
+          // Obstacle deflection — if the next step would land inside
+          // an obstacle's collision radius, push the step OUT along
+          // the radius vector. Then pick a fresh target so the pet
+          // routes around the obstacle instead of grinding into it.
+          for (let oi = 0; oi < _obstacles.length; oi++) {
+            const o = _obstacles[oi];
+            const odx = nextX - o.x, odz = nextZ - o.z;
+            const od2 = odx * odx + odz * odz;
+            const safe = o.radius + 0.10;
+            if (od2 < safe * safe) {
+              const od = Math.sqrt(od2) || 1e-4;
+              nextX = o.x + (odx / od) * safe;
+              nextZ = o.z + (odz / od) * safe;
+              // Re-target so we don't keep grinding along the rim
+              target = _newRandomTarget();
+              break;
+            }
+          }
+          petGroup.position.x = nextX;
+          petGroup.position.z = nextZ;
 
           // Facing — damped spring (no linear lerp). Stiffness picked for ~250ms settle.
           const targetAngle = Math.atan2(nx, nz);
