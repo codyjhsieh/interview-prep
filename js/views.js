@@ -4037,159 +4037,127 @@ function renderSyncSection(sync) {
 }
 
 /*
- * Liquid Glass sign-in gate. Apple-spec material: layered translucent
- * substrate, top-edge gloss, fresnel rim, soft drop. Springy entrance
- * (gate fades, card scales 0.94→1 with cubic-bezier overshoot, contents
- * stagger). Minimal copy — input + arrow + escape hatch.
+ * Apple Liquid Glass sign-in gate. Uses the project's established
+ * Liquid Glass material tokens (--regular, --spring-overshoot,
+ * --spring-settle) and the same recipe applied to the tab bar /
+ * sidebar — no creative liberties, no decorative animations.
  *
- * Once paired (or skipped), the card scales down 1→0.98 + fade, gate
- * fades, `onDismiss` fires.
+ * Material recipe (mirrors #liquid-tabbar in styles.css):
+ *   background:        color-mix(--regular with --card-tint)
+ *   backdrop-filter:   blur(40px) saturate(220%) brightness(1.08) contrast(1.04)
+ *   box-shadow:        inset rim highlights + soft drop
+ *   transitions:       --spring-overshoot for entrance, --spring-settle for exit
  */
 function renderLoginGate(onDismiss) {
   const prior = document.getElementById('login-gate');
   if (prior) prior.remove();
 
-  // Inject the gate's own keyframes once — keeps the logic colocated
-  // with the markup rather than burying it in styles.css.
   if (!document.getElementById('login-gate-css')) {
     const css = document.createElement('style');
     css.id = 'login-gate-css';
     css.textContent = `
       /* (Lock rules live in index.html inline critical CSS so they
          apply before the first paint — see html.lg-locked / .lg-unlocking) */
-      @keyframes lg-bg-bloom {
-        0%   { transform: translate(0,0)   scale(1);   opacity: 0.9; }
-        50%  { transform: translate(-2%,1%) scale(1.04); opacity: 1;   }
-        100% { transform: translate(0,0)   scale(1);   opacity: 0.9; }
+      #login-gate {
+        position: fixed; inset: 0; z-index: 100;
+        display: grid; place-items: center; padding: 1.5rem;
+        background: rgba(248,249,252,0.55);
+        -webkit-backdrop-filter: blur(32px) saturate(180%);
+        backdrop-filter:        blur(32px) saturate(180%);
+        opacity: 0;
+        transition: opacity 0.38s var(--spring-settle, cubic-bezier(0.16,1,0.3,1));
       }
-      @keyframes lg-card-in {
-        from { opacity: 0; transform: translateY(14px) scale(0.94); filter: blur(8px); }
-        to   { opacity: 1; transform: translateY(0)    scale(1);    filter: blur(0); }
-      }
-      @keyframes lg-stagger-in {
-        from { opacity: 0; transform: translateY(6px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-      @keyframes lg-shine {
-        0%   { transform: translateX(-120%) skewX(-18deg); }
-        100% { transform: translateX(240%)  skewX(-18deg); }
-      }
+      #login-gate.visible { opacity: 1; }
+      #login-gate.dismiss { opacity: 0; }
+
       #login-gate .lg-card {
         position: relative;
-        max-width: 380px; width: 100%;
-        padding: 1.85rem 1.65rem 1.4rem;
-        background:
-          linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.42));
-        border: 1px solid rgba(255,255,255,0.55);
-        border-radius: 26px;
-        -webkit-backdrop-filter: blur(40px) saturate(220%) brightness(1.10);
-        backdrop-filter: blur(40px) saturate(220%) brightness(1.10);
+        max-width: 360px; width: 100%;
+        padding: 28px 24px 22px;
+        border-radius: 28px;
+        /* Identical to #liquid-tabbar's material recipe */
+        background: color-mix(in srgb, var(--regular, rgba(255,255,255,0.58)) 80%, var(--card-tint, transparent) 20%);
+        -webkit-backdrop-filter: blur(40px) saturate(220%) brightness(1.08) contrast(1.04);
+        backdrop-filter:        blur(40px) saturate(220%) brightness(1.08) contrast(1.04);
         box-shadow:
-          0 1px 0 rgba(255,255,255,0.85) inset,
-          0 -1px 0 rgba(15,23,42,0.05) inset,
-          0 30px 60px -20px rgba(15,23,42,0.30),
-          0 12px 24px -12px rgba(15,23,42,0.18);
-        animation: lg-card-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-        overflow: hidden;
-      }
-      /* Top-edge gloss — the "license plate" specular highlight */
-      #login-gate .lg-card::before {
-        content: ''; position: absolute; inset: 0;
-        border-radius: inherit; pointer-events: none;
-        background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 35%);
-        mix-blend-mode: overlay; opacity: 0.9;
-      }
-      /* Fresnel rim — subtle chromatic edge */
-      #login-gate .lg-card::after {
-        content: ''; position: absolute; inset: 0;
-        border-radius: inherit; pointer-events: none;
-        box-shadow: 0 0 0 1px rgba(255,255,255,0.35) inset;
-      }
-      #login-gate .lg-stagger > * {
+          inset  0  1px 0 rgba(255,255,255,0.95),
+          inset  0 -1px 0 rgba(15,23,42,0.06),
+          inset  1px 0 0 rgba(255,255,255,0.55),
+          inset -1px 0 0 rgba(255,255,255,0.30),
+          0 22px 50px -18px rgba(15,23,42,0.28),
+          0 6px 16px -8px rgba(15,23,42,0.14);
         opacity: 0;
-        animation: lg-stagger-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        transform: translateY(8px) scale(0.96);
+        transition:
+          opacity 0.45s var(--spring-settle, cubic-bezier(0.16,1,0.3,1)),
+          transform 0.55s var(--spring-overshoot, cubic-bezier(0.34,1.56,0.64,1));
       }
-      #login-gate .lg-stagger > *:nth-child(1) { animation-delay: 0.15s; }
-      #login-gate .lg-stagger > *:nth-child(2) { animation-delay: 0.24s; }
-      #login-gate .lg-stagger > *:nth-child(3) { animation-delay: 0.32s; }
-      #login-gate .lg-stagger > *:nth-child(4) { animation-delay: 0.40s; }
-      #login-gate .lg-stagger > *:nth-child(5) { animation-delay: 0.48s; }
+      #login-gate.visible .lg-card {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      #login-gate.dismiss .lg-card {
+        opacity: 0;
+        transform: scale(0.97);
+        transition:
+          opacity 0.28s var(--spring-settle, cubic-bezier(0.16,1,0.3,1)),
+          transform 0.32s var(--spring-settle, cubic-bezier(0.16,1,0.3,1));
+      }
+
       #login-gate .lg-input {
         width: 100%;
         background: rgba(255,255,255,0.55);
         border: 1px solid rgba(15,23,42,0.10);
         border-radius: 14px;
-        padding: 0.85rem 1rem;
+        padding: 12px 14px;
         font-family: 'Geist Mono', ui-monospace, monospace;
         font-size: 17px;
         font-weight: 500;
-        letter-spacing: 0.30em;
+        letter-spacing: 0.28em;
         text-align: center;
         text-transform: uppercase;
         color: var(--text, #0F172A);
-        transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
-        -webkit-backdrop-filter: blur(20px);
-        backdrop-filter: blur(20px);
+        transition:
+          border-color 0.28s var(--spring-settle, cubic-bezier(0.16,1,0.3,1)),
+          background   0.28s var(--spring-settle, cubic-bezier(0.16,1,0.3,1));
       }
       #login-gate .lg-input::placeholder {
-        color: rgba(15,23,42,0.32); letter-spacing: 0.18em;
+        color: rgba(15,23,42,0.32);
+        letter-spacing: 0.16em;
       }
       #login-gate .lg-input:focus {
         outline: none;
-        border-color: rgba(14,163,113,0.55);
+        border-color: rgba(15,23,42,0.32);
         background: rgba(255,255,255,0.78);
-        box-shadow: 0 0 0 4px rgba(14,163,113,0.12);
       }
-      #login-gate .lg-arrow-btn {
-        position: relative;
+
+      #login-gate .lg-btn {
         width: 100%;
-        margin-top: 0.7rem;
-        padding: 0.85rem 1rem;
+        margin-top: 10px;
+        padding: 12px 14px;
         border-radius: 14px;
         border: none;
-        background: linear-gradient(180deg, var(--accent, #0EA371), var(--accent-deep, #0A7553));
+        background: var(--accent, #0EA371);
         color: #fff;
         font-weight: 600;
-        font-size: 14.5px;
-        letter-spacing: 0.02em;
+        font-size: 15px;
+        letter-spacing: 0.01em;
         cursor: pointer;
-        overflow: hidden;
-        transition: transform 0.18s ease, box-shadow 0.25s ease, filter 0.25s ease;
-        box-shadow: 0 8px 20px -8px rgba(14,163,113,0.55), 0 1px 0 rgba(255,255,255,0.3) inset;
+        transition: transform 0.18s var(--spring-settle, cubic-bezier(0.16,1,0.3,1));
       }
-      #login-gate .lg-arrow-btn:hover { transform: translateY(-1px); filter: brightness(1.04); }
-      #login-gate .lg-arrow-btn:active { transform: translateY(0); filter: brightness(0.96); }
-      #login-gate .lg-arrow-btn::after {
-        content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 50%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
-        animation: lg-shine 2.8s ease-in-out infinite;
-        pointer-events: none;
-      }
-      #login-gate .lg-bg-1, #login-gate .lg-bg-2 {
-        position: absolute; pointer-events: none; border-radius: 50%; filter: blur(50px);
-      }
-      #login-gate .lg-bg-1 {
-        width: 60vmin; height: 60vmin; top: -10vmin; left: -10vmin;
-        background: radial-gradient(circle, rgba(120,73,224,0.30), transparent 70%);
-        animation: lg-bg-bloom 9s ease-in-out infinite;
-      }
-      #login-gate .lg-bg-2 {
-        width: 70vmin; height: 70vmin; bottom: -15vmin; right: -15vmin;
-        background: radial-gradient(circle, rgba(14,163,113,0.28), transparent 70%);
-        animation: lg-bg-bloom 11s ease-in-out infinite reverse;
-      }
+      #login-gate .lg-btn:active { transform: scale(0.985); }
+
       #login-gate .lg-link {
         background: none; border: none; padding: 0;
-        font-size: 12.5px; color: var(--accent, #0EA371);
-        font-weight: 500; cursor: pointer;
+        font-size: 13px;
+        color: var(--accent, #0EA371);
+        font-weight: 500;
+        cursor: pointer;
       }
-      #login-gate .lg-link:hover { text-decoration: underline; }
-      #login-gate.dismiss .lg-card {
-        animation: none;
-        transition: opacity 0.32s ease-out, transform 0.32s ease-out, filter 0.32s ease-out;
-        opacity: 0; transform: scale(0.97); filter: blur(4px);
+      #login-gate .lg-link.muted {
+        color: var(--muted, #6B7785);
+        font-weight: 400;
       }
-      #login-gate.dismiss { transition: opacity 0.36s ease-out; opacity: 0; }
     `;
     document.head.appendChild(css);
   }
@@ -4198,39 +4166,20 @@ function renderLoginGate(onDismiss) {
   gate.id = 'login-gate';
   gate.setAttribute('role', 'dialog');
   gate.setAttribute('aria-modal', 'true');
-  gate.style.cssText = `
-    position: fixed; inset: 0; z-index: 100;
-    display: grid; place-items: center; padding: 1.5rem;
-    background: linear-gradient(180deg, rgba(248,249,252,0.72), rgba(228,232,244,0.78));
-    -webkit-backdrop-filter: blur(48px) saturate(180%);
-    backdrop-filter: blur(48px) saturate(180%);
-    opacity: 0; transition: opacity 0.55s ease;
-    overflow: hidden;
-  `;
   gate.innerHTML = `
-    <div class="lg-bg-1"></div>
-    <div class="lg-bg-2"></div>
     <div class="lg-card">
-      <div class="lg-stagger">
-        <div style="text-align:center; margin-bottom: 1.5rem;">
-          <div class="font-display font-semibold tracking-tight" style="font-size:15px; letter-spacing:0.08em; color:var(--muted, #6B7785); text-transform:uppercase;">FDE/SDE 2026</div>
-        </div>
-        <h2 class="font-display font-semibold" style="font-size:22px; text-align:center; letter-spacing:-0.01em; margin-bottom: 1.1rem;">Sign in</h2>
-        <input id="gate-code-input" class="lg-input" type="text" placeholder="code" maxlength="11"
-          autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false"/>
-        <button id="gate-pair-btn" class="lg-arrow-btn" type="button">
-          <span style="display:inline-flex; align-items:center; gap:0.5rem;">Continue
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top:1px">
-              <path d="M5 12h14"></path><path d="M13 5l7 7-7 7"></path>
-            </svg>
-          </span>
-        </button>
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-top:1rem;">
-          <button id="gate-generate-btn" class="lg-link" type="button">Generate a code</button>
-          <button id="gate-skip-btn" class="lg-link" type="button" style="color: var(--muted, #6B7785); font-weight:400;">Skip</button>
-        </div>
-        <div id="gate-status" style="font-size:11.5px; color:var(--muted, #6B7785); text-align:center; min-height:1em; margin-top:0.7rem;"></div>
+      <div style="text-align:center; margin-bottom: 18px;">
+        <div class="font-display font-semibold" style="font-size:12px; letter-spacing:0.10em; color:var(--muted, #6B7785); text-transform:uppercase;">FDE/SDE 2026</div>
       </div>
+      <h2 class="font-display font-semibold" style="font-size:22px; text-align:center; letter-spacing:-0.01em; margin-bottom: 18px;">Sign in</h2>
+      <input id="gate-code-input" class="lg-input" type="text" placeholder="code" maxlength="11"
+        autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false"/>
+      <button id="gate-pair-btn" class="lg-btn" type="button">Continue</button>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top: 14px;">
+        <button id="gate-generate-btn" class="lg-link" type="button">Generate a code</button>
+        <button id="gate-skip-btn" class="lg-link muted" type="button">Skip</button>
+      </div>
+      <div id="gate-status" style="font-size:12px; color:var(--muted, #6B7785); text-align:center; min-height:1em; margin-top:10px;"></div>
     </div>
   `;
   // Ensure the lock is applied (it usually already is, set by the
@@ -4238,8 +4187,8 @@ function renderLoginGate(onDismiss) {
   // dynamically from Profile mid-session, set it here too).
   document.documentElement.classList.add('lg-locked');
   document.body.appendChild(gate);
-  // Trigger the gate fade-in on the next frame so the transition kicks in
-  requestAnimationFrame(() => { gate.style.opacity = '1'; });
+  // Trigger the entrance on the next frame so the transition kicks in.
+  requestAnimationFrame(() => requestAnimationFrame(() => gate.classList.add('visible')));
 
   const codeInput = gate.querySelector('#gate-code-input');
   const statusEl  = gate.querySelector('#gate-status');
@@ -4255,6 +4204,7 @@ function renderLoginGate(onDismiss) {
   const dismiss = () => {
     if (dismissing) return;
     dismissing = true;
+    gate.classList.remove('visible');
     gate.classList.add('dismiss');
     // Swap lock → unlocking so the app fades IN while the gate fades OUT.
     document.documentElement.classList.remove('lg-locked');
@@ -4263,7 +4213,7 @@ function renderLoginGate(onDismiss) {
       gate.remove();
       document.documentElement.classList.remove('lg-unlocking');
       if (typeof onDismiss === 'function') onDismiss();
-    }, 470);
+    }, 420);
   };
 
   const doPair = async () => {
