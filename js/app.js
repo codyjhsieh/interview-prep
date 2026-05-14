@@ -723,6 +723,69 @@ function showHelp() {
 }
 function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+/*
+ * Minimal DOM morph. Mutates `target` so its children match `source`,
+ * preserving node identity where structure matches.
+ *
+ * Strategy per child slot (i = 0..max):
+ *   - source has more children: insert clones of the extra source children
+ *   - target has more children: remove the extra target children
+ *   - both present, different node types: replace
+ *   - both present, text node: update nodeValue if differs
+ *   - both present, element of same tag: diff attrs, recurse on children
+ *
+ * No keyed lists, so reordering is treated as a series of in-place edits
+ * (fine for our use — sync updates are append-only for lists like
+ * jobApps/history; existing rows stay in place). Inputs are skipped so
+ * the user's in-flight typing isn't clobbered.
+ */
+function morphTree(target, source) {
+  // Match attributes on root containers (e.g., className changes)
+  if (target.nodeType === 1 && source.nodeType === 1) {
+    syncAttrs(target, source);
+  }
+  const targetKids = Array.from(target.childNodes);
+  const sourceKids = Array.from(source.childNodes);
+  const max = Math.max(targetKids.length, sourceKids.length);
+  for (let i = 0; i < max; i++) {
+    const t = targetKids[i];
+    const s = sourceKids[i];
+    if (!s) { if (t) t.remove(); continue; }
+    if (!t) { target.appendChild(s.cloneNode(true)); continue; }
+    if (t.nodeType !== s.nodeType || t.nodeName !== s.nodeName) {
+      target.replaceChild(s.cloneNode(true), t);
+      continue;
+    }
+    if (t.nodeType === 3) {                       // text node
+      if (t.nodeValue !== s.nodeValue) t.nodeValue = s.nodeValue;
+      continue;
+    }
+    if (t.nodeType !== 1) continue;
+    // Don't reach into form fields the user might be holding
+    const tag = t.nodeName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+      syncAttrs(t, s);
+      continue;
+    }
+    // Skip subtrees we explicitly don't want morphed (e.g., 3D canvases
+    // managed externally), marked with data-morph-skip.
+    if (t.hasAttribute && t.hasAttribute('data-morph-skip')) continue;
+    morphTree(t, s);
+  }
+}
+function syncAttrs(t, s) {
+  // Remove attrs that aren't on source
+  const tAttrs = Array.from(t.attributes);
+  for (const a of tAttrs) {
+    if (!s.hasAttribute(a.name)) t.removeAttribute(a.name);
+  }
+  // Add / update from source
+  const sAttrs = Array.from(s.attributes);
+  for (const a of sAttrs) {
+    if (t.getAttribute(a.name) !== a.value) t.setAttribute(a.name, a.value);
+  }
+}
+
 // Liquid Glass sign-in gate. Shown on boot when:
 //   - the Cloudflare Worker URL is configured (window.SYNC.status().configured)
 //   - the device hasn't paired (no code in localStorage)
@@ -781,8 +844,7 @@ return {
     GAMI.saveImmediate(state);
     try { updateHeader(); } catch (_) {}
     // Guard: don't yank the view out from under an actively-typing
-    // user. If something's focused that takes input, just keep the
-    // header updated — list content will refresh on the next nav.
+    // user. Header chips already updated above; rest can wait for nav.
     const focused = document.activeElement;
     const isTyping = focused && (
       focused.tagName === 'INPUT' ||
@@ -793,17 +855,35 @@ return {
     if (isTyping) return;
     const view = document.getElementById('view');
     if (!view) return;
-    // Crossfade: dim → swap → restore. 110ms each side keeps the
-    // change perceptible without feeling like a page reload.
-    view.style.transition = 'opacity 0.11s ease-out';
-    view.style.opacity = '0.35';
-    setTimeout(() => {
-      try { render(); } catch (_) {}
-      view.style.opacity = '1';
-      // Drop the inline style on the next tick so route nav re-renders
-      // aren't affected by it.
-      setTimeout(() => { view.style.transition = ''; view.style.opacity = ''; }, 200);
-    }, 115);
+    // Surgical update: render the new view into a detached buffer,
+    // then morph the live DOM to match. Nodes that are structurally
+    // identical stay put; only changed text / attrs / inserted /
+    // removed nodes touch the DOM. Result: counters tick, list rows
+    // appear, stats change — no flash, no reflow of the whole view.
+    try {
+      const buf = document.createElement('section');
+      buf.className = view.className;
+      const { route, a, b } = parseHash();
+      // Only morph routes where re-rendering into a buffer is safe.
+      // Skipped: flashcards (swipe animation in flight), infographics
+      // and coverage (Chart.js mounts to canvases by ID — re-mounting
+      // would double-init), lesson / mock / games (interactive),
+      // stories (form input the user may be editing).
+      switch (route) {
+        case 'dashboard':    VIEWS.renderDashboard(state, buf); break;
+        case 'curriculum':   VIEWS.renderCurriculum(state, buf); break;
+        case 'category':     VIEWS.renderCategory(state, buf, a, b); break;
+        case 'companies':    VIEWS.renderCompanies(state, buf); break;
+        case 'company':      VIEWS.renderCompany(state, buf, a); break;
+        case 'mocks':        VIEWS.renderMocks(state, buf); break;
+        case 'prep':         VIEWS.renderPrep(state, buf, a || 'stories'); break;
+        case 'review':       VIEWS.renderReview(state, buf, a || 'missed'); break;
+        case 'sources':      VIEWS.renderSources(state, buf); break;
+        case 'profile':      VIEWS.renderProfile(state, buf); break;
+        default: return;
+      }
+      morphTree(view, buf);
+    } catch (_) { /* swallow — header already updated */ }
   },
 };
 })();

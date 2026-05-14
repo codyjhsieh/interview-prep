@@ -2095,8 +2095,9 @@ function renderPetCard(state, p) {
     </div>
 
     <div class="pet-grid">
-      <!-- LEFT: Three.js WebGL scene — Bit dominant -->
-      <div class="pet-room-3d" id="pet-room-3d-host"></div>
+      <!-- LEFT: Three.js WebGL scene — Bit dominant. data-morph-skip
+           so sync's surgical DOM updater doesn't wipe the canvas. -->
+      <div class="pet-room-3d" id="pet-room-3d-host" data-morph-skip></div>
 
       <!-- RIGHT panel: all stats + interactions stacked -->
       <div class="pet-panel pet-panel-right space-y-3 self-center">
@@ -2386,7 +2387,11 @@ function renderDashboard(state, hub) {
   // Falls back gracefully (empty container) if Three.js isn't available.
   requestAnimationFrame(() => {
     const host = petCard.querySelector('#pet-room-3d-host');
-    if (host) {
+    // Skip mounting if the host is detached — happens when sync.js's
+    // morph renders the dashboard into a buffer to diff against the
+    // live DOM. Without this, every 2.5s sync poll would spin up a
+    // wasted Three.js scene on a detached canvas.
+    if (host && document.contains(host)) {
       // Pass the persisted lastTickDate up so window/picture rotation stays
       // stable. autoSpawnFood:false → the dashboard scene starts empty; piles
       // only appear when the user clicks "Drop food".
