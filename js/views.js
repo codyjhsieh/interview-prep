@@ -4036,6 +4036,124 @@ function renderSyncSection(sync) {
     </div>`;
 }
 
+/*
+ * Liquid Glass login gate. Shown as a full-screen overlay on app boot
+ * when the Cloudflare Worker is configured AND no pairing code is
+ * stored locally AND the user hasn't explicitly chosen "use locally".
+ *
+ * Once the user pairs (or skips), the gate fades out and `onDismiss`
+ * is invoked so app.js can finish rendering the dashboard.
+ */
+function renderLoginGate(onDismiss) {
+  // Remove any prior gate (defensive — should never happen)
+  const prior = document.getElementById('login-gate');
+  if (prior) prior.remove();
+
+  const gate = document.createElement('div');
+  gate.id = 'login-gate';
+  gate.setAttribute('role', 'dialog');
+  gate.setAttribute('aria-modal', 'true');
+  gate.style.cssText = `
+    position: fixed; inset: 0; z-index: 100;
+    display: grid; place-items: center; padding: 1.5rem;
+    background:
+      radial-gradient(1200px 800px at 20% 10%, rgba(120,73,224,0.10), transparent 60%),
+      radial-gradient(900px 600px at 85% 90%, rgba(14,163,113,0.10), transparent 60%),
+      linear-gradient(180deg, rgba(248,249,252,0.85), rgba(232,236,247,0.90));
+    -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(1.06);
+    backdrop-filter: blur(60px) saturate(200%) brightness(1.06);
+    animation: fade-in 0.4s ease-out;
+  `;
+  gate.innerHTML = `
+    <div class="card elevated" style="max-width: 400px; width: 100%; padding: 1.75rem 1.75rem 1.5rem;">
+      <div style="text-align:center; margin-bottom: 1.25rem;">
+        <div class="font-display font-bold text-[22px] tracking-tight">FDE/SDE 2026</div>
+        <div class="muted text-[12px] mt-0.5" style="letter-spacing:0.04em">Interview prep</div>
+      </div>
+      <h2 class="font-display text-[17px] font-semibold mb-1">Sign in with a sync code</h2>
+      <p class="muted text-[12.5px] mb-4" style="line-height:1.5">
+        Pair this device with your code. Stats, curriculum progress, and Bit
+        sync across every device you sign in on.
+      </p>
+      <input id="gate-code-input" type="text" placeholder="ENTER YOUR CODE" maxlength="11"
+        autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false"
+        class="w-full font-mono text-center"
+        style="background: var(--surface-1, rgba(255,255,255,0.55));
+               border: 1px solid var(--border-2, rgba(15,23,42,0.15));
+               border-radius: 12px; padding: 0.75rem 0.5rem;
+               font-size: 16px; letter-spacing: 0.22em; text-transform: uppercase;"/>
+      <button class="btn btn-primary w-full mt-3" id="gate-pair-btn"
+        style="justify-content:center; padding-top:0.7rem; padding-bottom:0.7rem; font-size:14px;">
+        Sign in
+      </button>
+      <div class="text-center mt-3 text-[12.5px]">
+        <span class="muted">First time? </span>
+        <button id="gate-generate-btn" class="hover:underline" style="color: var(--accent); font-weight:500">
+          Generate a new code
+        </button>
+      </div>
+      <div id="gate-status" class="text-[11.5px] muted text-center mt-3" style="min-height:1em"></div>
+      <div class="text-center mt-4 pt-3" style="border-top: 1px solid var(--hairline, rgba(15,23,42,0.08))">
+        <button id="gate-skip-btn" class="text-[11.5px] muted hover:text-[color:var(--text)] transition">
+          Use locally only — no sync
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(gate);
+
+  const codeInput = gate.querySelector('#gate-code-input');
+  const statusEl  = gate.querySelector('#gate-status');
+  const setStatus = (s) => { if (statusEl) statusEl.textContent = s; };
+
+  codeInput.addEventListener('input', (e) => {
+    const pos = e.target.selectionStart;
+    e.target.value = e.target.value.toUpperCase();
+    try { e.target.setSelectionRange(pos, pos); } catch (_) {}
+  });
+
+  const dismiss = () => {
+    gate.style.transition = 'opacity 0.32s ease-out';
+    gate.style.opacity = '0';
+    setTimeout(() => { gate.remove(); if (typeof onDismiss === 'function') onDismiss(); }, 340);
+  };
+
+  const doPair = async () => {
+    if (!window.SYNC) { setStatus('Sync not loaded'); return; }
+    const raw = codeInput.value.trim();
+    if (!raw) { setStatus('Enter a code'); return; }
+    setStatus('Pairing…');
+    try {
+      const result = await window.SYNC.pair(raw);
+      setStatus(result.adopted ? 'Pulled in your saved progress.' : 'Code claimed on this device.');
+      dismiss();
+    } catch (e) {
+      setStatus('Error: ' + (e.message || 'pairing failed'));
+    }
+  };
+
+  codeInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); doPair(); }
+  });
+  gate.querySelector('#gate-pair-btn').addEventListener('click', doPair);
+  gate.querySelector('#gate-generate-btn').addEventListener('click', () => {
+    if (!window.SYNC) return;
+    const code = window.SYNC.generateCode();
+    codeInput.value = code;
+    setStatus('Code generated — write this down. Click Sign in to claim it.');
+    codeInput.focus();
+    codeInput.select();
+  });
+  gate.querySelector('#gate-skip-btn').addEventListener('click', () => {
+    try { localStorage.setItem('fdeprep.syncSkip.v1', '1'); } catch (_) {}
+    setStatus('Continuing without sync. You can pair later from Profile.');
+    dismiss();
+  });
+
+  // Autofocus the input so the user can just start typing
+  setTimeout(() => codeInput.focus(), 60);
+}
+
 function renderProfile(state, hub) {
   const container = el('div','fade-in space-y-5');
   const earned = Object.keys(state.badges || {});
@@ -4957,6 +5075,7 @@ return {
   renderCompanies, renderCompany, renderFlashcards, renderInfographics,
   renderCoverage, renderProfile, renderSources, renderMocks, renderStories,
   renderPrep, renderReview, renderMockInterview,
+  renderLoginGate,
   openPetLifecyclePreview,
   iconHTML,                       // exposed so app.js/animations.js toasts can use Lucide too
 };

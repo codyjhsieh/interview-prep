@@ -613,7 +613,12 @@ function init() {
     bindMobileNav();
     bindKeyboard();
     ensureOnboarded();
+    // If sync is configured but this device isn't paired (and hasn't
+    // opted out), show the Liquid Glass login gate. The dashboard
+    // still renders underneath so once paired, the merged state is
+    // already in the DOM and the gate fades to reveal a live app.
     render();
+    maybeShowLoginGate();
     // Auto-save safeguards
     window.addEventListener('visibilitychange', () => GAMI.saveImmediate(state));
     window.addEventListener('beforeunload', () => GAMI.saveImmediate(state));
@@ -714,6 +719,25 @@ function showHelp() {
   wrap.addEventListener('click', (e) => { if (e.target === wrap || e.target.dataset.closeHelp !== undefined) wrap.remove(); });
 }
 function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Liquid Glass sign-in gate. Shown on boot when:
+//   - the Cloudflare Worker URL is configured (window.SYNC.status().configured)
+//   - the device hasn't paired (no code in localStorage)
+//   - the user hasn't explicitly opted out via "Use locally only"
+// Once paired or skipped, sync.js owns the rest (poll/push loop).
+function maybeShowLoginGate() {
+  try {
+    if (!window.SYNC || !window.VIEWS || !window.VIEWS.renderLoginGate) return;
+    const s = window.SYNC.status();
+    if (!s || !s.configured) return;
+    if (s.code) return;
+    if (localStorage.getItem('fdeprep.syncSkip.v1')) return;
+    VIEWS.renderLoginGate(() => {
+      // After pair/skip — re-render so any merged remote state shows.
+      try { render(); } catch (_) {}
+    });
+  } catch (_) {}
+}
 
 // Mobile nav is now the floating Liquid Glass tab bar (built by
 // buildTabbar). The legacy hamburger / slide-over sidebar has been
