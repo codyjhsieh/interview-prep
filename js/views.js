@@ -2062,6 +2062,7 @@ function openPetLifecyclePreview() {
 
 function renderPetCard(state, p) {
   const card = el('div','card pet-card overflow-hidden');
+  card.setAttribute('data-card', 'pet');
   // Status line — blunter when health is low.
   const statusLine = {
     'walk':    `${p.name} is wandering around`,
@@ -2338,6 +2339,7 @@ function renderDashboard(state, hub) {
 
   // Hero — single primary CTA
   const hero = el('div','card card-glow');
+  hero.setAttribute('data-card', 'hero');
   hero.innerHTML = `
     ${showCueNudge ? `
       <div class="rounded-md p-3 mb-4 flex items-start gap-2" style="background:rgba(46,111,224,0.06); border:1px solid rgba(46,111,224,0.25)">
@@ -2438,6 +2440,7 @@ function renderDashboard(state, hub) {
 
   // Stats row
   const stats = el('div','grid grid-cols-2 sm:grid-cols-4 gap-4');
+  stats.setAttribute('data-card', 'stats');
   stats.innerHTML = `
     <div class="card !p-4">
       <div class="text-xs text-slate-400 uppercase tracking-wide">Streak</div>
@@ -2472,6 +2475,7 @@ function renderDashboard(state, hub) {
   // SRS review tiles — surface only when there's something due / queued
   if (missedTotal > 0 || conceptReviewsTotal > 0) {
     const reviews = el('div','grid grid-cols-1 sm:grid-cols-2 gap-4');
+    reviews.setAttribute('data-card', 'reviews');
     reviews.innerHTML = `
       <a class="card card-glow block" href="#review/missed">
         <div class="flex items-start justify-between">
@@ -2517,6 +2521,7 @@ function renderDashboard(state, hub) {
     }
   };
   const questsCard = el('div','card lg:col-span-2');
+  questsCard.setAttribute('data-card', 'quests');
   questsCard.innerHTML = `
     <div class="flex items-center justify-between mb-3">
       <h3 class="font-display font-semibold text-lg">Today's quests</h3>
@@ -2546,6 +2551,7 @@ function renderDashboard(state, hub) {
   row.appendChild(questsCard);
 
   const nextCard = el('div','card');
+  nextCard.setAttribute('data-card', 'nextup');
   if (next) {
     nextCard.innerHTML = `
       <div class="text-xs uppercase tracking-wide text-slate-400 mb-1">Next up</div>
@@ -2566,6 +2572,7 @@ function renderDashboard(state, hub) {
 
   // Heatmap
   const heat = el('div','card');
+  heat.setAttribute('data-card', 'heatmap');
   heat.innerHTML = `
     <div class="flex items-center justify-between mb-3">
       <h3 class="font-display font-semibold text-lg">Last 90 days</h3>

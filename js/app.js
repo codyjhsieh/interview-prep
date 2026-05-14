@@ -724,33 +724,87 @@ function showHelp() {
 function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 /*
- * Surgical updates triggered by sync poll. For each card whose contents
- * depend on synced state, find it by a stable [data-card="…"] selector
- * and replace it with a freshly-rendered copy. Cards not on the current
- * page are no-ops. Avoids the generic morph (which mis-aligns text nodes
- * for some structures) and preserves 3D canvases / scroll position.
+ * Surgical updates triggered by sync poll. Renders the current route's
+ * view into a detached buffer, then for every [data-card="…"] in the
+ * live DOM finds the matching buffer card and swaps it. Cards without
+ * a matching buffer card are left alone; non-card content (headers,
+ * spacing) is untouched. Result: each syncable card updates one-for-
+ * one with no full-view flash and no fragile node-by-node morph.
+ *
+ * Special-case: the pet card. Its drop-food button has a listener
+ * attached inside renderDashboard's rAF that closes over the petHandle
+ * returned by mountPet3D, and the 3D canvas needs to survive the swap.
+ * So instead of swapping the whole pet card, we move the existing
+ * canvas to the fresh card's host, swap, then re-attach the canvas.
+ * The drop-food handler is re-bound by the rAF only if the host is
+ * re-mounted; for simplicity here we update pet text/bars in place
+ * rather than swap.
  */
 function syncSurgicalUpdates(currentState) {
-  // Job-applications counter — render a fresh card and swap.
-  const liveJobApps = document.querySelector('[data-card="jobapps"]');
-  if (liveJobApps && window.VIEWS && typeof window.VIEWS.renderDashboard === 'function') {
-    // renderJobAppsCard is internal — use the closure helper exposed via
-    // an indirect call. Falls back to a tiny in-place text update.
-    if (typeof window.VIEWS.renderJobAppsCard === 'function') {
-      liveJobApps.replaceWith(window.VIEWS.renderJobAppsCard(currentState));
-    } else {
-      // Minimal fallback: just patch the visible count number.
-      const today = new Date().toISOString().slice(0, 10);
-      const count = (currentState.jobApps || []).filter(j => j.date === today).length;
-      const goal = (currentState.user && currentState.user.goal) || 60;
-      const target = 10;
-      const pct = Math.min(100, Math.round((count / target) * 100));
-      const countNode = liveJobApps.querySelector('.text-3xl.font-bold');
-      if (countNode && countNode.firstChild) countNode.firstChild.nodeValue = count + ' ';
-      const bar = liveJobApps.querySelector('.bar > i');
-      if (bar) bar.style.width = pct + '%';
-    }
+  const view = document.getElementById('view');
+  if (!view || !window.VIEWS) return;
+  const route = parseHash().route;
+
+  // Render the matching view into a detached buffer so we can pull
+  // freshly-rendered cards out of it. The renderXxx side-effect rAFs
+  // (3D mounts, charts) are guarded by document.contains(host) checks,
+  // so they no-op for buffer DOM.
+  const buf = document.createElement('section');
+  buf.className = view.className;
+  switch (route) {
+    case 'dashboard':    VIEWS.renderDashboard(currentState, buf); break;
+    case 'curriculum':   VIEWS.renderCurriculum(currentState, buf); break;
+    case 'profile':      VIEWS.renderProfile(currentState, buf); break;
+    case 'companies':    VIEWS.renderCompanies(currentState, buf); break;
+    case 'mocks':        VIEWS.renderMocks(currentState, buf); break;
+    case 'sources':      VIEWS.renderSources(currentState, buf); break;
+    case 'prep':         VIEWS.renderPrep(currentState, buf); break;
+    case 'review':       VIEWS.renderReview(currentState, buf); break;
+    // Routes we don't sync-refresh live: flashcards (swipe in flight),
+    // lesson / mock / games (interactive), coverage / infographics (Chart.js).
+    default: return;
   }
+
+  // Walk every tagged card in the live DOM. For each, find the matching
+  // buffer card by data-card key and swap it in. Cards in live but not
+  // buffer (e.g., reviews tile that has now hidden because counts hit 0)
+  // are removed; cards in buffer but not live (newly appeared) are
+  // skipped — they'll show on next navigation. The pet card is special.
+  const liveCards = Array.from(view.querySelectorAll('[data-card]'));
+  for (const liveCard of liveCards) {
+    const key = liveCard.getAttribute('data-card');
+    const bufCard = buf.querySelector(`[data-card="${key}"]`);
+    if (!bufCard) continue;                  // no fresh version → leave alone
+
+    if (key === 'pet') {
+      // Update only the text/bar values inside the pet card. Don't swap
+      // the whole card (would orphan the WebGL canvas + lose drop-food
+      // listener). The 3D scene picks up state changes via its own loop.
+      updatePetCardTextInPlace(liveCard, currentState);
+      continue;
+    }
+
+    // Generic swap. The buffer card has its own freshly-attached event
+    // listeners (e.g., +/− on jobapps); discarded along with the old card.
+    liveCard.replaceWith(bufCard);
+  }
+}
+
+// Pet text/bars get updated in place — selector-based, preserves canvas.
+function updatePetCardTextInPlace(live, state) {
+  if (!state.pet) return;
+  // Pet name in the h3
+  const h3 = live.querySelector('h3.font-display');
+  if (h3 && state.pet.name) {
+    const firstText = h3.firstChild;
+    if (firstText && firstText.nodeType === 3) firstText.nodeValue = state.pet.name + "'s room ";
+  }
+  // Vitality numeric + bar
+  const vit = (state.pet.vitality || 0);
+  const vitNum = live.querySelector('.pet-panel .numeric');
+  if (vitNum) vitNum.textContent = vit + '/100' + (vit < 30 ? ' · sick' : '');
+  const vitBar = live.querySelector('.pet-panel .bar > i, .pet-panel [style*="width"]');
+  if (vitBar) vitBar.style.width = Math.max(0, Math.min(100, vit)) + '%';
 }
 
 /*
