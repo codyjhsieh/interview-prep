@@ -28,7 +28,8 @@ window.SYNC = (function () {
   const SYNC_ENDPOINT = 'https://interview-prep-sync.codyjhsieh.workers.dev';
 
   const CODE_KEY     = 'fdeprep.syncCode.v1';
-  const POLL_MS      = 5000;
+  const POLL_MS      = 2500;   // 2.5s — snappier real-time feel; still
+                               // ~34k reads/day per device (free tier = 100k)
   const PUSH_DEBOUNCE_MS = 1000;
   const STORAGE_KEY  = 'fdeprep.v1';            // matches GAMI.STORAGE_KEY
 
@@ -158,10 +159,11 @@ window.SYNC = (function () {
     // Free-recall: array-per-key, concat + dedupe by ts
     merged.freeRecallAttempts = unionMapOfArrays(a.freeRecallAttempts, b.freeRecallAttempts);
 
-    // Pet: take whichever has the more recent lastTickDate; tie-break
-    // on higher deathCount (more advanced timeline). pet is treated as
-    // an atomic unit because its fields are tightly correlated.
-    merged.pet = pickPet(a.pet, b.pet);
+    // Pet: deep-merge so name / color / stats all sync. Stats (vitality,
+    // form, ageDays, etc.) are unioned via max; date fields take the
+    // later string; identity fields (name, bodyHue) come from the
+    // device with the fresher overall updatedAt.
+    merged.pet = mergePets(a.pet, b.pet, aT, bT);
 
     // Streak: prefer higher count (monotonic per active day)
     if ((a.streak?.count || 0) >= (b.streak?.count || 0)) merged.streak = a.streak;
@@ -240,14 +242,40 @@ window.SYNC = (function () {
     return out;
   }
 
-  function pickPet(a, b) {
+  /*
+   * Deep-merge two pet states. Strategy per field:
+   *   - Numeric stats (vitality, form, ageDays, eatenTodayXP, deathCount):
+   *     max() — neither device's progress is lost.
+   *   - Date strings (lastTickDate, lastFedDate, lastEatenDate): later
+   *     ISO string wins (string compare works for YYYY-MM-DD).
+   *   - Stage: take from whichever pet has the higher ageDays (the more
+   *     "grown-up" timeline is canonical).
+   *   - Identity fields (name, bodyHue, …): from the device with the
+   *     fresher overall updatedAt — that's where the user most recently
+   *     interacted, so their customization wins.
+   * Replaces the old atomic pickPet which permanently kept each device's
+   * own pet because ties broke local-side.
+   */
+  function mergePets(a, b, aTimestamp, bTimestamp) {
+    if (!a && !b) return null;
     if (!a) return b;
     if (!b) return a;
-    const aT = (a.lastTickDate || '').replace(/-/g, '');
-    const bT = (b.lastTickDate || '').replace(/-/g, '');
-    if (aT !== bT) return aT > bT ? a : b;
-    // Tie-break: more deaths means a longer / more advanced timeline.
-    return (a.deathCount || 0) >= (b.deathCount || 0) ? a : b;
+    const fresher = (bTimestamp || 0) >= (aTimestamp || 0) ? b : a;
+    // Start with all of fresher's fields, then explicit per-field overrides.
+    const merged = { ...a, ...fresher };
+    // Numeric stats: union via max
+    for (const k of ['vitality', 'form', 'ageDays', 'eatenTodayXP', 'deathCount']) {
+      merged[k] = Math.max(a[k] || 0, b[k] || 0);
+    }
+    // Date strings: take the later one (works for YYYY-MM-DD compare)
+    for (const k of ['lastTickDate', 'lastFedDate', 'lastEatenDate']) {
+      const da = a[k] || '', db = b[k] || '';
+      merged[k] = db > da ? db : da;
+    }
+    // Stage: pick from the older pet (higher ageDays)
+    const olderPet = (a.ageDays || 0) >= (b.ageDays || 0) ? a : b;
+    if (olderPet.stage) merged.stage = olderPet.stage;
+    return merged;
   }
 
   // ── Lifecycle ───────────────────────────────────────────────────────

@@ -772,14 +772,38 @@ return {
     render();
   },
   // Soft-replace from sync poll: swap state in place, persist locally,
-  // refresh ONLY the header chips (streak / level / XP / daily bar /
-  // profile initial). No view re-render — that's what causes the flash
-  // every 5 seconds while polling. Cards in the current view stay as
-  // they were; the next navigation picks up the new state naturally.
+  // refresh header chips, AND re-render the current view through a
+  // brief opacity crossfade so list content (jobApps, completed
+  // lessons, history) updates in real time without the harsh blank
+  // flash a naive innerHTML swap produces.
   setStateFromSync: (next) => {
     state = next;
     GAMI.saveImmediate(state);
     try { updateHeader(); } catch (_) {}
+    // Guard: don't yank the view out from under an actively-typing
+    // user. If something's focused that takes input, just keep the
+    // header updated — list content will refresh on the next nav.
+    const focused = document.activeElement;
+    const isTyping = focused && (
+      focused.tagName === 'INPUT' ||
+      focused.tagName === 'TEXTAREA' ||
+      focused.tagName === 'SELECT' ||
+      focused.isContentEditable
+    );
+    if (isTyping) return;
+    const view = document.getElementById('view');
+    if (!view) return;
+    // Crossfade: dim → swap → restore. 110ms each side keeps the
+    // change perceptible without feeling like a page reload.
+    view.style.transition = 'opacity 0.11s ease-out';
+    view.style.opacity = '0.35';
+    setTimeout(() => {
+      try { render(); } catch (_) {}
+      view.style.opacity = '1';
+      // Drop the inline style on the next tick so route nav re-renders
+      // aren't affected by it.
+      setTimeout(() => { view.style.transition = ''; view.style.opacity = ''; }, 200);
+    }, 115);
   },
 };
 })();
