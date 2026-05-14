@@ -4037,17 +4037,160 @@ function renderSyncSection(sync) {
 }
 
 /*
- * Liquid Glass login gate. Shown as a full-screen overlay on app boot
- * when the Cloudflare Worker is configured AND no pairing code is
- * stored locally AND the user hasn't explicitly chosen "use locally".
+ * Liquid Glass sign-in gate. Apple-spec material: layered translucent
+ * substrate, top-edge gloss, fresnel rim, soft drop. Springy entrance
+ * (gate fades, card scales 0.94→1 with cubic-bezier overshoot, contents
+ * stagger). Minimal copy — input + arrow + escape hatch.
  *
- * Once the user pairs (or skips), the gate fades out and `onDismiss`
- * is invoked so app.js can finish rendering the dashboard.
+ * Once paired (or skipped), the card scales down 1→0.98 + fade, gate
+ * fades, `onDismiss` fires.
  */
 function renderLoginGate(onDismiss) {
-  // Remove any prior gate (defensive — should never happen)
   const prior = document.getElementById('login-gate');
   if (prior) prior.remove();
+
+  // Inject the gate's own keyframes once — keeps the logic colocated
+  // with the markup rather than burying it in styles.css.
+  if (!document.getElementById('login-gate-css')) {
+    const css = document.createElement('style');
+    css.id = 'login-gate-css';
+    css.textContent = `
+      @keyframes lg-bg-bloom {
+        0%   { transform: translate(0,0)   scale(1);   opacity: 0.9; }
+        50%  { transform: translate(-2%,1%) scale(1.04); opacity: 1;   }
+        100% { transform: translate(0,0)   scale(1);   opacity: 0.9; }
+      }
+      @keyframes lg-card-in {
+        from { opacity: 0; transform: translateY(14px) scale(0.94); filter: blur(8px); }
+        to   { opacity: 1; transform: translateY(0)    scale(1);    filter: blur(0); }
+      }
+      @keyframes lg-stagger-in {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes lg-shine {
+        0%   { transform: translateX(-120%) skewX(-18deg); }
+        100% { transform: translateX(240%)  skewX(-18deg); }
+      }
+      #login-gate .lg-card {
+        position: relative;
+        max-width: 380px; width: 100%;
+        padding: 1.85rem 1.65rem 1.4rem;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.42));
+        border: 1px solid rgba(255,255,255,0.55);
+        border-radius: 26px;
+        -webkit-backdrop-filter: blur(40px) saturate(220%) brightness(1.10);
+        backdrop-filter: blur(40px) saturate(220%) brightness(1.10);
+        box-shadow:
+          0 1px 0 rgba(255,255,255,0.85) inset,
+          0 -1px 0 rgba(15,23,42,0.05) inset,
+          0 30px 60px -20px rgba(15,23,42,0.30),
+          0 12px 24px -12px rgba(15,23,42,0.18);
+        animation: lg-card-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        overflow: hidden;
+      }
+      /* Top-edge gloss — the "license plate" specular highlight */
+      #login-gate .lg-card::before {
+        content: ''; position: absolute; inset: 0;
+        border-radius: inherit; pointer-events: none;
+        background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 35%);
+        mix-blend-mode: overlay; opacity: 0.9;
+      }
+      /* Fresnel rim — subtle chromatic edge */
+      #login-gate .lg-card::after {
+        content: ''; position: absolute; inset: 0;
+        border-radius: inherit; pointer-events: none;
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.35) inset;
+      }
+      #login-gate .lg-stagger > * {
+        opacity: 0;
+        animation: lg-stagger-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+      #login-gate .lg-stagger > *:nth-child(1) { animation-delay: 0.15s; }
+      #login-gate .lg-stagger > *:nth-child(2) { animation-delay: 0.24s; }
+      #login-gate .lg-stagger > *:nth-child(3) { animation-delay: 0.32s; }
+      #login-gate .lg-stagger > *:nth-child(4) { animation-delay: 0.40s; }
+      #login-gate .lg-stagger > *:nth-child(5) { animation-delay: 0.48s; }
+      #login-gate .lg-input {
+        width: 100%;
+        background: rgba(255,255,255,0.55);
+        border: 1px solid rgba(15,23,42,0.10);
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        font-family: 'Geist Mono', ui-monospace, monospace;
+        font-size: 17px;
+        font-weight: 500;
+        letter-spacing: 0.30em;
+        text-align: center;
+        text-transform: uppercase;
+        color: var(--text, #0F172A);
+        transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+      }
+      #login-gate .lg-input::placeholder {
+        color: rgba(15,23,42,0.32); letter-spacing: 0.18em;
+      }
+      #login-gate .lg-input:focus {
+        outline: none;
+        border-color: rgba(14,163,113,0.55);
+        background: rgba(255,255,255,0.78);
+        box-shadow: 0 0 0 4px rgba(14,163,113,0.12);
+      }
+      #login-gate .lg-arrow-btn {
+        position: relative;
+        width: 100%;
+        margin-top: 0.7rem;
+        padding: 0.85rem 1rem;
+        border-radius: 14px;
+        border: none;
+        background: linear-gradient(180deg, var(--accent, #0EA371), var(--accent-deep, #0A7553));
+        color: #fff;
+        font-weight: 600;
+        font-size: 14.5px;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        overflow: hidden;
+        transition: transform 0.18s ease, box-shadow 0.25s ease, filter 0.25s ease;
+        box-shadow: 0 8px 20px -8px rgba(14,163,113,0.55), 0 1px 0 rgba(255,255,255,0.3) inset;
+      }
+      #login-gate .lg-arrow-btn:hover { transform: translateY(-1px); filter: brightness(1.04); }
+      #login-gate .lg-arrow-btn:active { transform: translateY(0); filter: brightness(0.96); }
+      #login-gate .lg-arrow-btn::after {
+        content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 50%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+        animation: lg-shine 2.8s ease-in-out infinite;
+        pointer-events: none;
+      }
+      #login-gate .lg-bg-1, #login-gate .lg-bg-2 {
+        position: absolute; pointer-events: none; border-radius: 50%; filter: blur(50px);
+      }
+      #login-gate .lg-bg-1 {
+        width: 60vmin; height: 60vmin; top: -10vmin; left: -10vmin;
+        background: radial-gradient(circle, rgba(120,73,224,0.30), transparent 70%);
+        animation: lg-bg-bloom 9s ease-in-out infinite;
+      }
+      #login-gate .lg-bg-2 {
+        width: 70vmin; height: 70vmin; bottom: -15vmin; right: -15vmin;
+        background: radial-gradient(circle, rgba(14,163,113,0.28), transparent 70%);
+        animation: lg-bg-bloom 11s ease-in-out infinite reverse;
+      }
+      #login-gate .lg-link {
+        background: none; border: none; padding: 0;
+        font-size: 12.5px; color: var(--accent, #0EA371);
+        font-weight: 500; cursor: pointer;
+      }
+      #login-gate .lg-link:hover { text-decoration: underline; }
+      #login-gate.dismiss .lg-card {
+        animation: none;
+        transition: opacity 0.32s ease-out, transform 0.32s ease-out, filter 0.32s ease-out;
+        opacity: 0; transform: scale(0.97); filter: blur(4px);
+      }
+      #login-gate.dismiss { transition: opacity 0.36s ease-out; opacity: 0; }
+    `;
+    document.head.appendChild(css);
+  }
 
   const gate = document.createElement('div');
   gate.id = 'login-gate';
@@ -4056,51 +4199,41 @@ function renderLoginGate(onDismiss) {
   gate.style.cssText = `
     position: fixed; inset: 0; z-index: 100;
     display: grid; place-items: center; padding: 1.5rem;
-    background:
-      radial-gradient(1200px 800px at 20% 10%, rgba(120,73,224,0.10), transparent 60%),
-      radial-gradient(900px 600px at 85% 90%, rgba(14,163,113,0.10), transparent 60%),
-      linear-gradient(180deg, rgba(248,249,252,0.85), rgba(232,236,247,0.90));
-    -webkit-backdrop-filter: blur(60px) saturate(200%) brightness(1.06);
-    backdrop-filter: blur(60px) saturate(200%) brightness(1.06);
-    animation: fade-in 0.4s ease-out;
+    background: linear-gradient(180deg, rgba(248,249,252,0.72), rgba(228,232,244,0.78));
+    -webkit-backdrop-filter: blur(48px) saturate(180%);
+    backdrop-filter: blur(48px) saturate(180%);
+    opacity: 0; transition: opacity 0.55s ease;
+    overflow: hidden;
   `;
   gate.innerHTML = `
-    <div class="card elevated" style="max-width: 400px; width: 100%; padding: 1.75rem 1.75rem 1.5rem;">
-      <div style="text-align:center; margin-bottom: 1.25rem;">
-        <div class="font-display font-bold text-[22px] tracking-tight">FDE/SDE 2026</div>
-        <div class="muted text-[12px] mt-0.5" style="letter-spacing:0.04em">Interview prep</div>
-      </div>
-      <h2 class="font-display text-[17px] font-semibold mb-1">Sign in with a sync code</h2>
-      <p class="muted text-[12.5px] mb-4" style="line-height:1.5">
-        Pair this device with your code. Stats, curriculum progress, and Bit
-        sync across every device you sign in on.
-      </p>
-      <input id="gate-code-input" type="text" placeholder="ENTER YOUR CODE" maxlength="11"
-        autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false"
-        class="w-full font-mono text-center"
-        style="background: var(--surface-1, rgba(255,255,255,0.55));
-               border: 1px solid var(--border-2, rgba(15,23,42,0.15));
-               border-radius: 12px; padding: 0.75rem 0.5rem;
-               font-size: 16px; letter-spacing: 0.22em; text-transform: uppercase;"/>
-      <button class="btn btn-primary w-full mt-3" id="gate-pair-btn"
-        style="justify-content:center; padding-top:0.7rem; padding-bottom:0.7rem; font-size:14px;">
-        Sign in
-      </button>
-      <div class="text-center mt-3 text-[12.5px]">
-        <span class="muted">First time? </span>
-        <button id="gate-generate-btn" class="hover:underline" style="color: var(--accent); font-weight:500">
-          Generate a new code
+    <div class="lg-bg-1"></div>
+    <div class="lg-bg-2"></div>
+    <div class="lg-card">
+      <div class="lg-stagger">
+        <div style="text-align:center; margin-bottom: 1.5rem;">
+          <div class="font-display font-semibold tracking-tight" style="font-size:15px; letter-spacing:0.08em; color:var(--muted, #6B7785); text-transform:uppercase;">FDE/SDE 2026</div>
+        </div>
+        <h2 class="font-display font-semibold" style="font-size:22px; text-align:center; letter-spacing:-0.01em; margin-bottom: 1.1rem;">Sign in</h2>
+        <input id="gate-code-input" class="lg-input" type="text" placeholder="code" maxlength="11"
+          autocapitalize="characters" autocorrect="off" autocomplete="off" spellcheck="false"/>
+        <button id="gate-pair-btn" class="lg-arrow-btn" type="button">
+          <span style="display:inline-flex; align-items:center; gap:0.5rem;">Continue
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top:1px">
+              <path d="M5 12h14"></path><path d="M13 5l7 7-7 7"></path>
+            </svg>
+          </span>
         </button>
-      </div>
-      <div id="gate-status" class="text-[11.5px] muted text-center mt-3" style="min-height:1em"></div>
-      <div class="text-center mt-4 pt-3" style="border-top: 1px solid var(--hairline, rgba(15,23,42,0.08))">
-        <button id="gate-skip-btn" class="text-[11.5px] muted hover:text-[color:var(--text)] transition">
-          Use locally only — no sync
-        </button>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-top:1rem;">
+          <button id="gate-generate-btn" class="lg-link" type="button">Generate a code</button>
+          <button id="gate-skip-btn" class="lg-link" type="button" style="color: var(--muted, #6B7785); font-weight:400;">Skip</button>
+        </div>
+        <div id="gate-status" style="font-size:11.5px; color:var(--muted, #6B7785); text-align:center; min-height:1em; margin-top:0.7rem;"></div>
       </div>
     </div>
   `;
   document.body.appendChild(gate);
+  // Trigger the gate fade-in on the next frame so the transition kicks in
+  requestAnimationFrame(() => { gate.style.opacity = '1'; });
 
   const codeInput = gate.querySelector('#gate-code-input');
   const statusEl  = gate.querySelector('#gate-status');
@@ -4112,23 +4245,24 @@ function renderLoginGate(onDismiss) {
     try { e.target.setSelectionRange(pos, pos); } catch (_) {}
   });
 
+  let dismissing = false;
   const dismiss = () => {
-    gate.style.transition = 'opacity 0.32s ease-out';
-    gate.style.opacity = '0';
-    setTimeout(() => { gate.remove(); if (typeof onDismiss === 'function') onDismiss(); }, 340);
+    if (dismissing) return;
+    dismissing = true;
+    gate.classList.add('dismiss');
+    setTimeout(() => { gate.remove(); if (typeof onDismiss === 'function') onDismiss(); }, 380);
   };
 
   const doPair = async () => {
     if (!window.SYNC) { setStatus('Sync not loaded'); return; }
     const raw = codeInput.value.trim();
-    if (!raw) { setStatus('Enter a code'); return; }
+    if (!raw) { setStatus('Enter a code'); codeInput.focus(); return; }
     setStatus('Pairing…');
     try {
-      const result = await window.SYNC.pair(raw);
-      setStatus(result.adopted ? 'Pulled in your saved progress.' : 'Code claimed on this device.');
+      await window.SYNC.pair(raw);
       dismiss();
     } catch (e) {
-      setStatus('Error: ' + (e.message || 'pairing failed'));
+      setStatus(e.message || 'Pairing failed');
     }
   };
 
@@ -4138,20 +4272,18 @@ function renderLoginGate(onDismiss) {
   gate.querySelector('#gate-pair-btn').addEventListener('click', doPair);
   gate.querySelector('#gate-generate-btn').addEventListener('click', () => {
     if (!window.SYNC) return;
-    const code = window.SYNC.generateCode();
-    codeInput.value = code;
-    setStatus('Code generated — write this down. Click Sign in to claim it.');
-    codeInput.focus();
-    codeInput.select();
+    codeInput.value = window.SYNC.generateCode();
+    setStatus('Save this code to sign in elsewhere.');
+    codeInput.focus(); codeInput.select();
   });
   gate.querySelector('#gate-skip-btn').addEventListener('click', () => {
     try { localStorage.setItem('fdeprep.syncSkip.v1', '1'); } catch (_) {}
-    setStatus('Continuing without sync. You can pair later from Profile.');
     dismiss();
   });
 
-  // Autofocus the input so the user can just start typing
-  setTimeout(() => codeInput.focus(), 60);
+  // Autofocus once the entrance settles, so iOS doesn't pop the keyboard
+  // before the card has fully landed.
+  setTimeout(() => codeInput.focus(), 380);
 }
 
 function renderProfile(state, hub) {
