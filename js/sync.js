@@ -36,6 +36,12 @@ window.SYNC = (function () {
   let pollTimer = null;
   let pushTimer = null;
   let pushPending = false;
+  // lastSeenRemoteSeq — monotonic counter from the Worker (stamped per
+  // code, not per device). Drives "is the remote newer than what I
+  // already saw" without relying on Date.now() agreement between
+  // devices. updatedAt-based comparison kept as a fallback for legacy
+  // state blobs that pre-date _seq.
+  let lastSeenRemoteSeq = 0;
   let lastSeenRemoteUpdatedAt = 0;
   let statusCb = null;
   let lastStatus = 'idle';
@@ -118,6 +124,17 @@ window.SYNC = (function () {
         body: JSON.stringify(state),
       });
       if (res.ok) {
+        // Read the server-assigned _seq back so the local state knows
+        // what KV holds. Without this, the next poll would see remote
+        // ._seq > local._seq and re-merge our own push (a no-op but
+        // wasteful).
+        try {
+          const j = await res.json();
+          if (j && typeof j._seq === 'number') {
+            state._seq = j._seq;
+            lastSeenRemoteSeq = j._seq;
+          }
+        } catch (_) {}
         lastSeenRemoteUpdatedAt = state.updatedAt;
         setStatus('synced');
       } else {
@@ -167,9 +184,14 @@ window.SYNC = (function () {
   function mergeStates(a, b) {
     if (!a) return b;
     if (!b) return a;
+    // Determine "fresher" side. Prefer server-issued _seq (monotonic
+    // per code, no clock-drift sensitivity). Fall back to updatedAt
+    // when _seq is missing on either side (legacy blobs).
+    const aS = a._seq || 0, bS = b._seq || 0;
     const aT = a.updatedAt || 0, bT = b.updatedAt || 0;
-    const fresher = bT >= aT ? b : a;
-    const stale   = bT >= aT ? a : b;
+    const seqBased = aS > 0 && bS > 0;
+    const fresher = seqBased ? (bS >= aS ? b : a) : (bT >= aT ? b : a);
+    const stale   = seqBased ? (bS >= aS ? a : b) : (bT >= aT ? a : b);
     const merged = { ...stale, ...fresher };
 
     // Append-only arrays
@@ -198,8 +220,10 @@ window.SYNC = (function () {
     // Pet: deep-merge so name / color / stats all sync. Stats (vitality,
     // form, ageDays, etc.) are unioned via max; date fields take the
     // later string; identity fields (name, bodyHue) come from the
-    // device with the fresher overall updatedAt.
-    merged.pet = mergePets(a.pet, b.pet, aT, bT);
+    // device with the fresher overall _seq (falling back to updatedAt).
+    const aFreshness = seqBased ? aS : aT;
+    const bFreshness = seqBased ? bS : bT;
+    merged.pet = mergePets(a.pet, b.pet, aFreshness, bFreshness);
 
     // Streak: prefer higher count (monotonic per active day)
     if ((a.streak?.count || 0) >= (b.streak?.count || 0)) merged.streak = a.streak;
@@ -215,6 +239,9 @@ window.SYNC = (function () {
     merged.todayDate = fresher.todayDate || null;
 
     merged.updatedAt = Math.max(aT, bT);
+    // Propagate the higher _seq so the merged state carries the most
+    // recent server stamp. The next PUT will increment from here.
+    merged._seq = Math.max(aS, bS);
     return merged;
   }
 
@@ -343,11 +370,22 @@ window.SYNC = (function () {
     if (!remote) { setStatus('paired'); return; }
     const local = window.APP && window.APP.getState();
     if (!local) return;
-    const remoteT = remote.updatedAt || 0;
-    if (remoteT <= (local.updatedAt || 0)) return;
-    if (remoteT <= lastSeenRemoteUpdatedAt) return;
+    // Primary ordering: server-stamped _seq (monotonic, per code).
+    // Fallback: updatedAt (for blobs from clients pre-_seq, or while
+    // the Worker hasn't been upgraded yet).
+    const remoteSeq = remote._seq || 0;
+    const localSeq  = local._seq  || 0;
+    if (remoteSeq && localSeq) {
+      if (remoteSeq <= localSeq)             return;
+      if (remoteSeq <= lastSeenRemoteSeq)    return;
+    } else {
+      const remoteT = remote.updatedAt || 0;
+      if (remoteT <= (local.updatedAt || 0)) return;
+      if (remoteT <= lastSeenRemoteUpdatedAt) return;
+    }
     const merged = mergeStates(local, remote);
-    lastSeenRemoteUpdatedAt = remoteT;
+    lastSeenRemoteSeq = Math.max(lastSeenRemoteSeq, remoteSeq);
+    lastSeenRemoteUpdatedAt = Math.max(lastSeenRemoteUpdatedAt, remote.updatedAt || 0);
     // Use the SOFT setter so the live view doesn't flash on every
     // poll. setStateFromSync swaps state + refreshes only the header
     // chips; the current view's cards stay put until next navigation.

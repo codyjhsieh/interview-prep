@@ -50,10 +50,19 @@ if (!LIVE) {
       if (len > MAX_BODY) return mkRes(JSON.stringify({ error: 'too-large' }), 413, { 'content-type': 'application/json' });
       const body = typeof init.body === 'string' ? init.body : '';
       if (body.length > MAX_BODY) return mkRes(JSON.stringify({ error: 'too-large' }), 413, { 'content-type': 'application/json' });
-      try { JSON.parse(body); }
+      let parsed;
+      try { parsed = JSON.parse(body); }
       catch { return mkRes(JSON.stringify({ error: 'invalid-json' }), 400, { 'content-type': 'application/json' }); }
-      kv.set(code, body);
-      return mkRes(JSON.stringify({ ok: true, savedAt: Date.now() }), 200, { 'content-type': 'application/json' });
+      // Mirror worker.js: read-modify-write _seq + _sv
+      let prevSeq = 0;
+      const existing = kv.get(code);
+      if (existing) {
+        try { prevSeq = (JSON.parse(existing)._seq || 0); } catch {}
+      }
+      parsed._seq = prevSeq + 1;
+      parsed._sv  = Date.now();
+      kv.set(code, JSON.stringify(parsed));
+      return mkRes(JSON.stringify({ ok: true, savedAt: parsed._sv, _seq: parsed._seq }), 200, { 'content-type': 'application/json' });
     }
     return mkRes(JSON.stringify({ error: 'method-not-allowed' }), 405, { 'content-type': 'application/json' });
   };
@@ -358,8 +367,34 @@ async function get(code = CODE) {
   // Cleanup
   try { await fetch(`${URL}/state/${CODE2}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ wipe: 1 }) }); } catch (_) {}
 
+  // ── Section H: Server-issued _seq (5) ──────────────────────────────
+  console.log('\n--- H. Server-issued _seq ---');
+  const CODE3 = 'SEQTESTH1';
+  // 51: first PUT stamps _seq = 1
+  let rH = await put({ hello: 'first' }, CODE3);
+  let bodyH = await rH.json();
+  ok(bodyH._seq === 1, '51. first PUT to a fresh code stamps _seq = 1');
+  // 52: subsequent PUTs increment _seq monotonically
+  rH = await put({ hello: 'second' }, CODE3); bodyH = await rH.json();
+  ok(bodyH._seq === 2, '52. second PUT increments to _seq = 2');
+  rH = await put({ hello: 'third' }, CODE3); bodyH = await rH.json();
+  ok(bodyH._seq === 3, '53. third PUT increments to _seq = 3');
+  // 54: GET returns the stamped state with the latest _seq
+  const gH = await get(CODE3);
+  ok(gH.body._seq === 3 && gH.body.hello === 'third', '54. GET returns latest stamped state');
+  // 55: pollOnce skip-criteria (mirrors js/sync.js): when local._seq >=
+  //     remote._seq, the poll should skip the merge — verifies the
+  //     "fresher" comparator uses _seq first.
+  function shouldSkip(localSeq, remoteSeq, lastSeen) {
+    if (remoteSeq <= localSeq) return true;
+    if (remoteSeq <= lastSeen) return true;
+    return false;
+  }
+  ok(shouldSkip(3, 3, 3) && shouldSkip(4, 3, 0) && !shouldSkip(2, 3, 2),
+    '55. _seq-based pollOnce skip logic correct for equal/ahead/behind');
+
   console.log(`\n========================================`);
-  console.log(`SUMMARY: ${pass} passed, ${fail} failed (of 50)`);
+  console.log(`SUMMARY: ${pass} passed, ${fail} failed (of 55)`);
   if (fail > 0) {
     console.log('\nFAILURES:');
     failures.forEach(f => console.log('  •', f));

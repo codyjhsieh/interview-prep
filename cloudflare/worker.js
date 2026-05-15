@@ -63,10 +63,25 @@ export default {
       if (len > MAX_BODY) return json({ error: 'too-large' }, 413);
       const body = await req.text();
       if (body.length > MAX_BODY) return json({ error: 'too-large' }, 413);
-      try { JSON.parse(body); }
+      let parsed;
+      try { parsed = JSON.parse(body); }
       catch { return json({ error: 'invalid-json' }, 400); }
-      await env.STATE.put(code, body, { expirationTtl: TTL_SECONDS });
-      return json({ ok: true, savedAt: Date.now() });
+      // Read-modify-write: stamp a server-issued monotonic _seq tied
+      // to the code. Replaces the previous reliance on each device's
+      // local Date.now() (subject to clock drift). _seq always
+      // increments — even on concurrent PUTs the survivor's _seq is
+      // strictly > the prior stored _seq.
+      let prevSeq = 0;
+      const existing = await env.STATE.get(code);
+      if (existing) {
+        try { prevSeq = (JSON.parse(existing)._seq || 0); }
+        catch { prevSeq = 0; }
+      }
+      parsed._seq = prevSeq + 1;
+      parsed._sv  = Date.now();          // server-stamped wall-clock (diagnostic)
+      const stamped = JSON.stringify(parsed);
+      await env.STATE.put(code, stamped, { expirationTtl: TTL_SECONDS });
+      return json({ ok: true, savedAt: parsed._sv, _seq: parsed._seq });
     }
 
     return json({ error: 'method-not-allowed' }, 405);
