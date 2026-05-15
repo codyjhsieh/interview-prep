@@ -1888,6 +1888,142 @@ function mountPet3D(container, p) {
     scene.add(frame);
   }
 
+  // ---- Chessboard (teen stage only) — Bit's hobby ------------------
+  // Teen Bit plays chess against himself. The wander loop alternates
+  // between two phases:
+  //   1. "Thinking" — walks somewhere random, pauses, looks down (sells
+  //       the contemplation read).
+  //   2. "Returning" — walks back to a fixed spot south of the board.
+  //       On arrival a piece slides from one square to another, hopping
+  //       slightly as if Bit lifted + placed it.
+  // The board is registered as an obstacle so Bit routes around it.
+  // ------------------------------------------------------------------
+  let chessGroup = null;
+  let chessPieces = [];                 // [{ mesh, file, rank, col, type }]
+  let chessHomeX = 0, chessHomeZ = 0;   // pose-spot for Bit when "moving"
+  let chessNextMoveAt = 0;
+  let chessActiveMove = null;           // { piece, t0, dur, fx, fz, tx, tz, baseY }
+  let lookAtChessUntil = 0;             // head pitches down at the board while > t
+  const BOARD_HALF = 0.75;
+  const SQ = (BOARD_HALF * 2) / 8;
+  if (p.stage === 'teen') {
+    chessGroup = new T.Group();
+    chessGroup.position.set(2.0, 0, 1.8);
+
+    // Wooden base — slightly larger than the playable area, dark walnut.
+    const woodMat = new T.MeshStandardMaterial({ color: 0x3C2412, roughness: 0.75 });
+    const base = new T.Mesh(new T.BoxGeometry(BOARD_HALF*2 + 0.06, 0.04, BOARD_HALF*2 + 0.06), woodMat);
+    base.position.y = 0.02; base.castShadow = true; base.receiveShadow = true;
+    chessGroup.add(base);
+
+    // Light squares — cream — placed on top of the base. Dark squares
+    // are just the base color showing through, so we only render the
+    // 32 light squares (half the work).
+    const lightMat = new T.MeshStandardMaterial({ color: 0xE8D8B0, roughness: 0.8 });
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        if ((r + c) % 2 !== 0) continue;
+        const sq = new T.Mesh(new T.BoxGeometry(SQ * 0.96, 0.005, SQ * 0.96), lightMat);
+        sq.position.set(-BOARD_HALF + (c + 0.5) * SQ, 0.045, -BOARD_HALF + (r + 0.5) * SQ);
+        chessGroup.add(sq);
+      }
+    }
+
+    // Build a single piece — a stylized polygonal silhouette per type.
+    // Materials shared across pieces by color so we don't allocate 16 of them.
+    const lightPieceMat = new T.MeshStandardMaterial({ color: 0xF4E5C8, roughness: 0.45, metalness: 0.05 });
+    const darkPieceMat  = new T.MeshStandardMaterial({ color: 0x2B1B0D, roughness: 0.45, metalness: 0.05 });
+    function buildPiece(type, mat) {
+      const g = new T.Group();
+      const base = new T.Mesh(new T.CylinderGeometry(SQ*0.32, SQ*0.38, 0.012, 8), mat);
+      base.position.y = 0.063; g.add(base);
+      if (type === 'pawn') {
+        const body = new T.Mesh(new T.CylinderGeometry(SQ*0.18, SQ*0.28, 0.04, 8), mat);
+        body.position.y = 0.09; g.add(body);
+        const head = new T.Mesh(new T.SphereGeometry(SQ*0.22, 6, 4), mat);
+        head.position.y = 0.125; g.add(head);
+      } else if (type === 'king') {
+        const body = new T.Mesh(new T.CylinderGeometry(SQ*0.20, SQ*0.30, 0.07, 8), mat);
+        body.position.y = 0.105; g.add(body);
+        const head = new T.Mesh(new T.SphereGeometry(SQ*0.24, 6, 4), mat);
+        head.position.y = 0.16; g.add(head);
+        // Crown cross
+        const crossV = new T.Mesh(new T.BoxGeometry(SQ*0.06, 0.05, SQ*0.06), mat);
+        crossV.position.y = 0.205; g.add(crossV);
+        const crossH = new T.Mesh(new T.BoxGeometry(SQ*0.20, 0.012, SQ*0.06), mat);
+        crossH.position.y = 0.215; g.add(crossH);
+      } else if (type === 'knight') {
+        const body = new T.Mesh(new T.CylinderGeometry(SQ*0.18, SQ*0.28, 0.04, 8), mat);
+        body.position.y = 0.09; g.add(body);
+        const head = new T.Mesh(new T.BoxGeometry(SQ*0.40, 0.07, SQ*0.22), mat);
+        head.position.y = 0.14; head.rotation.z = 0.32; g.add(head);
+      } else if (type === 'bishop') {
+        const body = new T.Mesh(new T.ConeGeometry(SQ*0.22, 0.10, 6), mat);
+        body.position.y = 0.12; g.add(body);
+        const tip = new T.Mesh(new T.SphereGeometry(SQ*0.10, 5, 4), mat);
+        tip.position.y = 0.185; g.add(tip);
+      }
+      g.children.forEach(m => { m.castShadow = true; });
+      return g;
+    }
+    const piecePoses = [
+      // Mid-game position
+      { col: 'w', type: 'king',   f: 4, r: 0 },
+      { col: 'w', type: 'pawn',   f: 3, r: 1 },
+      { col: 'w', type: 'pawn',   f: 4, r: 3 },    // e4
+      { col: 'w', type: 'knight', f: 5, r: 2 },    // f3
+      { col: 'w', type: 'bishop', f: 2, r: 3 },    // c4
+      { col: 'b', type: 'king',   f: 4, r: 7 },
+      { col: 'b', type: 'pawn',   f: 4, r: 4 },    // e5
+      { col: 'b', type: 'pawn',   f: 2, r: 5 },    // c6
+      { col: 'b', type: 'knight', f: 5, r: 5 },    // f6
+      { col: 'b', type: 'bishop', f: 5, r: 4 },    // f5
+    ];
+    for (const pos of piecePoses) {
+      const mat = pos.col === 'w' ? lightPieceMat : darkPieceMat;
+      const m = buildPiece(pos.type, mat);
+      m.position.x = -BOARD_HALF + (pos.f + 0.5) * SQ;
+      m.position.z = -BOARD_HALF + (pos.r + 0.5) * SQ;
+      chessGroup.add(m);
+      chessPieces.push({ mesh: m, file: pos.f, rank: pos.r, col: pos.col, type: pos.type, baseY: m.position.y });
+    }
+
+    scene.add(chessGroup);
+    // Smaller obstacle radius — keeps Bit out of the board interior but
+    // lets him stand right next to the south edge for the move animation.
+    _obstacles.push({ x: 2.0, z: 1.8, radius: BOARD_HALF + 0.05 });
+    // Where Bit stands while "moving" a piece — pressed up against the
+    // south edge so the head pitch-down reads as actually looking at it.
+    chessHomeX = 2.0;
+    chessHomeZ = 1.8 - BOARD_HALF - 0.20;        // sits just outside obstacle safety zone
+    chessNextMoveAt = 4 + Math.random() * 3;       // first move after 4-7s
+  }
+
+  function _triggerChessMove(now) {
+    if (!chessPieces.length || chessActiveMove) return;
+    // Random piece, random nearby square (1-2 squares away)
+    const piece = chessPieces[Math.floor(Math.random() * chessPieces.length)];
+    let toF = piece.file, toR = piece.rank, tries = 8;
+    while (tries-- > 0) {
+      const df = Math.floor(Math.random() * 5) - 2;     // -2..2
+      const dr = Math.floor(Math.random() * 5) - 2;
+      if (df === 0 && dr === 0) continue;
+      const nf = Math.max(0, Math.min(7, piece.file + df));
+      const nr = Math.max(0, Math.min(7, piece.rank + dr));
+      if (nf === piece.file && nr === piece.rank) continue;
+      // Avoid stacking with another piece — pick again if occupied
+      if (chessPieces.some(q => q !== piece && q.file === nf && q.rank === nr)) continue;
+      toF = nf; toR = nr; break;
+    }
+    if (toF === piece.file && toR === piece.rank) return;
+    const fx = -BOARD_HALF + (piece.file + 0.5) * SQ;
+    const fz = -BOARD_HALF + (piece.rank + 0.5) * SQ;
+    const tx = -BOARD_HALF + (toF   + 0.5) * SQ;
+    const tz = -BOARD_HALF + (toR   + 0.5) * SQ;
+    chessActiveMove = { piece: piece.mesh, t0: now, dur: 0.55, fx, fz, tx, tz, baseY: piece.baseY };
+    piece.file = toF; piece.rank = toR;
+  }
+
   // ---- Pet body ----
   // bodyHue is the persistent identity color picked at birth/respawn —
   // each life starts with a fresh hue from a curated palette. Mood + stage
@@ -2563,6 +2699,25 @@ function mountPet3D(container, p) {
       }
     }
 
+    // ===== CHESS PIECE SLIDE (teen only) =====
+    // Piece floats up, slides across to the new square, then settles.
+    // Triggered by _triggerChessMove() when Bit arrives at the board.
+    if (chessActiveMove) {
+      const m = chessActiveMove;
+      const k = Math.min(1, (t - m.t0) / m.dur);
+      const eased = k < 0.5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2) / 2;   // inOutQuad
+      m.piece.position.x = m.fx + (m.tx - m.fx) * eased;
+      m.piece.position.z = m.fz + (m.tz - m.fz) * eased;
+      // Hop arc — Bit "lifts" the piece, slides, and sets it down
+      m.piece.position.y = m.baseY + Math.sin(k * Math.PI) * 0.05;
+      if (k >= 1) {
+        m.piece.position.x = m.tx;
+        m.piece.position.z = m.tz;
+        m.piece.position.y = m.baseY;
+        chessActiveMove = null;
+      }
+    }
+
     // ===== PER-STATE BEHAVIOR =====
     const activity = p.activity;
     // Bit moves under his own steam whenever he's walking, playing, or
@@ -2575,6 +2730,7 @@ function mountPet3D(container, p) {
     // Look-at-camera: the HEAD swivels independently of the body. Body
     // stays put; only headGroup.rotation changes. Clamp to ±70° (natural
     // owl-ish neck) + a clear upward pitch so the eyes meet the camera.
+    const lookingAtChess = chessGroup && t < lookAtChessUntil;
     if (lookingAtCam) {
       const dxc = camera.position.x - petGroup.position.x;
       const dzc = camera.position.z - petGroup.position.z;
@@ -2588,6 +2744,23 @@ function mountPet3D(container, p) {
       // Faster lerp so the head lands inside the look window (1.4s)
       headGroup.rotation.y += (headRel - headGroup.rotation.y) * Math.min(1, dt * 14);
       headGroup.rotation.x += (pitch  - headGroup.rotation.x) * Math.min(1, dt * 14);
+    } else if (lookingAtChess) {
+      // Pitch the head DOWN at the chessboard AND rotate the body so
+      // Bit visibly faces the board (he may have arrived from any
+      // angle; without the body yaw the head pitch alone looks weird).
+      const dxb = chessGroup.position.x - petGroup.position.x;
+      const dzb = chessGroup.position.z - petGroup.position.z;
+      const boardAngle = Math.atan2(dxb, dzb);
+      // Body — damped spring rotation toward the board
+      const angleDelta = _shortAngle(currentFacing, boardAngle);
+      const [newFacing, newFacingVel] = _dampSpring(currentFacing, facingVel, currentFacing + angleDelta, dt, 140, 18);
+      currentFacing = newFacing;
+      facingVel = newFacingVel;
+      facing.rotation.y = currentFacing;
+      // Head — neck stays neutral (yaw 0) since body now faces the board
+      const pitch = 0.55;                              // tilts head down
+      headGroup.rotation.y += (0 - headGroup.rotation.y) * Math.min(1, dt * 14);
+      headGroup.rotation.x += (pitch - headGroup.rotation.x) * Math.min(1, dt * 14);
     } else if (Math.abs(headGroup.rotation.y) > 0.002 || Math.abs(headGroup.rotation.x) > 0.002) {
       // Spring head back to neutral after the look
       headGroup.rotation.y += (0 - headGroup.rotation.y) * Math.min(1, dt * 10);
@@ -2735,9 +2908,28 @@ function mountPet3D(container, p) {
             // Note: eatenTodayXP is debited at drop time (Drop-food button),
             // not at arrival, so Bit eating is purely visual here.
           }
-          pauseUntil = t + 0.35 + Math.random() * 0.55;
+          // ===== ARRIVE — chess "move" if this was the chess return =====
+          if (target.chessHome) {
+            // Bit just got back to the board — slide a piece to a new
+            // square. Hold position while the move plays out + lock the
+            // head looking down at the board so the move reads as his.
+            _triggerChessMove(t);
+            pauseUntil = t + 1.1;
+            lookAtChessUntil = t + 1.0;
+            chessNextMoveAt = t + 5 + Math.random() * 4;     // think next
+          } else {
+            pauseUntil = t + 0.35 + Math.random() * 0.55;
+          }
+          // Pick the next target — chess "return" takes priority over
+          // wandering once it's been scheduled.
           const hasFood = foodPiles.some(f => !f.eaten);
-          target = hasFood ? _nearestFoodTarget() : _newRandomTarget();
+          if (hasFood) {
+            target = _nearestFoodTarget();
+          } else if (chessGroup && p.activity === 'walk' && chessNextMoveAt > 0 && t >= chessNextMoveAt) {
+            target = { x: chessHomeX, z: chessHomeZ, foodIdx: -1, chessHome: true };
+          } else {
+            target = _newRandomTarget();
+          }
         } else {
           // ===== MOVING TOWARD TARGET =====
           const step = Math.min(dist, speed * dt);
@@ -4396,22 +4588,22 @@ function companyFitScore(c) {
   else if (/series a\b/.test(stage)) s += 18;
   else if (/series b\b/.test(stage)) s += 11;
   else if (/series c\b/.test(stage)) s += 3;
-  else if (/series d\b/.test(stage)) s -= 8;
-  else if (/series e\b/.test(stage)) s -= 12;
+  else if (/series d\b/.test(stage)) s -= 5;
+  else if (/series e\b/.test(stage)) s -= 7;
   // Series F+ (F, G, H, …) treated as late-stage; same penalty bucket as
   // late / take-private. Without the explicit alternation we were missing
   // Series G companies like Hopper, Navan, Carta.
-  else if (/series [fghij]\b|late|take-private/.test(stage)) s -= 16;
-  else if (/public/.test(stage)) s -= 20;
+  else if (/series [fghij]\b|late|take-private/.test(stage)) s -= 10;
+  else if (/public/.test(stage)) s -= 12;
 
   // Size of raise — bigger == more bureaucracy + pedigree filtering.
   const r = c.raised || '';
   const num = parseFloat(r.replace(/[^\d.]/g, '')) || 0;
-  if (r.includes('B') && num >= 5) s -= 18;
-  else if (r.includes('B') && num >= 1) s -= 12;
-  else if (r.includes('B')) s -= 7;
-  else if (num >= 500) s -= 6;
-  else if (num >= 200) s -= 2;
+  if (r.includes('B') && num >= 5) s -= 10;
+  else if (r.includes('B') && num >= 1) s -= 7;
+  else if (r.includes('B')) s -= 4;
+  else if (num >= 500) s -= 3;
+  else if (num >= 200) s -= 1;
   else if (num <= 30) s += 6;
 
   // Elite-bar penalty: where the 2y gap + a fire is essentially a
@@ -4421,7 +4613,7 @@ function companyFitScore(c) {
     'cursor','perplexity','cohere','glean','sierra','jane-street',
     'scaleai','ramp','airtable',
   ]);
-  if (elite.has(c.id)) s -= 30;
+  if (elite.has(c.id)) s -= 16;
 
   // Mid-tier penalty: process-heavy but not frontier elite. Expanded
   // after the fifth refresh to cover the new late-stage SaaS / hospitality
@@ -4437,7 +4629,23 @@ function companyFitScore(c) {
   // Founding-role bonus — builder-first hiring forgives gaps.
   if ((c.jobs || []).some(j => j.level === 'founding')) s += 12;
 
-  return Math.max(3, Math.min(85, Math.round(s)));
+  // User-preference layer — bias the ranking toward sectors the
+  // candidate actively wants and away from ones they avoid. These
+  // are stacked on top of the offer-probability signal above.
+  const blob = ((c.sub || '') + ' ' + (c.notes || '')).toLowerCase();
+  if (/\b(crypto|web3|blockchain|nft|defi|on-?chain|cryptocurrency|tokeniz|stablecoin)\b/.test(blob)) {
+    s -= 15;                                              // hard penalty
+  }
+  if (c.vertical === 'media' ||
+      /\b(creative|design|video|image|music|audio|film|content creator|filmmaker|generative.*(video|image|audio|music)|3d|animation|publishing)\b/.test(blob)) {
+    s += 10;                                              // creative tools / generative-media bias
+  }
+  if (c.vertical === 'hospitality' ||
+      /\b(travel|hotel|restaurant|dining|hospitality|airline|trip|reservation)\b/.test(blob)) {
+    s += 10;                                              // travel / hospitality / restaurants
+  }
+
+  return Math.max(15, Math.min(85, Math.round(s)));
 }
 
 function roleFitScore(c, j) {
