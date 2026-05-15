@@ -1,9 +1,66 @@
 // 50-test sync stress suite. Mixes unit tests of the merge logic
 // against ported helpers (must mirror js/sync.js) and e2e tests
-// against the live Cloudflare Worker.
-
+// against an in-process MOCK of the Cloudflare Worker.
+//
+// The mock mirrors cloudflare/worker.js (CORS, routes, 1 MB limit,
+// 404 on unknown code, JSON validation). Default run: zero network,
+// zero Cloudflare KV writes — runs offline, costs nothing.
+//
+// To verify against the real Worker, pass `--live`:
+//     node scripts/sync-stress.mjs --live
+// (will spend ~30 KV writes + ~50 reads per run on your free tier).
+const LIVE = process.argv.includes('--live');
 const URL = 'https://interview-prep-sync.codyjhsieh.workers.dev';
 const CODE = 'STRESST01';
+
+// ── In-process Worker mock ──────────────────────────────────────────
+// When LIVE === false we shim global fetch with an in-memory KV store
+// + the exact routes from cloudflare/worker.js. Identical status codes,
+// headers, and bodies so tests can't tell the difference.
+if (!LIVE) {
+  const MAX_BODY = 1_048_576;
+  const CORS = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET, PUT, OPTIONS',
+    'access-control-allow-headers': 'Content-Type',
+    'access-control-max-age': '86400',
+  };
+  const kv = new Map();
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init = {}) => {
+    if (typeof url !== 'string' || !url.startsWith(URL)) return realFetch(url, init);
+    const path = url.slice(URL.length) || '/';
+    const method = (init.method || 'GET').toUpperCase();
+    const mkRes = (body, status = 200, extraHeaders = {}) => new Response(body, {
+      status,
+      headers: { ...CORS, ...extraHeaders },
+    });
+    if (method === 'OPTIONS') return mkRes(null, 204);
+    if (path === '/' || path === '') return mkRes('interview-prep-sync ok', 200, { 'content-type': 'text/plain' });
+    const m = path.match(/^\/state\/([A-Z0-9-]{4,20})$/i);
+    if (!m) return mkRes(JSON.stringify({ error: 'not-found' }), 404, { 'content-type': 'application/json' });
+    const code = m[1].toUpperCase().replace(/-/g, '');
+    if (method === 'GET') {
+      const v = kv.get(code);
+      if (!v) return mkRes(JSON.stringify({ error: 'not-found' }), 404, { 'content-type': 'application/json' });
+      return mkRes(v, 200, { 'content-type': 'application/json' });
+    }
+    if (method === 'PUT') {
+      const len = parseInt((init.headers || {})['content-length'] || '0', 10);
+      if (len > MAX_BODY) return mkRes(JSON.stringify({ error: 'too-large' }), 413, { 'content-type': 'application/json' });
+      const body = typeof init.body === 'string' ? init.body : '';
+      if (body.length > MAX_BODY) return mkRes(JSON.stringify({ error: 'too-large' }), 413, { 'content-type': 'application/json' });
+      try { JSON.parse(body); }
+      catch { return mkRes(JSON.stringify({ error: 'invalid-json' }), 400, { 'content-type': 'application/json' }); }
+      kv.set(code, body);
+      return mkRes(JSON.stringify({ ok: true, savedAt: Date.now() }), 200, { 'content-type': 'application/json' });
+    }
+    return mkRes(JSON.stringify({ error: 'method-not-allowed' }), 405, { 'content-type': 'application/json' });
+  };
+  console.log('[mock] in-process Worker — zero Cloudflare KV credits used\n');
+} else {
+  console.log('[LIVE] hitting real Worker at', URL, '— this spends free-tier writes\n');
+}
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let pass = 0, fail = 0;
