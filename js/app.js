@@ -177,7 +177,7 @@ function openMoreSheet() {
           </a>
         `).join('')}
       </div>
-      ${ver ? `<div class="more-sheet-version" aria-label="App version">v${escapeHtml(ver)}</div>` : ''}
+      ${ver ? `<button type="button" class="more-sheet-version" data-check-update aria-label="App version — tap to check for updates">v${escapeHtml(ver)} <span class="dim">· tap to update</span></button>` : ''}
     </div>
   `;
   document.body.appendChild(wrap);
@@ -198,6 +198,17 @@ function openMoreSheet() {
       // away in parallel with the view appearing beneath it. The 120ms
       // pre-close delay we used to have made the interaction feel sticky.
       close();
+      return;
+    }
+    // Tap-to-update — for iOS standalone bookmark apps where pull-to-
+    // refresh isn't available. Force-navigates to a cache-busted URL
+    // which guarantees a fresh HTML fetch (location.reload() can hit
+    // the 10-min GH Pages HTTP cache).
+    const upd = e.target.closest('[data-check-update]');
+    if (upd) {
+      upd.textContent = 'Updating…';
+      upd.style.pointerEvents = 'none';
+      location.href = location.pathname + '?_av=' + Date.now() + location.hash;
     }
   });
 }

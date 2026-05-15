@@ -153,7 +153,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-<link rel="stylesheet" href="styles.css?v=2026-05-15-14" />
+<link rel="stylesheet" href="styles.css?v=2026-05-15-16" />
 </head>
 <body>
 
@@ -222,23 +222,76 @@
 <!-- ?v=<build> cache-busts every deploy. The version string is bumped
      manually in tandem with sync.js / app.js / views.js changes so the
      browser + GH Pages CDN can't serve stale JS to paired devices. -->
-<script src="js/data.js?v=2026-05-15-14"></script>
-<script src="js/quotes.js?v=2026-05-15-14"></script>
-<script src="js/gamification.js?v=2026-05-15-14"></script>
-<script src="js/animations.js?v=2026-05-15-14"></script>
-<script src="js/infographics.js?v=2026-05-15-14"></script>
-<script src="js/games.js?v=2026-05-15-14"></script>
-<script src="js/views.js?v=2026-05-15-14"></script>
-<script src="js/app.js?v=2026-05-15-14"></script>
+<script src="js/data.js?v=2026-05-15-16"></script>
+<script src="js/quotes.js?v=2026-05-15-16"></script>
+<script src="js/gamification.js?v=2026-05-15-16"></script>
+<script src="js/animations.js?v=2026-05-15-16"></script>
+<script src="js/infographics.js?v=2026-05-15-16"></script>
+<script src="js/games.js?v=2026-05-15-16"></script>
+<script src="js/views.js?v=2026-05-15-16"></script>
+<script src="js/app.js?v=2026-05-15-16"></script>
 <!-- Cross-device sync via Cloudflare Worker + KV. Idle until paired
      (no network calls). Wraps GAMI.saveImmediate to PUT remotely
      and polls every 2.5s for changes from the other device. -->
-<script src="js/sync.js?v=2026-05-15-14"></script>
+<script src="js/sync.js?v=2026-05-15-16"></script>
 <script>window.SYNC && window.SYNC.init();</script>
 <!-- Liquid Glass: adaptive substrate tinting. Loads after app so cards
      are already in the DOM. Cards published after dashboard render are
      picked up by the module's MutationObserver. -->
-<script src="js/glass-adaptive.js?v=2026-05-15-14"></script>
+<script src="js/glass-adaptive.js?v=2026-05-15-16"></script>
+
+<!-- Auto-refresh on new deploy. iOS Add-to-Home-Screen webviews keep
+     the same standalone session alive across launches, so a manual
+     refresh is normally required to pick up new JS. This poll fetches
+     the latest index.html, reads the cache-buster off any script tag,
+     and reloads if it differs from the one this page was loaded with.
+     Triggers: every 5 min while tab is visible + on every focus /
+     visibilitychange. When the user returns to the bookmark and a new
+     version exists, reload is silent (no banner) since they haven't
+     interacted yet. -->
+<script>
+(function autoUpdate() {
+  var here = document.querySelector('script[src*="?v="]');
+  var m = here && here.src.match(/[?&]v=([\w.\-]+)/);
+  var myV = m && m[1];
+  if (!myV) return;
+  var checking = false, reloading = false;
+  async function check() {
+    if (checking || reloading) return;
+    checking = true;
+    try {
+      var res = await fetch(location.pathname + '?_av=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) return;
+      var html = await res.text();
+      var m2 = html.match(/script[^>]*src="[^"]*\?v=([\w.\-]+)"/);
+      if (!m2) return;
+      var latest = m2[1];
+      if (latest !== myV) {
+        reloading = true;
+        // GH Pages serves HTML with Cache-Control: max-age=600, and iOS
+        // standalone webviews honor that aggressively — location.reload()
+        // can return the same 10-min-old HTML. Navigating to a URL with
+        // a fresh query param forces a real network fetch, after which
+        // the new ?v= cache-busters pull the new JS bundle.
+        var delay = document.visibilityState === 'visible' ? 800 : 0;
+        setTimeout(function () {
+          location.href = location.pathname + '?_av=' + Date.now() + location.hash;
+        }, delay);
+      }
+    } catch (_) {}
+    finally { checking = false; }
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') check();
+  });
+  window.addEventListener('focus', check);
+  window.addEventListener('pageshow', check);   // iOS bfcache restore
+  setInterval(function () {
+    if (document.visibilityState === 'visible') check();
+  }, 5 * 60 * 1000);
+  check();
+})();
+</script>
 
 </body>
 </html>

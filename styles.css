@@ -803,15 +803,27 @@ body:has(> .fixed.inset-0[class*="z-5"]) #liquid-tabbar {
 }
 .more-sheet-list { display: flex; flex-direction: column; gap: 4px; }
 .more-sheet-version {
+  display: block;
+  width: 100%;
   margin-top: 14px;
+  padding: 10px 8px;
   text-align: center;
-  font-size: 10px;
+  font-size: 10.5px;
   font-feature-settings: 'tnum';
   letter-spacing: 0.04em;
   color: var(--muted);
-  opacity: 0.55;
+  opacity: 0.62;
   user-select: text;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: opacity 0.2s var(--spring-settle), background 0.2s var(--spring-settle);
 }
+.more-sheet-version:hover { opacity: 0.85; background: rgba(15,23,42,0.04); }
+.more-sheet-version:active { opacity: 1.0; background: rgba(15,23,42,0.08); }
 .more-sheet-row {
   display: flex; align-items: center; gap: 14px;
   padding: 14px 14px;
