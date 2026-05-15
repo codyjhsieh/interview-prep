@@ -235,12 +235,20 @@ function feedPetWithPile(state) {
   return true;
 }
 
+// Calibration constants — the daily goal (default 180) should require
+// roughly "10 applications + one curriculum subcategory" of effort.
+// With these values: 10 apps × 9 XP = 90, 5 lessons × 18 XP = 90,
+// total 180 — exactly hitting goal. Tuned 2026-05-15.
+const XP_LESSON_MULT = 1.5;       // 12-XP lesson → 18; 20-XP drill → 30
+const XP_APP_BASE    = 6;         // hard floor; actual = max(this, goal/20)
+
 function logLessonComplete(state, lessonId, baseXP) {
   if (state.completedLessons[lessonId]) {
     return { state, xpGained: 0, alreadyDone: true };
   }
   const prevLevel = state.level;
-  const { state: s, xpGained, bonusLabel } = awardXP(state, baseXP, 'lesson');
+  const boostedXP = Math.max(1, Math.round((baseXP || 0) * XP_LESSON_MULT));
+  const { state: s, xpGained, bonusLabel } = awardXP(state, boostedXP, 'lesson');
   s.completedLessons[lessonId] = { ts: Date.now(), xp: xpGained };
   const today = todayKey();
   const hentry = s.history.find(h => h.date === today);
@@ -283,7 +291,9 @@ function logJobApp(state) {
   tickDay(state);
   if (!Array.isArray(state.jobApps)) state.jobApps = [];
   const goal = (state.user && state.user.goal) || 60;
-  const perAppXP = Math.max(1, Math.round(goal / 20));
+  // Per-app XP: goal/20 so 10 apps = half a day's goal (the other half
+  // is curriculum). Floor at XP_APP_BASE for small-goal users.
+  const perAppXP = Math.max(XP_APP_BASE, Math.round(goal / 20));
   const award = awardXP(state, perAppXP, 'app');
   const entry = { date: todayKey(), ts: Date.now(), xp: award.xpGained };
   state.jobApps.push(entry);
@@ -302,7 +312,8 @@ function applyRole(state, roleKey, meta) {
   if (!Array.isArray(state.jobApps)) state.jobApps = [];
   if (state.jobApps.some(j => j.roleKey === roleKey)) return null;   // already applied
   const goal = (state.user && state.user.goal) || 60;
-  const perAppXP = Math.max(1, Math.round(goal / 20));
+  // Match logJobApp — goal/20, floor XP_APP_BASE.
+  const perAppXP = Math.max(XP_APP_BASE, Math.round(goal / 20));
   const award = awardXP(state, perAppXP, 'app');
   const entry = {
     date: todayKey(), ts: Date.now(), xp: award.xpGained,
