@@ -243,6 +243,42 @@ CANDIDATES = [
   ("suno","Suno","ashby","suno","ai","AI music generation","Series B","$125M","Lightspeed",["Lightspeed","Founder Collective","Nat Friedman"],"Generative music at scale. Audio pipelines, copyright/moderation, eval on subjective quality."),
   ("warp","Warp","ashby","warp","ai","AI-native terminal","Series B","$73M","Sequoia",["Sequoia","GV"],"Reimagined terminal with AI. Heavy on developer experience, latency, prompt design for code."),
   ("output","Output","ashby","output","saas","Music production software","Series A","$45M","Goldman Sachs",["Goldman Sachs","Marker"],"Music-production software (Arcade, Portal). Audio infra, ML for music, DAW integrations."),
+
+  # ── 2026-05-15 expansion: NYC-leaning AI / fintech / health / infra ──
+  # Slugs are best-guesses from each company's public careers page; run
+  # with -v to surface no-match diagnostics so we can iterate.
+  ("harvey","Harvey","ashby","harvey","ai","Legal AI for major firms","Series E","$500M+","Sequoia",["Sequoia","Kleiner","OpenAI Startup Fund"],"Legal AI for top law firms. FDE-style deploys, document workflows, reasoning eval."),
+  ("pinecone","Pinecone","greenhouse","pinecone","ai","Vector database for AI","Series B","$138M","Andreessen Horowitz",["a16z","Menlo","Wing"],"Production vector DB. Distributed indexing, latency, retrieval quality at scale."),
+  ("captions","Captions","ashby","captions","ai","AI video editor for creators","Series C","$100M","Index",["Index","Sequoia","Kleiner"],"NYC AI-first video editor. Real-time inference, mobile + web latency."),
+  ("granola","Granola","ashby","granola","ai","AI meeting notes","Series B","$67M","NfX",["NfX","Lightspeed","Spark"],"AI note-taking + meeting summaries. ASR, summarization, LLM eval."),
+  ("common-sense-machines","Common Sense Machines","ashby","csmcorp","ai","3D / world AI","Series A","$25M","OpenAI Startup Fund",["OpenAI","Translink"],"Generative 3D + simulation. Multimodal pipelines, GPU."),
+  ("huggingface","Hugging Face","workable","huggingface","ai","ML model hub + libraries","Series D","$395M","Salesforce",["Salesforce","Sequoia","Google"],"Open-source ML platform. Inference, hosting, eval; OSS-heavy culture."),
+  ("coreweave","CoreWeave","greenhouse","coreweave","infra","Specialized GPU cloud","Series C","$1.1B","Magnetar",["Magnetar","Coatue","NVIDIA"],"GPU cloud powering AI labs. Bare-metal infra + scheduling."),
+  ("lithic","Lithic","greenhouse","lithic","fintech","Card-issuing API","Series C","$60M","Index",["Index","Bessemer","Tusk"],"NYC card-issuing platform (Privacy.com lineage). Payments + compliance + APIs."),
+  ("unit","Unit","ashby","unit","fintech","Embedded banking","Series C","$170M","Insight",["Insight","Accel","Better Tomorrow"],"Banking-as-a-service. Ledger, KYC, money movement."),
+  ("increase","Increase","ashby","increase","fintech","Modern banking APIs","Series A","$20M","Andreessen Horowitz",["a16z","Susa","Garry Tan"],"Payments API (ACH/RTP/Wire). Deep banking + reliability."),
+  ("pagaya","Pagaya","greenhouse","pagaya","fintech","AI lending platform (NASDAQ)","Public","$500M+ pre-IPO","Israel Growth Partners",["NASDAQ","Aflac","Viola"],"NYC AI-lending. ML credit + capital-markets plumbing."),
+  ("petal","Petal","greenhouse","petalcard","fintech","Credit cards for thin-file consumers","Series E","$240M","Tarsadia",["Tarsadia","Valar","Peter Thiel"],"Cash-flow underwriting. ML risk + consumer lending."),
+  ("alphasense","AlphaSense","greenhouse","alphasense","ai","AI market intelligence","Series F","$650M+","BDT",["BDT","Viking","Goldman"],"NYC enterprise AI search over financial docs. Retrieval + integrations."),
+  ("tegus","Tegus","greenhouse","tegus","ai","Expert-call research platform","Late stage","$150M+","Bain",["Bain","Battery"],"NYC investment research. Search, ML, audio-to-text."),
+  ("yotta","Yotta","ashby","yotta","fintech","Prize-linked savings","Series A","$13M","Y Combinator",["YC","Base10"],"NYC consumer savings + lottery hybrid. Payments + ledger."),
+  ("bilt","Bilt Rewards","greenhouse","bilt","fintech","Rewards on rent + spend","Series C","$200M+","General Catalyst",["General Catalyst","Eldridge"],"NYC rewards network — points on rent. Loyalty + payments."),
+  ("neon","Neon","ashby","neon","devtools","Serverless Postgres","Series B","$104M","Menlo",["Menlo","General Catalyst","GGV"],"Branchable serverless Postgres. Storage separation, autoscaling."),
+  ("convex","Convex","ashby","convex","devtools","Reactive backend","Series A","$26M","Andreessen Horowitz",["a16z","Khosla"],"Reactive backend — DB + functions + real-time. TS-first DX."),
+  ("ro","Ro","lever","ro","health","D2C telehealth + pharmacy","Series E","$1B+","General Catalyst",["General Catalyst","Founders Fund","TPG"],"NYC telehealth. Care plans + fulfillment + identity."),
+  ("khealth","K Health","greenhouse","khealth","health","Primary-care AI","Series E","$378M","Cigna",["Cigna","Mangrove","Atreides"],"NYC AI-first primary care. Clinical NLP + EHR + telehealth."),
+  ("cityblock","Cityblock Health","workday","cityblockhealth/wd1/CityblockExternalCareerSite","health","Tech-enabled Medicaid care","Series D","$700M+","Tiger",["Tiger","General Catalyst","Maverick"],"NYC Medicaid care provider. Care platform + data + ops."),
+  ("edenhealth","Eden Health","greenhouse","edenhealth","health","Employer-sponsored primary care","Series C","$60M","Flare Capital",["Flare","Greycroft"],"NYC primary care for employers. Care navigation + telehealth."),
+  ("wiz","Wiz","greenhouse","wiz","security","Cloud security platform","Series E","$1.9B+","Andreessen Horowitz",["a16z","Sequoia","Lightspeed"],"Agentless cloud security. CSPM/CNAPP at scale; NYC eng presence."),
+  ("chainalysis","Chainalysis","greenhouse","chainalysis","fintech","Blockchain analytics + compliance","Series F","$540M","Insight",["Insight","Accel","Benchmark"],"NYC blockchain analytics. Crypto compliance + investigations + APIs."),
+
+  # ── 2026-05-15 — Workday ATS expansion (verified via probe) ────────
+  # Tuple-encoded slug = "tenant/wdN/site". See fetch() for the URL shape.
+  ("disney","The Walt Disney Company","workday","disney/wd5/disneycareer","media","Streaming + studios + parks (NYSE: DIS)","Public","$1B+ pre-IPO","NYSE",["NYSE","S&P 500"],"NYC tech: ABC News, Hulu, ESPN+, Disney+. Streaming infra + content systems."),
+  ("blackrock","BlackRock","workday","blackrock/wd1/BlackRock_Professional","fintech","World's largest asset manager (NYSE: BLK)","Public","$2.6B pre-IPO","NYSE",["NYSE","S&P 500"],"NYC HQ. Aladdin platform — risk + portfolio mgmt. Heavy systems / data eng."),
+  ("etsy","Etsy","workday","etsy/wd5/Etsy_Careers","marketplace","Marketplace for handmade + vintage (NASDAQ: ETSY)","Public","$307M pre-IPO","NASDAQ",["NASDAQ","S&P MidCap"],"Brooklyn HQ. Recommendations, search, payments, ML — strong Python culture."),
+  ("nbcuniversal","Comcast (NBCUniversal)","workday","comcast/wd5/Comcast_Careers","media","Media + telecom (NASDAQ: CMCSA)","Public","$1.1B pre-IPO","NASDAQ",["NASDAQ","S&P 500"],"NBCU + Peacock streaming. NYC: ad tech + media engineering."),
+  ("salesforce","Salesforce","workday","salesforce/wd12/External_Career_Site","saas","CRM + AI cloud (NYSE: CRM)","Public","$2B pre-IPO","NYSE",["NYSE","Dow 30"],"Hyperforce + Data Cloud + Einstein. NYC office for sales eng + applied AI."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -300,10 +336,17 @@ DOMAINS = {
 
 
 # ── HTTP fetchers (curl) ─────────────────────────────────────────────────
-def curl_json(url, timeout=15):
+def curl_json(url, timeout=15, method="GET", body=None, referer=None):
+  args = ["curl","-sS","-L","--max-time",str(timeout)]
+  if method == "POST":
+    args += ["-X","POST","-H","Content-Type: application/json","-H","Accept: application/json"]
+    if body is not None:
+      args += ["-d", body]
+  if referer:
+    args += ["-H", f"Referer: {referer}"]
+  args.append(url)
   try:
-    r = subprocess.run(["curl","-sS","-L","--max-time",str(timeout),url],
-                       capture_output=True, timeout=timeout+3, text=True)
+    r = subprocess.run(args, capture_output=True, timeout=timeout+3, text=True)
     return json.loads(r.stdout) if r.returncode == 0 and r.stdout else None
   except Exception:
     return None
@@ -318,6 +361,37 @@ def fetch(ats, slug):
   if ats == "lever":
     d = curl_json(f"https://api.lever.co/v0/postings/{slug}?mode=json")
     return d if isinstance(d, list) else []
+  if ats == "workable":
+    # Workable's v3 search endpoint — POST with empty body returns all
+    # published jobs. The public v3/accounts/{slug}/jobs GET 404s; the
+    # POST variant is what their SPA uses internally.
+    url = f"https://apply.workable.com/api/v3/accounts/{slug}/jobs"
+    body = '{"query":"","department":[],"location":[]}'
+    d = curl_json(url, method="POST", body=body)
+    return d.get("results", []) if d else []
+  if ats == "workday":
+    # Slug encodes the 3-tuple: "tenant/wdN/site"
+    # e.g. "cityblockhealth/wd1/CityblockExternalCareerSite"
+    try:
+      tenant, wdn, site = slug.split("/", 2)
+    except ValueError:
+      return []
+    url = f"https://{tenant}.{wdn}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs"
+    referer = f"https://{tenant}.{wdn}.myworkdayjobs.com/en-US/{site}"
+    # Workday caps limit at 20 — page through with offset until exhausted.
+    all_postings = []
+    offset = 0
+    while True:
+      body = json.dumps({"appliedFacets":{},"limit":20,"offset":offset,"searchText":""})
+      d = curl_json(url, method="POST", body=body, referer=referer)
+      if not d or not isinstance(d, dict): break
+      page = d.get("jobPostings", []) or []
+      all_postings.extend(page)
+      total = d.get("total") or 0
+      offset += 20
+      if offset >= total or not page: break
+      if offset > 500: break  # safety
+    return all_postings
   return []
 
 
@@ -328,7 +402,7 @@ def level(title):
   if "senior" in low or "sr." in low or "sr " in low: return "senior"
   return "mid"
 
-def filter_jobs(ats, raw):
+def filter_jobs(ats, raw, slug=""):
   out = []
   for j in raw:
     if ats == "ashby":
@@ -343,7 +417,7 @@ def filter_jobs(ats, raw):
       loc = (j.get("location") or {}).get("name","") or ""
       is_nyc = bool(NYC.search(loc))
       url = j.get("absolute_url")
-    else:  # lever
+    elif ats == "lever":
       title = (j.get("text") or "").strip()
       cat = j.get("categories") or {}
       loc = cat.get("location","") or ""
@@ -351,6 +425,31 @@ def filter_jobs(ats, raw):
       blob = loc + " " + " ".join(all_locs if isinstance(all_locs, list) else [])
       is_nyc = bool(NYC.search(blob))
       url = j.get("hostedUrl") or j.get("applyUrl")
+    elif ats == "workable":
+      # Workable: state=published only, location is a nested object with
+      # city/region/country plus a `locations` array for multi-location roles.
+      if j.get("state") and j.get("state") != "published": continue
+      title = (j.get("title") or "").strip()
+      primary = j.get("location") or {}
+      city = (primary.get("city") or "") + " " + (primary.get("region") or "")
+      others = j.get("locations") or []
+      blob = city + " " + " ".join(((l.get("city") or "") + " " + (l.get("region") or "")) for l in others if isinstance(l, dict))
+      is_nyc = bool(NYC.search(blob))
+      url = f"https://apply.workable.com/{slug}/j/{j.get('shortcode','')}"
+    elif ats == "workday":
+      # Workday: locationsText is a free-form string (e.g. "NY - New York"
+      # or "MI - Detroit"). externalPath is relative — prefix with the
+      # tenant URL we know from slug.
+      title = (j.get("title") or "").strip()
+      loc = j.get("locationsText") or ""
+      is_nyc = bool(NYC.search(loc))
+      try:
+        tenant, wdn, site = slug.split("/", 2)
+        url = f"https://{tenant}.{wdn}.myworkdayjobs.com/en-US/{site}{j.get('externalPath','')}"
+      except ValueError:
+        url = ""
+    else:
+      continue
     if not is_nyc: continue
     if not title or TITLE_EXCLUDE.search(title): continue
     if not TITLE_INCLUDE.search(title): continue
@@ -448,7 +547,7 @@ def main():
       continue
     seen.add(cid)
     raw = fetch(ats, slug)
-    matches = filter_jobs(ats, raw)
+    matches = filter_jobs(ats, raw, slug)
     if not matches:
       no_match.append(f"{name} ({ats}:{slug})")
       if args.verbose: print(f"[no-match] {name} ({ats}:{slug})", file=sys.stderr)
