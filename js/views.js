@@ -3199,20 +3199,6 @@ function renderPetCard(state, p) {
           </div>
           ${bar(p.vitality, p.vitality >= 60 ? 'var(--accent)' : p.vitality >= 30 ? 'var(--warn)' : 'var(--bad)')}
         </div>
-        ${p.stage !== 'baby' ? `
-        <div>
-          <div class="flex justify-between text-[11px] muted mb-0.5">
-            <span>Body</span>
-            <span class="numeric" style="text-transform:capitalize">${p.body}</span>
-          </div>
-          <div class="relative h-1 rounded-full" style="background:rgba(15,23,42,0.06)">
-            <div class="absolute top-0 bottom-0" style="left:50%; width:1px; background:var(--hairline)"></div>
-            <div class="absolute top-0 bottom-0 rounded-full" style="${p.form >= 0
-              ? `left:50%; width:${(p.form/50)*50}%; background:var(--sde)`
-              : `right:50%; width:${(-p.form/50)*50}%; background:var(--warn)`}"></div>
-          </div>
-          <div class="flex justify-between text-[10px] dim mt-0.5"><span>Chubby</span><span>Jacked</span></div>
-        </div>` : ''}
         <div>
           <div class="flex justify-between text-[11px] muted mb-0.5">
             <span>Today's XP</span>
