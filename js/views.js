@@ -1964,6 +1964,8 @@ function mountPet3D(container, p) {
     renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = T.BasicShadowMap;
+    const _ld = container.querySelector('[data-pet-loading]');
+    if (_ld) _ld.remove();
     container.appendChild(renderer.domElement);
     renderer.render(scene, camera);
     const handle = {
@@ -2307,6 +2309,9 @@ function mountPet3D(container, p) {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = T.BasicShadowMap;
   renderer.outputColorSpace = T.SRGBColorSpace || T.sRGBEncoding;
+  // Remove the Liquid Glass loading spinner now that the canvas is ready.
+  const _loadingEl = container.querySelector('[data-pet-loading]');
+  if (_loadingEl) _loadingEl.remove();
   container.appendChild(renderer.domElement);
 
   // ---- Food piles in the room ----
@@ -3097,7 +3102,9 @@ function openPetLifecyclePreview() {
         </div>
         <button class="text-2xl muted hover:text-[color:var(--text)]" data-close-lc aria-label="Close">×</button>
       </div>
-      <div id="lifecycle-room" class="pet-room-3d" style="height: 240px; width: 100%; margin: 12px auto 0"></div>
+      <div id="lifecycle-room" class="pet-room-3d" style="height: 240px; width: 100%; margin: 12px auto 0">
+        <div class="pet-loading" data-pet-loading aria-label="Loading stage"><div class="lg-spinner"></div></div>
+      </div>
       <div class="flex items-center justify-between gap-2 mt-4 flex-wrap">
         <button class="btn !py-1.5 !px-3" data-lc-prev>← Previous</button>
         <div class="text-xs muted numeric">${idx + 1} of ${stages.length}</div>
@@ -3115,7 +3122,9 @@ function openPetLifecyclePreview() {
       return ['walk', 'walk', 'walk', 'play', 'eat'];   // 3:1:1 walk:play:eat
     })();
     const _activity = _activityPool[Math.floor(Math.random() * _activityPool.length)];
-    requestAnimationFrame(() => {
+    // Double rAF so the Liquid Glass spinner gets one paint frame before
+    // the synchronous mountPet3D blocks the main thread for ~200-500ms.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
       mountPet3D(host, {
         name: 'Bit', stage: s.stage, body: s.body,
         activity: _activity, fedToday: true,
@@ -3126,7 +3135,7 @@ function openPetLifecyclePreview() {
         forceHour: s.hour,
         bodyHue: 0x9CC7E6,                              // preview keeps a stable color
       });
-    });
+    }));
     card.querySelector('[data-lc-prev]').addEventListener('click', () => {
       idx = (idx - 1 + stages.length) % stages.length; cleanup(); paint();
     });
@@ -3188,7 +3197,9 @@ function renderPetCard(state, p) {
     <div class="pet-grid">
       <!-- LEFT: Three.js WebGL scene — Bit dominant. data-morph-skip
            so sync's surgical DOM updater doesn't wipe the canvas. -->
-      <div class="pet-room-3d" id="pet-room-3d-host" data-morph-skip></div>
+      <div class="pet-room-3d" id="pet-room-3d-host" data-morph-skip>
+        <div class="pet-loading" data-pet-loading aria-label="Loading pet scene"><div class="lg-spinner"></div></div>
+      </div>
 
       <!-- RIGHT panel: all stats + interactions stacked -->
       <div class="pet-panel pet-panel-right space-y-3 self-center">
@@ -3206,8 +3217,8 @@ function renderPetCard(state, p) {
           </div>
           <div class="bar"><i style="width:${p.xpProgress}%"></i></div>
         </div>
-        <div class="text-[12px]" style="color:${p.fedToday ? 'var(--accent)' : 'inherit'}">
-          ${p.fedToday
+        <div class="text-[12px]" style="color:${p.todayXP >= p.goal ? 'var(--accent)' : 'inherit'}">
+          ${p.todayXP >= p.goal
             ? `✓ Goal hit${p.todayXP >= p.goal * 1.5 ? ' · workout bonus' : ''}`
             : `<b>${p.xpToFeed} XP</b> to today's goal`}
         </div>
@@ -3227,12 +3238,11 @@ function renderPetCard(state, p) {
     <details class="mt-3">
       <summary class="text-[11px] muted cursor-pointer hover:opacity-80">How feeding works ▾</summary>
       <ul class="list-muted mt-2 text-[11.5px]" style="font-size:11.5px">
-        <li><b>Hit ${p.goal} XP today</b> → ${esc(p.name)} eats: vitality <span style="color:var(--accent)">+25</span> (cap 100)</li>
-        <li><b>Hit ${Math.round(p.goal*1.5)} XP today</b> → ${esc(p.name)} hits the gym: body shifts toward <b>Jacked</b> (+6)</li>
-        <li><b>Hit ${p.goal} but not ${Math.round(p.goal*1.5)}</b> → fed but sedentary: drifts toward <b>Chubby</b> (-2)</li>
-        <li><b>Skip a day</b> → vitality <span style="color:var(--bad)">-30</span>; body drifts back to Normal</li>
-        <li><b>3 skipped days in a row</b> → vitality hits zero. ${esc(p.name)} <b style="color:var(--bad)">starves to death</b> in its little isometric room while you do absolutely nothing about it.</li>
-        <li><b>Death =</b> all stats reset, streak gone, a new baby pet hatches tomorrow morning to start over. Your skull counter goes up forever. There is no resurrection.</li>
+        <li>Vitality decays <b>100 → 0</b> over 24 h since the last feed.</li>
+        <li>Every 10 XP earned today = 1 food pile. Each drop consumes one pile: <b>+20 vitality</b> (cap 100).</li>
+        <li><b>Hit ${Math.round(p.goal*1.5)} XP today</b> → body shifts toward <b>Jacked</b>; less than ${p.goal} → toward <b>Chubby</b>.</li>
+        <li><b>24 h with no feed</b> → vitality 0. Cross a midnight at 0 → ${esc(p.name)} dies.</li>
+        <li>Death resets all pet stats; a new baby hatches tomorrow. Skull counter sticks.</li>
       </ul>
     </details>
   `;
@@ -3476,8 +3486,13 @@ function renderDashboard(state, hub) {
     container.appendChild(renderQuotesCard());
   }
   // Mount the 3D scene now that the host div is attached + has dimensions.
+  // Double rAF: frame N paints the Liquid Glass loading spinner so the
+  // user actually sees it; frame N+1 starts the (synchronous, ~200-500ms)
+  // scene construction that would otherwise block the spinner's first
+  // paint. Without this, the spinner is removed before the browser
+  // ever rasterizes it.
   // Falls back gracefully (empty container) if Three.js isn't available.
-  requestAnimationFrame(() => {
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     const host = petCard.querySelector('#pet-room-3d-host');
     // Skip mounting if the host is detached — happens when sync.js's
     // morph renders the dashboard into a buffer to diff against the
@@ -3500,7 +3515,7 @@ function renderDashboard(state, hub) {
       // in app.js (bindEvents) so it survives sync-driven pet-panel
       // swaps. It reads host._petHandle to find the scene.
     }
-  });
+  }));
 
   // Stats row
   const stats = el('div','grid grid-cols-2 sm:grid-cols-4 gap-4');
@@ -4453,6 +4468,57 @@ function fitBadgeHTML(score) {
   </span>`;
 }
 
+// Stable identifier for a (company, role) pair — used as state.jobApps
+// entry's `roleKey`. Same string on both devices for the same row so
+// the checked state syncs cleanly.
+function makeRoleKey(company, job) {
+  const u = (job && job.url) || '';
+  if (u) return company.id + '|' + u;            // URL is the most stable
+  return company.id + '|' + (job && job.title || '');
+}
+
+// Wires the .applied-cb toggle behavior on a container. Click anywhere
+// on the row's checkbox toggles applied-state via GAMI.applyRole /
+// unapplyRole + propagates the change through afterStateChange (which
+// re-renders the dashboard's jobApps card and pushes the change via
+// sync.js's wrapped saveImmediate).
+function bindApplyToggles(container) {
+  container.addEventListener('click', (e) => {
+    const cb = e.target.closest('[data-apply-toggle]');
+    if (!cb) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const row = cb.closest('[data-role-row]');
+    if (!row) return;
+    const key = row.getAttribute('data-role-key');
+    if (!key) return;
+    const st = (window.APP && window.APP.getState) ? window.APP.getState() : null;
+    if (!st) return;
+    if (GAMI.isRoleApplied(st, key)) {
+      const r = GAMI.unapplyRole(st, key);
+      if (r && window.ANIM && window.ANIM.toast) {
+        window.ANIM.toast({ title: 'Application removed', body: `-${r.xpRemoved} XP refunded.` });
+      }
+      cb.setAttribute('data-checked', '0');
+      cb.setAttribute('aria-checked', 'false');
+    } else {
+      const meta = {
+        company: row.getAttribute('data-co-name'),
+        title:   row.getAttribute('data-role-title'),
+        url:     row.getAttribute('data-role-url'),
+      };
+      const r = GAMI.applyRole(st, key, meta);
+      if (r && window.ANIM && window.ANIM.toast) {
+        window.ANIM.toast({ title: 'Application logged', body: `+${r.xpGained} XP` });
+      }
+      cb.setAttribute('data-checked', '1');
+      cb.setAttribute('aria-checked', 'true');
+    }
+    GAMI.saveImmediate(st);     // wrapped → triggers sync push
+    if (window.APP && window.APP.afterStateChange) window.APP.afterStateChange();
+  });
+}
+
 function renderCompanies(state, hub) {
   const container = el('div','fade-in space-y-4');
   const verifiedAt = window.DATA && window.DATA.COMPANIES_VERIFIED_AT;
@@ -4524,8 +4590,11 @@ function renderCompanies(state, hub) {
     const cardEl = el('a','card card-glow block');
     cardEl.href = `#company/${c.id}`;
     const domain = COMPANY_DOMAINS[c.id];
+    // Clearbit's free logo API was deprecated by HubSpot; logo.clearbit.com
+    // now returns ERR_NAME_NOT_RESOLVED for most domains. Switched to
+    // Google's S2 favicon service — reliable, free, returns 64px PNG.
     const logo = domain
-      ? `<img src="https://logo.clearbit.com/${domain}" alt="${esc(c.name)} logo" loading="lazy" decoding="async" width="32" height="32" onerror="this.style.display='none';this.parentElement.textContent='${esc(c.name[0])}'" />`
+      ? `<img src="https://www.google.com/s2/favicons?domain=${domain}&sz=64" alt="${esc(c.name)} logo" loading="lazy" decoding="async" width="32" height="32" onerror="this.style.display='none';this.parentElement.textContent='${esc(c.name[0])}'" />`
       : esc(c.name[0]);
     const badges = (c.badges || []).slice(0, 3)
       .map(b => `<span class="chip chip-funding">${esc(b)}</span>`).join('');
@@ -4624,18 +4693,25 @@ function renderCompanies(state, hub) {
     }
     // Cap render to 250 rows for performance; show how many are hidden.
     const cap = 250;
+    const live = (window.APP && window.APP.getState) ? window.APP.getState() : state;
     const head = `<div class="text-[11px] muted">${filtered.length} role${filtered.length===1?'':'s'} matched, sorted by fit${filtered.length>cap?` (showing top ${cap})`:''}</div>`;
     const rows = filtered.slice(0, cap).map(r => {
       const c = r._company;
+      const roleKey = makeRoleKey(c, r);
+      const checked = GAMI.isRoleApplied(live, roleKey);
       const domain = COMPANY_DOMAINS[c.id];
       const logoMini = domain
-        ? `<img src="https://logo.clearbit.com/${domain}" alt="${esc(c.name)}" loading="lazy" decoding="async" width="24" height="24" style="width:24px;height:24px;border-radius:6px;flex-shrink:0;object-fit:cover" onerror="this.style.display='none'"/>`
+        ? `<img src="https://www.google.com/s2/favicons?domain=${domain}&sz=64" alt="${esc(c.name)}" loading="lazy" decoding="async" width="28" height="28" style="width:28px;height:28px;border-radius:7px;flex-shrink:0;object-fit:cover" onerror="this.style.display='none'"/>`
         : `<div class="role-row-letter">${esc(c.name[0])}</div>`;
       const lvl = r.level || 'mid';
       const lvlClass = lvl === 'founding' ? 'pill-ai' : (lvl === 'senior' ? 'pill-both' : 'pill-dev');
       const lvlLabel = lvl === 'founding' ? 'Founding' : (lvl === 'senior' ? 'Senior' : 'Mid');
       return `
-        <a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer" class="role-row">
+        <div class="role-row" data-role-row data-role-key="${esc(roleKey)}" data-role-url="${esc(r.url)}"
+             data-co-id="${esc(c.id)}" data-co-name="${esc(c.name)}" data-role-title="${esc(r.title)}">
+          <span class="applied-cb" data-apply-toggle data-checked="${checked ? '1' : '0'}"
+                role="checkbox" aria-checked="${checked ? 'true' : 'false'}"
+                aria-label="Mark as applied"></span>
           ${logoMini}
           <div class="role-row-text">
             <div class="role-row-title truncate">${esc(r.title)}</div>
@@ -4651,8 +4727,10 @@ function renderCompanies(state, hub) {
           </div>
           <span class="pill ${lvlClass}" style="font-size:10px">${lvlLabel}</span>
           ${fitBadgeHTML(r._fit)}
-          <span style="color:var(--accent)">↗</span>
-        </a>`;
+          <a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer"
+             onclick="event.stopPropagation()"
+             style="color:var(--accent); text-decoration:none; padding:4px 6px;">↗</a>
+        </div>`;
     }).join('');
     rolelist.innerHTML = head + '<div class="space-y-1.5 mt-2">' + rows + '</div>';
   }
@@ -4670,6 +4748,9 @@ function renderCompanies(state, hub) {
     }
   }
   paint();
+  // One delegated click handler for ALL applied-checkbox toggles in the
+  // roles list (also used by the company detail view; it binds its own).
+  bindApplyToggles(rolelist);
 
   // Liquid-Glass animated thumb under the primary tab. Position is
   // tracked via CSS variables on the container so the thumb can slide
@@ -4728,7 +4809,7 @@ function renderCompany(state, hub, id) {
   const container = el('div','fade-in space-y-5');
   const domain = COMPANY_DOMAINS[c.id];
   const logo = domain
-    ? `<img src="https://logo.clearbit.com/${domain}" alt="${esc(c.name)} logo" onerror="this.style.display='none';this.parentElement.textContent='${esc(c.name[0])}'" />`
+    ? `<img src="https://www.google.com/s2/favicons?domain=${domain}&sz=128" alt="${esc(c.name)} logo" onerror="this.style.display='none';this.parentElement.textContent='${esc(c.name[0])}'" />`
     : esc(c.name[0]);
 
   const badges = (c.badges || []).map(b => `<span class="chip chip-funding">${esc(b)}</span>`).join('');
@@ -4737,17 +4818,25 @@ function renderCompany(state, hub, id) {
     const lvl = j.level || 'mid';
     const lvlLabel = lvl === 'founding' ? 'Founding' : (lvl === 'senior' ? 'Senior' : 'Mid');
     const lvlClass = lvl === 'founding' ? 'pill-ai' : (lvl === 'senior' ? 'pill-both' : 'pill-dev');
+    const roleKey = makeRoleKey(c, j);
+    const checked = GAMI.isRoleApplied(state, roleKey);
     return `
-      <a href="${esc(j.url)}" target="_blank" rel="noopener noreferrer"
-         class="job-row flex items-center gap-3 p-3 rounded-xl border border-[color:var(--hairline)] hover:border-[color:var(--accent)] transition">
+      <div class="job-row flex items-center gap-3 p-3 rounded-xl border border-[color:var(--hairline)] transition"
+           data-role-row data-role-key="${esc(roleKey)}" data-role-url="${esc(j.url)}"
+           data-co-id="${esc(c.id)}" data-co-name="${esc(c.name)}" data-role-title="${esc(j.title)}">
+        <span class="applied-cb" data-apply-toggle data-checked="${checked ? '1' : '0'}"
+              role="checkbox" aria-checked="${checked ? 'true' : 'false'}"
+              aria-label="Mark as applied"></span>
         <div class="flex-1 min-w-0">
           <div class="text-sm font-medium truncate">${esc(j.title)}</div>
           <div class="text-[11px] muted mt-0.5">Direct posting · opens in new tab</div>
         </div>
         <span class="pill ${lvlClass}">${lvlLabel}</span>
         ${fitBadgeHTML(roleFitScore(c, j))}
-        <span style="color:var(--accent)">↗</span>
-      </a>`;
+        <a href="${esc(j.url)}" target="_blank" rel="noopener noreferrer"
+           onclick="event.stopPropagation()"
+           style="color:var(--accent); text-decoration:none; padding:4px 6px;">↗</a>
+      </div>`;
   }).join('');
 
   container.innerHTML = `
@@ -4778,13 +4867,16 @@ function renderCompany(state, hub, id) {
       <div class="card">
         <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
           <h3 class="font-display font-semibold text-lg">Live NYC engineering postings</h3>
-          <span class="text-[11px] muted">${c.jobs.length} verified · direct links</span>
+          <span class="text-[11px] muted">${c.jobs.length} verified · check to log as applied</span>
         </div>
-        <div class="space-y-2">${jobsHTML}</div>
+        <div class="space-y-2" id="co-jobs-list">${jobsHTML}</div>
         <p class="text-[11px] muted mt-3">Postings verified live on ${esc((window.DATA && window.DATA.COMPANIES_VERIFIED_AT) || 'recently')}. If a link is dead, the role was filled or pulled since verification.</p>
       </div>` : ''}
   `;
   hub.appendChild(container);
+  // Wire up the apply-toggle checkboxes on this view.
+  const jobsList = container.querySelector('#co-jobs-list');
+  if (jobsList) bindApplyToggles(jobsList);
 }
 
 /* ====================== FLASHCARDS ====================== */

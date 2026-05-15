@@ -802,6 +802,16 @@ body:has(> .fixed.inset-0[class*="z-5"]) #liquid-tabbar {
   margin: 0 auto 14px;
 }
 .more-sheet-list { display: flex; flex-direction: column; gap: 4px; }
+.more-sheet-version {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 10px;
+  font-feature-settings: 'tnum';
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  opacity: 0.55;
+  user-select: text;
+}
 .more-sheet-row {
   display: flex; align-items: center; gap: 14px;
   padding: 14px 14px;
@@ -960,6 +970,78 @@ body:has(> .fixed.inset-0[class*="z-5"]) #liquid-tabbar {
   box-shadow: inset 0 -1px 0 rgba(15,23,42,0.04);
 }
 .pet-room-3d canvas { display: block; width: 100%; height: 100%; }
+
+/* Ambient Liquid Glass activity indicator — soft, diffused, emerges
+ * from the scene rather than sitting on top of it.
+ *  Layers:
+ *    1. Radial halo behind the disc — bleeds into the scene so the
+ *       loader feels integrated with the warm sand background.
+ *    2. Translucent glass disc with subtle inner highlight — provides
+ *       material substance without hard edges.
+ *    3. Conic-gradient ring with a long smooth gradient (multi-stop)
+ *       and a 1.5px blur applied — gives the rotation a soft "smoke"
+ *       quality instead of a sharp comet trail.
+ *    4. Outer glow box-shadow instead of a drop shadow — radiates
+ *       softly outward, no hard rim.
+ *  Animation: 1.4s constant-velocity rotation — slower than the
+ *  default iOS spinner so the motion reads as breathing rather
+ *  than urgency.
+ */
+.pet-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.06) 35%,
+    transparent 65%
+  );
+}
+.lg-spinner {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(28px) saturate(190%) brightness(1.04);
+          backdrop-filter: blur(28px) saturate(190%) brightness(1.04);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -0.5px 0 rgba(15, 23, 42, 0.04),
+    0 0 28px rgba(255, 255, 255, 0.35),
+    0 0 12px rgba(255, 255, 255, 0.2);
+}
+.lg-spinner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.0)   0deg,
+    rgba(255, 255, 255, 0.02)  45deg,
+    rgba(255, 255, 255, 0.08)  100deg,
+    rgba(255, 255, 255, 0.20)  170deg,
+    rgba(255, 255, 255, 0.40)  240deg,
+    rgba(255, 255, 255, 0.65)  300deg,
+    rgba(255, 255, 255, 0.85)  340deg,
+    rgba(255, 255, 255, 0.95)  360deg
+  );
+  -webkit-mask: radial-gradient(circle at center, transparent 0 14px, #000 16px 21.5px, transparent 23.5px);
+          mask: radial-gradient(circle at center, transparent 0 14px, #000 16px 21.5px, transparent 23.5px);
+  filter: blur(1.5px);
+  animation: lg-spin 1.4s linear infinite;
+}
+@keyframes lg-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lg-spinner::before, .lg-spinner::after { animation: none; opacity: 0.65; }
+}
 
 @media (max-width: 640px) {
   .pet-room-3d { width: 100%; max-width: 340px; height: 200px; margin: 0 auto; }
@@ -1692,10 +1774,10 @@ code, pre, .font-mono {
 
 /* Individual-roles list row (the flat list shown when Roles tab active). */
 .role-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.50);
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.55);
   border: 1px solid var(--hairline);
   text-decoration: none;
   color: var(--text);
@@ -1707,16 +1789,16 @@ code, pre, .font-mono {
   transform: translateY(-1px);
 }
 .role-row-letter {
-  width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+  width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
   background: var(--hl-faint); display: grid; place-items: center;
-  font-size: 11px; font-weight: 600; color: var(--muted);
+  font-size: 12px; font-weight: 600; color: var(--muted);
 }
 .role-row-text  { flex: 1 1 0; min-width: 0; }
-.role-row-title { font-size: 13.5px; font-weight: 500; }
-.role-row-co    { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.role-row-title { font-size: 14.5px; font-weight: 500; line-height: 1.35; }
+.role-row-co    { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
 @media (max-width: 640px) {
-  .role-row { gap: 8px; padding: 8px 10px; }
-  .role-row-title { font-size: 13px; }
+  .role-row { gap: 12px; padding: 13px 14px; }
+  .role-row-title { font-size: 14px; }
   .role-row .fit-badge .fit-tier { display: none; } /* tight layout */
 }
 
@@ -2417,4 +2499,62 @@ blockquote {
   /* Lists inside lesson bodies need more spacing between items */
   .list-muted { margin: 8px 0 8px 20px; }
   .list-muted li { margin: 4px 0; line-height: 1.6; }
+}
+
+/* ─── Liquid Glass apply-checkbox ────────────────────────────────────
+ * Square checkbox used to mark a role as "applied to". Translucent
+ * substrate + inset rim + soft drop matches the rest of the Liquid
+ * Glass material. Toggling [data-checked] on the wrapper switches the
+ * fill + check-mark in/out via a spring-easing transition. Toggling
+ * happens on click (handled in JS) — no native <input> involvement.
+ */
+.applied-cb {
+  position: relative;
+  flex-shrink: 0;
+  width: 24px; height: 24px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.05),
+    0 1px 2px rgba(15, 23, 42, 0.08);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  backdrop-filter:        blur(8px) saturate(160%);
+  cursor: pointer;
+  transition:
+    background 0.22s var(--spring-settle, ease),
+    border-color 0.22s var(--spring-settle, ease),
+    transform 0.18s var(--spring-settle, ease);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+.applied-cb:hover {
+  border-color: color-mix(in srgb, var(--accent) 50%, rgba(15,23,42,0.18));
+}
+.applied-cb:active { transform: scale(0.92); }
+/* The checkmark glyph — rendered via CSS so we don't need an inline SVG. */
+.applied-cb::after {
+  content: '';
+  position: absolute;
+  left: 7px; top: 3px;
+  width: 7px; height: 12px;
+  border-right: 2.5px solid #ffffff;
+  border-bottom: 2.5px solid #ffffff;
+  transform: rotate(45deg) scale(0);
+  opacity: 0;
+  transition: transform 0.24s var(--spring-overshoot, ease),
+              opacity 0.18s var(--spring-settle, ease);
+}
+.applied-cb[data-checked="1"] {
+  background: var(--accent, #0EA371);
+  border-color: var(--accent, #0EA371);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 2px 6px -2px color-mix(in srgb, var(--accent, #0EA371) 70%, transparent);
+}
+.applied-cb[data-checked="1"]::after {
+  transform: rotate(45deg) scale(1);
+  opacity: 1;
 }

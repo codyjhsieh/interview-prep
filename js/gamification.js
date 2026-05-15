@@ -205,10 +205,24 @@ function awardXP(state, amount, reason) {
  * body form by +1 if the user is on the workout path (todayXP > goal*1.5)
  * else -1 (sedentary → chubby). This replaces the previous automatic
  * vitality bump that fired the moment todayXP crossed the goal. */
+/* Manual feed — called when the user drops a food pile. Each pile
+ * restores +20 vitality (so 5 piles = full restore from zero). Pile
+ * cost is 10 XP earned today (see foodPilesAvailable in petState).
+ *
+ * The new vitality model: a snapshot value lives in p.vitality + a
+ * timestamp p.lastFedAt; the displayed value decays linearly from
+ * that snapshot at 100 points per 24 hours. Feeding RESETS the
+ * snapshot to (current live + bonus) and writes a fresh lastFedAt.
+ */
 function feedPetWithPile(state) {
   if (!state || !state.pet) return false;
   const p = state.pet;
-  p.vitality = Math.min(100, (p.vitality || 0) + 8);
+  // Roll the time-decayed live value back into the stored snapshot
+  // before adding the bonus. Without this, every feed event would
+  // discard accumulated decay (you could feed once a day and stay
+  // at 100 forever).
+  p.vitality = Math.min(100, _liveVitality(p) + 20);
+  p.lastFedAt = Date.now();
   const today = todayKey();
   p.lastFedDate = today;
   const goal = (state.user && state.user.goal) || 60;
@@ -276,6 +290,67 @@ function logJobApp(state) {
   // Cap retained history (~1y of heavy use) to keep state size bounded.
   if (state.jobApps.length > 1000) state.jobApps.splice(0, state.jobApps.length - 1000);
   return { entry, ...award };
+}
+
+/* Toggle-on a specific role as "applied to". Same XP rules as logJobApp
+ * but the entry carries a roleKey (+ display metadata) so the same row
+ * can later be toggled OFF, and so it shows as checked across devices
+ * after sync. Re-applying the SAME roleKey while already checked is a
+ * no-op (returns null). */
+function applyRole(state, roleKey, meta) {
+  tickDay(state);
+  if (!Array.isArray(state.jobApps)) state.jobApps = [];
+  if (state.jobApps.some(j => j.roleKey === roleKey)) return null;   // already applied
+  const goal = (state.user && state.user.goal) || 60;
+  const perAppXP = Math.max(1, Math.round(goal / 20));
+  const award = awardXP(state, perAppXP, 'app');
+  const entry = {
+    date: todayKey(), ts: Date.now(), xp: award.xpGained,
+    roleKey,
+    company: meta && meta.company,
+    title:   meta && meta.title,
+    url:     meta && meta.url,
+  };
+  state.jobApps.push(entry);
+  if (state.jobApps.length > 1000) state.jobApps.splice(0, state.jobApps.length - 1000);
+  return { entry, ...award };
+}
+
+/* Toggle-off — remove the jobApp entry matching roleKey, refund its
+ * xp, and tombstone the ts so the other paired device's merge
+ * doesn't resurrect it. */
+function unapplyRole(state, roleKey) {
+  if (!Array.isArray(state.jobApps)) return null;
+  const idx = state.jobApps.findIndex(j => j.roleKey === roleKey);
+  if (idx === -1) return null;
+  const [removed] = state.jobApps.splice(idx, 1);
+  const xp = removed.xp || 0;
+  state.xp      = Math.max(0, (state.xp      || 0) - xp);
+  state.level   = levelFromXP(state.xp);
+  // Only refund todayXP + today's history if the entry is today.
+  if (removed.date === todayKey()) {
+    state.todayXP = Math.max(0, (state.todayXP || 0) - xp);
+    const hentry  = (state.history || []).find(h => h.date === removed.date);
+    if (hentry) hentry.xp = Math.max(0, (hentry.xp || 0) - xp);
+  }
+  if (!state.jobAppsDeletedTs) state.jobAppsDeletedTs = {};
+  if (removed.ts != null) state.jobAppsDeletedTs[removed.ts] = Date.now();
+  // Garbage-collect tombstones older than 30 days
+  const cutoff = Date.now() - 30 * 86400000;
+  for (const k of Object.keys(state.jobAppsDeletedTs)) {
+    if ((state.jobAppsDeletedTs[k] || 0) < cutoff) delete state.jobAppsDeletedTs[k];
+  }
+  return { removed, xpRemoved: xp };
+}
+
+/* Is this roleKey currently applied (i.e., present in state.jobApps)?
+ * Cheap lookup used by the role-row checkbox renderer. */
+function isRoleApplied(state, roleKey) {
+  if (!Array.isArray(state.jobApps)) return false;
+  for (let i = 0; i < state.jobApps.length; i++) {
+    if (state.jobApps[i].roleKey === roleKey) return true;
+  }
+  return false;
 }
 
 /* Undo the most recent job application logged TODAY. Subtracts the
@@ -559,7 +634,8 @@ function _newPet(name = 'Bit') {
   return {
     stage: 'baby',
     ageDays: 0,
-    vitality: 80,
+    vitality: 80,                  // snapshot (live = vitality − decay since lastFedAt)
+    lastFedAt: Date.now(),         // ms timestamp — drives live decay (100 pts / 24h)
     form: 0,
     lastFedDate: null,
     lastTickDate: todayKey(),
@@ -635,48 +711,15 @@ function _petTick(p, today, state) {
   // Grace period: a brand-new pet (ageDays === 0) is exempt on its very
   // first day after creation, otherwise creating Bit at 11 PM and not
   // earning the goal in the remaining hour would kill him by morning.
-  const goal = (state && state.user && state.user.goal) || 60;
-  const history = (state && state.history) || [];
-  const xpByDate = Object.create(null);
-  for (const h of history) xpByDate[h.date] = h.xp || 0;
-  if (p.consecutiveSkipDays == null) p.consecutiveSkipDays = 0;
-  const checkStarvation = p.lastTickDate && (p.ageDays > 0 || daysElapsed > 1);
-  if (checkStarvation) {
-    const dayMs = 24 * 3600 * 1000;
-    const lastT  = new Date(p.lastTickDate + 'T00:00:00').getTime();
-    const todayT = new Date(today          + 'T00:00:00').getTime();
-    for (let t = lastT; t < todayT; t += dayMs) {
-      const dKey = new Date(t).toISOString().slice(0, 10);
-      const dayXP = xpByDate[dKey] || 0;
-      // Vitality penalty is uniform across all sub-goal days (scaled by
-      // the shortfall); skip-credit logic is independent and only gates
-      // DEATH on the second consecutive 0-XP day.
-      if (dayXP < goal) {
-        const shortfall = (goal - dayXP) / goal;          // 0..1
-        const penalty = Math.round(30 * shortfall);       // 0..30
-        p.vitality = Math.max(0, p.vitality - penalty);
-      }
-      if (dayXP === 0) {
-        p.consecutiveSkipDays += 1;
-        if (p.consecutiveSkipDays >= 2) {
-          // Second consecutive 0-XP day → death (regardless of how
-          // much vitality remained after the proportional penalty).
-          p.vitality = 0;
-          break;
-        }
-      } else {
-        // Any nonzero XP day resets the consecutive-skip counter.
-        p.consecutiveSkipDays = 0;
-      }
-      if (p.vitality === 0) break;
-    }
-  } else if (!checkStarvation) {
-    // Fallback for the grace-period case (brand-new pet, first day):
-    // apply the original gentle -30/day so vitality still moves.
-    for (let i = 0; i < daysElapsed; i++) {
-      p.vitality = Math.max(0, p.vitality - 30);
-      if (p.vitality === 0) break;
-    }
+  // ── Vitality is now purely time-since-fed (see _liveVitality).
+  // _petTick no longer subtracts vitality based on yesterday's XP — that
+  // would double-count with the live decay. Death = the live value
+  // crossing 0 (i.e. went >24h without a feed). consecutiveSkipDays is
+  // kept zero-pinned for legacy data shapes but unused in the new model.
+  p.consecutiveSkipDays = 0;
+  if (_liveVitality(p) === 0 && (p.ageDays > 0 || daysElapsed > 1)) {
+    p.vitality = 0;
+    // (handed off to the death branch lower in this function)
   }
   // Form & age advance every day regardless
   for (let i = 0; i < daysElapsed; i++) {
@@ -738,22 +781,24 @@ function _petBody(p) {
  *     to regime 1 — the skip counter will reset at midnight, no
  *     death, vitality recovers visibly.
  */
-function _liveVitality(p, todayXP, goal) {
+/* Live vitality — pure time-since-fed decay.
+ *
+ *   live = max(0, snapshot − 100 × (now − lastFedAt) / 24h)
+ *
+ * Snapshot (p.vitality) only changes on real EVENTS: a feed bumps
+ * the snapshot up; nothing decays the snapshot — the displayed
+ * value just slides down as time passes. To restore vitality the
+ * user spends XP-earned-today on food piles (each pile = +20).
+ *
+ * If they go 24 hours without feeding, vitality hits 0. Stays at
+ * 0 until the next feed.
+ */
+function _liveVitality(p /* legacy 2nd/3rd args ignored */) {
   if (!p || p.vitality == null) return 0;
-  const now = new Date();
-  const hourFraction = (now.getHours() * 3600
-                     + now.getMinutes() * 60
-                     + now.getSeconds()) / 86400;
-  const xp = todayXP || 0;
-  // Regime 2: pre-locked death trajectory (second consecutive skip).
-  if (xp === 0 && (p.consecutiveSkipDays || 0) >= 1) {
-    return Math.max(0, Math.round(p.vitality * (1 - hourFraction)));
-  }
-  // Regime 1: standard partial-credit decay (also covers fresh first-skip
-  // days — vitality still drops, only DEATH is gated by the skip credit).
-  const xpRatio = Math.min(1, xp / (goal || 60));
-  const pendingPenalty = (1 - xpRatio) * 30 * hourFraction;
-  return Math.max(0, Math.round(p.vitality - pendingPenalty));
+  const last = p.lastFedAt || Date.now();
+  const elapsed = Math.max(0, Date.now() - last);
+  const decay = 100 * (elapsed / 86400000);
+  return Math.max(0, Math.round((p.vitality || 0) - decay));
 }
 
 function _petActivity(p, today, justFed, liveVitality) {
@@ -802,10 +847,9 @@ function petState(state) {
   // food via the "Drop food" button, which calls feedPetWithPile().
   const justFed = (todayXP >= goal) && p.lastFedDate !== today;
 
-  // Food piles: every 10 XP earned (not yet spent on a drop) is one
-  // droppable pile. No cap — crossing the daily goal doesn't stop the
-  // user from earning more food. The user is in charge of when to drop;
-  // unspent XP just accumulates.
+  // Food piles: every 10 XP earned today = 1 pile. Each drop consumes
+  // one pile (eatenTodayXP += 10). Available = earned − consumed.
+  // Vitality caps at 100; form math runs per drop.
   const PILE_XP = 10;
   const uneatenXP = Math.max(0, todayXP - (p.eatenTodayXP || 0));
   const foodPilesAvailable = Math.floor(uneatenXP / PILE_XP);
@@ -1004,7 +1048,9 @@ function coverage(state, categories, modules) {
 
 return {
   STORAGE_KEY, load, save, saveImmediate, reset,
-  tickDay, awardXP, logLessonComplete, logJobApp, removeLastJobApp, feedPetWithPile,
+  tickDay, awardXP, logLessonComplete, logJobApp, removeLastJobApp,
+  applyRole, unapplyRole, isRoleApplied,
+  feedPetWithPile,
   reviewCard, dueCards,
   recordWrongAnswer, reviewMissedQuestion, dueMissedQuestions, totalMissedCount,
   scheduleConceptReview, dueConceptReviews, totalConceptReviewsCount,

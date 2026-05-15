@@ -149,11 +149,20 @@ function buildTabbar() {
 /* "More" sheet — Liquid Glass overlay sliding up from the bottom. Lists
  * secondary routes as large tappable rows. Closes on outside-tap, on
  * route-select, or on Esc. */
+function _appVersion() {
+  // Derive from the cache-buster query on any same-origin script tag.
+  // All app scripts share the same ?v=<version> so any one works.
+  const s = document.querySelector('script[src*="?v="]');
+  const m = s && s.src.match(/[?&]v=([\w.\-]+)/);
+  return m ? m[1] : '';
+}
+
 function openMoreSheet() {
   if (document.getElementById('more-sheet')) return;             // already open
   const wrap = document.createElement('div');
   wrap.id = 'more-sheet';
   wrap.className = 'fixed inset-0 z-50';
+  const ver = _appVersion();
   wrap.innerHTML = `
     <div class="more-sheet-scrim" data-close></div>
     <div class="more-sheet-panel card" role="dialog" aria-label="More routes">
@@ -168,6 +177,7 @@ function openMoreSheet() {
           </a>
         `).join('')}
       </div>
+      ${ver ? `<div class="more-sheet-version" aria-label="App version">v${escapeHtml(ver)}</div>` : ''}
     </div>
   `;
   document.body.appendChild(wrap);
@@ -267,6 +277,17 @@ function render() {
   // The actual DOM swap — wrapped so View Transitions can snapshot before/
   // after states for a smooth morph between routes.
   const swap = () => {
+    // Tear down the pet 3D scene before clearing innerHTML when leaving
+    // dashboard. The renderer holds a live WebGL context + scene graph
+    // (wheatgrass, bonsai, pet model); without dispose() the rAF tick
+    // keeps polling via setTimeout(250) and GPU resources leak until GC.
+    if (_lastActiveRoute === 'dashboard' && route !== 'dashboard') {
+      const oldHost = hub.querySelector('#pet-room-3d-host');
+      if (oldHost && oldHost._petHandle && typeof oldHost._petHandle.dispose === 'function') {
+        try { oldHost._petHandle.dispose(); } catch (_) {}
+        oldHost._petHandle = null;
+      }
+    }
     hub.innerHTML = '';
     switch (route) {
       case 'dashboard':    VIEWS.renderDashboard(state, hub); break;
