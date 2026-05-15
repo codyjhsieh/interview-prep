@@ -267,7 +267,7 @@ const CATEGORIES = [
   },
   {
     id: 'coding', name: 'Coding & Algorithms',          icon: 'code',
-    weight: 15, track: 'both', tier: 1, roi: 3,
+    weight: 18, track: 'both', tier: 1, roi: 4,
     blurb: 'LeetCode-medium difficulty wrapped in customer scenarios. ROI is moderate-per-hour because most candidates have already done extensive LeetCode prep elsewhere — but failure here is binary. Use as a refresher.',
   },
 
