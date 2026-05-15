@@ -386,6 +386,21 @@ window.SYNC = (function () {
     const merged = mergeStates(local, remote);
     lastSeenRemoteSeq = Math.max(lastSeenRemoteSeq, remoteSeq);
     lastSeenRemoteUpdatedAt = Math.max(lastSeenRemoteUpdatedAt, remote.updatedAt || 0);
+    // ─── Convergence fix ───────────────────────────────────────────
+    // If the merged state added local-only data not present in remote
+    // (e.g. concurrent edits where the other device's push overwrote
+    // ours on KV), schedule a corrective push so the union goes back
+    // up. Without this, our local stays correct but KV — and therefore
+    // the other device — sits in the partial state until something
+    // else triggers a push.
+    const mergedAddsLocal =
+      (merged.jobApps && merged.jobApps.length > (remote.jobApps || []).length) ||
+      (merged.history && merged.history.length > (remote.history || []).length) ||
+      (Object.keys(merged.completedLessons || {}).length >
+        Object.keys(remote.completedLessons || {}).length) ||
+      (merged.mocks && merged.mocks.length > (remote.mocks || []).length) ||
+      ((merged.xp || 0) > (remote.xp || 0));
+    if (mergedAddsLocal) scheduleSync();
     // Use the SOFT setter so the live view doesn't flash on every
     // poll. setStateFromSync swaps state + refreshes only the header
     // chips; the current view's cards stay put until next navigation.
