@@ -1667,10 +1667,84 @@ def bfs(graph, start):
        blanks:['deque','deque','popleft','visited'],
        hint:'You want O(1) pop from the front. Lists don\'t do that — Python\'s collections module has the right type.',
        explain:'Two key things this template gets right: deque (O(1) popleft, unlike list) and marking visited at ENQUEUE (line `visited.add(nb)` happens before `q.append(nb)`).'}},
-    {id:'g-2', type:'question', name:'Q: Shortest path between two nodes in a social graph (10M nodes)', xp:15, time:12,
-     body:'BFS for unweighted. Bidirectional BFS for memory. Beyond ~10M: precomputed landmark distances or sampling. State assumptions about the graph (sparse? cached?).'},
-    {id:'g-3', type:'question', name:'Q: Infection spread', xp:15, time:12,
-     body:'Multi-source BFS from initially infected nodes. Time = level number. Variant: with quarantine wall — which edge do you cut first? (Greedy: cut edge to the highest-degree uninfected component.)'},
+    {id:'g-2', type:'concept', name:'Shortest path between two nodes in a social graph (10M nodes)', xp:15, time:12,
+     body:`Single-source BFS is the textbook answer for unweighted shortest path. But at 10M nodes the frontier size at radius <code>r</code> grows as <i>branching-factor^r</i> — a few hops in and you\'re holding millions of nodes in the queue. Memory, not time, is the problem.
+<br><br>
+<b>The senior fix — bidirectional BFS:</b>
+<pre><code>def bidir_shortest(graph, start, target):
+    if start == target: return 0
+    front = {start: 0}; back = {target: 0}
+    while front and back:
+        # Always expand the SMALLER frontier — that\'s what halves the search radius
+        if len(front) &gt; len(back): front, back = back, front
+        nxt = {}
+        for node, d in front.items():
+            for nb in graph[node]:
+                if nb in back: return d + 1 + back[nb]   # frontiers met
+                if nb not in nxt: nxt[nb] = d + 1
+        front = nxt
+    return -1</code></pre>
+<b>Why it halves the search radius:</b> single BFS goes to radius N. Each side of bidirectional only goes to N/2. With branching factor b: <code>b^N</code> nodes vs <code>2 · b^(N/2)</code> — exponential savings. For 6-degrees-of-separation on a social graph with ~100 friends each: 100⁶ = 10¹² vs. 2·100³ = 2·10⁶. That\'s the entire reason it fits in memory.
+<br><br>
+<b>The "expand the smaller frontier" rule:</b> always work from whichever side currently has fewer nodes. Without this you can blow up one side and lose the asymmetry win.
+<br><br>
+<b>Beyond ~10M nodes — landmark distances:</b>
+<ul class="list-muted">
+<li>Pick ~50-100 random "landmark" nodes; precompute BFS distances from each landmark to every other node (offline).</li>
+<li>At query time: <code>dist(s, t) ≤ dist(s, L) + dist(L, t)</code> for every landmark L. Take the min over landmarks for an upper bound; ALSO <code>dist(s, t) ≥ |dist(s, L) − dist(L, t)|</code> via triangle inequality for a lower bound.</li>
+<li>If bounds match, you have the exact answer; otherwise run a constrained BFS within those bounds.</li>
+</ul>
+State aloud: <i>"I\'d state assumptions first — undirected? sparse? in-memory or distributed? Then BFS for small radii, bidirectional BFS for the 10M case, landmarks if it\'s a recurring query against a static graph."</i>
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>Knowing the WHY of bidirectional BFS — that it halves the exponent — separates candidates who memorized the trick from those who can defend the complexity claim.</div>`,
+     interactive:{ type:'mcq',
+       q:'Why does bidirectional BFS halve the search radius for shortest path, giving exponential memory savings on a social graph with branching factor ~100?',
+       options:[
+         'Two queues are faster than one due to CPU cache effects',
+         'Each side only explores radius N/2; total work ≈ 2·b^(N/2) vs the single-side b^N. For b=100, N=6 that\'s ~2 million vs 10¹² — exponentially less.',
+         'It doesn\'t — bidirectional BFS only helps when the graph is bipartite',
+         'It works only because the heap data structure caches better',
+       ],
+       correct:1,
+       explain:'The exponential saving comes from cutting the radius in half. With branching factor b, BFS at radius r explores ~b^r nodes. Two simultaneous searches each going r/2 cost ~2·b^(r/2) = √(b^r) · 2 — drastically less. The "expand the smaller frontier" rule is what preserves this asymmetry under uneven graph density.'}},
+
+    {id:'g-3', type:'concept', name:'Infection spread (multi-source BFS) — start every source on layer 0', xp:15, time:12,
+     body:`Given a grid (or graph) with several initial infection points, simulate spread. Each time step, every infected cell infects its uninfected neighbors. Min time until everyone is infected? Same shape: rotten oranges, walls and gates, shortest distance from any 0 in a binary matrix.
+<br><br>
+<b>The naive trap:</b> run BFS from each source separately and take the min. That\'s O(K · N) for K sources. With K = N you\'re at O(N²).
+<br><br>
+<b>The senior reframe:</b> push EVERY source onto the BFS queue at layer 0. The BFS wavefront expands from all sources simultaneously. Each cell\'s "infection time" = the BFS layer where it first appears.
+<pre><code>def min_infection_time(grid):
+    R, C = len(grid), len(grid[0])
+    q = deque()
+    fresh = 0
+    for r in range(R):
+        for c in range(C):
+            if grid[r][c] == 2: q.append((r, c, 0))    # infected source
+            elif grid[r][c] == 1: fresh += 1            # uninfected
+    last = 0
+    while q:
+        r, c, t = q.popleft()
+        last = t
+        for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:
+            nr, nc = r+dr, c+dc
+            if 0 &lt;= nr &lt; R and 0 &lt;= nc &lt; C and grid[nr][nc] == 1:
+                grid[nr][nc] = 2; fresh -= 1
+                q.append((nr, nc, t + 1))
+    return last if fresh == 0 else -1</code></pre>
+<b>Why this is correct (single-pass over all cells):</b> BFS guarantees the FIRST time a cell is reached = its minimum distance to any source. The wavefront is the union of K parallel BFSs; cells get assigned the layer of whichever source\'s wave hits them first.
+<br><br>
+<b>Variant — quarantine wall:</b> "you can cut one edge to slow the spread; which one?" Greedy: cut the edge whose removal isolates the largest still-uninfected component. Compute via DFS on the uninfected subgraph from each potential cut-target → pick the cut that maximizes the disconnected subgraph size.
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"Multi-source BFS is single-source BFS with K seeds in the initial queue. Same complexity as single-source: O(V + E). No need for K independent passes — that\'s the rookie trap."</div>`,
+     interactive:{ type:'whyexplain',
+       prompt:'Why does pushing ALL infection sources onto the BFS queue at layer 0 give correct minimum infection times — instead of running BFS from each source separately?',
+       options:[
+         'BFS doesn\'t work with multiple sources; the result is approximate',
+         'Single-pass BFS naturally finds min distance to ANY source: the first time a cell appears in the queue is its closest-source distance, because BFS expands by layer (uniform-cost). K parallel waves expanding together is mathematically equivalent to "min over K BFSs" but in one pass.',
+         'Multi-source BFS only works if all sources are at the same node',
+         'It\'s a heuristic that approximates the answer',
+       ],
+       correct:1,
+       explain:'The wavefront from K sources is the UNION of K independent BFSs, layer-aligned. Whichever source reaches a cell first owns it; that "first arrival" IS the min distance. Time complexity: O(V + E), same as single-source. Running K independent BFSs would be O(K · (V + E)) — much worse.'}},
     {id:'g-4', type:'drill', name:'Drill: write BFS in Python in 4 min', xp:10, time:5,
      body:`from collections import deque. Write graph as dict-of-lists, run BFS from node 0, return level dict. Time yourself. Reference answer:
 <pre><code>from collections import deque
@@ -2357,15 +2431,15 @@ The hard part is recognizing the pattern. Once you see "next/previous greater/sm
 </ul>
 <b>Interview-relevant:</b> XOR singleton, count set bits, subset sums, missing number (using sum or XOR). Saying "I\'ll XOR everything; pairs cancel" sounds elite when it lands.`,
      interactive:{ type:'mcq',
-       q:'You\'re given an array where every element appears twice except ONE. Find that one in O(1) memory.',
+       q:'Variant: every element in <code>nums</code> appears THREE times except ONE. The "XOR everything" trick fails (XOR cancels pairs, not triples). How do you find the singleton in O(N) time, O(1) memory?',
        options:[
-         'Hash map of counts',
-         'Sort the array, then scan for the odd one out',
-         'XOR all elements; result is the singleton',
-         'Bloom filter'
+         'XOR works fine — return reduce(xor, nums)',
+         'Hash counter — break the O(1) memory constraint',
+         'Track each bit position independently: count how many times bit b is set across all numbers. (count_b mod 3) is the bit value of the singleton. Reconstruct over all 32 bits.',
+         'Sort the array then return the element with no triplet neighbor',
        ],
        correct:2,
-       explain:'XOR cancels pairs (x ^ x = 0). The singleton survives. O(n) time, O(1) memory — better than the hash-map approach in space.'}},
+       explain:'XOR is "mod 2 per bit"; we need "mod 3 per bit" here. For each of 32 bit positions, sum how many numbers have that bit set. Triples contribute 0 mod 3; the singleton\'s bits remain. Reconstruct: for b in 0..31, if sum_b % 3 == 1, set bit b in answer. O(32·N) time = O(N), O(32) memory = O(1). This generalizes to "appears K times except one" by using mod K.'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
     {id:'ag-LC1', type:'concept', name:'Cheapest Flights Within K Stops — Bellman-Ford vs modified Dijkstra', xp:32, time:14,
@@ -2588,15 +2662,20 @@ class LRUCache:
         if len(self.map) == self.cap:
             lru = self.tail.prev; self._detach(lru); del self.map[lru.k]
         n = Node(key, val); self.map[key] = n; self._push_front(n)</code></pre>`},
-    {id:'h-4', type:'question', name:'Q: Max sum sliding window of size k', xp:10, time:8,
-     body:`Initial window sum, then slide: add right, subtract left. O(n). Variant: longest substring without repeats — variable-size window with hash set.
-<pre><code>def maxSumWindow(nums, k):
-    s = sum(nums[:k])
-    best = s
-    for i in range(k, len(nums)):
-        s += nums[i] - nums[i - k]      # slide: add right, drop left
-        best = max(best, s)
-    return best</code></pre>`},
+    {id:'h-4', type:'question', name:'Q: Longest substring without repeating characters — hash + variable-size window', xp:10, time:8,
+     body:`Variable-size sliding window where a <b>hash map of char → last-seen index</b> lets you jump the left pointer in O(1) instead of scanning. The right pointer always advances; the left pointer jumps forward to <code>max(left, lastSeen[c] + 1)</code> when a duplicate is encountered.
+<pre><code>def length_of_longest_substring(s):
+    last_seen = {}        # char -&gt; index
+    l = best = 0
+    for r, c in enumerate(s):
+        if c in last_seen and last_seen[c] &gt;= l:
+            l = last_seen[c] + 1      # jump past the duplicate
+        last_seen[c] = r
+        best = max(best, r - l + 1)
+    return best</code></pre>
+<b>Why the <code>last_seen[c] &gt;= l</code> check?</b> A char may have been seen earlier but already OUTSIDE the current window. We only treat it as a duplicate if its last position is at or after the current left bound. This avoids dragging the window back.
+<br><br>
+<b>Why this is the "hash + sliding window" canonical pattern:</b> the fixed-size variant (max-sum window) doesn\'t need a hash at all. The moment the constraint becomes "no duplicates" / "at most K distinct" / "with multiplicities", the hash buys you O(1) state lookups that turn the brute-force O(N²) into O(N). Same family: Minimum Window Substring, At Most K Distinct, Permutation in String.`},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
     {id:'h-LC1', type:'concept', name:'Minimum Window Substring — sliding window with counter', xp:30, time:13,
@@ -2759,7 +2838,9 @@ class LRUCache:
   intro:'AI-first companies (Deepgram, Tavily, Credal, OpenAI) routinely substitute LC puzzles with real-world tasks: parse 1GB JSON, dedupe events, retry with backoff.',
   lessons:[
     {id:'p-1', type:'question', name:'Q: Parse & clean a 1GB JSONL file', xp:15, time:12,
-     body:`Stream line-by-line (don\'t json.load). For each line: try-except, validate schema, normalize keys, write to clean.jsonl. Track stats: total, valid, invalid (by reason). State assumption: file may have trailing partial line.
+     body:`The senior signal here is what you DON\'T do: <code>json.load(open(path))</code> would attempt to parse the entire file as one JSON value AND hold every line in memory simultaneously. On 1 GB you OOM. Real production constraints: stream line-by-line, validate per-record, partition by failure reason so the operator can debug, never explode on one bad line.
+<br><br>
+<b>Streaming + classified failure tracking:</b>
 <pre><code>import json
 from collections import Counter
 
@@ -2780,9 +2861,34 @@ def clean_jsonl(in_path, out_path):
             rec = {k.lower().strip(): v for k, v in rec.items()}   # normalize keys
             fout.write(json.dumps(rec) + "\\n")
             stats["valid"] += 1
-    return stats</code></pre>`},
+    return stats</code></pre>
+<b>Three production "whys" interviewers probe for:</b>
+<ul class="list-muted">
+<li><b>Why stream (not <code>readlines()</code>)?</b> <code>open(path)</code> iterates lazily — constant memory regardless of file size. <code>readlines()</code> materializes the entire list.</li>
+<li><b>Why bucketed failure counters (not a single "errors" int)?</b> When you ship a report saying "4% rejected," ops will ask: malformed JSON, missing schema field, encoding error, or empty line? The Counter lets you answer without re-running.</li>
+<li><b>Why try-except <i>per line</i> (not over the whole loop)?</b> One bad line shouldn\'t kill the job. The retry/repair decision is per-record.</li>
+</ul>
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>State aloud: <i>"I\'ll stream so memory is O(line size), not O(file size). I\'ll categorize errors so the operator has actionable diagnostics. I\'ll continue past bad lines so one corrupt record doesn\'t fail the whole pipeline."</i> That three-sentence framing is the production-coding bar.</div>`,
+     interactive:{ type:'mcq',
+       q:'You\'re processing 1 GB of JSONL and the consumer (a streaming analytics tool) measures throughput. The naive <code>json.load(open(path))</code> dies with MemoryError after ~10 minutes. What\'s the SPECIFIC cause?',
+       options:[
+         'JSON parsing is inherently slow for files over 1 GB',
+         'json.load attempts to parse the entire file as ONE JSON value — JSONL is N independent values, not one. The parser builds an in-memory data structure for whatever it thinks the file is, blowing up before reaching the end.',
+         'Python can\'t open files larger than 1 GB',
+         'The file needs to be gzipped first',
+       ],
+       correct:1,
+       explain:'JSONL = one JSON value per line. json.load expects a single root value, so it tries to read the WHOLE file into one structure (and fails on syntactically valid JSONL because line 2 onward isn\'t part of line 1\'s value). The fix is iterating lines and calling json.loads() per line — streaming.'}},
     {id:'p-2', type:'question', name:'Q: Retry-with-backoff decorator', xp:10, time:10,
-     body:`Exponential backoff with jitter (avoid thundering herd). Distinguish retryable (429, 503, timeout) from terminal (400, 401). Cap total retries AND total elapsed wall-time. Log each attempt.
+     body:`Five non-obvious production decisions hidden in this one decorator:
+<ol>
+<li><b>Exponential backoff</b> — first retry waits ~0.5 s, second ~1 s, third ~2 s. Linear (or no) backoff hammers the same overloaded server.</li>
+<li><b>Jitter</b> — multiply the delay by a random factor in [0.5, 1.5]. Without it, every retrying client backs off in lockstep → simultaneous retry waves → "thundering herd" hits the recovering service.</li>
+<li><b>Retryable vs terminal</b> — 429/5xx are retryable (server overloaded, will recover). 4xx (except 429) are CLIENT errors and retrying just wastes time. Distinguish at the catch site.</li>
+<li><b>Wall-time cap</b> — independent of max_attempts. If each retry waits up to 30 s and you allow 5 attempts, total wait is 60+ seconds — too long for a request that needs to respond in 10s. Bail on wall-time even if attempts remain.</li>
+<li><b>Log each retry</b> — without logging, an intermittently-failing dependency is invisible. Production retries are silent killers if not observable.</li>
+</ol>
+<br>
 <pre><code>import time, random, functools, logging
 
 RETRYABLE = {429, 502, 503, 504}
@@ -2804,9 +2910,20 @@ def retry(max_attempts=5, base=0.5, cap=30, max_wall=60):
                     logging.info(f"retry {attempt} after {delay:.2f}s")
                     time.sleep(delay)
         return wrapper
-    return decorator</code></pre>`},
+    return decorator</code></pre>
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"Backoff + jitter together prevent thundering herd. Separately classify retryable status codes. Cap by wall-clock independently of attempt count. Always log." Four sentences and you\'ve covered the SRE-level production wisdom for this pattern.</div>`,
+     interactive:{ type:'whyexplain',
+       prompt:'Without jitter, why do retries cluster into simultaneous waves that worsen the outage they\'re responding to?',
+       options:[
+         'CPU clock precision causes drift',
+         'All clients hitting the same overloaded service see the failure within milliseconds of each other, then wait the same backoff interval, then retry at the same moment — a synchronized "herd" stampede that re-overloads the just-recovering service. Jitter desynchronizes them.',
+         'It\'s a Python GIL issue',
+         'Exponential growth alone is enough; jitter is optional',
+       ],
+       correct:1,
+       explain:'When 10,000 clients all see a 503 within a 100ms window, deterministic exponential backoff sends them retries within the same 100ms window — magnified attempts at exactly the moments the service is trying to recover. Random jitter spreads the retry timestamps over [0.5x, 1.5x] of the backoff interval, breaking the synchronization. This is the canonical AWS-recommended fix.'}},
     {id:'p-3', type:'question', name:'Q: Flatten a nested list of arbitrary depth', xp:8, time:6,
-     body:`Recursion or stack. Watch for stack-overflow on pathological depth — switch to iterative with explicit stack for production.
+     body:`The recursive version is two lines and obviously correct. The senior version trades that simplicity for production-safety: an explicit stack avoids Python\'s 1000-frame recursion limit, so a pathological input like <code>[[[[[[[...[1]...]]]]]]]</code> at depth 10,000 still works.
 <pre><code># Iterative — stack-safe for any depth
 def flatten(nested):
     out, stack = [], [iter(nested)]
@@ -2816,10 +2933,24 @@ def flatten(nested):
         except StopIteration:
             stack.pop(); continue
         if isinstance(x, list):
-            stack.append(iter(x))
+            stack.append(iter(x))      # descend
         else:
             out.append(x)
-    return out</code></pre>`},
+    return out</code></pre>
+<b>The "stack of iterators" trick:</b> instead of a stack of <i>positions</i>, push <i>iterators</i>. Each iterator remembers its own position; popping the top resumes the parent iterator from where it left off. This is the simulation of a recursive call stack in O(depth) memory.
+<br><br>
+<b>When to reach for this:</b> any tree-walk that might exceed Python\'s default recursion limit (1000). Sometimes the recursive version is fine — interviewer\'s "what about depth 100k?" follow-up is your cue to switch.
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"Recursive is cleaner. But for production input I\'d use an explicit stack — Python defaults to 1000 frames, and <code>sys.setrecursionlimit</code> trades crashes for SIGSEGV. Iterative is the safe shape."</div>`,
+     interactive:{ type:'whyexplain',
+       prompt:'Why use a stack of ITERATORS rather than a stack of lists (e.g., <code>stack = [nested]</code>, then on each pop iterate the whole top list)?',
+       options:[
+         'Iterators are faster than lists',
+         'A stack of iterators remembers each level\'s CURRENT position. When we descend into a nested sublist and come back, we resume from where we left off without re-iterating. A stack-of-lists would either re-traverse from the start (wrong order) or need a separate index per level (extra bookkeeping).',
+         'It avoids the StopIteration exception',
+         'Iterators are immutable',
+       ],
+       correct:1,
+       explain:'The iterator pattern faithfully simulates recursion: each "frame" knows where IT is in its loop. Without iterator-state-preservation, you\'d need a parallel stack of (list, index) pairs, manually advancing — same effect with more bookkeeping. Python\'s iterators do this naturally.'}},
     {id:'p-4', type:'question', name:'Q: Thread-safe singleton', xp:8, time:6,
      body:`Double-checked locking + class-level lock, or just use a module (Python modules are singletons by import). Risk: subclassing, testability — singletons fight DI. Often the right answer in an interview is "I\'d avoid this pattern; here\'s the alternative."
 <pre><code>import threading
@@ -3463,41 +3594,60 @@ Time is O(R · C · 4^L) where L is word length. Memory is O(L) for the recursio
        explain:'The comment promises an in-place visited mark, but no mutation happens. With no visited tracking the same cell can be reused — word="AA" would match a single "A" cell via self-recursion. Fix: tmp = board[r][c]; board[r][c] = "#" before the OR; restore after.'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'bt-LC1', type:'concept', name:'N-Queens — column + diagonal sets for O(1) attack-check', xp:30, time:13,
-     body:`Place N queens on an N×N board so none attack each other. Brute-force backtracking with O(N) attack check per cell = O(N!·N) — slow for N=12+.
+    {id:'bt-LC1', type:'concept', name:'Remove Invalid Parentheses — min-removal backtracking with prune + dedup', xp:32, time:14,
+     body:`Given a string with letters and parentheses, return <b>all distinct strings</b> obtainable by removing the <b>minimum number</b> of invalid parens to make the string valid.
 <br><br>
-<b>The optimization — three boolean sets:</b>
+<b>The two senior subproblems hidden in one prompt:</b>
+<ol>
+<li><b>How many to remove?</b> One left-to-right pass counts open/close imbalance: <code>left</code> = unmatched <code>(</code>, <code>right</code> = unmatched <code>)</code>. Total removals = <code>left + right</code>.</li>
+<li><b>Which to remove (and avoid duplicates)?</b> Backtrack with a budget of <code>left</code> <code>(</code>-removals and <code>right</code> <code>)</code>-removals. Skip a duplicate paren at the same DFS level — that\'s what eliminates the same result emerging multiple ways.</li>
+</ol>
+<br>
+<pre><code>def remove_invalid(s):
+    # Phase 1 — compute removal budget
+    left = right = 0
+    for c in s:
+        if c == '(': left += 1
+        elif c == ')':
+            if left: left -= 1
+            else:    right += 1
+    out = set()
+
+    # Phase 2 — backtrack with two budgets
+    def dfs(i, path, l, r, open_count):
+        if i == len(s):
+            if l == 0 and r == 0 and open_count == 0:
+                out.add(path)
+            return
+        c = s[i]
+        # Option A: remove c (only if budget allows AND it\'s a paren)
+        if c == '(' and l &gt; 0: dfs(i+1, path, l-1, r, open_count)
+        if c == ')' and r &gt; 0: dfs(i+1, path, l, r-1, open_count)
+        # Option B: keep c
+        path2 = path + c
+        if c == '(': dfs(i+1, path2, l, r, open_count+1)
+        elif c == ')':
+            if open_count &gt; 0: dfs(i+1, path2, l, r, open_count-1)
+            # if open_count == 0, this ')' would create an immediate imbalance — prune
+        else: dfs(i+1, path2, l, r, open_count)
+    dfs(0, "", left, right, 0)
+    return list(out)</code></pre>
+<b>The two prune insights that separate junior from senior:</b>
 <ul class="list-muted">
-<li><code>cols</code> = columns occupied</li>
-<li><code>diag1</code> = anti-diagonals: identified by <code>r - c</code> (constant along a "\\\\")</li>
-<li><code>diag2</code> = main diagonals: identified by <code>r + c</code> (constant along a "/")</li>
+<li><b>"Don\'t recurse on impossible states."</b> If <code>open_count == 0</code> and the current char is <code>)</code>, keeping it makes the prefix invalid forever — skip the keep-branch.</li>
+<li><b>Dedupe via the result set.</b> The simplest correctness fix; alternative is "skip duplicate parens at the same DFS depth" via index comparison — slightly faster, more bookkeeping.</li>
 </ul>
-Attack-check becomes O(1): "can I place at (r,c)?" iff <code>c not in cols and (r-c) not in diag1 and (r+c) not in diag2</code>.
-<br><br>
-<pre><code>def n_queens(n):
-    out = []; cols = set(); d1 = set(); d2 = set()
-    queens = []
-    def dfs(r):
-        if r == n:
-            out.append(queens[:]); return
-        for c in range(n):
-            if c in cols or (r-c) in d1 or (r+c) in d2: continue
-            cols.add(c); d1.add(r-c); d2.add(r+c); queens.append(c)
-            dfs(r+1)
-            cols.remove(c); d1.remove(r-c); d2.remove(r+c); queens.pop()
-    dfs(0)
-    return out</code></pre>
-<b>The "diagonals as constants" insight:</b> along an anti-diagonal "\\\\", row and column both increase by 1 each step. So <code>r - c</code> is invariant. Symmetric for main diagonals: <code>r + c</code> invariant. Treating each diagonal as a numeric ID lets you store occupancy in a set with O(1) lookup.
-<div class="callout callout-depth"><div class="callout-label">Bitmask variant — even faster</div>For N ≤ 30, store cols/d1/d2 as integers using bitmasks. Attack-check becomes a bitwise OR. Used in competition code; not usually needed for interviews but worth knowing exists.</div>`,
-     interactive:{ type:'match',
-       prompt:'For an N-Queens row, match the diagonal type with its invariant:',
-       pairs:[
-         ['Anti-diagonal (\\\\)','r - c is constant along it'],
-         ['Main diagonal (/)','r + c is constant along it'],
-         ['Same column','c is constant trivially'],
-         ['Same row','Not relevant — we place one queen per row by construction'],
+<div class="callout callout-senior"><div class="callout-label">Senior framing</div>"Phase 1 tells me <i>how many</i> to remove via a single pass. Phase 2 enumerates <i>which</i> via backtracking with two budgets — left-removals and right-removals — plus the open_count invariant to prune dead branches early."</div>`,
+     interactive:{ type:'whyexplain',
+       prompt:'Why split the problem into two phases (count first, then backtrack)?',
+       options:[
+         'It\'s required by the LeetCode test cases',
+         'Phase 1 gives a tight upper bound on removals (the minimum). Without it, backtracking would explore strings with TOO MANY removals — exponential blow-up. The budget cuts the search tree drastically.',
+         'Phase 1 sorts the parens by importance',
+         'It avoids needing a result set',
        ],
-       explain:'The "two diagonal classes" are easy to confuse. Anti-diagonal slopes from top-left to bottom-right (r and c both increase by 1, so r-c is invariant). Main diagonal slopes from top-right to bottom-left (r increases, c decreases, so r+c is invariant).'}},
+       correct:1,
+       explain:'Without the upper-bound budget, you\'d explore O(2^N) subsequences. Phase 1\'s left+right count is the EXACT minimum — passing it as a budget means we explore only subsequences with that many removals, far fewer. The pre-computed budget is what makes this tractable for inputs of length 25+.'}},
 
     {id:'bt-LC2', type:'concept', name:'Sudoku Solver — constraint propagation + backtracking', xp:32, time:14,
      body:`Fill a 9×9 sudoku. Each cell, row, column, and 3×3 box must contain digits 1-9 exactly once.
@@ -3909,27 +4059,16 @@ class SummaryRanges:
         return [[s, e] for s, e in self.iv.items()]</code></pre>
 <b>The four cases:</b> "merge both sides", "extend left", "prepend right", "new singleton". Forgetting one is the most common bug.
 <div class="callout callout-note"><div class="callout-label">The map-vs-list tradeoff</div>SortedDict gives O(log N) for both insert and bisect. A plain sorted list of intervals would do O(N) for insert. For a stream of N additions, dict is O(N log N) total vs list's O(N²).</div>`,
-     interactive:{ type:'findbug',
-       prompt:'This addNum has a bug — what is it?',
-       codeLines:[
-         'def addNum(self, x):',
-         '    starts = self.iv.keys()',
-         '    i = self.iv.bisect_right(x) - 1',
-         '    if i >= 0 and self.iv[starts[i]] >= x: return',
-         '    left_end_is_xm1 = i >= 0 and self.iv[starts[i]] == x - 1',
-         '    right_start_is_xp1 = (i + 1 < len(starts)) and starts[i+1] == x + 1',
-         '    if left_end_is_xm1:',
-         '        self.iv[starts[i]] = x',
-         '    elif right_start_is_xp1:',
-         '        new_end = self.iv[starts[i+1]]',
-         '        del self.iv[starts[i+1]]',
-         '        self.iv[x] = new_end',
-         '    else:',
-         '        self.iv[x] = x',
+     interactive:{ type:'mcq',
+       q:'The addNum below handles three cases — left-extends, right-prepends, new-singleton. What\'s the bug?\n\nif left_end_is_xm1:\n    self.iv[starts[i]] = x\nelif right_start_is_xp1:\n    new_end = self.iv[starts[i+1]]; del self.iv[starts[i+1]]; self.iv[x] = new_end\nelse:\n    self.iv[x] = x',
+       options:[
+         'bisect_right should be bisect_left',
+         'Missing the fourth case: when both left ends at x-1 AND right starts at x+1, the two flanking intervals should merge into one. Current code only extends left, leaving the right interval orphaned.',
+         'The "inside existing interval" check should use > not >=',
+         'self.iv[x] = x should be self.iv[x] = None for singleton',
        ],
-       correctLine:6,
-       cat:'coding',
-       explain:'Missing the "merge both sides" case. If both left_end_is_xm1 AND right_start_is_xp1 are true, you need to bridge them into a single interval. The current code only handles "left extends" — leaving the right interval orphaned. The first-tested condition needs to be the AND case.'}},
+       correct:1,
+       explain:'Four cases exist: merge-both, extend-left, prepend-right, new-singleton. The code handles three but checks "left_end_is_xm1" before the AND case — so a merge-both scenario silently takes the extend-left branch and orphans the right interval. Fix: test the AND case first.'}},
 
   ]
 },
@@ -3960,6 +4099,18 @@ class SummaryRanges:
         out.append(node.val)
         node = node.right
     return out</code></pre>
+<b>Post-order (DFS), iterative — "modified preorder, reversed":</b>
+<pre><code>def postorder(root):
+    if not root: return []
+    out, stack = [], [root]
+    while stack:
+        node = stack.pop()
+        out.append(node.val)
+        if node.left:  stack.append(node.left)    # left first → right popped first
+        if node.right: stack.append(node.right)
+    return out[::-1]                              # reverse for true post-order</code></pre>
+The trick: do preorder with children swapped (right, left → out as root-right-left), then reverse the whole list to get left-right-root. Two-pointer post-order alternatives exist (with a "last visited" marker) but the reverse-trick is cleaner.
+<br><br>
 <b>Level-order (BFS) with deque:</b>
 <pre><code>from collections import deque
 def levelOrder(root):
@@ -4165,73 +4316,85 @@ The trick: <b>at each node we compute two different things</b>. The function ret
        cat:'coding'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'t-LC1', type:'concept', name:'Binary Tree Maximum Path Sum — return vs record', xp:32, time:14,
-     body:`Find max sum of any path (start and end anywhere). Path can bend at any node but visits each node at most once.
+    {id:'t-LC1', type:'concept', name:'Binary Tree Cameras — three-state DP on the tree', xp:34, time:15,
+     body:`Place the minimum number of cameras on a binary tree so that every node is monitored. A camera on a node watches itself, its parent, and its immediate children. Return the minimum number of cameras.
 <br><br>
-<b>The two-quantity insight</b> (this is the senior signal): at each node, you compute TWO things — only one of which you return.
+<b>The three-state observation:</b> at any node, post-order recursion returns one of:
 <ul class="list-muted">
-<li><b>Gain (what you return):</b> max sum of a path that <i>extends upward through this node</i> — i.e., uses this node and at MOST one child. Caller chains it.</li>
-<li><b>Local best (what you record globally):</b> max sum of a path that <i>terminates at this node</i> — uses BOTH children plus this node. Cannot extend further.</li>
+<li><b>0 — "I have a camera"</b> (covers self + parent + children)</li>
+<li><b>1 — "I\'m covered but no camera"</b> (covered by one of my children)</li>
+<li><b>2 — "I\'m NOT covered"</b> (no camera below me has reached this node)</li>
 </ul>
 <br>
-<pre><code>def max_path_sum(root):
-    best = [-inf]
-    def gain(node):
-        if not node: return 0
-        L = max(0, gain(node.left))      # negatives → don\'t take
-        R = max(0, gain(node.right))
-        best[0] = max(best[0], L + R + node.val)    # bend-here path
-        return node.val + max(L, R)                  # extend-up path
-    gain(root)
-    return best[0]</code></pre>
-<b>Why the <code>max(0, ...)</code>?</b> If a child's gain is negative, we'd be better off skipping that child entirely. Clamping to 0 means "don't take this subtree".
-<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"I return one value to the caller (extend-up) but record a different one globally (bend-here). They're not the same — that's the trick." Distinguishing these is what separates the candidates who solve it from those who almost do.</div>`,
-     interactive:{ type:'sort',
-       prompt:'Order the recursive computation at a node:',
-       items:[
-         'Recurse left → gain_L; recurse right → gain_R',
-         'Clamp negatives: gain_L = max(0, gain_L); gain_R = max(0, gain_R)',
-         'Update global best with the "bend here" path: node.val + gain_L + gain_R',
-         'Return to caller the "extend up" gain: node.val + max(gain_L, gain_R)',
-       ],
-       explain:'The recursion returns extend-up gains (path through this node up to caller). Bend-here paths are recorded into best[] because they terminate — caller can\'t use them.'}},
-
-    {id:'t-LC2', type:'concept', name:'Serialize and Deserialize Binary Tree — preorder with null markers', xp:30, time:13,
-     body:`Convert a tree to a string and back, lossless. Allowed any format.
-<br><br>
-<b>The simplest correct scheme — preorder DFS with null markers:</b>
-<pre><code>def serialize(root):
-    parts = []
+<b>Recurrence (post-order — we look at children\'s states before deciding):</b>
+<pre><code>def min_camera_cover(root):
+    cameras = [0]
     def dfs(n):
-        if not n: parts.append("#"); return
-        parts.append(str(n.val))
-        dfs(n.left); dfs(n.right)
-    dfs(root)
-    return ",".join(parts)
-
-def deserialize(s):
-    it = iter(s.split(","))
-    def build():
-        v = next(it)
-        if v == "#": return None
-        node = TreeNode(int(v))
-        node.left = build()
-        node.right = build()
-        return node
-    return build()</code></pre>
-<b>Why null markers are required:</b> without them, you can't reconstruct the shape. Two different trees could yield the same preorder traversal (e.g., a left-skewed vs right-skewed chain of values). Markers say "no child here" so the deserializer knows when to stop a subtree.
+        if not n: return 1                  # null → "covered" (vacuously)
+        L, R = dfs(n.left), dfs(n.right)
+        if L == 2 or R == 2:                # uncovered child → must place camera here
+            cameras[0] += 1
+            return 0
+        if L == 0 or R == 0:                # at least one child has a camera → I\'m covered
+            return 1
+        return 2                            # both children covered-but-cameraless → I\'m uncovered, defer to parent
+    if dfs(root) == 2: cameras[0] += 1      # root was uncovered → add final camera
+    return cameras[0]</code></pre>
+<b>Why the "defer to parent" trick (return 2) is the entire optimization:</b> a greedy that always places a camera on uncovered nodes works but uses more cameras. The trick is to LET an uncovered leaf bubble up — the parent will place a camera that covers the leaf, itself, and one more level up. Cameras on parents pay for three nodes; cameras on leaves pay for two. Always prefer parent placements.
 <br><br>
-<b>Why preorder (not inorder/postorder):</b> preorder lets the deserializer know the root FIRST, then build subtrees left-to-right by recursion. Inorder requires knowing structure separately — needs TWO traversals to unambiguously reconstruct.
-<div class="callout callout-depth"><div class="callout-label">Variants</div>Level-order (BFS) serialization is also common — visually mirrors a heap array but wastes space on null-heavy trees. Preorder + null markers is more compact for sparse trees.</div>`,
-     interactive:{ type:'match',
-       prompt:'Match the traversal with what info it captures unambiguously:',
-       pairs:[
-         ['Preorder + null markers','Root first, recursive subtree boundaries via "#" — sufficient to reconstruct alone'],
-         ['Inorder alone','Insufficient — can\'t distinguish left-only chain from right-only chain'],
-         ['Inorder + preorder (no markers)','Sufficient if all values are distinct'],
-         ['Level-order with placeholders for null','Sufficient — matches heap-style array indexing'],
+<b>The "null returns 1" subtlety:</b> we treat a non-existent child as already covered. This lets a leaf node return 2 (uncovered) since both its (null) children are "covered" — flowing the uncovered signal up to the grandparent, where the camera goes.
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"Post-order with a three-state return value. The non-obvious move is letting uncovered leaves bubble up rather than greedy-place — that\'s what gets us to optimum. The state machine has exactly three states because each node\'s situation w.r.t. its parent is HAS-CAMERA / IS-COVERED / IS-UNCOVERED."</div>`,
+     interactive:{ type:'mcq',
+       q:'Why does a greedy "place a camera at every uncovered leaf" use more cameras than this DP?',
+       options:[
+         'Greedy double-counts coverage',
+         'A camera placed at a parent covers 3 nodes (self + both children) for free, vs. a camera at a leaf which only covers 2 nodes (self + parent). Deferring leaf coverage to the parent maximizes the "3-for-1" payoff.',
+         'Greedy doesn\'t handle null nodes correctly',
+         'It only matters for trees with depth > 10',
        ],
-       explain:'Single-traversal lossless serialization requires "missing child" markers OR a second traversal. Preorder + null markers is the standard one-pass solution.'}},
+       correct:1,
+       explain:'Camera economics: a camera at a parent node covers the parent + both children + the grandparent — up to 4 nodes. A camera at a leaf covers only the leaf + its parent (2 nodes). By "deferring" uncovered leaves up to their parent, we always place the camera in the position that buys the most coverage per unit. The bubble-up via "return 2" is the mechanism.'}},
+
+    {id:'t-LC2', type:'concept', name:'Construct Binary Tree from Preorder + Inorder — the index trick', xp:32, time:14,
+     body:`Given <code>preorder</code> and <code>inorder</code> traversals of a binary tree (distinct values), reconstruct the tree.
+<br><br>
+<b>Why TWO traversals are required:</b> a single traversal — preorder, inorder, OR postorder alone — does NOT uniquely determine a tree (a left-skewed and right-skewed chain of the same values share the same inorder sequence). With both preorder + inorder, the tree IS unique.
+<br><br>
+<b>The recursive structure:</b>
+<ul class="list-muted">
+<li><b>Root</b> is always the FIRST element of preorder.</li>
+<li>Finding that root in inorder splits it into: <i>left subtree</i> (everything before root) and <i>right subtree</i> (everything after). The split sizes tell us how many preorder elements belong to each subtree.</li>
+<li>Recurse.</li>
+</ul>
+<br>
+<b>The senior optimization — O(N) using a hash:</b>
+<pre><code>def build_tree(preorder, inorder):
+    idx_of = {v: i for i, v in enumerate(inorder)}      # O(1) lookups
+    self_pre = [0]                                      # next preorder index
+    def build(lo, hi):                                  # bounds within inorder
+        if lo &gt; hi: return None
+        root_val = preorder[self_pre[0]]
+        self_pre[0] += 1
+        root = TreeNode(root_val)
+        mid = idx_of[root_val]                          # O(1) split
+        root.left  = build(lo, mid - 1)
+        root.right = build(mid + 1, hi)
+        return root
+    return build(0, len(inorder) - 1)</code></pre>
+<b>Why O(N), not O(N log N):</b> each preorder index is consumed exactly once; each inorder position is computed in O(1) via the hash. The recursion is linear in the number of nodes.
+<br><br>
+<b>The "next preorder index" trick:</b> instead of slicing preorder per recursion (O(N) per level), we use a shared mutable pointer. Preorder is consumed left-to-right by the natural DFS order — left subtree first, then right.
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"The recursion shape comes from <i>preorder gives the root, inorder gives the left/right split</i>. Without the hash, each split is O(N) and total is O(N²); with the hash, each is O(1) and total is O(N)."</div>`,
+     interactive:{ type:'whyexplain',
+       prompt:'Why does inorder alone NOT uniquely determine a tree, but preorder + inorder together do?',
+       options:[
+         'Inorder lists nodes in sorted order, which destroys structure',
+         'Inorder visits every node but doesn\'t encode which node is the root or any subtree boundaries. Preorder gives the root (first element); inorder then tells us how the rest splits left/right around that root. Both together pin down the recursion.',
+         'Inorder is ambiguous because of duplicate values',
+         'Preorder alone is sufficient if values are distinct',
+       ],
+       correct:1,
+       explain:'Inorder is "what\'s left of root, then root, then what\'s right of root" — recursively. Alone, it doesn\'t mark WHICH element is the root at any level. Preorder marks the root unambiguously (it\'s first). The two pieces together let recursion partition inorder into left/right subtrees at every level.'}},
 
     {id:'t-LC3', type:'concept', name:'Recover BST — Morris traversal finds two swapped nodes', xp:32, time:14,
      body:`A binary search tree had exactly two of its nodes swapped by mistake. Recover the BST WITHOUT changing structure, in O(1) extra space.
@@ -4391,9 +4554,29 @@ def leastInterval(tasks, n):
     return max(framework, len(tasks))</code></pre>
 Time O(N + 26·log26). Memory O(26) = O(1).
 <br><br>
-<b>The intuition:</b> imagine the most-frequent task M appears K times. It MUST occupy K time slots with N gaps between consecutive appearances. That creates a "framework" of (K-1)·(N+1) + 1 slots. Tasks that tie with M for max count each add one more to the last row. Everything else fills idle slots; if there's not enough idle space, the answer is simply len(tasks) (no idles needed).
+<b>The intuition — visualize the "framework":</b> imagine the most-frequent task M appears K times with cooldown N. The K copies must be separated by N other steps each. Lay it out as a grid of <code>(K − 1)</code> full rows of width <code>(N + 1)</code> plus a final partial row:
 <br><br>
-The <code>max(framework, len(tasks))</code> at the end handles the case where you have so many distinct tasks that no idles are required.`,
+<pre style="font-family:monospace;line-height:1.4">
+Example: tasks = AAA BBB,  N = 2  (cooldown 2 between same task)
+
+   col 0   col 1   col 2
+ ┌───────┬───────┬───────┐
+ │   A   │   B   │   _   │   row 0   ← (K−1) full rows of width (N+1)
+ ├───────┼───────┼───────┤
+ │   A   │   B   │   _   │   row 1
+ ├───────┼───────┼───────┘
+ │   A   │   B   │           row 2   ← partial: one slot per task tied at max
+ └───────┴───────┘
+
+ Total slots = (K−1) · (N+1) + (tasks tied at max)
+            = (3−1) · (2+1) + 2
+            = 2 · 3 + 2
+            = 8
+</pre>
+<br>
+The <b>first column</b> is forced — it holds the K copies of M, one per row. Columns 1..N within each full row can be filled by ANY other task that doesn't violate cooldown (or stay idle if none available). The <b>last row</b> only contains tasks tied with M for the max count (no idles needed; we stop as soon as the M-line completes).
+<br><br>
+If there are MORE tasks than the framework can hold, no idles are needed and the answer is simply <code>len(tasks)</code> — hence the <code>max(framework, len(tasks))</code>.`,
      interactive:{ type:'codepredict',
        code:'from collections import Counter\ndef leastInterval(tasks, n):\n    counts = Counter(tasks).values()\n    M = max(counts)\n    most = sum(1 for c in counts if c == M)\n    framework = (M - 1) * (n + 1) + most\n    return max(framework, len(tasks))\n\nprint(leastInterval(["A","A","A","B","B","B"], 2))',
        question:'What does this print?',
@@ -4980,7 +5163,30 @@ The <code>counter</code> tiebreaker handles equal vals — without it, heap comp
     return False</code></pre>
 Time O(N), memory O(1).
 <br><br>
-<b>Find the cycle ENTRANCE</b> (LeetCode "Linked List Cycle II"): after they meet, reset slow to head. Now move BOTH at speed 1; the next meeting point is the cycle entrance. Why? Math: if the cycle has length C, slow traveled S, fast traveled 2S, and S = nC + D where D is distance from head to entrance. So slow is D steps into the cycle from start. Walking D more steps from both head and the meeting point lands them both at the entrance.
+<b>Find the cycle ENTRANCE</b> (LeetCode "Linked List Cycle II"): after they meet, reset slow to head. Now move BOTH at speed 1; the next meeting point is the cycle entrance.
+<br><br>
+<b>The proof, visualized:</b>
+<pre style="font-family:monospace;line-height:1.4">
+     head                       entrance
+       •                            •
+       │                            │
+       │←———— D steps ————→         │
+       │                            ▼
+       └─→ o ─→ o ─→ o ─→ ... ─→ o ─┐ ◄———————┐
+                                    │         │
+                                    ▼         │ cycle of length C
+                                    o         │
+                                    │         │
+                                    ▼         │
+                                    o ─→ ... ─┘
+                                    ↑
+                                    meeting point
+                                    (slow met fast here)
+</pre>
+<br>
+Let <code>D</code> = distance from head to cycle entrance, <code>C</code> = cycle length, <code>M</code> = distance from entrance to meeting point along the cycle direction. When they meet, slow has traveled <code>D + M</code>; fast has traveled <code>D + M + k·C</code> for some integer k. Fast moves at 2× speed so: <code>2(D + M) = D + M + k·C</code> → <code>D + M = k·C</code> → <code>D = k·C − M</code>.
+<br><br>
+Now reset slow to head and walk both at speed 1. After <code>D</code> steps, slow lands at the entrance. The other pointer (already at the meeting point) walked <code>D = k·C − M</code> steps from there — which lands <i>also</i> at the entrance (going M more steps forward + (k−1) full laps).
 <pre><code>def detectCycle(head):
     slow = fast = head
     while fast and fast.next:
@@ -5097,50 +5303,83 @@ The interleave version is the senior signal — most candidates only know the ha
        ],
        explain:'Three phases: validate-length, reverse-in-place, stitch-with-rest. The recursion naturally cleans up the boundaries between groups.'}},
 
-    {id:'ll-LC2', type:'concept', name:'Copy List with Random Pointer — interleave trick (no hash)', xp:30, time:13,
-     body:`Deep-copy a linked list where each node has <code>next</code> AND a <code>random</code> pointer to ANY node (or null).
+    {id:'ll-LC2', type:'concept', name:'All O(1) Data Structure — keys grouped by count in a doubly-linked list of buckets', xp:34, time:15,
+     body:`Design a data structure with <b>O(1)</b> <code>inc(key)</code>, <code>dec(key)</code>, <code>getMaxKey()</code>, <code>getMinKey()</code>. <code>inc</code>/<code>dec</code> adjusts the count of a key (start at 0); <code>getMaxKey</code>/<code>getMinKey</code> returns any key with the highest/lowest count.
 <br><br>
-<b>The hash-map approach:</b> first pass clones every node and stores <code>orig → clone</code> in a dict. Second pass sets clone.next and clone.random using the dict. O(N) time, O(N) extra space.
-<br><br>
-<b>The O(1) extra-space trick — interleave:</b>
-<ol>
-<li><b>Weave clones between originals:</b> A → A' → B → B' → C → C'. Now each clone is immediately after its original.</li>
-<li><b>Wire random pointers:</b> for each original A, clone is A.next. To set A'.random, look at A.random.next (which IS the clone of A.random).</li>
-<li><b>Unweave:</b> separate the two interleaved lists back into "original" and "clone".</li>
-</ol>
+<b>Why naïve approaches fail:</b>
+<ul class="list-muted">
+<li><b>Hash + heap:</b> getMax/getMin are O(1), but inc/dec is O(log N).</li>
+<li><b>Sorted dict / OrderedDict:</b> O(log N) inc/dec.</li>
+<li><b>Two hashes:</b> count-of-key and key-set-by-count work for inc/dec but getMax/getMin needs scanning.</li>
+</ul>
 <br>
-<pre><code>def copy_random_list(head):
-    if not head: return None
-    # 1. Interleave
-    curr = head
-    while curr:
-        clone = Node(curr.val)
-        clone.next = curr.next
-        curr.next = clone
-        curr = clone.next
-    # 2. Set random pointers on clones
-    curr = head
-    while curr:
-        if curr.random: curr.next.random = curr.random.next
-        curr = curr.next.next
-    # 3. Separate
-    new_head = head.next; curr = head
-    while curr:
-        clone = curr.next
-        curr.next = clone.next
-        clone.next = clone.next.next if clone.next else None
-        curr = curr.next
-    return new_head</code></pre>
-<b>Why this avoids hashing:</b> the "next" pointer on each ORIGINAL temporarily points to its CLONE. This in-place mapping replaces the hash map for the duration of the weave.
-<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"I can do it with a hash, but if asked for O(1) extra space, I'd interleave the clones between originals so each clone is reachable via the original's .next." The "interleave" reframing IS the answer to the senior-bar question.</div>`,
-     interactive:{ type:'match',
-       prompt:'Match each pass with what it accomplishes:',
-       pairs:[
-         ['Pass 1: weave','Insert each clone immediately after its original — creates an implicit orig→clone map via .next'],
-         ['Pass 2: set random','For each orig, orig.next is the clone; orig.random.next is the clone of orig.random. Wire them.'],
-         ['Pass 3: unweave','Separate the two interleaved lists back into pure-original and pure-clone chains'],
+<b>The structure that nails all four ops in O(1) — buckets in a doubly-linked list:</b>
+<ul class="list-muted">
+<li><b>Each "bucket"</b> = a node holding a count value and a SET of keys with that count.</li>
+<li><b>The buckets are doubly linked</b>, sorted by count ascending. Head = min count, tail = max count.</li>
+<li><b>A hash</b> <code>key_to_bucket</code> gives O(1) "which bucket holds this key".</li>
+</ul>
+<br>
+<pre><code>class Bucket:
+    __slots__ = ('count', 'keys', 'prev', 'next')
+    def __init__(self, count):
+        self.count = count; self.keys = set(); self.prev = self.next = None
+
+class AllOne:
+    def __init__(self):
+        self.head = Bucket(0); self.tail = Bucket(0)    # sentinels
+        self.head.next = self.tail; self.tail.prev = self.head
+        self.kb = {}    # key -&gt; bucket
+
+    def _insert_after(self, prev, count):
+        nb = Bucket(count); nb.prev = prev; nb.next = prev.next
+        prev.next.prev = nb; prev.next = nb
+        return nb
+
+    def _remove_if_empty(self, b):
+        if not b.keys and b is not self.head and b is not self.tail:
+            b.prev.next = b.next; b.next.prev = b.prev
+
+    def inc(self, key):
+        cur = self.kb.get(key, self.head)        # missing key → starts at "0" before head
+        nxt = cur.next if cur is not self.head else self.head.next
+        if nxt is self.tail or nxt.count != cur.count + 1:
+            nxt = self._insert_after(cur, cur.count + 1)
+        nxt.keys.add(key); self.kb[key] = nxt
+        if cur is not self.head:
+            cur.keys.discard(key); self._remove_if_empty(cur)
+
+    def dec(self, key):
+        cur = self.kb[key]
+        if cur.count == 1:
+            del self.kb[key]
+        else:
+            prv = cur.prev
+            if prv is self.head or prv.count != cur.count - 1:
+                prv = self._insert_after(prv, cur.count - 1)
+            prv.keys.add(key); self.kb[key] = prv
+        cur.keys.discard(key); self._remove_if_empty(cur)
+
+    def getMaxKey(self):
+        return next(iter(self.tail.prev.keys), "")
+    def getMinKey(self):
+        return next(iter(self.head.next.keys), "")</code></pre>
+<b>Why each op is O(1):</b>
+<ul class="list-muted">
+<li><b>inc/dec:</b> O(1) hash lookup → adjust ONE neighbor bucket (create if missing) → set add/remove. Bucket list moves are constant-time pointer rewires.</li>
+<li><b>getMaxKey/getMinKey:</b> tail.prev / head.next are O(1). <code>next(iter(set))</code> peeks any key — O(1).</li>
+</ul>
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"The trick is bucketing by count, keeping the buckets in a sorted doubly-linked list. Hash points each key to its bucket; bucket holds a set of keys. inc/dec moves a key between adjacent buckets (creating one if it doesn\'t exist). Max/min are bucket-list endpoints." Same family as LRU/LFU — bucket-of-equivalents linked structure is the recurring move.</div>`,
+     interactive:{ type:'whyexplain',
+       prompt:'Why are the BUCKETS kept in a doubly-linked list rather than a sorted array or heap?',
+       options:[
+         'It\'s more memory-efficient',
+         'inc/dec moves a key between count-N and count-(N±1) buckets — adjacent in sorted order. A doubly-linked list gives O(1) "find and link adjacent bucket". Array would shift O(N); heap is O(log N).',
+         'It avoids the need for a hash map',
+         'Sets cannot be stored in arrays',
        ],
-       explain:'The three-pass structure is the entire trick. Each pass is O(N), giving O(N) total time with O(1) extra space — no hash map needed.'}},
+       correct:1,
+       explain:'The fundamental insight: every inc/dec moves to an ADJACENT count value. The doubly-linked list gives O(1) "splice in a new bucket between two existing ones" and O(1) "remove an empty bucket". Array shifts all elements; heap reheapifies in log time. The linked list is the structure that matches the access pattern.'}},
 
     {id:'ll-LC3', type:'concept', name:'LFU Cache — frequency buckets + ordered sets', xp:34, time:15,
      body:`Implement Least-Frequently-Used cache. Evict the least-frequently-used key; if tie, evict least-recently-used among those. O(1) get and put.
@@ -5473,7 +5712,7 @@ Max rectangle across all rows = answer.
          '[1, 1, 1, 1]',
        ],
        correct:2,
-       explain:'At row 2, column 0: three 1s stacked → height 3. Col 1: one 1 at row 2 only → height 1. Col 2: three 1s → 3. Col 3: two 1s (rows 1, 2) → 2. Heights = [3,1,3,2]. Largest rect = 3×2 = 6 (cols 0+2 not contiguous; cols 0-2 only height-1 limited; cols 2-3 height-2 wide-2 = 4; col 0 alone = 3; the answer for THIS row\'s histogram is 6 from cols 0,2,3 limited by min=2).'}},
+       explain:'At row 2, column 0: three 1s stacked → height 3. Col 1: one 1 at row 2 only → height 1. Col 2: three 1s → 3. Col 3: two 1s (rows 1, 2) → 2. Heights = [3, 1, 3, 2]. The largest-rectangle-in-histogram pass over this row gives area 4 (cols 2–3, height = min(3,2) = 2, width 2).'}},
 
     {id:'st-LC4', type:'concept', name:'132 Pattern — descending monotonic stack', xp:30, time:13,
      body:`Find indices i &lt; j &lt; k with a[i] &lt; a[k] &lt; a[j]. The "132" name refers to the pattern's relative magnitude order.
@@ -5519,15 +5758,18 @@ Max rectangle across all rows = answer.
 def quickselect(nums, k):
     # k is 1-indexed: 1 = largest, 2 = second largest, ...
     def partition(lo, hi):
-        pivot = nums[random.randint(lo, hi)]
-        # Hoare partition: produce "≥ pivot" then "≤ pivot" zones
+        # 1. Swap random pivot to the right end so its index is known
+        pi = random.randint(lo, hi)
+        nums[pi], nums[hi] = nums[hi], nums[pi]
+        pivot = nums[hi]
+        # 2. Lomuto partition (descending order — "larger goes left")
         i = lo
         for j in range(lo, hi):
             if nums[j] &gt; pivot:
                 nums[i], nums[j] = nums[j], nums[i]
                 i += 1
-        # Put pivot in its final place by moving the last element here
-        # (simplified: standard Lomuto with pivot at end; see notes)
+        # 3. Place pivot at its final position
+        nums[i], nums[hi] = nums[hi], nums[i]
         return i
     target = k - 1                    # 0-indexed position of the kth largest
     lo, hi = 0, len(nums) - 1
@@ -5538,6 +5780,8 @@ def quickselect(nums, k):
         else: hi = p - 1
     return -1</code></pre>
 The randomized pivot is essential — without it, sorted inputs trigger O(N²). Always state this aloud.
+<br><br>
+<b>Why the three-step partition matters:</b> step 1 makes the pivot\'s index <i>known</i> (it\'s at <code>hi</code>); step 2 partitions everything else by comparison against <code>pivot</code>; step 3 swaps the pivot into its final sorted-position slot. Skip step 1 or 3 and the pivot value gets shuffled mid-iteration, breaking the invariant.
 <br><br>
 <b>Alternative — min-heap of size K:</b> O(N log K). For very small K relative to N, heap is competitive. For K close to N/2 (e.g., median), quickselect wins. Mention this tradeoff.`,
      interactive:{ type:'whyexplain',
@@ -5644,8 +5888,13 @@ def median_sliding_window(nums, k):
     delayed = defaultdict(int)
     lo_sz = hi_sz = 0
     def prune(h):
-        while h and delayed[(-h[0] if h is lo else h[0])] &gt; 0:
-            delayed[(-h[0] if h is lo else h[0])] -= 1
+        # "Top of h as a real value" — lo stores negatives (max-heap),
+        # hi stores positives directly. Peek the real value of h[0],
+        # pop while it's marked for deletion.
+        def top_value(h):
+            return -h[0] if h is lo else h[0]
+        while h and delayed[top_value(h)] &gt; 0:
+            delayed[top_value(h)] -= 1
             heapq.heappop(h)
     def add(x):
         nonlocal lo_sz, hi_sz
@@ -5767,32 +6016,29 @@ class KthLargest:
        correct:1,
        explain:'If matrix[r][c] > mid, then column c at and below row r is also > mid (column-sorted). So no contribution to count_le from this column. Move UP to find smaller cells. Each up-step or right-step decreases r or increases c → at most 2N steps total.'}},
 
-    {id:'sel-LC4', type:'concept', name:'Wiggle Sort II — quickselect + index remap', xp:32, time:14,
+    {id:'sel-LC4', type:'concept', name:'Wiggle Sort II — sort + reverse-interleave (with O(N) extension)', xp:32, time:14,
      body:`Rearrange the array so that <code>nums[0] &lt; nums[1] &gt; nums[2] &lt; nums[3] &gt; ...</code> Allowed any rearrangement; equal values cannot be adjacent.
 <br><br>
-<b>Three phases:</b>
-<ol>
-<li><b>Find the median</b> in O(N) via quickselect.</li>
-<li><b>3-way partition</b> in O(N): &lt; median | == median | &gt; median.</li>
-<li><b>Place into even slots from the LARGER side, odd slots from the SMALLER side</b> — specifically, even slots get values just BELOW median descending, odd slots get values just ABOVE median descending.</li>
-</ol>
-<br>
-<b>The index-mapping trick to avoid an extra array:</b> "virtual index" function <code>v(i) = (2*i + 1) % (n | 1)</code> reorders the array so that under v, the wiggle pattern emerges. Apply 3-way partition under the virtual index ordering.
-<br><br>
+<b>The O(N log N) interview answer — sort + reverse-interleave:</b>
 <pre><code>def wiggle_sort(nums):
     n = len(nums)
-    nums.sort()
+    nums.sort()                              # O(N log N)
     median_idx = (n - 1) // 2
-    # Split sorted nums into two halves
-    smaller = nums[:median_idx + 1][::-1]   # reverse so largest of smaller half is first
+    smaller = nums[:median_idx + 1][::-1]    # reverse so largest of smaller-half is first
     bigger  = nums[median_idx + 1:][::-1]
     # Interleave: even slots from smaller (largest first); odd from bigger (largest first)
     for i in range(n):
-        if i % 2 == 0:
-            nums[i] = smaller[i // 2]
-        else:
-            nums[i] = bigger[i // 2]</code></pre>
-<b>Why reverse before interleaving?</b> Placing the LARGEST of smaller-half at even-index 0 and the LARGEST of bigger-half at odd-index 1 ensures their values don't accidentally tie at adjacent positions — even with duplicates.
+        if i % 2 == 0: nums[i] = smaller[i // 2]
+        else:          nums[i] = bigger[i // 2]</code></pre>
+<b>Why reverse before interleaving?</b> Placing the LARGEST of smaller-half at even-index 0 and the LARGEST of bigger-half at odd-index 1 ensures duplicates of the median (which would tie at adjacent positions in natural order) get split to opposite ends of the result.
+<br><br>
+<b>The O(N) extension — say it aloud even if you don\'t code it:</b>
+<ol>
+<li><b>Find the median in O(N)</b> via quickselect.</li>
+<li><b>3-way partition in O(N):</b> &lt; median | == median | &gt; median.</li>
+<li><b>Virtual-index map:</b> <code>v(i) = (2*i + 1) % (n | 1)</code> reorders positions so a 3-way partition <i>under v</i> produces the wiggle layout — no extra array.</li>
+</ol>
+The senior answer: present the O(N log N) above, then say "I can get to O(N) by replacing the sort with quickselect for the median and doing the 3-way partition under the virtual-index map." Most interviewers accept the simpler version; offering the upgrade shows depth.
 <div class="callout callout-depth"><div class="callout-label">The duplicate-handling trick</div>If you place even slots from the SMALL side of median (small to large) and odd from BIG side (large to small), adjacent equal values can land next to each other. Reversing both halves means the median (if it appears multiple times) is split: half goes to the leftmost even slots, half to the rightmost odd slots — they're never adjacent.</div>`,
      interactive:{ type:'whyexplain',
        prompt:'Why reverse the two halves before interleaving (instead of using natural sorted order)?',
@@ -5886,13 +6132,16 @@ The "slide" via lps[j-1] is what avoids re-comparing. Total comparisons across a
 The verification step (<code>text[i:i+M] == pat</code>) catches hash collisions. With a good hash, collisions are rare; total expected work is O(N + M).
 <br><br>
 <b>Where Rabin-Karp shines:</b> matching MANY patterns at once. Hash all K patterns, then scan the text once — every window\'s hash gets checked against the set in O(1). Total O(N + K·M).`,
-     interactive:{ type:'codepredict',
-       code:'def naiveMatch(text, pat):\n    M, N = len(pat), len(text)\n    for i in range(N - M + 1):\n        if text[i:i+M] == pat:\n            return i\n    return -1\n\nprint(naiveMatch("aaaaaab", "aaab"))',
-       question:'What does this print?',
-       options:['3','4','5','-1'],
+     interactive:{ type:'mcq',
+       q:'You\'re sliding a window of length 3 across "abcde". Current window "abc" hashes via h(w) = ord(w[0])·base² + ord(w[1])·base + ord(w[2]). To roll forward to "bcd" in O(1), the update is:',
+       options:[
+         'h_new = h_old - ord("a") · base² + ord("d")   (subtract leaving char\'s top-power contribution, then add incoming at the bottom)',
+         'h_new = (h_old + ord("d")) % mod   (just append the new char)',
+         'h_new = h_old · base + ord("d") - ord("a")   (multiply, add new, subtract old)',
+         'h_new = h_old - ord("a") + ord("d")   (no multiplication needed)',
+       ],
        correct:0,
-       cat:'coding',
-       explain:'Naive scan: i=0 "aaaa"!="aaab". i=1 "aaaa"!="aaab". i=2 "aaaa"!="aaab". i=3 "aaab"=="aaab" → return 3. Worst case complexity is O(M·N) — that\'s the pathological pattern that motivates KMP / Rabin-Karp.'}},
+       explain:'Rolling hash: each char\'s contribution is base^position. Leaving char "a" was at the highest power (base² for M=3), so subtract ord("a")·base². The shift LEFT by one position (multiply by base) demotes remaining chars; the incoming char takes the lowest power (base⁰ = 1). Standard form: h_new = (h_old - ord(out)·base^(M-1)) · base + ord(in). Mod each step. Without this O(1) update, you\'d recompute the full hash per window — degenerate to O(M·N).'}},
 
     {id:'sm-3', type:'concept', name:'Z-function — every prefix-length match in O(N)', xp:12, time:9,
      body:`The Z-array of a string S has Z[i] = length of the longest substring starting at i that is also a prefix of S. Built in O(N) with the "Z-box" technique. Useful for: pattern matching, longest palindromic substring, string periodicity.
