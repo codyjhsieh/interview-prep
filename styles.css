@@ -377,6 +377,17 @@ body:has(> .fixed.inset-0[class*="z-4"]),
 body:has(> .fixed.inset-0[class*="z-5"]) {
   --glass-blur: 84px;
   --glass-saturate: 220%;
+  /* Lock body scroll while a modal is open so the page underneath doesn't
+   * scroll behind the sheet on iOS (overscroll bleed). The modal wrapper
+   * carries its own overflow-y:auto -- we only freeze the body.
+   * overscroll-behavior blocks the pull-to-refresh / rubber-band bleed
+   * that iOS Safari would otherwise still allow at the edges. */
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+html:has(body > .fixed.inset-0[class*="z-4"]),
+html:has(body > .fixed.inset-0[class*="z-5"]) {
+  overflow: hidden;
 }
 
 /* Scene drop — the underlying <main> recedes when a modal opens. Combined

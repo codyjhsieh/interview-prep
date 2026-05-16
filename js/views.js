@@ -4518,20 +4518,18 @@ function renderLesson(state, lessonId, sourceEl) {
         </div>
         <button class="text-2xl muted hover:text-white" data-close="lesson" aria-label="Close">×</button>
       </div>
-      <div id="engagement-status" class="mt-4 px-3 py-2 rounded-md text-[12.5px] flex items-center gap-2"
+      <!-- Body FIRST so the reader gets the material before the practice -->
+      <div class="mt-4 lesson-prose">
+        ${lesson.body}
+      </div>
+
+      <!-- Activity (free-recall + interactive) BELOW the body -->
+      <div id="engagement-status" class="mt-6 px-3 py-2 rounded-md text-[12.5px] flex items-center gap-2"
            style="background:rgba(199,120,14,0.08); border:1px solid rgba(199,120,14,0.25); color:var(--warn)">
         <span class="font-mono">○</span>
         <span>${esc(stepLabel)} to unlock Mark complete</span>
       </div>
-
-      <!-- Activity FIRST — most prominent, slot for mountLessonInteraction -->
       <div id="lesson-interaction" class="mt-4 min-h-[2rem]"></div>
-
-      <!-- Body always visible below the activity -->
-      <div class="mt-5 pt-5 border-t border-[color:var(--hairline)] lesson-prose">
-        <div class="eyebrow mb-2 mobile-hide">Reference · the full insight</div>
-        ${lesson.body}
-      </div>
       <div class="mt-6 flex items-center justify-between gap-2 flex-wrap">
         <div class="flex gap-2 items-center">
           <button class="btn btn-ghost" data-close="lesson">Close <span class="dim text-[10px] ml-1 hidden sm:inline">Esc</span></button>
@@ -5299,6 +5297,14 @@ function renderFlashcards(state, hub) {
 
   const stage = container.querySelector('#fc-stage');
   let idx = 0;
+  // Resume the card the user was on before they opened a lesson modal.
+  // Captured globally on Review-link click; cleared after first use so
+  // a manual return to /#flashcards still shuffles freely.
+  if (window._fcResumeId) {
+    const resumePos = due.findIndex(d => d.card.id === window._fcResumeId);
+    if (resumePos >= 0) idx = resumePos;
+    window._fcResumeId = null;
+  }
   // Keyboard: Space/Enter flips, 1-4 rates
   const onKey = (e) => {
     if (idx >= due.length) return;
@@ -5321,6 +5327,9 @@ function renderFlashcards(state, hub) {
   document.addEventListener('keydown', onKey);
   window.addEventListener('hashchange', () => document.removeEventListener('keydown', onKey), { once: true });
   function paint() {
+    // Tear down resize listener on the prior card before swapping.
+    const prior = stage.querySelector('.flashcard');
+    if (prior && prior._sizeCard) window.removeEventListener('resize', prior._sizeCard);
     stage.innerHTML = '';
     if (idx >= due.length) {
       stage.innerHTML = `<div class="card text-center py-12">
@@ -5354,7 +5363,7 @@ function renderFlashcards(state, hub) {
         <div class="flashcard-face flashcard-back">
           <div class="text-xs uppercase tracking-wide text-slate-400 mb-3 flex items-center justify-between">
             <span>Answer</span>
-            <a href="${reviewHref}" class="text-[11px] normal-case tracking-normal" style="color:var(--accent)" onclick="event.stopPropagation()">Review ${card.lesson ? 'lesson' : card.module ? 'module' : 'category'} →</a>
+            <a href="${reviewHref}" class="text-[11px] normal-case tracking-normal" style="color:var(--accent)" onclick="event.stopPropagation(); window._fcResumeId='${card.id}';">Review ${card.lesson ? 'lesson' : card.module ? 'module' : 'category'} →</a>
           </div>
           <div class="flashcard-answer leading-relaxed">${richText(card.a)}</div>
           <div class="absolute bottom-5 right-6 text-xs text-slate-500">Click to flip back</div>
@@ -5369,6 +5378,23 @@ function renderFlashcards(state, hub) {
     `;
     stage.appendChild(fc);
     const flashEl = fc;
+    // iOS WebKit doesn't size grid rows correctly when the grid container
+    // has transform-style:preserve-3d, so the card stays at min-height
+    // even when the back-face answer overflows. Measure both faces after
+    // mount and lock the inner to the taller one. rAF lets fonts settle
+    // first so we don't undershoot.
+    const sizeCard = () => {
+      const inner = flashEl.querySelector('.flashcard-inner');
+      const faces = flashEl.querySelectorAll('.flashcard-face');
+      if (!inner || faces.length < 2) return;
+      let max = 240;
+      faces.forEach(f => { max = Math.max(max, f.scrollHeight); });
+      inner.style.minHeight = max + 'px';
+    };
+    requestAnimationFrame(() => requestAnimationFrame(sizeCard));
+    // Re-measure on viewport resize (mobile rotate, soft keyboard).
+    flashEl._sizeCard = sizeCard;
+    window.addEventListener('resize', sizeCard, { passive: true });
     flashEl.querySelector('.flashcard-inner').addEventListener('click', () => {
       // Toggle so the card flips back and forth on repeated clicks.
       // The rate row stays visible once shown — the user has already
