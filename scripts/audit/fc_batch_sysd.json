@@ -1,0 +1,381 @@
+{
+  "cat": "sysd",
+  "lessons": [
+    {
+      "id": "sd-1",
+      "type": "concept",
+      "name": "The 4-step interview frame",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-2",
+      "type": "concept",
+      "name": "URL shortener \u2014 designed in 10 minutes",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-3",
+      "type": "concept",
+      "name": "Rate limiter \u2014 token bucket, sliding window, GCRA, and edge enforcement",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-4",
+      "type": "concept",
+      "name": "News feed \u2014 push vs pull vs hybrid",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-5",
+      "type": "concept",
+      "name": "Caching pitfalls \u2014 the six that come up in interviews",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-7",
+      "type": "concept",
+      "name": "Chat / messaging at scale",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-8",
+      "type": "concept",
+      "name": "Consistent hashing \u2014 how to shard without re-shuffling",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-9",
+      "type": "concept",
+      "name": "CAP & PACELC \u2014 what you can't have all of",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-bo",
+      "type": "concept",
+      "name": "Back-of-envelope \u2014 the numbers every senior knows cold",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-db",
+      "type": "concept",
+      "name": "DB internals \u2014 B-tree vs LSM, when each wins",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-raft",
+      "type": "concept",
+      "name": "Replication & Raft \u2014 consensus in one page",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-reliable",
+      "type": "concept",
+      "name": "Reliability patterns \u2014 circuit breaker, bulkhead, retry budget",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-kafka",
+      "type": "concept",
+      "name": "Distributed log \u2014 Kafka partitioning, replication, exactly-once",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-geo",
+      "type": "concept",
+      "name": "Geo-dispatch \u2014 Uber-style matching at scale",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-pay",
+      "type": "concept",
+      "name": "Payment processing \u2014 idempotency, sagas, the exactly-once myth",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-6",
+      "type": "concept",
+      "name": "Notification system \u2014 how the pieces fit",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-cells",
+      "type": "concept",
+      "name": "Cell-based architecture \u2014 blast radius as a first-class design constraint",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-outbox",
+      "type": "concept",
+      "name": "Outbox pattern + CDC \u2014 transactional event publishing",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-tail",
+      "type": "concept",
+      "name": "Tail-latency engineering \u2014 hedged requests + p99 thinking",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "sd-tracing",
+      "type": "concept",
+      "name": "Distributed tracing \u2014 OpenTelemetry + W3C trace context",
+      "module_id": "sd-classic",
+      "module_name": "Classic primitives",
+      "cat": "sysd"
+    },
+    {
+      "id": "fd-1",
+      "type": "concept",
+      "name": "Multi-tenancy \u2014 what it means and why it matters",
+      "module_id": "sd-fde",
+      "module_name": "FDE-specific system design",
+      "cat": "sysd"
+    },
+    {
+      "id": "fd-2",
+      "type": "concept",
+      "name": "Webhook reliability \u2014 making someone else's server your problem",
+      "module_id": "sd-fde",
+      "module_name": "FDE-specific system design",
+      "cat": "sysd"
+    },
+    {
+      "id": "fd-3",
+      "type": "concept",
+      "name": "SSO for enterprise \u2014 what SAML, OIDC, SCIM actually do",
+      "module_id": "sd-fde",
+      "module_name": "FDE-specific system design",
+      "cat": "sysd"
+    },
+    {
+      "id": "fd-4",
+      "type": "concept",
+      "name": "Customer VPC deploys \u2014 four shapes, escalating cost (incl. BYOC)",
+      "module_id": "sd-fde",
+      "module_name": "FDE-specific system design",
+      "cat": "sysd"
+    },
+    {
+      "id": "fd-7",
+      "type": "concept",
+      "name": "Event sourcing + CQRS \u2014 when the log IS the database",
+      "module_id": "sd-fde",
+      "module_name": "FDE-specific system design",
+      "cat": "sysd"
+    },
+    {
+      "id": "fd-8",
+      "type": "concept",
+      "name": "gRPC vs REST vs GraphQL \u2014 pick the wire format",
+      "module_id": "sd-fde",
+      "module_name": "FDE-specific system design",
+      "cat": "sysd"
+    },
+    {
+      "id": "fd-5",
+      "type": "concept",
+      "name": "Customer's legacy ERP has no API \u2014 the integration ladder",
+      "module_id": "sd-fde",
+      "module_name": "FDE-specific system design",
+      "cat": "sysd"
+    },
+    {
+      "id": "fd-6",
+      "type": "concept",
+      "name": "Customer-facing eval & monitoring \u2014 the AI observability stack",
+      "module_id": "sd-fde",
+      "module_name": "FDE-specific system design",
+      "cat": "sysd"
+    }
+  ],
+  "existing_cards": [
+    {
+      "id": "fc-sd-1",
+      "cat": "sysd",
+      "q": "4-step system design frame?",
+      "a": "Requirements (functional + non-functional) \u2192 capacity estimate \u2192 high-level boxes \u2192 deep-dive on a hard subproblem."
+    },
+    {
+      "id": "fc-sd-2",
+      "cat": "sysd",
+      "q": "Multi-tenancy: silo vs pool vs bridge?",
+      "a": "Silo: dedicated DB per tenant (max isolation, highest cost). Pool: shared DB + shared schema with a tenant_id column (cheapest, noisy-neighbor risk). Bridge: shared DB instance with a separate schema per tenant (middle ground \u2014 logical isolation, easier per-tenant migrations). Match the pattern to the customer's compliance posture."
+    },
+    {
+      "id": "fc-sd-3",
+      "cat": "sysd",
+      "q": "Webhook reliability checklist?",
+      "a": "HMAC sign, idempotency keys, exponential backoff retries with DLQ, dashboard for replay, signed timestamps with skew limit, document delivery-latency SLA."
+    },
+    {
+      "id": "fc-sd-4",
+      "cat": "sysd",
+      "q": "Consistent hashing add/remove cost?",
+      "a": "When adding the Nth node, ~1/N of keys remap to it. With virtual nodes (typically K=100-200 per server), load redistributes evenly across the existing nodes."
+    },
+    {
+      "id": "fc-sd-5",
+      "cat": "sysd",
+      "q": "CAP vs PACELC?",
+      "a": "CAP: during PARTITION, choose Consistency or Availability. PACELC adds: Else (no partition), choose Latency or Consistency. PACELC is more useful \u2014 it covers steady-state tradeoffs."
+    },
+    {
+      "id": "fc-sd-6",
+      "cat": "sysd",
+      "q": "When to fan-out push vs pull for feeds?",
+      "a": "Push (fanout-on-write): low read latency, write amplification for celebs. Pull (fanout-on-read): low write cost, high read for high-followed users. Hybrid above a celebrity threshold."
+    },
+    {
+      "id": "fc-sd-7",
+      "cat": "sysd",
+      "q": "Idempotency key + side-effecting tool?",
+      "a": "Every charge_card / send_email / deploy call gets a unique key. Server-side de-dupe table rejects duplicates. Non-negotiable for retries + agent loops."
+    },
+    {
+      "id": "fc-sd-8",
+      "cat": "sysd",
+      "q": "Per-server in-memory rate limit failure mode at scale?",
+      "a": "Each server enforces independently. A customer making 1k req/sec across N servers can pass each server's 100/sec limit. Fix: Redis sliding-window with Lua for atomicity."
+    },
+    {
+      "id": "fc-sd-9",
+      "cat": "sysd",
+      "q": "Three multi-tenancy patterns?",
+      "a": "(1) Pool \u2014 shared DB, shared schema, tenant_id column. (2) Silo \u2014 dedicated DB per tenant. (3) Bridge \u2014 shared DB, separate schema per tenant. Match isolation level to compliance posture and blast-radius tolerance."
+    },
+    {
+      "id": "fc-sd-10",
+      "cat": "sysd",
+      "q": "Why hybrid push/pull for feeds?",
+      "a": "Pure push: celebs cause write amplification. Pure pull: high-followers users slow reads. Hybrid: push for normal, pull for celebs above threshold."
+    },
+    {
+      "id": "fc-sd-11",
+      "cat": "sysd",
+      "q": "CAP theorem \u2014 when does the tradeoff actually apply?",
+      "a": "Only during a network PARTITION: pick Availability or Consistency. On a healthy network you can have both. PACELC extends CAP by adding the steady-state Else clause: even without partitions, you trade Latency vs Consistency."
+    },
+    {
+      "id": "fc-sd-12",
+      "cat": "sysd",
+      "q": "PACELC for Cassandra default?",
+      "a": "PA/EL \u2014 availability + low latency (default; tunable per-query). Spanner is PC/EC \u2014 consistency always."
+    },
+    {
+      "id": "fc-sd-13",
+      "cat": "sysd",
+      "q": "Consistent hashing: scaling from N to N+1 nodes \u2014 what fraction of keys remap?",
+      "a": "Roughly 1/(N+1) of keys move to the new node. With virtual nodes, the load redistributes evenly across existing nodes instead of from a single neighbor."
+    },
+    {
+      "id": "fc-sd-14",
+      "cat": "sysd",
+      "q": "For \"exactly-once\" semantics?",
+      "a": "Effectively impossible in distributed systems. Settle for \"at-least-once + idempotent receivers\" or \"at-most-once + accept loss.\""
+    },
+    {
+      "id": "fc-sd-15",
+      "cat": "sysd",
+      "q": "Cache stampede mitigation?",
+      "a": "Singleflight (only one request rebuilds, others wait) OR refresh-ahead (rebuild before TTL expires, serve stale during)."
+    },
+    {
+      "id": "fc-sd-16",
+      "cat": "sysd",
+      "q": "Hot keys in Redis \u2014 fix?",
+      "a": "Replicate hot keys across multiple nodes + load-balance reads. Consistent hashing doesn't help when ONE key is hot."
+    },
+    {
+      "id": "fc-sd-17",
+      "cat": "sysd",
+      "q": "For cross-server rate limiting?",
+      "a": "Redis with Lua script \u2014 atomic + low-latency. In-memory per-server can't enforce a global cap."
+    },
+    {
+      "id": "fc-sd-18",
+      "cat": "sysd",
+      "q": "Token bucket vs sliding-window for rate limits?",
+      "a": "Token bucket: tolerates bursts up to bucket size. Sliding-window counter: cheap + approximate. Pick by burst tolerance."
+    },
+    {
+      "id": "fc-sd-19",
+      "cat": "sysd",
+      "q": "Idempotency key TTL on a webhook receiver \u2014 how to size it?",
+      "a": "TTL must exceed the sender's max retry window (e.g., Stripe ~3 days, others up to weeks). Sized too short, late retries slip past the dedupe table and cause duplicate processing."
+    },
+    {
+      "id": "fc-sd-20",
+      "cat": "sysd",
+      "q": "For chat ordering with simultaneous sends?",
+      "a": "Server-assigned per-conversation sequence number. Wall-clock skews. Sequence is monotonic + deterministic."
+    },
+    {
+      "id": "fc-sd-21",
+      "cat": "sysd",
+      "q": "Range vs hash sharding \u2014 range when?",
+      "a": "When you need range queries (e.g., \"rows where date BETWEEN X and Y\"). Risk: hot partitions. Hash distributes evenly but kills ranges."
+    },
+    {
+      "id": "fc-sd-22",
+      "cat": "sysd",
+      "q": "Read-replica lag breaks read-your-writes \u2014 fix?",
+      "a": "Session pinning: route a user's reads to the primary for N seconds after their write, so they see their own update. Other users keep reading from replicas, preserving scale."
+    },
+    {
+      "id": "fc-sd-23",
+      "cat": "sysd",
+      "q": "SAGA pattern for distributed transactions?",
+      "a": "Each step has compensating action. On failure, run compensations in reverse. Standard when 2PC is impractical."
+    },
+    {
+      "id": "fc-sd-24",
+      "cat": "sysd",
+      "q": "Circuit breaker pattern goal?",
+      "a": "Prevent cascading failures. After N failures, open breaker \u2192 fast-fail subsequent calls \u2192 probe for recovery. Don't overload the downstream."
+    },
+    {
+      "id": "fc-sd-25",
+      "cat": "sysd",
+      "q": "Event sourcing \u2014 source of truth?",
+      "a": "Append-only event log. Current state derived by replaying events. Snapshots + projections are derived views for fast reads."
+    }
+  ]
+}

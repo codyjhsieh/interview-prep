@@ -1,0 +1,1124 @@
+[
+  {
+    "id": "fc-rag-1",
+    "cat": "ai",
+    "q": "When should you NOT build a RAG?",
+    "a": "When your knowledge base fits in the model's context window (Claude Sonnet/Opus 4.6+ ship a 1M-token window GA at standard pricing) \u2014 full-context + prompt caching is often faster and cheaper than building retrieval infra. Also skip RAG when answers don't depend on private or fresh data."
+  },
+  {
+    "id": "fc-rag-2",
+    "cat": "ai",
+    "q": "Sparse vs dense vs hybrid retrieval \u2014 when to use each?",
+    "a": "Sparse (BM25) for rare terms, codes, names. Dense (vector) for paraphrase, semantic intent. Hybrid + reciprocal rank fusion is the production default. Add a cross-encoder re-ranker on top-k."
+  },
+  {
+    "id": "fc-rag-3",
+    "cat": "ai",
+    "q": "Why temperature=0 for extraction tasks?",
+    "a": "Determinism + minimum hallucination. Pair with structured outputs and retry-on-invalid. Creative tasks want 0.5\u20130.8."
+  },
+  {
+    "id": "fc-rag-4",
+    "cat": "ai",
+    "q": "Three LLM eval layers?",
+    "a": "Unit (deterministic checks: schema/regex/length/refusal), System (golden Q\u2192A sets scored by LLM-as-judge + human spot-check), Production (online thumbs/escalation/regret)."
+  },
+  {
+    "id": "fc-rag-5",
+    "cat": "ai",
+    "q": "Agent vs chain \u2014 what's the real distinction?",
+    "a": "A chain has a fixed graph (LLM fills steps). An agent chooses the next step, including which tool to call. Agents trade determinism for flexibility \u2014 most \"agents\" should be chains."
+  },
+  {
+    "id": "fc-dec-1",
+    "cat": "decomp",
+    "q": "What is the #1 instant-reject signal in a problem-decomposition / case interview?",
+    "a": "Jumping to specific tools or solutions before asking clarifying questions and scoping the problem (users, success metric, constraints, data)."
+  },
+  {
+    "id": "fc-dec-2",
+    "cat": "decomp",
+    "q": "Decomposition 5-step framework?",
+    "a": "1. Clarify (success metric, users, data, constraints). 2. Stakeholder map. 3. Data sources. 4. Tradeoffs. 5. Failure modes."
+  },
+  {
+    "id": "fc-cod-1",
+    "cat": "coding",
+    "q": "BFS template essentials?",
+    "a": "deque + visited set; check visited at enqueue (not dequeue) to avoid re-enqueues; track level via separate counter or by queue-length-per-level loop."
+  },
+  {
+    "id": "fc-cod-2",
+    "cat": "coding",
+    "q": "LRU cache structure?",
+    "a": "Hash map (key\u2192node) + doubly-linked list. On get/put: detach node, insert at head, evict tail when over capacity. O(1) get/put."
+  },
+  {
+    "id": "fc-sd-1",
+    "cat": "sysd",
+    "q": "4-step system design frame?",
+    "a": "Requirements (functional + non-functional) \u2192 capacity estimate \u2192 high-level boxes \u2192 deep-dive on a hard subproblem."
+  },
+  {
+    "id": "fc-sd-2",
+    "cat": "sysd",
+    "q": "Multi-tenancy: silo vs pool vs bridge?",
+    "a": "Silo: dedicated DB per tenant (max isolation, highest cost). Pool: shared DB + shared schema with a tenant_id column (cheapest, noisy-neighbor risk). Bridge: shared DB instance with a separate schema per tenant (middle ground \u2014 logical isolation, easier per-tenant migrations). Match the pattern to the customer's compliance posture."
+  },
+  {
+    "id": "fc-sd-3",
+    "cat": "sysd",
+    "q": "Webhook reliability checklist?",
+    "a": "HMAC sign, idempotency keys, exponential backoff retries with DLQ, dashboard for replay, signed timestamps with skew limit, document delivery-latency SLA."
+  },
+  {
+    "id": "fc-beh-1",
+    "cat": "behav",
+    "q": "STAR weighting for Forward Deployed Engineer (FDE) behavioral rounds?",
+    "a": "Situation: 2-3 sentences MAX. Task: clarify YOUR ownership (FDE rounds probe individual accountability). Action: ~60% of the story, focus on technical + customer decisions you made. Result: both technical outcome and quantified business impact."
+  },
+  {
+    "id": "fc-beh-2",
+    "cat": "behav",
+    "q": "Five must-have stories for a Forward Deployed Engineer (FDE) loop?",
+    "a": "(1) Production fix under live customer pressure. (2) Pushing back on a client request. (3) Owning a deployment failure end-to-end. (4) Explaining a hard technical limit to a non-technical stakeholder. (5) Making a decision with incomplete information."
+  },
+  {
+    "id": "fc-cli-1",
+    "cat": "client",
+    "q": "ADO framework for handling an angry-customer / outage moment?",
+    "a": "Acknowledge the impact in their words, Diagnose visibly (think out loud so they see progress), Own the resolution timeline with a concrete next checkpoint. Never blame the customer's environment in the moment."
+  },
+  {
+    "id": "fc-sql-1",
+    "cat": "data",
+    "q": "Window functions to know cold?",
+    "a": "ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD, SUM/AVG OVER (PARTITION BY\u2026). Most SQL screens hide one inside a wordy prompt."
+  },
+  {
+    "id": "fc-sql-2",
+    "cat": "data",
+    "q": "NOT IN vs NOT EXISTS \u2014 what's the trap?",
+    "a": "NOT IN returns NULL on any NULL in the subquery (then unknown \u2192 no match). NOT EXISTS is safer and equivalent semantically."
+  },
+  {
+    "id": "fc-cl-1",
+    "cat": "cloud",
+    "q": "OAuth 2.1 grant types in 2026?",
+    "a": "Authorization Code + PKCE is now required for ALL clients (web, SPA, mobile, native \u2014 OAuth 2.1 removed the public/confidential distinction for PKCE). Client Credentials for server-to-server. Device Code for TV/CLI. Implicit and Resource Owner Password Credentials grants are removed."
+  },
+  {
+    "id": "fc-ai-6",
+    "cat": "ai",
+    "q": "Why does CoT (chain-of-thought) work?",
+    "a": "Each token's prediction can attend to all prior tokens. Reasoning written FIRST means the answer benefits from that reasoning. Without CoT, the answer comes before any reasoning compute can be spent."
+  },
+  {
+    "id": "fc-ai-7",
+    "cat": "ai",
+    "q": "Production pattern for CoT + machine-readable output?",
+    "a": "Use the provider's native structured outputs or tool-use schema (Anthropic extended thinking, OpenAI Structured Outputs) so reasoning lives in a separate thinking block and the final answer is schema-validated JSON. Reasoning is logged for debugging; only the validated JSON is returned to users."
+  },
+  {
+    "id": "fc-ai-8",
+    "cat": "ai",
+    "q": "Three reasons to fine-tune (vs RAG / prompting)?",
+    "a": "(1) Narrow classification with latency budget. (2) Proprietary format / jargon / style the base model lacks. (3) Distillation: large\u2192small for cost. NEVER for \"teaching facts\" \u2014 that's RAG."
+  },
+  {
+    "id": "fc-ai-9",
+    "cat": "ai",
+    "q": "Five controls for bounding agent autonomy?",
+    "a": "(1) Action allowlist. (2) Per-conversation spend cap. (3) Max-step budget. (4) Human-in-the-loop on irreversible actions. (5) Per-step observability (every input/output logged)."
+  },
+  {
+    "id": "fc-ai-10",
+    "cat": "ai",
+    "q": "Top failure mode in multi-agent systems?",
+    "a": "Inter-agent coordination failures dominate (~37% of multi-agent bug reports per Cemri et al. 2025), and the biggest sub-pattern is the receiving agent missing context the sender assumed it had \u2014 wrong assumptions, dropped history, mismatched reasoning vs action. Fix: full trajectory logging, explicit state passing, and shared scratchpads instead of implicit handoffs."
+  },
+  {
+    "id": "fc-ai-11",
+    "cat": "ai",
+    "q": "Why is temperature 0 not perfectly deterministic in 2026?",
+    "a": "Floating-point math is non-associative, and batched GPU inference reorders reductions depending on batch size and kernel scheduling \u2014 so identical inputs at T=0 can produce slightly different logits and occasionally different tokens. Treat T=0 as \"very stable,\" not \"deterministic\"; always validate output and retry-on-invalid."
+  },
+  {
+    "id": "fc-ai-12",
+    "cat": "ai",
+    "q": "Best embedding choice for a customer requiring VPC-only deploys?",
+    "a": "Self-hosted open-source models \u2014 BGE-M3 (Apache 2.0), Nomic Embed, GTE \u2014 run inside the VPC with no egress. API-based embeddings (OpenAI, Cohere, Voyage) need outbound network calls, so they're only an option if the customer accepts a private-deployment contract that runs the provider's model inside their VPC."
+  },
+  {
+    "id": "fc-ai-13",
+    "cat": "ai",
+    "q": "Anti-pattern in prompt injection defense?",
+    "a": "Relying on the LLM's judgment to enforce policy. The LLM is generative \u2014 it can be fooled. Always add deterministic validators between LLM output and side effects (refunds, emails, deploys)."
+  },
+  {
+    "id": "fc-ai-14",
+    "cat": "ai",
+    "q": "RAGAS metrics for RAG evaluation?",
+    "a": "Faithfulness (answer uses retrieved context, not hallucinated), Answer relevance (addresses the question), Context precision / recall (retriever quality)."
+  },
+  {
+    "id": "fc-ai-15",
+    "cat": "ai",
+    "q": "When should you use full-context loading over RAG?",
+    "a": "When the knowledge base fits in the model's context window (Claude Sonnet/Opus 4.6+ support 1M tokens GA in 2026) and prompt caching is available \u2014 you get a simpler architecture, often lower cost via cache reads at ~10% of input price, and zero retrieval-miss risk."
+  },
+  {
+    "id": "fc-cod-3",
+    "cat": "coding",
+    "q": "Two-pointer pattern works when\u2026",
+    "a": "(1) Array is sorted (or you can sort it). (2) Each step provably rules out one end. (3) You're looking for pairs, palindromes, or in-place modification. O(n\u00b2) \u2192 O(n)."
+  },
+  {
+    "id": "fc-cod-4",
+    "cat": "coding",
+    "q": "Sliding window \u2014 when to choose fixed vs variable?",
+    "a": "Fixed: window size is given (e.g., \"max sum subarray of size k\"). Variable: window grows/shrinks to maintain an invariant (e.g., \"longest substring with no repeats\")."
+  },
+  {
+    "id": "fc-cod-5",
+    "cat": "coding",
+    "q": "Binary search \"on the answer\" pattern?",
+    "a": "When the problem space (e.g., capacity, threshold) is monotonic \u2014 small fails, big works \u2014 define a predicate can_do(x) and binary search for the boundary. Example: \"smallest ship capacity for D days.\""
+  },
+  {
+    "id": "fc-cod-6",
+    "cat": "coding",
+    "q": "Union-Find two optimizations?",
+    "a": "(1) Path compression in find \u2014 point every node directly to root. (2) Union by rank \u2014 attach smaller tree to bigger. Together: ~O(\u03b1(N)) per op \u2014 effectively constant."
+  },
+  {
+    "id": "fc-cod-7",
+    "cat": "coding",
+    "q": "Dijkstra vs Bellman-Ford?",
+    "a": "Dijkstra: non-negative weights only, O((V+E) log V) with heap. Bellman-Ford: handles negative weights, O(VE). Negatives break Dijkstra's \"lock-in once extracted\" invariant."
+  },
+  {
+    "id": "fc-cod-8",
+    "cat": "coding",
+    "q": "Monotonic stack \u2014 when?",
+    "a": "\"Next greater / smaller element\" patterns. Stack maintains decreasing values; new element pops until order is restored. Each element pushed once + popped once = O(n)."
+  },
+  {
+    "id": "fc-cod-9",
+    "cat": "coding",
+    "q": "Singleton XOR trick?",
+    "a": "Array has every value twice except one. XOR all values: pairs cancel (x ^ x = 0); singleton remains. O(n) time, O(1) memory."
+  },
+  {
+    "id": "fc-cod-10",
+    "cat": "coding",
+    "q": "Topo sort failure mode (Kahn's algorithm)?",
+    "a": "If the produced order has fewer than N nodes, there's a cycle. Cycle-detection comes free."
+  },
+  {
+    "id": "fc-cod-11",
+    "cat": "coding",
+    "q": "Bit-mask DP \u2014 when does it apply?",
+    "a": "When state includes \"which subset of N items is visited\" and N \u2264 ~20. Represent the visited set as an integer; iterate over all 2^N masks. TSP, set-cover variants."
+  },
+  {
+    "id": "fc-sd-4",
+    "cat": "sysd",
+    "q": "Consistent hashing add/remove cost?",
+    "a": "When adding the Nth node, ~1/N of keys remap to it. With virtual nodes (typically K=100-200 per server), load redistributes evenly across the existing nodes."
+  },
+  {
+    "id": "fc-sd-5",
+    "cat": "sysd",
+    "q": "CAP vs PACELC?",
+    "a": "CAP: during PARTITION, choose Consistency or Availability. PACELC adds: Else (no partition), choose Latency or Consistency. PACELC is more useful \u2014 it covers steady-state tradeoffs."
+  },
+  {
+    "id": "fc-sd-6",
+    "cat": "sysd",
+    "q": "When to fan-out push vs pull for feeds?",
+    "a": "Push (fanout-on-write): low read latency, write amplification for celebs. Pull (fanout-on-read): low write cost, high read for high-followed users. Hybrid above a celebrity threshold."
+  },
+  {
+    "id": "fc-sd-7",
+    "cat": "sysd",
+    "q": "Idempotency key + side-effecting tool?",
+    "a": "Every charge_card / send_email / deploy call gets a unique key. Server-side de-dupe table rejects duplicates. Non-negotiable for retries + agent loops."
+  },
+  {
+    "id": "fc-sd-8",
+    "cat": "sysd",
+    "q": "Per-server in-memory rate limit failure mode at scale?",
+    "a": "Each server enforces independently. A customer making 1k req/sec across N servers can pass each server's 100/sec limit. Fix: Redis sliding-window with Lua for atomicity."
+  },
+  {
+    "id": "fc-sd-9",
+    "cat": "sysd",
+    "q": "Three multi-tenancy patterns?",
+    "a": "(1) Pool \u2014 shared DB, shared schema, tenant_id column. (2) Silo \u2014 dedicated DB per tenant. (3) Bridge \u2014 shared DB, separate schema per tenant. Match isolation level to compliance posture and blast-radius tolerance."
+  },
+  {
+    "id": "fc-sql-3",
+    "cat": "data",
+    "q": "Composite index (a, b) \u2014 which queries use it?",
+    "a": "Queries filtering on a, or (a + anything), or starting with a in ORDER BY. Queries filtering on b alone CANNOT use it \u2014 leftmost-prefix rule."
+  },
+  {
+    "id": "fc-sql-4",
+    "cat": "data",
+    "q": "SCD Type 2 schema?",
+    "a": "Each row has valid_from + valid_to (NULL = current) + is_current flag. Updates close the old row (valid_to = now) and insert a new one. Queries filter to the period."
+  },
+  {
+    "id": "fc-sql-5",
+    "cat": "data",
+    "q": "CDC vs polling?",
+    "a": "CDC reads the transaction log (Postgres WAL, MySQL binlog) \u2014 captures INSERT/UPDATE/DELETE. Polling SELECTs miss deletes. CDC scales, polls don't."
+  },
+  {
+    "id": "fc-sql-6",
+    "cat": "data",
+    "q": "5 tiers of data-quality checks?",
+    "a": "(1) Schema (types, non-null). (2) Volume (row count vs avg). (3) Freshness (latest event \u2264 N min). (4) Distribution (proportions, ranges). (5) Referential (FKs resolve)."
+  },
+  {
+    "id": "fc-sql-7",
+    "cat": "data",
+    "q": "Idempotent partitioned writes pattern?",
+    "a": "Each task run for date D first DELETEs WHERE date=D, then inserts. Safe to re-run. Never APPEND without a partition key \u2014 backfills will duplicate."
+  },
+  {
+    "id": "fc-beh-3",
+    "cat": "behav",
+    "q": "Palantir failure-story bar?",
+    "a": "Real, specific, owned, with the actual mechanism + cost + systemic change you made afterward. \"I work too hard\" / \"I helped with...\" are instant-reject signals."
+  },
+  {
+    "id": "fc-beh-4",
+    "cat": "behav",
+    "q": "OpenAI Charter principles and 2025/2026 context to know for an interview?",
+    "a": "Four Charter principles: Broadly Distributed Benefits, Long-Term Safety, Technical Leadership, Cooperative Orientation. As of Oct 2025, OpenAI restructured: the for-profit is now OpenAI Group PBC under the OpenAI Foundation (nonprofit). Have a specific reason for the Forward Deployed Engineer (FDE) role, not just 'OpenAI'."
+  },
+  {
+    "id": "fc-beh-5",
+    "cat": "behav",
+    "q": "Anthropic values to know?",
+    "a": "AI safety, beneficial AI, Constitutional AI, and the Responsible Scaling Policy (RSP v3.0, Feb 2026) \u2014 which moved to a two-track model (Anthropic-only mitigations + industry-wide map) and added a public Frontier Safety Roadmap. Expect ethical-dilemma scenarios; surface depth on safety, not generic concern."
+  },
+  {
+    "id": "fc-beh-6",
+    "cat": "behav",
+    "q": "\"Why are you leaving?\" \u2014 strongest framing?",
+    "a": "Pull-not-push: focus on what attracts you to the new role; light positive about current. Never badmouth \u2014 signals you'll do the same at the new place in a year."
+  },
+  {
+    "id": "fc-beh-7",
+    "cat": "behav",
+    "q": "\"Disagree and commit\" \u2014 what most candidates miss?",
+    "a": "The COMMIT half. Telling a story where you disagreed AND won is incomplete. Stronger: disagreed, brought data, lost, executed fully, validated the team's view in hindsight."
+  },
+  {
+    "id": "fc-beh-8",
+    "cat": "behav",
+    "q": "5 required Forward Deployed Engineer (FDE) stories?",
+    "a": "(1) Production fix under pressure. (2) Pushing back on a customer. (3) Deployment failure ownership. (4) Explaining a technical limit. (5) Decision under incomplete info."
+  },
+  {
+    "id": "fc-cl-2",
+    "cat": "cloud",
+    "q": "Webhook reliability checklist?",
+    "a": "(1) HMAC sign (timestamp + body). (2) Idempotency event_id. (3) Exponential backoff retries on 5xx + timeouts only. (4) DLQ after N fails. (5) Replay dashboard. (6) Documented SLA."
+  },
+  {
+    "id": "fc-cl-3",
+    "cat": "cloud",
+    "q": "Three pillars of observability?",
+    "a": "Logs (why did this request fail?), Metrics (is something wrong NOW?), Traces (where in the call graph is the slow span?). OpenTelemetry unifies emission across vendors."
+  },
+  {
+    "id": "fc-cl-4",
+    "cat": "cloud",
+    "q": "Canary vs blue-green vs rolling deploys?",
+    "a": "Canary: 1% \u2192 10% \u2192 50% with metric checks. Blue-green: full new environment, flip LB. Rolling: replace one instance at a time. Canary for risky changes with good metrics."
+  },
+  {
+    "id": "fc-cl-5",
+    "cat": "cloud",
+    "q": "SAML vs OIDC?",
+    "a": "SAML: XML-based, browser SSO, still common with enterprise IdPs (Okta, Entra ID, Ping). OIDC: JWT-based, built on OAuth 2.0, default for new/mobile/API integrations. For enterprise SaaS in 2026, support both \u2014 SAML for legacy IT, OIDC for everything new."
+  },
+  {
+    "id": "fc-cl-6",
+    "cat": "cloud",
+    "q": "SCIM does what?",
+    "a": "REST API for user/group provisioning lifecycle (create/update/disable). Lets customer's IdP automatically provision users in your system. Required for enterprise."
+  },
+  {
+    "id": "fc-cl-7",
+    "cat": "cloud",
+    "q": "What is a DPA?",
+    "a": "Data Processing Agreement \u2014 GDPR-required contract specifying how you process the customer's personal data. Covers sub-processors, residency, breach notification, right-to-delete."
+  },
+  {
+    "id": "fc-dec-3",
+    "cat": "decomp",
+    "q": "How long should clarifying questions take in a 60-min decomp round?",
+    "a": "10\u201315 minutes. Most candidates rush in under 3 minutes. The interviewer is testing whether you can stay in the problem space before solving \u2014 senior candidates linger longer than feels comfortable. (See also fc-dec-6.)"
+  },
+  {
+    "id": "fc-dec-4",
+    "cat": "decomp",
+    "q": "I \u2192 L \u2192 O mental model \u2014 what goes where?",
+    "a": "Inputs = data sources (logs, APIs, files). Logic = transformations, decisions, joins. Outputs = what the user sees/acts on (dashboards, alerts, reports)."
+  },
+  {
+    "id": "fc-dec-5",
+    "cat": "decomp",
+    "q": "4 killer phrases in decomp rounds?",
+    "a": "(1) \"Before I propose anything\u2026\" (2) \"The simplest version that delivers value\u2026\" (3) \"X over Y because of this specific constraint \u2014 if it changes I'd flip.\" (4) \"Let me make an explicit assumption: X; please push back.\""
+  },
+  {
+    "id": "fc-dom-1",
+    "cat": "domain",
+    "q": "Hospitality timezone gotcha?",
+    "a": "A venue's \"Saturday night\" crosses UTC midnight. Always compute venue-local timestamps before filtering by day-of-week. Common cause of \"wrong-day\" reports."
+  },
+  {
+    "id": "fc-dom-2",
+    "cat": "domain",
+    "q": "Marketplace cold-start playbook?",
+    "a": "Pre-seed one side (manually recruit, or fake demand), drive demand to it, prove utility in a single concentrated metro, then expand. Two-sided liquidity is the hardest problem."
+  },
+  {
+    "id": "fc-dom-3",
+    "cat": "domain",
+    "q": "Healthcare deployment \u2014 biggest non-technical hurdle?",
+    "a": "8\u201316 week compliance review by the hospital's security team. Plan for this in your project timeline. Multi-tenant SaaS often DOA; single-tenant in customer VPC is standard."
+  },
+  {
+    "id": "fc-meta-1",
+    "cat": "meta",
+    "q": "Highest-leverage prep activity?",
+    "a": "Recording yourself in mock interviews and watching back at 1.5x. Painful at first, transformative within a week. Catches speech tics, length-of-action issues, body language."
+  },
+  {
+    "id": "fc-meta-2",
+    "cat": "meta",
+    "q": "When to ask for interview feedback after rejection?",
+    "a": "Always, once, professionally. Most recruiters decline; the ones who reply give priceless intel. \"Thanks for letting me know. If you have any feedback on the interview, I'd genuinely appreciate even 1-2 sentences.\""
+  },
+  {
+    "id": "fc-meta-3",
+    "cat": "meta",
+    "q": "Pre-offer comp expectations script?",
+    "a": "\"I want to focus on whether the role is a strong fit before talking numbers. That said, market for FDE roles at companies your size is roughly $X-$Y total comp. Happy to be more specific once we're aligned.\""
+  },
+  {
+    "id": "fc-meta-4",
+    "cat": "meta",
+    "q": "Resume bullet formula?",
+    "a": "[Action verb] [system you owned] [the specific technical mechanism] [quantified customer/business outcome]. Recruiters skim 6-20 seconds \u2014 the verb + the number carry the signal."
+  },
+  {
+    "id": "fc-dec-6",
+    "cat": "decomp",
+    "q": "Senior signal: how long should clarifying-question time feel uncomfortable?",
+    "a": "Past the point where you want to start drawing \u2014 typically 10\u201315 min in a 60-min round. The discomfort is the signal you're doing it right; juniors leave step 1 the moment they have a plausible solution."
+  },
+  {
+    "id": "fc-dec-7",
+    "cat": "decomp",
+    "q": "When interviewer says \"you decide\"?",
+    "a": "Make explicit assumption out loud + invite correction: \"I'll assume X \u2014 please push back if wrong.\" Write it on the board."
+  },
+  {
+    "id": "fc-dec-8",
+    "cat": "decomp",
+    "q": "Structure of a good clarifying question?",
+    "a": "\"Are we doing A or B? Because if A, I'd do X; if B, I'd do Y.\" Specific, falsifiable, branches into design-relevant alternatives."
+  },
+  {
+    "id": "fc-dec-9",
+    "cat": "decomp",
+    "q": "How many failure modes should you name in a decomp answer?",
+    "a": "3 specific ones with detection mechanism + rollback. \"Add monitoring\" alone is junior."
+  },
+  {
+    "id": "fc-dec-10",
+    "cat": "decomp",
+    "q": "The \"decomposition shape\" \u2014 how many solution options?",
+    "a": "TWO phased options with explicit tradeoffs + recommendation + rationale. One = no tradeoff awareness. Three = indecisive."
+  },
+  {
+    "id": "fc-dec-11",
+    "cat": "decomp",
+    "q": "A senior signal phrase in decomp?",
+    "a": "\"X over Y because of this specific constraint \u2014 if it changes I'd flip the decision.\" Explicit tradeoff + conditional commitment."
+  },
+  {
+    "id": "fc-dec-12",
+    "cat": "decomp",
+    "q": "Hospital adoption (12% after 90 days) \u2014 first analytical split?",
+    "a": "Product gaps vs adoption gaps. Different fixes: product needs product changes; adoption needs training/change-mgmt/incentives."
+  },
+  {
+    "id": "fc-dec-13",
+    "cat": "decomp",
+    "q": "What to draw FIRST on the whiteboard?",
+    "a": "Inputs \u2192 Logic \u2192 Outputs. Boxes describe BEHAVIOR (not tech) until you discuss implementation choices."
+  },
+  {
+    "id": "fc-ai-16",
+    "cat": "ai",
+    "q": "Tagged-thinking pattern for CoT + structured output?",
+    "a": "<thinking>...</thinking> then <answer>{json}</answer>. Parse only the answer; log thinking for debugging."
+  },
+  {
+    "id": "fc-ai-17",
+    "cat": "ai",
+    "q": "For a stable system prompt sent many times, what cuts cost ~90%?",
+    "a": "Prompt caching. Provider caches the model's internal state for the prefix; subsequent requests reuse the computation."
+  },
+  {
+    "id": "fc-ai-18",
+    "cat": "ai",
+    "q": "Cross-encoder re-rank pipeline order?",
+    "a": "Fast retrieval (top 50) \u2192 cross-encoder re-rank \u2192 top 5 \u2192 into LLM prompt. Cross-encoders too slow at full corpus scale."
+  },
+  {
+    "id": "fc-ai-19",
+    "cat": "ai",
+    "q": "Best chunk strategy for a structured contract with numbered clauses?",
+    "a": "Structural splitting on clause hierarchy + recursive fallback for long clauses. Preserves meaning + makes citations precise."
+  },
+  {
+    "id": "fc-ai-20",
+    "cat": "ai",
+    "q": "Function calling vs MCP \u2014 what's the diff?",
+    "a": "Function calling = each provider's native tool-use API (OpenAI, Anthropic, Google) \u2014 tightly coupled to the model. MCP (Model Context Protocol) = open standard (donated to Linux Foundation's Agentic AI Foundation in Dec 2025) for LLM\u2194tool integration; now supported by OpenAI, Anthropic, Google, Microsoft. Use MCP for portable tool servers, function calling for in-prompt one-offs."
+  },
+  {
+    "id": "fc-ai-21",
+    "cat": "ai",
+    "q": "Why do agent retries need idempotency keys?",
+    "a": "Network blip \u2192 response lost \u2192 LLM retries \u2192 without idempotency keys, side effects (charges, emails) fire twice."
+  },
+  {
+    "id": "fc-ai-22",
+    "cat": "ai",
+    "q": "How do you detect LLM-judge drift?",
+    "a": "Monthly: re-grade ~30 examples by hand, confirm judge agreement \u2265 85%. If drift, re-write rubric or swap judge model."
+  },
+  {
+    "id": "fc-ai-23",
+    "cat": "ai",
+    "q": "For a customer in a VPC, which embedding model?",
+    "a": "Self-hostable open-source (BGE-M3 is the 2026 default; multi-lingual, dense+sparse) or domain-specific (e.g. voyage-law-2, voyage-code-3 \u2014 self-hostable for enterprise). Avoid API-only embedders (OpenAI text-embedding-3, Cohere) when egress from the VPC is prohibited."
+  },
+  {
+    "id": "fc-ai-24",
+    "cat": "ai",
+    "q": "Pinecone vs pgvector \u2014 when pgvector wins?",
+    "a": "Customer already on Postgres + corpus under ~10M vectors (HNSW index handles this comfortably on a well-provisioned instance). Zero new infra; SQL filters compose with vector search. Migrate to Pinecone/Qdrant/etc. above ~50M or when you need horizontal autoscaling."
+  },
+  {
+    "id": "fc-ai-25",
+    "cat": "ai",
+    "q": "Three Anthropic-specific concepts to know?",
+    "a": "(1) Constitutional AI. (2) Responsible Scaling Policy v3.0 (Feb 2026: two-track commitments + Frontier Safety Roadmap). (3) Long-context + prompt caching + extended thinking. Read the latest RSP and the Claude docs before interviewing."
+  },
+  {
+    "id": "fc-ai-26",
+    "cat": "ai",
+    "q": "Indirect prompt injection mitigation?",
+    "a": "Tag retrieved/external content with <untrusted_content>...</untrusted_content> + instruct model to treat as DATA not instructions. Imperfect but reduces risk."
+  },
+  {
+    "id": "fc-ai-27",
+    "cat": "ai",
+    "q": "Speculative decoding explained?",
+    "a": "Small fast model drafts tokens; big model validates in parallel. Most drafts pass \u2192 2-3\u00d7 speedup at big-model quality."
+  },
+  {
+    "id": "fc-ai-28",
+    "cat": "ai",
+    "q": "Voice agent UX hardest problem in 2026?",
+    "a": "Turn-taking (detecting end-of-utterance via prosody + semantics, not VAD alone) and adaptive interruption handling (distinguishing backchannels like 'mm-hmm' from real barge-ins). End-to-end latency under ~600\u2013700ms is necessary but not sufficient for 'feels human'."
+  },
+  {
+    "id": "fc-cod-12",
+    "cat": "coding",
+    "q": "Why deque over list for BFS queue?",
+    "a": "list.pop(0) is O(n) (shifts every element). deque.popleft is O(1). At scale, the diff is asymptotic."
+  },
+  {
+    "id": "fc-cod-13",
+    "cat": "coding",
+    "q": "Mark visited at enqueue or dequeue?",
+    "a": "Enqueue. Mark-at-dequeue lets the same node be enqueued by every neighbor before processing \u2014 memory blowup in dense graphs."
+  },
+  {
+    "id": "fc-cod-14",
+    "cat": "coding",
+    "q": "LIS (longest increasing subsequence) optimal complexity?",
+    "a": "O(N log N) via patience sort: maintain \"tails\" array, binary search insert position. Pure DP is O(N\u00b2)."
+  },
+  {
+    "id": "fc-cod-15",
+    "cat": "coding",
+    "q": "K-th largest in unsorted N-element array?",
+    "a": "QuickSelect O(N) avg case, OR min-heap of size K \u2014 O(N log K). Beats full sort."
+  },
+  {
+    "id": "fc-cod-16",
+    "cat": "coding",
+    "q": "Top-K from a stream \u2014 data structure?",
+    "a": "Min-heap of size K. Each new item: if larger than min, pop min and push new. O(log K) per item, O(K) memory."
+  },
+  {
+    "id": "fc-cod-17",
+    "cat": "coding",
+    "q": "Streaming median \u2014 data structure?",
+    "a": "Two heaps: max-heap for lower half, min-heap for upper. Rebalance after insert. Median = root(s)."
+  },
+  {
+    "id": "fc-cod-18",
+    "cat": "coding",
+    "q": "Connected components in a graph?",
+    "a": "DFS or BFS from each unvisited node. Each start = one new component. O(V+E)."
+  },
+  {
+    "id": "fc-cod-19",
+    "cat": "coding",
+    "q": "Cycle detection in directed graph?",
+    "a": "DFS with \"currently on stack\" set. Encountering a node on the stack = back-edge = cycle. Or Kahn's topo sort with count check."
+  },
+  {
+    "id": "fc-cod-20",
+    "cat": "coding",
+    "q": "For \"merge K sorted lists\" optimally?",
+    "a": "Min-heap of K head pointers. Pop smallest, push its next. O(N log K) \u2014 strictly better than pairwise merge or full sort for small K."
+  },
+  {
+    "id": "fc-cod-21",
+    "cat": "coding",
+    "q": "Sliding window \u2014 invariant requirement?",
+    "a": "Monotone invariant: adding to window can't un-break the property once broken. Without monotonicity, sliding window may not apply."
+  },
+  {
+    "id": "fc-cod-22",
+    "cat": "coding",
+    "q": "Two-pointer technique time/space?",
+    "a": "O(N) time, O(1) extra space on sorted arrays. Each pointer moves forward at most N times. Strictly better than hash-set on space."
+  },
+  {
+    "id": "fc-cod-23",
+    "cat": "coding",
+    "q": "Binary search \"on the answer\" \u2014 when?",
+    "a": "When answer space is monotonic: predicate(x) \u2014 small fails, big works. Boundary searchable in O(log N) evaluations of predicate."
+  },
+  {
+    "id": "fc-cod-24",
+    "cat": "coding",
+    "q": "Prefix sums \u2014 what they buy you?",
+    "a": "Range-sum queries in O(1) after O(N) precompute. Difference: prefix[r]-prefix[l]. Use also for \"subarray sum equals K.\""
+  },
+  {
+    "id": "fc-cod-25",
+    "cat": "coding",
+    "q": "Bit manipulation: x & (x-1) does what?",
+    "a": "Clears the lowest set bit. Repeat to count bits. Used in Brian Kernighan's bit count."
+  },
+  {
+    "id": "fc-cod-26",
+    "cat": "coding",
+    "q": "XOR singleton trick?",
+    "a": "Array has every value twice except one. XOR all values: pairs cancel; singleton remains. O(N) time, O(1) memory."
+  },
+  {
+    "id": "fc-cod-27",
+    "cat": "coding",
+    "q": "Dijkstra fails on negative edges because?",
+    "a": "Locks in a node's distance once extracted from PQ. Negative edges can later offer a shorter path. Use Bellman-Ford instead."
+  },
+  {
+    "id": "fc-cod-28",
+    "cat": "coding",
+    "q": "Bellman-Ford complexity + benefit?",
+    "a": "O(VE). Handles negative edges. Detects negative cycles (one extra relaxation pass \u2014 if any edge can still relax, cycle exists)."
+  },
+  {
+    "id": "fc-cod-29",
+    "cat": "coding",
+    "q": "Monotonic stack \u2014 pattern recognition?",
+    "a": "\"Next greater/smaller element,\" \"stock span,\" \"trapping rain water.\" Each element pushed once + popped once = O(N)."
+  },
+  {
+    "id": "fc-cod-30",
+    "cat": "coding",
+    "q": "A* vs Dijkstra?",
+    "a": "A* = Dijkstra + heuristic h(n). With admissible heuristic (never overestimates), A* finds optimal + prunes search dramatically when target known."
+  },
+  {
+    "id": "fc-sd-10",
+    "cat": "sysd",
+    "q": "Why hybrid push/pull for feeds?",
+    "a": "Pure push: celebs cause write amplification. Pure pull: high-followers users slow reads. Hybrid: push for normal, pull for celebs above threshold."
+  },
+  {
+    "id": "fc-sd-11",
+    "cat": "sysd",
+    "q": "CAP theorem \u2014 when does the tradeoff actually apply?",
+    "a": "Only during a network PARTITION: pick Availability or Consistency. On a healthy network you can have both. PACELC extends CAP by adding the steady-state Else clause: even without partitions, you trade Latency vs Consistency."
+  },
+  {
+    "id": "fc-sd-12",
+    "cat": "sysd",
+    "q": "PACELC for Cassandra default?",
+    "a": "PA/EL \u2014 availability + low latency (default; tunable per-query). Spanner is PC/EC \u2014 consistency always."
+  },
+  {
+    "id": "fc-sd-13",
+    "cat": "sysd",
+    "q": "Consistent hashing: scaling from N to N+1 nodes \u2014 what fraction of keys remap?",
+    "a": "Roughly 1/(N+1) of keys move to the new node. With virtual nodes, the load redistributes evenly across existing nodes instead of from a single neighbor."
+  },
+  {
+    "id": "fc-sd-14",
+    "cat": "sysd",
+    "q": "For \"exactly-once\" semantics?",
+    "a": "Effectively impossible in distributed systems. Settle for \"at-least-once + idempotent receivers\" or \"at-most-once + accept loss.\""
+  },
+  {
+    "id": "fc-sd-15",
+    "cat": "sysd",
+    "q": "Cache stampede mitigation?",
+    "a": "Singleflight (only one request rebuilds, others wait) OR refresh-ahead (rebuild before TTL expires, serve stale during)."
+  },
+  {
+    "id": "fc-sd-16",
+    "cat": "sysd",
+    "q": "Hot keys in Redis \u2014 fix?",
+    "a": "Replicate hot keys across multiple nodes + load-balance reads. Consistent hashing doesn't help when ONE key is hot."
+  },
+  {
+    "id": "fc-sd-17",
+    "cat": "sysd",
+    "q": "For cross-server rate limiting?",
+    "a": "Redis with Lua script \u2014 atomic + low-latency. In-memory per-server can't enforce a global cap."
+  },
+  {
+    "id": "fc-sd-18",
+    "cat": "sysd",
+    "q": "Token bucket vs sliding-window for rate limits?",
+    "a": "Token bucket: tolerates bursts up to bucket size. Sliding-window counter: cheap + approximate. Pick by burst tolerance."
+  },
+  {
+    "id": "fc-sd-19",
+    "cat": "sysd",
+    "q": "Idempotency key TTL on a webhook receiver \u2014 how to size it?",
+    "a": "TTL must exceed the sender's max retry window (e.g., Stripe ~3 days, others up to weeks). Sized too short, late retries slip past the dedupe table and cause duplicate processing."
+  },
+  {
+    "id": "fc-sd-20",
+    "cat": "sysd",
+    "q": "For chat ordering with simultaneous sends?",
+    "a": "Server-assigned per-conversation sequence number. Wall-clock skews. Sequence is monotonic + deterministic."
+  },
+  {
+    "id": "fc-sd-21",
+    "cat": "sysd",
+    "q": "Range vs hash sharding \u2014 range when?",
+    "a": "When you need range queries (e.g., \"rows where date BETWEEN X and Y\"). Risk: hot partitions. Hash distributes evenly but kills ranges."
+  },
+  {
+    "id": "fc-sd-22",
+    "cat": "sysd",
+    "q": "Read-replica lag breaks read-your-writes \u2014 fix?",
+    "a": "Session pinning: route a user's reads to the primary for N seconds after their write, so they see their own update. Other users keep reading from replicas, preserving scale."
+  },
+  {
+    "id": "fc-sd-23",
+    "cat": "sysd",
+    "q": "SAGA pattern for distributed transactions?",
+    "a": "Each step has compensating action. On failure, run compensations in reverse. Standard when 2PC is impractical."
+  },
+  {
+    "id": "fc-sd-24",
+    "cat": "sysd",
+    "q": "Circuit breaker pattern goal?",
+    "a": "Prevent cascading failures. After N failures, open breaker \u2192 fast-fail subsequent calls \u2192 probe for recovery. Don't overload the downstream."
+  },
+  {
+    "id": "fc-sd-25",
+    "cat": "sysd",
+    "q": "Event sourcing \u2014 source of truth?",
+    "a": "Append-only event log. Current state derived by replaying events. Snapshots + projections are derived views for fast reads."
+  },
+  {
+    "id": "fc-sql-8",
+    "cat": "data",
+    "q": "Window function for \"running total\"?",
+    "a": "SUM(amount) OVER (PARTITION BY group ORDER BY date). GROUP BY collapses; you'd lose per-row detail."
+  },
+  {
+    "id": "fc-sql-9",
+    "cat": "data",
+    "q": "For \"top N per group\"?",
+    "a": "ROW_NUMBER() OVER (PARTITION BY group ORDER BY metric DESC) \u2192 filter rn \u2264 N in an outer query."
+  },
+  {
+    "id": "fc-sql-10",
+    "cat": "data",
+    "q": "LAG/LEAD functions do what?",
+    "a": "LAG(col, n): previous nth row's value. LEAD: next. Useful for diffs, deltas, conversion funnels."
+  },
+  {
+    "id": "fc-sql-11",
+    "cat": "data",
+    "q": "Composite index on (a, b, c) \u2014 usable for WHERE b=X?",
+    "a": "NO. Leftmost-prefix rule: must use leftmost column (a). WHERE a=X, (a, b), (a, b, c) all work; skipping a doesn't."
+  },
+  {
+    "id": "fc-sql-12",
+    "cat": "data",
+    "q": "Covering index \u2014 what is it?",
+    "a": "Index that contains all columns needed by query (key + INCLUDE columns). DB satisfies query from index alone; no table fetch."
+  },
+  {
+    "id": "fc-sql-13",
+    "cat": "data",
+    "q": "Postgres MVCC + VACUUM relationship?",
+    "a": "UPDATE/DELETE leave dead tuples (multi-version concurrency). VACUUM reclaims dead-tuple space + ANALYZE updates planner statistics."
+  },
+  {
+    "id": "fc-sql-14",
+    "cat": "data",
+    "q": "OLAP vs OLTP \u2014 fundamental difference?",
+    "a": "OLTP: row-oriented, single-record write/read, normalized (Postgres, MySQL). OLAP: columnar, batch aggregates, denormalized (Snowflake, ClickHouse)."
+  },
+  {
+    "id": "fc-sql-15",
+    "cat": "data",
+    "q": "Star schema vs snowflake?",
+    "a": "Star: fact + denormalized dim tables. Fewer joins, faster queries. Snowflake: normalized dims (more joins). Star = analytical default."
+  },
+  {
+    "id": "fc-sql-16",
+    "cat": "data",
+    "q": "Idempotent partitioned writes?",
+    "a": "DELETE WHERE partition=X then INSERT. Task is replayable; re-runs don't duplicate. Standard pipeline pattern."
+  },
+  {
+    "id": "fc-sql-17",
+    "cat": "data",
+    "q": "Analytics on a 1TB Postgres table \u2014 what to do?",
+    "a": "Move the analytics workload to a columnar engine: Snowflake / ClickHouse / DuckDB / BigQuery. Row-store Postgres is poor at full-table aggregate scans. If you must stay in-Postgres, extensions like pg_duckdb or pg_mooncake bolt a columnar engine onto Postgres."
+  },
+  {
+    "id": "fc-sql-18",
+    "cat": "data",
+    "q": "Medallion architecture layers?",
+    "a": "Bronze (raw) \u2192 Silver (cleaned/normalized) \u2192 Gold (business-ready aggregates). Standard layer model for Delta Lake / Iceberg."
+  },
+  {
+    "id": "fc-sql-19",
+    "cat": "data",
+    "q": "Schema registry purpose?",
+    "a": "Avro/Protobuf schemas tracked centrally with backward/forward compat rules. Lets producers + consumers evolve independently."
+  },
+  {
+    "id": "fc-sql-20",
+    "cat": "data",
+    "q": "Iceberg vs Delta vs Hudi \u2014 what's the 2026 state?",
+    "a": "Three open table formats over Parquet adding ACID, time travel, and schema evolution to data lakes. Iceberg has won industry consolidation (Databricks acquired Tabular 2024; AWS S3 Tables, Snowflake, BigQuery all support it natively). Delta still leads inside Databricks/Spark; Hudi specializes in record-level upserts. Cross-format projects (Delta UniForm, Apache XTable) blur the lines."
+  },
+  {
+    "id": "fc-beh-9",
+    "cat": "behav",
+    "q": "Biggest behavioral red flags in a Palantir interview?",
+    "a": "(1) Fake-failure dodges ('I work too hard', 'I don't really fail'). (2) Surface-level 'why Palantir' \u2014 citing comp/perks/'cool problems' instead of specifics. (3) Mixing up Foundry (commercial) and Gotham (gov). (4) Inability to justify a technical choice. Cultural-fit signals weigh heavily; they reject strong technical candidates over these."
+  },
+  {
+    "id": "fc-beh-10",
+    "cat": "behav",
+    "q": "\"Why are you leaving?\" \u2014 strongest framing?",
+    "a": "Pull-not-push: what attracts you forward; light positive on current employer. Never badmouth \u2014 signals you'll do same about them later."
+  },
+  {
+    "id": "fc-beh-11",
+    "cat": "behav",
+    "q": "STAR weighting for FDE \u2014 biggest section?",
+    "a": "Action ~60% of the story. Be specific about both technical and interpersonal moves you made."
+  },
+  {
+    "id": "fc-beh-12",
+    "cat": "behav",
+    "q": "5 required FDE stories?",
+    "a": "(1) Production fix under pressure. (2) Pushing back on customer. (3) Deployment failure ownership. (4) Explaining a technical limit. (5) Decision under incomplete info."
+  },
+  {
+    "id": "fc-beh-13",
+    "cat": "behav",
+    "q": "OpenAI values to know (2026)?",
+    "a": "Charter still anchors on AGI that benefits humanity; updated April 2026 to five operational principles: Democratization, Empowerment, Universal Prosperity, Resilience, Adaptability. Culture also stresses intensity + scale + shipping products people love. Have a specific reason for the role, not a generic mission quote."
+  },
+  {
+    "id": "fc-beh-14",
+    "cat": "behav",
+    "q": "Anthropic interview signal (2026)?",
+    "a": "Real engagement with safety: RSP v3.0 (Feb 2026, replaces hard pauses with a public Frontier Safety Roadmap + recurring risk assessments), Constitutional AI, and the Acceptable Use Policy. Expect ethical-dilemma scenarios; generic 'I do the right thing' answers fail."
+  },
+  {
+    "id": "fc-beh-15",
+    "cat": "behav",
+    "q": "\"Tell me about a time you disagreed with your manager\" \u2014 what most candidates skip?",
+    "a": "The COMMIT half: executing fully on the team's decision, even when you lost. Often stronger when you were partly wrong + did your share."
+  },
+  {
+    "id": "fc-beh-16",
+    "cat": "behav",
+    "q": "\"Tell me about mentoring someone\" \u2014 what makes it strong?",
+    "a": "Specific person + specific gap + your approach + measurable outcome (promotion, project shipped, observable behavior change)."
+  },
+  {
+    "id": "fc-cl-8",
+    "cat": "cloud",
+    "q": "Three pillars of observability?",
+    "a": "Logs (why did this fail), Metrics (is something wrong NOW), Traces (where in the call graph). OpenTelemetry unifies emission."
+  },
+  {
+    "id": "fc-cl-9",
+    "cat": "cloud",
+    "q": "OpenTelemetry \u2014 what is it?",
+    "a": "Vendor-neutral instrumentation library emitting logs/metrics/traces. Pluggable backends (Datadog, Jaeger, Honeycomb, etc.)."
+  },
+  {
+    "id": "fc-cl-10",
+    "cat": "cloud",
+    "q": "Senior debugging order?",
+    "a": "Metrics (what's wrong, narrow service) \u2192 Traces (find the slow span) \u2192 Logs (read the exception). Logs-first is junior."
+  },
+  {
+    "id": "fc-cl-11",
+    "cat": "cloud",
+    "q": "BYOK \u2014 Bring Your Own Keys?",
+    "a": "Customer holds encryption key in their KMS. They can revoke = your service can't decrypt their data. Strong enterprise trust boundary."
+  },
+  {
+    "id": "fc-cl-12",
+    "cat": "cloud",
+    "q": "PCI scope reduction strategy?",
+    "a": "Don't touch raw card data. Use Stripe/Adyen tokenization. PCI scope shrinks dramatically; compliance burden much smaller."
+  },
+  {
+    "id": "fc-cl-13",
+    "cat": "cloud",
+    "q": "DPA \u2014 what is it?",
+    "a": "Data Processing Agreement. GDPR-required contract specifying how you handle customer's personal data. Sub-processors, residency, breach windows."
+  },
+  {
+    "id": "fc-cl-14",
+    "cat": "cloud",
+    "q": "SAML SSO intermittent failure \u2014 top cause?",
+    "a": "Clock skew. Assertions arrive with timestamps outside tolerance window. Allow 60s tolerance on NotBefore/NotOnOrAfter."
+  },
+  {
+    "id": "fc-cl-15",
+    "cat": "cloud",
+    "q": "SCIM \u2014 what does it do?",
+    "a": "REST API for user/group provisioning. Customer's IdP automatically creates/updates/disables users in your system. Enterprise required."
+  },
+  {
+    "id": "fc-cl-16",
+    "cat": "cloud",
+    "q": "Air-gapped customer deploy?",
+    "a": "Helm chart in their cluster, with all images mirrored into their internal container registry. No outbound to your servers."
+  },
+  {
+    "id": "fc-cl-17",
+    "cat": "cloud",
+    "q": "Blue-green vs canary deploy?",
+    "a": "Blue-green: two parallel envs, atomic cutover via LB flip. Canary: gradual % traffic shift with metric gates. Canary for risk; B/G for atomic rollback."
+  },
+  {
+    "id": "fc-cl-18",
+    "cat": "cloud",
+    "q": "TLS cert auto-renewal pattern?",
+    "a": "ACME protocol (Let's Encrypt) + cert-manager in K8s. Manual rotation fails when certs expire on weekends + incidents."
+  },
+  {
+    "id": "fc-cl-19",
+    "cat": "cloud",
+    "q": "Auto-rollback on metric regression \u2014 tools?",
+    "a": "Argo Rollouts or Flagger (K8s-native, GitOps), Harness, or LaunchDarkly for flag-based rollback. Spinnaker still works but is fading. Watch error rate / latency / saturation for N minutes post-deploy and auto-revert on regression."
+  },
+  {
+    "id": "fc-cl-20",
+    "cat": "cloud",
+    "q": "Secret rotation without downtime?",
+    "a": "Dual-credential window: add new alongside old, roll services, remove old. Zero-downtime credential rotation."
+  },
+  {
+    "id": "fc-cl-21",
+    "cat": "cloud",
+    "q": "Service mesh value?",
+    "a": "Sidecars handle mTLS + retries + circuit-breaking + observability without code changes. Useful at scale; complex to operate."
+  },
+  {
+    "id": "fc-dom-4",
+    "cat": "domain",
+    "q": "Healthcare deploy \u2014 biggest non-technical hurdle?",
+    "a": "8-16 week compliance review by hospital security teams. Plan for it. Single-tenant in customer VPC is often required (HIPAA)."
+  },
+  {
+    "id": "fc-dom-5",
+    "cat": "domain",
+    "q": "Defense / government FDE requirements?",
+    "a": "Air-gapped on-prem deploys + FedRAMP High / IL5 + cleared engineers. Procurement cycle is months-years."
+  },
+  {
+    "id": "fc-dom-6",
+    "cat": "domain",
+    "q": "Fintech ledger non-negotiables?",
+    "a": "Double-entry + append-only (never UPDATE/DELETE) + idempotent writes. Adjustments via offsetting entries. Audit trail is sacred."
+  },
+  {
+    "id": "fc-dom-7",
+    "cat": "domain",
+    "q": "Multimodal AI UX challenge?",
+    "a": "Long-running inference (minutes). Need async job queue + WS/polling progress + content moderation pre+post-gen + cancellation tokens."
+  },
+  {
+    "id": "fc-dom-8",
+    "cat": "domain",
+    "q": "Voice AI 2026 \u2014 hardest UX problem?",
+    "a": "Turn-taking + barge-in (interruption) handling. Industry target is sub-500ms end-to-end via streaming STT\u2192LLM\u2192TTS overlap; neural turn-prediction models have replaced VAD-only silence detection. Sub-500ms latency is necessary but not sufficient \u2014 natural turn boundaries are what make it 'feel human.'"
+  },
+  {
+    "id": "fc-dom-9",
+    "cat": "domain",
+    "q": "PLG vs SLG growth motion \u2014 which needs FDE?",
+    "a": "SLG (sales-led, enterprise customers). FDE is the customer-engineering arm. PLG companies usually don't need traditional FDE."
+  },
+  {
+    "id": "fc-dom-10",
+    "cat": "domain",
+    "q": "Matching algorithms \u2014 greedy vs ML?",
+    "a": "Greedy by rating starves new entrants. ML rank with diversity injection (5-10% to newer suppliers) keeps supply healthy."
+  },
+  {
+    "id": "fc-meta-5",
+    "cat": "meta",
+    "q": "Lowest-ROI prep activity?",
+    "a": "Re-reading concepts you already know. Testing yourself + practicing under pressure is higher-leverage per hour."
+  },
+  {
+    "id": "fc-meta-6",
+    "cat": "meta",
+    "q": "Kill criterion for stopping prep on a topic?",
+    "a": "Can you teach it aloud + answer 3 follow-ups in 5 min? Yes \u2192 move on. Deeper study has diminishing returns past that."
+  },
+  {
+    "id": "fc-meta-7",
+    "cat": "meta",
+    "q": "Implementation intention effect size?",
+    "a": "~2\u00d7 follow-through vs goal-setting alone (Gollwitzer). \"When X, then Y\" plans turn intentions into automatic triggers."
+  },
+  {
+    "id": "fc-meta-8",
+    "cat": "meta",
+    "q": "Concurrent process portfolio target during search?",
+    "a": "3-5 concurrent processes. Gives competing-offer leverage + risk diversification + faster timeline."
+  },
+  {
+    "id": "fc-meta-9",
+    "cat": "meta",
+    "q": "Strongest predictor of 2-year role outcome?",
+    "a": "Manager quality. Worth weighting heavily in offer comparison even at \u00b1$40k diff."
+  },
+  {
+    "id": "fc-meta-10",
+    "cat": "meta",
+    "q": "Salary expectations script?",
+    "a": "\"Want to focus on whether the role is a fit. Market for FDE at your size is roughly $X-$Y total comp. Happy to be specific once aligned.\""
+  },
+  {
+    "id": "fc-meta-11",
+    "cat": "meta",
+    "q": "Resume bullet formula?",
+    "a": "[Verb] [system you owned] [specific mechanism] [quantified outcome]. Recruiters skim 6-20 sec \u2014 verb + number carry signal."
+  },
+  {
+    "id": "fc-meta-12",
+    "cat": "meta",
+    "q": "70% rule for decisions?",
+    "a": "When you have 70% of the info you need, decide. Waiting for 90% usually costs more than acting on 70%. Especially for reversible decisions."
+  },
+  {
+    "id": "fc-meta-13",
+    "cat": "meta",
+    "q": "When to negotiate equity refresh?",
+    "a": "At offer time AND every annual review. Refresh grants are negotiable, not automatic. Most engineers leave money on the table."
+  },
+  {
+    "id": "fc-meta-14",
+    "cat": "meta",
+    "q": "Atomic-habit prep stack?",
+    "a": "(1) Implementation intention (when-then). (2) 2-minute rule (start cost <30s). (3) Habit stacking (after coffee \u2192 study). (4) Environment design (pinned tab)."
+  },
+  {
+    "id": "fc-meta-15",
+    "cat": "meta",
+    "q": "Rejection processing discipline?",
+    "a": "30-min \"feel bad\" block \u2192 resume next day. Don't check email obsessively (fix time). Maintain 3-5 concurrent processes so rejections are data, not verdicts."
+  },
+  {
+    "id": "fc-cli-2",
+    "cat": "client",
+    "q": "ADO framework expanded?",
+    "a": "Acknowledge impact (\"I hear you\") \u2192 Diagnose visibly (\"checking X now, can you tell me Y?\") \u2192 Own resolution timeline (\"status by EOD, here's plan\")."
+  },
+  {
+    "id": "fc-cli-3",
+    "cat": "client",
+    "q": "Demo failure recovery?",
+    "a": "Acknowledge + run two tracks: visible (show recorded version) + backend (debug). Never blame customer's env in the moment. RCA within 24h."
+  },
+  {
+    "id": "fc-cli-4",
+    "cat": "client",
+    "q": "Customer demands 6 weeks in 3 days \u2014 move?",
+    "a": "Decompose to the 20% that unblocks them + document tradeoffs + get the REAL deadline (often softer than stated)."
+  },
+  {
+    "id": "fc-cli-5",
+    "cat": "client",
+    "q": "Same problem recurs 2 hours after fix \u2014 response?",
+    "a": "Own as Sev1 + commit specific timeline + status updates every 4 hours. Defending the prior fix kills trust further."
+  },
+  {
+    "id": "fc-cli-6",
+    "cat": "client",
+    "q": "Writing customer status updates \u2014 format?",
+    "a": "Four labeled bullets: Shipped this week, In flight, Risks/blockers, Next week. 5 short bullets read better than 3 paragraphs; lead with outcomes, not activity."
+  },
+  {
+    "id": "fc-cli-7",
+    "cat": "client",
+    "q": "Customer's IT team blocks integration \u2014 move?",
+    "a": "Structured security review proposal (SOC2 docs + architecture + sub-processor list). Bypassing them = political damage."
+  },
+  {
+    "id": "fc-cli-8",
+    "cat": "client",
+    "q": "A customer-side champion is leaving \u2014 what next?",
+    "a": "Get reintroduced to replacement + re-confirm scope/timeline with new owner. Champion loss = retention risk."
+  },
+  {
+    "id": "fc-cli-9",
+    "cat": "client",
+    "q": "Explaining stochastic AI to a CFO?",
+    "a": "Weather-forecast analogy + show confidence range + 95th-percentile worst case + leading indicators. Quant always wins with CFOs."
+  }
+]

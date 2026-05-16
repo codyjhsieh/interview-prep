@@ -1,0 +1,231 @@
+{
+  "cat": "data",
+  "lessons": [
+    {
+      "id": "sq-1",
+      "type": "concept",
+      "name": "Window functions \u2014 the thing that separates SQL juniors from seniors",
+      "module_id": "data-sql",
+      "module_name": "SQL fluency under pressure",
+      "cat": "data"
+    },
+    {
+      "id": "sq-2",
+      "type": "question",
+      "name": "Q: Top-3 highest-grossing restaurants per city",
+      "module_id": "data-sql",
+      "module_name": "SQL fluency under pressure",
+      "cat": "data"
+    },
+    {
+      "id": "sq-3",
+      "type": "question",
+      "name": "Q: Find customers who abandoned the funnel",
+      "module_id": "data-sql",
+      "module_name": "SQL fluency under pressure",
+      "cat": "data"
+    },
+    {
+      "id": "sq-4",
+      "type": "question",
+      "name": "Q: Day-over-day retention cohort",
+      "module_id": "data-sql",
+      "module_name": "SQL fluency under pressure",
+      "cat": "data"
+    },
+    {
+      "id": "sq-5",
+      "type": "concept",
+      "name": "OLAP vs OLTP \u2014 say this in the interview",
+      "module_id": "data-sql",
+      "module_name": "SQL fluency under pressure",
+      "cat": "data"
+    },
+    {
+      "id": "pp-1",
+      "type": "concept",
+      "name": "Pipeline orchestrators (Airflow / Dagster) \u2014 the mental model",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "pp-3",
+      "type": "concept",
+      "name": "JOIN types \u2014 what each actually does, with traps",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "pp-4",
+      "type": "concept",
+      "name": "Indexes \u2014 how the database finds rows fast (and why your query is slow)",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "pp-5",
+      "type": "concept",
+      "name": "Slowly-changing dimensions (SCD Type 1/2/3) \u2014 modeling history",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "pp-6",
+      "type": "concept",
+      "name": "Change Data Capture (CDC) \u2014 keeping the warehouse in sync",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "pp-2",
+      "type": "concept",
+      "name": "Data quality checks \u2014 the 5 tiers",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "wh-1",
+      "type": "concept",
+      "name": "OLAP engines compared \u2014 Snowflake / BigQuery / ClickHouse / DuckDB",
+      "module_id": "data-warehouse",
+      "module_name": "OLAP engines + streaming \u2014 picking the stack",
+      "cat": "data"
+    },
+    {
+      "id": "wh-2",
+      "type": "concept",
+      "name": "Streaming basics \u2014 Kafka, exactly-once, windowing",
+      "module_id": "data-warehouse",
+      "module_name": "OLAP engines + streaming \u2014 picking the stack",
+      "cat": "data"
+    }
+  ],
+  "existing_cards": [
+    {
+      "id": "fc-sql-1",
+      "cat": "data",
+      "q": "Window functions to know cold?",
+      "a": "ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD, SUM/AVG OVER (PARTITION BY\u2026). Most SQL screens hide one inside a wordy prompt."
+    },
+    {
+      "id": "fc-sql-2",
+      "cat": "data",
+      "q": "NOT IN vs NOT EXISTS \u2014 what's the trap?",
+      "a": "NOT IN returns NULL on any NULL in the subquery (then unknown \u2192 no match). NOT EXISTS is safer and equivalent semantically."
+    },
+    {
+      "id": "fc-sql-3",
+      "cat": "data",
+      "q": "Composite index (a, b) \u2014 which queries use it?",
+      "a": "Queries filtering on a, or (a + anything), or starting with a in ORDER BY. Queries filtering on b alone CANNOT use it \u2014 leftmost-prefix rule."
+    },
+    {
+      "id": "fc-sql-4",
+      "cat": "data",
+      "q": "SCD Type 2 schema?",
+      "a": "Each row has valid_from + valid_to (NULL = current) + is_current flag. Updates close the old row (valid_to = now) and insert a new one. Queries filter to the period."
+    },
+    {
+      "id": "fc-sql-5",
+      "cat": "data",
+      "q": "CDC vs polling?",
+      "a": "CDC reads the transaction log (Postgres WAL, MySQL binlog) \u2014 captures INSERT/UPDATE/DELETE. Polling SELECTs miss deletes. CDC scales, polls don't."
+    },
+    {
+      "id": "fc-sql-6",
+      "cat": "data",
+      "q": "5 tiers of data-quality checks?",
+      "a": "(1) Schema (types, non-null). (2) Volume (row count vs avg). (3) Freshness (latest event \u2264 N min). (4) Distribution (proportions, ranges). (5) Referential (FKs resolve)."
+    },
+    {
+      "id": "fc-sql-7",
+      "cat": "data",
+      "q": "Idempotent partitioned writes pattern?",
+      "a": "Each task run for date D first DELETEs WHERE date=D, then inserts. Safe to re-run. Never APPEND without a partition key \u2014 backfills will duplicate."
+    },
+    {
+      "id": "fc-sql-8",
+      "cat": "data",
+      "q": "Window function for \"running total\"?",
+      "a": "SUM(amount) OVER (PARTITION BY group ORDER BY date). GROUP BY collapses; you'd lose per-row detail."
+    },
+    {
+      "id": "fc-sql-9",
+      "cat": "data",
+      "q": "For \"top N per group\"?",
+      "a": "ROW_NUMBER() OVER (PARTITION BY group ORDER BY metric DESC) \u2192 filter rn \u2264 N in an outer query."
+    },
+    {
+      "id": "fc-sql-10",
+      "cat": "data",
+      "q": "LAG/LEAD functions do what?",
+      "a": "LAG(col, n): previous nth row's value. LEAD: next. Useful for diffs, deltas, conversion funnels."
+    },
+    {
+      "id": "fc-sql-11",
+      "cat": "data",
+      "q": "Composite index on (a, b, c) \u2014 usable for WHERE b=X?",
+      "a": "NO. Leftmost-prefix rule: must use leftmost column (a). WHERE a=X, (a, b), (a, b, c) all work; skipping a doesn't."
+    },
+    {
+      "id": "fc-sql-12",
+      "cat": "data",
+      "q": "Covering index \u2014 what is it?",
+      "a": "Index that contains all columns needed by query (key + INCLUDE columns). DB satisfies query from index alone; no table fetch."
+    },
+    {
+      "id": "fc-sql-13",
+      "cat": "data",
+      "q": "Postgres MVCC + VACUUM relationship?",
+      "a": "UPDATE/DELETE leave dead tuples (multi-version concurrency). VACUUM reclaims dead-tuple space + ANALYZE updates planner statistics."
+    },
+    {
+      "id": "fc-sql-14",
+      "cat": "data",
+      "q": "OLAP vs OLTP \u2014 fundamental difference?",
+      "a": "OLTP: row-oriented, single-record write/read, normalized (Postgres, MySQL). OLAP: columnar, batch aggregates, denormalized (Snowflake, ClickHouse)."
+    },
+    {
+      "id": "fc-sql-15",
+      "cat": "data",
+      "q": "Star schema vs snowflake?",
+      "a": "Star: fact + denormalized dim tables. Fewer joins, faster queries. Snowflake: normalized dims (more joins). Star = analytical default."
+    },
+    {
+      "id": "fc-sql-16",
+      "cat": "data",
+      "q": "Idempotent partitioned writes?",
+      "a": "DELETE WHERE partition=X then INSERT. Task is replayable; re-runs don't duplicate. Standard pipeline pattern."
+    },
+    {
+      "id": "fc-sql-17",
+      "cat": "data",
+      "q": "Analytics on a 1TB Postgres table \u2014 what to do?",
+      "a": "Move the analytics workload to a columnar engine: Snowflake / ClickHouse / DuckDB / BigQuery. Row-store Postgres is poor at full-table aggregate scans. If you must stay in-Postgres, extensions like pg_duckdb or pg_mooncake bolt a columnar engine onto Postgres."
+    },
+    {
+      "id": "fc-sql-18",
+      "cat": "data",
+      "q": "Medallion architecture layers?",
+      "a": "Bronze (raw) \u2192 Silver (cleaned/normalized) \u2192 Gold (business-ready aggregates). Standard layer model for Delta Lake / Iceberg."
+    },
+    {
+      "id": "fc-sql-19",
+      "cat": "data",
+      "q": "Schema registry purpose?",
+      "a": "Avro/Protobuf schemas tracked centrally with backward/forward compat rules. Lets producers + consumers evolve independently."
+    },
+    {
+      "id": "fc-sql-20",
+      "cat": "data",
+      "q": "Iceberg vs Delta vs Hudi \u2014 what's the 2026 state?",
+      "a": "Three open table formats over Parquet adding ACID, time travel, and schema evolution to data lakes. Iceberg has won industry consolidation (Databricks acquired Tabular 2024; AWS S3 Tables, Snowflake, BigQuery all support it natively). Delta still leads inside Databricks/Spark; Hudi specializes in record-level upserts. Cross-format projects (Delta UniForm, Apache XTable) blur the lines."
+    }
+  ]
+}

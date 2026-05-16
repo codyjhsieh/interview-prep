@@ -1,0 +1,108 @@
+{
+  "cat": "client",
+  "updates": [
+    {
+      "id": "fc-cli-1",
+      "lesson": "c-1"
+    },
+    {
+      "id": "fc-cli-2",
+      "lesson": "c-1",
+      "q": "ADO -- what concrete sentence fits each phase?",
+      "a": "Acknowledge: 'I hear that this is blocking your launch.' Diagnose: 'Checking the logs now -- can you confirm when it last worked?' Offer: 'I'll have a fix or a workaround by 4pm, and I'll send a written update either way.'"
+    },
+    {
+      "id": "fc-cli-3",
+      "lesson": "c-2"
+    },
+    {
+      "id": "fc-cli-4",
+      "lesson": "c-3"
+    },
+    {
+      "id": "fc-cli-5",
+      "lesson": "c-6"
+    },
+    {
+      "id": "fc-cli-6",
+      "lesson": "c-8"
+    },
+    {
+      "id": "fc-cli-7",
+      "lesson": "c-5"
+    },
+    {
+      "id": "fc-cli-8",
+      "lesson": "c-7"
+    },
+    {
+      "id": "fc-cli-9",
+      "lesson": "c-4"
+    }
+  ],
+  "new_cards": [
+    {
+      "id": "fc-cli-10",
+      "cat": "client",
+      "lesson": "c-1",
+      "q": "What does each letter of ADO actually mean?",
+      "a": "Acknowledge the impact in the customer's words (not 'sorry for the inconvenience'). Diagnose visibly so they see progress and can supply context. Offer a concrete next step with a named owner and a time, even if that step is just 'I'll write back by 5pm.'"
+    },
+    {
+      "id": "fc-cli-11",
+      "cat": "client",
+      "lesson": "c-1",
+      "q": "The 'I don't know' recovery pattern in a roleplay?",
+      "a": "Say 'I don't know yet' (not 'I don't know'), state what you would check to find out, and commit to a time you'll come back with the answer. Bluffing is the single fastest way to fail the round."
+    },
+    {
+      "id": "fc-cli-12",
+      "cat": "client",
+      "lesson": "c-3",
+      "q": "When to push back on a customer ask vs acquiesce?",
+      "a": "Push back when the ask hurts the customer's own outcome (bad data, unsafe rollout, wrong metric). Acquiesce on preference items (UI choices, report format) where the cost is low. Always name the tradeoff explicitly so the choice is theirs, not yours."
+    },
+    {
+      "id": "fc-cli-13",
+      "cat": "client",
+      "lesson": "c-8",
+      "q": "How to surface bad news to a customer?",
+      "a": "Lead with the headline and the impact in the first sentence, not the backstory. Then state what you're doing about it and the next checkpoint. Burying bad news mid-paragraph or waiting for the next standing meeting is the anti-pattern interviewers flag."
+    },
+    {
+      "id": "fc-cli-14",
+      "cat": "client",
+      "lesson": "c-1",
+      "q": "Top client-sim anti-patterns that fail candidates?",
+      "a": "Defensiveness ('well, actually...'), blaming the customer's environment or team in the moment, over-promising a fix time you can't hit, and ending the turn without a committed next step. Any one of these is usually a no-hire signal."
+    },
+    {
+      "id": "fc-cli-15",
+      "cat": "client",
+      "lesson": "c-9",
+      "q": "When should an FDE escalate to their manager during an engagement?",
+      "a": "Escalate when the issue threatens the contract, requires a resource or policy decision above your level, or when you've missed a committed timeline twice. Escalate early with a recommendation, not a problem dump -- 'here's what's happening and what I'd like to do.'"
+    },
+    {
+      "id": "fc-cli-16",
+      "cat": "client",
+      "lesson": "c-3",
+      "q": "How to negotiate scope mid-engagement without losing trust?",
+      "a": "Re-anchor on the original business outcome, show the current burn-down, and present two options with explicit tradeoffs (cut scope X to hit date, or slip date to keep scope X). Let the customer pick. Never silently de-scope."
+    },
+    {
+      "id": "fc-cli-17",
+      "cat": "client",
+      "lesson": "c-10",
+      "q": "How to recommend killing a project gracefully?",
+      "a": "Frame it as protecting the customer's outcome, not retreating: show the data on why the current path won't hit the business goal, propose the smaller bet that would, and offer to keep the relationship warm. Credibility goes up, not down, when you say 'we shouldn't build this.'"
+    },
+    {
+      "id": "fc-cli-18",
+      "cat": "client",
+      "lesson": "c-1",
+      "q": "What signals do client-sim interviewers actually grade on?",
+      "a": "Composure under pressure (no flinching, no filler), customer-first framing (their outcome before your product), and the ability to commit to a concrete next step with an owner and a time. Polish matters less than ending the turn with a clear ADO."
+    }
+  ]
+}

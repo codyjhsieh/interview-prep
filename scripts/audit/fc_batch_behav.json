@@ -1,0 +1,215 @@
+{
+  "cat": "behav",
+  "lessons": [
+    {
+      "id": "b-1",
+      "type": "checklist",
+      "name": "Story 1: Production fix under live pressure",
+      "module_id": "b-stories",
+      "module_name": "The 5 stories every FDE must have ready",
+      "cat": "behav"
+    },
+    {
+      "id": "b-2",
+      "type": "checklist",
+      "name": "Story 2: Pushing back on a client request",
+      "module_id": "b-stories",
+      "module_name": "The 5 stories every FDE must have ready",
+      "cat": "behav"
+    },
+    {
+      "id": "b-3",
+      "type": "checklist",
+      "name": "Story 3: Deployment failure ownership",
+      "module_id": "b-stories",
+      "module_name": "The 5 stories every FDE must have ready",
+      "cat": "behav"
+    },
+    {
+      "id": "b-4",
+      "type": "checklist",
+      "name": "Story 4: Explaining a technical limit",
+      "module_id": "b-stories",
+      "module_name": "The 5 stories every FDE must have ready",
+      "cat": "behav"
+    },
+    {
+      "id": "b-5",
+      "type": "checklist",
+      "name": "Story 5: Decision with incomplete info",
+      "module_id": "b-stories",
+      "module_name": "The 5 stories every FDE must have ready",
+      "cat": "behav"
+    },
+    {
+      "id": "b-6",
+      "type": "concept",
+      "name": "STAR weighting for FDE",
+      "module_id": "b-stories",
+      "module_name": "The 5 stories every FDE must have ready",
+      "cat": "behav"
+    },
+    {
+      "id": "bs-1",
+      "type": "concept",
+      "name": "Story 1: Live production fix under pressure",
+      "module_id": "b-fivestories",
+      "module_name": "The 5 required FDE stories \u2014 taught individually",
+      "cat": "behav"
+    },
+    {
+      "id": "bs-2",
+      "type": "concept",
+      "name": "Story 2: Pushing back on a customer request",
+      "module_id": "b-fivestories",
+      "module_name": "The 5 required FDE stories \u2014 taught individually",
+      "cat": "behav"
+    },
+    {
+      "id": "bs-3",
+      "type": "concept",
+      "name": "Story 3: Deployment failure ownership",
+      "module_id": "b-fivestories",
+      "module_name": "The 5 required FDE stories \u2014 taught individually",
+      "cat": "behav"
+    },
+    {
+      "id": "bs-4",
+      "type": "concept",
+      "name": "Story 4: Explaining a technical limit to a non-technical stakeholder",
+      "module_id": "b-fivestories",
+      "module_name": "The 5 required FDE stories \u2014 taught individually",
+      "cat": "behav"
+    },
+    {
+      "id": "bs-5",
+      "type": "concept",
+      "name": "Story 5: Decision under incomplete information",
+      "module_id": "b-fivestories",
+      "module_name": "The 5 required FDE stories \u2014 taught individually",
+      "cat": "behav"
+    },
+    {
+      "id": "v-1",
+      "type": "concept",
+      "name": "OpenAI \u2014 what their values look like in interviews",
+      "module_id": "b-values",
+      "module_name": "Values alignment by company",
+      "cat": "behav"
+    },
+    {
+      "id": "v-2",
+      "type": "concept",
+      "name": "Anthropic \u2014 values and how they probe in interviews",
+      "module_id": "b-values",
+      "module_name": "Values alignment by company",
+      "cat": "behav"
+    },
+    {
+      "id": "v-3",
+      "type": "concept",
+      "name": "Palantir \u2014 values, with a focus on failure stories",
+      "module_id": "b-values",
+      "module_name": "Values alignment by company",
+      "cat": "behav"
+    }
+  ],
+  "existing_cards": [
+    {
+      "id": "fc-beh-1",
+      "cat": "behav",
+      "q": "STAR weighting for Forward Deployed Engineer (FDE) behavioral rounds?",
+      "a": "Situation: 2-3 sentences MAX. Task: clarify YOUR ownership (FDE rounds probe individual accountability). Action: ~60% of the story, focus on technical + customer decisions you made. Result: both technical outcome and quantified business impact."
+    },
+    {
+      "id": "fc-beh-2",
+      "cat": "behav",
+      "q": "Five must-have stories for a Forward Deployed Engineer (FDE) loop?",
+      "a": "(1) Production fix under live customer pressure. (2) Pushing back on a client request. (3) Owning a deployment failure end-to-end. (4) Explaining a hard technical limit to a non-technical stakeholder. (5) Making a decision with incomplete information."
+    },
+    {
+      "id": "fc-beh-3",
+      "cat": "behav",
+      "q": "Palantir failure-story bar?",
+      "a": "Real, specific, owned, with the actual mechanism + cost + systemic change you made afterward. \"I work too hard\" / \"I helped with...\" are instant-reject signals."
+    },
+    {
+      "id": "fc-beh-4",
+      "cat": "behav",
+      "q": "OpenAI Charter principles and 2025/2026 context to know for an interview?",
+      "a": "Four Charter principles: Broadly Distributed Benefits, Long-Term Safety, Technical Leadership, Cooperative Orientation. As of Oct 2025, OpenAI restructured: the for-profit is now OpenAI Group PBC under the OpenAI Foundation (nonprofit). Have a specific reason for the Forward Deployed Engineer (FDE) role, not just 'OpenAI'."
+    },
+    {
+      "id": "fc-beh-5",
+      "cat": "behav",
+      "q": "Anthropic values to know?",
+      "a": "AI safety, beneficial AI, Constitutional AI, and the Responsible Scaling Policy (RSP v3.0, Feb 2026) \u2014 which moved to a two-track model (Anthropic-only mitigations + industry-wide map) and added a public Frontier Safety Roadmap. Expect ethical-dilemma scenarios; surface depth on safety, not generic concern."
+    },
+    {
+      "id": "fc-beh-6",
+      "cat": "behav",
+      "q": "\"Why are you leaving?\" \u2014 strongest framing?",
+      "a": "Pull-not-push: focus on what attracts you to the new role; light positive about current. Never badmouth \u2014 signals you'll do the same at the new place in a year."
+    },
+    {
+      "id": "fc-beh-7",
+      "cat": "behav",
+      "q": "\"Disagree and commit\" \u2014 what most candidates miss?",
+      "a": "The COMMIT half. Telling a story where you disagreed AND won is incomplete. Stronger: disagreed, brought data, lost, executed fully, validated the team's view in hindsight."
+    },
+    {
+      "id": "fc-beh-8",
+      "cat": "behav",
+      "q": "5 required Forward Deployed Engineer (FDE) stories?",
+      "a": "(1) Production fix under pressure. (2) Pushing back on a customer. (3) Deployment failure ownership. (4) Explaining a technical limit. (5) Decision under incomplete info."
+    },
+    {
+      "id": "fc-beh-9",
+      "cat": "behav",
+      "q": "Biggest behavioral red flags in a Palantir interview?",
+      "a": "(1) Fake-failure dodges ('I work too hard', 'I don't really fail'). (2) Surface-level 'why Palantir' \u2014 citing comp/perks/'cool problems' instead of specifics. (3) Mixing up Foundry (commercial) and Gotham (gov). (4) Inability to justify a technical choice. Cultural-fit signals weigh heavily; they reject strong technical candidates over these."
+    },
+    {
+      "id": "fc-beh-10",
+      "cat": "behav",
+      "q": "\"Why are you leaving?\" \u2014 strongest framing?",
+      "a": "Pull-not-push: what attracts you forward; light positive on current employer. Never badmouth \u2014 signals you'll do same about them later."
+    },
+    {
+      "id": "fc-beh-11",
+      "cat": "behav",
+      "q": "STAR weighting for FDE \u2014 biggest section?",
+      "a": "Action ~60% of the story. Be specific about both technical and interpersonal moves you made."
+    },
+    {
+      "id": "fc-beh-12",
+      "cat": "behav",
+      "q": "5 required FDE stories?",
+      "a": "(1) Production fix under pressure. (2) Pushing back on customer. (3) Deployment failure ownership. (4) Explaining a technical limit. (5) Decision under incomplete info."
+    },
+    {
+      "id": "fc-beh-13",
+      "cat": "behav",
+      "q": "OpenAI values to know (2026)?",
+      "a": "Charter still anchors on AGI that benefits humanity; updated April 2026 to five operational principles: Democratization, Empowerment, Universal Prosperity, Resilience, Adaptability. Culture also stresses intensity + scale + shipping products people love. Have a specific reason for the role, not a generic mission quote."
+    },
+    {
+      "id": "fc-beh-14",
+      "cat": "behav",
+      "q": "Anthropic interview signal (2026)?",
+      "a": "Real engagement with safety: RSP v3.0 (Feb 2026, replaces hard pauses with a public Frontier Safety Roadmap + recurring risk assessments), Constitutional AI, and the Acceptable Use Policy. Expect ethical-dilemma scenarios; generic 'I do the right thing' answers fail."
+    },
+    {
+      "id": "fc-beh-15",
+      "cat": "behav",
+      "q": "\"Tell me about a time you disagreed with your manager\" \u2014 what most candidates skip?",
+      "a": "The COMMIT half: executing fully on the team's decision, even when you lost. Often stronger when you were partly wrong + did your share."
+    },
+    {
+      "id": "fc-beh-16",
+      "cat": "behav",
+      "q": "\"Tell me about mentoring someone\" \u2014 what makes it strong?",
+      "a": "Specific person + specific gap + your approach + measurable outcome (promotion, project shipped, observable behavior change)."
+    }
+  ]
+}

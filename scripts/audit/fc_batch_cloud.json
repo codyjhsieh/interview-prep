@@ -1,0 +1,205 @@
+{
+  "cat": "cloud",
+  "lessons": [
+    {
+      "id": "cl-1",
+      "type": "concept",
+      "name": "AWS / GCP \u2014 the 8 services you must know cold",
+      "module_id": "cl-core",
+      "module_name": "Core cloud / DevOps",
+      "cat": "cloud"
+    },
+    {
+      "id": "cl-2",
+      "type": "concept",
+      "name": "Docker and Kubernetes \u2014 the mental model that gets you fluent",
+      "module_id": "cl-core",
+      "module_name": "Core cloud / DevOps",
+      "cat": "cloud"
+    },
+    {
+      "id": "cl-3",
+      "type": "concept",
+      "name": "Infrastructure as Code (Terraform) \u2014 why and how",
+      "module_id": "cl-core",
+      "module_name": "Core cloud / DevOps",
+      "cat": "cloud"
+    },
+    {
+      "id": "cl-4",
+      "type": "concept",
+      "name": "Compliance lingo \u2014 what SOC2/HIPAA/GDPR/PCI actually mean",
+      "module_id": "cl-core",
+      "module_name": "Core cloud / DevOps",
+      "cat": "cloud"
+    },
+    {
+      "id": "in-1",
+      "type": "concept",
+      "name": "OAuth 2.0 grant types decoded",
+      "module_id": "cl-integ",
+      "module_name": "Integrations & auth",
+      "cat": "cloud"
+    },
+    {
+      "id": "in-2",
+      "type": "concept",
+      "name": "Webhook signing + idempotency \u2014 the wire details",
+      "module_id": "cl-integ",
+      "module_name": "Integrations & auth",
+      "cat": "cloud"
+    },
+    {
+      "id": "in-4",
+      "type": "concept",
+      "name": "Observability stack \u2014 logs, metrics, traces",
+      "module_id": "cl-integ",
+      "module_name": "Integrations & auth",
+      "cat": "cloud"
+    },
+    {
+      "id": "in-5",
+      "type": "concept",
+      "name": "CI/CD pipelines \u2014 from commit to production safely",
+      "module_id": "cl-integ",
+      "module_name": "Integrations & auth",
+      "cat": "cloud"
+    },
+    {
+      "id": "in-3",
+      "type": "concept",
+      "name": "Enterprise auth \u2014 SAML, OIDC, SCIM crash course",
+      "module_id": "cl-integ",
+      "module_name": "Integrations & auth",
+      "cat": "cloud"
+    }
+  ],
+  "existing_cards": [
+    {
+      "id": "fc-cl-1",
+      "cat": "cloud",
+      "q": "OAuth 2.1 grant types in 2026?",
+      "a": "Authorization Code + PKCE is now required for ALL clients (web, SPA, mobile, native \u2014 OAuth 2.1 removed the public/confidential distinction for PKCE). Client Credentials for server-to-server. Device Code for TV/CLI. Implicit and Resource Owner Password Credentials grants are removed."
+    },
+    {
+      "id": "fc-cl-2",
+      "cat": "cloud",
+      "q": "Webhook reliability checklist?",
+      "a": "(1) HMAC sign (timestamp + body). (2) Idempotency event_id. (3) Exponential backoff retries on 5xx + timeouts only. (4) DLQ after N fails. (5) Replay dashboard. (6) Documented SLA."
+    },
+    {
+      "id": "fc-cl-3",
+      "cat": "cloud",
+      "q": "Three pillars of observability?",
+      "a": "Logs (why did this request fail?), Metrics (is something wrong NOW?), Traces (where in the call graph is the slow span?). OpenTelemetry unifies emission across vendors."
+    },
+    {
+      "id": "fc-cl-4",
+      "cat": "cloud",
+      "q": "Canary vs blue-green vs rolling deploys?",
+      "a": "Canary: 1% \u2192 10% \u2192 50% with metric checks. Blue-green: full new environment, flip LB. Rolling: replace one instance at a time. Canary for risky changes with good metrics."
+    },
+    {
+      "id": "fc-cl-5",
+      "cat": "cloud",
+      "q": "SAML vs OIDC?",
+      "a": "SAML: XML-based, browser SSO, still common with enterprise IdPs (Okta, Entra ID, Ping). OIDC: JWT-based, built on OAuth 2.0, default for new/mobile/API integrations. For enterprise SaaS in 2026, support both \u2014 SAML for legacy IT, OIDC for everything new."
+    },
+    {
+      "id": "fc-cl-6",
+      "cat": "cloud",
+      "q": "SCIM does what?",
+      "a": "REST API for user/group provisioning lifecycle (create/update/disable). Lets customer's IdP automatically provision users in your system. Required for enterprise."
+    },
+    {
+      "id": "fc-cl-7",
+      "cat": "cloud",
+      "q": "What is a DPA?",
+      "a": "Data Processing Agreement \u2014 GDPR-required contract specifying how you process the customer's personal data. Covers sub-processors, residency, breach notification, right-to-delete."
+    },
+    {
+      "id": "fc-cl-8",
+      "cat": "cloud",
+      "q": "Three pillars of observability?",
+      "a": "Logs (why did this fail), Metrics (is something wrong NOW), Traces (where in the call graph). OpenTelemetry unifies emission."
+    },
+    {
+      "id": "fc-cl-9",
+      "cat": "cloud",
+      "q": "OpenTelemetry \u2014 what is it?",
+      "a": "Vendor-neutral instrumentation library emitting logs/metrics/traces. Pluggable backends (Datadog, Jaeger, Honeycomb, etc.)."
+    },
+    {
+      "id": "fc-cl-10",
+      "cat": "cloud",
+      "q": "Senior debugging order?",
+      "a": "Metrics (what's wrong, narrow service) \u2192 Traces (find the slow span) \u2192 Logs (read the exception). Logs-first is junior."
+    },
+    {
+      "id": "fc-cl-11",
+      "cat": "cloud",
+      "q": "BYOK \u2014 Bring Your Own Keys?",
+      "a": "Customer holds encryption key in their KMS. They can revoke = your service can't decrypt their data. Strong enterprise trust boundary."
+    },
+    {
+      "id": "fc-cl-12",
+      "cat": "cloud",
+      "q": "PCI scope reduction strategy?",
+      "a": "Don't touch raw card data. Use Stripe/Adyen tokenization. PCI scope shrinks dramatically; compliance burden much smaller."
+    },
+    {
+      "id": "fc-cl-13",
+      "cat": "cloud",
+      "q": "DPA \u2014 what is it?",
+      "a": "Data Processing Agreement. GDPR-required contract specifying how you handle customer's personal data. Sub-processors, residency, breach windows."
+    },
+    {
+      "id": "fc-cl-14",
+      "cat": "cloud",
+      "q": "SAML SSO intermittent failure \u2014 top cause?",
+      "a": "Clock skew. Assertions arrive with timestamps outside tolerance window. Allow 60s tolerance on NotBefore/NotOnOrAfter."
+    },
+    {
+      "id": "fc-cl-15",
+      "cat": "cloud",
+      "q": "SCIM \u2014 what does it do?",
+      "a": "REST API for user/group provisioning. Customer's IdP automatically creates/updates/disables users in your system. Enterprise required."
+    },
+    {
+      "id": "fc-cl-16",
+      "cat": "cloud",
+      "q": "Air-gapped customer deploy?",
+      "a": "Helm chart in their cluster, with all images mirrored into their internal container registry. No outbound to your servers."
+    },
+    {
+      "id": "fc-cl-17",
+      "cat": "cloud",
+      "q": "Blue-green vs canary deploy?",
+      "a": "Blue-green: two parallel envs, atomic cutover via LB flip. Canary: gradual % traffic shift with metric gates. Canary for risk; B/G for atomic rollback."
+    },
+    {
+      "id": "fc-cl-18",
+      "cat": "cloud",
+      "q": "TLS cert auto-renewal pattern?",
+      "a": "ACME protocol (Let's Encrypt) + cert-manager in K8s. Manual rotation fails when certs expire on weekends + incidents."
+    },
+    {
+      "id": "fc-cl-19",
+      "cat": "cloud",
+      "q": "Auto-rollback on metric regression \u2014 tools?",
+      "a": "Argo Rollouts or Flagger (K8s-native, GitOps), Harness, or LaunchDarkly for flag-based rollback. Spinnaker still works but is fading. Watch error rate / latency / saturation for N minutes post-deploy and auto-revert on regression."
+    },
+    {
+      "id": "fc-cl-20",
+      "cat": "cloud",
+      "q": "Secret rotation without downtime?",
+      "a": "Dual-credential window: add new alongside old, roll services, remove old. Zero-downtime credential rotation."
+    },
+    {
+      "id": "fc-cl-21",
+      "cat": "cloud",
+      "q": "Service mesh value?",
+      "a": "Sidecars handle mTLS + retries + circuit-breaking + observability without code changes. Useful at scale; complex to operate."
+    }
+  ]
+}

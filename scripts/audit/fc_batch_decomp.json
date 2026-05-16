@@ -1,0 +1,149 @@
+{
+  "cat": "decomp",
+  "lessons": [
+    {
+      "id": "d-1",
+      "type": "concept",
+      "name": "What IS a decomposition interview?",
+      "module_id": "decomp-101",
+      "module_name": "The Decomposition Round, end-to-end",
+      "cat": "decomp"
+    },
+    {
+      "id": "d-2",
+      "type": "concept",
+      "name": "The 5-step framework, walked through 911",
+      "module_id": "decomp-101",
+      "module_name": "The Decomposition Round, end-to-end",
+      "cat": "decomp"
+    },
+    {
+      "id": "d-3",
+      "type": "concept",
+      "name": "The mental model: Inputs \u2192 Logic \u2192 Outputs",
+      "module_id": "decomp-101",
+      "module_name": "The Decomposition Round, end-to-end",
+      "cat": "decomp"
+    },
+    {
+      "id": "d-4",
+      "type": "concept",
+      "name": "How to ask clarifying questions (with examples)",
+      "module_id": "decomp-101",
+      "module_name": "The Decomposition Round, end-to-end",
+      "cat": "decomp"
+    },
+    {
+      "id": "d-5",
+      "type": "concept",
+      "name": "The 5 traps that get candidates rejected",
+      "module_id": "decomp-101",
+      "module_name": "The Decomposition Round, end-to-end",
+      "cat": "decomp"
+    },
+    {
+      "id": "d-6",
+      "type": "drill",
+      "name": "Drill: walk through the 911 prompt yourself",
+      "module_id": "decomp-101",
+      "module_name": "The Decomposition Round, end-to-end",
+      "cat": "decomp"
+    },
+    {
+      "id": "d-7",
+      "type": "drill",
+      "name": "Drill: logistics rerouting AI agent",
+      "module_id": "decomp-101",
+      "module_name": "The Decomposition Round, end-to-end",
+      "cat": "decomp"
+    },
+    {
+      "id": "d-8",
+      "type": "concept",
+      "name": "Four live phrases that signal senior judgment",
+      "module_id": "decomp-101",
+      "module_name": "The Decomposition Round, end-to-end",
+      "cat": "decomp"
+    }
+  ],
+  "existing_cards": [
+    {
+      "id": "fc-dec-1",
+      "cat": "decomp",
+      "q": "What is the #1 instant-reject signal in a problem-decomposition / case interview?",
+      "a": "Jumping to specific tools or solutions before asking clarifying questions and scoping the problem (users, success metric, constraints, data)."
+    },
+    {
+      "id": "fc-dec-2",
+      "cat": "decomp",
+      "q": "Decomposition 5-step framework?",
+      "a": "1. Clarify (success metric, users, data, constraints). 2. Stakeholder map. 3. Data sources. 4. Tradeoffs. 5. Failure modes."
+    },
+    {
+      "id": "fc-dec-3",
+      "cat": "decomp",
+      "q": "How long should clarifying questions take in a 60-min decomp round?",
+      "a": "10\u201315 minutes. Most candidates rush in under 3 minutes. The interviewer is testing whether you can stay in the problem space before solving \u2014 senior candidates linger longer than feels comfortable. (See also fc-dec-6.)"
+    },
+    {
+      "id": "fc-dec-4",
+      "cat": "decomp",
+      "q": "I \u2192 L \u2192 O mental model \u2014 what goes where?",
+      "a": "Inputs = data sources (logs, APIs, files). Logic = transformations, decisions, joins. Outputs = what the user sees/acts on (dashboards, alerts, reports)."
+    },
+    {
+      "id": "fc-dec-5",
+      "cat": "decomp",
+      "q": "4 killer phrases in decomp rounds?",
+      "a": "(1) \"Before I propose anything\u2026\" (2) \"The simplest version that delivers value\u2026\" (3) \"X over Y because of this specific constraint \u2014 if it changes I'd flip.\" (4) \"Let me make an explicit assumption: X; please push back.\""
+    },
+    {
+      "id": "fc-dec-6",
+      "cat": "decomp",
+      "q": "Senior signal: how long should clarifying-question time feel uncomfortable?",
+      "a": "Past the point where you want to start drawing \u2014 typically 10\u201315 min in a 60-min round. The discomfort is the signal you're doing it right; juniors leave step 1 the moment they have a plausible solution."
+    },
+    {
+      "id": "fc-dec-7",
+      "cat": "decomp",
+      "q": "When interviewer says \"you decide\"?",
+      "a": "Make explicit assumption out loud + invite correction: \"I'll assume X \u2014 please push back if wrong.\" Write it on the board."
+    },
+    {
+      "id": "fc-dec-8",
+      "cat": "decomp",
+      "q": "Structure of a good clarifying question?",
+      "a": "\"Are we doing A or B? Because if A, I'd do X; if B, I'd do Y.\" Specific, falsifiable, branches into design-relevant alternatives."
+    },
+    {
+      "id": "fc-dec-9",
+      "cat": "decomp",
+      "q": "How many failure modes should you name in a decomp answer?",
+      "a": "3 specific ones with detection mechanism + rollback. \"Add monitoring\" alone is junior."
+    },
+    {
+      "id": "fc-dec-10",
+      "cat": "decomp",
+      "q": "The \"decomposition shape\" \u2014 how many solution options?",
+      "a": "TWO phased options with explicit tradeoffs + recommendation + rationale. One = no tradeoff awareness. Three = indecisive."
+    },
+    {
+      "id": "fc-dec-11",
+      "cat": "decomp",
+      "q": "A senior signal phrase in decomp?",
+      "a": "\"X over Y because of this specific constraint \u2014 if it changes I'd flip the decision.\" Explicit tradeoff + conditional commitment."
+    },
+    {
+      "id": "fc-dec-12",
+      "cat": "decomp",
+      "q": "Hospital adoption (12% after 90 days) \u2014 first analytical split?",
+      "a": "Product gaps vs adoption gaps. Different fixes: product needs product changes; adoption needs training/change-mgmt/incentives."
+    },
+    {
+      "id": "fc-dec-13",
+      "cat": "decomp",
+      "q": "What to draw FIRST on the whiteboard?",
+      "a": "Inputs \u2192 Logic \u2192 Outputs. Boxes describe BEHAVIOR (not tech) until you discuss implementation choices."
+    }
+  ]
+}

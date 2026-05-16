@@ -272,7 +272,7 @@ function onScrollMinimize() {
 function parseHash() {
   const h = (location.hash || '#dashboard').slice(1);
   const parts = h.split('/');
-  return { route: parts[0] || 'dashboard', a: parts[1], b: parts[2] };
+  return { route: parts[0] || 'dashboard', a: parts[1], b: parts[2], c: parts[3] };
 }
 
 function render() {
@@ -281,7 +281,7 @@ function render() {
   GAMI.checkBadges(state, DATA.BADGES);
   GAMI.save(state);
 
-  const { route, a, b } = parseHash();
+  const { route, a, b, c } = parseHash();
   const hub = document.getElementById('view');
   setActiveNav(route);
 
@@ -303,7 +303,7 @@ function render() {
     switch (route) {
       case 'dashboard':    VIEWS.renderDashboard(state, hub); break;
       case 'curriculum':   VIEWS.renderCurriculum(state, hub); break;
-      case 'category':     VIEWS.renderCategory(state, hub, a, b); break;
+      case 'category':     VIEWS.renderCategory(state, hub, a, b, c); break;
       case 'companies':    VIEWS.renderCompanies(state, hub); break;
       case 'company':      VIEWS.renderCompany(state, hub, a); break;
       case 'flashcards':   VIEWS.renderFlashcards(state, hub); break;

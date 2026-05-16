@@ -1,0 +1,121 @@
+{
+  "cat": "domain",
+  "updates": [
+    {
+      "id": "fc-dom-1",
+      "lesson": "dh-1"
+    },
+    {
+      "id": "fc-dom-2",
+      "lesson": "dm-1"
+    },
+    {
+      "id": "fc-dom-3",
+      "lesson": "dh-4"
+    },
+    {
+      "id": "fc-dom-4",
+      "lesson": "dh-4",
+      "q": "HIPAA BAA -- what is it and when do you need one?",
+      "a": "A Business Associate Agreement is a contract required whenever a vendor handles PHI on a covered entity's behalf. No BAA == no PHI can legally flow to you. Most cloud and LLM vendors offer BAAs only on specific (often higher-tier) plans, so confirm coverage before architecting."
+    },
+    {
+      "id": "fc-dom-5",
+      "lesson": "dh-5"
+    },
+    {
+      "id": "fc-dom-6",
+      "lesson": "dm-3"
+    },
+    {
+      "id": "fc-dom-7",
+      "lesson": "dai-3"
+    },
+    {
+      "id": "fc-dom-8",
+      "lesson": "dai-2",
+      "q": "Voice AI -- hardest UX problem in 2026?",
+      "a": "Turn-taking and barge-in (interruption) handling. Industry target is sub-500ms end-to-end via streaming STT to LLM to TTS overlap; neural turn-prediction models have replaced VAD-only silence detection. Low latency is necessary but not sufficient -- natural turn boundaries are what make it feel human."
+    },
+    {
+      "id": "fc-dom-9",
+      "lesson": "dh-6"
+    },
+    {
+      "id": "fc-dom-10",
+      "lesson": "dm-2"
+    }
+  ],
+  "new_cards": [
+    {
+      "id": "fc-dom-11",
+      "cat": "domain",
+      "lesson": "dm-3",
+      "q": "ACH vs RTP vs wire -- when do you pick each?",
+      "a": "ACH is cheap (cents) and batch-settled in 1-3 business days, reversible, best for payroll and recurring debits. RTP/FedNow is instant (seconds), irrevocable, 24/7, capped (currently $1M on RTP), best for payouts and just-in-time funding. Wires are same-day, irrevocable, expensive ($15-30), and used for high-value B2B and real estate."
+    },
+    {
+      "id": "fc-dom-12",
+      "cat": "domain",
+      "lesson": "dm-3",
+      "q": "PCI DSS scope -- cheapest way to stay compliant?",
+      "a": "Never let raw PAN (card number) touch your servers. Use a tokenization vendor (Stripe Elements, Spreedly, Basis Theory) with an iframe or SDK so your environment qualifies for SAQ-A (the lightest level). Touching PAN in plaintext pushes you into SAQ-D and a full audit."
+    },
+    {
+      "id": "fc-dom-13",
+      "cat": "domain",
+      "lesson": "dm-3",
+      "q": "KYC vs KYB -- what's the practical difference?",
+      "a": "KYC verifies an individual (government ID, selfie, SSN, sanctions screening). KYB verifies a business (EIN, formation docs, UBO/beneficial owners >25%, then KYC on each). KYB is slower, manual, and the bottleneck for B2B fintech onboarding."
+    },
+    {
+      "id": "fc-dom-14",
+      "cat": "domain",
+      "lesson": "dh-4",
+      "q": "FHIR vs HL7 v2 -- which do new healthcare integrations use?",
+      "a": "FHIR (REST/JSON, resource-oriented) is the modern standard and mandated for US patient-access APIs under ONC/CMS rules. HL7 v2 (pipe-delimited, MLLP/TCP) still dominates inside hospital walls for ADT, orders, and lab results. Greenfield integrations build on FHIR; integrations with legacy EHRs still require HL7 v2."
+    },
+    {
+      "id": "fc-dom-15",
+      "cat": "domain",
+      "lesson": "dd-1",
+      "q": "Devtool north star -- why DAU/MAU misleads?",
+      "a": "Devtools are workflow tools, not consumer apps -- a developer using your CLI 3 days a week is highly engaged. Better north stars are integration-depth (commands run per active dev, languages/repos covered), retained weekly active devs, and time-to-first-value (signup to first successful call)."
+    },
+    {
+      "id": "fc-dom-16",
+      "cat": "domain",
+      "lesson": "dai-1",
+      "q": "AI-first eval gating -- what is it?",
+      "a": "Treating evals as CI: every prompt or model change must pass a frozen golden-set with regression thresholds before merge. Combined with prompt versioning (prompts are code, stored in git, addressable by hash) and shadow traffic in prod. Without it, prompt edits silently regress quality."
+    },
+    {
+      "id": "fc-dom-17",
+      "cat": "domain",
+      "lesson": "dai-2",
+      "q": "Model routing -- why production AI apps need it?",
+      "a": "Different requests have different cost/latency/quality needs. A router classifies the request (intent, length, sensitivity) and dispatches to the cheapest model that meets the SLO -- e.g. Haiku for classification, Sonnet for chat, Opus for hard reasoning. Cuts cost 5-10x vs always-Opus with negligible quality loss."
+    },
+    {
+      "id": "fc-dom-18",
+      "cat": "domain",
+      "lesson": "dh-1",
+      "q": "Hospitality -- why RevPAR beats occupancy as a north star?",
+      "a": "RevPAR (revenue per available room) = ADR x occupancy. Occupancy alone rewards fire-sale discounting; ADR alone rewards empty rooms. RevPAR captures the price-vs-fill tradeoff and is the industry-standard yield metric. Restaurants have an analog: revenue per available seat-hour (RevPASH)."
+    },
+    {
+      "id": "fc-dom-19",
+      "cat": "domain",
+      "lesson": "dh-3",
+      "q": "Restaurant POS integration -- why is it harder than it looks?",
+      "a": "POS systems (Toast, Square, Aloha, Micros) have inconsistent menu modeling (modifiers, combos, voids), partial real-time APIs (Toast is good; Aloha often requires polling or on-prem agents), and ticket-time semantics that vary by venue. Expect to write per-POS adapters and reconcile menu state nightly."
+    },
+    {
+      "id": "fc-dom-20",
+      "cat": "domain",
+      "lesson": "dd-2",
+      "q": "Enterprise LLM gateway -- what core features must it have?",
+      "a": "Centralized API keys with per-team budgets and rate limits, PII redaction on egress, prompt/response logging for audit, model abstraction (swap providers without app changes), and SSO + RBAC. Sells to security/IT, not developers -- the buyer wants observability and a kill switch."
+    }
+  ]
+}

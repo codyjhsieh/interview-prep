@@ -1,0 +1,149 @@
+{
+  "cat": "client",
+  "lessons": [
+    {
+      "id": "c-1",
+      "type": "concept",
+      "name": "The ADO framework \u2014 what to actually SAY in the room",
+      "module_id": "cli-roleplay",
+      "module_name": "Live client roleplay",
+      "cat": "client"
+    },
+    {
+      "id": "c-2",
+      "type": "drill",
+      "name": "Drill: demo fails during executive presentation",
+      "module_id": "cli-roleplay",
+      "module_name": "Live client roleplay",
+      "cat": "client"
+    },
+    {
+      "id": "c-3",
+      "type": "drill",
+      "name": "Drill: client demands 6 weeks of work in 3 days",
+      "module_id": "cli-roleplay",
+      "module_name": "Live client roleplay",
+      "cat": "client"
+    },
+    {
+      "id": "c-4",
+      "type": "drill",
+      "name": "Drill: explain stochastic model variability to a CFO",
+      "module_id": "cli-roleplay",
+      "module_name": "Live client roleplay",
+      "cat": "client"
+    },
+    {
+      "id": "c-5",
+      "type": "drill",
+      "name": "Drill: client IT blocks the integration",
+      "module_id": "cli-roleplay",
+      "module_name": "Live client roleplay",
+      "cat": "client"
+    },
+    {
+      "id": "c-6",
+      "type": "drill",
+      "name": "Drill: same problem recurs 2 hours after fix",
+      "module_id": "cli-roleplay",
+      "module_name": "Live client roleplay",
+      "cat": "client"
+    },
+    {
+      "id": "c-7",
+      "type": "concept",
+      "name": "Scoping a project with a non-technical buyer",
+      "module_id": "cli-roleplay",
+      "module_name": "Live client roleplay",
+      "cat": "client"
+    },
+    {
+      "id": "c-8",
+      "type": "concept",
+      "name": "Written status cadence \u2014 the no-meeting Slack update",
+      "module_id": "cli-roleplay",
+      "module_name": "Live client roleplay",
+      "cat": "client"
+    },
+    {
+      "id": "c-9",
+      "type": "concept",
+      "name": "When (and how) to escalate to your manager",
+      "module_id": "cli-roleplay",
+      "module_name": "Live client roleplay",
+      "cat": "client"
+    },
+    {
+      "id": "c-10",
+      "type": "concept",
+      "name": "Killing a project gracefully \u2014 when the right answer is \"we shouldn't build this\"",
+      "module_id": "cli-roleplay",
+      "module_name": "Live client roleplay",
+      "cat": "client"
+    },
+    {
+      "id": "fd-9",
+      "type": "concept",
+      "name": "Fine-grained authorization \u2014 Zanzibar / OpenFGA / Cedar",
+      "module_id": "cli-roleplay",
+      "module_name": "Live client roleplay",
+      "cat": "client"
+    }
+  ],
+  "existing_cards": [
+    {
+      "id": "fc-cli-1",
+      "cat": "client",
+      "q": "ADO framework for handling an angry-customer / outage moment?",
+      "a": "Acknowledge the impact in their words, Diagnose visibly (think out loud so they see progress), Own the resolution timeline with a concrete next checkpoint. Never blame the customer's environment in the moment."
+    },
+    {
+      "id": "fc-cli-2",
+      "cat": "client",
+      "q": "ADO framework expanded?",
+      "a": "Acknowledge impact (\"I hear you\") \u2192 Diagnose visibly (\"checking X now, can you tell me Y?\") \u2192 Own resolution timeline (\"status by EOD, here's plan\")."
+    },
+    {
+      "id": "fc-cli-3",
+      "cat": "client",
+      "q": "Demo failure recovery?",
+      "a": "Acknowledge + run two tracks: visible (show recorded version) + backend (debug). Never blame customer's env in the moment. RCA within 24h."
+    },
+    {
+      "id": "fc-cli-4",
+      "cat": "client",
+      "q": "Customer demands 6 weeks in 3 days \u2014 move?",
+      "a": "Decompose to the 20% that unblocks them + document tradeoffs + get the REAL deadline (often softer than stated)."
+    },
+    {
+      "id": "fc-cli-5",
+      "cat": "client",
+      "q": "Same problem recurs 2 hours after fix \u2014 response?",
+      "a": "Own as Sev1 + commit specific timeline + status updates every 4 hours. Defending the prior fix kills trust further."
+    },
+    {
+      "id": "fc-cli-6",
+      "cat": "client",
+      "q": "Writing customer status updates \u2014 format?",
+      "a": "Four labeled bullets: Shipped this week, In flight, Risks/blockers, Next week. 5 short bullets read better than 3 paragraphs; lead with outcomes, not activity."
+    },
+    {
+      "id": "fc-cli-7",
+      "cat": "client",
+      "q": "Customer's IT team blocks integration \u2014 move?",
+      "a": "Structured security review proposal (SOC2 docs + architecture + sub-processor list). Bypassing them = political damage."
+    },
+    {
+      "id": "fc-cli-8",
+      "cat": "client",
+      "q": "A customer-side champion is leaving \u2014 what next?",
+      "a": "Get reintroduced to replacement + re-confirm scope/timeline with new owner. Champion loss = retention risk."
+    },
+    {
+      "id": "fc-cli-9",
+      "cat": "client",
+      "q": "Explaining stochastic AI to a CFO?",
+      "a": "Weather-forecast analogy + show confidence range + 95th-percentile worst case + leading indicators. Quant always wins with CFOs."
+    }
+  ]
+}

@@ -1,0 +1,423 @@
+{
+  "cat": "ai",
+  "lessons": [
+    {
+      "id": "rag-1",
+      "type": "concept",
+      "name": "What is RAG and why does it exist?",
+      "module_id": "ai-rag",
+      "module_name": "RAG \u2014 what it is and when to build it",
+      "cat": "ai"
+    },
+    {
+      "id": "rag-2",
+      "type": "concept",
+      "name": "Chunking \u2014 how to split docs without breaking them",
+      "module_id": "ai-rag",
+      "module_name": "RAG \u2014 what it is and when to build it",
+      "cat": "ai"
+    },
+    {
+      "id": "rag-4",
+      "type": "concept",
+      "name": "Embedding models \u2014 how to choose one",
+      "module_id": "ai-rag",
+      "module_name": "RAG \u2014 what it is and when to build it",
+      "cat": "ai"
+    },
+    {
+      "id": "rag-5",
+      "type": "concept",
+      "name": "Vector DBs \u2014 choosing one, with tradeoffs",
+      "module_id": "ai-rag",
+      "module_name": "RAG \u2014 what it is and when to build it",
+      "cat": "ai"
+    },
+    {
+      "id": "rag-6",
+      "type": "concept",
+      "name": "Prompt injection \u2014 the security model for LLM apps",
+      "module_id": "ai-rag",
+      "module_name": "RAG \u2014 what it is and when to build it",
+      "cat": "ai"
+    },
+    {
+      "id": "rag-3",
+      "type": "concept",
+      "name": "How retrieval actually works (sparse vs dense vs hybrid)",
+      "module_id": "ai-rag",
+      "module_name": "RAG \u2014 what it is and when to build it",
+      "cat": "ai"
+    },
+    {
+      "id": "rag-7",
+      "type": "question",
+      "name": "Q: How do you debug a RAG that \"knows\" but ignores the context?",
+      "module_id": "ai-rag",
+      "module_name": "RAG \u2014 what it is and when to build it",
+      "cat": "ai"
+    },
+    {
+      "id": "rag-8",
+      "type": "question",
+      "name": "Q: Protect sensitive data in a RAG pipeline?",
+      "module_id": "ai-rag",
+      "module_name": "RAG \u2014 what it is and when to build it",
+      "cat": "ai"
+    },
+    {
+      "id": "rag-9",
+      "type": "drill",
+      "name": "Drill: design RAG for a CFO-facing support bot",
+      "module_id": "ai-rag",
+      "module_name": "RAG \u2014 what it is and when to build it",
+      "cat": "ai"
+    },
+    {
+      "id": "rag-10",
+      "type": "concept",
+      "name": "Long-context vs RAG \u2014 when 1M-token windows change the calculus",
+      "module_id": "ai-rag",
+      "module_name": "RAG \u2014 what it is and when to build it",
+      "cat": "ai"
+    },
+    {
+      "id": "ev-1",
+      "type": "concept",
+      "name": "Why \"evals\" are the hardest part of AI engineering",
+      "module_id": "ai-evals",
+      "module_name": "Evals \u2014 what most candidates fumble",
+      "cat": "ai"
+    },
+    {
+      "id": "ev-2",
+      "type": "concept",
+      "name": "LLM-as-judge \u2014 and the 4 ways it lies to you",
+      "module_id": "ai-evals",
+      "module_name": "Evals \u2014 what most candidates fumble",
+      "cat": "ai"
+    },
+    {
+      "id": "ev-3",
+      "type": "concept",
+      "name": "How to build a golden set in one day",
+      "module_id": "ai-evals",
+      "module_name": "Evals \u2014 what most candidates fumble",
+      "cat": "ai"
+    },
+    {
+      "id": "ev-4",
+      "type": "question",
+      "name": "Q: Eval suite for an agent that spends money",
+      "module_id": "ai-evals",
+      "module_name": "Evals \u2014 what most candidates fumble",
+      "cat": "ai"
+    },
+    {
+      "id": "ev-5",
+      "type": "concept",
+      "name": "The eval-tooling landscape (RAGAS, DeepEval, Braintrust, HoneyHive)",
+      "module_id": "ai-evals",
+      "module_name": "Evals \u2014 what most candidates fumble",
+      "cat": "ai"
+    },
+    {
+      "id": "pr-1",
+      "type": "concept",
+      "name": "Anatomy of a production prompt (with example)",
+      "module_id": "ai-prompt",
+      "module_name": "Prompt engineering as structured programming",
+      "cat": "ai"
+    },
+    {
+      "id": "pr-2",
+      "type": "concept",
+      "name": "Reasoning models vs prompted CoT \u2014 the 2026 default has flipped",
+      "module_id": "ai-prompt",
+      "module_name": "Prompt engineering as structured programming",
+      "cat": "ai"
+    },
+    {
+      "id": "pr-3",
+      "type": "concept",
+      "name": "Temperature \u2014 what it actually controls",
+      "module_id": "ai-prompt",
+      "module_name": "Prompt engineering as structured programming",
+      "cat": "ai"
+    },
+    {
+      "id": "pr-4",
+      "type": "drill",
+      "name": "Drill: prompt-injection red team",
+      "module_id": "ai-prompt",
+      "module_name": "Prompt engineering as structured programming",
+      "cat": "ai"
+    },
+    {
+      "id": "pr-5",
+      "type": "concept",
+      "name": "Prompt caching \u2014 the #1 production cost lever",
+      "module_id": "ai-prompt",
+      "module_name": "Prompt engineering as structured programming",
+      "cat": "ai"
+    },
+    {
+      "id": "ag-1",
+      "type": "concept",
+      "name": "What is an \"agent\" really? (vs a chain)",
+      "module_id": "ai-agents",
+      "module_name": "Agents in production",
+      "cat": "ai"
+    },
+    {
+      "id": "ag-2",
+      "type": "concept",
+      "name": "Tool calling \u2014 the 6 ways it actually breaks",
+      "module_id": "ai-agents",
+      "module_name": "Agents in production",
+      "cat": "ai"
+    },
+    {
+      "id": "ag-3",
+      "type": "concept",
+      "name": "Bounding agent autonomy \u2014 the 6 controls",
+      "module_id": "ai-agents",
+      "module_name": "Agents in production",
+      "cat": "ai"
+    },
+    {
+      "id": "ag-4",
+      "type": "concept",
+      "name": "Structured outputs \u2014 JSON Schema as your security boundary",
+      "module_id": "ai-agents",
+      "module_name": "Agents in production",
+      "cat": "ai"
+    },
+    {
+      "id": "ag-5",
+      "type": "concept",
+      "name": "Tool-call formats: native APIs + MCP as the cross-provider standard",
+      "module_id": "ai-agents",
+      "module_name": "Agents in production",
+      "cat": "ai"
+    },
+    {
+      "id": "ag-6",
+      "type": "concept",
+      "name": "Multi-agent system fails \u2014 where to look first",
+      "module_id": "ai-agents",
+      "module_name": "Agents in production",
+      "cat": "ai"
+    },
+    {
+      "id": "ag-7",
+      "type": "concept",
+      "name": "Building an MCP server \u2014 the practical job skill",
+      "module_id": "ai-agents",
+      "module_name": "Agents in production",
+      "cat": "ai"
+    },
+    {
+      "id": "ag-8",
+      "type": "concept",
+      "name": "Computer Use \u2014 when the tool IS a virtual desktop",
+      "module_id": "ai-agents",
+      "module_name": "Agents in production",
+      "cat": "ai"
+    },
+    {
+      "id": "ag-9",
+      "type": "concept",
+      "name": "Cost & latency engineering \u2014 the production levers",
+      "module_id": "ai-agents",
+      "module_name": "Agents in production",
+      "cat": "ai"
+    },
+    {
+      "id": "ft-1",
+      "type": "concept",
+      "name": "Prompt vs RAG vs fine-tune \u2014 the decision tree",
+      "module_id": "ai-finetune",
+      "module_name": "Fine-tune vs RAG vs prompt",
+      "cat": "ai"
+    },
+    {
+      "id": "ft-2",
+      "type": "concept",
+      "name": "When fine-tuning is actually the right call",
+      "module_id": "ai-finetune",
+      "module_name": "Fine-tune vs RAG vs prompt",
+      "cat": "ai"
+    }
+  ],
+  "existing_cards": [
+    {
+      "id": "fc-rag-1",
+      "cat": "ai",
+      "q": "When should you NOT build a RAG?",
+      "a": "When your knowledge base fits in the model's context window (Claude Sonnet/Opus 4.6+ ship a 1M-token window GA at standard pricing) \u2014 full-context + prompt caching is often faster and cheaper than building retrieval infra. Also skip RAG when answers don't depend on private or fresh data."
+    },
+    {
+      "id": "fc-rag-2",
+      "cat": "ai",
+      "q": "Sparse vs dense vs hybrid retrieval \u2014 when to use each?",
+      "a": "Sparse (BM25) for rare terms, codes, names. Dense (vector) for paraphrase, semantic intent. Hybrid + reciprocal rank fusion is the production default. Add a cross-encoder re-ranker on top-k."
+    },
+    {
+      "id": "fc-rag-3",
+      "cat": "ai",
+      "q": "Why temperature=0 for extraction tasks?",
+      "a": "Determinism + minimum hallucination. Pair with structured outputs and retry-on-invalid. Creative tasks want 0.5\u20130.8."
+    },
+    {
+      "id": "fc-rag-4",
+      "cat": "ai",
+      "q": "Three LLM eval layers?",
+      "a": "Unit (deterministic checks: schema/regex/length/refusal), System (golden Q\u2192A sets scored by LLM-as-judge + human spot-check), Production (online thumbs/escalation/regret)."
+    },
+    {
+      "id": "fc-rag-5",
+      "cat": "ai",
+      "q": "Agent vs chain \u2014 what's the real distinction?",
+      "a": "A chain has a fixed graph (LLM fills steps). An agent chooses the next step, including which tool to call. Agents trade determinism for flexibility \u2014 most \"agents\" should be chains."
+    },
+    {
+      "id": "fc-ai-6",
+      "cat": "ai",
+      "q": "Why does CoT (chain-of-thought) work?",
+      "a": "Each token's prediction can attend to all prior tokens. Reasoning written FIRST means the answer benefits from that reasoning. Without CoT, the answer comes before any reasoning compute can be spent."
+    },
+    {
+      "id": "fc-ai-7",
+      "cat": "ai",
+      "q": "Production pattern for CoT + machine-readable output?",
+      "a": "Use the provider's native structured outputs or tool-use schema (Anthropic extended thinking, OpenAI Structured Outputs) so reasoning lives in a separate thinking block and the final answer is schema-validated JSON. Reasoning is logged for debugging; only the validated JSON is returned to users."
+    },
+    {
+      "id": "fc-ai-8",
+      "cat": "ai",
+      "q": "Three reasons to fine-tune (vs RAG / prompting)?",
+      "a": "(1) Narrow classification with latency budget. (2) Proprietary format / jargon / style the base model lacks. (3) Distillation: large\u2192small for cost. NEVER for \"teaching facts\" \u2014 that's RAG."
+    },
+    {
+      "id": "fc-ai-9",
+      "cat": "ai",
+      "q": "Five controls for bounding agent autonomy?",
+      "a": "(1) Action allowlist. (2) Per-conversation spend cap. (3) Max-step budget. (4) Human-in-the-loop on irreversible actions. (5) Per-step observability (every input/output logged)."
+    },
+    {
+      "id": "fc-ai-10",
+      "cat": "ai",
+      "q": "Top failure mode in multi-agent systems?",
+      "a": "Inter-agent coordination failures dominate (~37% of multi-agent bug reports per Cemri et al. 2025), and the biggest sub-pattern is the receiving agent missing context the sender assumed it had \u2014 wrong assumptions, dropped history, mismatched reasoning vs action. Fix: full trajectory logging, explicit state passing, and shared scratchpads instead of implicit handoffs."
+    },
+    {
+      "id": "fc-ai-11",
+      "cat": "ai",
+      "q": "Why is temperature 0 not perfectly deterministic in 2026?",
+      "a": "Floating-point math is non-associative, and batched GPU inference reorders reductions depending on batch size and kernel scheduling \u2014 so identical inputs at T=0 can produce slightly different logits and occasionally different tokens. Treat T=0 as \"very stable,\" not \"deterministic\"; always validate output and retry-on-invalid."
+    },
+    {
+      "id": "fc-ai-12",
+      "cat": "ai",
+      "q": "Best embedding choice for a customer requiring VPC-only deploys?",
+      "a": "Self-hosted open-source models \u2014 BGE-M3 (Apache 2.0), Nomic Embed, GTE \u2014 run inside the VPC with no egress. API-based embeddings (OpenAI, Cohere, Voyage) need outbound network calls, so they're only an option if the customer accepts a private-deployment contract that runs the provider's model inside their VPC."
+    },
+    {
+      "id": "fc-ai-13",
+      "cat": "ai",
+      "q": "Anti-pattern in prompt injection defense?",
+      "a": "Relying on the LLM's judgment to enforce policy. The LLM is generative \u2014 it can be fooled. Always add deterministic validators between LLM output and side effects (refunds, emails, deploys)."
+    },
+    {
+      "id": "fc-ai-14",
+      "cat": "ai",
+      "q": "RAGAS metrics for RAG evaluation?",
+      "a": "Faithfulness (answer uses retrieved context, not hallucinated), Answer relevance (addresses the question), Context precision / recall (retriever quality)."
+    },
+    {
+      "id": "fc-ai-15",
+      "cat": "ai",
+      "q": "When should you use full-context loading over RAG?",
+      "a": "When the knowledge base fits in the model's context window (Claude Sonnet/Opus 4.6+ support 1M tokens GA in 2026) and prompt caching is available \u2014 you get a simpler architecture, often lower cost via cache reads at ~10% of input price, and zero retrieval-miss risk."
+    },
+    {
+      "id": "fc-ai-16",
+      "cat": "ai",
+      "q": "Tagged-thinking pattern for CoT + structured output?",
+      "a": "<thinking>...</thinking> then <answer>{json}</answer>. Parse only the answer; log thinking for debugging."
+    },
+    {
+      "id": "fc-ai-17",
+      "cat": "ai",
+      "q": "For a stable system prompt sent many times, what cuts cost ~90%?",
+      "a": "Prompt caching. Provider caches the model's internal state for the prefix; subsequent requests reuse the computation."
+    },
+    {
+      "id": "fc-ai-18",
+      "cat": "ai",
+      "q": "Cross-encoder re-rank pipeline order?",
+      "a": "Fast retrieval (top 50) \u2192 cross-encoder re-rank \u2192 top 5 \u2192 into LLM prompt. Cross-encoders too slow at full corpus scale."
+    },
+    {
+      "id": "fc-ai-19",
+      "cat": "ai",
+      "q": "Best chunk strategy for a structured contract with numbered clauses?",
+      "a": "Structural splitting on clause hierarchy + recursive fallback for long clauses. Preserves meaning + makes citations precise."
+    },
+    {
+      "id": "fc-ai-20",
+      "cat": "ai",
+      "q": "Function calling vs MCP \u2014 what's the diff?",
+      "a": "Function calling = each provider's native tool-use API (OpenAI, Anthropic, Google) \u2014 tightly coupled to the model. MCP (Model Context Protocol) = open standard (donated to Linux Foundation's Agentic AI Foundation in Dec 2025) for LLM\u2194tool integration; now supported by OpenAI, Anthropic, Google, Microsoft. Use MCP for portable tool servers, function calling for in-prompt one-offs."
+    },
+    {
+      "id": "fc-ai-21",
+      "cat": "ai",
+      "q": "Why do agent retries need idempotency keys?",
+      "a": "Network blip \u2192 response lost \u2192 LLM retries \u2192 without idempotency keys, side effects (charges, emails) fire twice."
+    },
+    {
+      "id": "fc-ai-22",
+      "cat": "ai",
+      "q": "How do you detect LLM-judge drift?",
+      "a": "Monthly: re-grade ~30 examples by hand, confirm judge agreement \u2265 85%. If drift, re-write rubric or swap judge model."
+    },
+    {
+      "id": "fc-ai-23",
+      "cat": "ai",
+      "q": "For a customer in a VPC, which embedding model?",
+      "a": "Self-hostable open-source (BGE-M3 is the 2026 default; multi-lingual, dense+sparse) or domain-specific (e.g. voyage-law-2, voyage-code-3 \u2014 self-hostable for enterprise). Avoid API-only embedders (OpenAI text-embedding-3, Cohere) when egress from the VPC is prohibited."
+    },
+    {
+      "id": "fc-ai-24",
+      "cat": "ai",
+      "q": "Pinecone vs pgvector \u2014 when pgvector wins?",
+      "a": "Customer already on Postgres + corpus under ~10M vectors (HNSW index handles this comfortably on a well-provisioned instance). Zero new infra; SQL filters compose with vector search. Migrate to Pinecone/Qdrant/etc. above ~50M or when you need horizontal autoscaling."
+    },
+    {
+      "id": "fc-ai-25",
+      "cat": "ai",
+      "q": "Three Anthropic-specific concepts to know?",
+      "a": "(1) Constitutional AI. (2) Responsible Scaling Policy v3.0 (Feb 2026: two-track commitments + Frontier Safety Roadmap). (3) Long-context + prompt caching + extended thinking. Read the latest RSP and the Claude docs before interviewing."
+    },
+    {
+      "id": "fc-ai-26",
+      "cat": "ai",
+      "q": "Indirect prompt injection mitigation?",
+      "a": "Tag retrieved/external content with <untrusted_content>...</untrusted_content> + instruct model to treat as DATA not instructions. Imperfect but reduces risk."
+    },
+    {
+      "id": "fc-ai-27",
+      "cat": "ai",
+      "q": "Speculative decoding explained?",
+      "a": "Small fast model drafts tokens; big model validates in parallel. Most drafts pass \u2192 2-3\u00d7 speedup at big-model quality."
+    },
+    {
+      "id": "fc-ai-28",
+      "cat": "ai",
+      "q": "Voice agent UX hardest problem in 2026?",
+      "a": "Turn-taking (detecting end-of-utterance via prosody + semantics, not VAD alone) and adaptive interruption handling (distinguishing backchannels like 'mm-hmm' from real barge-ins). End-to-end latency under ~600\u2013700ms is necessary but not sufficient for 'feels human'."
+    }
+  ]
+}

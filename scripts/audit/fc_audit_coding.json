@@ -1,0 +1,247 @@
+{
+  "cat": "coding",
+  "updates": [
+    { "id": "fc-cod-1", "lesson": "g-1" },
+    { "id": "fc-cod-2", "lesson": "p-LC1" },
+    { "id": "fc-cod-3", "lesson": "a-1" },
+    { "id": "fc-cod-4", "lesson": "a-2" },
+    { "id": "fc-cod-5", "lesson": "a-3" },
+    { "id": "fc-cod-6", "lesson": "g-6" },
+    { "id": "fc-cod-7", "lesson": "ag-cod-1" },
+    { "id": "fc-cod-8", "lesson": "ag-cod-3" },
+    { "id": "fc-cod-9", "lesson": "ag-cod-4" },
+    { "id": "fc-cod-10", "lesson": "ag-cod-2" },
+    { "id": "fc-cod-11", "lesson": "ag-cod-4" },
+    { "id": "fc-cod-12", "lesson": "g-4" },
+    { "id": "fc-cod-13", "lesson": "g-1" },
+    { "id": "fc-cod-14", "lesson": "dp-4" },
+    { "id": "fc-cod-15", "lesson": "sel-1" },
+    { "id": "fc-cod-16", "lesson": "sel-2" },
+    { "id": "fc-cod-17", "lesson": "m-LC1" },
+    { "id": "fc-cod-18", "lesson": "g-5" },
+    { "id": "fc-cod-19", "lesson": "ag-cod-2" },
+    { "id": "fc-cod-20", "lesson": "m-LC2" },
+    { "id": "fc-cod-21", "lesson": "a-2" },
+    { "id": "fc-cod-22", "lesson": "a-1" },
+    { "id": "fc-cod-23", "lesson": "a-3", "q": "Binary search on the answer -- when does it apply?", "a": "Use it when the answer space is monotonic (a predicate flips false-to-true exactly once). Binary search the boundary, evaluating the predicate each step. Classic: 'min capacity to ship in D days,' 'smallest max page in K splits.'" },
+    { "id": "fc-cod-24", "lesson": "a-4" },
+    { "id": "fc-cod-25", "lesson": "ag-cod-4" },
+    { "id": "fc-cod-26", "lesson": "ag-cod-4", "q": "Find the two singletons when every other number appears twice?", "a": "XOR everything to get x = a ^ b. Pick any set bit of x (e.g., x & -x); split the array by that bit and XOR each half separately. Each half isolates one singleton." },
+    { "id": "fc-cod-27", "lesson": "ag-cod-1" },
+    { "id": "fc-cod-28", "lesson": "ag-LC1" },
+    { "id": "fc-cod-29", "lesson": "ag-LC4", "q": "Largest Rectangle in Histogram -- key invariant?", "a": "Use a stack of strictly increasing bar indices. When a shorter bar arrives, pop and compute the rectangle bounded by the popped bar's height; the width spans from the new top+1 to the current index. Each bar pushed and popped once -- O(N)." },
+    { "id": "fc-cod-30", "lesson": "ag-cod-1" }
+  ],
+  "new_cards": [
+    {
+      "id": "fc-cod-31",
+      "cat": "coding",
+      "lesson": "g-2",
+      "q": "Shortest path between two users in a 10M-node social graph -- which traversal?",
+      "a": "Bidirectional BFS from both endpoints, alternating the smaller frontier. Cuts the explored set from b^d to ~2*b^(d/2), which is decisive on high-fan-out social graphs."
+    },
+    {
+      "id": "fc-cod-32",
+      "cat": "coding",
+      "lesson": "g-3",
+      "q": "Multi-source BFS -- how do you seed the queue?",
+      "a": "Push every source onto the queue at the start with distance 0 and mark them all visited. The first time BFS reaches a node, that's its distance to the nearest source -- single pass, O(V+E)."
+    },
+    {
+      "id": "fc-cod-33",
+      "cat": "coding",
+      "lesson": "g-LC2",
+      "q": "Shortest path in grid with up to K obstacle removals -- what's the state?",
+      "a": "Augment the BFS state with remaining eliminations: (row, col, k_left). Visited is keyed on the full triple so the same cell can be reached with different budgets. Still BFS because all moves cost 1."
+    },
+    {
+      "id": "fc-cod-34",
+      "cat": "coding",
+      "lesson": "g-LC3",
+      "q": "Bus Routes (min buses to reach destination) -- what's the right graph?",
+      "a": "Build a graph of routes, not stops. Two routes are neighbors if they share any stop; BFS on routes counting hops. Stop-level BFS blows up because each stop has many neighbors via its route."
+    },
+    {
+      "id": "fc-cod-35",
+      "cat": "coding",
+      "lesson": "ag-LC3",
+      "q": "Tarjan bridge-finding -- what's the bridge condition?",
+      "a": "DFS tracks disc[u] (discovery time) and low[u] (lowest disc reachable via subtree + one back-edge). Edge (u,v) is a bridge iff low[v] > disc[u] -- v's subtree has no alternative route back."
+    },
+    {
+      "id": "fc-cod-36",
+      "cat": "coding",
+      "lesson": "a-LC1",
+      "q": "Trapping Rain Water two-pointer -- why is the lower side safe to advance?",
+      "a": "The water at index i depends on min(maxLeft, maxRight). If leftMax <= rightMax, the left side is the binding constraint, so water at L is leftMax - height[L] regardless of what's between. Move the lower pointer; the bound only grows."
+    },
+    {
+      "id": "fc-cod-37",
+      "cat": "coding",
+      "lesson": "a-LC2",
+      "q": "Sliding Window Maximum -- which structure gives O(N)?",
+      "a": "A monotonic deque storing indices with strictly decreasing values. Pop from back while incoming value is larger; pop from front when index falls out of the window. Front is always the window max."
+    },
+    {
+      "id": "fc-cod-38",
+      "cat": "coding",
+      "lesson": "a-LC4",
+      "q": "Subarrays with exactly K distinct integers -- the inclusion-exclusion trick?",
+      "a": "Compute atMost(K) - atMost(K-1). Each is a sliding-window count of subarrays with at most K distinct, which is monotone and trivially windowable. Direct 'exactly K' has no monotone invariant."
+    },
+    {
+      "id": "fc-cod-39",
+      "cat": "coding",
+      "lesson": "h-LC1",
+      "q": "Minimum Window Substring -- when do you shrink the window?",
+      "a": "Maintain a need-count map and a 'matched' counter equal to distinct chars fully satisfied. Expand right; while matched == required, record answer and shrink left, decrementing matched when a char drops below its need."
+    },
+    {
+      "id": "fc-cod-40",
+      "cat": "coding",
+      "lesson": "h-LC3",
+      "q": "First Missing Positive in O(N) time, O(1) space -- core trick?",
+      "a": "Use the array as a hash: for each value v in [1,N], swap it to index v-1. Then scan: first index where A[i] != i+1 gives the answer. Values out of range are ignored."
+    },
+    {
+      "id": "fc-cod-41",
+      "cat": "coding",
+      "lesson": "iv-3",
+      "q": "Meeting Rooms II -- min rooms via sweep line?",
+      "a": "Create +1 events at start times and -1 events at end times, sort (ends before starts on ties), sweep and track the running max. Equivalently: a min-heap of end times, peek vs each new start. Both O(N log N)."
+    },
+    {
+      "id": "fc-cod-42",
+      "cat": "coding",
+      "lesson": "iv-4",
+      "q": "Non-overlapping intervals -- why sort by end?",
+      "a": "Greedy by earliest end leaves the most room for what comes next; an exchange argument shows any optimal solution can be transformed into the earliest-end choice without loss. Sorting by start can keep a long interval that blocks many short ones."
+    },
+    {
+      "id": "fc-cod-43",
+      "cat": "coding",
+      "lesson": "tr-2",
+      "q": "LCA in a generic binary tree -- the recursive pattern?",
+      "a": "Recurse left and right. If both sides return non-null, current node is the LCA. Otherwise propagate up the non-null side. O(N) with no parent pointers."
+    },
+    {
+      "id": "fc-cod-44",
+      "cat": "coding",
+      "lesson": "tr-4",
+      "q": "Validate BST -- common bug?",
+      "a": "Comparing only against direct children fails on grandchildren. Pass down (lo, hi) bounds at each call, or do in-order traversal and verify strict increase. Inclusive vs strict matters: use strict (<, >) for standard BST."
+    },
+    {
+      "id": "fc-cod-45",
+      "cat": "coding",
+      "lesson": "tr-6",
+      "q": "Max path sum in a binary tree -- return-vs-track split?",
+      "a": "At each node, recursively compute the best one-armed extension (max child gain, clipped at 0). Update a global best with node.val + leftGain + rightGain (path bends here). Return only the one-armed value -- a parent can't use a bend."
+    },
+    {
+      "id": "fc-cod-46",
+      "cat": "coding",
+      "lesson": "t-LC2",
+      "q": "Build binary tree from preorder + inorder -- what makes it O(N)?",
+      "a": "Preorder gives the root; locate it in inorder to split left/right subtrees. Pre-hash inorder value -> index so the lookup is O(1), and recurse on index ranges. Without the hashmap it degrades to O(N^2)."
+    },
+    {
+      "id": "fc-cod-47",
+      "cat": "coding",
+      "lesson": "dp-3",
+      "q": "0/1 knapsack -- why iterate capacity in reverse for 1D rolling?",
+      "a": "Each item can be used at most once. Iterating capacity descending guarantees dp[c-w] still reflects the previous row (no item yet), so you don't 'reuse' the item. Ascending iteration is the unbounded-knapsack form."
+    },
+    {
+      "id": "fc-cod-48",
+      "cat": "coding",
+      "lesson": "dp-LC1",
+      "q": "Burst Balloons -- what's the DP state and why?",
+      "a": "dp[l][r] = max coins bursting all balloons strictly between sentinels at l and r. Pick which balloon i is burst LAST in (l, r): cost = nums[l] * nums[i] * nums[r] + dp[l][i] + dp[i][r]. Last-to-burst pins the neighbors so subproblems decouple."
+    },
+    {
+      "id": "fc-cod-49",
+      "cat": "coding",
+      "lesson": "m-3",
+      "q": "When does a problem call for DP?",
+      "a": "When the answer has overlapping subproblems plus optimal substructure: same subcalls recur, and the optimal solution composes from optimal subsolutions. If subproblems don't repeat, it's plain divide-and-conquer or greedy."
+    },
+    {
+      "id": "fc-cod-50",
+      "cat": "coding",
+      "lesson": "m-3",
+      "q": "Most common DP bug?",
+      "a": "Off-by-one in base case or transition indexing -- especially confusing 'index i means first i chars' vs 'first i+1 chars.' Pick one convention and write base cases that fit it. Second-most-common: forgetting to memoize a parameter that varies between calls."
+    },
+    {
+      "id": "fc-cod-51",
+      "cat": "coding",
+      "lesson": "sm-1",
+      "q": "KMP -- what does the failure function store?",
+      "a": "f[i] = length of the longest proper prefix of pattern[0..i] that is also a suffix. On a mismatch at text position, jump pattern back to f[i-1] instead of restarting. Build in O(M), match in O(N) -- total O(M+N)."
+    },
+    {
+      "id": "fc-cod-52",
+      "cat": "coding",
+      "lesson": "sm-2",
+      "q": "Rabin-Karp -- why is the hash 'rolling'?",
+      "a": "Treat the substring as a base-B number mod a prime. Sliding one char right: new_hash = (old_hash - leftChar * B^(L-1)) * B + rightChar, all mod p. O(1) per slide. Verify equal hashes by direct compare to dodge collisions."
+    },
+    {
+      "id": "fc-cod-53",
+      "cat": "coding",
+      "lesson": "str-LC4",
+      "q": "Longest Duplicate Substring -- which two patterns combine?",
+      "a": "Binary search on the answer length L, plus rolling hash to test 'does any substring of length L repeat?' in O(N) per check. Total O(N log N), assuming you handle hash collisions (double hash or verify)."
+    },
+    {
+      "id": "fc-cod-54",
+      "cat": "coding",
+      "lesson": "ll-3",
+      "q": "Floyd's tortoise-and-hare -- how do you find the cycle start?",
+      "a": "After fast meets slow inside the cycle, reset one pointer to the head and advance both one step at a time. They meet at the cycle's entry. Proof: distance from head to entry equals distance from meeting point to entry (mod cycle length)."
+    },
+    {
+      "id": "fc-cod-55",
+      "cat": "coding",
+      "lesson": "ll-LC1",
+      "q": "Reverse Nodes in K-Group -- structural trick?",
+      "a": "Walk K nodes ahead to verify a full group exists, reverse those K in place, then connect the previous group's tail to the new head and recurse/loop on the rest. O(N) time, O(1) space (iterative)."
+    },
+    {
+      "id": "fc-cod-56",
+      "cat": "coding",
+      "lesson": "ll-LC3",
+      "q": "LFU cache -- data structures for O(1) get/put?",
+      "a": "Hash key -> node, hash freq -> doubly-linked list of nodes at that freq, and a min-freq pointer. On access, bump the node to the next freq's list; evict from the min-freq list's tail. Each op O(1)."
+    },
+    {
+      "id": "fc-cod-57",
+      "cat": "coding",
+      "lesson": "bt-LC3",
+      "q": "Word Search II -- why a trie beats per-word DFS?",
+      "a": "Insert all words into a trie. Run one DFS per board cell, walking the trie alongside the path; stop instantly when no child matches. Shared prefixes are explored once -- complexity goes from O(W * cells * 4^L) to roughly O(cells * 4^L)."
+    },
+    {
+      "id": "fc-cod-58",
+      "cat": "coding",
+      "lesson": "st-LC2",
+      "q": "Sum of Subarray Minimums -- monotonic stack counting trick?",
+      "a": "For each index i, find PLE (previous less, strict on one side) and NLE (next less, non-strict on the other) using a monotonic stack. Contribution = A[i] * (i - PLE) * (NLE - i). Asymmetric strictness avoids double-counting equal mins."
+    },
+    {
+      "id": "fc-cod-59",
+      "cat": "coding",
+      "lesson": "sel-LC3",
+      "q": "Kth smallest in a sorted matrix -- binary search on what?",
+      "a": "Binary search on the value, not the index. For a candidate v, count cells <= v in O(N) via the staircase walk from bottom-left. Shrink lo/hi by whether the count is < K or >= K. O(N log(maxVal-minVal))."
+    },
+    {
+      "id": "fc-cod-60",
+      "cat": "coding",
+      "lesson": "gr-LC3",
+      "q": "Minimum Refueling Stops -- the 'borrow from the past' heap-greedy?",
+      "a": "Drive forward without stopping, dropping each reachable station's fuel into a max-heap as you pass it. When you run out before the next station/target, pop the largest remembered tank and add it -- one stop. Repeat until you reach target or the heap is empty."
+    }
+  ]
+}

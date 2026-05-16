@@ -1,0 +1,179 @@
+{
+  "cat": "domain",
+  "lessons": [
+    {
+      "id": "dai-1",
+      "type": "concept",
+      "name": "What AI-first companies (Deepgram, OpenAI, Anthropic) actually screen for",
+      "module_id": "dom-ai",
+      "module_name": "AI-first companies",
+      "cat": "domain"
+    },
+    {
+      "id": "dai-2",
+      "type": "concept",
+      "name": "Latency-critical AI (Deepgram, Tavily) \u2014 how to make AI fast",
+      "module_id": "dom-ai",
+      "module_name": "AI-first companies",
+      "cat": "domain"
+    },
+    {
+      "id": "dai-3",
+      "type": "concept",
+      "name": "Multimodal AI (Runway, Suno, Mirage) \u2014 the long-running-job pattern",
+      "module_id": "dom-ai",
+      "module_name": "AI-first companies",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-1",
+      "type": "concept",
+      "name": "Hospitality data model \u2014 entities, relationships, time-zone gotchas",
+      "module_id": "dom-hosp",
+      "module_name": "Hospitality / F&B",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-2",
+      "type": "concept",
+      "name": "Hospitality interview prompts \u2014 patterns you'll see",
+      "module_id": "dom-hosp",
+      "module_name": "Hospitality / F&B",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-3",
+      "type": "concept",
+      "name": "Reservation systems \u2014 inventory, overlap, race conditions",
+      "module_id": "dom-hosp",
+      "module_name": "Hospitality / F&B",
+      "cat": "domain"
+    },
+    {
+      "id": "dm-1",
+      "type": "concept",
+      "name": "Marketplace fundamentals \u2014 the five primitives",
+      "module_id": "dom-mkt",
+      "module_name": "Marketplace & fintech",
+      "cat": "domain"
+    },
+    {
+      "id": "dm-2",
+      "type": "concept",
+      "name": "Matching algorithms \u2014 greedy vs bipartite vs ML-ranked",
+      "module_id": "dom-mkt",
+      "module_name": "Marketplace & fintech",
+      "cat": "domain"
+    },
+    {
+      "id": "dm-3",
+      "type": "concept",
+      "name": "Fintech / payments (Coast) \u2014 the irreducible primitives",
+      "module_id": "dom-mkt",
+      "module_name": "Marketplace & fintech",
+      "cat": "domain"
+    },
+    {
+      "id": "dd-1",
+      "type": "concept",
+      "name": "Developer-tool north stars (Warp, Tavily)",
+      "module_id": "dom-dev",
+      "module_name": "Dev tools & infra",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-4",
+      "type": "concept",
+      "name": "Healthcare / regulated industry \u2014 what makes deployment different",
+      "module_id": "dom-dev",
+      "module_name": "Dev tools & infra",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-5",
+      "type": "concept",
+      "name": "Government / defense / public sector \u2014 Palantir-style FDE",
+      "module_id": "dom-dev",
+      "module_name": "Dev tools & infra",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-6",
+      "type": "concept",
+      "name": "B2B SaaS at scale \u2014 PLG vs sales-led growth",
+      "module_id": "dom-dev",
+      "module_name": "Dev tools & infra",
+      "cat": "domain"
+    },
+    {
+      "id": "dd-2",
+      "type": "concept",
+      "name": "Enterprise LLM gateways (Credal) \u2014 what they actually do",
+      "module_id": "dom-dev",
+      "module_name": "Dev tools & infra",
+      "cat": "domain"
+    }
+  ],
+  "existing_cards": [
+    {
+      "id": "fc-dom-1",
+      "cat": "domain",
+      "q": "Hospitality timezone gotcha?",
+      "a": "A venue's \"Saturday night\" crosses UTC midnight. Always compute venue-local timestamps before filtering by day-of-week. Common cause of \"wrong-day\" reports."
+    },
+    {
+      "id": "fc-dom-2",
+      "cat": "domain",
+      "q": "Marketplace cold-start playbook?",
+      "a": "Pre-seed one side (manually recruit, or fake demand), drive demand to it, prove utility in a single concentrated metro, then expand. Two-sided liquidity is the hardest problem."
+    },
+    {
+      "id": "fc-dom-3",
+      "cat": "domain",
+      "q": "Healthcare deployment \u2014 biggest non-technical hurdle?",
+      "a": "8\u201316 week compliance review by the hospital's security team. Plan for this in your project timeline. Multi-tenant SaaS often DOA; single-tenant in customer VPC is standard."
+    },
+    {
+      "id": "fc-dom-4",
+      "cat": "domain",
+      "q": "Healthcare deploy \u2014 biggest non-technical hurdle?",
+      "a": "8-16 week compliance review by hospital security teams. Plan for it. Single-tenant in customer VPC is often required (HIPAA)."
+    },
+    {
+      "id": "fc-dom-5",
+      "cat": "domain",
+      "q": "Defense / government FDE requirements?",
+      "a": "Air-gapped on-prem deploys + FedRAMP High / IL5 + cleared engineers. Procurement cycle is months-years."
+    },
+    {
+      "id": "fc-dom-6",
+      "cat": "domain",
+      "q": "Fintech ledger non-negotiables?",
+      "a": "Double-entry + append-only (never UPDATE/DELETE) + idempotent writes. Adjustments via offsetting entries. Audit trail is sacred."
+    },
+    {
+      "id": "fc-dom-7",
+      "cat": "domain",
+      "q": "Multimodal AI UX challenge?",
+      "a": "Long-running inference (minutes). Need async job queue + WS/polling progress + content moderation pre+post-gen + cancellation tokens."
+    },
+    {
+      "id": "fc-dom-8",
+      "cat": "domain",
+      "q": "Voice AI 2026 \u2014 hardest UX problem?",
+      "a": "Turn-taking + barge-in (interruption) handling. Industry target is sub-500ms end-to-end via streaming STT\u2192LLM\u2192TTS overlap; neural turn-prediction models have replaced VAD-only silence detection. Sub-500ms latency is necessary but not sufficient \u2014 natural turn boundaries are what make it 'feel human.'"
+    },
+    {
+      "id": "fc-dom-9",
+      "cat": "domain",
+      "q": "PLG vs SLG growth motion \u2014 which needs FDE?",
+      "a": "SLG (sales-led, enterprise customers). FDE is the customer-engineering arm. PLG companies usually don't need traditional FDE."
+    },
+    {
+      "id": "fc-dom-10",
+      "cat": "domain",
+      "q": "Matching algorithms \u2014 greedy vs ML?",
+      "a": "Greedy by rating starves new entrants. ML rank with diversity injection (5-10% to newer suppliers) keeps supply healthy."
+    }
+  ]
+}

@@ -1,0 +1,2082 @@
+[
+  {
+    "id": "d-1",
+    "type": "concept",
+    "name": "What IS a decomposition interview?",
+    "module_id": "decomp-101",
+    "module_name": "The Decomposition Round, end-to-end",
+    "cat": "decomp"
+  },
+  {
+    "id": "d-2",
+    "type": "concept",
+    "name": "The 5-step framework, walked through 911",
+    "module_id": "decomp-101",
+    "module_name": "The Decomposition Round, end-to-end",
+    "cat": "decomp"
+  },
+  {
+    "id": "d-3",
+    "type": "concept",
+    "name": "The mental model: Inputs \u2192 Logic \u2192 Outputs",
+    "module_id": "decomp-101",
+    "module_name": "The Decomposition Round, end-to-end",
+    "cat": "decomp"
+  },
+  {
+    "id": "d-4",
+    "type": "concept",
+    "name": "How to ask clarifying questions (with examples)",
+    "module_id": "decomp-101",
+    "module_name": "The Decomposition Round, end-to-end",
+    "cat": "decomp"
+  },
+  {
+    "id": "d-5",
+    "type": "concept",
+    "name": "The 5 traps that get candidates rejected",
+    "module_id": "decomp-101",
+    "module_name": "The Decomposition Round, end-to-end",
+    "cat": "decomp"
+  },
+  {
+    "id": "d-6",
+    "type": "drill",
+    "name": "Drill: walk through the 911 prompt yourself",
+    "module_id": "decomp-101",
+    "module_name": "The Decomposition Round, end-to-end",
+    "cat": "decomp"
+  },
+  {
+    "id": "d-7",
+    "type": "drill",
+    "name": "Drill: logistics rerouting AI agent",
+    "module_id": "decomp-101",
+    "module_name": "The Decomposition Round, end-to-end",
+    "cat": "decomp"
+  },
+  {
+    "id": "d-8",
+    "type": "concept",
+    "name": "Four live phrases that signal senior judgment",
+    "module_id": "decomp-101",
+    "module_name": "The Decomposition Round, end-to-end",
+    "cat": "decomp"
+  },
+  {
+    "id": "rag-1",
+    "type": "concept",
+    "name": "What is RAG and why does it exist?",
+    "module_id": "ai-rag",
+    "module_name": "RAG \u2014 what it is and when to build it",
+    "cat": "ai"
+  },
+  {
+    "id": "rag-2",
+    "type": "concept",
+    "name": "Chunking \u2014 how to split docs without breaking them",
+    "module_id": "ai-rag",
+    "module_name": "RAG \u2014 what it is and when to build it",
+    "cat": "ai"
+  },
+  {
+    "id": "rag-4",
+    "type": "concept",
+    "name": "Embedding models \u2014 how to choose one",
+    "module_id": "ai-rag",
+    "module_name": "RAG \u2014 what it is and when to build it",
+    "cat": "ai"
+  },
+  {
+    "id": "rag-5",
+    "type": "concept",
+    "name": "Vector DBs \u2014 choosing one, with tradeoffs",
+    "module_id": "ai-rag",
+    "module_name": "RAG \u2014 what it is and when to build it",
+    "cat": "ai"
+  },
+  {
+    "id": "rag-6",
+    "type": "concept",
+    "name": "Prompt injection \u2014 the security model for LLM apps",
+    "module_id": "ai-rag",
+    "module_name": "RAG \u2014 what it is and when to build it",
+    "cat": "ai"
+  },
+  {
+    "id": "rag-3",
+    "type": "concept",
+    "name": "How retrieval actually works (sparse vs dense vs hybrid)",
+    "module_id": "ai-rag",
+    "module_name": "RAG \u2014 what it is and when to build it",
+    "cat": "ai"
+  },
+  {
+    "id": "rag-7",
+    "type": "question",
+    "name": "Q: How do you debug a RAG that \"knows\" but ignores the context?",
+    "module_id": "ai-rag",
+    "module_name": "RAG \u2014 what it is and when to build it",
+    "cat": "ai"
+  },
+  {
+    "id": "rag-8",
+    "type": "question",
+    "name": "Q: Protect sensitive data in a RAG pipeline?",
+    "module_id": "ai-rag",
+    "module_name": "RAG \u2014 what it is and when to build it",
+    "cat": "ai"
+  },
+  {
+    "id": "rag-9",
+    "type": "drill",
+    "name": "Drill: design RAG for a CFO-facing support bot",
+    "module_id": "ai-rag",
+    "module_name": "RAG \u2014 what it is and when to build it",
+    "cat": "ai"
+  },
+  {
+    "id": "rag-10",
+    "type": "concept",
+    "name": "Long-context vs RAG \u2014 when 1M-token windows change the calculus",
+    "module_id": "ai-rag",
+    "module_name": "RAG \u2014 what it is and when to build it",
+    "cat": "ai"
+  },
+  {
+    "id": "ev-1",
+    "type": "concept",
+    "name": "Why \"evals\" are the hardest part of AI engineering",
+    "module_id": "ai-evals",
+    "module_name": "Evals \u2014 what most candidates fumble",
+    "cat": "ai"
+  },
+  {
+    "id": "ev-2",
+    "type": "concept",
+    "name": "LLM-as-judge \u2014 and the 4 ways it lies to you",
+    "module_id": "ai-evals",
+    "module_name": "Evals \u2014 what most candidates fumble",
+    "cat": "ai"
+  },
+  {
+    "id": "ev-3",
+    "type": "concept",
+    "name": "How to build a golden set in one day",
+    "module_id": "ai-evals",
+    "module_name": "Evals \u2014 what most candidates fumble",
+    "cat": "ai"
+  },
+  {
+    "id": "ev-4",
+    "type": "question",
+    "name": "Q: Eval suite for an agent that spends money",
+    "module_id": "ai-evals",
+    "module_name": "Evals \u2014 what most candidates fumble",
+    "cat": "ai"
+  },
+  {
+    "id": "ev-5",
+    "type": "concept",
+    "name": "The eval-tooling landscape (RAGAS, DeepEval, Braintrust, HoneyHive)",
+    "module_id": "ai-evals",
+    "module_name": "Evals \u2014 what most candidates fumble",
+    "cat": "ai"
+  },
+  {
+    "id": "pr-1",
+    "type": "concept",
+    "name": "Anatomy of a production prompt (with example)",
+    "module_id": "ai-prompt",
+    "module_name": "Prompt engineering as structured programming",
+    "cat": "ai"
+  },
+  {
+    "id": "pr-2",
+    "type": "concept",
+    "name": "Reasoning models vs prompted CoT \u2014 the 2026 default has flipped",
+    "module_id": "ai-prompt",
+    "module_name": "Prompt engineering as structured programming",
+    "cat": "ai"
+  },
+  {
+    "id": "pr-3",
+    "type": "concept",
+    "name": "Temperature \u2014 what it actually controls",
+    "module_id": "ai-prompt",
+    "module_name": "Prompt engineering as structured programming",
+    "cat": "ai"
+  },
+  {
+    "id": "pr-4",
+    "type": "drill",
+    "name": "Drill: prompt-injection red team",
+    "module_id": "ai-prompt",
+    "module_name": "Prompt engineering as structured programming",
+    "cat": "ai"
+  },
+  {
+    "id": "pr-5",
+    "type": "concept",
+    "name": "Prompt caching \u2014 the #1 production cost lever",
+    "module_id": "ai-prompt",
+    "module_name": "Prompt engineering as structured programming",
+    "cat": "ai"
+  },
+  {
+    "id": "ag-1",
+    "type": "concept",
+    "name": "What is an \"agent\" really? (vs a chain)",
+    "module_id": "ai-agents",
+    "module_name": "Agents in production",
+    "cat": "ai"
+  },
+  {
+    "id": "ag-2",
+    "type": "concept",
+    "name": "Tool calling \u2014 the 6 ways it actually breaks",
+    "module_id": "ai-agents",
+    "module_name": "Agents in production",
+    "cat": "ai"
+  },
+  {
+    "id": "ag-3",
+    "type": "concept",
+    "name": "Bounding agent autonomy \u2014 the 6 controls",
+    "module_id": "ai-agents",
+    "module_name": "Agents in production",
+    "cat": "ai"
+  },
+  {
+    "id": "ag-4",
+    "type": "concept",
+    "name": "Structured outputs \u2014 JSON Schema as your security boundary",
+    "module_id": "ai-agents",
+    "module_name": "Agents in production",
+    "cat": "ai"
+  },
+  {
+    "id": "ag-5",
+    "type": "concept",
+    "name": "Tool-call formats: native APIs + MCP as the cross-provider standard",
+    "module_id": "ai-agents",
+    "module_name": "Agents in production",
+    "cat": "ai"
+  },
+  {
+    "id": "ag-6",
+    "type": "concept",
+    "name": "Multi-agent system fails \u2014 where to look first",
+    "module_id": "ai-agents",
+    "module_name": "Agents in production",
+    "cat": "ai"
+  },
+  {
+    "id": "ag-7",
+    "type": "concept",
+    "name": "Building an MCP server \u2014 the practical job skill",
+    "module_id": "ai-agents",
+    "module_name": "Agents in production",
+    "cat": "ai"
+  },
+  {
+    "id": "ag-8",
+    "type": "concept",
+    "name": "Computer Use \u2014 when the tool IS a virtual desktop",
+    "module_id": "ai-agents",
+    "module_name": "Agents in production",
+    "cat": "ai"
+  },
+  {
+    "id": "ag-9",
+    "type": "concept",
+    "name": "Cost & latency engineering \u2014 the production levers",
+    "module_id": "ai-agents",
+    "module_name": "Agents in production",
+    "cat": "ai"
+  },
+  {
+    "id": "ft-1",
+    "type": "concept",
+    "name": "Prompt vs RAG vs fine-tune \u2014 the decision tree",
+    "module_id": "ai-finetune",
+    "module_name": "Fine-tune vs RAG vs prompt",
+    "cat": "ai"
+  },
+  {
+    "id": "ft-2",
+    "type": "concept",
+    "name": "When fine-tuning is actually the right call",
+    "module_id": "ai-finetune",
+    "module_name": "Fine-tune vs RAG vs prompt",
+    "cat": "ai"
+  },
+  {
+    "id": "g-1",
+    "type": "concept",
+    "name": "BFS \u2014 what it does and how to code it from memory",
+    "module_id": "cod-graphs",
+    "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+    "cat": "coding"
+  },
+  {
+    "id": "g-2",
+    "type": "concept",
+    "name": "Shortest path between two nodes in a social graph (10M nodes)",
+    "module_id": "cod-graphs",
+    "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+    "cat": "coding"
+  },
+  {
+    "id": "g-3",
+    "type": "concept",
+    "name": "Infection spread (multi-source BFS) \u2014 start every source on layer 0",
+    "module_id": "cod-graphs",
+    "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+    "cat": "coding"
+  },
+  {
+    "id": "g-4",
+    "type": "drill",
+    "name": "Drill: write BFS in Python in 4 min",
+    "module_id": "cod-graphs",
+    "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+    "cat": "coding"
+  },
+  {
+    "id": "g-5",
+    "type": "concept",
+    "name": "DFS \u2014 recursion, backtracking, and when to use it over BFS",
+    "module_id": "cod-graphs",
+    "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+    "cat": "coding"
+  },
+  {
+    "id": "g-6",
+    "type": "concept",
+    "name": "Union-Find (DSU) \u2014 connecting components fast",
+    "module_id": "cod-graphs",
+    "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+    "cat": "coding"
+  },
+  {
+    "id": "g-LC1",
+    "type": "concept",
+    "name": "Word Ladder II \u2014 why BFS-then-DFS, not pure BFS",
+    "module_id": "cod-graphs",
+    "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+    "cat": "coding"
+  },
+  {
+    "id": "g-LC2",
+    "type": "concept",
+    "name": "Shortest Path in Grid with K Obstacle Eliminations \u2014 state-space BFS",
+    "module_id": "cod-graphs",
+    "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+    "cat": "coding"
+  },
+  {
+    "id": "g-LC3",
+    "type": "concept",
+    "name": "Bus Routes \u2014 model as a graph of routes, not stops",
+    "module_id": "cod-graphs",
+    "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+    "cat": "coding"
+  },
+  {
+    "id": "g-LC4",
+    "type": "concept",
+    "name": "Open the Lock \u2014 implicit state graph + dead ends",
+    "module_id": "cod-graphs",
+    "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+    "cat": "coding"
+  },
+  {
+    "id": "a-1",
+    "type": "concept",
+    "name": "Two pointers \u2014 when \"linear sweep with two indices\" is the trick",
+    "module_id": "cod-arrays",
+    "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+    "cat": "coding"
+  },
+  {
+    "id": "a-2",
+    "type": "concept",
+    "name": "Sliding window \u2014 variable vs fixed",
+    "module_id": "cod-arrays",
+    "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+    "cat": "coding"
+  },
+  {
+    "id": "a-3",
+    "type": "concept",
+    "name": "Binary search \u2014 beyond \"find element in sorted array\"",
+    "module_id": "cod-arrays",
+    "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+    "cat": "coding"
+  },
+  {
+    "id": "a-4",
+    "type": "concept",
+    "name": "Prefix sums + difference arrays",
+    "module_id": "cod-arrays",
+    "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+    "cat": "coding"
+  },
+  {
+    "id": "a-LC1",
+    "type": "concept",
+    "name": "Trapping Rain Water \u2014 two-pointer \"ruled-out\" argument",
+    "module_id": "cod-arrays",
+    "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+    "cat": "coding"
+  },
+  {
+    "id": "a-LC2",
+    "type": "concept",
+    "name": "Sliding Window Maximum \u2014 monotonic deque trick",
+    "module_id": "cod-arrays",
+    "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+    "cat": "coding"
+  },
+  {
+    "id": "a-LC3",
+    "type": "concept",
+    "name": "Median of Two Sorted Arrays \u2014 partition by binary search",
+    "module_id": "cod-arrays",
+    "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+    "cat": "coding"
+  },
+  {
+    "id": "a-LC4",
+    "type": "concept",
+    "name": "Subarrays with K Different Integers \u2014 atMost(K) \u2212 atMost(K\u22121)",
+    "module_id": "cod-arrays",
+    "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+    "cat": "coding"
+  },
+  {
+    "id": "ag-cod-1",
+    "type": "concept",
+    "name": "Dijkstra \u2014 shortest path with weighted edges",
+    "module_id": "cod-advgraphs",
+    "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+    "cat": "coding"
+  },
+  {
+    "id": "ag-cod-2",
+    "type": "concept",
+    "name": "Topological sort \u2014 ordering tasks with dependencies",
+    "module_id": "cod-advgraphs",
+    "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+    "cat": "coding"
+  },
+  {
+    "id": "ag-cod-3",
+    "type": "concept",
+    "name": "Monotonic stack \u2014 \"next greater / smaller element\"",
+    "module_id": "cod-advgraphs",
+    "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+    "cat": "coding"
+  },
+  {
+    "id": "ag-cod-4",
+    "type": "concept",
+    "name": "Bit manipulation \u2014 XOR tricks, subset enumeration, bitmasks",
+    "module_id": "cod-advgraphs",
+    "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+    "cat": "coding"
+  },
+  {
+    "id": "ag-LC1",
+    "type": "concept",
+    "name": "Cheapest Flights Within K Stops \u2014 Bellman-Ford vs modified Dijkstra",
+    "module_id": "cod-advgraphs",
+    "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+    "cat": "coding"
+  },
+  {
+    "id": "ag-LC2",
+    "type": "concept",
+    "name": "Alien Dictionary \u2014 topological sort from inferred edges",
+    "module_id": "cod-advgraphs",
+    "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+    "cat": "coding"
+  },
+  {
+    "id": "ag-LC3",
+    "type": "concept",
+    "name": "Critical Connections \u2014 Tarjan's bridge-finding algorithm",
+    "module_id": "cod-advgraphs",
+    "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+    "cat": "coding"
+  },
+  {
+    "id": "ag-LC4",
+    "type": "concept",
+    "name": "Largest Rectangle in Histogram \u2014 monotonic stack invariant",
+    "module_id": "cod-advgraphs",
+    "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+    "cat": "coding"
+  },
+  {
+    "id": "h-1",
+    "type": "question",
+    "name": "Q: Two-sum / pair-sum to target",
+    "module_id": "cod-hashing",
+    "module_name": "Hash maps & strings",
+    "cat": "coding"
+  },
+  {
+    "id": "h-2",
+    "type": "question",
+    "name": "Q: First non-repeating character",
+    "module_id": "cod-hashing",
+    "module_name": "Hash maps & strings",
+    "cat": "coding"
+  },
+  {
+    "id": "h-3",
+    "type": "question",
+    "name": "Q: LRU cache, O(1) get/put",
+    "module_id": "cod-hashing",
+    "module_name": "Hash maps & strings",
+    "cat": "coding"
+  },
+  {
+    "id": "h-4",
+    "type": "question",
+    "name": "Q: Longest substring without repeating characters \u2014 hash + variable-size window",
+    "module_id": "cod-hashing",
+    "module_name": "Hash maps & strings",
+    "cat": "coding"
+  },
+  {
+    "id": "h-LC1",
+    "type": "concept",
+    "name": "Minimum Window Substring \u2014 sliding window with counter",
+    "module_id": "cod-hashing",
+    "module_name": "Hash maps & strings",
+    "cat": "coding"
+  },
+  {
+    "id": "h-LC2",
+    "type": "concept",
+    "name": "Substring with Concatenation of All Words \u2014 windowed hash check",
+    "module_id": "cod-hashing",
+    "module_name": "Hash maps & strings",
+    "cat": "coding"
+  },
+  {
+    "id": "h-LC3",
+    "type": "concept",
+    "name": "First Missing Positive \u2014 index-as-hash in O(N) time, O(1) space",
+    "module_id": "cod-hashing",
+    "module_name": "Hash maps & strings",
+    "cat": "coding"
+  },
+  {
+    "id": "h-LC4",
+    "type": "concept",
+    "name": "Longest Substring with At Most K Distinct Characters",
+    "module_id": "cod-hashing",
+    "module_name": "Hash maps & strings",
+    "cat": "coding"
+  },
+  {
+    "id": "p-1",
+    "type": "question",
+    "name": "Q: Parse & clean a 1GB JSONL file",
+    "module_id": "cod-prod",
+    "module_name": "Production-flavored coding",
+    "cat": "coding"
+  },
+  {
+    "id": "p-2",
+    "type": "question",
+    "name": "Q: Retry-with-backoff decorator",
+    "module_id": "cod-prod",
+    "module_name": "Production-flavored coding",
+    "cat": "coding"
+  },
+  {
+    "id": "p-3",
+    "type": "question",
+    "name": "Q: Flatten a nested list of arbitrary depth",
+    "module_id": "cod-prod",
+    "module_name": "Production-flavored coding",
+    "cat": "coding"
+  },
+  {
+    "id": "p-4",
+    "type": "question",
+    "name": "Q: Thread-safe singleton",
+    "module_id": "cod-prod",
+    "module_name": "Production-flavored coding",
+    "cat": "coding"
+  },
+  {
+    "id": "p-LC1",
+    "type": "concept",
+    "name": "LRU Cache \u2014 hash map + doubly linked list",
+    "module_id": "cod-prod",
+    "module_name": "Production-flavored coding",
+    "cat": "coding"
+  },
+  {
+    "id": "p-LC2",
+    "type": "concept",
+    "name": "Design In-Memory File System \u2014 trie of dicts",
+    "module_id": "cod-prod",
+    "module_name": "Production-flavored coding",
+    "cat": "coding"
+  },
+  {
+    "id": "p-LC3",
+    "type": "concept",
+    "name": "Time-Based Key-Value Store \u2014 binary search on timestamps",
+    "module_id": "cod-prod",
+    "module_name": "Production-flavored coding",
+    "cat": "coding"
+  },
+  {
+    "id": "p-LC4",
+    "type": "concept",
+    "name": "Snake Game \u2014 deque + set for O(1) self-collision check",
+    "module_id": "cod-prod",
+    "module_name": "Production-flavored coding",
+    "cat": "coding"
+  },
+  {
+    "id": "m-1",
+    "type": "concept",
+    "name": "Heaps \u2014 when (and why) to reach for one",
+    "module_id": "cod-misc",
+    "module_name": "Trees, heaps, DP \u2014 short ladder",
+    "cat": "coding"
+  },
+  {
+    "id": "m-2",
+    "type": "question",
+    "name": "Q: Cycle detection in linked list",
+    "module_id": "cod-misc",
+    "module_name": "Trees, heaps, DP \u2014 short ladder",
+    "cat": "coding"
+  },
+  {
+    "id": "m-3",
+    "type": "concept",
+    "name": "Dynamic programming \u2014 recognizing when to use it",
+    "module_id": "cod-misc",
+    "module_name": "Trees, heaps, DP \u2014 short ladder",
+    "cat": "coding"
+  },
+  {
+    "id": "m-4",
+    "type": "question",
+    "name": "Q: Trie insert / search",
+    "module_id": "cod-misc",
+    "module_name": "Trees, heaps, DP \u2014 short ladder",
+    "cat": "coding"
+  },
+  {
+    "id": "m-LC1",
+    "type": "concept",
+    "name": "Find Median from Data Stream \u2014 two heaps, balanced",
+    "module_id": "cod-misc",
+    "module_name": "Trees, heaps, DP \u2014 short ladder",
+    "cat": "coding"
+  },
+  {
+    "id": "m-LC2",
+    "type": "concept",
+    "name": "Merge K Sorted Lists \u2014 heap of head pointers",
+    "module_id": "cod-misc",
+    "module_name": "Trees, heaps, DP \u2014 short ladder",
+    "cat": "coding"
+  },
+  {
+    "id": "m-LC3",
+    "type": "concept",
+    "name": "Edit Distance \u2014 2D DP with three operations",
+    "module_id": "cod-misc",
+    "module_name": "Trees, heaps, DP \u2014 short ladder",
+    "cat": "coding"
+  },
+  {
+    "id": "m-LC4",
+    "type": "concept",
+    "name": "Longest Increasing Subsequence \u2014 patience sort O(N log N)",
+    "module_id": "cod-misc",
+    "module_name": "Trees, heaps, DP \u2014 short ladder",
+    "cat": "coding"
+  },
+  {
+    "id": "bt-1",
+    "type": "concept",
+    "name": "The backtracking template (subsets / power set)",
+    "module_id": "cod-backtrack",
+    "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+    "cat": "coding"
+  },
+  {
+    "id": "bt-2",
+    "type": "concept",
+    "name": "Permutations \u2014 used/visited bookkeeping",
+    "module_id": "cod-backtrack",
+    "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+    "cat": "coding"
+  },
+  {
+    "id": "bt-3",
+    "type": "concept",
+    "name": "Combinations & combination sum \u2014 pruning on the path",
+    "module_id": "cod-backtrack",
+    "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+    "cat": "coding"
+  },
+  {
+    "id": "bt-4",
+    "type": "concept",
+    "name": "N-Queens \u2014 pruning with diagonal sets",
+    "module_id": "cod-backtrack",
+    "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+    "cat": "coding"
+  },
+  {
+    "id": "bt-5",
+    "type": "concept",
+    "name": "Word search on a grid \u2014 DFS with in-place visited",
+    "module_id": "cod-backtrack",
+    "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+    "cat": "coding"
+  },
+  {
+    "id": "bt-LC1",
+    "type": "concept",
+    "name": "Remove Invalid Parentheses \u2014 min-removal backtracking with prune + dedup",
+    "module_id": "cod-backtrack",
+    "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+    "cat": "coding"
+  },
+  {
+    "id": "bt-LC2",
+    "type": "concept",
+    "name": "Sudoku Solver \u2014 constraint propagation + backtracking",
+    "module_id": "cod-backtrack",
+    "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+    "cat": "coding"
+  },
+  {
+    "id": "bt-LC3",
+    "type": "concept",
+    "name": "Word Search II \u2014 Trie pruning makes it tractable",
+    "module_id": "cod-backtrack",
+    "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+    "cat": "coding"
+  },
+  {
+    "id": "bt-LC4",
+    "type": "concept",
+    "name": "Expression Add Operators \u2014 backtracking with multiplication carry",
+    "module_id": "cod-backtrack",
+    "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+    "cat": "coding"
+  },
+  {
+    "id": "iv-1",
+    "type": "concept",
+    "name": "Merge overlapping intervals \u2014 the canonical pattern",
+    "module_id": "cod-intervals",
+    "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+    "cat": "coding"
+  },
+  {
+    "id": "iv-2",
+    "type": "concept",
+    "name": "Insert interval \u2014 the three-phase walk",
+    "module_id": "cod-intervals",
+    "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+    "cat": "coding"
+  },
+  {
+    "id": "iv-3",
+    "type": "concept",
+    "name": "Meeting rooms II \u2014 min rooms via heap or sweep",
+    "module_id": "cod-intervals",
+    "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+    "cat": "coding"
+  },
+  {
+    "id": "iv-4",
+    "type": "concept",
+    "name": "Non-overlapping intervals \u2014 greedy by END",
+    "module_id": "cod-intervals",
+    "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+    "cat": "coding"
+  },
+  {
+    "id": "iv-LC1",
+    "type": "concept",
+    "name": "Employee Free Time \u2014 merge then complement",
+    "module_id": "cod-intervals",
+    "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+    "cat": "coding"
+  },
+  {
+    "id": "iv-LC2",
+    "type": "concept",
+    "name": "My Calendar III \u2014 max-overlap via sweep line / diff array",
+    "module_id": "cod-intervals",
+    "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+    "cat": "coding"
+  },
+  {
+    "id": "iv-LC3",
+    "type": "concept",
+    "name": "Meeting Rooms III \u2014 two heaps for room assignment",
+    "module_id": "cod-intervals",
+    "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+    "cat": "coding"
+  },
+  {
+    "id": "iv-LC4",
+    "type": "concept",
+    "name": "Data Stream as Disjoint Intervals \u2014 sorted dict + merge on insert",
+    "module_id": "cod-intervals",
+    "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+    "cat": "coding"
+  },
+  {
+    "id": "tr-1",
+    "type": "concept",
+    "name": "Three traversals + level-order, iterative versions",
+    "module_id": "cod-trees",
+    "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+    "cat": "coding"
+  },
+  {
+    "id": "tr-2",
+    "type": "concept",
+    "name": "Lowest Common Ancestor \u2014 BST vs binary tree",
+    "module_id": "cod-trees",
+    "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+    "cat": "coding"
+  },
+  {
+    "id": "tr-3",
+    "type": "concept",
+    "name": "Serialize & deserialize binary tree (BFS encoding)",
+    "module_id": "cod-trees",
+    "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+    "cat": "coding"
+  },
+  {
+    "id": "tr-4",
+    "type": "concept",
+    "name": "Validate BST \u2014 pass min/max bounds, not just check children",
+    "module_id": "cod-trees",
+    "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+    "cat": "coding"
+  },
+  {
+    "id": "tr-5",
+    "type": "concept",
+    "name": "Kth smallest in BST \u2014 in-order with a counter",
+    "module_id": "cod-trees",
+    "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+    "cat": "coding"
+  },
+  {
+    "id": "tr-6",
+    "type": "concept",
+    "name": "Max path sum (binary tree) \u2014 return one, track best",
+    "module_id": "cod-trees",
+    "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+    "cat": "coding"
+  },
+  {
+    "id": "t-LC1",
+    "type": "concept",
+    "name": "Binary Tree Cameras \u2014 three-state DP on the tree",
+    "module_id": "cod-trees",
+    "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+    "cat": "coding"
+  },
+  {
+    "id": "t-LC2",
+    "type": "concept",
+    "name": "Construct Binary Tree from Preorder + Inorder \u2014 the index trick",
+    "module_id": "cod-trees",
+    "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+    "cat": "coding"
+  },
+  {
+    "id": "t-LC3",
+    "type": "concept",
+    "name": "Recover BST \u2014 Morris traversal finds two swapped nodes",
+    "module_id": "cod-trees",
+    "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+    "cat": "coding"
+  },
+  {
+    "id": "t-LC4",
+    "type": "concept",
+    "name": "Vertical Order Traversal \u2014 sort by (col, row, val)",
+    "module_id": "cod-trees",
+    "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+    "cat": "coding"
+  },
+  {
+    "id": "gr-1",
+    "type": "concept",
+    "name": "Jump game \u2014 reach the end with greedy max-reach",
+    "module_id": "cod-greedy",
+    "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+    "cat": "coding"
+  },
+  {
+    "id": "gr-2",
+    "type": "concept",
+    "name": "Gas station \u2014 total + running min",
+    "module_id": "cod-greedy",
+    "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+    "cat": "coding"
+  },
+  {
+    "id": "gr-3",
+    "type": "concept",
+    "name": "Task scheduler \u2014 count buckets, formula",
+    "module_id": "cod-greedy",
+    "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+    "cat": "coding"
+  },
+  {
+    "id": "gr-4",
+    "type": "concept",
+    "name": "Interval scheduling maximization \u2014 pick by earliest end",
+    "module_id": "cod-greedy",
+    "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+    "cat": "coding"
+  },
+  {
+    "id": "gr-LC1",
+    "type": "concept",
+    "name": "Candy \u2014 two-pass greedy from each side",
+    "module_id": "cod-greedy",
+    "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+    "cat": "coding"
+  },
+  {
+    "id": "gr-LC2",
+    "type": "concept",
+    "name": "Patching Array \u2014 exchange-argument greedy",
+    "module_id": "cod-greedy",
+    "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+    "cat": "coding"
+  },
+  {
+    "id": "gr-LC3",
+    "type": "concept",
+    "name": "Minimum Refueling Stops \u2014 heap-greedy \"borrow from past\"",
+    "module_id": "cod-greedy",
+    "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+    "cat": "coding"
+  },
+  {
+    "id": "gr-LC4",
+    "type": "concept",
+    "name": "Jump Game IV \u2014 BFS vs greedy chunking",
+    "module_id": "cod-greedy",
+    "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+    "cat": "coding"
+  },
+  {
+    "id": "dp-1",
+    "type": "concept",
+    "name": "1D DP \u2014 house robber, climbing stairs",
+    "module_id": "cod-dp",
+    "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+    "cat": "coding"
+  },
+  {
+    "id": "dp-2",
+    "type": "concept",
+    "name": "2D DP \u2014 unique paths, edit distance",
+    "module_id": "cod-dp",
+    "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+    "cat": "coding"
+  },
+  {
+    "id": "dp-3",
+    "type": "concept",
+    "name": "0/1 Knapsack \u2014 bounded capacity, each item once",
+    "module_id": "cod-dp",
+    "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+    "cat": "coding"
+  },
+  {
+    "id": "dp-4",
+    "type": "concept",
+    "name": "LIS \u2014 patience sort gives O(N log N)",
+    "module_id": "cod-dp",
+    "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+    "cat": "coding"
+  },
+  {
+    "id": "dp-5",
+    "type": "concept",
+    "name": "Palindrome partition \u2014 interval DP",
+    "module_id": "cod-dp",
+    "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+    "cat": "coding"
+  },
+  {
+    "id": "dp-LC1",
+    "type": "concept",
+    "name": "Burst Balloons \u2014 interval DP with \"last to burst\"",
+    "module_id": "cod-dp",
+    "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+    "cat": "coding"
+  },
+  {
+    "id": "dp-LC2",
+    "type": "concept",
+    "name": "Distinct Subsequences \u2014 2D DP with branch on match/no-match",
+    "module_id": "cod-dp",
+    "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+    "cat": "coding"
+  },
+  {
+    "id": "dp-LC3",
+    "type": "concept",
+    "name": "Russian Doll Envelopes \u2014 sort + LIS variant",
+    "module_id": "cod-dp",
+    "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+    "cat": "coding"
+  },
+  {
+    "id": "dp-LC4",
+    "type": "concept",
+    "name": "Stone Game II \u2014 memoized recursion with state (i, M)",
+    "module_id": "cod-dp",
+    "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+    "cat": "coding"
+  },
+  {
+    "id": "ll-1",
+    "type": "concept",
+    "name": "Reverse a linked list \u2014 iterative + recursive",
+    "module_id": "cod-linked",
+    "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+    "cat": "coding"
+  },
+  {
+    "id": "ll-2",
+    "type": "concept",
+    "name": "Merge two sorted lists \u2014 dummy-head trick",
+    "module_id": "cod-linked",
+    "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+    "cat": "coding"
+  },
+  {
+    "id": "ll-3",
+    "type": "concept",
+    "name": "Fast/slow \u2014 cycle detect + find cycle start",
+    "module_id": "cod-linked",
+    "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+    "cat": "coding"
+  },
+  {
+    "id": "ll-4",
+    "type": "concept",
+    "name": "Copy list with random pointer \u2014 interleave or hashmap",
+    "module_id": "cod-linked",
+    "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+    "cat": "coding"
+  },
+  {
+    "id": "ll-LC1",
+    "type": "concept",
+    "name": "Reverse Nodes in K-Group \u2014 segment-by-segment reversal",
+    "module_id": "cod-linked",
+    "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+    "cat": "coding"
+  },
+  {
+    "id": "ll-LC2",
+    "type": "concept",
+    "name": "All O(1) Data Structure \u2014 keys grouped by count in a doubly-linked list of buckets",
+    "module_id": "cod-linked",
+    "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+    "cat": "coding"
+  },
+  {
+    "id": "ll-LC3",
+    "type": "concept",
+    "name": "LFU Cache \u2014 frequency buckets + ordered sets",
+    "module_id": "cod-linked",
+    "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+    "cat": "coding"
+  },
+  {
+    "id": "ll-LC4",
+    "type": "concept",
+    "name": "Sort List \u2014 merge sort on a linked list",
+    "module_id": "cod-linked",
+    "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+    "cat": "coding"
+  },
+  {
+    "id": "st-1",
+    "type": "concept",
+    "name": "Valid parentheses \u2014 pair-match with stack",
+    "module_id": "cod-stack",
+    "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+    "cat": "coding"
+  },
+  {
+    "id": "st-2",
+    "type": "concept",
+    "name": "Min stack \u2014 O(1) min query",
+    "module_id": "cod-stack",
+    "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+    "cat": "coding"
+  },
+  {
+    "id": "st-3",
+    "type": "concept",
+    "name": "Decode string \u2014 nested k[content]",
+    "module_id": "cod-stack",
+    "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+    "cat": "coding"
+  },
+  {
+    "id": "st-LC1",
+    "type": "concept",
+    "name": "Basic Calculator IV \u2014 parse expressions with parens",
+    "module_id": "cod-stack",
+    "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+    "cat": "coding"
+  },
+  {
+    "id": "st-LC2",
+    "type": "concept",
+    "name": "Sum of Subarray Minimums \u2014 monotonic stack counting",
+    "module_id": "cod-stack",
+    "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+    "cat": "coding"
+  },
+  {
+    "id": "st-LC3",
+    "type": "concept",
+    "name": "Maximal Rectangle \u2014 apply histogram row-by-row",
+    "module_id": "cod-stack",
+    "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+    "cat": "coding"
+  },
+  {
+    "id": "st-LC4",
+    "type": "concept",
+    "name": "132 Pattern \u2014 descending monotonic stack",
+    "module_id": "cod-stack",
+    "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+    "cat": "coding"
+  },
+  {
+    "id": "sel-1",
+    "type": "concept",
+    "name": "Quickselect \u2014 Kth largest in O(N) avg",
+    "module_id": "cod-select",
+    "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+    "cat": "coding"
+  },
+  {
+    "id": "sel-2",
+    "type": "concept",
+    "name": "Top-K with heap \u2014 streaming-friendly",
+    "module_id": "cod-select",
+    "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+    "cat": "coding"
+  },
+  {
+    "id": "sel-3",
+    "type": "concept",
+    "name": "Median of two sorted arrays \u2014 binary search",
+    "module_id": "cod-select",
+    "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+    "cat": "coding"
+  },
+  {
+    "id": "sel-LC1",
+    "type": "concept",
+    "name": "Sliding Window Median \u2014 two heaps + lazy deletion",
+    "module_id": "cod-select",
+    "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+    "cat": "coding"
+  },
+  {
+    "id": "sel-LC2",
+    "type": "concept",
+    "name": "Kth Largest Element in a Stream \u2014 min-heap of size K",
+    "module_id": "cod-select",
+    "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+    "cat": "coding"
+  },
+  {
+    "id": "sel-LC3",
+    "type": "concept",
+    "name": "Kth Smallest Element in Sorted Matrix \u2014 binary search on VALUE",
+    "module_id": "cod-select",
+    "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+    "cat": "coding"
+  },
+  {
+    "id": "sel-LC4",
+    "type": "concept",
+    "name": "Wiggle Sort II \u2014 sort + reverse-interleave (with O(N) extension)",
+    "module_id": "cod-select",
+    "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+    "cat": "coding"
+  },
+  {
+    "id": "sm-1",
+    "type": "concept",
+    "name": "KMP \u2014 failure function for O(M+N) matching",
+    "module_id": "cod-strings",
+    "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+    "cat": "coding"
+  },
+  {
+    "id": "sm-2",
+    "type": "concept",
+    "name": "Rabin-Karp \u2014 rolling hash for fast substring match",
+    "module_id": "cod-strings",
+    "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+    "cat": "coding"
+  },
+  {
+    "id": "sm-3",
+    "type": "concept",
+    "name": "Z-function \u2014 every prefix-length match in O(N)",
+    "module_id": "cod-strings",
+    "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+    "cat": "coding"
+  },
+  {
+    "id": "str-LC1",
+    "type": "concept",
+    "name": "Shortest Palindrome \u2014 KMP failure function trick",
+    "module_id": "cod-strings",
+    "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+    "cat": "coding"
+  },
+  {
+    "id": "str-LC2",
+    "type": "concept",
+    "name": "Distinct Subsequences II \u2014 DP with last-occurrence subtraction",
+    "module_id": "cod-strings",
+    "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+    "cat": "coding"
+  },
+  {
+    "id": "str-LC3",
+    "type": "concept",
+    "name": "Wildcard Matching \u2014 DP with * (multi-char) and ? (single)",
+    "module_id": "cod-strings",
+    "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+    "cat": "coding"
+  },
+  {
+    "id": "str-LC4",
+    "type": "concept",
+    "name": "Longest Duplicate Substring \u2014 binary search + rolling hash",
+    "module_id": "cod-strings",
+    "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+    "cat": "coding"
+  },
+  {
+    "id": "sd-1",
+    "type": "concept",
+    "name": "The 4-step interview frame",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-2",
+    "type": "concept",
+    "name": "URL shortener \u2014 designed in 10 minutes",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-3",
+    "type": "concept",
+    "name": "Rate limiter \u2014 token bucket, sliding window, GCRA, and edge enforcement",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-4",
+    "type": "concept",
+    "name": "News feed \u2014 push vs pull vs hybrid",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-5",
+    "type": "concept",
+    "name": "Caching pitfalls \u2014 the six that come up in interviews",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-7",
+    "type": "concept",
+    "name": "Chat / messaging at scale",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-8",
+    "type": "concept",
+    "name": "Consistent hashing \u2014 how to shard without re-shuffling",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-9",
+    "type": "concept",
+    "name": "CAP & PACELC \u2014 what you can't have all of",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-bo",
+    "type": "concept",
+    "name": "Back-of-envelope \u2014 the numbers every senior knows cold",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-db",
+    "type": "concept",
+    "name": "DB internals \u2014 B-tree vs LSM, when each wins",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-raft",
+    "type": "concept",
+    "name": "Replication & Raft \u2014 consensus in one page",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-reliable",
+    "type": "concept",
+    "name": "Reliability patterns \u2014 circuit breaker, bulkhead, retry budget",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-kafka",
+    "type": "concept",
+    "name": "Distributed log \u2014 Kafka partitioning, replication, exactly-once",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-geo",
+    "type": "concept",
+    "name": "Geo-dispatch \u2014 Uber-style matching at scale",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-pay",
+    "type": "concept",
+    "name": "Payment processing \u2014 idempotency, sagas, the exactly-once myth",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-6",
+    "type": "concept",
+    "name": "Notification system \u2014 how the pieces fit",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-cells",
+    "type": "concept",
+    "name": "Cell-based architecture \u2014 blast radius as a first-class design constraint",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-outbox",
+    "type": "concept",
+    "name": "Outbox pattern + CDC \u2014 transactional event publishing",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-tail",
+    "type": "concept",
+    "name": "Tail-latency engineering \u2014 hedged requests + p99 thinking",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "sd-tracing",
+    "type": "concept",
+    "name": "Distributed tracing \u2014 OpenTelemetry + W3C trace context",
+    "module_id": "sd-classic",
+    "module_name": "Classic primitives",
+    "cat": "sysd"
+  },
+  {
+    "id": "fd-1",
+    "type": "concept",
+    "name": "Multi-tenancy \u2014 what it means and why it matters",
+    "module_id": "sd-fde",
+    "module_name": "FDE-specific system design",
+    "cat": "sysd"
+  },
+  {
+    "id": "fd-2",
+    "type": "concept",
+    "name": "Webhook reliability \u2014 making someone else's server your problem",
+    "module_id": "sd-fde",
+    "module_name": "FDE-specific system design",
+    "cat": "sysd"
+  },
+  {
+    "id": "fd-3",
+    "type": "concept",
+    "name": "SSO for enterprise \u2014 what SAML, OIDC, SCIM actually do",
+    "module_id": "sd-fde",
+    "module_name": "FDE-specific system design",
+    "cat": "sysd"
+  },
+  {
+    "id": "fd-4",
+    "type": "concept",
+    "name": "Customer VPC deploys \u2014 four shapes, escalating cost (incl. BYOC)",
+    "module_id": "sd-fde",
+    "module_name": "FDE-specific system design",
+    "cat": "sysd"
+  },
+  {
+    "id": "fd-7",
+    "type": "concept",
+    "name": "Event sourcing + CQRS \u2014 when the log IS the database",
+    "module_id": "sd-fde",
+    "module_name": "FDE-specific system design",
+    "cat": "sysd"
+  },
+  {
+    "id": "fd-8",
+    "type": "concept",
+    "name": "gRPC vs REST vs GraphQL \u2014 pick the wire format",
+    "module_id": "sd-fde",
+    "module_name": "FDE-specific system design",
+    "cat": "sysd"
+  },
+  {
+    "id": "fd-5",
+    "type": "concept",
+    "name": "Customer's legacy ERP has no API \u2014 the integration ladder",
+    "module_id": "sd-fde",
+    "module_name": "FDE-specific system design",
+    "cat": "sysd"
+  },
+  {
+    "id": "fd-6",
+    "type": "concept",
+    "name": "Customer-facing eval & monitoring \u2014 the AI observability stack",
+    "module_id": "sd-fde",
+    "module_name": "FDE-specific system design",
+    "cat": "sysd"
+  },
+  {
+    "id": "c-1",
+    "type": "concept",
+    "name": "The ADO framework \u2014 what to actually SAY in the room",
+    "module_id": "cli-roleplay",
+    "module_name": "Live client roleplay",
+    "cat": "client"
+  },
+  {
+    "id": "c-2",
+    "type": "drill",
+    "name": "Drill: demo fails during executive presentation",
+    "module_id": "cli-roleplay",
+    "module_name": "Live client roleplay",
+    "cat": "client"
+  },
+  {
+    "id": "c-3",
+    "type": "drill",
+    "name": "Drill: client demands 6 weeks of work in 3 days",
+    "module_id": "cli-roleplay",
+    "module_name": "Live client roleplay",
+    "cat": "client"
+  },
+  {
+    "id": "c-4",
+    "type": "drill",
+    "name": "Drill: explain stochastic model variability to a CFO",
+    "module_id": "cli-roleplay",
+    "module_name": "Live client roleplay",
+    "cat": "client"
+  },
+  {
+    "id": "c-5",
+    "type": "drill",
+    "name": "Drill: client IT blocks the integration",
+    "module_id": "cli-roleplay",
+    "module_name": "Live client roleplay",
+    "cat": "client"
+  },
+  {
+    "id": "c-6",
+    "type": "drill",
+    "name": "Drill: same problem recurs 2 hours after fix",
+    "module_id": "cli-roleplay",
+    "module_name": "Live client roleplay",
+    "cat": "client"
+  },
+  {
+    "id": "c-7",
+    "type": "concept",
+    "name": "Scoping a project with a non-technical buyer",
+    "module_id": "cli-roleplay",
+    "module_name": "Live client roleplay",
+    "cat": "client"
+  },
+  {
+    "id": "c-8",
+    "type": "concept",
+    "name": "Written status cadence \u2014 the no-meeting Slack update",
+    "module_id": "cli-roleplay",
+    "module_name": "Live client roleplay",
+    "cat": "client"
+  },
+  {
+    "id": "c-9",
+    "type": "concept",
+    "name": "When (and how) to escalate to your manager",
+    "module_id": "cli-roleplay",
+    "module_name": "Live client roleplay",
+    "cat": "client"
+  },
+  {
+    "id": "c-10",
+    "type": "concept",
+    "name": "Killing a project gracefully \u2014 when the right answer is \"we shouldn't build this\"",
+    "module_id": "cli-roleplay",
+    "module_name": "Live client roleplay",
+    "cat": "client"
+  },
+  {
+    "id": "fd-9",
+    "type": "concept",
+    "name": "Fine-grained authorization \u2014 Zanzibar / OpenFGA / Cedar",
+    "module_id": "cli-roleplay",
+    "module_name": "Live client roleplay",
+    "cat": "client"
+  },
+  {
+    "id": "sq-1",
+    "type": "concept",
+    "name": "Window functions \u2014 the thing that separates SQL juniors from seniors",
+    "module_id": "data-sql",
+    "module_name": "SQL fluency under pressure",
+    "cat": "data"
+  },
+  {
+    "id": "sq-2",
+    "type": "question",
+    "name": "Q: Top-3 highest-grossing restaurants per city",
+    "module_id": "data-sql",
+    "module_name": "SQL fluency under pressure",
+    "cat": "data"
+  },
+  {
+    "id": "sq-3",
+    "type": "question",
+    "name": "Q: Find customers who abandoned the funnel",
+    "module_id": "data-sql",
+    "module_name": "SQL fluency under pressure",
+    "cat": "data"
+  },
+  {
+    "id": "sq-4",
+    "type": "question",
+    "name": "Q: Day-over-day retention cohort",
+    "module_id": "data-sql",
+    "module_name": "SQL fluency under pressure",
+    "cat": "data"
+  },
+  {
+    "id": "sq-5",
+    "type": "concept",
+    "name": "OLAP vs OLTP \u2014 say this in the interview",
+    "module_id": "data-sql",
+    "module_name": "SQL fluency under pressure",
+    "cat": "data"
+  },
+  {
+    "id": "pp-1",
+    "type": "concept",
+    "name": "Pipeline orchestrators (Airflow / Dagster) \u2014 the mental model",
+    "module_id": "data-pipe",
+    "module_name": "Data pipelines & quality",
+    "cat": "data"
+  },
+  {
+    "id": "pp-3",
+    "type": "concept",
+    "name": "JOIN types \u2014 what each actually does, with traps",
+    "module_id": "data-pipe",
+    "module_name": "Data pipelines & quality",
+    "cat": "data"
+  },
+  {
+    "id": "pp-4",
+    "type": "concept",
+    "name": "Indexes \u2014 how the database finds rows fast (and why your query is slow)",
+    "module_id": "data-pipe",
+    "module_name": "Data pipelines & quality",
+    "cat": "data"
+  },
+  {
+    "id": "pp-5",
+    "type": "concept",
+    "name": "Slowly-changing dimensions (SCD Type 1/2/3) \u2014 modeling history",
+    "module_id": "data-pipe",
+    "module_name": "Data pipelines & quality",
+    "cat": "data"
+  },
+  {
+    "id": "pp-6",
+    "type": "concept",
+    "name": "Change Data Capture (CDC) \u2014 keeping the warehouse in sync",
+    "module_id": "data-pipe",
+    "module_name": "Data pipelines & quality",
+    "cat": "data"
+  },
+  {
+    "id": "pp-2",
+    "type": "concept",
+    "name": "Data quality checks \u2014 the 5 tiers",
+    "module_id": "data-pipe",
+    "module_name": "Data pipelines & quality",
+    "cat": "data"
+  },
+  {
+    "id": "wh-1",
+    "type": "concept",
+    "name": "OLAP engines compared \u2014 Snowflake / BigQuery / ClickHouse / DuckDB",
+    "module_id": "data-warehouse",
+    "module_name": "OLAP engines + streaming \u2014 picking the stack",
+    "cat": "data"
+  },
+  {
+    "id": "wh-2",
+    "type": "concept",
+    "name": "Streaming basics \u2014 Kafka, exactly-once, windowing",
+    "module_id": "data-warehouse",
+    "module_name": "OLAP engines + streaming \u2014 picking the stack",
+    "cat": "data"
+  },
+  {
+    "id": "b-1",
+    "type": "checklist",
+    "name": "Story 1: Production fix under live pressure",
+    "module_id": "b-stories",
+    "module_name": "The 5 stories every FDE must have ready",
+    "cat": "behav"
+  },
+  {
+    "id": "b-2",
+    "type": "checklist",
+    "name": "Story 2: Pushing back on a client request",
+    "module_id": "b-stories",
+    "module_name": "The 5 stories every FDE must have ready",
+    "cat": "behav"
+  },
+  {
+    "id": "b-3",
+    "type": "checklist",
+    "name": "Story 3: Deployment failure ownership",
+    "module_id": "b-stories",
+    "module_name": "The 5 stories every FDE must have ready",
+    "cat": "behav"
+  },
+  {
+    "id": "b-4",
+    "type": "checklist",
+    "name": "Story 4: Explaining a technical limit",
+    "module_id": "b-stories",
+    "module_name": "The 5 stories every FDE must have ready",
+    "cat": "behav"
+  },
+  {
+    "id": "b-5",
+    "type": "checklist",
+    "name": "Story 5: Decision with incomplete info",
+    "module_id": "b-stories",
+    "module_name": "The 5 stories every FDE must have ready",
+    "cat": "behav"
+  },
+  {
+    "id": "b-6",
+    "type": "concept",
+    "name": "STAR weighting for FDE",
+    "module_id": "b-stories",
+    "module_name": "The 5 stories every FDE must have ready",
+    "cat": "behav"
+  },
+  {
+    "id": "bs-1",
+    "type": "concept",
+    "name": "Story 1: Live production fix under pressure",
+    "module_id": "b-fivestories",
+    "module_name": "The 5 required FDE stories \u2014 taught individually",
+    "cat": "behav"
+  },
+  {
+    "id": "bs-2",
+    "type": "concept",
+    "name": "Story 2: Pushing back on a customer request",
+    "module_id": "b-fivestories",
+    "module_name": "The 5 required FDE stories \u2014 taught individually",
+    "cat": "behav"
+  },
+  {
+    "id": "bs-3",
+    "type": "concept",
+    "name": "Story 3: Deployment failure ownership",
+    "module_id": "b-fivestories",
+    "module_name": "The 5 required FDE stories \u2014 taught individually",
+    "cat": "behav"
+  },
+  {
+    "id": "bs-4",
+    "type": "concept",
+    "name": "Story 4: Explaining a technical limit to a non-technical stakeholder",
+    "module_id": "b-fivestories",
+    "module_name": "The 5 required FDE stories \u2014 taught individually",
+    "cat": "behav"
+  },
+  {
+    "id": "bs-5",
+    "type": "concept",
+    "name": "Story 5: Decision under incomplete information",
+    "module_id": "b-fivestories",
+    "module_name": "The 5 required FDE stories \u2014 taught individually",
+    "cat": "behav"
+  },
+  {
+    "id": "v-1",
+    "type": "concept",
+    "name": "OpenAI \u2014 what their values look like in interviews",
+    "module_id": "b-values",
+    "module_name": "Values alignment by company",
+    "cat": "behav"
+  },
+  {
+    "id": "v-2",
+    "type": "concept",
+    "name": "Anthropic \u2014 values and how they probe in interviews",
+    "module_id": "b-values",
+    "module_name": "Values alignment by company",
+    "cat": "behav"
+  },
+  {
+    "id": "v-3",
+    "type": "concept",
+    "name": "Palantir \u2014 values, with a focus on failure stories",
+    "module_id": "b-values",
+    "module_name": "Values alignment by company",
+    "cat": "behav"
+  },
+  {
+    "id": "cl-1",
+    "type": "concept",
+    "name": "AWS / GCP \u2014 the 8 services you must know cold",
+    "module_id": "cl-core",
+    "module_name": "Core cloud / DevOps",
+    "cat": "cloud"
+  },
+  {
+    "id": "cl-2",
+    "type": "concept",
+    "name": "Docker and Kubernetes \u2014 the mental model that gets you fluent",
+    "module_id": "cl-core",
+    "module_name": "Core cloud / DevOps",
+    "cat": "cloud"
+  },
+  {
+    "id": "cl-3",
+    "type": "concept",
+    "name": "Infrastructure as Code (Terraform) \u2014 why and how",
+    "module_id": "cl-core",
+    "module_name": "Core cloud / DevOps",
+    "cat": "cloud"
+  },
+  {
+    "id": "cl-4",
+    "type": "concept",
+    "name": "Compliance lingo \u2014 what SOC2/HIPAA/GDPR/PCI actually mean",
+    "module_id": "cl-core",
+    "module_name": "Core cloud / DevOps",
+    "cat": "cloud"
+  },
+  {
+    "id": "in-1",
+    "type": "concept",
+    "name": "OAuth 2.0 grant types decoded",
+    "module_id": "cl-integ",
+    "module_name": "Integrations & auth",
+    "cat": "cloud"
+  },
+  {
+    "id": "in-2",
+    "type": "concept",
+    "name": "Webhook signing + idempotency \u2014 the wire details",
+    "module_id": "cl-integ",
+    "module_name": "Integrations & auth",
+    "cat": "cloud"
+  },
+  {
+    "id": "in-4",
+    "type": "concept",
+    "name": "Observability stack \u2014 logs, metrics, traces",
+    "module_id": "cl-integ",
+    "module_name": "Integrations & auth",
+    "cat": "cloud"
+  },
+  {
+    "id": "in-5",
+    "type": "concept",
+    "name": "CI/CD pipelines \u2014 from commit to production safely",
+    "module_id": "cl-integ",
+    "module_name": "Integrations & auth",
+    "cat": "cloud"
+  },
+  {
+    "id": "in-3",
+    "type": "concept",
+    "name": "Enterprise auth \u2014 SAML, OIDC, SCIM crash course",
+    "module_id": "cl-integ",
+    "module_name": "Integrations & auth",
+    "cat": "cloud"
+  },
+  {
+    "id": "dai-1",
+    "type": "concept",
+    "name": "What AI-first companies (Deepgram, OpenAI, Anthropic) actually screen for",
+    "module_id": "dom-ai",
+    "module_name": "AI-first companies",
+    "cat": "domain"
+  },
+  {
+    "id": "dai-2",
+    "type": "concept",
+    "name": "Latency-critical AI (Deepgram, Tavily) \u2014 how to make AI fast",
+    "module_id": "dom-ai",
+    "module_name": "AI-first companies",
+    "cat": "domain"
+  },
+  {
+    "id": "dai-3",
+    "type": "concept",
+    "name": "Multimodal AI (Runway, Suno, Mirage) \u2014 the long-running-job pattern",
+    "module_id": "dom-ai",
+    "module_name": "AI-first companies",
+    "cat": "domain"
+  },
+  {
+    "id": "dh-1",
+    "type": "concept",
+    "name": "Hospitality data model \u2014 entities, relationships, time-zone gotchas",
+    "module_id": "dom-hosp",
+    "module_name": "Hospitality / F&B",
+    "cat": "domain"
+  },
+  {
+    "id": "dh-2",
+    "type": "concept",
+    "name": "Hospitality interview prompts \u2014 patterns you'll see",
+    "module_id": "dom-hosp",
+    "module_name": "Hospitality / F&B",
+    "cat": "domain"
+  },
+  {
+    "id": "dh-3",
+    "type": "concept",
+    "name": "Reservation systems \u2014 inventory, overlap, race conditions",
+    "module_id": "dom-hosp",
+    "module_name": "Hospitality / F&B",
+    "cat": "domain"
+  },
+  {
+    "id": "dm-1",
+    "type": "concept",
+    "name": "Marketplace fundamentals \u2014 the five primitives",
+    "module_id": "dom-mkt",
+    "module_name": "Marketplace & fintech",
+    "cat": "domain"
+  },
+  {
+    "id": "dm-2",
+    "type": "concept",
+    "name": "Matching algorithms \u2014 greedy vs bipartite vs ML-ranked",
+    "module_id": "dom-mkt",
+    "module_name": "Marketplace & fintech",
+    "cat": "domain"
+  },
+  {
+    "id": "dm-3",
+    "type": "concept",
+    "name": "Fintech / payments (Coast) \u2014 the irreducible primitives",
+    "module_id": "dom-mkt",
+    "module_name": "Marketplace & fintech",
+    "cat": "domain"
+  },
+  {
+    "id": "dd-1",
+    "type": "concept",
+    "name": "Developer-tool north stars (Warp, Tavily)",
+    "module_id": "dom-dev",
+    "module_name": "Dev tools & infra",
+    "cat": "domain"
+  },
+  {
+    "id": "dh-4",
+    "type": "concept",
+    "name": "Healthcare / regulated industry \u2014 what makes deployment different",
+    "module_id": "dom-dev",
+    "module_name": "Dev tools & infra",
+    "cat": "domain"
+  },
+  {
+    "id": "dh-5",
+    "type": "concept",
+    "name": "Government / defense / public sector \u2014 Palantir-style FDE",
+    "module_id": "dom-dev",
+    "module_name": "Dev tools & infra",
+    "cat": "domain"
+  },
+  {
+    "id": "dh-6",
+    "type": "concept",
+    "name": "B2B SaaS at scale \u2014 PLG vs sales-led growth",
+    "module_id": "dom-dev",
+    "module_name": "Dev tools & infra",
+    "cat": "domain"
+  },
+  {
+    "id": "dd-2",
+    "type": "concept",
+    "name": "Enterprise LLM gateways (Credal) \u2014 what they actually do",
+    "module_id": "dom-dev",
+    "module_name": "Dev tools & infra",
+    "cat": "domain"
+  },
+  {
+    "id": "me-1",
+    "type": "concept",
+    "name": "Building a prep habit that survives week 4",
+    "module_id": "meta-prep",
+    "module_name": "Habits, deliberate practice & negotiation",
+    "cat": "meta"
+  },
+  {
+    "id": "me-2",
+    "type": "concept",
+    "name": "Spaced repetition (SM-2) \u2014 what your flashcards are doing",
+    "module_id": "meta-prep",
+    "module_name": "Habits, deliberate practice & negotiation",
+    "cat": "meta"
+  },
+  {
+    "id": "me-3",
+    "type": "concept",
+    "name": "Mock-interview cadence \u2014 and why recording matters",
+    "module_id": "meta-prep",
+    "module_name": "Habits, deliberate practice & negotiation",
+    "cat": "meta"
+  },
+  {
+    "id": "me-4",
+    "type": "concept",
+    "name": "Pipeline mechanics \u2014 applying, intros, and the leverage of competing offers",
+    "module_id": "meta-prep",
+    "module_name": "Habits, deliberate practice & negotiation",
+    "cat": "meta"
+  },
+  {
+    "id": "me-6",
+    "type": "concept",
+    "name": "Resume optimization for FDE specifically",
+    "module_id": "meta-prep",
+    "module_name": "Habits, deliberate practice & negotiation",
+    "cat": "meta"
+  },
+  {
+    "id": "me-7",
+    "type": "concept",
+    "name": "Portfolio projects that signal correctly",
+    "module_id": "meta-prep",
+    "module_name": "Habits, deliberate practice & negotiation",
+    "cat": "meta"
+  },
+  {
+    "id": "me-8",
+    "type": "concept",
+    "name": "Handling rejection emotionally and tactically",
+    "module_id": "meta-prep",
+    "module_name": "Habits, deliberate practice & negotiation",
+    "cat": "meta"
+  },
+  {
+    "id": "me-9",
+    "type": "concept",
+    "name": "Multi-offer comparison \u2014 beyond total comp",
+    "module_id": "meta-prep",
+    "module_name": "Habits, deliberate practice & negotiation",
+    "cat": "meta"
+  },
+  {
+    "id": "me-5",
+    "type": "concept",
+    "name": "Negotiation \u2014 what to say (and what to never say)",
+    "module_id": "meta-prep",
+    "module_name": "Habits, deliberate practice & negotiation",
+    "cat": "meta"
+  }
+]

@@ -4342,7 +4342,7 @@ function renderCurriculum(state, hub) {
 }
 
 /* ====================== CATEGORY DETAIL ====================== */
-function renderCategory(state, hub, catId, openModuleId) {
+function renderCategory(state, hub, catId, openModuleId, openLessonId) {
   const cat = CATEGORIES.find(c => c.id === catId);
   if (!cat) { hub.innerHTML = '<div class="text-slate-400">Unknown category.</div>'; return; }
   const mods = MODULES.filter(m => m.cat === catId);
@@ -4415,6 +4415,10 @@ function renderCategory(state, hub, catId, openModuleId) {
     `;
     list.appendChild(mCard);
   });
+
+  if (openLessonId) {
+    setTimeout(() => renderLesson(state, openLessonId), 50);
+  }
 }
 
 /* ====================== LESSON MODAL ====================== */
@@ -5090,6 +5094,91 @@ function renderCompany(state, hub, id) {
 /* ====================== FLASHCARDS ====================== */
 function renderFlashcards(state, hub) {
   const due = GAMI.dueCards(state, FLASHCARDS, 50);
+  const fs = state.flashcardFailStats || {};
+  const totalFails = Object.values(fs.byCard || {}).reduce((s,n) => s + n, 0);
+  const top = (obj, n=3) => Object.entries(obj || {})
+    .filter(([_, v]) => v > 0)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, n);
+  const topCats = top(fs.byCat);
+  const topMods = top(fs.byModule);
+  const topLessons = top(fs.byLesson);
+  const topCards = top(fs.byCard, 5);
+  const catName = (id) => (CATEGORIES.find(c => c.id === id) || {}).name || id;
+  const modName = (id) => {
+    const m = MODULES.find(mm => mm.id === id);
+    return m ? m.name : id;
+  };
+  const lessonInfo = (id) => {
+    for (const m of MODULES) {
+      const l = m.lessons.find(x => x.id === id);
+      if (l) return { name: l.name, module: m.id, cat: m.cat };
+    }
+    return null;
+  };
+  const cardInfo = (id) => {
+    const c = FLASHCARDS.find(x => x.id === id);
+    if (!c) return null;
+    return { q: c.q, cat: c.cat, module: c.module, lesson: c.lesson };
+  };
+  const statsHTML = totalFails === 0 ? '' : `
+    <div class="card thin" id="fc-stats">
+      <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+        <div class="font-display font-semibold text-sm uppercase tracking-wide text-slate-300">Trouble spots</div>
+        <div class="text-xs text-slate-400 numeric">${totalFails} total ${totalFails === 1 ? 'fail' : 'fails'}</div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">By category</div>
+          ${topCats.length ? topCats.map(([id, n]) => `
+            <a href="#category/${id}" class="flex items-center justify-between py-1 hover:text-accent-400 transition">
+              <span class="truncate">${esc(catName(id))}</span>
+              <span class="numeric text-slate-400 ml-2">${n}×</span>
+            </a>
+          `).join('') : '<div class="text-slate-500">—</div>'}
+        </div>
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">By module</div>
+          ${topMods.length ? topMods.map(([id, n]) => {
+            const m = MODULES.find(mm => mm.id === id);
+            const href = m ? `#category/${m.cat}/${id}` : '#flashcards';
+            return `<a href="${href}" class="flex items-center justify-between py-1 hover:text-accent-400 transition">
+              <span class="truncate">${esc(modName(id))}</span>
+              <span class="numeric text-slate-400 ml-2">${n}×</span>
+            </a>`;
+          }).join('') : '<div class="text-slate-500">—</div>'}
+        </div>
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">By lesson</div>
+          ${topLessons.length ? topLessons.map(([id, n]) => {
+            const info = lessonInfo(id);
+            const href = info ? `#category/${info.cat}/${info.module}/${id}` : '#flashcards';
+            return `<a href="${href}" class="flex items-center justify-between py-1 hover:text-accent-400 transition">
+              <span class="truncate">${esc(info ? info.name : id)}</span>
+              <span class="numeric text-slate-400 ml-2">${n}×</span>
+            </a>`;
+          }).join('') : '<div class="text-slate-500">—</div>'}
+        </div>
+      </div>
+      ${topCards.length ? `
+        <div class="mt-3 pt-3 border-t border-ink-700/50">
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">Stickiest cards</div>
+          <div class="space-y-1 text-xs">
+            ${topCards.map(([id, n]) => {
+              const c = cardInfo(id);
+              if (!c) return '';
+              const href = c.lesson && c.module
+                ? `#category/${c.cat}/${c.module}/${c.lesson}`
+                : c.module ? `#category/${c.cat}/${c.module}` : `#category/${c.cat}`;
+              return `<a href="${href}" class="flex items-center justify-between py-0.5 hover:text-accent-400 transition">
+                <span class="truncate flex-1 mr-2">${esc(c.q)}</span>
+                <span class="numeric text-slate-400 shrink-0">${n}×</span>
+              </a>`;
+            }).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>`;
   const container = el('div','fade-in space-y-5');
   container.innerHTML = `
     <div class="flex items-end justify-between flex-wrap gap-3">
@@ -5102,6 +5191,7 @@ function renderFlashcards(state, hub) {
         <div class="text-2xl font-bold" id="fc-due">${due.length}</div>
       </div>
     </div>
+    ${statsHTML}
     <div id="fc-stage"></div>
   `;
   hub.appendChild(container);
@@ -5155,8 +5245,8 @@ function renderFlashcards(state, hub) {
     // category index).
     const stats = state.flashcardFailStats || {};
     const failCount = (stats.byCard && stats.byCard[card.id]) || 0;
-    const reviewHref = card.lesson
-      ? `#category/${card.cat}/${card.module || ''}`
+    const reviewHref = card.lesson && card.module
+      ? `#category/${card.cat}/${card.module}/${card.lesson}`
       : card.module
         ? `#category/${card.cat}/${card.module}`
         : `#category/${card.cat}`;

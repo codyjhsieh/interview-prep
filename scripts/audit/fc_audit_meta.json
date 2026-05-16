@@ -1,0 +1,194 @@
+{
+  "cat": "meta",
+  "updates": [
+    {
+      "id": "fc-meta-1",
+      "lesson": "me-3"
+    },
+    {
+      "id": "fc-meta-2",
+      "lesson": "me-8"
+    },
+    {
+      "id": "fc-meta-3",
+      "lesson": "me-5",
+      "q": "Pre-offer comp expectations script when recruiter asks 'what are you looking for?'",
+      "a": "Deflect with fit-first, then anchor with a market band: 'I want to focus on whether the role is a strong fit before talking numbers. That said, market for FDE roles at companies your size is roughly $X-$Y total comp. Happy to be more specific once we are aligned.' Never give a single number first."
+    },
+    {
+      "id": "fc-meta-4",
+      "lesson": "me-6",
+      "q": "Resume bullet formula for FDE roles?",
+      "a": "[Action verb] [system you owned] [specific technical mechanism] [quantified customer/business outcome]. Recruiters skim each bullet for 6-20 seconds, so the verb and the number carry the signal -- everything else is supporting context."
+    },
+    {
+      "id": "fc-meta-5",
+      "lesson": "me-1"
+    },
+    {
+      "id": "fc-meta-6",
+      "lesson": "me-1",
+      "q": "Kill criterion for stopping deeper prep on a topic?",
+      "a": "If you can teach it aloud and answer 3 follow-ups inside 5 minutes, move on. Deeper study past that point has sharply diminishing returns versus practicing a weaker topic."
+    },
+    {
+      "id": "fc-meta-7",
+      "lesson": "me-1",
+      "q": "Implementation intention effect size on follow-through?",
+      "a": "Roughly 2x follow-through versus goal-setting alone (Gollwitzer meta-analyses). 'When X happens, then I do Y' plans convert intentions into automatic triggers that survive low-motivation days."
+    },
+    {
+      "id": "fc-meta-8",
+      "lesson": "me-4",
+      "q": "Concurrent active processes to target during a job search?",
+      "a": "3-5 concurrent processes running at any time. Gives competing-offer leverage, diversifies away single-loop variance, and compresses overall timeline by running phone screens in parallel."
+    },
+    {
+      "id": "fc-meta-9",
+      "lesson": "me-9",
+      "q": "Strongest predictor of 2-year outcome in a new role?",
+      "a": "Manager quality. Worth weighting heavily in offer comparison -- a great manager at $40k less typically beats a mediocre one at $40k more once you factor growth, scope, and tenure."
+    },
+    {
+      "id": "fc-meta-10",
+      "lesson": "me-5",
+      "q": "What is the one-line salary deflection when pushed for a number on the first call?",
+      "a": "'I want to focus on whether the role is a fit first. Market for FDE at your size is roughly $X-$Y total comp -- happy to get specific once we are aligned.' Then stop talking and let them respond."
+    },
+    {
+      "id": "fc-meta-11",
+      "lesson": "me-6",
+      "q": "Which two tokens in a resume bullet do recruiters actually read?",
+      "a": "The leading verb and the trailing number. Skim time is 6-20 seconds per bullet, so 'Shipped X cutting latency 40%' beats 'Was responsible for working on latency improvements' every time. Front-load verb, back-load metric."
+    },
+    {
+      "id": "fc-meta-12",
+      "lesson": "me-9",
+      "q": "70% rule for accepting offers and other reversible decisions?",
+      "a": "When you have 70% of the info you need, decide. Waiting for 90% costs more in lost optionality and momentum than acting on 70%, especially for reversible decisions like accepting an offer (you can still renege or leave in 6 months)."
+    },
+    {
+      "id": "fc-meta-13",
+      "lesson": "me-5"
+    },
+    {
+      "id": "fc-meta-14",
+      "lesson": "me-1",
+      "q": "Atomic-habits stack for daily interview prep?",
+      "a": "(1) Implementation intention (when-then trigger). (2) 2-minute rule (make start cost <30s). (3) Habit stacking (after morning coffee -> 25 min study). (4) Environment design (pinned LeetCode tab, phone in other room)."
+    },
+    {
+      "id": "fc-meta-15",
+      "lesson": "me-8",
+      "q": "Discipline for processing a rejection?",
+      "a": "Give yourself one 30-minute 'feel bad' block, then resume normal prep the next day. Do not check email obsessively (fix a time-of-day). Maintaining 3-5 concurrent processes makes any single rejection data, not a verdict."
+    }
+  ],
+  "new_cards": [
+    {
+      "id": "fc-meta-16",
+      "cat": "meta",
+      "lesson": "me-4",
+      "q": "Pipeline math: how many applications convert to one offer at FDE level?",
+      "a": "Rough industry baseline is 100 cold apps -> 10-15 recruiter screens -> 4-6 onsites -> 1-2 offers. Referrals roughly 5x the top-of-funnel conversion. Plan volume backward from the offer count you want."
+    },
+    {
+      "id": "fc-meta-17",
+      "cat": "meta",
+      "lesson": "me-4",
+      "q": "Daily application volume target during an active search?",
+      "a": "10-20 quality applications per day is the bar for a full-time search, front-loaded into Monday-Wednesday when recruiters review queues. Below 5/day the pipeline starves; above 30/day quality collapses and you blacklist yourself."
+    },
+    {
+      "id": "fc-meta-18",
+      "cat": "meta",
+      "lesson": "me-4",
+      "q": "Referral vs cold apply -- response-rate difference?",
+      "a": "Referrals typically see 5-10x the recruiter-response rate of cold apps and skip ATS keyword filters entirely. Always spend 10 minutes finding a warm intro before submitting cold -- the ROI per minute is the highest activity in the entire search."
+    },
+    {
+      "id": "fc-meta-19",
+      "cat": "meta",
+      "lesson": "me-4",
+      "q": "How to sequence dream-company interviews in the loop calendar?",
+      "a": "Schedule dream companies last, not first. You want 2-3 lower-stakes loops worth of live reps and ideally a competing offer in hand before the company you most want to join sees you. First-loop nerves cost real performance."
+    },
+    {
+      "id": "fc-meta-20",
+      "cat": "meta",
+      "lesson": "me-3",
+      "q": "Minimum mock-interview cadence during active prep?",
+      "a": "3 mocks per week minimum, with at least one recorded and reviewed at 1.5x. Below 2/week and live-performance skills decay; above 5/week and you stop having time to fix the issues mocks surface."
+    },
+    {
+      "id": "fc-meta-21",
+      "cat": "meta",
+      "lesson": "me-3",
+      "q": "Deliberate-practice rule for weak interview round-types?",
+      "a": "Allocate 60-70% of prep time to your single weakest round-type until it is no longer the bottleneck, then rotate. Even prep allocation across strong+weak rounds is a common trap -- variance in the loop is set by your worst round."
+    },
+    {
+      "id": "fc-meta-22",
+      "cat": "meta",
+      "lesson": "me-1",
+      "q": "Time-block discipline that survives a real job + search?",
+      "a": "Two fixed daily blocks: 45-60 min before work (high-cognitive: algorithms, system design) and 30 min evening (low-cognitive: applications, flashcards, follow-ups). Calendar-blocked, phone in another room, same time every day."
+    },
+    {
+      "id": "fc-meta-23",
+      "cat": "meta",
+      "lesson": "me-1",
+      "q": "Why does prep typically collapse around week 4?",
+      "a": "Motivation decays predictably while novelty wears off and no offers have landed yet. Counter with habit infrastructure (fixed time, fixed place, small daily target) rather than willpower, and track streak length not total hours."
+    },
+    {
+      "id": "fc-meta-24",
+      "cat": "meta",
+      "lesson": "me-5",
+      "q": "Negotiation: how to use a competing offer as leverage without bluffing?",
+      "a": "Share the competing offer's total-comp band and deadline, frame as 'I would prefer to join you -- can you help me close the gap on X?' Never invent offers; recruiters talk and the industry is small. Real leverage beats fake leverage 10/10 times."
+    },
+    {
+      "id": "fc-meta-25",
+      "cat": "meta",
+      "lesson": "me-5",
+      "q": "Equity vesting cliff and refresh terms to negotiate at offer time?",
+      "a": "Standard is 4-year vest, 1-year cliff, monthly thereafter. Negotiable: cliff length (push for 6-month or no cliff), sign-on bonus to bridge the cliff, and getting refresh-grant language in writing. Refresh grants are not automatic and most engineers never ask."
+    },
+    {
+      "id": "fc-meta-26",
+      "cat": "meta",
+      "lesson": "me-5",
+      "q": "What should you never say during compensation negotiation?",
+      "a": "Never give the first number, never disclose your current salary unprompted, never say 'I just need X to live on,' and never accept verbally on the call. Always: 'Let me think it over and come back tomorrow.' Silence after their number is the strongest tool."
+    },
+    {
+      "id": "fc-meta-27",
+      "cat": "meta",
+      "lesson": "me-7",
+      "q": "Portfolio rule: one strong case study vs five mediocre projects?",
+      "a": "One deep case study with problem framing, tradeoffs, metrics, and code beats five surface-level repos. Hiring managers spend 2-3 minutes on a portfolio max -- depth on a single project is the only way to demonstrate the senior-IC thinking they are screening for."
+    },
+    {
+      "id": "fc-meta-28",
+      "cat": "meta",
+      "lesson": "me-7",
+      "q": "LinkedIn vs personal site -- which one matters for FDE roles?",
+      "a": "LinkedIn is for recruiter-inbound discovery (keywords + 'open to work' beacon); personal site is for converting after they click. You need both, but LinkedIn drives 10x the top-of-funnel for non-FAANG roles. Optimize the headline and the first 2 lines of 'About'."
+    },
+    {
+      "id": "fc-meta-29",
+      "cat": "meta",
+      "lesson": "me-8",
+      "q": "How to handle recruiter ghosting after a strong onsite?",
+      "a": "Wait 5-7 business days, send one short, neutral follow-up ('checking in on next steps -- still very interested'), then wait another 5-7 days, then move on. Two unanswered pings means the answer is no; do not chain three+. Re-route energy to live pipelines."
+    },
+    {
+      "id": "fc-meta-30",
+      "cat": "meta",
+      "lesson": "me-3",
+      "q": "Post-interview thank-you email -- format and timing?",
+      "a": "Send within 24 hours, one short paragraph per interviewer, reference one concrete thing discussed (not generic), and add one new thought you had after the conversation. This is signal not formality -- shows recall, taste, and async-writing chops."
+    }
+  ]
+}

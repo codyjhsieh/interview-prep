@@ -1,0 +1,169 @@
+{
+  "cat": "meta",
+  "lessons": [
+    {
+      "id": "me-1",
+      "type": "concept",
+      "name": "Building a prep habit that survives week 4",
+      "module_id": "meta-prep",
+      "module_name": "Habits, deliberate practice & negotiation",
+      "cat": "meta"
+    },
+    {
+      "id": "me-2",
+      "type": "concept",
+      "name": "Spaced repetition (SM-2) \u2014 what your flashcards are doing",
+      "module_id": "meta-prep",
+      "module_name": "Habits, deliberate practice & negotiation",
+      "cat": "meta"
+    },
+    {
+      "id": "me-3",
+      "type": "concept",
+      "name": "Mock-interview cadence \u2014 and why recording matters",
+      "module_id": "meta-prep",
+      "module_name": "Habits, deliberate practice & negotiation",
+      "cat": "meta"
+    },
+    {
+      "id": "me-4",
+      "type": "concept",
+      "name": "Pipeline mechanics \u2014 applying, intros, and the leverage of competing offers",
+      "module_id": "meta-prep",
+      "module_name": "Habits, deliberate practice & negotiation",
+      "cat": "meta"
+    },
+    {
+      "id": "me-6",
+      "type": "concept",
+      "name": "Resume optimization for FDE specifically",
+      "module_id": "meta-prep",
+      "module_name": "Habits, deliberate practice & negotiation",
+      "cat": "meta"
+    },
+    {
+      "id": "me-7",
+      "type": "concept",
+      "name": "Portfolio projects that signal correctly",
+      "module_id": "meta-prep",
+      "module_name": "Habits, deliberate practice & negotiation",
+      "cat": "meta"
+    },
+    {
+      "id": "me-8",
+      "type": "concept",
+      "name": "Handling rejection emotionally and tactically",
+      "module_id": "meta-prep",
+      "module_name": "Habits, deliberate practice & negotiation",
+      "cat": "meta"
+    },
+    {
+      "id": "me-9",
+      "type": "concept",
+      "name": "Multi-offer comparison \u2014 beyond total comp",
+      "module_id": "meta-prep",
+      "module_name": "Habits, deliberate practice & negotiation",
+      "cat": "meta"
+    },
+    {
+      "id": "me-5",
+      "type": "concept",
+      "name": "Negotiation \u2014 what to say (and what to never say)",
+      "module_id": "meta-prep",
+      "module_name": "Habits, deliberate practice & negotiation",
+      "cat": "meta"
+    }
+  ],
+  "existing_cards": [
+    {
+      "id": "fc-meta-1",
+      "cat": "meta",
+      "q": "Highest-leverage prep activity?",
+      "a": "Recording yourself in mock interviews and watching back at 1.5x. Painful at first, transformative within a week. Catches speech tics, length-of-action issues, body language."
+    },
+    {
+      "id": "fc-meta-2",
+      "cat": "meta",
+      "q": "When to ask for interview feedback after rejection?",
+      "a": "Always, once, professionally. Most recruiters decline; the ones who reply give priceless intel. \"Thanks for letting me know. If you have any feedback on the interview, I'd genuinely appreciate even 1-2 sentences.\""
+    },
+    {
+      "id": "fc-meta-3",
+      "cat": "meta",
+      "q": "Pre-offer comp expectations script?",
+      "a": "\"I want to focus on whether the role is a strong fit before talking numbers. That said, market for FDE roles at companies your size is roughly $X-$Y total comp. Happy to be more specific once we're aligned.\""
+    },
+    {
+      "id": "fc-meta-4",
+      "cat": "meta",
+      "q": "Resume bullet formula?",
+      "a": "[Action verb] [system you owned] [the specific technical mechanism] [quantified customer/business outcome]. Recruiters skim 6-20 seconds \u2014 the verb + the number carry the signal."
+    },
+    {
+      "id": "fc-meta-5",
+      "cat": "meta",
+      "q": "Lowest-ROI prep activity?",
+      "a": "Re-reading concepts you already know. Testing yourself + practicing under pressure is higher-leverage per hour."
+    },
+    {
+      "id": "fc-meta-6",
+      "cat": "meta",
+      "q": "Kill criterion for stopping prep on a topic?",
+      "a": "Can you teach it aloud + answer 3 follow-ups in 5 min? Yes \u2192 move on. Deeper study has diminishing returns past that."
+    },
+    {
+      "id": "fc-meta-7",
+      "cat": "meta",
+      "q": "Implementation intention effect size?",
+      "a": "~2\u00d7 follow-through vs goal-setting alone (Gollwitzer). \"When X, then Y\" plans turn intentions into automatic triggers."
+    },
+    {
+      "id": "fc-meta-8",
+      "cat": "meta",
+      "q": "Concurrent process portfolio target during search?",
+      "a": "3-5 concurrent processes. Gives competing-offer leverage + risk diversification + faster timeline."
+    },
+    {
+      "id": "fc-meta-9",
+      "cat": "meta",
+      "q": "Strongest predictor of 2-year role outcome?",
+      "a": "Manager quality. Worth weighting heavily in offer comparison even at \u00b1$40k diff."
+    },
+    {
+      "id": "fc-meta-10",
+      "cat": "meta",
+      "q": "Salary expectations script?",
+      "a": "\"Want to focus on whether the role is a fit. Market for FDE at your size is roughly $X-$Y total comp. Happy to be specific once aligned.\""
+    },
+    {
+      "id": "fc-meta-11",
+      "cat": "meta",
+      "q": "Resume bullet formula?",
+      "a": "[Verb] [system you owned] [specific mechanism] [quantified outcome]. Recruiters skim 6-20 sec \u2014 verb + number carry signal."
+    },
+    {
+      "id": "fc-meta-12",
+      "cat": "meta",
+      "q": "70% rule for decisions?",
+      "a": "When you have 70% of the info you need, decide. Waiting for 90% usually costs more than acting on 70%. Especially for reversible decisions."
+    },
+    {
+      "id": "fc-meta-13",
+      "cat": "meta",
+      "q": "When to negotiate equity refresh?",
+      "a": "At offer time AND every annual review. Refresh grants are negotiable, not automatic. Most engineers leave money on the table."
+    },
+    {
+      "id": "fc-meta-14",
+      "cat": "meta",
+      "q": "Atomic-habit prep stack?",
+      "a": "(1) Implementation intention (when-then). (2) 2-minute rule (start cost <30s). (3) Habit stacking (after coffee \u2192 study). (4) Environment design (pinned tab)."
+    },
+    {
+      "id": "fc-meta-15",
+      "cat": "meta",
+      "q": "Rejection processing discipline?",
+      "a": "30-min \"feel bad\" block \u2192 resume next day. Don't check email obsessively (fix time). Maintain 3-5 concurrent processes so rejections are data, not verdicts."
+    }
+  ]
+}
