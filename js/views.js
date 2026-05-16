@@ -5121,61 +5121,93 @@ function renderFlashcards(state, hub) {
     if (!c) return null;
     return { q: c.q, cat: c.cat, module: c.module, lesson: c.lesson };
   };
-  const statsHTML = totalFails === 0 ? '' : `
+  // Spaced-repetition progress across the full card library.
+  const fcMeta = state.flashcards || {};
+  const totalCards = FLASHCARDS.length;
+  let reviewedCount = 0, masteredCount = 0, learningCount = 0, totalReps = 0, totalLapses = 0;
+  for (const c of FLASHCARDS) {
+    const m = fcMeta[c.id];
+    if (!m) continue;
+    reviewedCount++;
+    totalReps += (m.reps || 0);
+    totalLapses += (m.lapses || 0);
+    if ((m.interval || 0) >= 21 && (m.reps || 0) >= 3) masteredCount++;
+    else learningCount++;
+  }
+  const newCount = totalCards - reviewedCount;
+  const pct = (n) => totalCards ? Math.round(n / totalCards * 100) : 0;
+  const statBlock = (label, value, sub) => `
+    <div class="text-center">
+      <div class="text-[10px] uppercase tracking-wider text-slate-500">${label}</div>
+      <div class="text-xl font-bold font-mono numeric mt-0.5">${value}</div>
+      ${sub ? `<div class="text-[10px] text-slate-500 mt-0.5">${sub}</div>` : ''}
+    </div>`;
+  const statsHTML = `
     <div class="card thin" id="fc-stats">
-      <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
-        <div class="font-display font-semibold text-sm uppercase tracking-wide text-slate-300">Trouble spots</div>
-        <div class="text-xs text-slate-400 numeric">${totalFails} total ${totalFails === 1 ? 'fail' : 'fails'}</div>
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-3">
+        ${statBlock('Mastered', masteredCount, `${pct(masteredCount)}% of ${totalCards}`)}
+        ${statBlock('Learning', learningCount, '&lt; 21 day interval')}
+        ${statBlock('New', newCount, 'never seen')}
+        ${statBlock('Reviews', totalReps, 'lifetime')}
+        ${statBlock('Fails', totalFails, totalLapses ? `${totalLapses} lapses` : 'none yet')}
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-        <div>
-          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">By category</div>
-          ${topCats.length ? topCats.map(([id, n]) => `
-            <a href="#category/${id}" class="flex items-center justify-between py-1 hover:text-accent-400 transition">
-              <span class="truncate">${esc(catName(id))}</span>
-              <span class="numeric text-slate-400 ml-2">${n}×</span>
-            </a>
-          `).join('') : '<div class="text-slate-500">—</div>'}
-        </div>
-        <div>
-          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">By module</div>
-          ${topMods.length ? topMods.map(([id, n]) => {
-            const m = MODULES.find(mm => mm.id === id);
-            const href = m ? `#category/${m.cat}/${id}` : '#flashcards';
-            return `<a href="${href}" class="flex items-center justify-between py-1 hover:text-accent-400 transition">
-              <span class="truncate">${esc(modName(id))}</span>
-              <span class="numeric text-slate-400 ml-2">${n}×</span>
-            </a>`;
-          }).join('') : '<div class="text-slate-500">—</div>'}
-        </div>
-        <div>
-          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">By lesson</div>
-          ${topLessons.length ? topLessons.map(([id, n]) => {
-            const info = lessonInfo(id);
-            const href = info ? `#category/${info.cat}/${info.module}/${id}` : '#flashcards';
-            return `<a href="${href}" class="flex items-center justify-between py-1 hover:text-accent-400 transition">
-              <span class="truncate">${esc(info ? info.name : id)}</span>
-              <span class="numeric text-slate-400 ml-2">${n}×</span>
-            </a>`;
-          }).join('') : '<div class="text-slate-500">—</div>'}
-        </div>
-      </div>
-      ${topCards.length ? `
-        <div class="mt-3 pt-3 border-t border-ink-700/50">
-          <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">Stickiest cards</div>
-          <div class="space-y-1 text-xs">
-            ${topCards.map(([id, n]) => {
-              const c = cardInfo(id);
-              if (!c) return '';
-              const href = c.lesson && c.module
-                ? `#category/${c.cat}/${c.module}/${c.lesson}`
-                : c.module ? `#category/${c.cat}/${c.module}` : `#category/${c.cat}`;
-              return `<a href="${href}" class="flex items-center justify-between py-0.5 hover:text-accent-400 transition">
-                <span class="truncate flex-1 mr-2">${esc(c.q)}</span>
-                <span class="numeric text-slate-400 shrink-0">${n}×</span>
-              </a>`;
-            }).join('')}
+      <div class="bar"><i style="width:${pct(masteredCount)}%"></i></div>
+      ${totalFails > 0 ? `
+        <div class="mt-4 pt-3 border-t border-ink-700/50">
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+            <div class="font-display font-semibold text-sm uppercase tracking-wide text-slate-300">Trouble spots</div>
           </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">By category</div>
+              ${topCats.length ? topCats.map(([id, n]) => `
+                <a href="#category/${id}" class="flex items-center justify-between py-1 hover:text-accent-400 transition">
+                  <span class="truncate">${esc(catName(id))}</span>
+                  <span class="numeric text-slate-400 ml-2">${n}×</span>
+                </a>
+              `).join('') : '<div class="text-slate-500">—</div>'}
+            </div>
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">By module</div>
+              ${topMods.length ? topMods.map(([id, n]) => {
+                const m = MODULES.find(mm => mm.id === id);
+                const href = m ? `#category/${m.cat}/${id}` : '#flashcards';
+                return `<a href="${href}" class="flex items-center justify-between py-1 hover:text-accent-400 transition">
+                  <span class="truncate">${esc(modName(id))}</span>
+                  <span class="numeric text-slate-400 ml-2">${n}×</span>
+                </a>`;
+              }).join('') : '<div class="text-slate-500">—</div>'}
+            </div>
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">By lesson</div>
+              ${topLessons.length ? topLessons.map(([id, n]) => {
+                const info = lessonInfo(id);
+                const href = info ? `#category/${info.cat}/${info.module}/${id}` : '#flashcards';
+                return `<a href="${href}" class="flex items-center justify-between py-1 hover:text-accent-400 transition">
+                  <span class="truncate">${esc(info ? info.name : id)}</span>
+                  <span class="numeric text-slate-400 ml-2">${n}×</span>
+                </a>`;
+              }).join('') : '<div class="text-slate-500">—</div>'}
+            </div>
+          </div>
+          ${topCards.length ? `
+            <div class="mt-3 pt-3 border-t border-ink-700/30">
+              <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">Stickiest cards</div>
+              <div class="space-y-1 text-xs">
+                ${topCards.map(([id, n]) => {
+                  const c = cardInfo(id);
+                  if (!c) return '';
+                  const href = c.lesson && c.module
+                    ? `#category/${c.cat}/${c.module}/${c.lesson}`
+                    : c.module ? `#category/${c.cat}/${c.module}` : `#category/${c.cat}`;
+                  return `<a href="${href}" class="flex items-center justify-between py-0.5 hover:text-accent-400 transition">
+                    <span class="truncate flex-1 mr-2">${esc(c.q)}</span>
+                    <span class="numeric text-slate-400 shrink-0">${n}×</span>
+                  </a>`;
+                }).join('')}
+              </div>
+            </div>
+          ` : ''}
         </div>
       ` : ''}
     </div>`;
