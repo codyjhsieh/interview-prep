@@ -409,7 +409,7 @@ function removeLastJobApp(state) {
   return { removed, xpRemoved: xp };
 }
 
-function dueCards(state, allCards, limit=20) {
+function dueCards(state, allCards, limit=20, pinFirstId=null) {
   const now = Date.now();
   const out = allCards
     .map(c => ({ card: c, meta: state.flashcards[c.id] }))
@@ -418,6 +418,18 @@ function dueCards(state, allCards, limit=20) {
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [out[i], out[j]] = [out[j], out[i]];
+  }
+  // If the caller wants a specific card pinned to the front (e.g. user is
+  // returning from "Review lesson" and we need to resume on that card),
+  // hoist it out of the shuffled list and prepend. The card might not be
+  // in the first `limit` after shuffling -- pinning ensures it survives
+  // the slice below.
+  if (pinFirstId) {
+    const pinIdx = out.findIndex(d => d.card.id === pinFirstId);
+    if (pinIdx > 0) {
+      const [pinned] = out.splice(pinIdx, 1);
+      out.unshift(pinned);
+    }
   }
   return out.slice(0, limit);
 }

@@ -5143,7 +5143,12 @@ function renderCompany(state, hub, id) {
 
 /* ====================== FLASHCARDS ====================== */
 function renderFlashcards(state, hub) {
-  const due = GAMI.dueCards(state, FLASHCARDS, 50);
+  // Pull the resume id BEFORE building due[] so we can pin that card to
+  // position 0 -- otherwise a 374-card library randomly slices to 50 and
+  // the resumed card may not even survive the cut.
+  let resumeId = null;
+  try { resumeId = sessionStorage.getItem('fc.resumeId'); } catch (_) {}
+  const due = GAMI.dueCards(state, FLASHCARDS, 50, resumeId);
   const fs = state.flashcardFailStats || {};
   const totalFails = Object.values(fs.byCard || {}).reduce((s,n) => s + n, 0);
   const top = (obj, n=3) => Object.entries(obj || {})
@@ -5300,15 +5305,12 @@ function renderFlashcards(state, hub) {
   }
 
   const stage = container.querySelector('#fc-stage');
-  let idx = 0;
-  // Resume the card the user was on before they opened a lesson modal.
-  // Captured globally on Review-link click; cleared after first use so
-  // a manual return to /#flashcards still shuffles freely.
-  if (window._fcResumeId) {
-    const resumePos = due.findIndex(d => d.card.id === window._fcResumeId);
-    if (resumePos >= 0) idx = resumePos;
-    window._fcResumeId = null;
+  // resumeId was already used to pin the card to due[0] above. Clear the
+  // session key now so a normal next-mount of /#flashcards shuffles freely.
+  if (resumeId) {
+    try { sessionStorage.removeItem('fc.resumeId'); } catch (_) {}
   }
+  let idx = 0;
   // Keyboard: Space/Enter flips, 1-4 rates
   const onKey = (e) => {
     if (idx >= due.length) return;
@@ -5367,7 +5369,7 @@ function renderFlashcards(state, hub) {
         <div class="flashcard-face flashcard-back">
           <div class="text-xs uppercase tracking-wide text-slate-400 mb-3 flex items-center justify-between">
             <span>Answer</span>
-            <a href="${reviewHref}" class="text-[11px] normal-case tracking-normal" style="color:var(--accent)" onclick="event.stopPropagation(); window._fcResumeId='${card.id}';">Review ${card.lesson ? 'lesson' : card.module ? 'module' : 'category'} →</a>
+            <a href="${reviewHref}" class="text-[11px] normal-case tracking-normal" style="color:var(--accent)" onclick="event.stopPropagation(); try { sessionStorage.setItem('fc.resumeId','${card.id}'); } catch(_){}">Review ${card.lesson ? 'lesson' : card.module ? 'module' : 'category'} →</a>
           </div>
           <div class="flashcard-answer leading-relaxed">${richText(card.a)}</div>
           <div class="absolute bottom-5 right-6 text-xs text-slate-500">Click to flip back</div>
