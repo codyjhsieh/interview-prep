@@ -9471,11 +9471,11 @@ const COMPANIES = [
       { title:"Software Engineer, Early Career", url:"https://jobs.ashbyhq.com/mirage/cbf278fd-84ec-48d9-8052-b76abb035ac7", level:"mid" }
     ] },
   { id:"tavily", name:"Tavily", vertical:"ai",
-    sub:"Search API for AI agents",
+    sub:"Search API for AI agents (acq. by Nebius Feb 2026)",
     stage:"Series A", raised:"$30M", lead:"Insight Partners",
     badges:["Insight", "YC W24"],
     totalRoles:1,
-    notes:"Retrieval API for agents. Ranking + eval. RAG-adjacent.",
+    notes:"Retrieval API for AI agents. Now part of Nebius; still hiring under Tavily brand. Ranking + eval.",
     jobs:[
       { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/tavily/1999e01d-f9e3-4f43-a097-812c0800fb0f", level:"mid" }
     ] },
@@ -9764,11 +9764,11 @@ const COMPANIES = [
       { title:"Software Engineer, Production Engineering", url:"https://jobs.ashbyhq.com/ramp/be496b52-cfbf-494e-b862-61fb4a188b24", level:"mid" }
     ] },
   { id:"brex", name:"Brex", vertical:"fintech",
-    sub:"Corporate cards + spend mgmt",
+    sub:"Corporate cards + spend mgmt (acq. by Capital One Apr 2026)",
     stage:"Series D", raised:"$1.5B", lead:"DST",
     badges:["YC", "DST", "Greenoaks"],
     totalRoles:5,
-    notes:"Cards, banking, expense. PCI, ledger, large eng org.",
+    notes:"Cards, banking, expense. Now part of Capital One; still hiring under Brex brand. PCI, ledger, large eng org.",
     jobs:[
       { title:"Senior Software Engineer, Frontend", url:"https://www.brex.com/careers/8501052002?gh_jid=8501052002", level:"senior" },
       { title:"Senior Software Engineer, Full Stack", url:"https://www.brex.com/careers/8472634002?gh_jid=8472634002", level:"senior" },
@@ -9867,11 +9867,11 @@ const COMPANIES = [
       { title:"Senior Software Engineer II, Developer Experience", url:"https://job-boards.greenhouse.io/carta/jobs/7713882003", level:"senior" }
     ] },
   { id:"blockworks", name:"Blockworks", vertical:"fintech",
-    sub:"Crypto media + research",
+    sub:"Crypto data + analytics platform",
     stage:"Series A", raised:"$15M", lead:"Framework",
     badges:["Framework", "10T", "S Capital"],
     totalRoles:3,
-    notes:"Crypto news + intelligence. Editorial tech + data products.",
+    notes:"Data warehouse + market intelligence for crypto traders/institutions (post-2025 pivot away from media). Dashboards, analytics infra.",
     jobs:[
       { title:"Senior Backend Engineer (Solana)", url:"https://jobs.ashbyhq.com/blockworks/51e9d7e5-eef8-4b26-8442-7fd273b14421", level:"senior" },
       { title:"Senior Data Engineer", url:"https://jobs.ashbyhq.com/blockworks/6b0b650d-fae6-4cf1-b70f-8225eb7f77f3", level:"senior" },
@@ -9900,11 +9900,11 @@ const COMPANIES = [
       { title:"Senior Full Stack Engineer", url:"https://jobs.ashbyhq.com/propel/d0e96770-a073-4d53-88b6-586d74db35e8", level:"senior" }
     ] },
   { id:"gemini", name:"Gemini", vertical:"fintech",
-    sub:"Crypto exchange",
-    stage:"Late stage", raised:"$400M", lead:"Morgan Creek",
+    sub:"Crypto exchange + prediction markets (NASDAQ: GEMI)",
+    stage:"Public", raised:"$400M", lead:"Morgan Creek",
     badges:["Morgan Creek"],
     totalRoles:2,
-    notes:"Winklevoss-led NYC crypto exchange. Compliance-first culture.",
+    notes:"Public co (GEMI) since Sept 2025. Winklevoss-led; US-focused after intl exit. Exchange + CFTC-regulated derivatives.",
     jobs:[
       { title:"Senior Software Engineer, Predictions (Mobile)", url:"https://boards.greenhouse.io/embed/job_app?for=gemini&token=7846814&gh_jid=7846814", level:"senior" },
       { title:"Senior Software Engineer, Risk Engineering", url:"https://boards.greenhouse.io/embed/job_app?for=gemini&token=7768456&gh_jid=7768456", level:"senior" }
@@ -10314,11 +10314,11 @@ const COMPANIES = [
       { title:"Software Engineer / Writer", url:"https://job-boards.greenhouse.io/janestreet/jobs/7604415002", level:"mid" }
     ] },
   { id:"mosaic", name:"Mosaic", vertical:"fintech",
-    sub:"Strategic finance platform",
+    sub:"Modern FP&A platform (acq. by HiBob Feb 2025)",
     stage:"Series C", raised:"$45M", lead:"Founders Fund",
     badges:["Founders Fund", "Y Combinator"],
     totalRoles:1,
-    notes:"FP&A software for CFOs. Modeling + integrations.",
+    notes:"Strategic finance — budgeting + forecasting. Now part of HiBob HR platform; still has standalone product team.",
     jobs:[
       { title:"Software Engineer", url:"https://jobs.ashbyhq.com/mosaic/49f2511d-4835-4d18-813f-e8dec4cdd7da", level:"mid" }
     ] },
@@ -10332,11 +10332,11 @@ const COMPANIES = [
       { title:"Applied Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/montecarlodata/a6953b7a-fb69-4b37-9888-700a3af4e6c8", level:"mid" }
     ] },
   { id:"forge", name:"Forge", vertical:"fintech",
-    sub:"Private-markets liquidity",
+    sub:"Private-market liquidity (acq. by Charles Schwab Mar 2026)",
     stage:"Public", raised:"$240M pre-IPO", lead:"Tiger",
     badges:["NYSE", "Tiger", "FTV"],
     totalRoles:2,
-    notes:"Private secondary marketplace. Markets infra + compliance.",
+    notes:"Secondaries trading + private-market data. Now part of Schwab; hiring under Forge brand. Markets infra + KYC.",
     jobs:[
       { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/forge/ca54fd9a-55eb-45ae-ba48-f666747a24e8", level:"mid" },
       { title:"Forward Deployed Strategist", url:"https://jobs.ashbyhq.com/forge/c1724ef7-8f2b-40f1-8db6-965104cf8815", level:"mid" }
@@ -10373,11 +10373,11 @@ const COMPANIES = [
       { title:"Software Engineer, Backend (New-York)", url:"https://jobs.lever.co/mistral/f2e8ba75-bf5a-4976-bb96-c5d3e0f99366", level:"mid" }
     ] },
   { id:"commure", name:"Commure", vertical:"health",
-    sub:"AI healthcare ops platform",
+    sub:"AI-native RCM + ambient documentation",
     stage:"Series D", raised:"$870M+", lead:"General Catalyst",
     badges:["GC", "Sequoia"],
     totalRoles:12,
-    notes:"Health-system operations AI. Heavy enterprise deploys; FDE-flavored.",
+    notes:"AI-native revenue cycle + ambient AI scribe + agents for health systems. Powers 130+ health systems, $25B+ in annual claims.",
     jobs:[
       { title:"Senior Fullstack Engineer", url:"https://jobs.ashbyhq.com/commure/1e3abe6b-f051-4e74-bf45-08e3e0ccb2f8", level:"senior" },
       { title:"Senior Backend Engineer", url:"https://jobs.ashbyhq.com/commure/2c6bf269-a6fa-414f-9082-0de727863a0c", level:"senior" },
@@ -10580,21 +10580,21 @@ const COMPANIES = [
       { title:"Sr. Software Engineer II", url:"https://job-boards.greenhouse.io/doubleverify/jobs/7922070002", level:"senior" }
     ] },
   { id:"wealthfront", name:"Wealthfront", vertical:"fintech",
-    sub:"Robo-advisor + cash mgmt",
-    stage:"Late stage", raised:"$205M", lead:"Greylock",
+    sub:"Robo-advisor + cash mgmt (NASDAQ: WLTH)",
+    stage:"Public", raised:"$205M", lead:"Greylock",
     badges:["Greylock", "Index"],
     totalRoles:2,
-    notes:"Robo-advisor + banking. Algorithms + compliance + UX.",
+    notes:"Public co since Dec 2025. Robo-advisor + banking at $88B+ AUM. Algorithms + compliance + UX.",
     jobs:[
       { title:"Backend Engineer", url:"https://jobs.lever.co/wealthfront/f5a0963a-ca1a-4140-b9e6-dbf6072093fe", level:"mid" },
       { title:"Software Engineer \u2013 DevOps Platform", url:"https://jobs.lever.co/wealthfront/91c149ed-18fa-4e72-a3a6-386840aae86e", level:"mid" }
     ] },
   { id:"stash", name:"Stash", vertical:"fintech",
-    sub:"Investing for everyday people",
+    sub:"Beginner investing app (Grab acquisition pending Q3 2026)",
     stage:"Series G", raised:"$427M", lead:"T. Rowe Price",
     badges:["T. Rowe Price", "Goodwater", "Coatue"],
     totalRoles:1,
-    notes:"Consumer fintech for retail investors. Markets + fractional shares + banking.",
+    notes:"Subscription-based brokerage + banking for first-time investors. Grab acquisition announced Feb 2026, closes Q3.",
     jobs:[
       { title:"Senior Fullstack Engineer", url:"https://ats.comparably.com/api/v2/stash/post/7649514:?gh_jid=7649514", level:"senior" }
     ] },
@@ -10652,22 +10652,22 @@ const COMPANIES = [
       { title:"Software Engineer, Identity & Access", url:"https://jobs.ashbyhq.com/patreon/40fda795-0ba7-4185-a023-0e2ad0d8b7a4", level:"mid" }
     ] },
   { id:"hopper", name:"Hopper", vertical:"hospitality",
-    sub:"Mobile-first travel booking + fintech",
+    sub:"B2B travel tech + fintech (HTS)",
     stage:"Series G", raised:"$750M", lead:"Goldman Sachs",
     badges:["Goldman Sachs", "Inovia", "Capital One"],
     totalRoles:3,
-    notes:"Flights/hotels with fintech overlays (price-freeze, cancel-for-any-reason). Mobile + travel-data + ML pricing.",
+    notes:"Hopper Technology Solutions powers partners (Capital One, Uber, Nubank) with booking + travel fintech (price-freeze, cancel-for-any-reason). B2B is now majority of revenue.",
     jobs:[
       { title:"Senior Software Engineer - Customer Experience Platform", url:"https://jobs.ashbyhq.com/hopper/71d27c3e-0898-46f7-b4e6-5dedc2458d23", level:"senior" },
       { title:"Senior Full Stack Product Engineer", url:"https://jobs.ashbyhq.com/hopper/81784196-259a-49a2-9715-b9e85e8d0be2", level:"senior" },
       { title:"Senior Software Engineer - AI Fintech foundation", url:"https://jobs.ashbyhq.com/hopper/2a41cd40-3447-47b0-ab63-8c8d689e0e9a", level:"senior" }
     ] },
   { id:"hang", name:"Hang", vertical:"hospitality",
-    sub:"Loyalty + membership platform",
+    sub:"Autonomous marketing system for brands",
     stage:"Series A", raised:"$32M", lead:"Paradigm",
     badges:["Paradigm", "a16z"],
     totalRoles:2,
-    notes:"Membership / loyalty for brands. Payments, identity, integrations.",
+    notes:"AI-driven marketing + CDP + loyalty stack for restaurants/retailers (Ulta, ASICS, Cinemark). Identity resolution, segmentation, gamified engagement.",
     jobs:[
       { title:"Machine Learning Engineer", url:"https://jobs.ashbyhq.com/hang/7b899a89-ed68-4988-8c3b-27ee46d6eca3", level:"mid" },
       { title:"Front End Software Engineer (React/NextJS)", url:"https://jobs.ashbyhq.com/hang/70f319e5-d44e-4f89-9b7f-47906c1547a7", level:"mid" }
@@ -10738,21 +10738,21 @@ const COMPANIES = [
       { title:"Software Engineer - Full Stack", url:"https://jobs.ashbyhq.com/airgoods/036e4ed9-9c41-4aaa-9219-3851fb02f8e3", level:"mid" }
     ] },
   { id:"blee", name:"Blee", vertical:"ai",
-    sub:"AI for SMB ops",
+    sub:"AI for marketing compliance review",
     stage:"Seed", raised:"$8M", lead:"Sequoia Scout",
     badges:["YC W24"],
     totalRoles:2,
-    notes:"Early-stage AI startup. Product-engineering culture, broad scope.",
+    notes:"Enterprise AI compliance platform — legal/compliance review of marketing content in regulated industries (fintech, healthcare, pharma). LLMs + workflow + integrations.",
     jobs:[
       { title:"Product Engineer", url:"https://jobs.ashbyhq.com/blee/fb0b6592-88a3-4ada-9b6c-7cef0c33b486", level:"mid" },
       { title:"Full Stack Engineer", url:"https://jobs.ashbyhq.com/blee/18d456d1-587a-4cb2-8faa-5f43af7f700a", level:"mid" }
     ] },
   { id:"camber", name:"Camber", vertical:"ai",
-    sub:"AI for healthcare data",
+    sub:"AI medical billing + RCM",
     stage:"Series A", raised:"$30M", lead:"Andreessen Horowitz",
     badges:["a16z", "Foundry"],
     totalRoles:4,
-    notes:"Healthcare data platform with AI. SQL + integrations + clinical workflow.",
+    notes:"AI revenue-cycle / claims-processing platform for healthcare clinics. Claims automation, denial prediction; behavioral-health roots, expanding verticals.",
     jobs:[
       { title:"Senior Software Engineer, Data", url:"https://jobs.ashbyhq.com/camber/fbc8ffb8-71bf-4d35-be44-a1a56f06ed9f", level:"senior" },
       { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/camber/ae0a5b41-b1d0-4318-a430-9cfb5fa0d3fe", level:"senior" },
@@ -10760,11 +10760,11 @@ const COMPANIES = [
       { title:"AI Product Engineer", url:"https://jobs.ashbyhq.com/camber/d85afd85-0014-4607-b4ce-587941026093", level:"mid" }
     ] },
   { id:"crosby", name:"Crosby", vertical:"ai",
-    sub:"AI legal agent",
+    sub:"AI-first law firm for contract review",
     stage:"Seed", raised:"$10M", lead:"Sequoia",
     badges:["Sequoia", "YC"],
     totalRoles:4,
-    notes:"AI for legal contracts. Domain-specific LLM + agent workflows.",
+    notes:"AI-native law firm reviewing NDAs/MSAs/DPAs for tech clients (Cursor, Clay, etc.). LLM + lawyer workflows, eval on legal accuracy.",
     jobs:[
       { title:"Founding Frontend Engineer", url:"https://jobs.ashbyhq.com/crosby/3fac53ba-6766-4bb4-832d-319af545a46c", level:"founding" },
       { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/crosby/e5e089e9-7074-4fd8-99aa-fbb067d0b6cd", level:"senior" },
@@ -10841,11 +10841,11 @@ const COMPANIES = [
       { title:"\ud83d\udee0\ufe0f Platform Engineer", url:"https://jobs.ashbyhq.com/partiful/56eb4e23-fff8-4f6f-80d5-b7cf1c3f6e73", level:"mid" }
     ] },
   { id:"plot", name:"Plot", vertical:"ai",
-    sub:"Applied AI for SMBs",
+    sub:"AI for cultural / social-video intelligence",
     stage:"Seed", raised:"$10M", lead:"Andreessen Horowitz",
     badges:["a16z"],
     totalRoles:2,
-    notes:"Early-stage applied-AI product. Senior engineering culture.",
+    notes:"AI-native social listening turning short-form video into real-time cultural insights. Multimodal ingestion, ranking.",
     jobs:[
       { title:"Senior Software Engineer -- Applied AI", url:"https://jobs.ashbyhq.com/plot/b9841f72-75b4-47ac-8f95-d5289d938c17", level:"senior" },
       { title:"Senior Backend Engineer", url:"https://jobs.ashbyhq.com/plot/d457f74f-89e4-40be-85eb-ce89a847514d", level:"senior" }
@@ -10889,20 +10889,20 @@ const COMPANIES = [
       { title:"AI Engineer - NYC", url:"https://jobs.ashbyhq.com/sequence/3d64276a-98ad-4b23-8807-0c013415b1a9", level:"mid" }
     ] },
   { id:"slate", name:"Slate", vertical:"media",
-    sub:"Content / publishing platform",
+    sub:"Content + brand tools for social-media teams",
     stage:"Series A", raised:"$15M", lead:"Forerunner",
     badges:["Forerunner"],
     totalRoles:1,
-    notes:"Modern content + publishing platform.",
+    notes:"Brand-consistent content creation for enterprise social teams (NFL, Visa, Budweiser). In-browser/mobile studio, brand asset mgmt, direct social publishing.",
     jobs:[
       { title:"Software Engineer", url:"https://jobs.lever.co/slate/41518324-7696-4147-9ad7-aa8beae09767", level:"mid" }
     ] },
   { id:"sola", name:"Sola", vertical:"ai",
-    sub:"AI agents for service businesses",
+    sub:"Agentic process automation for enterprises",
     stage:"Series A", raised:"$30M", lead:"Lightspeed",
     badges:["Lightspeed", "FirstMark"],
     totalRoles:3,
-    notes:"Forward-deployed AI for vertical services (legal, real estate, etc). Customer-deploy heavy.",
+    notes:"AI-native RPA: record a workflow once, Sola turns it into an autonomous agent. Customers in logistics, legal, healthcare back-office.",
     jobs:[
       { title:"Software Engineer, Backend", url:"https://jobs.ashbyhq.com/sola/8ae775b2-e137-4d93-8d54-4ce876c7afe0", level:"mid" },
       { title:"Software Engineer, Fullstack", url:"https://jobs.ashbyhq.com/sola/0c859bfa-c3e1-429d-876d-0542f5358c17", level:"mid" },
@@ -11005,11 +11005,11 @@ const COMPANIES = [
       { title:"Senior Software Engineer - Search", url:"https://job-boards.greenhouse.io/alphasense/jobs/8436028002", level:"senior" }
     ] },
   { id:"neon", name:"Neon", vertical:"devtools",
-    sub:"Serverless Postgres",
+    sub:"Serverless Postgres (acq. by Databricks May 2025)",
     stage:"Series B", raised:"$104M", lead:"Menlo",
     badges:["Menlo", "General Catalyst", "GGV"],
     totalRoles:2,
-    notes:"Branchable serverless Postgres. Storage separation, autoscaling.",
+    notes:"Branchable serverless Postgres. Now part of Databricks; product still runs standalone. Storage separation, autoscaling.",
     jobs:[
       { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/neon/104a1a8e-fb12-442d-8146-759b75d1e128", level:"senior" },
       { title:"Software Engineer", url:"https://jobs.ashbyhq.com/neon/dc5bf47b-d705-49e3-a82b-f0cac2a98d6f", level:"mid" }

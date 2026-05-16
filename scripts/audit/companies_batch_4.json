@@ -1,0 +1,194 @@
+[
+ {
+  "id": "beacons",
+  "name": "Beacons",
+  "sub": "Link-in-bio + creator monetization",
+  "notes": "Link-in-bio + creator-commerce platform. Mobile + e-commerce + creator tooling."
+ },
+ {
+  "id": "navan",
+  "name": "Navan",
+  "sub": "Business travel + expense",
+  "notes": "Modern T&E platform (formerly TripActions). Travel inventory, expense, payments."
+ },
+ {
+  "id": "airgoods",
+  "name": "Airgoods",
+  "sub": "B2B grocery / CPG marketplace",
+  "notes": "Wholesale CPG marketplace. Two-sided liquidity, catalog, payments."
+ },
+ {
+  "id": "blee",
+  "name": "Blee",
+  "sub": "AI for SMB ops",
+  "notes": "Early-stage AI startup. Product-engineering culture, broad scope."
+ },
+ {
+  "id": "camber",
+  "name": "Camber",
+  "sub": "AI for healthcare data",
+  "notes": "Healthcare data platform with AI. SQL + integrations + clinical workflow."
+ },
+ {
+  "id": "crosby",
+  "name": "Crosby",
+  "sub": "AI legal agent",
+  "notes": "AI for legal contracts. Domain-specific LLM + agent workflows."
+ },
+ {
+  "id": "flora",
+  "name": "FLORA",
+  "sub": "AI creative studio",
+  "notes": "AI-native creative platform \\u2014 boards / sketches / prompts. Multimodal + design-tool depth."
+ },
+ {
+  "id": "general-context",
+  "name": "General Context",
+  "sub": "AI for enterprise context",
+  "notes": "Early-stage AI infra. Founding-engineer hiring; broad scope."
+ },
+ {
+  "id": "glossgenius",
+  "name": "GlossGenius",
+  "sub": "Software for beauty + wellness pros",
+  "notes": "SaaS for independent beauty/wellness pros. Booking + payments + marketing."
+ },
+ {
+  "id": "loopai",
+  "name": "Loop",
+  "sub": "AI agents for freight ops",
+  "notes": "Freight/logistics agents. Deploy with top carriers; agent eval + customer integration."
+ },
+ {
+  "id": "metropolis",
+  "name": "Metropolis",
+  "sub": "AI computer-vision parking",
+  "notes": "Computer-vision parking platform (acquired SP Plus). Edge AI, payments, infrastructure."
+ },
+ {
+  "id": "opus-training",
+  "name": "Opus Training",
+  "sub": "Mobile training for hourly workers",
+  "notes": "Hourly-worker training SaaS \\u2014 built for restaurants + hospitality. Mobile-first."
+ },
+ {
+  "id": "partiful",
+  "name": "Partiful",
+  "sub": "Modern event-invite app",
+  "notes": "Mobile event invites + RSVPs. Social graph, mobile UX, identity."
+ },
+ {
+  "id": "plot",
+  "name": "Plot",
+  "sub": "Applied AI for SMBs",
+  "notes": "Early-stage applied-AI product. Senior engineering culture."
+ },
+ {
+  "id": "qloo",
+  "name": "Qloo",
+  "sub": "Taste / cultural AI API",
+  "notes": "Cross-domain taste graph API. Recommender systems, API design, latency."
+ },
+ {
+  "id": "sandbar",
+  "name": "Sandbar",
+  "sub": "AI for compliance / fincrime",
+  "notes": "Anti-fincrime AI. ML + investigation tooling + bank integrations."
+ },
+ {
+  "id": "sequence",
+  "name": "Sequence",
+  "sub": "Personal-finance autopilot",
+  "notes": "Money-routing + automation for consumers. Payments, ledger, AI advice."
+ },
+ {
+  "id": "slate",
+  "name": "Slate",
+  "sub": "Content / publishing platform",
+  "notes": "Modern content + publishing platform."
+ },
+ {
+  "id": "sola",
+  "name": "Sola",
+  "sub": "AI agents for service businesses",
+  "notes": "Forward-deployed AI for vertical services (legal, real estate, etc). Customer-deploy heavy."
+ },
+ {
+  "id": "suno",
+  "name": "Suno",
+  "sub": "AI music generation",
+  "notes": "Generative music at scale. Audio pipelines, copyright/moderation, eval on subjective quality."
+ },
+ {
+  "id": "warp",
+  "name": "Warp",
+  "sub": "AI-native terminal",
+  "notes": "Reimagined terminal with AI. Heavy on developer experience, latency, prompt design for code."
+ },
+ {
+  "id": "output",
+  "name": "Output",
+  "sub": "Music production software",
+  "notes": "Music-production software (Arcade, Portal). Audio infra, ML for music, DAW integrations."
+ },
+ {
+  "id": "harvey",
+  "name": "Harvey",
+  "sub": "Legal AI for major firms",
+  "notes": "Legal AI for top law firms; $11B valuation (Mar 2026). FDE-style deploys, document workflows, reasoning eval."
+ },
+ {
+  "id": "huggingface",
+  "name": "Hugging Face",
+  "sub": "ML model hub + libraries",
+  "notes": "Open-source ML platform; $4.5B valuation. Inference, hosting, eval; OSS-heavy culture."
+ },
+ {
+  "id": "coreweave",
+  "name": "CoreWeave",
+  "sub": "Specialized GPU cloud (NASDAQ: CRWV)",
+  "notes": "GPU cloud powering AI labs; IPO'd Mar 2025. Bare-metal infra + scheduling."
+ },
+ {
+  "id": "alphasense",
+  "name": "AlphaSense",
+  "sub": "AI market intelligence",
+  "notes": "NYC enterprise AI search over financial docs. Retrieval + integrations."
+ },
+ {
+  "id": "neon",
+  "name": "Neon",
+  "sub": "Serverless Postgres",
+  "notes": "Branchable serverless Postgres. Storage separation, autoscaling."
+ },
+ {
+  "id": "ro",
+  "name": "Ro",
+  "sub": "D2C telehealth + pharmacy",
+  "notes": "NYC telehealth. Care plans + fulfillment + identity."
+ },
+ {
+  "id": "disney",
+  "name": "The Walt Disney Company",
+  "sub": "Streaming + studios + parks (NYSE: DIS)",
+  "notes": "NYC tech: ABC News, Hulu, ESPN+, Disney+. Streaming infra + content systems."
+ },
+ {
+  "id": "blackrock",
+  "name": "BlackRock",
+  "sub": "World's largest asset manager (NYSE: BLK)",
+  "notes": "NYC HQ. Aladdin platform \\u2014 risk + portfolio mgmt. Heavy systems / data eng."
+ },
+ {
+  "id": "etsy",
+  "name": "Etsy",
+  "sub": "Marketplace for handmade + vintage (NASDAQ: ETSY)",
+  "notes": "Brooklyn HQ. Recommendations, search, payments, ML \\u2014 strong Python culture."
+ },
+ {
+  "id": "nbcuniversal",
+  "name": "Comcast (NBCUniversal)",
+  "sub": "Media + telecom (NASDAQ: CMCSA)",
+  "notes": "NBCU + Peacock streaming. NYC: ad tech + media engineering."
+ }
+]

@@ -1,0 +1,212 @@
+[
+ {
+  "id": "openai",
+  "name": "OpenAI",
+  "sub": "GPT / ChatGPT / API",
+  "notes": "FDE-style 'solutions' work + applied research. Bar is extreme; emphasizes shipping + safety judgment."
+ },
+ {
+  "id": "anthropic",
+  "name": "Anthropic",
+  "sub": "Claude \\u2014 AI safety lab",
+  "notes": "Heavy values screen; expect ethical-dilemma and downside-risk questions. Applied-AI eng roles are FDE-flavored."
+ },
+ {
+  "id": "scaleai",
+  "name": "Scale AI",
+  "sub": "AI data + evals + RLHF",
+  "notes": "Data pipelines for AI labs + DoD. FDE work for enterprise deploys; long async eval workflows."
+ },
+ {
+  "id": "decagon",
+  "name": "Decagon",
+  "sub": "AI customer-support agents",
+  "notes": "Enterprise AI agents. FDE-heavy: deploy alongside customer success."
+ },
+ {
+  "id": "credal",
+  "name": "Credal",
+  "sub": "Enterprise LLM gateway",
+  "notes": "Auth, audit, redaction, routing. RAG + governance for regulated buyers."
+ },
+ {
+  "id": "mirage",
+  "name": "Mirage",
+  "sub": "AI 3D worldbuilding",
+  "notes": "3D scene generation. Multimodal, GPU pool design, long-running inference."
+ },
+ {
+  "id": "tavily",
+  "name": "Tavily",
+  "sub": "Search API for AI agents",
+  "notes": "Retrieval API for agents. Ranking + eval. RAG-adjacent."
+ },
+ {
+  "id": "modal",
+  "name": "Modal Labs",
+  "sub": "Serverless cloud for AI",
+  "notes": "Container runtime, serverless GPU. Systems-heavy."
+ },
+ {
+  "id": "normal-computing",
+  "name": "Normal Computing",
+  "sub": "Probabilistic AI for enterprise",
+  "notes": "Probabilistic compute approach to enterprise AI."
+ },
+ {
+  "id": "distyl",
+  "name": "Distyl",
+  "sub": "AI for Fortune 500 deployments",
+  "notes": "FDE-heavy: deploy AI inside banks, telcos."
+ },
+ {
+  "id": "sierra",
+  "name": "Sierra",
+  "sub": "AI agents for consumer brands",
+  "notes": "Bret Taylor's agent co. Customer-deploy heavy."
+ },
+ {
+  "id": "cognition",
+  "name": "Cognition",
+  "sub": "Devin \\u2014 autonomous SWE agent",
+  "notes": "Autonomous code agent. Agent reliability + eval depth."
+ },
+ {
+  "id": "glean",
+  "name": "Glean",
+  "sub": "Enterprise AI search",
+  "notes": "Enterprise search + chat over corp docs. Retrieval at scale."
+ },
+ {
+  "id": "elevenlabs",
+  "name": "ElevenLabs",
+  "sub": "Voice AI / TTS",
+  "notes": "Voice synthesis API. Audio infra, real-time streaming."
+ },
+ {
+  "id": "rilla",
+  "name": "Rilla",
+  "sub": "AI for field-sales coaching",
+  "notes": "Speech AI for outside sales. ASR, summarization, ranking."
+ },
+ {
+  "id": "perplexity",
+  "name": "Perplexity",
+  "sub": "AI answer engine",
+  "notes": "Conversational answer engine with citations. Retrieval + ranking + UX."
+ },
+ {
+  "id": "cohere",
+  "name": "Cohere",
+  "sub": "Enterprise LLM platform",
+  "notes": "Enterprise LLM toolchain. Strong RAG + finetuning depth."
+ },
+ {
+  "id": "cursor",
+  "name": "Cursor",
+  "sub": "AI-first code editor",
+  "notes": "AI code editor. Frontier model integration, latency, UX."
+ },
+ {
+  "id": "langchain",
+  "name": "LangChain",
+  "sub": "LLM app dev framework",
+  "notes": "LangSmith + framework. Agent tooling, observability, evals."
+ },
+ {
+  "id": "baseten",
+  "name": "Baseten",
+  "sub": "ML model deployment",
+  "notes": "Model deployment infra. Inference engineering, autoscaling GPU."
+ },
+ {
+  "id": "deepgram",
+  "name": "Deepgram",
+  "sub": "Speech AI / STT",
+  "notes": "Real-time speech recognition. Streaming protocols, audio pipelines, AI eval."
+ },
+ {
+  "id": "assemblyai",
+  "name": "AssemblyAI",
+  "sub": "Speech-to-text API",
+  "notes": "Production STT API. Streaming, models, scale."
+ },
+ {
+  "id": "writer",
+  "name": "Writer",
+  "sub": "Enterprise generative AI",
+  "notes": "Enterprise writing AI. RAG + governance + integrations."
+ },
+ {
+  "id": "abridge",
+  "name": "Abridge",
+  "sub": "AI for medical scribing",
+  "notes": "Real-time medical transcription. Audio + clinical NLP + EHR."
+ },
+ {
+  "id": "stripe",
+  "name": "Stripe",
+  "sub": "Payments + financial infra",
+  "notes": "Payments at planet scale. Distributed systems, idempotency, money."
+ },
+ {
+  "id": "ramp",
+  "name": "Ramp",
+  "sub": "Corporate cards + finance ops",
+  "notes": "Ledger, fraud, integrations at scale. High autonomy bar."
+ },
+ {
+  "id": "brex",
+  "name": "Brex",
+  "sub": "Corporate cards + spend mgmt",
+  "notes": "Cards, banking, expense. PCI, ledger, large eng org."
+ },
+ {
+  "id": "mercury",
+  "name": "Mercury",
+  "sub": "Banking for startups",
+  "notes": "Banking UX + ops. Compliance, money movement."
+ },
+ {
+  "id": "plaid",
+  "name": "Plaid",
+  "sub": "Banking API + financial data",
+  "notes": "Bank-data connectivity infra. Integration breadth, reliability."
+ },
+ {
+  "id": "alloy",
+  "name": "Alloy",
+  "sub": "Identity decisioning for fintech",
+  "notes": "KYC/AML infra. Identity graph, compliance UX."
+ },
+ {
+  "id": "gusto",
+  "name": "Gusto",
+  "sub": "Payroll / HR for SMBs",
+  "notes": "Payroll engine + benefits. Compliance, money movement, multi-state tax."
+ },
+ {
+  "id": "robinhood",
+  "name": "Robinhood",
+  "sub": "Retail brokerage (NASDAQ)",
+  "notes": "Public co. Markets infra, latency, identity."
+ },
+ {
+  "id": "sofi",
+  "name": "SoFi",
+  "sub": "Personal finance (NASDAQ)",
+  "notes": "Consumer finance super-app. Lending, banking, brokerage."
+ },
+ {
+  "id": "modern-treasury",
+  "name": "Modern Treasury",
+  "sub": "Payment operations",
+  "notes": "Money movement infra. Bank integrations, ledger, ops UX."
+ },
+ {
+  "id": "carta",
+  "name": "Carta",
+  "sub": "Cap-table + private markets",
+  "notes": "Cap tables + fund admin. Compliance, securities."
+ }
+]

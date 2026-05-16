@@ -1,0 +1,212 @@
+[
+ {
+  "id": "lyft",
+  "name": "Lyft",
+  "sub": "Rideshare + mobility (NASDAQ)",
+  "notes": "Public co. Mobility platform \\u2014 matching, payments, mapping."
+ },
+ {
+  "id": "reddit",
+  "name": "Reddit",
+  "sub": "Social discussion platform (NYSE)",
+  "notes": "Public co. Massive social platform with rich data + recs."
+ },
+ {
+  "id": "jane-street",
+  "name": "Jane Street",
+  "sub": "Quant trading firm",
+  "notes": "Quant trading. Strong on functional programming (OCaml), CS fundamentals."
+ },
+ {
+  "id": "mosaic",
+  "name": "Mosaic",
+  "sub": "Strategic finance platform",
+  "notes": "FP&A software for CFOs. Modeling + integrations."
+ },
+ {
+  "id": "monte-carlo",
+  "name": "Monte Carlo",
+  "sub": "Data observability",
+  "notes": "Data reliability platform. Lineage, anomaly detection, integrations."
+ },
+ {
+  "id": "forge",
+  "name": "Forge",
+  "sub": "Private-markets liquidity",
+  "notes": "Private secondary marketplace. Markets infra + compliance."
+ },
+ {
+  "id": "middesk",
+  "name": "Middesk",
+  "sub": "KYB / business identity infra",
+  "notes": "Business identity verification for fintech. Identity graph + compliance."
+ },
+ {
+  "id": "pinwheel",
+  "name": "Pinwheel",
+  "sub": "Payroll API",
+  "notes": "Payroll connectivity infra. Income/employment data, direct-deposit switching."
+ },
+ {
+  "id": "mistral",
+  "name": "Mistral AI",
+  "sub": "Open-weights LLM platform",
+  "notes": "Open-source frontier models. Strong systems + applied research culture."
+ },
+ {
+  "id": "commure",
+  "name": "Commure",
+  "sub": "AI healthcare ops platform",
+  "notes": "Health-system operations AI. Heavy enterprise deploys; FDE-flavored."
+ },
+ {
+  "id": "spotify",
+  "name": "Spotify",
+  "sub": "Audio streaming (NYSE)",
+  "notes": "Public co. Audio infra + recs + ads + creator tools."
+ },
+ {
+  "id": "point72",
+  "name": "Point72",
+  "sub": "Quant + multi-strat hedge fund",
+  "notes": "Steve Cohen's quant firm. Trading systems + ML + low-latency infra."
+ },
+ {
+  "id": "jump-trading",
+  "name": "Jump Trading",
+  "sub": "Proprietary trading firm",
+  "notes": "Quant trading. HFT, C++, low-latency networking, crypto infra."
+ },
+ {
+  "id": "virtu",
+  "name": "Virtu Financial",
+  "sub": "Market maker (NASDAQ)",
+  "notes": "Public market maker. HFT, market-data, low-latency systems."
+ },
+ {
+  "id": "secureframe",
+  "name": "Secureframe",
+  "sub": "Compliance automation",
+  "notes": "SOC2/ISO/HIPAA automation. Compliance + integrations."
+ },
+ {
+  "id": "asana",
+  "name": "Asana",
+  "sub": "Work management (NYSE)",
+  "notes": "Public co. Work-graph platform + AI features."
+ },
+ {
+  "id": "iterable",
+  "name": "Iterable",
+  "sub": "Cross-channel marketing platform",
+  "notes": "Customer messaging + journey orchestration. Data plumbing + segmentation."
+ },
+ {
+  "id": "braze",
+  "name": "Braze",
+  "sub": "Customer engagement (NASDAQ)",
+  "notes": "Public co. Cross-channel CRM messaging at scale."
+ },
+ {
+  "id": "knock",
+  "name": "Knock",
+  "sub": "Notifications-as-a-service",
+  "notes": "Notification API for product teams. Event-driven infra + integrations."
+ },
+ {
+  "id": "extend",
+  "name": "Extend",
+  "sub": "Virtual card platform",
+  "notes": "Virtual card issuing + spend mgmt for fintechs. Card networks + ledger."
+ },
+ {
+  "id": "chime",
+  "name": "Chime",
+  "sub": "Consumer neobank (NASDAQ)",
+  "notes": "Public co. Consumer banking at scale. Money movement + UX."
+ },
+ {
+  "id": "kustomer",
+  "name": "Kustomer",
+  "sub": "CRM platform for support",
+  "notes": "Modern support CRM. Unified customer record + automation + AI."
+ },
+ {
+  "id": "doubleverify",
+  "name": "DoubleVerify",
+  "sub": "Ad measurement (NYSE)",
+  "notes": "Public co. Ad verification + analytics infra."
+ },
+ {
+  "id": "wealthfront",
+  "name": "Wealthfront",
+  "sub": "Robo-advisor + cash mgmt",
+  "notes": "Robo-advisor + banking. Algorithms + compliance + UX."
+ },
+ {
+  "id": "stash",
+  "name": "Stash",
+  "sub": "Investing for everyday people",
+  "notes": "Consumer fintech for retail investors. Markets + fractional shares + banking."
+ },
+ {
+  "id": "bombas",
+  "name": "Bombas",
+  "sub": "Mission-driven apparel DTC",
+  "notes": "DTC apparel. Logistics, e-commerce, subscriptions, marketing tech."
+ },
+ {
+  "id": "lovable",
+  "name": "Lovable",
+  "sub": "AI app generator",
+  "notes": "AI builder for apps. Frontier model integration + product engineering."
+ },
+ {
+  "id": "fireworks",
+  "name": "Fireworks AI",
+  "sub": "Fast inference for open models",
+  "notes": "Production inference platform for open-weights models. Systems + perf."
+ },
+ {
+  "id": "logrocket",
+  "name": "LogRocket",
+  "sub": "Frontend session replay + obs",
+  "notes": "Frontend observability + session replay. JS infra + analytics."
+ },
+ {
+  "id": "patreon",
+  "name": "Patreon",
+  "sub": "Membership platform for creators",
+  "notes": "Creator monetization at scale. Subscriptions infra, payments, media tooling."
+ },
+ {
+  "id": "hopper",
+  "name": "Hopper",
+  "sub": "Mobile-first travel booking + fintech",
+  "notes": "Flights/hotels with fintech overlays (price-freeze, cancel-for-any-reason). Mobile + travel-data + ML pricing."
+ },
+ {
+  "id": "hang",
+  "name": "Hang",
+  "sub": "Loyalty + membership platform",
+  "notes": "Membership / loyalty for brands. Payments, identity, integrations."
+ },
+ {
+  "id": "block",
+  "name": "Block",
+  "sub": "Square / Cash App / Afterpay (NYSE)",
+  "notes": "Square / Cash App / Tidal / Afterpay parent. Payments + commerce + crypto."
+ },
+ {
+  "id": "mighty-networks",
+  "name": "Mighty Networks",
+  "sub": "Community + course platform",
+  "notes": "Branded community + course platform for creators. Social graph + commerce."
+ },
+ {
+  "id": "seatgeek",
+  "name": "SeatGeek",
+  "sub": "Live-events ticketing",
+  "notes": "Tickets marketplace + primary-issuer platform. Marketplace ranking, payments, integrations."
+ }
+]

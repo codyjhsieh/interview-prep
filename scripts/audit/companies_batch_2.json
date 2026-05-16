@@ -1,0 +1,212 @@
+[
+ {
+  "id": "blockworks",
+  "name": "Blockworks",
+  "sub": "Crypto media + research",
+  "notes": "Crypto news + intelligence. Editorial tech + data products."
+ },
+ {
+  "id": "betterment",
+  "name": "Betterment",
+  "sub": "Robo-advisor",
+  "notes": "Robo-advised investing. Algorithms + compliance + UX."
+ },
+ {
+  "id": "propel",
+  "name": "Propel",
+  "sub": "Fintech for low-income Americans",
+  "notes": "SNAP-balance app + benefits financial services. Mission-driven."
+ },
+ {
+  "id": "gemini",
+  "name": "Gemini",
+  "sub": "Crypto exchange",
+  "notes": "Winklevoss-led NYC crypto exchange. Compliance-first culture."
+ },
+ {
+  "id": "alchemy",
+  "name": "Alchemy",
+  "sub": "Web3 dev platform",
+  "notes": "Web3 infra. RPC, indexing, SDKs."
+ },
+ {
+  "id": "datadog",
+  "name": "Datadog",
+  "sub": "Cloud monitoring (NASDAQ)",
+  "notes": "Public co. Time-series infra, alerting, observability depth."
+ },
+ {
+  "id": "mongodb",
+  "name": "MongoDB",
+  "sub": "Document database (NASDAQ)",
+  "notes": "Public co. Database internals, distributed systems."
+ },
+ {
+  "id": "vercel",
+  "name": "Vercel",
+  "sub": "Frontend cloud / Next.js",
+  "notes": "Edge platform + Next.js. CDN, build, runtime."
+ },
+ {
+  "id": "stainless",
+  "name": "Stainless",
+  "sub": "SDK generation from OpenAPI",
+  "notes": "SDK generation from OpenAPI. Compiler/codegen, DX depth."
+ },
+ {
+  "id": "airtable",
+  "name": "Airtable",
+  "sub": "No-code database",
+  "notes": "No-code data platform. App framework + AI features."
+ },
+ {
+  "id": "sigma-computing",
+  "name": "Sigma",
+  "sub": "Cloud BI",
+  "notes": "Cloud-native BI over Snowflake/BigQuery. Spreadsheet UX."
+ },
+ {
+  "id": "whatnot",
+  "name": "Whatnot",
+  "sub": "Live shopping marketplace",
+  "notes": "Real-time live shopping. Streaming, payments, trust & safety."
+ },
+ {
+  "id": "attentive",
+  "name": "Attentive",
+  "sub": "SMS marketing platform",
+  "notes": "Conversational SMS. Messaging infra, deliverability, analytics."
+ },
+ {
+  "id": "squarespace",
+  "name": "Squarespace",
+  "sub": "Website builder + payments",
+  "notes": "Hosting, builder, payments at scale."
+ },
+ {
+  "id": "substack",
+  "name": "Substack",
+  "sub": "Independent publishing",
+  "notes": "Newsletter platform + Notes. Publishing infra, subscriptions."
+ },
+ {
+  "id": "dorsia",
+  "name": "Dorsia",
+  "sub": "Membership dining + reservations",
+  "notes": "Multi-venue reservations. SQL + payments + UX."
+ },
+ {
+  "id": "resortpass",
+  "name": "ResortPass",
+  "sub": "Day-pass hotel marketplace",
+  "notes": "Inventory + pricing for hotel amenities."
+ },
+ {
+  "id": "talkspace",
+  "name": "Talkspace",
+  "sub": "Online therapy (NASDAQ)",
+  "notes": "Telehealth platform \\u2014 therapy networks, intake, claims."
+ },
+ {
+  "id": "headway",
+  "name": "Headway",
+  "sub": "In-network mental health",
+  "notes": "Therapist network + billing. Healthcare insurance plumbing."
+ },
+ {
+  "id": "oscar",
+  "name": "Oscar Health",
+  "sub": "Tech-driven health insurance (NYSE)",
+  "notes": "Public co. Insurance platform with member-facing tech."
+ },
+ {
+  "id": "maven-clinic",
+  "name": "Maven Clinic",
+  "sub": "Family-care telehealth",
+  "notes": "Women's + family health network. Provider matching, telehealth."
+ },
+ {
+  "id": "ridgeline",
+  "name": "Ridgeline",
+  "sub": "Cloud OS for investment mgmt",
+  "notes": "Modern investment-management platform. Vertical SaaS at scale."
+ },
+ {
+  "id": "figma",
+  "name": "Figma",
+  "sub": "Collaborative design",
+  "notes": "Multiplayer collaboration at scale. CRDT, real-time infra, design tooling depth."
+ },
+ {
+  "id": "notion",
+  "name": "Notion",
+  "sub": "Connected workspace + AI",
+  "notes": "Block-based docs + LLM features. Schema design, perf, AI eval."
+ },
+ {
+  "id": "justworks",
+  "name": "Justworks",
+  "sub": "HR / payroll / benefits",
+  "notes": "PEO platform. Multi-tenant, integrations with payroll + carriers."
+ },
+ {
+  "id": "kalshi",
+  "name": "Kalshi",
+  "sub": "Regulated event-contracts exchange",
+  "notes": "CFTC-regulated prediction market. Markets infra, compliance."
+ },
+ {
+  "id": "polymarket",
+  "name": "Polymarket",
+  "sub": "Crypto prediction markets",
+  "notes": "Decentralized prediction markets. On-chain settlement + UX."
+ },
+ {
+  "id": "unify",
+  "name": "Unify",
+  "sub": "AI for outbound sales",
+  "notes": "AI sales rep / prospecting platform. Data + agents."
+ },
+ {
+  "id": "ideogram",
+  "name": "Ideogram",
+  "sub": "Generative image AI",
+  "notes": "Text-to-image generation. Multimodal eval + GPU pipeline."
+ },
+ {
+  "id": "poolside",
+  "name": "Poolside",
+  "sub": "AI for software engineering",
+  "notes": "Frontier AI for code. Frontier model R&D + product engineering."
+ },
+ {
+  "id": "drata",
+  "name": "Drata",
+  "sub": "Continuous compliance automation",
+  "notes": "SOC2/ISO/HIPAA automation. Compliance + integrations breadth."
+ },
+ {
+  "id": "numeric",
+  "name": "Numeric",
+  "sub": "AI-powered close software",
+  "notes": "Modern accounting close. Spreadsheet UX + workflow + AI."
+ },
+ {
+  "id": "glide",
+  "name": "Glide",
+  "sub": "No-code apps from spreadsheets",
+  "notes": "Spreadsheet \\u2192 app builder. Real-time sync + visual programming."
+ },
+ {
+  "id": "yext",
+  "name": "Yext",
+  "sub": "Brand / search platform (NYSE)",
+  "notes": "Public co. Knowledge-graph platform + AI answers."
+ },
+ {
+  "id": "the-trade-desk",
+  "name": "The Trade Desk",
+  "sub": "DSP for digital advertising (NASDAQ)",
+  "notes": "Public co. Real-time bidding + ad tech at scale."
+ }
+]
