@@ -129,6 +129,15 @@ function tickDay(state) {
     state.todayDate = today;
     state.todayXP = 0;
   }
+  // Reconcile todayXP against history[today].xp. The merge function in
+  // sync.js takes MAX on per-date history entries but takes the fresher
+  // side\'s todayXP — those rules disagree when devices diverge, and
+  // todayXP can be clipped below the (correct) history total. Use
+  // history as the audit-of-record. One-way: never decrease todayXP.
+  const hentry = (state.history || []).find(h => h.date === today);
+  if (hentry && (hentry.xp || 0) > (state.todayXP || 0)) {
+    state.todayXP = hentry.xp;
+  }
   if (state.streak.lastDay === today) return state; // already counted
 
   const last = state.streak.lastDay;

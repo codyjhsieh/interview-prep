@@ -346,10 +346,20 @@ window.SYNC = (function () {
     const fresher = (bTimestamp || 0) >= (aTimestamp || 0) ? b : a;
     // Start with all of fresher's fields, then explicit per-field overrides.
     const merged = { ...a, ...fresher };
-    // Numeric stats: union via max
-    for (const k of ['vitality', 'form', 'ageDays', 'eatenTodayXP', 'deathCount']) {
+    // Monotonic numeric stats: union via max. NOTE: vitality is NOT in
+    // this list — vitality is paired with lastFedAt (snapshot at the
+    // moment of last feed), so max-merging independently would mix a
+    // stale snapshot with a newer timestamp and inflate live vitality.
+    for (const k of ['form', 'ageDays', 'eatenTodayXP', 'deathCount']) {
       merged[k] = Math.max(a[k] || 0, b[k] || 0);
     }
+    // Vitality + lastFedAt: merge as a PAIR from whichever side has
+    // the most recent feed event. The "latest feed" defines both the
+    // snapshot value AND the timestamp the live-decay formula reads.
+    const aFed = a.lastFedAt || 0, bFed = b.lastFedAt || 0;
+    const fedSide = bFed >= aFed ? b : a;
+    merged.vitality  = fedSide.vitality || 0;
+    merged.lastFedAt = fedSide.lastFedAt || 0;
     // Date strings: take the later one (works for YYYY-MM-DD compare)
     for (const k of ['lastTickDate', 'lastFedDate', 'lastEatenDate']) {
       const da = a[k] || '', db = b[k] || '';

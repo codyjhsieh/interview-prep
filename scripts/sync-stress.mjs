@@ -141,9 +141,16 @@ function mergePets(a, b, aT, bT) {
   if (!a) return b; if (!b) return a;
   const fresher = (bT || 0) >= (aT || 0) ? b : a;
   const merged = { ...a, ...fresher };
-  for (const k of ['vitality','form','ageDays','eatenTodayXP','deathCount']) {
+  // Monotonic stats only — vitality is NOT here (see below).
+  for (const k of ['form','ageDays','eatenTodayXP','deathCount']) {
     merged[k] = Math.max(a[k] || 0, b[k] || 0);
   }
+  // Vitality + lastFedAt merged as a PAIR from the side with the most
+  // recent feed event.
+  const aFed = a.lastFedAt || 0, bFed = b.lastFedAt || 0;
+  const fedSide = bFed >= aFed ? b : a;
+  merged.vitality  = fedSide.vitality || 0;
+  merged.lastFedAt = fedSide.lastFedAt || 0;
   for (const k of ['lastTickDate','lastFedDate','lastEatenDate']) {
     const da = a[k] || '', db = b[k] || '';
     merged[k] = db > da ? db : da;
