@@ -4448,7 +4448,24 @@ function renderCategory(state, hub, catId, openModuleId, openLessonId) {
   });
 
   if (openLessonId) {
-    setTimeout(() => renderLesson(state, openLessonId), 50);
+    setTimeout(() => {
+      const w = renderLesson(state, openLessonId);
+      if (!w) return;
+      // Tag the modal so the close handler navigates back to #flashcards
+      // instead of leaving the user stranded on the category route.
+      w.dataset.returnTo = 'flashcards';
+      // Insert an explicit "← Flashcards" link above the lesson title so
+      // the back affordance is visible (the "×" close button also works).
+      const head = w.querySelector('h2');
+      if (head && head.parentElement) {
+        const back = document.createElement('a');
+        back.href = '#flashcards';
+        back.className = 'text-xs muted hover:text-accent-400 inline-flex items-center gap-1 mb-2';
+        back.style.color = 'var(--accent)';
+        back.innerHTML = '← Back to flashcards';
+        head.parentElement.insertBefore(back, head.parentElement.firstChild);
+      }
+    }, 50);
   }
 }
 

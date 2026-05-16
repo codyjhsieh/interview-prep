@@ -421,10 +421,14 @@ function bindEvents() {
       VIEWS.renderLesson(state, row.dataset.lesson);
       return;
     }
-    // Close lesson modal
+    // Close lesson modal. If the modal was opened from a flashcard deep-link
+    // (data-return-to="flashcards" stamped by renderCategory), navigate back
+    // to #flashcards so the user doesn't get stranded on the category route.
     if (e.target?.dataset?.close === 'lesson') {
       const modal = e.target.closest('.fixed');
+      const returnTo = modal?.dataset?.returnTo;
       modal?.remove();
+      if (returnTo === 'flashcards') location.hash = '#flashcards';
       return;
     }
     // Pet — preview all life stages

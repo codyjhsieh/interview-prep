@@ -1652,17 +1652,25 @@ code, pre, .font-mono {
  * Flashcard
  * ========================================================================= */
 .flashcard { perspective: 1400px; }
+/* Grid layout: both faces live in the same 1x1 cell so the card grows
+   with whichever face has more content (front Q is usually short, back
+   A is often structured). preserve-3d + backface-visibility keep the
+   flip animation working — only the front-facing face renders. */
 .flashcard-inner {
-  position: relative; width: 100%; min-height: 280px;
+  position: relative; width: 100%; min-height: 240px;
+  display: grid;
+  grid-template-areas: "card";
   transition: transform 0.7s var(--spring);
   transform-style: preserve-3d;
   cursor: pointer;
 }
 .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
 .flashcard-face {
-  position: absolute; inset: 0;
+  grid-area: card;
+  position: relative;
   backface-visibility: hidden;
-  padding: 1.5rem 1.6rem;
+  -webkit-backface-visibility: hidden;
+  padding: 1.5rem 1.6rem 4.5rem;
   border-radius: var(--r);
   background: var(--thick);
   -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.06);
@@ -2325,9 +2333,22 @@ code {
 
 @media (max-width: 640px) {
   .lesson-prose {
-    font-size: 16px;
-    line-height: 1.75;
+    font-size: 17.5px;
+    line-height: 1.8;
     max-width: 100%;
+  }
+  .lesson-prose h1, .lesson-prose h2 { font-size: 1.35rem; line-height: 1.25; }
+  .lesson-prose h3 { font-size: 1.15rem; line-height: 1.3; }
+  /* Lesson modal title + meta need to be readable on phone too */
+  .fixed.inset-0 h2.font-display { font-size: 1.45rem; line-height: 1.2; }
+  /* Modal cards need iOS momentum scrolling so the lesson body scrolls
+     when the content exceeds the 90vh max-height. Without this the
+     overflow:auto element steals the touch without scrolling. */
+  .fixed.inset-0 .card.overflow-y-auto,
+  .fixed.inset-0 .card[class*="max-h"] {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
   .lesson-prose br + br      { margin-top: 0.75em; }
   .lesson-prose pre          { margin: 1.2em 0; font-size: 13.5px; line-height: 1.6; }
