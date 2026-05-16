@@ -4482,7 +4482,11 @@ function renderLesson(state, lessonId, sourceEl) {
   wrap.style.background = 'rgba(248,249,252,0.55)';
   wrap.style.backdropFilter = 'blur(24px) saturate(180%)';
   wrap.style.webkitBackdropFilter = 'blur(24px) saturate(180%)';
-  const card = el('div','card elevated max-w-2xl w-full max-h-[90vh] overflow-y-auto');
+  // No max-h / overflow on the card itself -- the .fixed.inset-0 wrapper
+  // owns scroll (overflow-y:auto on the wrapper, see styles.css). Capping
+  // the card here would clip the body, which is the bug the user has been
+  // hitting (text overflows past the card's rounded bottom edge).
+  const card = el('div','card elevated max-w-2xl w-full');
   card.style.padding = '1.5rem 1.7rem';
   const done = !!state.completedLessons[lessonId];
 
