@@ -66,7 +66,7 @@
    * Returns the distribution we need without sending the whole buffer back. */
   function framesSince(sinceFrameCount) {
     const count = Math.min(frameCount - sinceFrameCount, FRAME_BUF);
-    if (count <= 0) return { count: 0, fps: 0, p95Ms: 0, maxMs: 0 };
+    if (count <= 0) return { count: 0, fps: 0, p95Ms: 0, maxMs: 0, buckets: null };
     const start = (frameWriteIdx - count + FRAME_BUF) % FRAME_BUF;
     const arr = new Array(count);
     for (let i = 0; i < count; i++) arr[i] = frames[(start + i) % FRAME_BUF];
@@ -75,7 +75,21 @@
     const avgMs = sum / count;
     const p95Ms = arr[Math.min(count - 1, Math.floor(count * 0.95))];
     const maxMs = arr[count - 1];
-    return { count, fps: avgMs > 0 ? 1000 / avgMs : 0, p95Ms, maxMs, avgMs };
+    // Frame-duration histogram. Buckets line up with sustained-fps brackets:
+    //   <17ms  -> 60fps     (smooth)
+    //   17-33  -> 30-60fps
+    //   33-50  -> 20-30fps
+    //   50-100 -> 10-20fps  (visible jank)
+    //   >=100  -> <10fps    (drops)
+    const buckets = { '<17': 0, '17-33': 0, '33-50': 0, '50-100': 0, '>=100': 0 };
+    for (const d of arr) {
+      if (d < 17) buckets['<17']++;
+      else if (d < 33) buckets['17-33']++;
+      else if (d < 50) buckets['33-50']++;
+      else if (d < 100) buckets['50-100']++;
+      else buckets['>=100']++;
+    }
+    return { count, fps: avgMs > 0 ? 1000 / avgMs : 0, p95Ms, maxMs, avgMs, buckets };
   }
 
   let routeStart = null;

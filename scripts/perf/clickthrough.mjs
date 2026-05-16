@@ -44,83 +44,220 @@ const JSON_PATH   = path.join(ROOT, 'scripts/perf/perf-report.json');
  *   - dwell: optional override of DWELL_MS during which FPS samples are
  *     collected (longer for routes with ongoing animations like the pet)
  */
+/* Helpers used inside steps. Each runs in the Playwright Node context;
+ * use page.evaluate() to drive the page. */
+
+/* Smooth-scrolls the viewport from current Y to targetY over durMs.
+ * Frames are driven by rAF inside the page so we measure real paint
+ * cost, not the discrete jumps that page.mouse.wheel() produces. */
+async function pageScroll(page, targetYFrac, durMs = 1500) {
+  await page.evaluate(({ frac, dur }) => {
+    return new Promise((resolve) => {
+      const start = window.scrollY;
+      const endY = (document.documentElement.scrollHeight - window.innerHeight) * frac;
+      const t0 = performance.now();
+      function step(t) {
+        const k = Math.min(1, (t - t0) / dur);
+        const eased = k < 0.5 ? 2 * k * k : -1 + (4 - 2 * k) * k;
+        window.scrollTo(0, start + (endY - start) * eased);
+        if (k < 1) requestAnimationFrame(step);
+        else resolve();
+      }
+      requestAnimationFrame(step);
+    });
+  }, { frac: targetYFrac, dur: durMs });
+}
+
 const JOURNEY = [
   {
     label: 'cold-load',
-    go: async (page) => {},        // driver does the initial goto
+    go: async () => {},               // driver does the initial goto
     dwell: 4000,
+    kind: 'load',
   },
+
+  /* ------------------------- Curriculum ------------------------- */
   {
-    label: 'curriculum',
+    label: 'curriculum:nav',
     go: (page) => page.evaluate(() => { location.hash = '#curriculum'; }),
     wait: 'h1:has-text("Curriculum")',
+    kind: 'nav',
   },
   {
-    label: 'category/coding',
+    label: 'curriculum:scroll-down',
+    go: (page) => pageScroll(page, 1.0, 1500),
+    dwell: 1700,
+    kind: 'scroll',
+  },
+  {
+    label: 'curriculum:scroll-up',
+    go: (page) => pageScroll(page, 0.0, 1500),
+    dwell: 1700,
+    kind: 'scroll',
+  },
+
+  /* ----------------------- Category page ------------------------ */
+  {
+    label: 'category/coding:nav',
     go: (page) => page.evaluate(() => { location.hash = '#category/coding'; }),
     wait: 'h1:has-text("Coding & Algorithms")',
+    kind: 'nav',
   },
   {
-    label: 'lesson-open',
-    go: async (page) => {
-      // Open the first available lesson via the data-open handler.
-      await page.evaluate(() => {
-        const btn = document.querySelector('[data-open]');
-        if (btn) btn.click();
-      });
-    },
+    label: 'category/coding:scroll',
+    go: (page) => pageScroll(page, 1.0, 2000),
+    dwell: 2200,
+    kind: 'scroll',
+  },
+
+  /* --------------- Lesson modal: open / scroll / close ---------- */
+  {
+    label: 'lesson:open',
+    go: (page) => page.evaluate(() => {
+      const btn = document.querySelector('[data-open]');
+      if (btn) btn.click();
+    }),
     wait: '.fixed.inset-0 h2',
-    dwell: 4000,
+    dwell: 3500,
+    kind: 'interaction',
   },
   {
-    label: 'lesson-close',
+    label: 'lesson:scroll-down',
+    go: (page) => page.evaluate(() => {
+      return new Promise((resolve) => {
+        // Modal wrapper is the scroll container post-fix.
+        const wrap = document.querySelector('.fixed.inset-0[class*="z-4"]') || document.querySelector('.fixed.inset-0');
+        if (!wrap) return resolve();
+        const start = wrap.scrollTop;
+        const end = wrap.scrollHeight - wrap.clientHeight;
+        const t0 = performance.now(), dur = 1800;
+        function step(t) {
+          const k = Math.min(1, (t - t0) / dur);
+          wrap.scrollTop = start + (end - start) * k;
+          if (k < 1) requestAnimationFrame(step);
+          else resolve();
+        }
+        requestAnimationFrame(step);
+      });
+    }),
+    dwell: 2000,
+    kind: 'scroll',
+  },
+  {
+    label: 'lesson:close',
     go: (page) => page.evaluate(() => {
       const x = document.querySelector('[data-close="lesson"]');
       if (x) x.click();
     }),
+    kind: 'interaction',
   },
+
+  /* ----------------------- Flashcards --------------------------- */
   {
-    label: 'flashcards',
+    label: 'flashcards:nav',
     go: (page) => page.evaluate(() => { location.hash = '#flashcards'; }),
     wait: '.flashcard',
+    kind: 'nav',
   },
   {
-    label: 'flashcard-flip',
+    label: 'flashcards:flip-x2',
     go: async (page) => {
-      // Flip the visible card, then flip back to record two flips.
-      await page.evaluate(() => {
-        const inner = document.querySelector('.flashcard-inner');
-        if (inner) inner.click();
-      });
-      await new Promise(r => setTimeout(r, 800));
-      await page.evaluate(() => {
-        const inner = document.querySelector('.flashcard-inner');
-        if (inner) inner.click();
-      });
+      await page.evaluate(() => document.querySelector('.flashcard-inner')?.click());
+      await new Promise(r => setTimeout(r, 900));
+      await page.evaluate(() => document.querySelector('.flashcard-inner')?.click());
     },
-    dwell: 2500,
+    dwell: 2200,
+    kind: 'interaction',
   },
   {
-    label: 'companies',
+    label: 'flashcards:rate-easy',
+    go: (page) => page.evaluate(() => {
+      // Flip first, then rate
+      const inner = document.querySelector('.flashcard-inner');
+      if (inner) inner.click();
+      setTimeout(() => {
+        document.querySelector('[data-rate="4"]')?.click();
+      }, 200);
+    }),
+    wait: '.flashcard',
+    dwell: 1500,
+    kind: 'interaction',
+  },
+  {
+    label: 'flashcards:scroll',
+    go: (page) => pageScroll(page, 1.0, 1500),
+    dwell: 1700,
+    kind: 'scroll',
+  },
+
+  /* ------------------------ Companies --------------------------- */
+  {
+    label: 'companies:nav',
     go: (page) => page.evaluate(() => { location.hash = '#companies'; }),
-    wait: 'text=startups',
-    dwell: 4000,
+    wait: 'h1:has-text("Companies")',
+    timeout: 20000,                 // 138-card grid is genuinely slow under 4×
+    dwell: 3500,
+    kind: 'nav',
   },
   {
-    label: 'dashboard',
+    label: 'companies:scroll-half',
+    go: (page) => pageScroll(page, 0.5, 1800),
+    dwell: 2000,
+    kind: 'scroll',
+  },
+  {
+    label: 'companies:scroll-bottom',
+    go: (page) => pageScroll(page, 1.0, 2000),
+    dwell: 2200,
+    kind: 'scroll',
+  },
+  {
+    label: 'companies:scroll-top',
+    go: (page) => pageScroll(page, 0.0, 1500),
+    dwell: 1700,
+    kind: 'scroll',
+  },
+
+  /* ------------------------ Dashboard --------------------------- */
+  {
+    label: 'dashboard:nav',
     go: (page) => page.evaluate(() => { location.hash = '#dashboard'; }),
     wait: '#view',
-    dwell: 5000,                   // pet 3D + heatmap take time to settle
+    dwell: 5000,                    // pet 3D + heatmap settle
+    kind: 'nav',
   },
   {
-    label: 'review',
+    label: 'dashboard:scroll',
+    go: (page) => pageScroll(page, 1.0, 2000),
+    dwell: 2200,
+    kind: 'scroll',
+  },
+
+  /* ----------------------- Other routes ------------------------- */
+  {
+    label: 'review:nav',
     go: (page) => page.evaluate(() => { location.hash = '#review'; }),
     wait: '#view',
+    kind: 'nav',
   },
   {
-    label: 'prep',
+    label: 'prep:nav',
     go: (page) => page.evaluate(() => { location.hash = '#prep'; }),
     wait: '#view',
+    kind: 'nav',
+  },
+  {
+    label: 'mocks:nav',
+    go: (page) => page.evaluate(() => { location.hash = '#mocks'; }),
+    wait: '#view',
+    kind: 'nav',
+  },
+  {
+    label: 'infographics:nav',
+    go: (page) => page.evaluate(() => { location.hash = '#infographics'; }),
+    wait: '#view',
+    dwell: 3500,
+    kind: 'nav',
   },
 ];
 
@@ -163,7 +300,8 @@ async function main() {
       await step.go(page);
       if (step.wait) {
         if (typeof step.wait === 'string') {
-          await page.waitForSelector(step.wait, { timeout: 6000 });
+          // Heavy routes under 4× throttle (companies grid) can need >6s.
+          await page.waitForSelector(step.wait, { timeout: step.timeout || 15000 });
         } else {
           await new Promise(r => setTimeout(r, step.wait));
         }
@@ -174,6 +312,7 @@ async function main() {
       await page.waitForTimeout(step.dwell || DWELL_MS);
       const m = await page.evaluate(() => window.__perf.endRoute());
       if (m) {
+        m.kind = step.kind;
         rows.push(m);
         const status = m.fps < 30 ? '✗' : m.fps < 50 ? '~' : '✓';
         const heapStr = m.heapDelta != null
@@ -207,55 +346,180 @@ async function main() {
   console.log(`📄 ${path.relative(ROOT, JSON_PATH)}`);
 }
 
+/* ASCII bar (10 cells wide) showing what % of frames landed in each
+ * duration bucket. Quick visual: lots of █ on the left = smooth, lots
+ * on the right = janky. */
+function frameBar(buckets) {
+  if (!buckets) return '';
+  const order = ['<17', '17-33', '33-50', '50-100', '>=100'];
+  const glyphs = { '<17': '█', '17-33': '▓', '33-50': '▒', '50-100': '░', '>=100': '·' };
+  const total = order.reduce((s, k) => s + buckets[k], 0);
+  if (!total) return '';
+  let out = '';
+  for (const k of order) {
+    const cells = Math.round((buckets[k] / total) * 10);
+    out += glyphs[k].repeat(cells);
+  }
+  return out.padEnd(10).slice(0, 10);
+}
+
 function renderMarkdown(r) {
   const fmt = (n, digits = 1) => n == null ? '—' : Number(n).toFixed(digits);
   const fpsBadge = (f) => f == null ? '—' : f < 30 ? `**${fmt(f)}** ✗` : f < 50 ? `${fmt(f)} ~` : `${fmt(f)} ✓`;
-  const heap = (b) => b == null ? '—' : (b / 1e6).toFixed(1) + ' MB';
+  const heapStr = (b) => b == null ? '—' : ((b >= 0 ? '+' : '') + (b / 1e6).toFixed(1) + ' MB');
+
+  const ok = (m) => m && !m.error;
+  const rows = r.rows.filter(ok);
+
+  /* Aggregates by kind */
+  const byKind = {};
+  for (const m of rows) {
+    const k = m.kind || 'other';
+    (byKind[k] ||= []).push(m);
+  }
+  const avgFps = (arr) => arr.reduce((s, m) => s + m.fps, 0) / Math.max(1, arr.length);
+  const avgP95 = (arr) => arr.reduce((s, m) => s + m.p95Ms, 0) / Math.max(1, arr.length);
+
+  /* Worst-of lists */
+  const worstFps = [...rows].sort((a, b) => a.fps - b.fps).slice(0, 3);
+  const worstLongTask = [...rows].sort((a, b) => b.maxLongTaskMs - a.maxLongTaskMs).slice(0, 3).filter(m => m.maxLongTaskMs > 0);
+  const heapWinners = [...rows].filter(m => m.heapDelta != null && m.heapDelta > 0).sort((a, b) => b.heapDelta - a.heapDelta).slice(0, 3);
+  const totalLong = rows.reduce((s, m) => s + (m.longTaskCount || 0), 0);
+  const totalLongMs = rows.reduce((s, m) => s + (m.longTaskMs || 0), 0);
+  const totalHeapDelta = rows.reduce((s, m) => s + (m.heapDelta || 0), 0);
 
   const lines = [];
   lines.push(`# Clickthrough perf report`);
   lines.push('');
-  lines.push(`- Captured: ${r.capturedAt}`);
-  lines.push(`- URL: ${r.url}`);
-  lines.push(`- CPU throttle: ${r.cpuThrottle}× (Lighthouse Moto G Power ≈ 4×)`);
-  lines.push(`- Viewport: ${r.viewport}`);
-  lines.push(`- Wall time: ${r.walltimeSec}s`);
+  lines.push(`> Automated journey through every major route — nav, scroll, and interaction — with frame-by-frame sampling under ${r.cpuThrottle}× CPU throttling. Generated by [scripts/perf/clickthrough.mjs](clickthrough.mjs).`);
   lines.push('');
+  lines.push(`- **Captured:** ${r.capturedAt}`);
+  lines.push(`- **URL:** ${r.url}`);
+  lines.push(`- **CPU throttle:** ${r.cpuThrottle}× (Lighthouse Moto G Power ≈ 4×)`);
+  lines.push(`- **Viewport:** ${r.viewport}`);
+  lines.push(`- **Wall time:** ${r.walltimeSec}s`);
+  lines.push(`- **Steps:** ${r.rows.length} (${rows.length} captured, ${r.rows.length - rows.length} errored)`);
+  lines.push('');
+
+  /* ---- TL;DR ---- */
+  lines.push(`## TL;DR`);
+  lines.push('');
+  const headline = [];
+  if (worstFps[0]) headline.push(`worst route \`${worstFps[0].label}\` at **${fmt(worstFps[0].fps)} fps**`);
+  if (worstLongTask[0]) headline.push(`longest single task **${fmt(worstLongTask[0].maxLongTaskMs)} ms** during \`${worstLongTask[0].label}\``);
+  if (heapWinners[0]) headline.push(`biggest heap growth +**${(heapWinners[0].heapDelta / 1e6).toFixed(1)} MB** on \`${heapWinners[0].label}\``);
+  if (headline.length) lines.push('Across the journey: ' + headline.join('; ') + '.');
+  lines.push('');
+  lines.push(`Total long tasks: **${totalLong}** (cumulative blocking **${fmt(totalLongMs, 0)} ms**). Net heap growth: **${heapStr(totalHeapDelta)}**.`);
+  lines.push('');
+
+  /* ---- Initial paint ---- */
   lines.push(`## Initial paint`);
   lines.push('');
-  lines.push(`| Metric | Value |`);
-  lines.push(`|---|---|`);
-  lines.push(`| First Contentful Paint | ${fmt(r.navTiming.firstContentfulPaint)} ms |`);
-  lines.push(`| DOMContentLoaded | ${fmt(r.navTiming.domContentLoaded)} ms |`);
-  lines.push(`| load event | ${fmt(r.navTiming.loadEvent)} ms |`);
+  lines.push(`| Metric | Value | Verdict |`);
+  lines.push(`|---|---|---|`);
+  const fcp = r.navTiming.firstContentfulPaint || 0;
+  const fcpVerdict = fcp < 1800 ? '✓ good' : fcp < 3000 ? '~ needs work' : '✗ poor';
+  lines.push(`| First Contentful Paint | ${fmt(fcp)} ms | ${fcpVerdict} |`);
+  lines.push(`| DOMContentLoaded | ${fmt(r.navTiming.domContentLoaded)} ms | — |`);
+  lines.push(`| load event | ${fmt(r.navTiming.loadEvent)} ms | — |`);
   lines.push('');
-  lines.push(`## Per-route`);
+
+  /* ---- By kind ---- */
+  lines.push(`## Averages by interaction kind`);
   lines.push('');
-  lines.push(`Status: ✓ = ≥50 fps · ~ = 30–50 · ✗ = <30. p95 frame = 95th-percentile frame duration in ms (60 fps target ≈ 16.7 ms).`);
+  lines.push(`| Kind | Routes sampled | Avg FPS | Avg p95 frame | Total long tasks |`);
+  lines.push(`|---|---|---|---|---|`);
+  const kindOrder = ['load', 'nav', 'scroll', 'interaction'];
+  for (const k of kindOrder) {
+    const arr = byKind[k] || [];
+    if (!arr.length) continue;
+    const fpsAvg = avgFps(arr);
+    const p95Avg = avgP95(arr);
+    const lt = arr.reduce((s, m) => s + (m.longTaskCount || 0), 0);
+    lines.push(`| \`${k}\` | ${arr.length} | ${fpsBadge(fpsAvg)} | ${fmt(p95Avg)} ms | ${lt} |`);
+  }
   lines.push('');
-  lines.push(`| Route | FPS | p95 frame | max frame | Long tasks | Long-task ms | Heap Δ |`);
+  lines.push(`Interpretation: the kind with the worst FPS is what's blocking real user-perceived smoothness most often. *scroll* worse than *nav* points at paint / IO observer cost; *interaction* worse than *nav* points at handler / re-render cost.`);
+  lines.push('');
+
+  /* ---- Per-step table with frame distribution ---- */
+  lines.push(`## Per-step detail`);
+  lines.push('');
+  lines.push(`Frame distribution glyphs: █ <17ms (60fps) · ▓ 17–33ms · ▒ 33–50ms · ░ 50–100ms · · ≥100ms (drops). 10-cell bar represents 100% of sampled frames.`);
+  lines.push('');
+  lines.push(`| Step | Kind | FPS | p95 / max frame | Long tasks (ms) | Heap Δ | Frame dist |`);
   lines.push(`|---|---|---|---|---|---|---|`);
   for (const m of r.rows) {
     if (m.error) {
-      lines.push(`| \`${m.label}\` | ERROR | | | | | ${m.error} |`);
+      lines.push(`| \`${m.label}\` | ${m.kind || '—'} | ERROR | | | | ${m.error} |`);
       continue;
     }
-    lines.push(`| \`${m.label}\` | ${fpsBadge(m.fps)} | ${fmt(m.p95Ms)} ms | ${fmt(m.maxMs)} ms | ${m.longTaskCount} | ${fmt(m.longTaskMs, 0)} | ${m.heapDelta != null ? (m.heapDelta >= 0 ? '+' : '') + (m.heapDelta / 1e6).toFixed(1) + ' MB' : '—'} |`);
+    const lt = m.longTaskCount > 0 ? `${m.longTaskCount} (${fmt(m.longTaskMs, 0)} ms)` : '0';
+    lines.push(`| \`${m.label}\` | ${m.kind || '—'} | ${fpsBadge(m.fps)} | ${fmt(m.p95Ms)} / ${fmt(m.maxMs)} ms | ${lt} | ${heapStr(m.heapDelta)} | \`${frameBar(m.buckets)}\` |`);
   }
   lines.push('');
 
-  /* Headline diagnostics */
-  const worst = [...r.rows].filter(m => !m.error).sort((a, b) => a.fps - b.fps)[0];
-  const longest = [...r.rows].filter(m => !m.error).sort((a, b) => b.maxLongTaskMs - a.maxLongTaskMs)[0];
-  const biggestHeap = [...r.rows].filter(m => !m.error && m.heapDelta != null).sort((a, b) => b.heapDelta - a.heapDelta)[0];
-
-  lines.push(`## Diagnostics`);
+  /* ---- Worst-of ---- */
+  lines.push(`## Worst-of leaderboard`);
   lines.push('');
-  if (worst) lines.push(`- Worst sustained FPS: \`${worst.label}\` at **${fmt(worst.fps)} fps** (p95 frame ${fmt(worst.p95Ms)} ms).`);
-  if (longest && longest.maxLongTaskMs > 0) lines.push(`- Worst single long task: \`${longest.label}\` blocking the main thread for **${fmt(longest.maxLongTaskMs)} ms**.`);
-  if (biggestHeap && biggestHeap.heapDelta > 1e6) lines.push(`- Biggest heap growth: \`${biggestHeap.label}\` +**${(biggestHeap.heapDelta / 1e6).toFixed(1)} MB**.`);
-  const totalLong = r.rows.reduce((s, m) => s + (m.longTaskCount || 0), 0);
-  lines.push(`- Total long tasks across journey: **${totalLong}**.`);
+  lines.push(`### Lowest sustained FPS`);
+  lines.push('');
+  for (let i = 0; i < worstFps.length; i++) {
+    const m = worstFps[i];
+    lines.push(`${i + 1}. \`${m.label}\` — **${fmt(m.fps)} fps** · p95 frame ${fmt(m.p95Ms)} ms · ${m.longTaskCount} long tasks`);
+  }
+  lines.push('');
+  if (worstLongTask.length) {
+    lines.push(`### Worst single main-thread block`);
+    lines.push('');
+    for (let i = 0; i < worstLongTask.length; i++) {
+      const m = worstLongTask[i];
+      lines.push(`${i + 1}. \`${m.label}\` — **${fmt(m.maxLongTaskMs)} ms** single task · ${m.longTaskCount} total long tasks`);
+    }
+    lines.push('');
+  }
+  if (heapWinners.length) {
+    lines.push(`### Largest heap growth (potential leaks)`);
+    lines.push('');
+    for (let i = 0; i < heapWinners.length; i++) {
+      const m = heapWinners[i];
+      lines.push(`${i + 1}. \`${m.label}\` — **+${(m.heapDelta / 1e6).toFixed(1)} MB** · ${m.fps.toFixed(1)} fps`);
+    }
+    lines.push('');
+  }
+
+  /* ---- Narrative recommendations ---- */
+  lines.push(`## Recommendations`);
+  lines.push('');
+  const recs = [];
+  const scrollArr = byKind.scroll || [];
+  const navArr = byKind.nav || [];
+  const interArr = byKind.interaction || [];
+  if (scrollArr.length && avgFps(scrollArr) < 50) {
+    recs.push(`Scroll averaged **${fmt(avgFps(scrollArr))} fps** across ${scrollArr.length} samples. Top suspects under throttle: \`glass-adaptive.js\` IntersectionObserver re-sampling each \`.card\` and the per-card backdrop-filter blur. Try gating IntersectionObserver to one-shot (already done) and adding \`content-visibility: auto\` to long card lists (companies grid, lesson list).`);
+  }
+  if (navArr.length && avgFps(navArr) < 50) {
+    recs.push(`Nav averaged **${fmt(avgFps(navArr))} fps**. Most cost is the synchronous \`render()\` re-paint of the route's view (full \`innerHTML\` swap). Splitting heavy renders (companies, dashboard) into a sync skeleton + async chunked fill would smooth the transition.`);
+  }
+  if (interArr.length && avgFps(interArr) < 50) {
+    recs.push(`Interactions averaged **${fmt(avgFps(interArr))} fps**. Suspects: lesson modal mount (Prism highlight + activity mount in one pass) and flashcard flip transform with preserve-3d. Consider deferring Prism highlighting until after the modal animates in.`);
+  }
+  if (heapWinners[0] && heapWinners[0].heapDelta > 5e6) {
+    recs.push(`\`${heapWinners[0].label}\` grew heap by **+${(heapWinners[0].heapDelta / 1e6).toFixed(1)} MB**. Worth checking what's retained — common culprits are uncleared \`setInterval\`/\`setTimeout\`, listeners on removed elements, or Three.js geometry not disposed on route change.`);
+  }
+  if (worstLongTask[0] && worstLongTask[0].maxLongTaskMs > 200) {
+    recs.push(`Single ${fmt(worstLongTask[0].maxLongTaskMs)} ms task during \`${worstLongTask[0].label}\` blocks all input. Slice it (\`requestIdleCallback\` chunks, or yield via \`await 0\`).`);
+  }
+  if (fcp > 3000) {
+    recs.push(`FCP at ${fmt(fcp)} ms is poor. Boot is dominated by synchronous CDN \`<script>\`s (GSAP, Chart.js, Three.js ~600KB, Prism + 4 langs). Defer Three.js until \`#dashboard\`, Chart.js until Today's heatmap renders, Prism until a lesson opens.`);
+  }
+  if (!recs.length) recs.push(`No headline regressions in this run. (Numbers are still below 60 fps under 4× throttle; that's expected for the Moto G Power profile — run \`npm run perf -- --throttle 1\` for laptop-grade results.)`);
+  for (const rec of recs) lines.push(`- ${rec}`);
+  lines.push('');
+
+  lines.push(`---`);
+  lines.push(`*Re-run: \`nvm use 22 && npm run perf\`. Customize the journey in [\`scripts/perf/clickthrough.mjs\`](clickthrough.mjs) → \`JOURNEY\`.*`);
   return lines.join('\n') + '\n';
 }
 
