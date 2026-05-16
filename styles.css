@@ -390,6 +390,35 @@ html:has(body > .fixed.inset-0[class*="z-5"]) {
   overflow: hidden;
 }
 
+/* Modal layout — applied at ALL widths.
+ *
+ * Why this exists: the modal wrappers are `<div class="fixed inset-0
+ * grid place-items-center p-4">` with the lesson card inside as
+ * `<div class="card ... max-h-[90vh] overflow-y-auto">`. That pattern
+ * caps the card at 90vh and tries to scroll internally, which
+ *   (a) wedges on iOS WebKit (fixed+grid centering + max-h child is
+ *       unreliable), and
+ *   (b) on desktop, hides content behind the closed-shape height even
+ *       when the rest of the viewport has room.
+ *
+ * The fix: turn the WRAPPER into the scroll container and let the card
+ * flow naturally inside it. The card grows with content; the wrapper
+ * scrolls when content exceeds the viewport. Plays well across WebKit
+ * and Blink. */
+.fixed.inset-0.grid.place-items-center {
+  display: block !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  padding: 1.5rem;
+}
+.fixed.inset-0 .card,
+.fixed.inset-0 .card.elevated {
+  max-height: none !important;
+  overflow: visible !important;
+  margin: 1rem auto !important;
+}
+
 /* Scene drop — the underlying <main> recedes when a modal opens. Combined
  * with the blur ramp above, this is the "sheet pushes the world back"
  * effect from iOS / macOS Liquid Glass. transform-origin keeps the top of
@@ -2090,25 +2119,12 @@ table { display: block; max-width: 100%; overflow-x: auto; }
   .card { padding: 1rem 1.1rem; }
   .card.elevated { padding: 1.1rem 1.15rem; }
 
-  /* Modal: switch from grid-centering to block + wrapper scroll. iOS Safari
-   * doesn't reliably scroll a max-h child inside a fixed+grid+place-items-
-   * center wrapper; making the wrapper itself the scroll container is the
-   * pattern that works across WebKit and Blink. The card flows naturally
-   * with auto margins. */
-  .fixed.inset-0.grid.place-items-center {
-    display: block !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior: contain !important;
-    padding: 1rem !important;
-  }
+  /* Mobile-only modal padding tightening. The wrapper-scroll pattern
+   * itself is now applied at all widths (see the .fixed.inset-0 rule
+   * outside this media query). */
+  .fixed.inset-0.grid.place-items-center { padding: 1rem !important; }
   .fixed.inset-0 .card,
-  .fixed.inset-0 .card.elevated {
-    padding: 1.1rem 1.15rem !important;
-    max-height: none !important;
-    overflow: visible !important;
-    margin: 0 auto !important;
-  }
+  .fixed.inset-0 .card.elevated { padding: 1.1rem 1.15rem !important; }
 
   /* Touch targets — Apple HIG ≥ 44px */
   .btn { min-height: 42px; padding: 0.6rem 1rem; font-size: 15px; }
