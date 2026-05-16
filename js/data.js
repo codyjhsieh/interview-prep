@@ -1767,7 +1767,7 @@ Each node has a <b>parent</b>. Initially every node is its own parent (singleton
        explain:'BFS is O(N) per query, way too slow. Union-Find with both optimizations is ~O(α(N)) per op — effectively constant. Canonical dynamic-connectivity structure.'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'g-LC1', type:'drill', name:'Word Ladder II — why BFS-then-DFS, not pure BFS', xp:28, time:12,
+    {id:'g-LC1', type:'concept', name:'Word Ladder II — why BFS-then-DFS, not pure BFS', xp:28, time:12,
      body:`<b>Word Ladder I</b> asks for the <i>length</i> of the shortest transformation. Pure BFS, return depth — clean. <b>Word Ladder II</b> asks for <i>all</i> shortest transformation paths. That tiny change breaks the naive approach.
 <br><br>
 <b>Why pure BFS fails:</b> recording the path along each BFS frontier means each node carries its prefix list. If the answer has 10 distinct shortest paths of length 5, you blow up memory exponentially trying to track all of them eagerly.
@@ -1789,7 +1789,7 @@ The decoupling is the senior signal: <b>compute the structure first, enumerate w
        ],
        explain:'Two-phase: BFS computes the layer map; DFS walks the shortest-path DAG using that map. Doing both at once (path-carrying BFS) is the rookie trap that blows up memory.'}},
 
-    {id:'g-LC2', type:'drill', name:'Shortest Path in Grid with K Obstacle Eliminations — state-space BFS', xp:30, time:13,
+    {id:'g-LC2', type:'concept', name:'Shortest Path in Grid with K Obstacle Eliminations — state-space BFS', xp:30, time:13,
      body:`Grid problem: 0 = empty, 1 = wall. You can eliminate up to <b>K</b> walls. Find shortest path from (0,0) to (m-1,n-1). At first glance this looks like grid BFS — but the K twist changes everything.
 <br><br>
 <b>Why plain BFS breaks:</b> a cell isn't just "visited or not". Visiting cell (r,c) with 3 eliminations remaining is genuinely different from visiting it with 1 remaining — the second version might be stuck. So <code>visited[r][c]</code> isn't enough state.
@@ -1821,7 +1821,7 @@ return -1</code></pre>
        correct:1,
        explain:'Two visits to the same (r,c) with different k_left are genuinely different "world states" — the higher-k version may reach the goal where the lower-k version is trapped. The visited set must encode (r, c, k_left).'}},
 
-    {id:'g-LC3', type:'drill', name:'Bus Routes — model as a graph of routes, not stops', xp:28, time:12,
+    {id:'g-LC3', type:'concept', name:'Bus Routes — model as a graph of routes, not stops', xp:28, time:12,
      body:`Problem: you start at bus stop <code>source</code>, want to reach <code>target</code>. You have a list of bus routes, each is a list of stops the bus cycles through. Find the minimum number of buses you must take.
 <br><br>
 <b>The naive modeling trap:</b> build a graph where stops are nodes and edges connect any two stops on the same route. BFS over stops. This is correct but pathologically slow — if a route has 10,000 stops, you create ~10^8 edges.
@@ -1860,7 +1860,7 @@ return -1</code></pre>
        correct:1,
        explain:'Each route of 200 stops contributes ~20,000 edges (all-pairs) to the stop-graph. With 500 routes that\'s 10M edges. The route-graph has 500 nodes and edges are sparse — usually under 100K total. BFS cost is dominated by edge count.'}},
 
-    {id:'g-LC4', type:'drill', name:'Open the Lock — implicit state graph + dead ends', xp:26, time:11,
+    {id:'g-LC4', type:'concept', name:'Open the Lock — implicit state graph + dead ends', xp:26, time:11,
      body:`Problem: 4-wheel lock, each wheel 0-9 with wrap-around. Start at "0000", target a code, given a list of <b>deadends</b> you must skip. Min wheel-turns to reach target.
 <br><br>
 <b>Why this is BFS:</b> "min wheel-turns" = "min edges in unweighted graph" = BFS. But the graph isn't given — it's implicit: every 4-digit code is a node; neighbors are the 8 codes you reach by ±1 on one wheel.
@@ -2056,7 +2056,7 @@ Each range-update is O(1); reconstruct the array once at the end. Replaces N ran
        explain:'Prefix sums are the textbook answer for many static-range-sum queries. BIT/Fenwick is for when the array also gets point-updates between queries.'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'a-LC1', type:'drill', name:'Trapping Rain Water — two-pointer "ruled-out" argument', xp:28, time:12,
+    {id:'a-LC1', type:'concept', name:'Trapping Rain Water — two-pointer "ruled-out" argument', xp:28, time:12,
      body:`Given elevations <code>[0,1,0,2,1,0,1,3,2,1,2,1]</code>, how much water is trapped? Brute force: for each cell, find max-left and max-right, water = min(maxL, maxR) − height. O(N²).
 <br><br>
 <b>The classic O(N) DP fix:</b> precompute <code>maxL[i]</code> and <code>maxR[i]</code> arrays in two passes. Total O(N) time + O(N) space.
@@ -2086,7 +2086,7 @@ while l &lt; r:
        ],
        explain:'The two-pointer works because the side with the smaller height has its water level provably bounded by its own running max (the other side has a taller wall blocking).'}},
 
-    {id:'a-LC2', type:'drill', name:'Sliding Window Maximum — monotonic deque trick', xp:30, time:13,
+    {id:'a-LC2', type:'concept', name:'Sliding Window Maximum — monotonic deque trick', xp:30, time:13,
      body:`Given an array and a window size <code>k</code>, return the max of each contiguous window. Brute force O(N·k); heap version O(N·log k). The interview-bar answer is O(N) with a <b>monotonic deque</b>.
 <br><br>
 <b>Core idea:</b> the deque stores <i>indices</i> whose values are in <b>strictly decreasing order</b>. Two invariants enforced each step:
@@ -2124,7 +2124,7 @@ def max_window(nums, k):
        cat:'coding',
        explain:'Line 5 uses < instead of <=. The "stale" check needs to discard indices that are <= i - k (i.e., outside the current window of size k). With <, an index exactly equal to i - k stays in the deque one tick too long, returning a stale max.'}},
 
-    {id:'a-LC3', type:'drill', name:'Median of Two Sorted Arrays — partition by binary search', xp:32, time:14,
+    {id:'a-LC3', type:'concept', name:'Median of Two Sorted Arrays — partition by binary search', xp:32, time:14,
      body:`Two sorted arrays A (length m) and B (length n), find the median of the combined sorted array. The catch: must be O(log(min(m,n))).
 <br><br>
 <b>Why merge-and-pick is wrong:</b> merging is O(m+n). The interviewer wants logarithmic, signaling "binary search on something subtle".
@@ -2166,7 +2166,7 @@ If both conditions hold, the median = average of (max-left, min-right). We binar
        correct:0,
        explain:'Both invariants hold (5 ≤ 6 and 3 ≤ 8), so the partition is valid. For even total length, median = (max of left-halves + min of right-halves) / 2 = (max(5,3) + min(8,6)) / 2 = (5 + 6) / 2 = 5.5.'}},
 
-    {id:'a-LC4', type:'drill', name:'Subarrays with K Different Integers — atMost(K) − atMost(K−1)', xp:28, time:12,
+    {id:'a-LC4', type:'concept', name:'Subarrays with K Different Integers — atMost(K) − atMost(K−1)', xp:28, time:12,
      body:`Count subarrays containing <b>exactly K</b> distinct integers. Pure sliding window struggles with the word "exactly" — you need a bidirectional bound, not a single window.
 <br><br>
 <b>The trick that unlocks an entire problem family:</b> "exactly K" = "at most K" − "at most K−1". Both subproblems are pure sliding window (single right-bound), and the subtraction gives you the exact count.
@@ -2368,7 +2368,7 @@ The hard part is recognizing the pattern. Once you see "next/previous greater/sm
        explain:'XOR cancels pairs (x ^ x = 0). The singleton survives. O(n) time, O(1) memory — better than the hash-map approach in space.'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'ag-LC1', type:'drill', name:'Cheapest Flights Within K Stops — Bellman-Ford vs modified Dijkstra', xp:32, time:14,
+    {id:'ag-LC1', type:'concept', name:'Cheapest Flights Within K Stops — Bellman-Ford vs modified Dijkstra', xp:32, time:14,
      body:`Find cheapest flight from <code>src</code> to <code>dst</code> with at most <b>K</b> intermediate stops. Naive Dijkstra fails here — why?
 <br><br>
 <b>The Dijkstra trap:</b> Dijkstra commits to a vertex once it pops with the smallest distance, but in this problem we might need to reach <code>v</code> at a HIGHER cost if doing so uses fewer stops. Dijkstra's monotonic-distance assumption is broken by the stop axis.
@@ -2405,7 +2405,7 @@ The hard part is recognizing the pattern. Once you see "next/previous greater/sm
        correct:1,
        explain:'Bellman-Ford with K+1=3 iterations is ~600K relaxations — fast and provably correct. Plain Dijkstra is incorrect (might over-commit). BFS ignores weights so it returns shortest by HOPS not by COST. Floyd-Warshall would be 10¹² ops, infeasible.'}},
 
-    {id:'ag-LC2', type:'drill', name:'Alien Dictionary — topological sort from inferred edges', xp:30, time:13,
+    {id:'ag-LC2', type:'concept', name:'Alien Dictionary — topological sort from inferred edges', xp:30, time:13,
      body:`Given a list of words sorted in an alien language's order, infer the alphabet's letter order. E.g., <code>["wrt","wrf","er","ett","rftt"]</code> → <code>"wertf"</code>.
 <br><br>
 <b>The decomposition (this is the entire problem):</b>
@@ -2453,7 +2453,7 @@ The "len(out) == len(indeg)" tail check detects cycles (some letter never had in
        ],
        explain:'Two-phase: edge extraction (linear in word pairs), then topo sort (linear in nodes+edges). The prefix-trap check ("longer word strictly precedes its own prefix") must be done DURING edge extraction.'}},
 
-    {id:'ag-LC3', type:'drill', name:'Critical Connections — Tarjan\'s bridge-finding algorithm', xp:34, time:15,
+    {id:'ag-LC3', type:'concept', name:'Critical Connections — Tarjan\'s bridge-finding algorithm', xp:34, time:15,
      body:`Given an undirected graph, find all edges whose removal disconnects the graph (called <b>bridges</b>). LC Hard. The naive O(E·(V+E)) solution removes each edge and tests connectivity — way too slow for E=10⁵.
 <br><br>
 <b>The Tarjan insight</b> (this is the deepest part of the problem): use a DFS and assign each node two numbers:
@@ -2491,7 +2491,7 @@ The "len(out) == len(indeg)" tail check detects cycles (some letter never had in
        ],
        explain:'The two timestamps separate "where we discovered each node" (fixed) from "where each node can climb back to" (running min). The bridge test compares them: if a subtree\'s climb-back doesn\'t reach above the parent, the connecting edge is the only path.'}},
 
-    {id:'ag-LC4', type:'drill', name:'Largest Rectangle in Histogram — monotonic stack invariant', xp:30, time:13,
+    {id:'ag-LC4', type:'concept', name:'Largest Rectangle in Histogram — monotonic stack invariant', xp:30, time:13,
      body:`Given histogram bar heights, find the largest rectangle entirely within bars. Brute force is O(N²): for each bar, expand left/right while heights ≥ this one. LC Hard wants O(N).
 <br><br>
 <b>The monotonic-increasing stack invariant:</b> stack holds <i>indices</i> whose corresponding heights are in <b>increasing order</b>. When a shorter bar arrives, pop until the top is shorter — and for each popped index <code>i</code>:
@@ -2599,7 +2599,7 @@ class LRUCache:
     return best</code></pre>`},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'h-LC1', type:'drill', name:'Minimum Window Substring — sliding window with counter', xp:30, time:13,
+    {id:'h-LC1', type:'concept', name:'Minimum Window Substring — sliding window with counter', xp:30, time:13,
      body:`Given strings <code>S</code> and <code>T</code>, find the shortest substring of <code>S</code> that contains every character of <code>T</code> (with multiplicities). LC Hard. The "with multiplicities" requirement is what makes it tricky.
 <br><br>
 <b>The two-counter idea:</b> maintain <code>need</code> (counter from T) and <code>have</code> (counter of window contents). But comparing full counters every step is O(|alphabet|) — too slow.
@@ -2633,7 +2633,7 @@ class LRUCache:
        ],
        explain:'Two-phase per step: expand right unconditionally, shrink left while window is valid. The matched counter avoids re-comparing all keys every iteration.'}},
 
-    {id:'h-LC2', type:'drill', name:'Substring with Concatenation of All Words — windowed hash check', xp:32, time:14,
+    {id:'h-LC2', type:'concept', name:'Substring with Concatenation of All Words — windowed hash check', xp:32, time:14,
      body:`Given <code>s</code> and <code>words</code> (all same length L), find all starting indices in <code>s</code> where the substring is a concatenation of every word in <code>words</code>, in any order, no overlap.
 <br><br>
 <b>The naive trap:</b> for each index i, slice <code>s[i : i + L * len(words)]</code> and check if it's a permutation. Per check: O(N · L · words). Total: O(N² · L). Too slow.
@@ -2673,7 +2673,7 @@ class LRUCache:
        correct:1,
        explain:'Since all words have length L, any concatenation match occupies positions p, p+L, p+2L, … So a match starting at p covers offsets p mod L. There are L such offset classes; each is its own independent sliding window over word-chunks.'}},
 
-    {id:'h-LC3', type:'drill', name:'First Missing Positive — index-as-hash in O(N) time, O(1) space', xp:30, time:13,
+    {id:'h-LC3', type:'concept', name:'First Missing Positive — index-as-hash in O(N) time, O(1) space', xp:30, time:13,
      body:`Given an array of integers, return the smallest missing positive integer. Constraints: O(N) time, O(1) extra space.
 <br><br>
 <b>Why a hash set fails:</b> O(N) time but O(N) space. Sort? O(N log N) time. Neither meets the bar.
@@ -2714,7 +2714,7 @@ class LRUCache:
        correct:1,
        explain:'Pigeonhole principle: N slots can hold at most N distinct positives. There are N+1 candidate positives (1..N+1). So at least one of them is missing. The smallest missing one is in [1, N+1].'}},
 
-    {id:'h-LC4', type:'drill', name:'Longest Substring with At Most K Distinct Characters', xp:28, time:12,
+    {id:'h-LC4', type:'concept', name:'Longest Substring with At Most K Distinct Characters', xp:28, time:12,
      body:`Sliding window with a counter map. Expand right unconditionally; while <code>len(counter) &gt; K</code>, shrink left.
 <pre><code>def longest_k_distinct(s, k):
     cnt = defaultdict(int); l = best = 0
@@ -2839,7 +2839,7 @@ class Singleton:
 # from app.config import shared_config       # singleton by virtue of import</code></pre>`},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'p-LC1', type:'drill', name:'LRU Cache — hash map + doubly linked list', xp:30, time:13,
+    {id:'p-LC1', type:'concept', name:'LRU Cache — hash map + doubly linked list', xp:30, time:13,
      body:`Design a cache with O(1) <code>get</code> and <code>put</code>, evicting the least-recently-used key when over capacity. The constraint "O(1) for both" is what forces the dual-data-structure answer.
 <br><br>
 <b>Why neither structure alone works:</b>
@@ -2887,7 +2887,7 @@ class LRU:
        ],
        explain:'Two structures cooperate: hash for O(1) lookup, list for O(1) recency update. The "promote to front" is what makes future evictions correct.'}},
 
-    {id:'p-LC2', type:'drill', name:'Design In-Memory File System — trie of dicts', xp:30, time:13,
+    {id:'p-LC2', type:'concept', name:'Design In-Memory File System — trie of dicts', xp:30, time:13,
      body:`Build a class with <code>ls(path)</code>, <code>mkdir(path)</code>, <code>addContentToFile(filePath, content)</code>, <code>readContentFromFile(filePath)</code>. LC Hard.
 <br><br>
 <b>The shape:</b> a file system is literally a trie where edges are name segments. Each node has either children (directory) or content (file). One unified <code>Node</code> class with both fields keeps the code clean.
@@ -2928,7 +2928,7 @@ class FileSystem:
        ],
        explain:'The unified Node design lets every operation use the same _walk helper. Disambiguation between file and directory happens at the very last step (checking node.content). This is the senior modeling choice.'}},
 
-    {id:'p-LC3', type:'drill', name:'Time-Based Key-Value Store — binary search on timestamps', xp:30, time:13,
+    {id:'p-LC3', type:'concept', name:'Time-Based Key-Value Store — binary search on timestamps', xp:30, time:13,
      body:`Design a structure supporting <code>set(key, value, timestamp)</code> and <code>get(key, timestamp)</code> returning the value at the largest timestamp ≤ the requested one.
 <br><br>
 <b>The structure:</b> hash map of <code>key → list of (timestamp, value)</code>, sorted by timestamp. Since <code>set</code> calls arrive in strictly-increasing timestamp order (per the problem), the list is naturally sorted — no insertion sort needed.
@@ -2953,7 +2953,7 @@ class TimeMap:
        correct:1,
        explain:'get(a, 12) wants the value at largest timestamp ≤ 12. Timestamps stored: [5, 10, 15]. 10 is the largest ≤ 12, so return value=2.'}},
 
-    {id:'p-LC4', type:'drill', name:'Snake Game — deque + set for O(1) self-collision check', xp:28, time:12,
+    {id:'p-LC4', type:'concept', name:'Snake Game — deque + set for O(1) self-collision check', xp:28, time:12,
      body:`Implement Snake. Each move shifts the head into a new cell, optionally eats food, otherwise drops the tail. The hard part is the O(1) self-collision check.
 <br><br>
 <b>Naive check:</b> scan the snake's body each move. O(L) per move where L = snake length. Bad at scale.
@@ -3127,7 +3127,7 @@ If both, DP applies. Concrete example — climbing stairs: <code>ways(N) = ways(
         return True                       # for autocomplete walk node\'s subtree</code></pre>`},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'m-LC1', type:'drill', name:'Find Median from Data Stream — two heaps, balanced', xp:30, time:13,
+    {id:'m-LC1', type:'concept', name:'Find Median from Data Stream — two heaps, balanced', xp:30, time:13,
      body:`Stream of ints arrive one by one. After each, return the running median in O(log N). Naive sort-then-pick is O(N log N) per query.
 <br><br>
 <b>The structure:</b> two heaps split the data at the median.
@@ -3159,7 +3159,7 @@ class MedianFinder:
        ],
        explain:'The "push to lo then drain to hi" pattern keeps lo strictly ≤ hi without needing to compare against an empty heap. Final rebalance handles the size invariant lo.size ≥ hi.size.'}},
 
-    {id:'m-LC2', type:'drill', name:'Merge K Sorted Lists — heap of head pointers', xp:28, time:12,
+    {id:'m-LC2', type:'concept', name:'Merge K Sorted Lists — heap of head pointers', xp:28, time:12,
      body:`Given K sorted linked lists, merge them into one. Brute O(NK) (pairwise merge): too slow for K large. Min-heap: O(N log K).
 <br><br>
 <b>The heap holds:</b> exactly one node per list at any time — the current head of that list. Pop the smallest, append it to the output, push the popped node's <code>next</code> (if any).
@@ -3194,7 +3194,7 @@ def merge_k(lists):
        cat:'coding',
        explain:'Line 4 pushes (head.val, head). When two nodes have equal .val, heapq compares the next tuple element — head objects (ListNode) which lack __lt__. TypeError. Fix: add a unique tiebreaker like the list index: (head.val, i, head).'}},
 
-    {id:'m-LC3', type:'drill', name:'Edit Distance — 2D DP with three operations', xp:32, time:14,
+    {id:'m-LC3', type:'concept', name:'Edit Distance — 2D DP with three operations', xp:32, time:14,
      body:`Min operations to transform string A into B, allowed ops: insert / delete / replace.
 <br><br>
 <b>State:</b> <code>dp[i][j]</code> = min ops to turn <code>A[:i]</code> into <code>B[:j]</code>.
@@ -3231,7 +3231,7 @@ def merge_k(lists):
        correct:1,
        explain:'Edit distance is 3: horse → rorse (replace h→r) → rose (delete r) → ros (delete e). Three operations.'}},
 
-    {id:'m-LC4', type:'drill', name:'Longest Increasing Subsequence — patience sort O(N log N)', xp:30, time:13,
+    {id:'m-LC4', type:'concept', name:'Longest Increasing Subsequence — patience sort O(N log N)', xp:30, time:13,
      body:`LIS = length of longest strictly-increasing subsequence (non-contiguous). DP version is O(N²); the patience-sort/binary-search trick is O(N log N).
 <br><br>
 <b>The patience-sort idea:</b> maintain <code>tails</code>, where <code>tails[k]</code> = the smallest possible tail value for an LIS of length <code>k+1</code> seen so far.
@@ -3463,7 +3463,7 @@ Time is O(R · C · 4^L) where L is word length. Memory is O(L) for the recursio
        explain:'The comment promises an in-place visited mark, but no mutation happens. With no visited tracking the same cell can be reused — word="AA" would match a single "A" cell via self-recursion. Fix: tmp = board[r][c]; board[r][c] = "#" before the OR; restore after.'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'bt-LC1', type:'drill', name:'N-Queens — column + diagonal sets for O(1) attack-check', xp:30, time:13,
+    {id:'bt-LC1', type:'concept', name:'N-Queens — column + diagonal sets for O(1) attack-check', xp:30, time:13,
      body:`Place N queens on an N×N board so none attack each other. Brute-force backtracking with O(N) attack check per cell = O(N!·N) — slow for N=12+.
 <br><br>
 <b>The optimization — three boolean sets:</b>
@@ -3499,7 +3499,7 @@ Attack-check becomes O(1): "can I place at (r,c)?" iff <code>c not in cols and (
        ],
        explain:'The "two diagonal classes" are easy to confuse. Anti-diagonal slopes from top-left to bottom-right (r and c both increase by 1, so r-c is invariant). Main diagonal slopes from top-right to bottom-left (r increases, c decreases, so r+c is invariant).'}},
 
-    {id:'bt-LC2', type:'drill', name:'Sudoku Solver — constraint propagation + backtracking', xp:32, time:14,
+    {id:'bt-LC2', type:'concept', name:'Sudoku Solver — constraint propagation + backtracking', xp:32, time:14,
      body:`Fill a 9×9 sudoku. Each cell, row, column, and 3×3 box must contain digits 1-9 exactly once.
 <br><br>
 <b>The data structures (this is the whole game):</b> three 2D boolean arrays: <code>rows[9][10]</code>, <code>cols[9][10]</code>, <code>boxes[9][10]</code>. <code>rows[r][d]</code> = true iff digit d is already in row r. <code>boxes[b][d]</code> where <code>b = (r // 3) * 3 + (c // 3)</code>.
@@ -3539,7 +3539,7 @@ Backtracking template: find next empty cell → try each digit 1-9 → check the
        ],
        explain:'Standard backtracking: state setup → recursive try → undo on failure. The boolean tables make the per-step check O(1), which is what makes it fast enough for 9×9 boards.'}},
 
-    {id:'bt-LC3', type:'drill', name:'Word Search II — Trie pruning makes it tractable', xp:32, time:14,
+    {id:'bt-LC3', type:'concept', name:'Word Search II — Trie pruning makes it tractable', xp:32, time:14,
      body:`Given a board of letters and a list of words, return all words found as paths on the board (8-direction neighbors, no cell reuse).
 <br><br>
 <b>The naive approach:</b> for each word, do a DFS from every cell. O(W · cells · 4^L). If W=10⁴ words and the board is 12×12, this is way too slow.
@@ -3587,7 +3587,7 @@ Backtracking template: find next empty cell → try each digit 1-9 → check the
        correct:2,
        explain:'If 100 words start with "abc", the per-word approach does the "abc" DFS prefix 100 times. The trie approach does it ONCE — the trie subtree at "abc" carries forward all 100 words\' continuations. This is the key complexity collapse.'}},
 
-    {id:'bt-LC4', type:'drill', name:'Expression Add Operators — backtracking with multiplication carry', xp:34, time:15,
+    {id:'bt-LC4', type:'concept', name:'Expression Add Operators — backtracking with multiplication carry', xp:34, time:15,
      body:`Given a string of digits and a target, insert +, −, × between digits to make the expression equal target. Return all valid expressions. LC Hard.
 <br><br>
 <b>The wrinkle — multiplication precedence:</b> + and − can be evaluated left-to-right, but × must "reach back" and undo the previous addition. This is what makes backtracking tricky.
@@ -3764,7 +3764,7 @@ Time O(N log N), memory O(1) extra. This is "interval scheduling maximization" �
        cat:'coding'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'iv-LC1', type:'drill', name:'Employee Free Time — merge then complement', xp:30, time:13,
+    {id:'iv-LC1', type:'concept', name:'Employee Free Time — merge then complement', xp:30, time:13,
      body:`Given each employee's schedule as a list of intervals, find the common free time of ALL employees (intervals where everyone is free), returned in sorted order.
 <br><br>
 <b>The decomposition:</b>
@@ -3797,7 +3797,7 @@ Time O(N log N), memory O(1) extra. This is "interval scheduling maximization" �
        ],
        explain:'Decomposing the problem into "merge + complement" is the senior move. Without flattening, you\'d need to coordinate across K schedules simultaneously (a heap solution works but is more complex).'}},
 
-    {id:'iv-LC2', type:'drill', name:'My Calendar III — max-overlap via sweep line / diff array', xp:30, time:13,
+    {id:'iv-LC2', type:'concept', name:'My Calendar III — max-overlap via sweep line / diff array', xp:30, time:13,
      body:`Add intervals one at a time. After each <code>book(start, end)</code>, return the current maximum overlap (max # of intervals containing any single point).
 <br><br>
 <b>The sweep-line trick (works incrementally):</b> maintain a sorted map of <code>time → delta</code>. For each booking [start, end), increment <code>delta[start]</code> and decrement <code>delta[end]</code>. To compute max overlap, walk the map summing deltas and tracking the running max.
@@ -3828,7 +3828,7 @@ class MyCalendarThree:
        correct:1,
        explain:'The delta pair (+1 at s, -1 at e) is the indicator function for "this booking is active". Running sum across all bookings = sum of indicator functions = count of active bookings at each time. The max of that is max overlap.'}},
 
-    {id:'iv-LC3', type:'drill', name:'Meeting Rooms III — two heaps for room assignment', xp:32, time:14,
+    {id:'iv-LC3', type:'concept', name:'Meeting Rooms III — two heaps for room assignment', xp:32, time:14,
      body:`Given <code>n</code> rooms and a list of meetings, assign each meeting to a room. If multiple rooms free, pick lowest-numbered. If none free, delay the meeting until one frees (preserving duration). Return the room with the most meetings.
 <br><br>
 <b>The structure — two min-heaps:</b>
@@ -3868,7 +3868,7 @@ def mostBooked(n, meetings):
        ],
        explain:'The dual-heap pattern: one heap for the "currently free" pool, one for the "currently busy with end times". Pop-then-push transitions rooms between them. Same pattern reappears in Process Scheduler, Task Scheduler with cooldown.'}},
 
-    {id:'iv-LC4', type:'drill', name:'Data Stream as Disjoint Intervals — sorted dict + merge on insert', xp:30, time:13,
+    {id:'iv-LC4', type:'concept', name:'Data Stream as Disjoint Intervals — sorted dict + merge on insert', xp:30, time:13,
      body:`Add integers to a stream. After each, return the current set of disjoint intervals (merged contiguous runs).
 <br><br>
 <b>The structure:</b> <code>SortedDict</code> from <i>start</i> → <i>end</i>, holding the current set of disjoint intervals.
@@ -4165,7 +4165,7 @@ The trick: <b>at each node we compute two different things</b>. The function ret
        cat:'coding'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'t-LC1', type:'drill', name:'Binary Tree Maximum Path Sum — return vs record', xp:32, time:14,
+    {id:'t-LC1', type:'concept', name:'Binary Tree Maximum Path Sum — return vs record', xp:32, time:14,
      body:`Find max sum of any path (start and end anywhere). Path can bend at any node but visits each node at most once.
 <br><br>
 <b>The two-quantity insight</b> (this is the senior signal): at each node, you compute TWO things — only one of which you return.
@@ -4196,7 +4196,7 @@ The trick: <b>at each node we compute two different things</b>. The function ret
        ],
        explain:'The recursion returns extend-up gains (path through this node up to caller). Bend-here paths are recorded into best[] because they terminate — caller can\'t use them.'}},
 
-    {id:'t-LC2', type:'drill', name:'Serialize and Deserialize Binary Tree — preorder with null markers', xp:30, time:13,
+    {id:'t-LC2', type:'concept', name:'Serialize and Deserialize Binary Tree — preorder with null markers', xp:30, time:13,
      body:`Convert a tree to a string and back, lossless. Allowed any format.
 <br><br>
 <b>The simplest correct scheme — preorder DFS with null markers:</b>
@@ -4233,7 +4233,7 @@ def deserialize(s):
        ],
        explain:'Single-traversal lossless serialization requires "missing child" markers OR a second traversal. Preorder + null markers is the standard one-pass solution.'}},
 
-    {id:'t-LC3', type:'drill', name:'Recover BST — Morris traversal finds two swapped nodes', xp:32, time:14,
+    {id:'t-LC3', type:'concept', name:'Recover BST — Morris traversal finds two swapped nodes', xp:32, time:14,
      body:`A binary search tree had exactly two of its nodes swapped by mistake. Recover the BST WITHOUT changing structure, in O(1) extra space.
 <br><br>
 <b>The two-pointer trick during inorder:</b> in a correct BST, inorder traversal is strictly ascending. With two swapped nodes, the sequence has exactly two violations (or one if the swapped nodes are adjacent).
@@ -4282,7 +4282,7 @@ After traversal, swap <code>first.val</code> and <code>second.val</code>.
        correct:1,
        explain:'Correct ascending order would be [1, 2, 3, 4, 5, 6, 7, 8]. Position of 7 (now where 2 should be) and position of 2 (now where 7 should be) are swapped. The violation-pairs trick: first descent is (7, 4) → first = 7; later descent is (6, 2) → second = 2.'}},
 
-    {id:'t-LC4', type:'drill', name:'Vertical Order Traversal — sort by (col, row, val)', xp:28, time:12,
+    {id:'t-LC4', type:'concept', name:'Vertical Order Traversal — sort by (col, row, val)', xp:28, time:12,
      body:`Return nodes column-by-column (leftmost first). Within a column, ordered by row (top first), then by value if same (row, col).
 <br><br>
 <b>The structure:</b> DFS (or BFS) accumulating <code>(col, row, val)</code> tuples, then sort and group by col.
@@ -4431,7 +4431,7 @@ Time O(N log N), memory O(1) extra.
        explain:'Greedy keeps an interval iff its start is at or after the last kept interval\'s end (no overlap; touching is OK depending on definition). Option B compares against end of the new interval — meaningless. Option C is a redundant double-check (e > end follows from s ≥ end after sort). Option D contradicts itself.'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'gr-LC1', type:'drill', name:'Candy — two-pass greedy from each side', xp:28, time:12,
+    {id:'gr-LC1', type:'concept', name:'Candy — two-pass greedy from each side', xp:28, time:12,
      body:`Children in a line have ratings. Each needs ≥1 candy. Higher-rated children get MORE candy than their neighbors. Min total candies?
 <br><br>
 <b>The wrong approach:</b> one pass left-to-right. Fails when a peak is followed by a descending sequence on the right — your assigned counts don't satisfy "more than right neighbor" for descending values.
@@ -4465,7 +4465,7 @@ Time O(N log N), memory O(1) extra.
        ],
        explain:'Two-direction constraint: each pass handles one direction. The right pass must NOT decrease a cell\'s candies (left pass may already have placed something larger). Taking max preserves both constraints.'}},
 
-    {id:'gr-LC2', type:'drill', name:'Patching Array — exchange-argument greedy', xp:32, time:14,
+    {id:'gr-LC2', type:'concept', name:'Patching Array — exchange-argument greedy', xp:32, time:14,
      body:`Given a sorted array <code>nums</code> and a target <code>n</code>, return the minimum number of additions so that EVERY integer in [1, n] is expressible as a sum of some subset.
 <br><br>
 <b>The invariant — track <code>covered</code> (max integer we can express).</b> Start with <code>covered = 0</code>. At each step:
@@ -4499,7 +4499,7 @@ Time O(N log N), memory O(1) extra.
        correct:1,
        explain:'Three cases: patch &lt; covered+1 — gap remains. Patch = covered+1 — gap filled, reach now 2·covered+1. Patch &gt; covered+1 — gap UNfilled (covered+1 still uncovered). Only "= covered+1" works, AND it maximally extends reach.'}},
 
-    {id:'gr-LC3', type:'drill', name:'Minimum Refueling Stops — heap-greedy "borrow from past"', xp:30, time:13,
+    {id:'gr-LC3', type:'concept', name:'Minimum Refueling Stops — heap-greedy "borrow from past"', xp:30, time:13,
      body:`Drive from 0 to <code>target</code> with starting fuel. Stations are at known positions with known fuel amounts. Min stops to reach target?
 <br><br>
 <b>The "borrow from past" intuition:</b> drive forward without refueling. When you're about to run out (or to skip an unreachable station), look back at all stations you've PASSED, pick the one with the most fuel, and pretend you stopped there. Each such "borrow" = one stop.
@@ -4531,7 +4531,7 @@ def min_refuel_stops(target, start_fuel, stations):
        ],
        explain:'The greedy decision is "when do I stop?" — the heap lets us defer that decision. We don\'t commit to a stop at the moment we pass the station; we commit only when we run out of fuel.'}},
 
-    {id:'gr-LC4', type:'drill', name:'Jump Game IV — BFS vs greedy chunking', xp:30, time:13,
+    {id:'gr-LC4', type:'concept', name:'Jump Game IV — BFS vs greedy chunking', xp:30, time:13,
      body:`Given an array, from index i you can jump to i-1, i+1, or any other index j where arr[i] == arr[j]. Min jumps to reach the end?
 <br><br>
 <b>The naive BFS (correct but slow):</b> for each cell, queue all "equal-value" cells as neighbors. If a value appears K times, that's O(K²) edges total for K=10⁵ → 10¹⁰ ops.
@@ -4744,7 +4744,7 @@ Time O(N²), memory O(N²). The palindrome precompute uses the classic 2D recurr
        cat:'coding'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'dp-LC1', type:'drill', name:'Burst Balloons — interval DP with "last to burst"', xp:34, time:15,
+    {id:'dp-LC1', type:'concept', name:'Burst Balloons — interval DP with "last to burst"', xp:34, time:15,
      body:`Pop balloons one at a time. Each pop earns <code>nums[i-1] * nums[i] * nums[i+1]</code> (where adjacent balloons shift to fill). Max total score?
 <br><br>
 <b>The wrong angle:</b> "which balloon to pop FIRST?" — leads to exponential branching because the array shape changes after each pop.
@@ -4778,7 +4778,7 @@ Time O(N²), memory O(N²). The palindrome precompute uses the classic 2D recurr
        ],
        explain:'Bottom-up interval DP. The "last to burst" reframing is critical — it ensures dp[i][k] and dp[k][j] are smaller subproblems already computed.'}},
 
-    {id:'dp-LC2', type:'drill', name:'Distinct Subsequences — 2D DP with branch on match/no-match', xp:32, time:14,
+    {id:'dp-LC2', type:'concept', name:'Distinct Subsequences — 2D DP with branch on match/no-match', xp:32, time:14,
      body:`Count the number of distinct subsequences of <code>s</code> that equal <code>t</code>. E.g., s="rabbbit", t="rabbit" → 3 ways.
 <br><br>
 <b>State:</b> <code>dp[i][j]</code> = number of ways to form <code>t[:j]</code> using a subsequence of <code>s[:i]</code>.
@@ -4822,7 +4822,7 @@ Time O(N²), memory O(N²). The palindrome precompute uses the classic 2D recurr
        cat:'coding',
        explain:'Line 9 assigns dp[i-1][j-1] directly on match — but you ALSO need to add dp[i-1][j] (the "skip s[i-1]" option). Match means BOTH skip-and-take options are available. Fix: dp[i][j] = dp[i-1][j] + dp[i-1][j-1] when matching.'}},
 
-    {id:'dp-LC3', type:'drill', name:'Russian Doll Envelopes — sort + LIS variant', xp:32, time:14,
+    {id:'dp-LC3', type:'concept', name:'Russian Doll Envelopes — sort + LIS variant', xp:32, time:14,
      body:`Each envelope has (width, height). Envelope A fits inside B iff A's both dimensions are strictly less. Max chain length?
 <br><br>
 <b>The reduction to LIS:</b> sort envelopes by width ASCENDING, height DESCENDING. Then find the longest INCREASING subsequence of heights. The descending tiebreak ensures envelopes with the SAME width don't form a chain (height won't increase).
@@ -4849,7 +4849,7 @@ def max_envelopes(env):
        correct:2,
        explain:'If two envelopes have the same width, they can\'t fit inside each other regardless of height. Sorting heights descending for equal widths means the LIS height-sweep sees (3,7) BEFORE (3,5) → 5 is "smaller" so it doesn\'t extend after 7 — chain stays correct.'}},
 
-    {id:'dp-LC4', type:'drill', name:'Stone Game II — memoized recursion with state (i, M)', xp:30, time:13,
+    {id:'dp-LC4', type:'concept', name:'Stone Game II — memoized recursion with state (i, M)', xp:30, time:13,
      body:`Two players alternate taking stones from a pile. State: position <code>i</code>, current M. On each turn, the player can take X piles for any X in [1, 2M]. After taking X, M becomes max(M, X). Alice goes first. Max stones Alice can guarantee?
 <br><br>
 <b>State:</b> <code>(i, M)</code> — Alice's optimal score from position i onward with current M.
@@ -5060,7 +5060,7 @@ The interleave version is the senior signal — most candidates only know the ha
        cat:'coding'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'ll-LC1', type:'drill', name:'Reverse Nodes in K-Group — segment-by-segment reversal', xp:30, time:13,
+    {id:'ll-LC1', type:'concept', name:'Reverse Nodes in K-Group — segment-by-segment reversal', xp:30, time:13,
      body:`Reverse every K consecutive nodes. If the last group has fewer than K, leave it as-is.
 <br><br>
 <b>The structure:</b> three pointers + a counter.
@@ -5097,7 +5097,7 @@ The interleave version is the senior signal — most candidates only know the ha
        ],
        explain:'Three phases: validate-length, reverse-in-place, stitch-with-rest. The recursion naturally cleans up the boundaries between groups.'}},
 
-    {id:'ll-LC2', type:'drill', name:'Copy List with Random Pointer — interleave trick (no hash)', xp:30, time:13,
+    {id:'ll-LC2', type:'concept', name:'Copy List with Random Pointer — interleave trick (no hash)', xp:30, time:13,
      body:`Deep-copy a linked list where each node has <code>next</code> AND a <code>random</code> pointer to ANY node (or null).
 <br><br>
 <b>The hash-map approach:</b> first pass clones every node and stores <code>orig → clone</code> in a dict. Second pass sets clone.next and clone.random using the dict. O(N) time, O(N) extra space.
@@ -5142,7 +5142,7 @@ The interleave version is the senior signal — most candidates only know the ha
        ],
        explain:'The three-pass structure is the entire trick. Each pass is O(N), giving O(N) total time with O(1) extra space — no hash map needed.'}},
 
-    {id:'ll-LC3', type:'drill', name:'LFU Cache — frequency buckets + ordered sets', xp:34, time:15,
+    {id:'ll-LC3', type:'concept', name:'LFU Cache — frequency buckets + ordered sets', xp:34, time:15,
      body:`Implement Least-Frequently-Used cache. Evict the least-frequently-used key; if tie, evict least-recently-used among those. O(1) get and put.
 <br><br>
 <b>Why this is harder than LRU:</b> LRU has one ordering (recency). LFU has TWO: primary by frequency, secondary by recency within a frequency.
@@ -5199,7 +5199,7 @@ class LFUCache:
        correct:1,
        explain:'min_freq tracks the smallest non-empty bucket. Bumping K out of bucket 3 makes bucket 3 empty IFF K was the only entry there. If so, AND bucket 3 was the current min, the new minimum is one tier up (the bucket K was promoted into, since by invariant all freqs ≥ old min).'}},
 
-    {id:'ll-LC4', type:'drill', name:'Sort List — merge sort on a linked list', xp:30, time:13,
+    {id:'ll-LC4', type:'concept', name:'Sort List — merge sort on a linked list', xp:30, time:13,
      body:`Sort a linked list in O(N log N) time with O(log N) memory (the recursion stack — true O(1) requires bottom-up merge sort).
 <br><br>
 <b>Why merge sort, not quicksort?</b> Linked lists give you O(1) split-at-middle (via fast/slow pointers) and O(1) merge-in-place (relink nodes). Quicksort on linked lists is O(N²) worst case because there's no efficient pivot selection.
@@ -5336,7 +5336,7 @@ Time O(N · max_decoded_length), memory O(N · stack depth).
        explain:'Walk: "2[ab3[c]]" — outer 2[...] repeats the inner result twice. Inner "ab3[c]" = "ab" + ("c" × 3) = "abccc". Outer: "abccc" × 2 = "abcccabccc". The decode-from-outside-in is exactly what the stack achieves.'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'st-LC1', type:'drill', name:'Basic Calculator IV — parse expressions with parens', xp:32, time:14,
+    {id:'st-LC1', type:'concept', name:'Basic Calculator IV — parse expressions with parens', xp:32, time:14,
      body:`Evaluate <code>"(2 + 3) * (5 - (1 + 2))"</code> WITHOUT using eval. Numbers can be multi-digit. Handle nested parens, unary minus.
 <br><br>
 <b>The two-stack technique:</b>
@@ -5403,7 +5403,7 @@ Time O(N · max_decoded_length), memory O(N · stack depth).
        cat:'coding',
        explain:'Line 6 uses > instead of >=. For left-associative operators (- and / and same-precedence pairs), equal precedence must trigger a pop to preserve left-to-right order. "3 - 2 - 1" becomes "3 - (2 - 1) = 2" with >, but should be "(3 - 2) - 1 = 0".'}},
 
-    {id:'st-LC2', type:'drill', name:'Sum of Subarray Minimums — monotonic stack counting', xp:32, time:14,
+    {id:'st-LC2', type:'concept', name:'Sum of Subarray Minimums — monotonic stack counting', xp:32, time:14,
      body:`For every subarray, take its minimum. Sum all those minimums. With N=10⁵, must be O(N).
 <br><br>
 <b>The clever reframing:</b> instead of iterating subarrays, iterate ELEMENTS. For each element <code>a[i]</code>, count how many subarrays have <code>a[i]</code> as their minimum. Contribution: <code>a[i] × count</code>.
@@ -5443,7 +5443,7 @@ Both arrays computable with monotonic stacks in O(N).
        ],
        explain:'Pivot from "iterate subarrays" to "iterate elements" + count subarrays they\'re min of. The monotonic stack gives O(N) for both left/right distances.'}},
 
-    {id:'st-LC3', type:'drill', name:'Maximal Rectangle — apply histogram row-by-row', xp:32, time:14,
+    {id:'st-LC3', type:'concept', name:'Maximal Rectangle — apply histogram row-by-row', xp:32, time:14,
      body:`Given a binary matrix, find the largest rectangle of 1s.
 <br><br>
 <b>The decomposition:</b> for each row, compute a "histogram" where each column's height = number of consecutive 1s ending at this row. Then apply the Largest-Rectangle-in-Histogram algorithm (monotonic stack) to that histogram.
@@ -5475,7 +5475,7 @@ Max rectangle across all rows = answer.
        correct:2,
        explain:'At row 2, column 0: three 1s stacked → height 3. Col 1: one 1 at row 2 only → height 1. Col 2: three 1s → 3. Col 3: two 1s (rows 1, 2) → 2. Heights = [3,1,3,2]. Largest rect = 3×2 = 6 (cols 0+2 not contiguous; cols 0-2 only height-1 limited; cols 2-3 height-2 wide-2 = 4; col 0 alone = 3; the answer for THIS row\'s histogram is 6 from cols 0,2,3 limited by min=2).'}},
 
-    {id:'st-LC4', type:'drill', name:'132 Pattern — descending monotonic stack', xp:30, time:13,
+    {id:'st-LC4', type:'concept', name:'132 Pattern — descending monotonic stack', xp:30, time:13,
      body:`Find indices i &lt; j &lt; k with a[i] &lt; a[k] &lt; a[j]. The "132" name refers to the pattern's relative magnitude order.
 <br><br>
 <b>The right-to-left scan with descending stack:</b>
@@ -5626,7 +5626,7 @@ This question separates strong candidates from average ones; explicit pre-mortem
        cat:'coding'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'sel-LC1', type:'drill', name:'Sliding Window Median — two heaps + lazy deletion', xp:34, time:15,
+    {id:'sel-LC1', type:'concept', name:'Sliding Window Median — two heaps + lazy deletion', xp:34, time:15,
      body:`Window of size K slides across the array. Output the median at each position.
 <br><br>
 <b>Why "lazy" deletion is necessary:</b> the two-heap median structure has no efficient "delete arbitrary element". Direct removal is O(K). Lazy deletion defers: mark removals in a dict, and only actually remove when they bubble to the top of a heap.
@@ -5691,7 +5691,7 @@ def median_sliding_window(nums, k):
        ],
        explain:'Each step: add new, lazy-remove old, balance, emit. Lazy deletion only physically removes elements when they bubble to a heap top — keeping the structure usable in O(log k) amortized.'}},
 
-    {id:'sel-LC2', type:'drill', name:'Kth Largest Element in a Stream — min-heap of size K', xp:28, time:12,
+    {id:'sel-LC2', type:'concept', name:'Kth Largest Element in a Stream — min-heap of size K', xp:28, time:12,
      body:`Maintain a stream of integers; after each <code>add(x)</code>, return the Kth largest so far.
 <br><br>
 <b>The trick:</b> a min-heap of size K. The heap's top IS the Kth largest. Why?
@@ -5725,7 +5725,7 @@ class KthLargest:
        ],
        explain:'Heap-bounded-by-K is the canonical streaming-Kth-rank structure. Quickselect is the static-array workhorse. Both are O(N) lookups under their respective constraints.'}},
 
-    {id:'sel-LC3', type:'drill', name:'Kth Smallest Element in Sorted Matrix — binary search on VALUE', xp:32, time:14,
+    {id:'sel-LC3', type:'concept', name:'Kth Smallest Element in Sorted Matrix — binary search on VALUE', xp:32, time:14,
      body:`N×N matrix where each row AND each column is sorted ascending. Find the Kth smallest element.
 <br><br>
 <b>The wrong angle:</b> heap of size K — works but O(K log K) and ignores the column-sorted property.
@@ -5767,7 +5767,7 @@ class KthLargest:
        correct:1,
        explain:'If matrix[r][c] > mid, then column c at and below row r is also > mid (column-sorted). So no contribution to count_le from this column. Move UP to find smaller cells. Each up-step or right-step decreases r or increases c → at most 2N steps total.'}},
 
-    {id:'sel-LC4', type:'drill', name:'Wiggle Sort II — quickselect + index remap', xp:32, time:14,
+    {id:'sel-LC4', type:'concept', name:'Wiggle Sort II — quickselect + index remap', xp:32, time:14,
      body:`Rearrange the array so that <code>nums[0] &lt; nums[1] &gt; nums[2] &lt; nums[3] &gt; ...</code> Allowed any rearrangement; equal values cannot be adjacent.
 <br><br>
 <b>Three phases:</b>
@@ -5926,7 +5926,7 @@ Each character is compared at most twice across the whole computation, giving th
        explain:'Z[0]=0 (convention). i=1: s[1]="a" matches s[0]="a", s[2]="b" ≠ s[1]="a" → z[1]=1. i=2: s[2]="b" ≠ s[0]="a" → z[2]=0. i=3: "aab" matches prefix "aab" → z[3]=3. i=4: "a" matches → z[4]=1. i=5: "b" ≠ "a" → z[5]=0. Result: [0,1,0,3,1,0].'}},
 
     /* ─── LC-Hard intuition drills ─────────────────────────────────── */
-    {id:'str-LC1', type:'drill', name:'Shortest Palindrome — KMP failure function trick', xp:34, time:15,
+    {id:'str-LC1', type:'concept', name:'Shortest Palindrome — KMP failure function trick', xp:34, time:15,
      body:`Given a string <code>s</code>, return the shortest palindrome you can make by prepending characters to the front.
 <br><br>
 <b>The reframe:</b> find the LONGEST palindromic PREFIX of s. Whatever's left (the suffix after that prefix) is the "tail" — we just prepend its reverse to make the whole thing a palindrome.
@@ -5959,7 +5959,7 @@ Each character is compared at most twice across the whole computation, giving th
        ],
        explain:'KMP\'s failure function natively finds "longest proper prefix == suffix". By concatenating with reverse(s), we redirect it to find "longest prefix of s that matches a suffix of reverse(s)" — which IS a palindromic prefix.'}},
 
-    {id:'str-LC2', type:'drill', name:'Distinct Subsequences II — DP with last-occurrence subtraction', xp:32, time:14,
+    {id:'str-LC2', type:'concept', name:'Distinct Subsequences II — DP with last-occurrence subtraction', xp:32, time:14,
      body:`Count the number of distinct non-empty subsequences of a string (mod 10⁹ + 7).
 <br><br>
 <b>The naive recurrence:</b> <code>dp[i] = 2 * dp[i-1] + 1</code> if all characters were distinct. The +1 accounts for the new single-character subsequence; the 2x accounts for "include or exclude" the new char.
@@ -6001,7 +6001,7 @@ Each character is compared at most twice across the whole computation, giving th
        cat:'coding',
        explain:'Line 10 subtracts dp[last[c]] but should subtract dp[last[c] - 1]. The dp index represents "number of distinct subseqs of s[:i]". When c last appeared at position last[c] (1-indexed), the duplicates are those subseqs ending in THAT c — i.e., subseqs of s[:last[c]-1] each extended by c. Count = dp[last[c] - 1].'}},
 
-    {id:'str-LC3', type:'drill', name:'Wildcard Matching — DP with * (multi-char) and ? (single)', xp:34, time:15,
+    {id:'str-LC3', type:'concept', name:'Wildcard Matching — DP with * (multi-char) and ? (single)', xp:34, time:15,
      body:`Match string <code>s</code> against pattern <code>p</code> where <code>?</code> matches any single char and <code>*</code> matches any sequence (including empty).
 <br><br>
 <b>State:</b> <code>dp[i][j]</code> = True if s[:i] matches p[:j].
@@ -6045,7 +6045,7 @@ Together they cover all multi-char * matches via repeated application.
        correct:0,
        explain:'True. dp[3][3]: p[2]="c", s[2]="c" match → dp[3][3] = dp[2][2]. dp[2][2]: p[1]="*" → dp[2][2] = dp[1][2] OR dp[2][1]. dp[1][2]: p[1]="*" → dp[1][2] = dp[0][2] OR dp[1][1]. dp[1][1]: p[0]="a", s[0]="a" match → dp[1][1] = dp[0][0] = True. So dp[1][2] = True, dp[2][2] = True, dp[3][3] = True. "a*c" correctly matches "abc".'}},
 
-    {id:'str-LC4', type:'drill', name:'Longest Duplicate Substring — binary search + rolling hash', xp:34, time:15,
+    {id:'str-LC4', type:'concept', name:'Longest Duplicate Substring — binary search + rolling hash', xp:34, time:15,
      body:`Find the longest substring that appears at least twice in <code>s</code>. (Suffix array would solve this in O(N log N), but the binary-search-on-length + Rabin-Karp approach is more interview-typical.)
 <br><br>
 <b>The two-layer search:</b>
