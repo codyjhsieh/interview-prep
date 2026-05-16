@@ -5099,12 +5099,19 @@ function renderFlashcards(state, hub) {
       </div>
       <div class="text-right">
         <div class="text-xs uppercase tracking-wide text-slate-400">Due now</div>
-        <div class="text-2xl font-bold">${due.length}</div>
+        <div class="text-2xl font-bold" id="fc-due">${due.length}</div>
       </div>
     </div>
     <div id="fc-stage"></div>
   `;
   hub.appendChild(container);
+  function refreshStats() {
+    // Today XP + food piles still update in state via reviewCard → awardXP
+    // and are visible on the dashboard. We just don't surface them on the
+    // flashcards screen — only the due-now counter ticks down here.
+    const dueEl = container.querySelector('#fc-due');
+    if (dueEl) dueEl.textContent = Math.max(0, due.length - idx);
+  }
 
   const stage = container.querySelector('#fc-stage');
   let idx = 0;
@@ -5152,6 +5159,7 @@ function renderFlashcards(state, hub) {
         <div class="flashcard-face flashcard-back">
           <div class="text-xs uppercase tracking-wide text-slate-400 mb-3">Answer</div>
           <div class="text-[15px] leading-relaxed">${esc(card.a)}</div>
+          <div class="absolute bottom-5 right-6 text-xs text-slate-500">Click to flip back</div>
         </div>
       </div>
       <div class="grid grid-cols-4 gap-2 mt-4" id="rate-row" style="display:none">
@@ -5164,7 +5172,10 @@ function renderFlashcards(state, hub) {
     stage.appendChild(fc);
     const flashEl = fc;
     flashEl.querySelector('.flashcard-inner').addEventListener('click', () => {
-      flashEl.classList.add('flipped');
+      // Toggle so the card flips back and forth on repeated clicks.
+      // The rate row stays visible once shown — the user has already
+      // seen the answer, no value in hiding it again.
+      flashEl.classList.toggle('flipped');
       flashEl.querySelector('#rate-row').style.display = 'grid';
     });
     flashEl.querySelectorAll('[data-rate]').forEach(b => {
@@ -5175,6 +5186,7 @@ function renderFlashcards(state, hub) {
         ANIM.toast({ icon: q===1 ? iconHTML('refresh-cw',{size:18}) : q===4 ? iconHTML('zap',{size:18}) : iconHTML('check',{size:18}), title:`+${r.xpGained} XP${r.bonusLabel||''}`, body: q===1?'Rescheduled tomorrow.':'Logged.' });
         GAMI.bumpQuestProgress(state, 'flashcard');
         idx++;
+        refreshStats();
         paint();
       });
     });
