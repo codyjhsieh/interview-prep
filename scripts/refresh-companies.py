@@ -247,14 +247,14 @@ CANDIDATES = [
   # ── 2026-05-15 expansion: NYC-leaning AI / fintech / health / infra ──
   # Slugs are best-guesses from each company's public careers page; run
   # with -v to surface no-match diagnostics so we can iterate.
-  ("harvey","Harvey","ashby","harvey","ai","Legal AI for major firms","Series E","$500M+","Sequoia",["Sequoia","Kleiner","OpenAI Startup Fund"],"Legal AI for top law firms. FDE-style deploys, document workflows, reasoning eval."),
+  ("harvey","Harvey","ashby","harvey","ai","Legal AI for major firms","Series F+","$806M+","Andreessen Horowitz",["a16z","Kleiner","Coatue","Sequoia","GIC"],"Legal AI for top law firms; $11B valuation (Mar 2026). FDE-style deploys, document workflows, reasoning eval."),
   ("pinecone","Pinecone","greenhouse","pinecone","ai","Vector database for AI","Series B","$138M","Andreessen Horowitz",["a16z","Menlo","Wing"],"Production vector DB. Distributed indexing, latency, retrieval quality at scale."),
   ("captions","Captions","ashby","captions","ai","AI video editor for creators","Series C","$100M","Index",["Index","Sequoia","Kleiner"],"NYC AI-first video editor. Real-time inference, mobile + web latency."),
-  ("granola","Granola","ashby","granola","ai","AI meeting notes","Series B","$67M","NfX",["NfX","Lightspeed","Spark"],"AI note-taking + meeting summaries. ASR, summarization, LLM eval."),
-  ("common-sense-machines","Common Sense Machines","ashby","csmcorp","ai","3D / world AI","Series A","$25M","OpenAI Startup Fund",["OpenAI","Translink"],"Generative 3D + simulation. Multimodal pipelines, GPU."),
-  ("huggingface","Hugging Face","workable","huggingface","ai","ML model hub + libraries","Series D","$395M","Salesforce",["Salesforce","Sequoia","Google"],"Open-source ML platform. Inference, hosting, eval; OSS-heavy culture."),
-  ("coreweave","CoreWeave","greenhouse","coreweave","infra","Specialized GPU cloud","Series C","$1.1B","Magnetar",["Magnetar","Coatue","NVIDIA"],"GPU cloud powering AI labs. Bare-metal infra + scheduling."),
-  ("lithic","Lithic","greenhouse","lithic","fintech","Card-issuing API","Series C","$60M","Index",["Index","Bessemer","Tusk"],"NYC card-issuing platform (Privacy.com lineage). Payments + compliance + APIs."),
+  ("granola","Granola","ashby","granola","ai","AI meeting notes / enterprise context","Series C","$192M","Lightspeed",["Lightspeed","NFDG","Spark"],"AI note-taking → enterprise AI workspace; $1.5B valuation (Mar 2026). ASR, summarization, LLM eval."),
+  # ("common-sense-machines", ...) — acquired by Alphabet/Google in Feb 2026. Dropped.
+  ("huggingface","Hugging Face","workable","huggingface","ai","ML model hub + libraries","Series D","$400M","Salesforce",["Salesforce","Google","Nvidia","Sequoia"],"Open-source ML platform; $4.5B valuation. Inference, hosting, eval; OSS-heavy culture."),
+  ("coreweave","CoreWeave","greenhouse","coreweave","infra","Specialized GPU cloud (NASDAQ: CRWV)","Public","$1.5B IPO ($14B+ pre-IPO)","NASDAQ",["NASDAQ","Coatue","NVIDIA","Blackstone"],"GPU cloud powering AI labs; IPO\\'d Mar 2025. Bare-metal infra + scheduling."),
+  ("lithic","Lithic","greenhouse","lithic","fintech","Card-issuing API","Series C","$110M","Stripes",["Stripes","Index","Bessemer","Tusk"],"NYC card-issuing platform (Privacy.com lineage). Payments + compliance + APIs."),
   ("unit","Unit","ashby","unit","fintech","Embedded banking","Series C","$170M","Insight",["Insight","Accel","Better Tomorrow"],"Banking-as-a-service. Ledger, KYC, money movement."),
   ("increase","Increase","ashby","increase","fintech","Modern banking APIs","Series A","$20M","Andreessen Horowitz",["a16z","Susa","Garry Tan"],"Payments API (ACH/RTP/Wire). Deep banking + reliability."),
   ("pagaya","Pagaya","greenhouse","pagaya","fintech","AI lending platform (NASDAQ)","Public","$500M+ pre-IPO","Israel Growth Partners",["NASDAQ","Aflac","Viola"],"NYC AI-lending. ML credit + capital-markets plumbing."),
