@@ -6719,6 +6719,17 @@ At 300 RPS most requests hit cache. DB load is tiny. p99 latency is single-digit
 <br><br>
 <b>Hot keys:</b> a single short URL gets shared on Twitter and gets 1M requests in an hour. Solutions: (a) cache it in Redis (already done) plus (b) put a CDN in front, which can serve the redirect entirely from edge without touching your servers.
 <br><br>
+<b>301 vs 302 redirects — the senior-follow-up gotcha:</b>
+<ul class="list-muted">
+<li><b>301 Permanent</b>: browsers AND search engines cache the mapping aggressively. Faster for users (no re-lookup), but you lose per-visit analytics (subsequent visits skip your server).</li>
+<li><b>302 Found / Temporary</b>: not cached. Every visit hits your server. You get every click in analytics, at the cost of more redirect traffic.</li>
+</ul>
+The 2026 production default for URL shorteners is <b>302</b> — analytics is usually a product requirement. bit.ly, lnk.to, and t.co all use 302 for exactly this reason. If analytics doesn\'t matter and you want pure speed, use 301.
+<br><br>
+<b>2026 serverless / edge KV deployment shape:</b> the entire URL shortener fits in a single Cloudflare Worker + Workers KV (or DynamoDB + API Gateway). No Postgres, no Redis, no app servers. Latency is single-digit ms globally because the KV is replicated to every edge POP. Cost is ~$1-5/month for 10B redirects. Mention this as the modern shape — the "design with Postgres + Redis + app servers" answer is technically fine but a senior candidate also names the serverless variant.
+<br><br>
+<b>ID-generation note:</b> for naming with sortable timestamps in the ID (useful for analytics), reach for <b>Snowflake-style IDs</b> (Twitter\'s 64-bit packed timestamp + machine_id + sequence) or <b>Sonyflake</b> / <b>ULID</b>. Random 7-char base62 is fine if you don\'t care about sortability.
+<br><br>
 <b>Analytics:</b> "we want to count clicks per short URL." DO NOT increment a counter synchronously on every redirect (that bottlenecks the hot path and creates a write contention point). Instead: emit a Kafka event on every redirect, batch-aggregate in a downstream consumer, write counts every 60s. The redirect path stays fast.`,
      interactive:{ type:'mcq',
        q:'For your URL shortener handling 300 redirects/sec, where would adding a CDN help MOST?',
@@ -6730,8 +6741,8 @@ At 300 RPS most requests hit cache. DB load is tiny. p99 latency is single-digit
        ],
        correct:2,
        explain:'CDNs cache the redirect at edge, so viral URLs are served without touching your origin at all. New-ID generation, write load, and storage are unaffected by a CDN.'}},
-    {id:'sd-3', type:'concept', name:'Rate limiter — sliding-window log vs token bucket', xp:10, time:9,
-     body:`Token bucket: cheap, allows bursts. Sliding-window log: exact, memory ∝ requests. Sliding-window counter: cheap + approximate, production sweet spot. Distributed: Redis with Lua script for atomicity.
+    {id:'sd-3', type:'concept', name:'Rate limiter — token bucket, sliding window, GCRA, and edge enforcement', xp:11, time:10,
+     body:`Token bucket: cheap, allows bursts. Sliding-window log: exact, memory ∝ requests. Sliding-window counter: cheap + approximate. <b>GCRA (Generic Cell Rate Algorithm)</b>: the 2026 production default — single-state-variable token bucket, no log, atomic with one Redis call. Distributed: Redis with Lua script for atomicity, OR a managed edge limiter (Cloudflare/CloudFront WAF) that runs BEFORE your origin sees the request.
 <br><br>
 <pre><code># Token bucket (cheap, bursty)
 class TokenBucket:
@@ -6762,7 +6773,32 @@ else
     redis.call('SET', KEYS[1], tokens, 'EX', 60)
     return 0
 end
-"""</code></pre>`,
+"""</code></pre>
+<b>GCRA (Generic Cell Rate Algorithm) — the 2026 production default for distributed rate limiting:</b>
+<pre><code># GCRA — single state var per key (TAT = "theoretical arrival time")
+# Allows N requests per T seconds, with optional burst tolerance B.
+def gcra_allow(key, T, B):
+    now = time.time()
+    tat = redis.get(key) or now            # theoretical arrival time
+    new_tat = max(tat, now) + T            # virtual arrival shifted by inter-arrival interval
+    if new_tat - now &gt; T + B: return False # exceeds burst tolerance
+    redis.set(key, new_tat, ex=ttl)
+    return True</code></pre>
+<b>Why GCRA wins over sliding-window-log:</b>
+<ul class="list-muted">
+<li>O(1) state per key — one float (TAT), no list of timestamps.</li>
+<li>Atomic with one Redis SET — no LUA script needed for correctness (CAS via Lua is still cleaner for high concurrency).</li>
+<li>Equivalent precision to sliding-window-log when configured properly.</li>
+<li>Used by Stripe, Cloudflare, Vercel internally.</li>
+</ul>
+<br>
+<b>Push rate limiting to the EDGE when possible.</b> Cloudflare WAF, AWS API Gateway, Cloud Armor, Akamai — all enforce rate limits BEFORE the request reaches your origin. Benefits:
+<ul class="list-muted">
+<li>Edge POPs handle the rejected requests; your origin doesn\'t see them; no Redis round-trip.</li>
+<li>Geographic distribution — local enforcement, no cross-region state synchronization.</li>
+<li>DDoS mitigation: 1M req/sec attack absorbed at the edge, never blows up your Redis cluster.</li>
+</ul>
+Use application-layer rate limiting (Redis-backed GCRA) only for the things the edge CAN\'T see — per-user-id, per-API-key, per-tenant business rules. The edge handles per-IP, per-geo, basic floods.`,
      interactive:{ type:'match',
        prompt:'Match each rate-limiter to its production tradeoff:',
        pairs:[
@@ -6825,8 +6861,23 @@ Reader's feed = SELECT FROM posts
        ],
        correct:1,
        explain:'Write amplification is the celebrity problem. Hybrid: push for normal authors, pull for celebrities above a follower threshold. Reader\'s feed = merge(pushed inbox + pulled celebrity timelines), then re-rank.'}},
-    {id:'sd-5', type:'concept', name:'Caching pitfalls', xp:10, time:6,
-     body:'Stampede (request coalescing or refresh-ahead), invalidation (TTL + event-driven), consistency (read-your-writes via session pin), hot keys (consistent hashing + replicas), thundering herd on cache rebuild.',
+    {id:'sd-5', type:'concept', name:'Caching pitfalls — the six that come up in interviews', xp:12, time:9,
+     body:`Senior engineers don\'t just say "add a cache." They name the failure modes they\'re mitigating. Six pitfalls + their textbook fixes.
+<br><br>
+<b>1. Thundering herd / cache stampede.</b> A hot key expires; 10K clients ask for it simultaneously; all hit the origin DB at once; the DB dies. Fixes: (a) <b>request coalescing</b> ("singleflight") — only ONE request actually fetches; others wait on its result. (b) <b>Refresh-ahead</b> — refresh the cache BEFORE expiry on access. (c) <b>Stale-while-revalidate (SWR)</b> — serve the stale value while refreshing asynchronously; the next request gets fresh.
+<br><br>
+<b>2. Invalidation is the hard problem.</b> "There are only two hard things in CS: cache invalidation and naming things." TTL alone is incomplete — clients read stale data for the TTL window. The 2026 production pattern combines: TTL for safety + event-driven invalidation on writes (publish "user:42 changed" → all replicas evict/refresh). For multi-region: invalidation messages over Kafka / pub-sub topic.
+<br><br>
+<b>3. Read-your-writes consistency.</b> Client writes "X = 42"; immediately reads X; cache returns the OLD value (replication lag). Fixes: (a) <b>Write-through</b> caching — update cache synchronously with DB. (b) <b>Session pinning</b> — pin a client\'s reads to the same replica that handled their write, for N seconds. (c) <b>Read-your-own-writes guarantee</b> via "version stamp" — client tracks last-written version, retries reads against a newer-than-version replica.
+<br><br>
+<b>4. Hot keys.</b> The "celebrity tweet" problem — one key gets 100K req/sec, exceeds a single node\'s capacity. Fixes: (a) <b>Replicate hot keys across multiple cache nodes</b> with client-side load balancing. (b) <b>Client-side double-keying</b> — write to "celebrity:tweet:N:variant1..K" instead of a single key; reads pick a random variant. (c) <b>Local-process LRU</b> in front of the shared cache for ultra-hot keys.
+<br><br>
+<b>5. Negative caching.</b> A repeated query for a nonexistent key ("user:notfound") never has a cache hit — every miss hits the DB. Cache the NEGATIVE result (with a shorter TTL) too. Critical for adversarial inputs (people probing your API with random IDs).
+<br><br>
+<b>6. Two-tier caching.</b> Local in-process cache (caffeine / lru-cache) in front of a shared cache (Redis / Memcached). The local cache absorbs 90%+ of reads at &lt; 1µs; only misses hit Redis. Tradeoff: cross-instance invalidation is harder — usually handled with a short local TTL (1-5s) + event-driven invalidation messages, accepting brief inconsistency.
+<br><br>
+<b>Stale-while-revalidate (SWR) is the 2026 default for read-heavy paths.</b> The Cloudflare / HTTP caching pattern: respond with the stale value immediately (latency wins) while refreshing in the background. Combined with negative caching, it\'s the cleanest pattern for "this is data I want fast and mostly-fresh."
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"I\'d use a two-tier cache (process-local LRU in front of Redis) with stale-while-revalidate semantics + event-driven invalidation on writes. Singleflight to prevent stampede. Negative caching for not-found keys. That\'s the recipe."</div>`,
      interactive:{ type:'truefalse',
        statements:[
          { text:'A cold cache + sudden traffic = thundering herd is a real risk.', answer:true, why:'Request coalescing (singleflight) or refresh-ahead protects against simultaneous regenerations of the same key.' },
@@ -6851,7 +6902,17 @@ Reader's feed = SELECT FROM posts
   <li>Group chats: 10k people in a group, one message → 10k pushes. Use fan-out workers; don\'t do it inline on the sender\'s request.</li>
   <li>WebSocket connections scale by number of users, not by traffic. Plan capacity per-gateway-server (typically 10k-50k connections each).</li>
   <li>Push notifications (when app is closed) go through APNs / FCM separately — add a worker that triggers on message-for-offline-user.</li>
-</ul>`,
+</ul>
+<b>Capacity numbers to anchor on:</b> assume 1B DAU sending ~50 messages/day → ~600K msgs/sec average, peak ~3M msgs/sec. Storage: 50B msgs/day × 200 bytes ≈ 10 TB/day; with replication 30 TB/day; archive after 90 days. WebSocket fanout per gateway: ~50K connections × 1 message/sec each = 50K msg/sec/gateway. Need ~20K gateway nodes globally for a WhatsApp-scale deployment.
+<br><br>
+<b>2026 transport options beyond WebSocket:</b>
+<ul class="list-muted">
+<li><b>HTTP/3 + WebTransport</b> — QUIC-based, head-of-line-blocking immune, better than WebSocket on flaky mobile networks. Supported by Chromium and modern servers (Cloudflare, NodeJS via @fails-components/webtransport). The 2026 successor for new builds.</li>
+<li><b>SSE (Server-Sent Events)</b> — one-way server-to-client. Simpler than WebSocket if clients only RECEIVE (notifications, live feeds). Auto-reconnects.</li>
+</ul>
+<b>Multi-device sync — when CRDTs become the right shape:</b> if users edit the same conversation/draft from phone + laptop simultaneously while one is offline, you have a multi-leader concurrent-edit problem. Server-assigned sequence numbers don\'t solve it (you can\'t assign a sequence when offline). The 2026 pattern: CRDT-based local-first storage (Yjs, Automerge) syncs to server when online. Used by Linear, Notion, modern chat apps with offline-first design.
+<br><br>
+<b>E2E encryption (MLS):</b> as of 2026 the modern standard for group-chat E2E is <b>MLS (Messaging Layer Security, RFC 9420)</b>, which Signal, WhatsApp, and Discord have either adopted or are migrating to. The previous Double Ratchet (Signal protocol) doesn\'t scale to large groups; MLS does (O(log N) per add/remove). If the interviewer cares about E2E, MLS is the senior answer in 2026, not "Signal protocol."`,
      interactive:{ type:'mcq',
        q:'In a chat system, two users send a message in the same conversation within 5ms of each other. They each see their own message first locally. What\'s the correct way to ensure all OTHER clients see them in the same order?',
        options:[
@@ -6884,7 +6945,14 @@ When you add server S3, only the keys whose "next server clockwise" was S2 but n
   <li>"What happens when a node fails?" → its arc redistributes among neighbors.</li>
   <li>"What about hot keys?" → consistent hashing alone doesn\'t fix hot keys — that needs replicas + load balancing.</li>
 </ul>
-<b>The senior signal:</b> draw the ring on the whiteboard, mention virtual nodes, name the failure-rebalancing behavior. Most candidates know the term; few can sketch it correctly.`,
+<b>Two modern alternatives every senior should name:</b>
+<ul class="list-muted">
+<li><b>Rendezvous hashing (HRW — Highest Random Weight)</b>: for each key, compute hash(key, node) for every node; pick the node with the highest hash. No ring, no virtual nodes, no rebalancing data structure — just O(N) hashes per lookup. Adding/removing a node only affects keys whose new "highest" landed on the changed node. Used in CDN routing (Akamai) and modern shard routers because it\'s simpler than rings with comparable balance.</li>
+<li><b>Jump consistent hash (Lamping/Veach, Google 2014)</b>: a one-line function that maps a key to a bucket in O(log N) time with no state at all — perfect balance, perfect monotonicity (when you add a bucket, only keys that move go to the new bucket). Limitation: only works for "bucket numbered 0..N-1" — you can\'t arbitrarily remove a middle node. Used by ScyllaDB, some shard routers, anywhere the node count is monotonically growing.</li>
+</ul>
+<b>Which to pick:</b> classic ring + vnodes for cache clusters with manual rebalancing; HRW for stateless routing where simplicity wins; jump hash for systems where buckets are append-only (data shards in a growing fleet).
+<br><br>
+<b>The senior signal:</b> draw the ring on the whiteboard, mention virtual nodes, name rendezvous and jump as alternatives, identify which fits the problem. Most candidates know "consistent hashing" — naming the two modern variants is the senior signal.`,
      interactive:{ type:'mcq',
        q:'Your distributed cache has 4 nodes using consistent hashing. You add a 5th node. Approximately what fraction of cached keys move to the new node?',
        options:[
@@ -6911,14 +6979,18 @@ Real systems also have to choose between low latency and strong consistency even
   <li>Acknowledge writes immediately at the local datacenter → low latency, eventual consistency.</li>
   <li>Wait for a quorum of geographically distant replicas → strong consistency, high latency.</li>
 </ul>
-<b>Common system PACELC profiles:</b>
+<b>Common system PACELC profiles (2026):</b>
 <ul class="list-muted">
-  <li>DynamoDB: PA/EL — availability + low latency</li>
-  <li>Spanner: PC/EC — consistency always (uses TrueTime hardware)</li>
-  <li>Cassandra: PA/EL by default; tunable per-query</li>
-  <li>Postgres replica setup: PC/EC for primary; replicas drift slightly</li>
+  <li>DynamoDB: <b>tunable per request</b> — strong-read or eventual-read at the API level since 2018; <b>Global Tables now support multi-region strong consistency (GA June 2025)</b>. So "PA/EL" is the default and historical framing, but the modern story is "you can pay for PC/EC at the request level."</li>
+  <li>Spanner: PC/EC — consistency always (uses TrueTime hardware). Commit latency ~10-50 ms across regions.</li>
+  <li>Aurora DSQL (AWS, GA 2025): PC/EC — serverless distributed Postgres with optimistic concurrency; commits are validated across regions.</li>
+  <li>CockroachDB: PC/EC — serializable by default; range-leaseholder routing for low single-row latency.</li>
+  <li>Cassandra / ScyllaDB: PA/EL by default; tunable per-query (QUORUM, LOCAL_QUORUM, ALL).</li>
+  <li>Postgres replica setup: PC/EC for primary writes; replicas drift slightly (configurable sync vs async).</li>
 </ul>
-<b>Interview move:</b> when asked "do you need strong consistency?", reach for PACELC, not CAP. PACELC forces you to answer the harder question about steady-state latency vs consistency.`,
+<b>The 2026 shift:</b> the "AP vs CP" choice is increasingly per-query, not per-system. Modern multi-region DBs (DynamoDB Global Tables strong, Spanner, Aurora DSQL, CockroachDB) all offer strong consistency as a paid option. The real question is no longer "which side of CAP did the architects pick?" but "for THIS read, do I pay the strong-consistency latency tax?"
+<br><br>
+<b>Interview move:</b> when asked "do you need strong consistency?", reach for PACELC, not CAP. PACELC forces you to answer the harder question about steady-state latency vs consistency. Then say: <i>"And in 2026, most managed DBs let me choose per-query — so the architecture question is which queries are willing to pay the cross-region commit cost."</i>`,
      interactive:{ type:'truefalse',
        statements:[
          { text:'CAP says you must choose 2 of 3 (Consistency, Availability, Partition tolerance) at all times.',
@@ -6951,7 +7023,7 @@ Real systems also have to choose between low latency and strong consistency even
 <ul class="list-muted">
   <li>1 KB ≈ a tweet / short message. 1 MB ≈ a photo. 1 GB ≈ a movie chunk / DB index.</li>
   <li>1 server ≈ 10–50K QPS for stateless work. 1K–10K QPS for DB-bound. 100–1K QPS for ML inference.</li>
-  <li>1 disk ≈ 10K IOPS (NVMe SSD), 100 IOPS (HDD).</li>
+  <li>1 disk ≈ 500K-1M IOPS (modern enterprise NVMe), 50-100K IOPS (consumer NVMe), 100 IOPS (HDD). Cloud-attached NVMe (gp3/io2/Local NVMe) sits at 16K-100K depending on tier — pricier than raw HW because of network virtualization. Cite the cloud-tier number in interviews; the raw-HW number is the upper bound.</li>
   <li>1 Redis instance ≈ 100K ops/sec (single-thread).</li>
   <li>1 day = 86,400 sec. 1 month ≈ 2.6 M sec. 1 year ≈ 31.5 M sec.</li>
 </ul>
@@ -6997,7 +7069,17 @@ LSM:     WRITE → append memtable + WAL (sequential, fast)
 </ul>
 <b>What an interviewer is listening for:</b> name write-amp and read-amp by name. Explain WHY LSM compaction exists (without it, reads degrade). Pick the storage engine BEFORE picking the DB. "We need 100 K writes/sec of telemetry — that's LSM territory, so I'd choose Cassandra or ScyllaDB, not Postgres."
 <br><br>
-<div class="callout callout-senior"><div class="callout-label">Mature signal</div>recognize that the choice cascades. LSM → secondary indexes are expensive (write to multiple SSTable sets). Joins are expensive (no co-located rows). You either design around it (denormalize, materialized views) or pick B-tree.</div>`,
+<div class="callout callout-senior"><div class="callout-label">Mature signal</div>recognize that the choice cascades. LSM → secondary indexes are expensive (write to multiple SSTable sets). Joins are expensive (no co-located rows). You either design around it (denormalize, materialized views) or pick B-tree.</div>
+<br>
+<b>2026 — serverless / disaggregated DBs change the calculus:</b>
+<ul class="list-muted">
+<li><b>Aurora DSQL</b> (AWS, GA 2025) — serverless distributed Postgres with optimistic concurrency. Storage layer is separated from compute; compute auto-scales to zero. The "Postgres + cloud-scale" answer for new builds.</li>
+<li><b>Neon</b> — serverless Postgres with branchable storage. Each git branch can have its own DB branch in seconds. Engineering-team-favorite for the dev-loop ergonomics.</li>
+<li><b>PlanetScale Postgres</b> — Vitess-style sharded Postgres-compatible. Online schema changes without locks.</li>
+<li><b>Databricks Lakebase</b> — Postgres with native Delta Lake integration; transactional + analytical in one engine.</li>
+<li><b>TigerBeetle</b> — purpose-built for double-entry accounting with insane throughput (1M tx/s); a counterexample to "general-purpose DB always wins."</li>
+</ul>
+<b>"Postgres as everything" is the 2026 default — until measurement shows otherwise:</b> Postgres now has solid pgvector (vector search), Listen/Notify (pub-sub), SKIP LOCKED (queue), partial indexes (sparse data), JSONB (semi-structured), and TimescaleDB extension (time-series). Many systems that needed 4 specialized stores in 2020 can be one Postgres in 2026. The senior framing: <i>"I\'d default to Postgres + targeted extensions. I\'d add a specialized store (Cassandra for write-heavy time-series, ClickHouse for OLAP, vector DB for billion-vector retrieval) only when measurement shows Postgres is the bottleneck."</i></div>`,
      interactive:{ type:'match',
        prompt:'Match each workload to the storage engine you would default to:',
        pairs:[
@@ -7038,9 +7120,17 @@ LSM:     WRITE → append memtable + WAL (sequential, fast)
   <li><b>etcd</b> (Kubernetes' brain) — Raft for cluster state.</li>
   <li><b>Consul</b>, <b>CockroachDB</b>, <b>TiKV</b> — Raft for replicated logs.</li>
   <li><b>Spanner</b> uses Paxos (Raft's ancestor) per shard.</li>
-  <li><b>Kafka</b>'s newer "KRaft" mode replaces ZooKeeper with Raft.</li>
+  <li><b>Kafka</b> — KRaft has been the ONLY mode since Kafka 4.0 (March 2025); ZooKeeper has been removed.</li>
+  <li><b>Aurora DSQL, FoundationDB, Tigris</b> — Raft (or Raft-derivatives) under the hood for serializable distributed Postgres-shaped systems.</li>
 </ul>
-<b>Interview move:</b> when asked "how do you replicate?", lead with the topology (single-leader / multi-leader / leaderless). When asked "what happens on failover?", name Raft, name the quorum math (N=3 → tolerates 1), name the split-brain risk you've prevented. "We use 3 etcd nodes for our config store; Raft elects a new leader within ~500 ms on failure."`,
+<b>CRDTs — the alternative to consensus for collaborative editing.</b> When multiple parties edit the SAME doc/data (Figma multiplayer, Linear realtime sync, Notion, multiplayer game state), Raft\'s "single leader funnels all writes" is the wrong shape. CRDTs (Conflict-free Replicated Data Types) let every replica accept writes locally and mathematically guarantee that, regardless of merge order, all replicas converge to the same state. Two families:
+<ul class="list-muted">
+  <li><b>State-based (CvRDTs):</b> each replica ships its full state; merge is a commutative, associative, idempotent join (e.g., a Set merged by union).</li>
+  <li><b>Operation-based (CmRDTs):</b> each replica ships operations; ops are commutative so order doesn\'t matter (e.g., G-Counter increment).</li>
+</ul>
+Used in Yjs, Automerge, Riak, Figma (custom CRDTs for multiplayer). The "CRDTs vs Operational Transformation (OT)" debate has largely settled in favor of CRDTs because OT requires a central server to order ops; CRDTs are decentralization-friendly.
+<br><br>
+<b>Interview move:</b> when asked "how do you replicate?", lead with the topology (single-leader / multi-leader / leaderless). When asked "what happens on failover?", name Raft, name the quorum math (N=3 → tolerates 1), name the split-brain risk you've prevented. "We use 3 etcd nodes for our config store; Raft elects a new leader within ~500 ms on failure." When the topology is "multi-region active-active with collaborative edits," reach for CRDTs, not Raft.`,
      interactive:{ type:'truefalse',
        statements:[
          { text:'A 5-node Raft cluster can tolerate 2 simultaneous failures and still elect a leader.',
@@ -7088,7 +7178,15 @@ LSM:     WRITE → append memtable + WAL (sequential, fast)
 </ul>
 <b>How they combine.</b> A real call chain typically uses ALL FOUR: timeout (so you don't wait forever) → retry with backoff (handle transient failures) → circuit breaker (stop trying when broken) → bulkhead (don't let this dependency take everyone down).
 <br><br>
-<b>The interview signal.</b> When the interviewer says "what if the DB is slow?", a junior says "we'd add retries." A senior says: "Each call is wrapped in a 3-second timeout. We retry 3× with exponential jitter, with a per-client retry budget of 10%. The connection pool is bulkheaded by query class so slow analytics don't starve OLTP. A circuit breaker opens after 5 errors and probes again after 30 seconds." That's the whole pattern landscape in one breath.`,
+<b>The interview signal.</b> When the interviewer says "what if the DB is slow?", a junior says "we'd add retries." A senior says: "Each call is wrapped in a 3-second timeout. We retry 3× with exponential jitter, with a per-client retry budget of 10%. The connection pool is bulkheaded by query class so slow analytics don't starve OLTP. A circuit breaker opens after 5 errors and probes again after 30 seconds." That's the whole pattern landscape in one breath.
+<br><br>
+<b>Where these patterns live in 2026 — name the tools, not just the concepts:</b>
+<ul class="list-muted">
+<li><b>Service mesh (Istio / Envoy / Linkerd)</b> implements timeouts, retries, circuit breakers as DestinationRule / VirtualService config — no app-level code. The 2026 default for new microservice architectures; the "Hystrix" answer is now historical. Istio also has an "ambient mesh" mode (GA 1.24, 2024) that drops the per-pod sidecar in favor of ztunnel + per-node proxies — lower overhead, easier ops.</li>
+<li><b>Application-level libraries</b>: <code>resilience4j</code> (Java), <code>polly</code> (.NET), <code>tenacity</code> (Python), <code>p-retry</code> (Node). Use these for in-process patterns the mesh can\'t see (DB query retries, in-app circuit breaks).</li>
+<li><b>Observability:</b> <b>OpenTelemetry</b> is the cross-vendor standard for traces + metrics + logs. Mesh and app both emit OTel; you correlate request-traces across the network boundary. The 2026 default observability stack: OTel collector → Tempo/Jaeger (traces) + Mimir/Prometheus (metrics) + Loki (logs), often as the Grafana LGTM stack. Datadog / Honeycomb / New Relic are still common but OTel makes vendor swaps cheap.</li>
+</ul>
+<b>The senior framing:</b> "I\'d let the service mesh handle timeout/retry/circuit-break for inter-service calls and reserve app-level libraries for in-process needs. All instrumentation via OpenTelemetry so I can swap vendors. Don\'t roll your own circuit breaker in 2026."`,
      interactive:{ type:'sort',
        prompt:'Order the reliability patterns from "outermost shield" to "innermost":',
        items:['Timeout (per call)','Circuit breaker (per dependency)','Retry with backoff (per attempt)','Bulkhead (per resource pool)'],
@@ -7136,7 +7234,14 @@ try {
 } catch (Exception e) {
     producer.abortTransaction();
 }</code></pre>
-<b>Common interview prompt:</b> "Design a clickstream pipeline." Walk through partition key choice, replication factor, consumer group sizing, and exactly-once if downstream is non-idempotent.`,
+<b>Common interview prompt:</b> "Design a clickstream pipeline." Walk through partition key choice, replication factor, consumer group sizing, and exactly-once if downstream is non-idempotent.
+<br><br>
+<b>2026 — what every senior knows about Kafka NOW:</b>
+<ul class="list-muted">
+<li><b>KRaft has been the only mode since Kafka 4.0 (March 2025).</b> ZooKeeper was removed entirely. Metadata is stored in an internal Kafka topic, managed by a Raft quorum of "controller" brokers. If you read older interview prep, ignore the "ZooKeeper or KRaft" framing — it\'s KRaft now.</li>
+<li><b>S3-backed BYOC tier reshaped the market.</b> <b>WarpStream</b> (acq. by Confluent 2024), <b>Redpanda BYOC</b>, and <b>AutoMQ</b> all write the log directly to S3 instead of broker-local disk. Cost drops 5-10× (you pay S3 storage, not 3×-replicated EBS). Latency tradeoff: p50 ~500ms vs ~5ms for traditional Kafka. Pick BYOC when throughput is high but you don\'t need single-digit-ms latency (most analytics and event-streaming workloads).</li>
+<li><b>"Postgres as a queue" is increasingly the right call</b> for &lt; 1K msgs/sec workloads. <code>SELECT ... FOR UPDATE SKIP LOCKED</code> + a status column gives you durable, transactional, exactly-once delivery with zero new infra. Saying "I\'d start with Postgres and graduate to Kafka if needed" is a senior signal — the rookie reflex is "Kafka by default."</li>
+</ul>`,
      interactive:{ type:'mcq',
        q:'You\'re ingesting 50 K events/sec into Kafka and need strict per-user ordering. You have 10 partitions, 1M users. Which partition-key strategy is correct?',
        options:[
@@ -7287,6 +7392,166 @@ Each transition is a separate event; each can fail independently. Storage = even
        ],
        correct:[1,3,0,4,2],
        explain:'Producer → fan-out → channel queues → channel workers → status. Each stage has one job; the queues between stages absorb backpressure when a downstream provider gets slow.'}},
+
+    {id:'sd-cells', type:'concept', name:'Cell-based architecture — blast radius as a first-class design constraint', xp:13, time:10,
+     body:`Modern AWS reference architectures (and most large-scale SaaS) shard not just data but the <b>entire service stack</b> into independent "cells." A cell is a complete, self-sufficient slice of your service — its own compute, DB, cache, queues, deploy pipeline — serving a deterministic partition of users (e.g., users 0-9999 → cell-1, users 10000-19999 → cell-2). Cells share NOTHING runtime. A bug, deploy error, or DB corruption affects ONE cell\'s users, not all of them.
+<br><br>
+<b>Why this matters in 2026:</b> traditional "shared infra, partitioned data" architectures spread blast radius across all customers when something goes wrong (a bad deploy, a runaway query, a DNS misconfiguration). Cell-based shrinks blast radius to a single cell — typically 1-10% of users. AWS uses this for many internal services (e.g., S3 cells); Stripe, Square, Slack have adopted variants.
+<br><br>
+<b>The components:</b>
+<ul class="list-muted">
+<li><b>Thin routing layer</b> (cell router) — hash(user_id) → cell N. The ONLY component shared by all users. Designed to be stateless, simple, and easy to roll back independently.</li>
+<li><b>N identical cells</b> — each runs a complete copy of your service. Sized to handle "this slice of users at peak."</li>
+<li><b>Per-cell deploy pipeline</b> — deploys roll out cell-by-cell. Wave 1: 1 cell. Wait an hour. If no regression: wave 2: 10 more. Wait. Wave 3: rest. A bad deploy hits 1% of users, not 100%.</li>
+<li><b>Per-cell observability</b> — every metric, log, and trace tagged with cell_id. "Cell 7 latency just spiked" is the right alert granularity.</li>
+</ul>
+<br>
+<b>The tradeoffs:</b>
+<ul class="list-muted">
+<li><span class="icon-check"></span> Blast radius bounded to one cell. Deploy waves are natural. Capacity scales by adding cells, not by resizing a global pool.</li>
+<li><span class="icon-x"></span> Cross-cell operations are EXPENSIVE — searching across all users, computing global stats, joining data from multiple cells requires fanning out to every cell. Design these as async, eventually-consistent.</li>
+<li><span class="icon-x"></span> Cell sizing matters. Too few cells = blast radius too large. Too many = per-cell overhead (each cell has its own DB connection pool, etc.). Typical: 10-100 cells per region for medium-scale; AWS S3 has thousands per region.</li>
+</ul>
+<br>
+<b>The senior interview move:</b> when an interviewer asks "how do you protect against a bad deploy taking down all customers?", reach for cell-based architecture. <i>"I\'d shard the service into cells of ~10K users each. Deploys roll cell-by-cell with bake time between waves. A bad change reaches at most 1% of users before the rollback alarm fires."</i>
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"Blast radius is a design constraint, not a property to discover after an incident. Cell-based architecture makes it explicit."</div>`,
+     interactive:{ type:'mcq',
+       q:'Your service has a single shared Postgres + 50 stateless app servers across 1 region, serving 5M users. A bad migration corrupts a non-critical table. Approximately what % of users are affected?',
+       options:[
+         '~2% — only those who actively use that feature',
+         '~100% — all users hit the same DB, so corruption affects everyone\'s queries that touch that table',
+         '~50% — half the app servers haven\'t executed the bad query yet',
+         '0% — Postgres rolls back automatically',
+       ],
+       correct:1,
+       explain:'Shared infrastructure → 100% blast radius. The bad migration affects every query that touches the corrupted table for every user, because they all share the same DB. Cell-based architecture limits this to a single cell\'s users (typically 1-10%) — the rest of your fleet keeps serving traffic from their own uncorrupted cells.'}},
+
+    {id:'sd-outbox', type:'concept', name:'Outbox pattern + CDC — transactional event publishing', xp:13, time:10,
+     body:`The classic dual-write bug: you update your DB and publish a Kafka event in the same function. Either can succeed while the other fails — DB updated but no event, or event sent but DB rollback. Both create state divergence between your service and downstream consumers. The 2026 standard fix: the <b>outbox pattern</b>, often paired with CDC.
+<br><br>
+<b>The pattern in three steps:</b>
+<ol>
+<li><b>Write your domain change AND an "event-to-publish" row to the outbox table IN THE SAME DB TRANSACTION.</b> Both succeed or both roll back — atomicity via the DB you already have.</li>
+<li><b>A separate "relay" process tails the outbox table</b> and publishes each row to Kafka/SQS/wherever. It marks rows as published (or deletes them) once successfully sent.</li>
+<li><b>If the relay crashes mid-publish</b>, it restarts and re-publishes (at-least-once). Consumers must be idempotent — use the outbox row\'s ID as the event ID.</li>
+</ol>
+<br>
+<pre><code>BEGIN;
+  UPDATE orders SET status = 'PAID' WHERE id = 42;
+  INSERT INTO outbox (event_type, payload, created_at)
+    VALUES ('OrderPaid', '{"order_id": 42, "amount": 99}', NOW());
+COMMIT;
+-- Both committed atomically. The relay will eventually pick up the outbox row.</code></pre>
+<b>CDC (Change Data Capture) — the high-leverage alternative:</b> instead of writing to an outbox table explicitly, point a CDC tool (<b>Debezium</b>, <b>Materialize</b>, <b>AWS DMS</b>) at your DB\'s replication log (Postgres WAL, MySQL binlog). Every row change becomes a stream event automatically. No app-level outbox writes; the DB log IS the event source.
+<ul class="list-muted">
+<li><span class="icon-check"></span> Zero app changes. Existing INSERT/UPDATE/DELETE flows produce events automatically. Captures changes from anywhere — ORMs, raw SQL, migration scripts, manual DBA changes.</li>
+<li><span class="icon-x"></span> Granularity = row-level changes, not domain events. You see "row X changed columns A and B" — your consumer reconstructs the meaning. Adds a streaming infra dependency.</li>
+</ul>
+<br>
+<b>When to pick which:</b>
+<ul class="list-muted">
+<li><b>Outbox table</b> — when events are first-class domain concepts ("OrderPaid", "UserSignedUp"). Schema is YOUR design.</li>
+<li><b>CDC</b> — when you need to mirror ALL changes downstream (e.g., into a data lake, search index, cache) and don\'t want to instrument every write site.</li>
+<li><b>Often both</b> — outbox for domain events, CDC for "everything else."</li>
+</ul>
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"For any service that needs to publish events on state changes, the answer is outbox pattern, NOT direct-publish-after-commit. The dual-write bug eats months of on-call time if you don\'t set this up correctly from the start."</div>`,
+     interactive:{ type:'whyexplain',
+       prompt:'Why does the outbox pattern eliminate the "dual write" bug where one side (DB or Kafka) succeeds and the other fails?',
+       options:[
+         'Because Kafka guarantees at-least-once delivery',
+         'Because the domain write AND the event-to-publish are both written in the SAME database transaction — they atomically succeed or fail together. A separate relay later moves outbox rows to Kafka. If the relay crashes, it retries; consumers de-dupe by event ID.',
+         'Because the outbox table is faster than Kafka',
+         'Because outbox uses synchronous replication',
+       ],
+       correct:1,
+       explain:'The trick is that you\'re no longer doing TWO writes (DB + Kafka) — you\'re doing ONE write (DB transaction containing BOTH the domain change and the outbox row). Atomicity is inherited from the DB. The relay is a separate, retryable process; if it fails, the outbox row stays unpublished until next attempt. Consumers tolerate duplicates via idempotency keyed on event ID.'}},
+
+    {id:'sd-tail', type:'concept', name:'Tail-latency engineering — hedged requests + p99 thinking', xp:12, time:9,
+     body:`Average latency is a lie. A service with 10ms mean and 2 seconds p99 looks fine in the dashboards but feels broken to 1 in 100 users — including the high-value users making 100+ requests per session. Senior engineers think in <b>tail latency</b>, not averages. The 2026 toolkit:
+<br><br>
+<b>1. Always measure and SLO on p99 (and p99.9 for critical paths).</b> Average is fine for capacity planning; the user-facing experience is the tail. If your SLO is "p99 &lt; 500ms," your alerts trigger on p99 regressions, not mean.
+<br><br>
+<b>2. The "Tail at Scale" insight</b> (Dean & Barroso, 2013): in a system that fans out to N backends, the response time is dominated by the SLOWEST backend\'s latency. If each backend has 1% chance of taking &gt; 1s, fanning out to 100 backends gives you a (1 - 0.99^100) ≈ <b>63% chance the request is slow</b>. Tails compound.
+<br><br>
+<b>3. Hedged requests — the canonical fix.</b> Send the request to backend A. If A doesn\'t respond within (say) p95-of-A-historical, send the SAME request to backend B in parallel. Take whichever returns first. Cancel the loser.
+<pre><code>async def hedged_call(servers, request, hedge_after_ms=50):
+    # Start the primary
+    primary = asyncio.create_task(call(servers[0], request))
+    try:
+        return await asyncio.wait_for(asyncio.shield(primary), hedge_after_ms / 1000)
+    except asyncio.TimeoutError:
+        # Primary still running — fire the hedge in parallel
+        hedge = asyncio.create_task(call(servers[1], request))
+        done, _ = await asyncio.wait(
+            {primary, hedge}, return_when=asyncio.FIRST_COMPLETED
+        )
+        return done.pop().result()</code></pre>
+Tradeoff: hedging doubles your backend load for the hedged fraction (typically 5%). 1.05× cost for 5-10× p99 improvement.
+<br><br>
+<b>4. Variants to know:</b>
+<ul class="list-muted">
+<li><b>Tied requests</b> — send to A and B simultaneously, but each side knows about the other. When one starts processing, it tells the other to cancel. Lower wasted work than naive hedging.</li>
+<li><b>Backup requests with cancellation</b> — Bigtable uses this for replica reads.</li>
+<li><b>Speculative retry</b> — fire the retry BEFORE the original times out, if the original is past p95 of historical.</li>
+</ul>
+<br>
+<b>5. Don\'t retry past the timeout — bound everything.</b> Hedged requests + retries can cascade and create work amplification. Bound retries with the same timeout budget as the parent call.
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"For critical paths I\'d measure p99 and p99.9, not mean. For fan-out queries, I\'d use hedged requests — fire the duplicate at p95 of historical latency, take the first response. That\'s a 1.05× cost for a major p99 cut."</div>`,
+     interactive:{ type:'mcq',
+       q:'Your service fans out to 50 backend shards. Each shard has p99 of 100ms. What\'s the approximate p99 of the OVERALL fan-out query?',
+       options:[
+         '~100ms — fan-out doesn\'t change latency',
+         '~500ms — additive across shards',
+         '~5000ms — multiplicative because of parallel work',
+         '~100ms but with the 99-th percentile being the SLOWEST of 50 — closer to p99.98 per shard, which is much higher than p99. Realistically several hundred ms.',
+       ],
+       correct:3,
+       explain:'When you fan out to 50 backends and wait for ALL, your overall p99 is the p99 of "max of 50 latencies." That\'s approximately the per-shard p_{(1 - 0.01/50)} ≈ p99.98 per shard, much worse than p99. Tail compounding is why hedged requests + parallel-friendly query patterns matter at fan-out scale. Some systems address this by issuing 51 requests and accepting the first 50 (drop the slow one) — partial-result tolerance.'}},
+
+    {id:'sd-tracing', type:'concept', name:'Distributed tracing — OpenTelemetry + W3C trace context', xp:12, time:9,
+     body:`When a user request flows through 10 microservices, "the API was slow" is useless. You need <b>distributed tracing</b>: a single trace ID that follows the request across services, with spans showing where time was spent. The 2026 standard is <b>OpenTelemetry (OTel)</b>, vendor-neutral.
+<br><br>
+<b>The model:</b>
+<ul class="list-muted">
+<li><b>Trace</b> = the full journey of one request through your system (one trace ID).</li>
+<li><b>Span</b> = one unit of work within the trace (an HTTP call, a DB query, an LLM inference). Spans have a start time, duration, parent span ID, and tags (attributes).</li>
+<li><b>Context propagation</b> = passing the trace ID + parent span ID across service boundaries via HTTP headers, so service B knows it\'s part of the trace that started in service A.</li>
+</ul>
+<br>
+<b>The W3C standard for context propagation:</b> <code>traceparent</code> and <code>tracestate</code> HTTP headers (W3C Trace Context spec). Format: <code>traceparent: 00-{trace_id}-{span_id}-{flags}</code>. Every modern instrumentation library emits and reads these headers automatically. This is why traces "just work" across services from different vendors / languages.
+<br><br>
+<b>OTel\'s value:</b> one SDK API across languages, one wire format (OTLP), and you pick your backend (Jaeger, Tempo, Datadog, Honeycomb, New Relic). Swap backends without re-instrumenting. The "Grafana LGTM stack" (Loki/Grafana/Tempo/Mimir) is a popular open-source backend.
+<br><br>
+<pre><code># Instrumenting an HTTP server with OTel (Python)
+from opentelemetry import trace
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+tracer = trace.get_tracer(__name__)
+FastAPIInstrumentor.instrument_app(app)
+
+@app.get("/checkout/{order_id}")
+async def checkout(order_id: int):
+    with tracer.start_as_current_span("validate_order") as span:
+        span.set_attribute("order.id", order_id)
+        # ... business logic
+    with tracer.start_as_current_span("charge_card"):
+        # ... outbound HTTP call automatically carries traceparent
+        await stripe.charge(...)
+    return {"ok": True}</code></pre>
+<b>Sampling — the cost/value tradeoff:</b> tracing every request is expensive (storage + processing). 1% sampling is common; the senior pattern is <b>tail-based sampling</b> — buffer all spans for a request, then decide AFTER it completes whether to keep based on outcome (always keep errors and slow requests; sample 1% of fast successes). OTel collector supports this natively.
+<br><br>
+<b>Senior signal:</b> "I\'d instrument with OpenTelemetry SDKs, propagate via W3C trace context headers, use OTel Collector with tail-based sampling (keep all errors + slow requests + 1% of fast successes), and route to whichever backend the org has. The instrumentation is vendor-neutral."`,
+     interactive:{ type:'match',
+       prompt:'Match each tracing concept to its role:',
+       pairs:[
+         ['Trace ID', 'Single ID that follows one user request across all services it touches'],
+         ['Span', 'One unit of work within a trace — has start time, duration, attributes, parent span ID'],
+         ['W3C traceparent header', 'Cross-service propagation: passes trace ID and parent span ID over HTTP'],
+         ['Tail-based sampling', 'Decide AFTER request completes whether to keep — always keep errors + slow, sample fast'],
+         ['OTel Collector', 'Vendor-neutral receiver/processor/exporter — lets you swap tracing backends without re-instrumenting'],
+       ],
+       explain:'OpenTelemetry won the vendor-neutral tracing standard war. Trace context propagates via W3C headers; instrumentation emits OTLP spans; the Collector buffers, samples, and exports to whichever backend you choose.'}},
+
   ]
 },
 {
@@ -7320,11 +7585,12 @@ The FDE-specific signal: real customers will often DEMAND silo as a condition of
 # Critical: ALL queries must filter by tenant_id. Use row-level security
 # (RLS) so the database enforces it, not just app code.
 ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE documents FORCE ROW LEVEL SECURITY;   -- enforce even for table owner
 CREATE POLICY tenant_isolation ON documents
     USING (tenant_id = current_setting(\'app.current_tenant\')::int);
--- App sets the variable PER request, so a SQL injection that bypasses
--- a WHERE clause STILL can\'t see other tenants:
-SET app.current_tenant = 42;  -- in your connection setup
+-- Use a role WITHOUT bypassrls so a misconfigured user can't disable enforcement
+-- App sets the variable PER request via SET LOCAL inside the txn:
+SET LOCAL app.current_tenant = 42;  -- scoped to this transaction only
 
 # Silo — per-tenant DB, route by tenant on each request
 DATABASES = {
@@ -7332,7 +7598,16 @@ DATABASES = {
     "mercy": "postgres://...mercy.us-east-1...",  # region-pinned for HIPAA
 }
 def db_for(tenant_id):
-    return DATABASES[tenant_id]   # NEVER read tenant_id from request body — use authed session</code></pre>`,
+    return DATABASES[tenant_id]   # NEVER read tenant_id from request body — use authed session</code></pre>
+<b>The "FORCE ROW LEVEL SECURITY" + non-BYPASSRLS-role pair is critical:</b> by default Postgres lets the table owner bypass RLS. A migration script or app role running as the owner would unintentionally see all tenants. Always (1) use <code>FORCE ROW LEVEL SECURITY</code> so even the owner is subject to policies, AND (2) have app workloads connect as a separate role created WITHOUT the <code>BYPASSRLS</code> attribute. Forgetting either is a real-world compliance audit failure.
+<br><br>
+<b>Pool-at-scale options for 2026:</b>
+<ul class="list-muted">
+<li><b>Citus</b> (now part of Microsoft Azure Cosmos for PostgreSQL) — distribute the pool across shards transparently while keeping the single-DB programming model.</li>
+<li><b>Aurora-Limitless</b> — AWS\'s answer; serverless horizontal scaling of Postgres pools.</li>
+<li><b>Schema-per-tenant</b> (the industry-standard term that used to be called "Bridge" in older curricula) — each tenant has its own Postgres schema, sharing one DB and migrations. Easier compliance than pool, easier ops than silo.</li>
+</ul>
+<b>A note on HIPAA + residency:</b> "HIPAA requires data in the US" is NOT precisely correct. HIPAA mandates safeguards for PHI but doesn\'t require US-only storage; the geographic constraint usually comes from the BAA terms a hospital negotiates. Customers conflate this; the senior framing is "we offer customer-chosen region, including US-only on request, which satisfies most HIPAA-covered entities\' BAA requirements."`,
      interactive:{ type:'match',
        prompt:'Match each tenant to the best multi-tenancy model:',
        pairs:[
@@ -7400,7 +7675,14 @@ def verify(secret, body, headers, max_age=300):
     if abs(time.time() - ts) &gt; max_age: raise ValueError("stale")
     expected = sign(secret, body, ts)
     if not hmac.compare_digest(expected, headers["X-Signature"]):
-        raise ValueError("bad signature")</code></pre>`,
+        raise ValueError("bad signature")</code></pre>
+<b>The 2026 standards layer — name these in interviews:</b>
+<ul class="list-muted">
+<li><b>Standard Webhooks spec</b> (standardwebhooks.com — Svix/Resend/Lob/etc. convergence) — the cross-vendor effort to standardize headers, signature format, and verification semantics. Headers: <code>webhook-id</code>, <code>webhook-timestamp</code>, <code>webhook-signature</code>. If you\'re designing a new webhook system in 2026, use this; if you\'re integrating with one, expect it.</li>
+<li><b>Asymmetric signing with key rotation (Ed25519 + JWKS)</b> — instead of a shared HMAC secret, sign with your private key; publish your public key at a <code>/.well-known/webhook-keys.json</code> JWKS endpoint. Customers fetch + cache the public key, rotate independently without coordination. Eliminates "rotating the secret" as an operational hazard.</li>
+<li><b>IETF <code>Idempotency-Key</code> HTTP header draft</b> (Stripe-derived, draft-ietf-httpapi-idempotency-key-header) — standardizes the "X-Event-Id"-style replay key as a first-class HTTP header. Use this for both webhook delivery AND outbound API calls. Modern API platforms (Stripe, Square, Anthropic) require it on side-effecting endpoints.</li>
+</ul>
+<b>Senior framing:</b> "I\'d follow the Standard Webhooks spec for the wire format, sign with Ed25519 over (id + timestamp + body) with JWKS-published rotating keys, and require an <code>Idempotency-Key</code> header per the IETF draft. Retry with exponential jitter, DLQ on exhaustion, surface a customer-facing replay UI."`,
      interactive:{ type:'truefalse',
        statements:[
          { text:'You should retry webhook delivery on a 401 response from the customer\'s endpoint.', answer:false, why:'4xx errors mean YOUR request was wrong (bad auth, malformed body). Retrying won\'t help. Log it and alert. Retry on 5xx + timeouts only.' },
@@ -7436,7 +7718,15 @@ SAML is verbose and old, but every legacy enterprise IdP supports it. If your cu
   <li>Group → role mapping: the customer\'s IdP sends "user belongs to groups [eng, eng-leads]"; your app maps that to your internal roles ("admin").</li>
   <li>Signed assertions with clock-skew tolerance (60s). Reject expired or future-dated assertions.</li>
 </ul>
-<b>Common interview question:</b> "How does your system handle a customer that requires their data stay in a specific cloud region?" Answer: "We use single-tenant deploys; for SAML, we point them at an IdP in their region; for storage, the silo is in their region."`,
+<b>Common interview question:</b> "How does your system handle a customer that requires their data stay in a specific cloud region?" Answer: "We use single-tenant deploys; for SAML, we point them at an IdP in their region; for storage, the silo is in their region."
+<br><br>
+<b>2026 standards layer worth naming:</b>
+<ul class="list-muted">
+<li><b>OAuth 2.1 / PKCE everywhere.</b> OAuth 2.1 (consolidating spec, ~RFC final 2024-2025) deprecates the implicit flow and ROPC; PKCE is mandatory for all clients including confidential ones. The "modern OAuth" answer in 2026 is "Authorization Code + PKCE, period."</li>
+<li><b>Workload Identity Federation</b> — the modern replacement for service-account keys. Instead of long-lived secrets, your workload presents an OIDC token issued by its runtime (GitHub Actions, EKS, GCP Workload Identity Pool) and the cloud trusts that issuer + claims. Stripe, GitHub Actions OIDC integration with AWS/GCP, Snowflake → GCS — all use this. Zero long-lived credentials.</li>
+<li><b>SCIM at scale</b> — for 10K+ user orgs, naive SCIM (per-user PATCH) becomes slow during bulk onboarding/offboarding. The 2026 patterns: bulk operations (RFC 7644 §3.7), event-driven SCIM via webhook, and async provisioning queues.</li>
+</ul>
+<b>The "JIT off-boarding hole" most candidates miss:</b> JIT provisioning creates users on SSO login, but if the customer disables a user in their IdP, JIT alone doesn\'t propagate that. The user can still access your app via session cookies until next SSO challenge. <b>Fix:</b> require SCIM for disable propagation, OR session TTLs short enough that the next SSO check catches the IdP-side disable, OR session-revocation webhook from the IdP. Naming this is a senior signal.`,
      interactive:{ type:'match',
        prompt:'Match each enterprise-auth standard to what it does:',
        pairs:[
@@ -7448,25 +7738,32 @@ SAML is verbose and old, but every legacy enterprise IdP supports it. If your cu
        ],
        explain:'Modern integrations: OIDC + SCIM. Legacy enterprises: SAML still required. Senior signal is naming all five components when asked "how would you support SSO?"'}},
 
-    {id:'fd-4', type:'concept', name:'Customer VPC deploys — three shapes, escalating cost', xp:12, time:9,
-     body:`Eventually a big customer says "we can't send our data to your SaaS — deploy in our environment." How you support that determines whether you close the enterprise deal. Three deployment shapes, each ~3× more expensive to support than the previous:
+    {id:'fd-4', type:'concept', name:'Customer VPC deploys — four shapes, escalating cost (incl. BYOC)', xp:13, time:10,
+     body:`Eventually a big customer says "we can\'t send our data to your SaaS — deploy in our environment." How you support that determines whether you close the enterprise deal. By 2026 the industry distinguishes four shapes — note the critical split between "single-tenant in YOUR cloud" and the BYOC/BYOVPC pattern where the data plane runs in the customer\'s own cloud account.
 <br><br>
 <b>1. Multi-tenant SaaS + PrivateLink / Private Service Connect.</b>
 <br>Your normal SaaS. Customer\'s data still sits in your cloud account, but traffic between their VPC and yours goes over AWS PrivateLink (or GCP\'s equivalent) — never crosses the public internet. From their security team\'s POV, this is "private connectivity."
 <br><span class="icon-check"></span> Easiest. One codebase. One deploy. Customer\'s data is logically siloed (still your DBs).
 <br><span class="icon-x"></span> Their data is still in YOUR account — some compliance teams reject this even with PrivateLink.
 <br><br>
-<b>2. Single-tenant in your VPC (BYOC-adjacent).</b>
-<br>You stand up a dedicated cluster for this customer. Same image, same infra-as-code, but their own DB, their own compute, their own region. Your team operates it.
-<br><span class="icon-check"></span> True isolation. Their data lives in their dedicated DB. Compliance reviews are smoother.
-<br><span class="icon-x"></span> N customers = N clusters to monitor, patch, deploy to. Your SRE on-call burden multiplies. Need automation (Terraform + per-tenant pipelines) to stay sane.
+<b>2. Single-tenant in YOUR VPC.</b>
+<br>You stand up a dedicated cluster for this customer in your cloud account. Same image, same infra-as-code, but their own DB, their own compute, their own region. Your team operates it. Data is isolated; data sovereignty is NOT — the data still lives in your account.
+<br><span class="icon-check"></span> True per-tenant isolation. Compliance reviews are smoother.
+<br><span class="icon-x"></span> N customers = N clusters to monitor, patch, deploy to. Operational cost scales linearly.
 <br><br>
-<b>3. Full on-prem / in-customer-cloud.</b>
-<br>You hand the customer a Helm chart. They run it in THEIR Kubernetes cluster, often in THEIR cloud account, often air-gapped (no outbound internet). The customer\'s IT operates it.
-<br><span class="icon-check"></span> Their data never leaves their environment. Satisfies the strictest compliance.
-<br><span class="icon-x"></span> Brutal to support. They run the version they want. Bug reports come without logs. You build observability tools they can run locally. You write a documentation site for their IT.
+<b>3. BYOC / BYOVPC — data plane in CUSTOMER\'s cloud account.</b>
+<br>The 2025+ industry-standard term for this shape: <b>your control plane runs in your cloud; your DATA plane runs in the customer\'s cloud account.</b> You publish a Terraform module / CloudFormation template; the customer applies it to a sub-account they own; your control plane deploys/monitors via cross-account IAM roles. Examples in the wild: Redpanda BYOC, MongoDB Atlas BYOC, Confluent BYOC, Databricks Classic. Data and workloads never leave the customer\'s cloud; only metadata (config, metrics) reaches the control plane.
+<br><span class="icon-check"></span> Customer\'s data never enters your account. Egress is paid by them. Compliance teams love this.
+<br><span class="icon-x"></span> Distributed-system complexity: your control plane must operate infrastructure it doesn\'t own, across accounts you can\'t directly access. Failure debugging requires customer cooperation. Network policies, IAM roles, and version skew are all harder.
 <br><br>
-<b>The senior insight:</b> the right answer for a customer depends on their compliance posture and your willingness to support the operational cost. Most SaaS companies offer shape 1 as default; shape 2 to enterprises willing to pay premium; shape 3 only when forced by regulated industries (defense, healthcare, public sector). The decision impacts your engineering org structure for years — you need an SRE team that can support whichever shapes you commit to.`,
+<b>4. Full on-prem / air-gapped — fully customer-operated.</b>
+<br>You hand the customer a Helm chart or signed installer. They run it in THEIR Kubernetes cluster, often air-gapped (no outbound internet). They operate it. You ship versioned artifacts (sometimes via offline tarball / sneakernet). Required in defense, intelligence, some healthcare.
+<br><span class="icon-check"></span> Strictest compliance posture met.
+<br><span class="icon-x"></span> Brutal to support. Customer runs the version they want; bug reports come without logs; you build self-contained observability they can run locally.
+<br><br>
+<b>The terminology trap:</b> candidates conflate shapes 2 and 3 by calling both "single-tenant deploy." The 2026 industry distinction: <i>"single-tenant in our VPC"</i> = shape 2 (your cloud); <i>"BYOC / BYOVPC / customer-managed data plane"</i> = shape 3 (their cloud). Compliance teams care intensely about the difference — the data residency story changes.
+<br><br>
+<b>The senior insight:</b> most SaaS companies offer shape 1 as default; shape 2 for early enterprise; shape 3 (BYOC) as the modern enterprise standard; shape 4 only for regulated industries that require air-gap. The decision impacts your engineering org structure for years — you need an SRE team that can support whichever shapes you commit to.`,
      interactive:{ type:'match',
        prompt:'Match each customer to the right VPC deploy shape:',
        pairs:[
@@ -7560,7 +7857,7 @@ class AuditReportProjection:
 <tr><td style="padding:6px">Public webhook delivery to customer endpoints</td><td style="padding:6px"><b>REST</b> (no special client needed)</td></tr>
 <tr><td style="padding:6px">Bidirectional streaming (chat, voice, telemetry)</td><td style="padding:6px"><b>gRPC</b> (or WebSocket for browsers)</td></tr>
 </tbody></table>
-<b>A grPC service in 30 lines:</b>
+<b>A gRPC service in 30 lines:</b>
 <pre><code># refund.proto — the contract
 syntax = "proto3";
 service RefundService {
@@ -7581,6 +7878,24 @@ stub = refund_pb2_grpc.RefundServiceStub(channel)
 resp = stub.IssueRefund(refund_pb2.RefundRequest(
     customer_id="c123", amount_usd=50.00, idempotency_key="k-xyz"))</code></pre>
 <b>The trap interviewers love:</b> "We should use gRPC for our public-facing API because it's faster." Wrong answer — browsers can\'t natively speak gRPC (you need gRPC-Web with a proxy), and your customers don\'t want to generate stubs from your .proto. <b>External = REST</b> almost always. <b>Internal high-volume = gRPC.</b>
+<br><br>
+<b>2026 protocol options that didn\'t exist 5 years ago:</b>
+<ul class="list-muted">
+<li><b>ConnectRPC</b> (Connect, from Buf) — gRPC schema and stubs, but speaks HTTP/1.1, HTTP/2, and HTTP/3 plus a JSON-on-HTTP variant. Works in browsers without a proxy. The "gRPC that you can actually call from the browser" answer. Increasingly the default for new full-stack systems where front-end + back-end share a schema.</li>
+<li><b>tRPC</b> (TypeScript-only) — schema-less; the TS types ARE the contract. The front-end imports the back-end\'s types, full inference end-to-end. Used by many Next.js apps. Only viable when both ends are TypeScript.</li>
+<li><b>SSE (Server-Sent Events)</b> — one-way streaming over plain HTTP. The 2026 default for streaming LLM responses to a browser (OpenAI\'s API streams over SSE; Anthropic uses SSE; ChatGPT\'s web UI streams over SSE). Simpler than WebSocket when you only need server→client.</li>
+<li><b>WebSocket / WebTransport</b> — still the right call for full-duplex realtime (chat, multiplayer, collaborative editing). WebTransport is the HTTP/3 successor — better behavior on flaky networks.</li>
+</ul>
+<b>The 2026 decision tree for picking a protocol:</b>
+<ul class="list-muted">
+<li>External REST API for partner devs → REST + OpenAPI.</li>
+<li>Internal microservices (any language) → gRPC.</li>
+<li>Full-stack TS app where you control both ends → tRPC.</li>
+<li>Schema-typed RPC that browsers can call → ConnectRPC.</li>
+<li>Streaming LLM response to a browser → SSE.</li>
+<li>Full-duplex realtime (chat, multiplayer) → WebSocket (or WebTransport for new builds).</li>
+<li>Customer-facing API with rapid iteration on shape → GraphQL.</li>
+</ul>
 <div class="callout callout-senior"><div class="callout-label">Mature signal</div>mention <b>contract testing</b>. With gRPC, the .proto IS the contract — break it and the compile fails. With REST, you need OpenAPI / Pact to enforce the same guarantee, and you have to actually run those checks in CI.</div>`,
      interactive:{ type:'cloze',
        prompt:'A streaming-AI startup needs a service that takes audio chunks and returns transcript chunks in real time. Which protocol + pattern?',
@@ -7701,7 +8016,23 @@ eval_scores:     { faithfulness, relevance, ... } (when LLM-as-judge runs)</pre>
 </ul>
 <b>The "show me what changed" feature.</b> Customers love this: "Between Friday 4pm and Monday 9am, p95 latency tripled — what changed?" Build a diff view that overlays: deploys, model version changes, prompt-template edits, dataset updates, retrieval-index rebuilds. Most regressions are caused by something on YOUR side; surfacing the timeline turns "we don't know" into "here's the prompt change that did it."
 <br><br>
-<b>Senior signal:</b> per-trace logging at the step level, eval scores against a customer-owned golden set, multi-tenant scoping enforced at the gateway, and a "what changed" overlay. That's the difference between observability that closes renewals and observability that creates support tickets.`,
+<b>Senior signal:</b> per-trace logging at the step level, eval scores against a customer-owned golden set, multi-tenant scoping enforced at the gateway, and a "what changed" overlay. That's the difference between observability that closes renewals and observability that creates support tickets.
+<br><br>
+<b>The 2026 instrumentation standard — OpenTelemetry GenAI semantic conventions</b> (otel.io/docs/specs/semconv/gen-ai/) — vendor-neutral attribute names for LLM spans: <code>gen_ai.request.model</code>, <code>gen_ai.usage.input_tokens</code>, <code>gen_ai.usage.output_tokens</code>, <code>gen_ai.response.finish_reason</code>. Emit these and your traces are portable across vendors. State this in interviews: "I instrument with the OTel GenAI conventions so we can swap our observability backend without re-instrumenting."
+<br><br>
+<b>Vendor landscape to name:</b>
+<ul class="list-muted">
+<li><b>LangSmith</b> — LangChain\'s integrated platform; default for LangGraph users.</li>
+<li><b>Langfuse</b> — open-source / self-hostable; on-prem-friendly.</li>
+<li><b>Arize Phoenix</b> — open-source, eval-focused, OTel-native.</li>
+<li><b>Helicone</b> — proxy-based, zero-config.</li>
+<li><b>Honeycomb / Datadog LLM Observability / New Relic AI Monitoring</b> — generalist APM vendors adding LLM-aware features.</li>
+</ul>
+<b>Two more things customers expect in 2026:</b>
+<ul class="list-muted">
+<li><b>PII redaction at log time</b>, not at view time. If a customer trace contains a customer\'s end-user\'s SSN, it shouldn\'t be in your DB at all. Apply redaction in the OTel collector pipeline before persistence; surface a "[REDACTED]" marker.</li>
+<li><b>Per-tenant cost attribution / chargeback.</b> Aggregate tokens × price × your-margin per customer-of-customer (the end users of the customer\'s app). They want to chargeback to internal teams. Build this in from day one or face a big retrofit.</li>
+</ul>`,
      interactive:{ type:'match',
        prompt:'Match each customer-facing observability concern to its design answer:',
        pairs:[
@@ -7911,6 +8242,40 @@ I lean toward (B). Want to discuss this week?"</pre>
        ],
        correct:2,
        explain:'Senior move = honest, structured options + your recommendation. Trust is built by telling customers when not to spend money, not by grinding on doomed projects.'}},
+
+    {id:'fd-9', type:'concept', name:'Fine-grained authorization — Zanzibar / OpenFGA / Cedar', xp:13, time:10,
+     body:`Enterprise customers don\'t want "role-based access control" (RBAC). They want <b>relationship-based access</b> ("this user can access this document because they\'re a member of the team that owns the folder containing it"). That\'s the gap Google\'s <b>Zanzibar</b> paper (2019) defined and that the 2026 ecosystem now implements at scale: <b>ReBAC (Relationship-Based Access Control)</b>.
+<br><br>
+<b>The Zanzibar model:</b>
+<ul class="list-muted">
+<li>Everything is a <b>tuple</b>: <code>(object, relation, user)</code>. Examples: <code>(doc:42, owner, user:alice)</code>, <code>(team:eng, member, user:bob)</code>, <code>(folder:engineering, parent_of, doc:42)</code>.</li>
+<li><b>Authorization check</b>: "can user X do action Y on object Z?" → "is there a path of tuples connecting X → Z that satisfies the rule for Y?"</li>
+<li><b>Rules / schema</b> express derived relationships. <i>"A user can READ a doc if they are: (a) its owner, OR (b) a member of a team that owns the folder containing it."</i></li>
+</ul>
+<br>
+<b>The 2026 implementations to name:</b>
+<ul class="list-muted">
+<li><b>OpenFGA</b> (Auth0 / CNCF) — open-source Zanzibar implementation. Cloud-hosted (Auth0 FGA) or self-host. The most-adopted ReBAC engine.</li>
+<li><b>SpiceDB</b> (AuthZed) — another Zanzibar-derived engine; strong Postgres-backed mode.</li>
+<li><b>Cedar</b> (AWS) — policy-as-code language; pairs with AWS Verified Permissions. Different shape — Cedar is policy-rule-based, less graph-y than Zanzibar, but solves similar problems for AWS-native shops.</li>
+<li><b>Permify</b>, <b>Topaz</b>, <b>Warrant</b> — alternatives in the same Zanzibar-inspired family.</li>
+</ul>
+<br>
+<b>When customers demand this:</b> enterprise SaaS selling into orgs with complex hierarchies. "Sales reps should see their accounts + accounts of their direct reports + shared accounts in their territory — and not see anything outside that." RBAC ("sales-rep" role with hardcoded scopes) collapses at the first reorg. Zanzibar-style ReBAC handles it.
+<br><br>
+<b>The senior signal:</b> "For complex enterprise hierarchies, I\'d push authorization into an OpenFGA / SpiceDB cluster. Schema in their config language; tuples derived from our domain model via outbox-style sync. Every API check is a single <code>check(object, relation, user)</code> call that takes ~5ms (sub-10ms tail with proper indexing). RBAC is fine for simple SaaS; Zanzibar is the bar when customers want \'these 7 people can see THIS specific list of records\' configurability."
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"Don\'t roll your own authorization engine. By 2026 the open-source Zanzibar-derived engines are mature; integrate one. Your auth checks become a 5ms RPC; your app code is freed from permissions logic."</div>`,
+     interactive:{ type:'mcq',
+       q:'Your enterprise customer says: "Sales reps should see only the accounts they own + accounts their direct reports own + accounts shared via team groups. When someone moves to a new team or gets promoted, permissions should update automatically." How do you build the authorization layer?',
+       options:[
+         'RBAC — define roles like sales-rep, sales-manager, with hardcoded scopes',
+         'ABAC — write a complex policy referencing user attributes (manager_of, team_id) at every check',
+         'ReBAC (Zanzibar / OpenFGA / SpiceDB) — model relationships as tuples (user → reports-to → manager, user → member-of → team, account → owner → user); auth checks traverse the graph',
+         'Just put all the data in one big table and trust the app to filter',
+       ],
+       correct:2,
+       explain:'RBAC dies at the first reorg ("I\'m a sales rep but now I have a different manager — please re-create my role"). ABAC scales but the policies become unreadable. ReBAC (Zanzibar-style) models the actual org graph; permission changes are automatic when relationships change. OpenFGA / SpiceDB / Cedar are the production options.'}},
+
   ]
 },
 
