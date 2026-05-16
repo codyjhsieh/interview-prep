@@ -689,7 +689,17 @@ function _sunPhysicsParams(forceHour) {
 }
 
 function mountPet3D(container, p) {
-  if (!container || !window.THREE) return null;
+  if (!container) return null;
+  // Three.js is lazy-loaded (see index.html LAZY). If it's not ready yet,
+  // kick off the load and re-enter once it resolves. Returning a pseudo-
+  // handle keeps existing callers happy; the loading spinner already in
+  // the container masks the brief delay.
+  if (!window.THREE) {
+    if (window.LAZY && window.LAZY.three) {
+      window.LAZY.three().then(() => mountPet3D(container, p)).catch(() => {});
+    }
+    return { dispose: () => {} };
+  }
   // Dispose any prior mount on this container
   if (_PET_MOUNTS.has(container)) {
     try { _PET_MOUNTS.get(container).dispose(); } catch(_) {}
@@ -3479,7 +3489,19 @@ function renderPetCard(state, p) {
 // Default = python. Heuristic upgrades to sql/bash/json when the code obviously
 // is one of those. Idempotent — re-runs safely on already-classified blocks.
 function highlightCodeIn(root) {
-  if (!root || !window.Prism) return;
+  if (!root) return;
+  // Prism is lazy-loaded. If it's not on `window` yet, kick off the load
+  // and re-enter once it lands. Code blocks read as plain monospace
+  // until that moment (one extra frame in the warm-cache case, longer
+  // on cold cache). The fallback monospace style in styles.css means
+  // there's no visible layout shift, just a color change when tokens
+  // come in.
+  if (!window.Prism) {
+    if (window.LAZY && window.LAZY.prism) {
+      window.LAZY.prism().then(() => highlightCodeIn(root)).catch(() => {});
+    }
+    return;
+  }
   root.querySelectorAll('pre > code').forEach(code => {
     const text = code.textContent || '';
     // Skip if already labelled
@@ -5608,9 +5630,11 @@ function renderCoverage(state, hub) {
   `;
   hub.appendChild(container);
 
-  setTimeout(() => {
+  setTimeout(async () => {
     const ctx = document.getElementById('cov-chart');
-    if (ctx && window.Chart) {
+    if (!ctx) return;
+    if (!window.Chart && window.LAZY) { try { await window.LAZY.chart(); } catch (_) { return; } }
+    if (window.Chart) {
       new Chart(ctx, {
         type:'bar',
         data:{

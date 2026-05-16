@@ -360,6 +360,14 @@ header.sticky > *, main > header > * { position: relative; z-index: 1; }
   -webkit-backdrop-filter: none;
   backdrop-filter:        none;
   background: rgba(255, 255, 255, 0.72);
+  /* Skip layout + paint for off-screen company cards. With 138 cards in
+   * the grid, scroll FPS was scraping the floor because every card kept
+   * paying its paint cost even when scrolled out of view. content-
+   * visibility:auto lets the browser skip both. contain-intrinsic-size
+   * keeps the scrollbar from jumping by reserving the card's typical
+   * height (~210px) up front. No visual change for on-screen cards. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 210px;
 }
 
 /* Concentric nesting — nested glass surfaces inherit a smaller radius so

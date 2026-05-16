@@ -39,10 +39,19 @@ function shake(el) {
 }
 
 function confettiBurst(intensity='m') {
-  if (typeof confetti === 'undefined') return;
   const counts = { s:60, m:120, l:240 };
   const c = counts[intensity] || 120;
-  confetti({ particleCount: c, spread: 80, origin: { y: 0.7 }, colors: ['#7CF1C2','#8B5CF6','#FFB95C','#FB7185'] });
+  const fire = () => {
+    if (typeof confetti === 'undefined') return;
+    confetti({ particleCount: c, spread: 80, origin: { y: 0.7 }, colors: ['#7CF1C2','#8B5CF6','#FFB95C','#FB7185'] });
+  };
+  // canvas-confetti is lazy-loaded (see index.html LAZY). Idle prefetch
+  // means it's almost always already cached by the time a level-up
+  // fires; if not, kick off the load now.
+  if (typeof confetti !== 'undefined') { fire(); return; }
+  if (window.LAZY && window.LAZY.confetti) {
+    window.LAZY.confetti().then(fire).catch(() => {});
+  }
 }
 
 function celebrateLevelUp(newLevel) {

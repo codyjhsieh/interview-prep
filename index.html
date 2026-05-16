@@ -105,7 +105,7 @@
      utility classes applied — likely a content-blocker / Private Relay issue
      hitting the runtime JIT bundle. Build with: npm run build:css. The
      content set in tailwind.config.js scans index.html + js/**.js. -->
-<link rel="stylesheet" href="tw.css?v=2026-05-16-18" />
+<link rel="stylesheet" href="tw.css?v=2026-05-16-19" />
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -119,23 +119,66 @@
      - Fraunces (variable, opsz + SOFT) — RESERVED for hero h1 and italic editorial pull only.
      - Inter is loaded as a fallback in case Geist fails to load. -->
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- GSAP — needed for the entrance stagger that runs on first paint, so
+     stays on the critical path. Everything else (Three.js ~600KB,
+     Chart.js, Prism + 4 lang packs, canvas-confetti) is now lazy-
+     loaded via window.LAZY below. Previously all of this ran
+     synchronously in <head>, costing ~5s of render-blocking work on a
+     mid-tier phone per Lighthouse. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<!-- Three.js — real WebGL 3D for the tamagotchi room (r148 UMD = global THREE).
-     ~600KB; loaded once, cached. Used by mountPet3D() in views.js. -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.148.0/three.min.js"></script>
-<!-- Prism.js — syntax highlighting for <pre><code> blocks across all lessons.
-     Theme: prism-tomorrow (light surfaces look great in our liquid-glass design
-     once we override .token colors in styles.css). Core + python + sql +
-     javascript + bash covers ~98% of snippets in the curriculum. -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-<link rel="stylesheet" href="styles.css?v=2026-05-16-18" />
+
+<script>
+/* Lazy vendor loader.
+ *
+ * Each LAZY.x() returns a Promise that resolves once the corresponding
+ * global is on `window`. Idempotent + cached per URL, so consumers can
+ * call it freely from any code path.
+ *
+ * After first paint, all four are prefetched during idle. By the time
+ * the user navigates to dashboard / opens a lesson modal, the script
+ * is warm in cache and there's no perceptible delay vs. the old
+ * eager-load setup. End-state visuals are identical. */
+(function () {
+  const _cache = {};
+  function loadOne(url) {
+    if (_cache[url]) return _cache[url];
+    return _cache[url] = new Promise((res, rej) => {
+      const isCss = url.endsWith('.css');
+      const tag = isCss
+        ? Object.assign(document.createElement('link'), { rel:'stylesheet', href:url })
+        : Object.assign(document.createElement('script'), { src:url, async:true });
+      tag.onload = () => res();
+      tag.onerror = () => rej(new Error('Lazy load failed: ' + url));
+      document.head.appendChild(tag);
+    });
+  }
+  function loadAll(urls) { return Promise.all(urls.map(loadOne)); }
+  const THREE_URL    = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.148.0/three.min.js';
+  const CHART_URL    = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
+  const CONFETTI_URL = 'https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js';
+  const PRISM_CSS    = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css';
+  const PRISM_JS     = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js';
+  const PRISM_LANGS  = ['python','sql','bash','json'].map(l =>
+    'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-' + l + '.min.js');
+  window.LAZY = {
+    three:    () => loadOne(THREE_URL),
+    chart:    () => loadOne(CHART_URL),
+    confetti: () => loadOne(CONFETTI_URL),
+    // Prism: core + theme first (so .token CSS applies as elements
+    // highlight), then the language packs in parallel.
+    prism:    () => loadAll([PRISM_CSS, PRISM_JS]).then(() => loadAll(PRISM_LANGS)),
+  };
+  function prefetch() {
+    window.LAZY.three();
+    window.LAZY.chart();
+    window.LAZY.prism();
+    window.LAZY.confetti();
+  }
+  if (document.readyState === 'complete') setTimeout(prefetch, 200);
+  else window.addEventListener('load', () => setTimeout(prefetch, 200), { once: true });
+})();
+</script>
+<link rel="stylesheet" href="styles.css?v=2026-05-16-19" />
 </head>
 <body>
 
@@ -204,23 +247,23 @@
 <!-- ?v=<build> cache-busts every deploy. The version string is bumped
      manually in tandem with sync.js / app.js / views.js changes so the
      browser + GH Pages CDN can't serve stale JS to paired devices. -->
-<script src="js/data.js?v=2026-05-16-18"></script>
-<script src="js/quotes.js?v=2026-05-16-18"></script>
-<script src="js/gamification.js?v=2026-05-16-18"></script>
-<script src="js/animations.js?v=2026-05-16-18"></script>
-<script src="js/infographics.js?v=2026-05-16-18"></script>
-<script src="js/games.js?v=2026-05-16-18"></script>
-<script src="js/views.js?v=2026-05-16-18"></script>
-<script src="js/app.js?v=2026-05-16-18"></script>
+<script src="js/data.js?v=2026-05-16-19"></script>
+<script src="js/quotes.js?v=2026-05-16-19"></script>
+<script src="js/gamification.js?v=2026-05-16-19"></script>
+<script src="js/animations.js?v=2026-05-16-19"></script>
+<script src="js/infographics.js?v=2026-05-16-19"></script>
+<script src="js/games.js?v=2026-05-16-19"></script>
+<script src="js/views.js?v=2026-05-16-19"></script>
+<script src="js/app.js?v=2026-05-16-19"></script>
 <!-- Cross-device sync via Cloudflare Worker + KV. Idle until paired
      (no network calls). Wraps GAMI.saveImmediate to PUT remotely
      and polls every 2.5s for changes from the other device. -->
-<script src="js/sync.js?v=2026-05-16-18"></script>
+<script src="js/sync.js?v=2026-05-16-19"></script>
 <script>window.SYNC && window.SYNC.init();</script>
 <!-- Liquid Glass: adaptive substrate tinting. Loads after app so cards
      are already in the DOM. Cards published after dashboard render are
      picked up by the module's MutationObserver. -->
-<script src="js/glass-adaptive.js?v=2026-05-16-18"></script>
+<script src="js/glass-adaptive.js?v=2026-05-16-19"></script>
 
 <!-- Auto-refresh on new deploy. iOS Add-to-Home-Screen webviews keep
      the same standalone session alive across launches, so a manual

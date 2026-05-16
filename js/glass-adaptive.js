@@ -76,9 +76,24 @@
     });
   }
 
-  /* Sample every .card currently on the page. */
+  /* Sample every .card currently on the page. Batches across animation
+   * frames so a page with 100+ cards (Companies, Curriculum) doesn't
+   * pay the full sample cost in one long task on first paint. Each
+   * sample does a getBoundingClientRect + a visibility:hidden / restore
+   * + an elementFromPoint hit-test, which is cheap individually but
+   * adds up on big lists. 16 per frame keeps the work under one frame
+   * at 60fps even on a throttled phone. */
   function rescanAll() {
-    document.querySelectorAll('.card').forEach(applyTint);
+    const list = Array.from(document.querySelectorAll('.card'));
+    if (!list.length) return;
+    const CHUNK = 16;
+    let i = 0;
+    function step() {
+      const end = Math.min(i + CHUNK, list.length);
+      for (; i < end; i++) applyTint(list[i]);
+      if (i < list.length) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
   }
 
   /* Observe DOM mutations — when new .card elements appear (dashboard
