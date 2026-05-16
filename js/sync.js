@@ -218,6 +218,22 @@ window.SYNC = (function () {
     merged.badges           = unionKeys(a.badges,           b.badges);
     merged.companySeen      = unionKeys(a.companySeen,      b.companySeen);
     merged.cueShownDates    = unionKeys(a.cueShownDates,    b.cueShownDates);
+    // Fail-stats: count maps per axis, merged via per-key max. (Sum
+    // would be more accurate but requires per-increment timestamps;
+    // max preserves the high-water mark from each device, which is
+    // good enough for the "what\'s sticking?" use case.)
+    const aFs = a.flashcardFailStats || {}, bFs = b.flashcardFailStats || {};
+    const mergeMaxCount = (x, y) => {
+      const out = { ...(x || {}) };
+      for (const k of Object.keys(y || {})) out[k] = Math.max(out[k] || 0, y[k] || 0);
+      return out;
+    };
+    merged.flashcardFailStats = {
+      byCat:    mergeMaxCount(aFs.byCat,    bFs.byCat),
+      byModule: mergeMaxCount(aFs.byModule, bFs.byModule),
+      byLesson: mergeMaxCount(aFs.byLesson, bFs.byLesson),
+      byCard:   mergeMaxCount(aFs.byCard,   bFs.byCard),
+    };
 
     // Free-recall: array-per-key, concat + dedupe by ts
     merged.freeRecallAttempts = unionMapOfArrays(a.freeRecallAttempts, b.freeRecallAttempts);

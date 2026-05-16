@@ -41,6 +41,10 @@ const DEFAULT_STATE = {
   history: [],                   // [{ date:'YYYY-MM-DD', xp, lessons }]
   mocks: [],                     // [{ ts, vertical, score, notes }]
   starStories: {},               // storyId -> {situation, task, action, result, updatedAt}
+  /* Flashcard failure stats — incremented when a card is rated "Again" (1).
+     byCard tracks per-card; byCat/byModule/byLesson aggregate. Used for the
+     "× N fails" badge on cards and for a future regrouped-by-weakness view. */
+  flashcardFailStats: { byCat: {}, byModule: {}, byLesson: {}, byCard: {} },
   companySeen: {},               // companyId -> true
   visitedSources: false,
   rewardsRoll: 0,                // variable-reward seed bump
@@ -405,10 +409,15 @@ function removeLastJobApp(state) {
 
 function dueCards(state, allCards, limit=20) {
   const now = Date.now();
-  return allCards
+  const out = allCards
     .map(c => ({ card: c, meta: state.flashcards[c.id] }))
-    .filter(({ meta }) => !meta || meta.due <= now)
-    .slice(0, limit);
+    .filter(({ meta }) => !meta || meta.due <= now);
+  // Shuffle so repeated sessions don't drill the same order. Fisher-Yates.
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out.slice(0, limit);
 }
 
 /* ---------- Wrong-answer SRS queue ----------

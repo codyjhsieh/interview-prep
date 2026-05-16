@@ -5149,15 +5149,29 @@ function renderFlashcards(state, hub) {
     }
     const { card } = due[idx];
     const fc = el('div','flashcard');
+    // Resolve lesson / module / category routing for the "Review" link.
+    // Prefer card.lesson > card.module > card.cat (each is optional on the
+    // card; for now most cards only have cat, so the link lands on the
+    // category index).
+    const stats = state.flashcardFailStats || {};
+    const failCount = (stats.byCard && stats.byCard[card.id]) || 0;
+    const reviewHref = card.lesson
+      ? `#category/${card.cat}/${card.module || ''}`
+      : card.module
+        ? `#category/${card.cat}/${card.module}`
+        : `#category/${card.cat}`;
     fc.innerHTML = `
       <div class="flashcard-inner">
         <div class="flashcard-face">
-          <div class="text-xs uppercase tracking-wide text-slate-400 mb-3 inline-flex items-center gap-1.5">${(() => { const _c = CATEGORIES.find(c => c.id === card.cat); return _c ? iconHTML(_c.icon, {size: 14}) : ''; })()} ${card.cat}</div>
+          <div class="text-xs uppercase tracking-wide text-slate-400 mb-3 inline-flex items-center gap-1.5">${(() => { const _c = CATEGORIES.find(c => c.id === card.cat); return _c ? iconHTML(_c.icon, {size: 14}) : ''; })()} ${card.cat}${failCount > 0 ? ` · <span style="color:var(--bad)">✗ ${failCount} ${failCount === 1 ? 'fail' : 'fails'}</span>` : ''}</div>
           <div class="text-xl font-display font-semibold leading-snug">${esc(card.q)}</div>
           <div class="absolute bottom-5 right-6 text-xs text-slate-500">Click to reveal</div>
         </div>
         <div class="flashcard-face flashcard-back">
-          <div class="text-xs uppercase tracking-wide text-slate-400 mb-3">Answer</div>
+          <div class="text-xs uppercase tracking-wide text-slate-400 mb-3 flex items-center justify-between">
+            <span>Answer</span>
+            <a href="${reviewHref}" class="text-[11px] normal-case tracking-normal" style="color:var(--accent)" onclick="event.stopPropagation()">Review ${card.lesson ? 'lesson' : card.module ? 'module' : 'category'} →</a>
+          </div>
           <div class="text-[15px] leading-relaxed">${esc(card.a)}</div>
           <div class="absolute bottom-5 right-6 text-xs text-slate-500">Click to flip back</div>
         </div>
@@ -5182,6 +5196,20 @@ function renderFlashcards(state, hub) {
       b.addEventListener('click', () => {
         const q = parseInt(b.dataset.rate, 10);
         const r = GAMI.reviewCard(state, card.id, q);
+        // Track failures by card / cat / module / lesson so the user can
+        // see what's sticking. byCard is always populated; byModule and
+        // byLesson are populated only for cards that explicitly carry
+        // those fields. byCat is the always-available aggregate.
+        if (q === 1) {
+          if (!state.flashcardFailStats) {
+            state.flashcardFailStats = { byCat: {}, byModule: {}, byLesson: {}, byCard: {} };
+          }
+          const s = state.flashcardFailStats;
+          s.byCard[card.id]  = (s.byCard[card.id]  || 0) + 1;
+          s.byCat[card.cat]  = (s.byCat[card.cat]  || 0) + 1;
+          if (card.module) s.byModule[card.module] = (s.byModule[card.module] || 0) + 1;
+          if (card.lesson) s.byLesson[card.lesson] = (s.byLesson[card.lesson] || 0) + 1;
+        }
         APP.afterStateChange();
         ANIM.toast({ icon: q===1 ? iconHTML('refresh-cw',{size:18}) : q===4 ? iconHTML('zap',{size:18}) : iconHTML('check',{size:18}), title:`+${r.xpGained} XP${r.bonusLabel||''}`, body: q===1?'Rescheduled tomorrow.':'Logged.' });
         GAMI.bumpQuestProgress(state, 'flashcard');
