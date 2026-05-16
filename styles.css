@@ -1682,6 +1682,19 @@ code, pre, .font-mono {
     var(--sh-lift);
 }
 .flashcard-back { transform: rotateY(180deg); }
+.flashcard-answer { font-size: 15px; line-height: 1.6; }
+.flashcard-answer p { margin: 6px 0; }
+.flashcard-answer ul { margin: 6px 0 6px 20px; padding: 0; }
+.flashcard-answer li { margin: 3px 0; }
+.flashcard-answer code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.92em; }
+@media (max-width: 640px) {
+  .flashcard-answer { font-size: 16.5px; line-height: 1.65; }
+  .flashcard-answer p { margin: 7px 0; }
+  .flashcard-answer ul { margin: 7px 0 7px 22px; }
+  .flashcard-answer li { margin: 4px 0; }
+  .flashcard-face { padding: 1.25rem 1.3rem 4rem; }
+  .flashcard-inner { min-height: 200px; }
+}
 
 /* =========================================================================
  * Heatmap
@@ -2044,32 +2057,59 @@ table { display: block; max-width: 100%; overflow-x: auto; }
 }
 
 @media (max-width: 640px) {
-  /* Typography */
-  h1.font-display, .font-display.text-3xl, .font-display.text-2xl { font-size: 1.55rem; line-height: 1.15; }
-  h1 { font-size: 1.55rem; line-height: 1.05; }
-  h2 { font-size: 1.3rem; }
-  .card .text-3xl { font-size: 1.5rem; }
-  .card .text-2xl { font-size: 1.25rem; }
+  /* Mobile type scale — anchored at 17px body (Apple HIG) using a 1.2
+   * modular ratio (Minor Third):
+   *   tiny 12  ·  small 14  ·  body 17  ·  subhead 20
+   *   h3  24  ·  h2    28  ·  h1   34
+   * Reading content (.lesson-prose) uses 18px so long-form is easier
+   * than UI chrome by one notch. */
+  html, body { font-size: 16.5px; line-height: 1.55; }
+  h1.font-display, .font-display.text-3xl, .font-display.text-2xl { font-size: 1.75rem; line-height: 1.2; }
+  h1 { font-size: 1.7rem; line-height: 1.15; }
+  h2 { font-size: 1.4rem; line-height: 1.25; }
+  h3 { font-size: 1.2rem; line-height: 1.3; }
+  .card .text-3xl { font-size: 1.6rem; }
+  .card .text-2xl { font-size: 1.3rem; }
+  .text-sm, p.text-sm, div.text-sm { font-size: 14.5px; }
+  .text-xs { font-size: 12.5px; }
+  /* The "ALL CAPS section eyebrows" should never go below 11px */
+  .eyebrow, .uppercase.tracking-wider { font-size: 11px; letter-spacing: 0.08em; }
 
-  /* Cards — tighter on phones */
-  .card { padding: 0.95rem 1rem; }
-  .card.elevated { padding: 1rem 1.05rem; }
+  /* Cards — tighter on phones but with a touch more breathing room than before */
+  .card { padding: 1rem 1.1rem; }
+  .card.elevated { padding: 1.1rem 1.15rem; }
 
-  /* Modal padding */
+  /* Modal: switch from grid-centering to block + wrapper scroll. iOS Safari
+   * doesn't reliably scroll a max-h child inside a fixed+grid+place-items-
+   * center wrapper; making the wrapper itself the scroll container is the
+   * pattern that works across WebKit and Blink. The card flows naturally
+   * with auto margins. */
+  .fixed.inset-0.grid.place-items-center {
+    display: block !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    padding: 1rem !important;
+  }
   .fixed.inset-0 .card,
-  .fixed.inset-0 .card.elevated { padding: 1.05rem 1.05rem !important; }
-  .fixed.inset-0.grid.place-items-center { padding: 0.5rem !important; }
+  .fixed.inset-0 .card.elevated {
+    padding: 1.1rem 1.15rem !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+  }
 
   /* Touch targets — Apple HIG ≥ 44px */
-  .btn { min-height: 40px; padding: 0.55rem 0.95rem; font-size: 14px; }
-  .btn.btn-primary, button.btn-primary { min-height: 44px; font-size: 14.5px; }
+  .btn { min-height: 42px; padding: 0.6rem 1rem; font-size: 15px; }
+  .btn.btn-primary, button.btn-primary { min-height: 46px; font-size: 15.5px; }
   /* Quiz / activity option buttons get the biggest target */
   [data-opt], [data-pick], [data-sort], [data-left], [data-right], [data-tf], [data-rate], [data-cr-rate] {
-    min-height: 48px !important;
-    font-size: 14px !important;
+    min-height: 52px !important;
+    font-size: 15.5px !important;
+    line-height: 1.35 !important;
   }
   /* Smaller "ghost" buttons can shrink but stay tappable */
-  .btn-ghost { min-height: 36px; padding: 0.5rem 0.85rem; }
+  .btn-ghost { min-height: 38px; padding: 0.55rem 0.95rem; }
 
   /* Rings */
   .ring { width: 96px; height: 96px; }
@@ -2333,23 +2373,16 @@ code {
 
 @media (max-width: 640px) {
   .lesson-prose {
-    font-size: 17.5px;
-    line-height: 1.8;
+    font-size: 18px;
+    line-height: 1.65;
     max-width: 100%;
   }
-  .lesson-prose h1, .lesson-prose h2 { font-size: 1.35rem; line-height: 1.25; }
-  .lesson-prose h3 { font-size: 1.15rem; line-height: 1.3; }
-  /* Lesson modal title + meta need to be readable on phone too */
-  .fixed.inset-0 h2.font-display { font-size: 1.45rem; line-height: 1.2; }
-  /* Modal cards need iOS momentum scrolling so the lesson body scrolls
-     when the content exceeds the 90vh max-height. Without this the
-     overflow:auto element steals the touch without scrolling. */
-  .fixed.inset-0 .card.overflow-y-auto,
-  .fixed.inset-0 .card[class*="max-h"] {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    touch-action: pan-y;
-  }
+  .lesson-prose h1, .lesson-prose h2 { font-size: 1.5rem; line-height: 1.25; }
+  .lesson-prose h3 { font-size: 1.25rem; line-height: 1.3; }
+  .lesson-prose blockquote { font-size: 16.5px; line-height: 1.5; }
+  .lesson-prose pre, .lesson-prose code { font-size: 14.5px; }
+  /* Lesson modal title needs hierarchy above body */
+  .fixed.inset-0 h2.font-display { font-size: 1.55rem; line-height: 1.2; }
   .lesson-prose br + br      { margin-top: 0.75em; }
   .lesson-prose pre          { margin: 1.2em 0; font-size: 13.5px; line-height: 1.6; }
   .lesson-prose ul,

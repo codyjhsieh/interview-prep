@@ -5356,7 +5356,7 @@ function renderFlashcards(state, hub) {
             <span>Answer</span>
             <a href="${reviewHref}" class="text-[11px] normal-case tracking-normal" style="color:var(--accent)" onclick="event.stopPropagation()">Review ${card.lesson ? 'lesson' : card.module ? 'module' : 'category'} →</a>
           </div>
-          <div class="text-[15px] leading-relaxed">${richText(card.a)}</div>
+          <div class="flashcard-answer leading-relaxed">${richText(card.a)}</div>
           <div class="absolute bottom-5 right-6 text-xs text-slate-500">Click to flip back</div>
         </div>
       </div>
