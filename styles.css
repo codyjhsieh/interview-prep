@@ -310,6 +310,10 @@ header.sticky > *, main > header > * { position: relative; z-index: 1; }
  * ========================================================================= */
 .card {
   position: relative;
+  /* Plain fallback first — WebKit < iOS 16.4 doesn't support color-mix(),
+   * which invalidates the whole background declaration. Without this
+   * fallback the .card surface renders fully transparent on older iOS. */
+  background: var(--regular);
   /* Adaptive substrate — color-mix pulls the glass slightly toward the
    * background sampled by JS (see js/glass-adaptive.js). When --card-tint
    * is transparent (default), the mix is a no-op and we get pure --regular. */
@@ -331,18 +335,22 @@ header.sticky > *, main > header > * { position: relative; z-index: 1; }
     inset 1px 0 0 rgba(255,255,255,0.55),
     inset -1px 0 0 rgba(255,255,255,0.30),
     var(--sh-card);
-  /* Spring physics on interactive transitions — uses the previously-
-   * defined Liquid Glass tokens (entrance overshoots, settle decelerates).
-   * box-shadow + background still use linear ease since those don't
-   * benefit from overshoot. */
+  overflow: hidden;
+  isolation: isolate;
+}
+/* Spring physics on interactive transitions — isolated to its own rule
+ * because --spring-overshoot is a linear() easing, which WebKit < iOS 17.2
+ * cannot parse. If the transition shorthand is invalid the parser used to
+ * sometimes corrupt subsequent declarations in the same block — keeping
+ * the layout properties above safe means cards still get padding/radius/
+ * shadow on older iOS even when the transition itself is dropped. */
+.card {
   transition:
     transform 0.42s var(--spring-overshoot),
     box-shadow 0.28s var(--spring-settle),
     background 0.4s var(--ease),
     backdrop-filter 0.45s var(--spring-settle),
     -webkit-backdrop-filter 0.45s var(--spring-settle);
-  overflow: hidden;
-  isolation: isolate;
 }
 /* Companies grid — 129+ cards at once. Skip the backdrop-filter pass
    (cheapest possible substrate) so the tap → paint isn't bottlenecked
