@@ -1,0 +1,138 @@
+Abridge
+Airgoods
+Airtable
+Alchemy
+Alloy
+AlphaSense
+Anthropic
+Asana
+AssemblyAI
+Attentive
+Baseten
+Beacons
+Betterment
+BlackRock
+Blee
+Block
+Blockworks
+Bombas
+Braze
+Brex
+Camber
+Carta
+Chime
+Cognition
+Cohere
+Comcast (NBCUniversal)
+Commure
+CoreWeave
+Credal
+Crosby
+Cursor
+Datadog
+Decagon
+Deepgram
+Distyl
+Dorsia
+DoubleVerify
+Drata
+ElevenLabs
+Etsy
+Extend
+FLORA
+Figma
+Fireworks AI
+Forge
+Gemini
+General Context
+Glean
+Glide
+GlossGenius
+Gusto
+Hang
+Harvey
+Headway
+Hopper
+Hugging Face
+Ideogram
+Iterable
+Jane Street
+Jump Trading
+Justworks
+Kalshi
+Knock
+Kustomer
+LangChain
+LogRocket
+Loop
+Lovable
+Lyft
+Maven Clinic
+Mercury
+Metropolis
+Middesk
+Mighty Networks
+Mirage
+Mistral AI
+Modal Labs
+Modern Treasury
+MongoDB
+Monte Carlo
+Mosaic
+Navan
+Neon
+Normal Computing
+Notion
+Numeric
+OpenAI
+Opus Training
+Oscar Health
+Output
+Partiful
+Patreon
+Perplexity
+Pinwheel
+Plaid
+Plot
+Point72
+Polymarket
+Poolside
+Propel
+Qloo
+Ramp
+Reddit
+ResortPass
+Ridgeline
+Rilla
+Ro
+Robinhood
+Salesforce
+Sandbar
+Scale AI
+SeatGeek
+Secureframe
+Sequence
+Sierra
+Sigma
+Slate
+SoFi
+Sola
+Spotify
+Squarespace
+Stainless
+Stash
+Stripe
+Substack
+Suno
+Talkspace
+Tavily
+The Trade Desk
+The Walt Disney Company
+Unify
+Vercel
+Virtu Financial
+Warp
+Wealthfront
+Whatnot
+Writer
+Yext

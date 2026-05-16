@@ -28,8 +28,13 @@ window.SYNC = (function () {
   const SYNC_ENDPOINT = 'https://interview-prep-sync.codyjhsieh.workers.dev';
 
   const CODE_KEY     = 'fdeprep.syncCode.v1';
-  const POLL_MS      = 2500;   // 2.5s — snappier real-time feel; still
-                               // ~34k reads/day per device (free tier = 100k)
+  // KV-conservative tuning (2026-05-15): 15s poll + visibility gate.
+  // At 2.5s + always-on, two devices alone burned ~69k reads/day (69%
+  // of the 100k free-tier ceiling). At 15s + visibility-paused, the
+  // same two devices cost ~1.5k reads/day (≤2%). Cross-device sync
+  // still lands in <15s while either tab is visible, and the focus
+  // listener below pulls instantly on tab return.
+  const POLL_MS      = 15000;
   const PUSH_DEBOUNCE_MS = 1000;
   const STORAGE_KEY  = 'fdeprep.v1';            // matches GAMI.STORAGE_KEY
 
@@ -413,8 +418,13 @@ window.SYNC = (function () {
   function startLoop() {
     stopLoop();
     if (!getCode() || !isConfigured()) return;
-    pollTimer = setInterval(pollOnce, POLL_MS);
-    pollOnce();
+    // Visibility-gated tick — only hits the network when the tab is
+    // visible to the user. iOS standalone webviews fire visibilitychange
+    // when the user backgrounds the app, so polls cleanly pause.
+    pollTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') pollOnce();
+    }, POLL_MS);
+    if (document.visibilityState === 'visible') pollOnce();
     setStatus(getCode() ? 'paired' : 'idle');
   }
 
@@ -486,6 +496,11 @@ window.SYNC = (function () {
     if (getCode() && isConfigured()) startLoop();
     // Pull on focus so coming back from another device feels instant.
     window.addEventListener('focus', () => { if (getCode() && isConfigured()) pollOnce(); });
+    // Belt + suspenders for iOS standalone webviews: visibilitychange
+    // sometimes fires without a corresponding window.focus event.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && getCode() && isConfigured()) pollOnce();
+    });
   }
 
   return {
