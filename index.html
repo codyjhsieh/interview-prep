@@ -100,30 +100,12 @@
   })();
 </script>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        // Sidebar docks earlier — at 900px instead of the default 1024px.
-        // This avoids the "sidebar mysteriously gone" state when a browser
-        // window is split or a smaller laptop is in use.
-        screens: { lg: '900px' },
-        colors: {
-          // Light-mode palette: "ink" is now used as surface tints, not dark backgrounds.
-          // Existing legacy class usage (bg-ink-900, border-ink-600, etc.) maps to
-          // near-white surfaces and subtle hairlines.
-          ink:    { 950:'#F1F3F8', 900:'#F4F5F9', 800:'#F7F8FB', 700:'#FFFFFF', 600:'rgba(15,23,42,0.10)' },
-          accent: { 400:'#0EA371', 500:'#0B8A60', 600:'#0A7553' },
-          warm:   { 400:'#C7780E', 500:'#A86409' },
-          rose:   { 400:'#D7384C', 500:'#B22B3D' },
-          violet: { 400:'#7849E0', 500:'#6336C7' },
-          sky:    { 400:'#2E6FE0', 500:'#1F5BC1' },
-        }
-      }
-    }
-  }
-</script>
+<!-- Precompiled Tailwind. Switched off cdn.tailwindcss.com after a regression
+     where iOS WebKit (Safari + iOS Chrome) was rendering pages without any
+     utility classes applied — likely a content-blocker / Private Relay issue
+     hitting the runtime JIT bundle. Build with: npm run build:css. The
+     content set in tailwind.config.js scans index.html + js/**.js. -->
+<link rel="stylesheet" href="tw.css?v=2026-05-16-9" />
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -153,7 +135,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-<link rel="stylesheet" href="styles.css?v=2026-05-16-8" />
+<link rel="stylesheet" href="styles.css?v=2026-05-16-9" />
 </head>
 <body>
 
@@ -222,23 +204,23 @@
 <!-- ?v=<build> cache-busts every deploy. The version string is bumped
      manually in tandem with sync.js / app.js / views.js changes so the
      browser + GH Pages CDN can't serve stale JS to paired devices. -->
-<script src="js/data.js?v=2026-05-16-8"></script>
-<script src="js/quotes.js?v=2026-05-16-8"></script>
-<script src="js/gamification.js?v=2026-05-16-8"></script>
-<script src="js/animations.js?v=2026-05-16-8"></script>
-<script src="js/infographics.js?v=2026-05-16-8"></script>
-<script src="js/games.js?v=2026-05-16-8"></script>
-<script src="js/views.js?v=2026-05-16-8"></script>
-<script src="js/app.js?v=2026-05-16-8"></script>
+<script src="js/data.js?v=2026-05-16-9"></script>
+<script src="js/quotes.js?v=2026-05-16-9"></script>
+<script src="js/gamification.js?v=2026-05-16-9"></script>
+<script src="js/animations.js?v=2026-05-16-9"></script>
+<script src="js/infographics.js?v=2026-05-16-9"></script>
+<script src="js/games.js?v=2026-05-16-9"></script>
+<script src="js/views.js?v=2026-05-16-9"></script>
+<script src="js/app.js?v=2026-05-16-9"></script>
 <!-- Cross-device sync via Cloudflare Worker + KV. Idle until paired
      (no network calls). Wraps GAMI.saveImmediate to PUT remotely
      and polls every 2.5s for changes from the other device. -->
-<script src="js/sync.js?v=2026-05-16-8"></script>
+<script src="js/sync.js?v=2026-05-16-9"></script>
 <script>window.SYNC && window.SYNC.init();</script>
 <!-- Liquid Glass: adaptive substrate tinting. Loads after app so cards
      are already in the DOM. Cards published after dashboard render are
      picked up by the module's MutationObserver. -->
-<script src="js/glass-adaptive.js?v=2026-05-16-8"></script>
+<script src="js/glass-adaptive.js?v=2026-05-16-9"></script>
 
 <!-- Auto-refresh on new deploy. iOS Add-to-Home-Screen webviews keep
      the same standalone session alive across launches, so a manual
