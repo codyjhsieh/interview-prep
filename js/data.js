@@ -12051,7 +12051,7 @@ const INFOGRAPHICS = [
 
 /* ---------- DAILY QUEST POOL ---------- */
 const DAILY_QUESTS = [
-  { id:'q-flash5',   name:'Review 5 flashcards',          xp:30,  kind:'flashcard', target:5  },
+  { id:'q-flash5',   name:'Review 5 flashcards',          xp:10,  kind:'flashcard', target:5  },
   { id:'q-lesson1',  name:'Complete 1 lesson',            xp:25,  kind:'lesson',    target:1  },
   { id:'q-drill1',   name:'Do 1 drill (practice prompt)', xp:40,  kind:'drill',     target:1  },
   { id:'q-decomp1',  name:'Decomposition prompt out loud',xp:45,  kind:'decomp',    target:1  },

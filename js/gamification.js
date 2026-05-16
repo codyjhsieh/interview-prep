@@ -287,9 +287,11 @@ function reviewCard(state, cardId, quality /* 1..4 */) {
   card.due = Date.now() + card.interval * 86400000;
   state.flashcards[cardId] = card;
 
-  // XP based on quality
-  const xpMap = { 1: 5, 2: 10, 3: 15, 4: 20 };
-  return awardXP(state, xpMap[quality] || 10, 'flashcard');
+  // XP based on quality. Calibrated low so flashcards feel like a warm-up,
+  // not the primary XP driver — daily goal should come from lessons + apps.
+  // Was 5/10/15/20; 10 Good cards used to clear the entire 180 daily goal.
+  const xpMap = { 1: 1, 2: 2, 3: 3, 4: 4 };
+  return awardXP(state, xpMap[quality] || 2, 'flashcard');
 }
 
 /* Job-application log. Each entry awards XP via the normal awardXP path

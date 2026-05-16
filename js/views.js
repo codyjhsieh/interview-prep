@@ -5313,10 +5313,10 @@ function renderFlashcards(state, hub) {
         </div>
       </div>
       <div class="grid grid-cols-4 gap-2 mt-4" id="rate-row" style="display:none">
-        <button class="btn btn-danger" data-rate="1">Again<span class="block text-[10px] mt-0.5">+5</span></button>
-        <button class="btn btn-ghost" data-rate="2">Hard<span class="block text-[10px] mt-0.5">+10</span></button>
-        <button class="btn btn-ghost" data-rate="3">Good<span class="block text-[10px] mt-0.5">+15</span></button>
-        <button class="btn btn-primary" data-rate="4">Easy<span class="block text-[10px] mt-0.5">+20</span></button>
+        <button class="btn btn-danger" data-rate="1">Again<span class="block text-[10px] mt-0.5">+1</span></button>
+        <button class="btn btn-ghost" data-rate="2">Hard<span class="block text-[10px] mt-0.5">+2</span></button>
+        <button class="btn btn-ghost" data-rate="3">Good<span class="block text-[10px] mt-0.5">+3</span></button>
+        <button class="btn btn-primary" data-rate="4">Easy<span class="block text-[10px] mt-0.5">+4</span></button>
       </div>
     `;
     stage.appendChild(fc);
