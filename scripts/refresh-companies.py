@@ -258,7 +258,7 @@ CANDIDATES = [
   ("unit","Unit","ashby","unit","fintech","Embedded banking","Series C","$170M","Insight",["Insight","Accel","Better Tomorrow"],"Banking-as-a-service. Ledger, KYC, money movement."),
   ("increase","Increase","ashby","increase","fintech","Modern banking APIs","Series A","$20M","Andreessen Horowitz",["a16z","Susa","Garry Tan"],"Payments API (ACH/RTP/Wire). Deep banking + reliability."),
   ("pagaya","Pagaya","greenhouse","pagaya","fintech","AI lending platform (NASDAQ)","Public","$500M+ pre-IPO","Israel Growth Partners",["NASDAQ","Aflac","Viola"],"NYC AI-lending. ML credit + capital-markets plumbing."),
-  ("petal","Petal","greenhouse","petalcard","fintech","Credit cards for thin-file consumers","Series E","$240M","Tarsadia",["Tarsadia","Valar","Peter Thiel"],"Cash-flow underwriting. ML risk + consumer lending."),
+  # ("petal", ...) — acquired by Empower Finance (April 2024); rebranded as Tilt Card. Dropped.
   ("alphasense","AlphaSense","greenhouse","alphasense","ai","AI market intelligence","Series F","$650M+","BDT",["BDT","Viking","Goldman"],"NYC enterprise AI search over financial docs. Retrieval + integrations."),
   ("tegus","Tegus","greenhouse","tegus","ai","Expert-call research platform","Late stage","$150M+","Bain",["Bain","Battery"],"NYC investment research. Search, ML, audio-to-text."),
   ("yotta","Yotta","ashby","yotta","fintech","Prize-linked savings","Series A","$13M","Y Combinator",["YC","Base10"],"NYC consumer savings + lottery hybrid. Payments + ledger."),
