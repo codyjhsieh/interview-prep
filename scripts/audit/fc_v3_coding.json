@@ -1,0 +1,305 @@
+{
+  "cat": "coding",
+  "rewrites": [
+    {
+      "id": "fc-cod-1",
+      "q": "What are the essential pieces of a BFS template for graph traversal?",
+      "a": "**Approach:** Use a `deque` plus a `visited` set. Mark nodes visited at **enqueue time**, not dequeue, to avoid the same node being queued by every neighbor before it's processed. Track depth by either a separate counter or by looping over `len(queue)` for one level at a time.\n\n**Complexity:** `O(V + E)` time, `O(V)` space."
+    },
+    {
+      "id": "fc-cod-2",
+      "q": "How do you implement an LRU cache with O(1) get and put?",
+      "a": "**Approach:** Combine a hash map (`key -> node`) with a **doubly linked list** ordered by recency. On `get`/`put`: detach the node from its current spot, splice it at the head, and evict the tail when over capacity.\n\n- Hash map gives `O(1)` lookup\n- Doubly linked list gives `O(1)` detach + insert\n- Use a sentinel head/tail to skip null checks\n\n**Complexity:** `O(1)` get/put, `O(capacity)` space."
+    },
+    {
+      "id": "fc-cod-3",
+      "q": "When does the two-pointer pattern apply on an array?",
+      "a": "**Trigger conditions:**\n\n- Array is **sorted** (or sortable as a preprocessing step)\n- Each step provably **rules out** one end (e.g., sum too small means move left up)\n- Looking for pairs, palindromes, partitions, or in-place rewrites\n- Want to drop from `O(n^2)` brute force to `O(n)` sweep\n\nIf no monotone rule-out argument exists, prefer hashing or sliding window."
+    },
+    {
+      "id": "fc-cod-4",
+      "q": "Sliding window: when do you pick a fixed-size window versus a variable-size one?",
+      "a": "- **Fixed window:** size `k` is given by the problem (e.g., max sum of subarray of size `k`, average of last `k`). Slide as a rigid block.\n- **Variable window:** grow `right` to include more, shrink `left` while an invariant is violated (e.g., longest substring with no repeats, smallest subarray with sum >= target).\n\n**Rule of thumb:** if the question fixes the size, use fixed; if it asks for the longest/shortest/best window satisfying a property, use variable."
+    },
+    {
+      "id": "fc-cod-5",
+      "q": "What is the binary-search-on-the-answer pattern and when does it apply?",
+      "a": "**Approach:** When the answer space is **monotonic** (some predicate `can_do(x)` flips from `false` to `true` exactly once), binary-search the boundary by evaluating `can_do(mid)` each step.\n\n- Classic: smallest ship capacity to ship in `D` days\n- Classic: split array into `k` parts minimizing max sum\n- Classic: smallest eating speed for Koko\n\n**Complexity:** `O(log(range) * cost(predicate))`."
+    },
+    {
+      "id": "fc-cod-6",
+      "q": "What two optimizations make Union-Find effectively constant-time?",
+      "a": "- **Path compression in `find`:** point every traversed node directly to the root.\n- **Union by rank/size:** attach the smaller tree under the larger one.\n\n**Complexity:** with both, each op runs in `O(alpha(N))` amortized, effectively constant. Without them, naive DSU degrades to `O(N)` per op on adversarial inputs."
+    },
+    {
+      "id": "fc-cod-7",
+      "q": "How do Dijkstra and Bellman-Ford compare for single-source shortest paths?",
+      "a": "- **`Dijkstra`:** non-negative weights only, `O((V + E) log V)` with a min-heap. Locks in each node's distance the moment it's popped.\n- **`Bellman-Ford`:** handles negative weights, `O(V * E)`. Also detects negative cycles via one extra relaxation pass.\n\n**Why negatives break Dijkstra:** the \"once-extracted-is-final\" invariant assumes future paths can only add cost. A negative edge can later beat the locked-in distance."
+    },
+    {
+      "id": "fc-cod-8",
+      "q": "When should you reach for a monotonic stack?",
+      "a": "**Trigger conditions:**\n\n- Asking for **next greater / next smaller** element\n- Need contributions bounded by \"how far does this element dominate?\"\n- Histograms, rain trap variants, daily temperatures, stock spans\n\n**Mechanics:** maintain a stack monotone in one direction; each incoming element pops violators until order is restored. Each element pushed and popped at most once.\n\n**Complexity:** `O(n)` time, `O(n)` space."
+    },
+    {
+      "id": "fc-cod-9",
+      "q": "How do you find the single non-duplicate value when every other number appears twice?",
+      "a": "**Approach:** XOR all values together. Identical pairs cancel (`x ^ x = 0`) and the lone singleton remains because `x ^ 0 = x`.\n\n**Complexity:** `O(n)` time, `O(1)` space. No hash set needed."
+    },
+    {
+      "id": "fc-cod-10",
+      "q": "How does Kahn's topological sort detect cycles?",
+      "a": "**Approach:** Repeatedly remove nodes with in-degree `0`, appending each to the output. If the final order has **fewer than `N` nodes**, some node never reached in-degree `0`, which means it sits on a cycle.\n\n**Complexity:** `O(V + E)`. Cycle detection comes free with the sort."
+    },
+    {
+      "id": "fc-cod-11",
+      "q": "When does bitmask DP apply?",
+      "a": "**Trigger conditions:**\n\n- State must track **which subset** of `N` items has been used/visited\n- `N` is small, roughly `<= 20` (so `2^N` masks fit in memory and time)\n- Subproblems compose: result for mask `m` depends only on results for sub-masks\n\n**Classic examples:** Traveling Salesman, set cover, assignment problems.\n\n**Complexity:** typically `O(2^N * N)` or `O(2^N * N^2)`."
+    },
+    {
+      "id": "fc-cod-12",
+      "q": "Why use `collections.deque` instead of a list as the BFS queue in Python?",
+      "a": "- `list.pop(0)` is `O(n)` because it shifts every remaining element left.\n- `deque.popleft()` is `O(1)` (doubly linked block layout).\n\nAt graph scale, the difference is **asymptotic**, not constant: a list-backed queue turns an `O(V + E)` BFS into `O(V^2 + V*E)`."
+    },
+    {
+      "id": "fc-cod-13",
+      "q": "In BFS, should you mark a node visited at enqueue or at dequeue?",
+      "a": "**At enqueue.** Marking on dequeue lets the same node be pushed by every neighbor before it's processed, blowing up memory and time in dense graphs.\n\n- Enqueue-mark: each node enters the queue at most once\n- Dequeue-mark: up to `deg(v)` duplicates per node\n\nFor weighted variants (Dijkstra), the dequeue check is correct because distances can improve."
+    },
+    {
+      "id": "fc-cod-14",
+      "q": "What is the optimal complexity for Longest Increasing Subsequence and how is it achieved?",
+      "a": "**Approach:** **Patience sort.** Maintain a `tails` array where `tails[i]` is the smallest possible tail of an increasing subsequence of length `i+1`. For each value, binary-search its insertion point in `tails` and overwrite.\n\n**Complexity:** `O(N log N)` time, `O(N)` space. The pure 2D DP variant is `O(N^2)`.\n\nNote: `tails` is **not** the actual LIS; reconstruct via parent pointers if needed."
+    },
+    {
+      "id": "fc-cod-15",
+      "q": "How do you find the K-th largest element in an unsorted N-element array?",
+      "a": "- **`Quickselect`:** average `O(N)`, worst `O(N^2)`. Partition around a pivot and recurse on one side.\n- **Min-heap of size `K`:** `O(N log K)` time, `O(K)` space. Streaming-friendly.\n- **Full sort:** `O(N log N)`, strictly worse.\n\nPick quickselect for one-shot in-memory; pick the heap when `K` is small or data streams in."
+    },
+    {
+      "id": "fc-cod-16",
+      "q": "What data structure tracks the top K elements of a stream?",
+      "a": "**Approach:** A **min-heap of size `K`**. For each incoming item: if the heap has fewer than `K` elements, push it; otherwise if the item is larger than the heap's root, pop and push.\n\n**Complexity:** `O(log K)` per item, `O(K)` memory. The root is the K-th largest seen so far, and the heap holds the top `K`."
+    },
+    {
+      "id": "fc-cod-17",
+      "q": "How do you maintain the running median of a streaming sequence?",
+      "a": "**Approach:** Two heaps: a **max-heap `lo`** for the smaller half and a **min-heap `hi`** for the larger half. Keep `len(lo) - len(hi)` in `{0, 1}` by rebalancing after each insert.\n\n- Odd count: median = `lo.top()`\n- Even count: median = `(lo.top() + hi.top()) / 2`\n\n**Complexity:** `O(log N)` per insert, `O(1)` per query."
+    },
+    {
+      "id": "fc-cod-18",
+      "q": "How do you count connected components in an undirected graph?",
+      "a": "**Approach:** Loop over every node; if it isn't visited yet, run a DFS or BFS from it and increment a component counter. Each traversal marks every reachable node visited.\n\n**Complexity:** `O(V + E)` time, `O(V)` space. Union-Find also works and is preferable when edges arrive online."
+    },
+    {
+      "id": "fc-cod-19",
+      "q": "How do you detect a cycle in a directed graph?",
+      "a": "- **DFS with three colors / on-stack set:** mark nodes `WHITE` (unseen), `GRAY` (on current DFS path), `BLACK` (finished). Encountering a `GRAY` node = back-edge = cycle.\n- **Kahn's topological sort:** if the produced order has fewer than `N` nodes, a cycle exists.\n\nBoth are `O(V + E)`. For undirected graphs, use union-find or parent-aware DFS instead."
+    },
+    {
+      "id": "fc-cod-20",
+      "q": "What is the optimal way to merge K sorted lists into one sorted list?",
+      "a": "**Approach:** Min-heap of `K` head pointers. Pop the smallest, append it to the output, and push its `.next` (if any).\n\n**Complexity:** `O(N log K)` time, `O(K)` space, where `N` is total elements.\n\nStrictly better than pairwise merge (`O(N*K)`) or concatenating-then-sorting (`O(N log N)`) when `K << N`."
+    },
+    {
+      "id": "fc-cod-21",
+      "q": "What invariant must hold for a sliding-window approach to work?",
+      "a": "**Monotonicity:** extending the window must not be able to \"un-break\" the property once it's broken, and shrinking must not be able to re-break it.\n\n- Longest substring with no repeats: extending only adds chars (monotone)\n- Subarray sum >= target with positives: monotone\n- Subarray with negatives included: **not** monotone, sliding window fails\n\nWithout monotonicity, a window can't be slid in one pass."
+    },
+    {
+      "id": "fc-cod-22",
+      "q": "What time and space complexity does the two-pointer technique give on a sorted array?",
+      "a": "**Complexity:** `O(N)` time, `O(1)` extra space.\n\nEach pointer moves forward at most `N` steps (they never go backward), so total work is linear. Strictly better than hash-set approaches on space, and matches them on time when the input is already sorted."
+    },
+    {
+      "id": "fc-cod-23",
+      "q": "When does binary-search-on-the-answer apply, and what are canonical examples?",
+      "a": "**Trigger:** the answer space is **monotonic**, meaning a predicate `feasible(x)` flips from `false` to `true` exactly once over the candidate range. Binary-search the boundary, calling the predicate each step.\n\n**Canonical examples:**\n\n- Min ship capacity to deliver in `D` days\n- Smallest max-page when splitting books across `K` students\n- Koko's minimum eating speed\n- Min largest sum splitting array into `K` parts"
+    },
+    {
+      "id": "fc-cod-24",
+      "q": "What problems do prefix sums solve, and at what cost?",
+      "a": "**Approach:** Precompute `prefix[i] = A[0] + ... + A[i-1]` once in `O(N)`. Then any range sum `A[l..r]` is `prefix[r+1] - prefix[l]` in `O(1)`.\n\n**Use for:**\n\n- Range-sum queries (immutable array)\n- **\"Subarray sum equals K\"** via `prefix_count` hash map\n- 2D variants for submatrix sums\n- Difference arrays for range updates\n\n**Complexity:** `O(N)` build, `O(1)` query."
+    },
+    {
+      "id": "fc-cod-25",
+      "q": "What does the bit operation `x & (x - 1)` compute?",
+      "a": "**It clears the lowest set bit of `x`.** Subtracting `1` flips the lowest set bit to `0` and all lower zeros to `1`s; the AND then zeros out everything from that bit down.\n\n**Uses:**\n\n- **Brian Kernighan's** bit count: loop `x &= x - 1` until zero; iterations = popcount\n- Check power of two: `x > 0 and (x & (x - 1)) == 0`\n- Enumerate set bits one at a time"
+    },
+    {
+      "id": "fc-cod-26",
+      "q": "How do you find the two unique numbers when every other value in the array appears twice?",
+      "a": "**Approach:** XOR all values to get `x = a ^ b`. Since `a != b`, `x` has at least one set bit; isolate the lowest one with `x & -x`. Partition the array by whether each element has that bit set, and XOR each partition separately. Each side cancels its pairs and isolates one of `a, b`.\n\n**Complexity:** `O(N)` time, `O(1)` space."
+    },
+    {
+      "id": "fc-cod-27",
+      "q": "Why does Dijkstra's algorithm fail on graphs with negative edge weights?",
+      "a": "**Reason:** Dijkstra locks in a node's distance the moment it's popped from the priority queue, relying on the invariant that future paths can only add cost. A negative edge could later offer a shorter route to the locked node, but the algorithm has already moved on.\n\n**Fix:** use `Bellman-Ford` (`O(V*E)`, handles negatives) or `SPFA`. For all-pairs with negatives, use `Floyd-Warshall`."
+    },
+    {
+      "id": "fc-cod-28",
+      "q": "What is Bellman-Ford's complexity, and what does it buy you over Dijkstra?",
+      "a": "**Complexity:** `O(V * E)` time, `O(V)` space.\n\n**Benefits:**\n\n- Handles **negative edge weights**\n- Detects **negative cycles**: run one extra relaxation pass after `V-1` rounds; any further relaxation proves a negative cycle exists\n- Simpler to implement than Dijkstra (no heap)\n\nPay the slower runtime when negatives are possible or when you need cycle detection."
+    },
+    {
+      "id": "fc-cod-29",
+      "q": "What is the key invariant in the monotonic-stack solution to Largest Rectangle in Histogram?",
+      "a": "**Approach:** Maintain a stack of bar indices with **strictly increasing heights**. When a shorter bar arrives, pop bars taller than it; for each popped bar, compute the rectangle bounded by its height with width from the new stack top `+ 1` to the current index `- 1`.\n\n- Stack top after pop = left boundary (first shorter bar to the left)\n- Current index = right boundary (first shorter bar to the right)\n\n**Complexity:** each bar pushed and popped once, `O(N)`."
+    },
+    {
+      "id": "fc-cod-30",
+      "q": "How does A* differ from Dijkstra for shortest-path search?",
+      "a": "**A\\* = Dijkstra + a heuristic `h(n)`** estimating cost to goal. Priority becomes `g(n) + h(n)` instead of just `g(n)`.\n\n- If `h` is **admissible** (never overestimates), A\\* still finds the optimal path\n- If `h` is also **consistent**, A\\* expands each node at most once like Dijkstra\n- With a good heuristic, A\\* prunes huge swaths of the search space when the target is known\n\nUse A\\* for single-target search with geometry/domain knowledge; Dijkstra for multi-target or no heuristic."
+    },
+    {
+      "id": "fc-cod-31",
+      "q": "What traversal finds the shortest path between two users in a 10M-node social graph?",
+      "a": "**Approach:** **Bidirectional BFS** from both endpoints, alternating expansion of the smaller frontier each round. Stop when the two frontiers intersect.\n\n**Why:** plain BFS explores `b^d` nodes; bidirectional cuts that to roughly `2 * b^(d/2)`, which is decisive on high-fanout social graphs.\n\n**Complexity:** `O(b^(d/2))` instead of `O(b^d)`, where `b` is branching factor and `d` is path length."
+    },
+    {
+      "id": "fc-cod-32",
+      "q": "How do you seed the queue for multi-source BFS (e.g., infection spread or 0-1 matrix)?",
+      "a": "**Approach:** Push **every source** onto the queue at the start, all with distance `0`, and mark them all visited up front. Then run standard BFS.\n\nThe first time BFS reaches any node, that's its distance to the **nearest** source, because all sources expanded in lockstep from layer `0`.\n\n**Complexity:** single pass, `O(V + E)`. Far better than running BFS from each source separately."
+    },
+    {
+      "id": "fc-cod-33",
+      "q": "Shortest path in a grid with up to K obstacle removals: what's the BFS state?",
+      "a": "**Approach:** Augment the state with the **remaining eliminations**: `(row, col, k_left)`. Visited is keyed on the full triple so the same cell can be reached with different elimination budgets.\n\n- Still BFS (not Dijkstra) because every move costs `1`\n- Without `k_left` in the key, you'd prune optimal paths that need more obstacle credit\n\n**Complexity:** `O(R * C * K)` time and space."
+    },
+    {
+      "id": "fc-cod-34",
+      "q": "Bus Routes (minimum buses to reach destination): what's the right graph to BFS over?",
+      "a": "**Approach:** Build a graph of **routes**, not stops. Two routes are connected iff they share at least one stop. BFS over routes from any route containing the source to any route containing the target; the level count `+ 1` is the answer.\n\n**Why not stops:** each stop has many neighbors via its routes, blowing up the edge count. Routes are far fewer than stop-edges in practice."
+    },
+    {
+      "id": "fc-cod-35",
+      "q": "What is the bridge condition in Tarjan's bridge-finding algorithm?",
+      "a": "**Approach:** DFS while tracking two values per node:\n\n- `disc[u]` = discovery time of `u`\n- `low[u]` = lowest `disc` reachable from `u`'s DFS subtree via tree edges plus at most one back-edge\n\n**Bridge condition:** edge `(u, v)` (where `v` is a child of `u`) is a bridge iff `low[v] > disc[u]`. That means `v`'s subtree has **no alternative route** back to `u` or its ancestors.\n\n**Complexity:** `O(V + E)`."
+    },
+    {
+      "id": "fc-cod-36",
+      "q": "Trapping Rain Water with two pointers: why is it safe to advance the lower side?",
+      "a": "**Approach:** Water at index `i` is `min(maxLeft, maxRight) - height[i]`. If `leftMax <= rightMax`, the left side is the binding constraint, so water at `L` is exactly `leftMax - height[L]` regardless of what lies between -- some bar `>= leftMax` exists on the right.\n\n**Therefore:** advance the lower pointer; the running max on that side can only grow, preserving the invariant.\n\n**Complexity:** `O(N)` time, `O(1)` space."
+    },
+    {
+      "id": "fc-cod-37",
+      "q": "Sliding Window Maximum: what structure gives O(N)?",
+      "a": "**Approach:** A **monotonic deque** of indices with strictly decreasing corresponding values.\n\n- Before pushing index `i`, pop from the **back** while the back's value is `<= A[i]`\n- Pop from the **front** when its index falls out of the window (`< i - k + 1`)\n- The front always holds the current window's max\n\n**Complexity:** each index pushed and popped at most once, `O(N)` time, `O(k)` space."
+    },
+    {
+      "id": "fc-cod-38",
+      "q": "Subarrays with Exactly K Distinct Integers: what's the inclusion-exclusion trick?",
+      "a": "**Approach:** Compute `atMost(K) - atMost(K - 1)`. Each `atMost` is a standard sliding-window count of subarrays whose distinct count stays `<= K`, which is **monotone** and windowable in `O(N)`.\n\n**Why not direct \"exactly K\":** the property \"distinct count == K\" is not monotone (adding chars can push you above or below), so no single window works.\n\n**Complexity:** `O(N)` total."
+    },
+    {
+      "id": "fc-cod-39",
+      "q": "Minimum Window Substring: when do you shrink the window?",
+      "a": "**Approach:** Maintain a `need` count map and a `matched` counter equal to the number of distinct chars currently satisfied at their required count.\n\n- Expand `right`, incrementing `matched` when a char hits its required count\n- While `matched == required_distinct`, record the window and shrink `left`, decrementing `matched` only when a char drops **below** its need\n\n**Complexity:** `O(|s| + |t|)` time."
+    },
+    {
+      "id": "fc-cod-40",
+      "q": "First Missing Positive in O(N) time and O(1) space: what's the core trick?",
+      "a": "**Approach:** Use the array itself as a hash. For each index, while `1 <= A[i] <= N` and `A[A[i] - 1] != A[i]`, swap `A[i]` to position `A[i] - 1`. Each swap places one value in its correct slot.\n\n**Then scan:** the first index where `A[i] != i + 1` gives the answer; if all match, return `N + 1`. Values outside `[1, N]` are ignored.\n\n**Complexity:** `O(N)` time, `O(1)` extra space."
+    },
+    {
+      "id": "fc-cod-41",
+      "q": "Meeting Rooms II (minimum rooms needed): how does the sweep-line approach work?",
+      "a": "**Approach:** Create `+1` events at start times and `-1` events at end times. Sort all events; on ties, **process ends before starts** (a room frees before being re-occupied). Sweep and track the running maximum of the prefix sum.\n\n**Equivalent heap version:** sort meetings by start; min-heap of end times; for each meeting, pop ends `<= start`, then push current end. Heap size = rooms.\n\n**Complexity:** `O(N log N)`."
+    },
+    {
+      "id": "fc-cod-42",
+      "q": "Non-overlapping intervals (max kept): why sort by end time, not start?",
+      "a": "**Greedy by earliest end** leaves the most room for what comes next. An exchange argument: any optimal schedule can be transformed (one swap at a time) into the earliest-end choice without losing intervals.\n\n**Why not sort by start:** a long interval with the earliest start can block many short ones that fit after a slightly later, shorter pick.\n\n**Complexity:** `O(N log N)` sort, `O(N)` sweep."
+    },
+    {
+      "id": "fc-cod-43",
+      "q": "How do you find the Lowest Common Ancestor in a generic (non-BST) binary tree?",
+      "a": "**Approach:** Recurse left and right.\n\n- If both sides return non-null, the **current node is the LCA**\n- Otherwise, propagate up whichever side returned non-null\n- Base cases: `null` returns `null`; finding `p` or `q` returns that node\n\n**Complexity:** `O(N)` time, `O(H)` recursion stack. Works without parent pointers; for repeated queries, preprocess with Euler tour + RMQ for `O(1)` queries."
+    },
+    {
+      "id": "fc-cod-44",
+      "q": "Validate BST: what is the most common bug, and how do you fix it?",
+      "a": "**Common bugs:**\n\n- Only comparing each node to its **direct children**, missing grandchildren violations (e.g., a `7` in the left subtree of `5`)\n- Using `<=` instead of `<` for a strict BST (or vice versa, depending on definition)\n- Forgetting `INT_MIN` / `INT_MAX` edge cases when nodes can hit those values\n\n**Fix:** pass `(lo, hi)` bounds down the recursion, or do an **in-order traversal** and verify the sequence strictly increases."
+    },
+    {
+      "id": "fc-cod-45",
+      "q": "Binary Tree Maximum Path Sum: how do you split what to return versus what to track?",
+      "a": "**Approach:** At each node, recursively compute the best **one-armed extension** (`node.val + max(0, max(leftGain, rightGain))`). Update a global `best` with `node.val + leftGain + rightGain` -- the path that **bends** at this node.\n\n**Return only the one-armed value:** a parent can extend through this node but cannot use a path that already bent.\n\n**Complexity:** `O(N)` time, `O(H)` recursion."
+    },
+    {
+      "id": "fc-cod-46",
+      "q": "Reconstruct binary tree from preorder + inorder: what makes it O(N)?",
+      "a": "**Approach:** Preorder's first element is the root. Locate it in inorder to split left and right subtree ranges; recurse on each.\n\n**The trick:** pre-build a hash map `inorder_value -> index` so each root lookup is `O(1)`. Pass index ranges (not list slices) to avoid copying.\n\n**Complexity:** `O(N)` time, `O(N)` space. Without the hash map (linear scan each call), it degrades to `O(N^2)`."
+    },
+    {
+      "id": "fc-cod-47",
+      "q": "0/1 Knapsack with 1D rolling array: why iterate capacity in reverse?",
+      "a": "**Reason:** Each item may be used **at most once**. Iterating capacity **descending** ensures `dp[c - w]` still reflects the previous row (item not yet considered), so the update doesn't double-use the item.\n\n**Ascending iteration** lets `dp[c - w]` already include the current item, which is the **unbounded knapsack** form (unlimited copies per item).\n\n**Complexity:** `O(N * W)` time, `O(W)` space."
+    },
+    {
+      "id": "fc-cod-48",
+      "q": "Burst Balloons: what's the DP state, and why \"last to burst\"?",
+      "a": "**State:** `dp[l][r]` = max coins obtainable by bursting every balloon strictly between sentinels at positions `l` and `r`.\n\n**Transition:** pick which balloon `i` in `(l, r)` is the **last** to burst:\n\n`dp[l][r] = max over i of (nums[l] * nums[i] * nums[r] + dp[l][i] + dp[i][r])`\n\n**Why last-to-burst:** it pins balloon `i`'s neighbors to `l` and `r`, decoupling the two subproblems. \"First to burst\" leaves the neighbors of subproblems entangled.\n\n**Complexity:** `O(N^3)` time, `O(N^2)` space."
+    },
+    {
+      "id": "fc-cod-49",
+      "q": "How do you recognize that a problem needs dynamic programming?",
+      "a": "**Trigger conditions:**\n\n- **Overlapping subproblems:** naive recursion revisits the same `(state)` many times\n- **Optimal substructure:** the optimal solution decomposes into optimal sub-solutions\n- Answer is a min/max/count over a sequence of choices with bounded state\n\n**If subproblems don't repeat,** it's plain **divide-and-conquer**. If a local greedy choice provably leads to global optimum, it's **greedy**, not DP."
+    },
+    {
+      "id": "fc-cod-50",
+      "q": "What is the most common dynamic-programming bug?",
+      "a": "**Common bugs:**\n\n- **Off-by-one in base case or transition indexing** -- especially confusing \"`i` means first `i` chars\" vs \"first `i + 1` chars.\" Pick one convention and let base cases follow it.\n- **Forgetting to memoize a parameter that varies between calls** (e.g., remaining budget), turning `dp` into a function of the wrong subset of state\n- Mutating shared state (lists, dicts) inside the recursion\n- Wrong iteration order in 1D rolling DP (knapsack-style)"
+    },
+    {
+      "id": "fc-cod-51",
+      "q": "KMP string matching: what does the failure function store, and how does it speed up matching?",
+      "a": "**Failure function:** `f[i]` = length of the longest **proper prefix** of `pattern[0..i]` that is also a **suffix** of `pattern[0..i]`.\n\n**On mismatch** at text position while at pattern position `i`: jump pattern back to `f[i - 1]` instead of restarting. The text pointer never moves backward.\n\n**Complexity:** `O(M)` to build the failure table, `O(N)` to match. Total `O(M + N)` time, `O(M)` space."
+    },
+    {
+      "id": "fc-cod-52",
+      "q": "Rabin-Karp: what makes the hash \"rolling,\" and why does that matter?",
+      "a": "**Approach:** Treat each window as a base-`B` number mod prime `p`. Sliding right by one char:\n\n`new_hash = ((old_hash - leftChar * B^(L-1)) * B + rightChar) mod p`\n\nThis is `O(1)` per slide instead of `O(L)` for recomputing from scratch.\n\n**Verify on hash hit:** compare strings directly to dodge collisions, or use a double hash.\n\n**Complexity:** `O(N + M)` expected, `O(N * M)` worst case."
+    },
+    {
+      "id": "fc-cod-53",
+      "q": "Longest Duplicate Substring: which two patterns combine to solve it?",
+      "a": "**Approach:** Binary-search on the answer length `L`, plus rolling hash to test \"does any substring of length `L` repeat?\" in `O(N)` per check via a hash set.\n\n- Predicate is monotone: if length `L` has a duplicate, so does every length `<= L`\n- Each predicate call is `O(N)` rolling hash\n\n**Complexity:** `O(N log N)` expected. Handle collisions with a double hash or by verifying matches directly."
+    },
+    {
+      "id": "fc-cod-54",
+      "q": "Floyd's tortoise-and-hare: how do you find the cycle start in a linked list?",
+      "a": "**Phase 1:** advance `slow` by `1` and `fast` by `2` until they meet inside the cycle (or `fast` hits null = no cycle).\n\n**Phase 2:** reset one pointer to the head; advance both one step at a time. They meet at the **cycle entry**.\n\n**Proof sketch:** let `a` = head-to-entry distance, `b` = entry-to-meeting distance, `c` = rest of cycle. Then `2(a + b) = a + b + k(b + c)`, which gives `a = (k - 1)(b + c) + c`. So the head-walker and the meeting-walker land together at the entry.\n\n**Complexity:** `O(N)` time, `O(1)` space."
+    },
+    {
+      "id": "fc-cod-55",
+      "q": "Reverse Nodes in K-Group: what's the structural trick?",
+      "a": "**Approach:** Walk `k` nodes ahead first to **verify a full group exists**. If not, leave the tail untouched. Otherwise, reverse those `k` in place, then splice the previous group's tail to the new head and the new tail to whatever came after the group.\n\n- Use a sentinel `dummy` node to handle the first group uniformly\n- Iterate, don't recurse, to keep space `O(1)`\n\n**Complexity:** `O(N)` time, `O(1)` space (iterative)."
+    },
+    {
+      "id": "fc-cod-56",
+      "q": "LFU Cache: which data structures give O(1) get and put?",
+      "a": "**Approach:** Three structures working together:\n\n- Hash `key -> node` for `O(1)` lookup\n- Hash `freq -> doubly linked list of nodes at that frequency` ordered by recency\n- An integer `min_freq` pointer\n\n**On access:** detach the node from its current freq's list and append it to the `(freq + 1)` list. If the old list is now empty and was at `min_freq`, bump `min_freq`.\n\n**Eviction:** remove the tail of the `min_freq` list. Each op `O(1)`."
+    },
+    {
+      "id": "fc-cod-57",
+      "q": "Word Search II: why does a trie beat running per-word DFS?",
+      "a": "**Approach:** Insert all words into a **trie**. Run **one DFS per board cell**, walking the trie alongside the path; immediately stop a branch when no trie child matches the current letter.\n\n**Why it's faster:**\n\n- Shared prefixes are explored **once** instead of per word\n- Pruning happens at every step, not just at word end\n\n**Complexity:** roughly `O(cells * 4^L)` vs `O(W * cells * 4^L)` for naive per-word DFS, where `L` is max word length."
+    },
+    {
+      "id": "fc-cod-58",
+      "q": "Sum of Subarray Minimums: what's the monotonic-stack counting trick?",
+      "a": "**Approach:** For each index `i`, find `PLE` (previous less element index) and `NLE` (next less element index) using a monotonic stack.\n\n**Contribution of `A[i]`** as the min of subarrays = `A[i] * (i - PLE) * (NLE - i)`.\n\n**Key detail:** make one side **strict** and the other **non-strict** when there are ties (e.g., PLE strict, NLE non-strict). This avoids double-counting subarrays whose minimum appears more than once.\n\n**Complexity:** `O(N)` time."
+    },
+    {
+      "id": "fc-cod-59",
+      "q": "Kth smallest in a row+column sorted matrix: binary search on what?",
+      "a": "**Approach:** Binary-search on the **value**, not on indices. For a candidate `v`, count cells `<= v` in `O(N)` using the **staircase walk** from the bottom-left corner: move up when current cell `> v`, right otherwise.\n\n- If count `< K`, raise `lo`\n- If count `>= K`, lower `hi`\n\n**Complexity:** `O(N log(maxVal - minVal))`. Heap-based alternative is `O(K log N)` but loses on large `K`."
+    },
+    {
+      "id": "fc-cod-60",
+      "q": "Minimum Refueling Stops: how does the \"borrow from the past\" heap-greedy work?",
+      "a": "**Approach:** Drive forward without stopping, but **drop each reachable station's fuel into a max-heap** as you pass it. When you run out of fuel before the next station (or before the target), **pop the largest remembered tank** and add it to your fuel -- that's one stop.\n\n**Repeat** until you reach the target or the heap is empty (impossible).\n\n**Why it's optimal:** any optimal strategy can be exchanged into one that always takes the largest available past tank when forced to refuel.\n\n**Complexity:** `O(N log N)` time, `O(N)` space."
+    }
+  ]
+}

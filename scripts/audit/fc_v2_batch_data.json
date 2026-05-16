@@ -1,0 +1,431 @@
+{
+  "cat": "data",
+  "lessons": [
+    {
+      "id": "sq-1",
+      "type": "concept",
+      "name": "Window functions \u2014 the thing that separates SQL juniors from seniors",
+      "module_id": "data-sql",
+      "module_name": "SQL fluency under pressure",
+      "cat": "data"
+    },
+    {
+      "id": "sq-2",
+      "type": "question",
+      "name": "Q: Top-3 highest-grossing restaurants per city",
+      "module_id": "data-sql",
+      "module_name": "SQL fluency under pressure",
+      "cat": "data"
+    },
+    {
+      "id": "sq-3",
+      "type": "question",
+      "name": "Q: Find customers who abandoned the funnel",
+      "module_id": "data-sql",
+      "module_name": "SQL fluency under pressure",
+      "cat": "data"
+    },
+    {
+      "id": "sq-4",
+      "type": "question",
+      "name": "Q: Day-over-day retention cohort",
+      "module_id": "data-sql",
+      "module_name": "SQL fluency under pressure",
+      "cat": "data"
+    },
+    {
+      "id": "sq-5",
+      "type": "concept",
+      "name": "OLAP vs OLTP \u2014 say this in the interview",
+      "module_id": "data-sql",
+      "module_name": "SQL fluency under pressure",
+      "cat": "data"
+    },
+    {
+      "id": "pp-1",
+      "type": "concept",
+      "name": "Pipeline orchestrators (Airflow / Dagster) \u2014 the mental model",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "pp-3",
+      "type": "concept",
+      "name": "JOIN types \u2014 what each actually does, with traps",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "pp-4",
+      "type": "concept",
+      "name": "Indexes \u2014 how the database finds rows fast (and why your query is slow)",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "pp-5",
+      "type": "concept",
+      "name": "Slowly-changing dimensions (SCD Type 1/2/3) \u2014 modeling history",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "pp-6",
+      "type": "concept",
+      "name": "Change Data Capture (CDC) \u2014 keeping the warehouse in sync",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "pp-2",
+      "type": "concept",
+      "name": "Data quality checks \u2014 the 5 tiers",
+      "module_id": "data-pipe",
+      "module_name": "Data pipelines & quality",
+      "cat": "data"
+    },
+    {
+      "id": "wh-1",
+      "type": "concept",
+      "name": "OLAP engines compared \u2014 Snowflake / BigQuery / ClickHouse / DuckDB",
+      "module_id": "data-warehouse",
+      "module_name": "OLAP engines + streaming \u2014 picking the stack",
+      "cat": "data"
+    },
+    {
+      "id": "wh-2",
+      "type": "concept",
+      "name": "Streaming basics \u2014 Kafka, exactly-once, windowing",
+      "module_id": "data-warehouse",
+      "module_name": "OLAP engines + streaming \u2014 picking the stack",
+      "cat": "data"
+    }
+  ],
+  "cards": [
+    {
+      "id": "fc-sql-1",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-1",
+      "q": "Window functions to know cold?",
+      "a": "ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD, SUM/AVG OVER (PARTITION BY\u2026). Most SQL screens hide one inside a wordy prompt."
+    },
+    {
+      "id": "fc-sql-2",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-3",
+      "q": "NOT IN vs NOT EXISTS \u2014 what's the trap?",
+      "a": "NOT IN returns NULL on any NULL in the subquery (then unknown \u2192 no match). NOT EXISTS is safer and equivalent semantically."
+    },
+    {
+      "id": "fc-sql-3",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-4",
+      "q": "Composite index (a, b) \u2014 which queries use it?",
+      "a": "Queries filtering on a, or (a + anything), or starting with a in ORDER BY. Queries filtering on b alone CANNOT use it \u2014 leftmost-prefix rule."
+    },
+    {
+      "id": "fc-sql-4",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-5",
+      "q": "SCD Type 2 schema?",
+      "a": "Each row has valid_from + valid_to (NULL = current) + is_current flag. Updates close the old row (valid_to = now) and insert a new one. Queries filter to the period."
+    },
+    {
+      "id": "fc-sql-5",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-6",
+      "q": "CDC vs polling?",
+      "a": "CDC reads the transaction log (Postgres WAL, MySQL binlog) \u2014 captures INSERT/UPDATE/DELETE. Polling SELECTs miss deletes. CDC scales, polls don't."
+    },
+    {
+      "id": "fc-sql-6",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-2",
+      "q": "5 tiers of data-quality checks?",
+      "a": "(1) Schema (types, non-null). (2) Volume (row count vs avg). (3) Freshness (latest event \u2264 N min). (4) Distribution (proportions, ranges). (5) Referential (FKs resolve)."
+    },
+    {
+      "id": "fc-sql-7",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-1",
+      "q": "Idempotent partitioned writes pattern?",
+      "a": "Each task run for date D first DELETEs WHERE date=D, then inserts. Safe to re-run. Never APPEND without a partition key \u2014 backfills will duplicate."
+    },
+    {
+      "id": "fc-sql-8",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-1",
+      "q": "Window function for \"running total\"?",
+      "a": "SUM(amount) OVER (PARTITION BY group ORDER BY date). GROUP BY collapses; you'd lose per-row detail."
+    },
+    {
+      "id": "fc-sql-9",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-2",
+      "q": "For \"top N per group\"?",
+      "a": "ROW_NUMBER() OVER (PARTITION BY group ORDER BY metric DESC) \u2192 filter rn \u2264 N in an outer query."
+    },
+    {
+      "id": "fc-sql-10",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-1",
+      "q": "LAG/LEAD functions do what?",
+      "a": "LAG(col, n): previous nth row's value. LEAD: next. Useful for diffs, deltas, conversion funnels."
+    },
+    {
+      "id": "fc-sql-11",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-4",
+      "q": "Composite index on (a, b, c) \u2014 usable for WHERE b=X?",
+      "a": "NO. Leftmost-prefix rule: must use leftmost column (a). WHERE a=X, (a, b), (a, b, c) all work; skipping a doesn't."
+    },
+    {
+      "id": "fc-sql-12",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-4",
+      "q": "Covering index \u2014 what is it?",
+      "a": "Index that contains all columns needed by query (key + INCLUDE columns). DB satisfies query from index alone; no table fetch."
+    },
+    {
+      "id": "fc-sql-13",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-4",
+      "q": "Postgres MVCC + VACUUM relationship?",
+      "a": "UPDATE/DELETE leave dead tuples (multi-version concurrency). VACUUM reclaims dead-tuple space + ANALYZE updates planner statistics."
+    },
+    {
+      "id": "fc-sql-14",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-5",
+      "q": "OLAP vs OLTP \u2014 fundamental difference?",
+      "a": "OLTP: row-oriented, single-record write/read, normalized (Postgres, MySQL). OLAP: columnar, batch aggregates, denormalized (Snowflake, ClickHouse)."
+    },
+    {
+      "id": "fc-sql-15",
+      "cat": "data",
+      "module": "data-warehouse",
+      "lesson": "wh-1",
+      "q": "Star schema vs snowflake?",
+      "a": "Star: fact + denormalized dim tables. Fewer joins, faster queries. Snowflake: normalized dims (more joins). Star = analytical default."
+    },
+    {
+      "id": "fc-sql-16",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-1",
+      "q": "MERGE / UPSERT pattern for idempotent loads?",
+      "a": "MERGE INTO target USING source ON keys WHEN MATCHED UPDATE WHEN NOT MATCHED INSERT. Postgres uses INSERT ... ON CONFLICT (key) DO UPDATE. Combined with a stable natural key, re-runs converge to the same state."
+    },
+    {
+      "id": "fc-sql-17",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-5",
+      "q": "Analytics on a 1TB Postgres table \u2014 what to do?",
+      "a": "Move the analytics workload to a columnar engine: Snowflake / ClickHouse / DuckDB / BigQuery. Row-store Postgres is poor at full-table aggregate scans. If you must stay in-Postgres, extensions like pg_duckdb or pg_mooncake bolt a columnar engine onto Postgres."
+    },
+    {
+      "id": "fc-sql-18",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-1",
+      "q": "Medallion architecture layers?",
+      "a": "Bronze (raw) \u2192 Silver (cleaned/normalized) \u2192 Gold (business-ready aggregates). Standard layer model for Delta Lake / Iceberg."
+    },
+    {
+      "id": "fc-sql-19",
+      "cat": "data",
+      "module": "data-warehouse",
+      "lesson": "wh-2",
+      "q": "Schema registry purpose?",
+      "a": "Avro/Protobuf schemas tracked centrally with backward/forward compat rules. Lets producers + consumers evolve independently."
+    },
+    {
+      "id": "fc-sql-20",
+      "cat": "data",
+      "module": "data-warehouse",
+      "lesson": "wh-1",
+      "q": "Iceberg vs Delta vs Hudi \u2014 what's the 2026 state?",
+      "a": "Three open table formats over Parquet adding ACID, time travel, and schema evolution to data lakes. Iceberg has won industry consolidation (Databricks acquired Tabular 2024; AWS S3 Tables, Snowflake, BigQuery all support it natively). Delta still leads inside Databricks/Spark; Hudi specializes in record-level upserts. Cross-format projects (Delta UniForm, Apache XTable) blur the lines."
+    },
+    {
+      "id": "fc-sql-21",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-1",
+      "q": "RANK vs DENSE_RANK vs ROW_NUMBER on a tie?",
+      "a": "Two rows tied at position 2: ROW_NUMBER gives 1,2,3,4 (arbitrary tiebreak). RANK gives 1,2,2,4 (skips 3). DENSE_RANK gives 1,2,2,3 (no gap)."
+    },
+    {
+      "id": "fc-sql-22",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-1",
+      "q": "NTILE(4) does what?",
+      "a": "Divides the ordered partition into 4 roughly equal buckets and labels each row 1..4. Standard tool for quartiles, deciles (NTILE(10)), or percentile bands."
+    },
+    {
+      "id": "fc-sql-23",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-1",
+      "q": "Window frame: ROWS vs RANGE?",
+      "a": "ROWS BETWEEN N PRECEDING AND CURRENT ROW counts physical rows. RANGE counts logical values of the ORDER BY column (ties grouped). Default is RANGE UNBOUNDED PRECEDING TO CURRENT ROW -- subtle bug source on duplicate timestamps."
+    },
+    {
+      "id": "fc-sql-24",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-2",
+      "q": "Deduplicate rows keeping the latest version?",
+      "a": "ROW_NUMBER() OVER (PARTITION BY natural_key ORDER BY updated_at DESC) AS rn, then WHERE rn = 1 in an outer query/CTE. Works for CDC streams and replayed events."
+    },
+    {
+      "id": "fc-sql-25",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-3",
+      "q": "Antijoin: rows in A with no match in B?",
+      "a": "LEFT JOIN B ON ... WHERE B.id IS NULL, or NOT EXISTS (SELECT 1 FROM B WHERE ...). NOT EXISTS is NULL-safe; NOT IN breaks on any NULL in B's column."
+    },
+    {
+      "id": "fc-sql-26",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-3",
+      "q": "Why does a LEFT JOIN inflate row counts?",
+      "a": "The right table has multiple matching rows per left key, so each left row fans out. Fix: pre-aggregate the right side in a CTE, or join on a unique key, or use DISTINCT ON / window-then-filter."
+    },
+    {
+      "id": "fc-sql-27",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-3",
+      "q": "CTE vs subquery vs temp table?",
+      "a": "Subquery / CTE = inline, planner usually inlines them (Postgres 12+ inlines non-recursive CTEs). Temp table = materialized, stats collected, reused across queries. Use temp tables when the intermediate is large and reused."
+    },
+    {
+      "id": "fc-sql-28",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-4",
+      "q": "B-tree vs hash vs GIN vs BRIN -- when to pick each?",
+      "a": "B-tree: equality + range, default. Hash: equality only, rarely better than B-tree. GIN: multi-value columns (arrays, jsonb, full-text). BRIN: huge tables with physical-order correlation (time-series append-only), tiny footprint."
+    },
+    {
+      "id": "fc-sql-29",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-4",
+      "q": "Index selectivity -- why does it matter?",
+      "a": "Selectivity = distinct values / rows. Low-selectivity columns (e.g. boolean is_active) make indexes useless because the planner correctly chooses a seq scan. Index high-cardinality columns or use partial/covering indexes."
+    },
+    {
+      "id": "fc-sql-30",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-4",
+      "q": "EXPLAIN vs EXPLAIN ANALYZE?",
+      "a": "EXPLAIN shows the planner's estimated plan + costs without executing. EXPLAIN ANALYZE actually runs the query and prints real row counts and timings -- the only way to spot estimate-vs-actual skew that drives bad plans."
+    },
+    {
+      "id": "fc-sql-31",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-3",
+      "q": "N+1 query problem?",
+      "a": "Code fetches a list of N parents, then issues one child query per parent (N+1 total round trips). Fix: a single JOIN, an IN (...) batch fetch, or ORM eager loading (e.g. SQLAlchemy selectinload)."
+    },
+    {
+      "id": "fc-sql-32",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-1",
+      "q": "GROUP BY vs HAVING vs WHERE?",
+      "a": "WHERE filters rows before grouping. GROUP BY collapses rows by key. HAVING filters groups after aggregation. You cannot reference an aggregate in WHERE, only HAVING."
+    },
+    {
+      "id": "fc-sql-33",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-1",
+      "q": "ROLLUP vs CUBE vs GROUPING SETS?",
+      "a": "ROLLUP (a, b, c): hierarchical subtotals + grand total. CUBE: every subset (2^n combinations). GROUPING SETS: explicit list of grouping combos. All emit one result set in a single pass instead of UNION ALL."
+    },
+    {
+      "id": "fc-sql-34",
+      "cat": "data",
+      "module": "data-sql",
+      "lesson": "sq-5",
+      "q": "Columnar storage -- why fast for analytics?",
+      "a": "Each column stored contiguously, so SELECT SUM(amount) reads only that column's pages. Adjacent values compress well (RLE, dictionary). Row stores must read every column of every row -- huge IO waste for wide tables."
+    },
+    {
+      "id": "fc-sql-35",
+      "cat": "data",
+      "module": "data-warehouse",
+      "lesson": "wh-1",
+      "q": "Partitioning vs sharding?",
+      "a": "Partitioning: one DB splits a table into segments by key (date, hash) for prune-on-scan; same node. Sharding: data split across multiple nodes/databases for horizontal scale. Partition first, shard only when one node can't hold it."
+    },
+    {
+      "id": "fc-sql-36",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-6",
+      "q": "Transactional outbox pattern?",
+      "a": "Inside the same DB transaction, write the business row AND an outbox row. A separate process tails the outbox (or via CDC) and publishes to Kafka. Guarantees the event ships iff the transaction commits -- no dual-write race."
+    },
+    {
+      "id": "fc-sql-37",
+      "cat": "data",
+      "module": "data-warehouse",
+      "lesson": "wh-2",
+      "q": "Lambda vs Kappa architecture?",
+      "a": "Lambda: parallel batch + speed (streaming) layers, merged at query time -- duplicates logic. Kappa: a single streaming pipeline; reprocess history by replaying the log. Modern stacks (Flink, Materialize) favor Kappa."
+    },
+    {
+      "id": "fc-sql-38",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-1",
+      "q": "dbt model layering convention?",
+      "a": "staging (1:1 cleanup of source tables) -> intermediate (joins, business logic) -> marts (fact + dim tables consumed by BI). Tests and docs live alongside models; refs build the DAG."
+    },
+    {
+      "id": "fc-sql-39",
+      "cat": "data",
+      "module": "data-pipe",
+      "lesson": "pp-5",
+      "q": "SCD Type 1 vs 2 vs 4?",
+      "a": "Type 1: overwrite -- no history. Type 2: new row per change with valid_from/valid_to -- full history (default for analytics). Type 4: keep current row in main table + a separate history table for changes."
+    },
+    {
+      "id": "fc-sql-40",
+      "cat": "data",
+      "module": "data-warehouse",
+      "lesson": "wh-1",
+      "q": "Snowflake vs BigQuery vs Redshift -- 2026 tradeoff?",
+      "a": "Snowflake: separated storage/compute, per-warehouse scaling, multi-cloud, strong governance. BigQuery: serverless, slot-based pricing, deepest GCP + ML integration. Redshift: AWS-native, RA3 separates storage, cheapest at steady high utilization but more tuning."
+    }
+  ]
+}

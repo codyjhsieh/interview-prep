@@ -1,0 +1,155 @@
+{
+  "cat": "meta",
+  "rewrites": [
+    {
+      "id": "fc-meta-1",
+      "q": "What is the single highest-leverage interview-prep activity per hour invested?",
+      "a": "**Record yourself in mocks and watch back at 1.5x speed.**\n\nPainful in week 1, transformative within a week. Catches what self-reflection misses:\n\n- **Speech tics** (filler words, trailing 'right?', vocal fry)\n- **Length-of-answer issues** (rambling past the point)\n- **Body language** (eye contact, hand jitter, slouching)\n- **Pacing** (where you race, where you stall)"
+    },
+    {
+      "id": "fc-meta-2",
+      "q": "After a rejection, when (and how) should you ask the recruiter for interview feedback?",
+      "a": "**Always, exactly once, professionally.** Most recruiters decline; the few who reply give priceless intel.\n\n**Timing:** within 24h of the rejection email, same thread.\n\n**Script:**\n- **You:** \"Thanks for letting me know, I appreciate the update. If you have any feedback from the team on the interview, I would genuinely value even 1-2 sentences to help me improve for next time.\"\n\nDo not push past one ask. Do not argue the decision."
+    },
+    {
+      "id": "fc-meta-3",
+      "q": "On a first recruiter call, how do you respond when asked 'What comp are you looking for?'",
+      "a": "**Deflect to fit first, then anchor with a market band, never a single number.**\n\n- **Recruiter:** \"What are you looking for comp-wise?\"\n- **You:** \"I want to focus on whether the role is a strong fit before talking numbers. That said, market for FDE roles at companies your size is roughly $X to $Y total comp. Happy to get more specific once we are aligned.\"\n\nThen **stop talking**. Silence after your band is the strongest tool you have."
+    },
+    {
+      "id": "fc-meta-4",
+      "q": "What is the resume-bullet formula for FDE / forward-deployed engineering roles?",
+      "a": "**[Action verb] [system you owned] [specific technical mechanism] [quantified customer or business outcome].**\n\nRecruiters skim each bullet for 6-20 seconds, so the **verb** and the **number** carry the signal; everything else is supporting context.\n\n- **Good:** \"Shipped Postgres -> ClickHouse pipeline cutting customer p95 from 4s to 380ms\"\n- **Bad:** \"Was responsible for working on database performance improvements\""
+    },
+    {
+      "id": "fc-meta-5",
+      "q": "Which prep activity has the lowest return-on-time during an active job search?",
+      "a": "**Re-reading concepts you already know.**\n\nIt feels productive (highlighting, nodding) but builds zero new retrieval pathways. Higher-leverage per hour:\n\n- **Active recall** (closed-book recitation, flashcards)\n- **Mock interviews under time pressure**\n- **Drilling your single weakest round-type**\n\nIf you can already teach the topic aloud, you are past the point of diminishing returns."
+    },
+    {
+      "id": "fc-meta-6",
+      "q": "What is the kill-criterion for deciding you have studied a topic enough and should move on?",
+      "a": "**If you can teach it aloud and answer 3 follow-ups inside 5 minutes, move on.**\n\n- Past that point, deeper study has sharply diminishing returns\n- The same hour spent on a **weaker topic** clears more loop-variance\n- Variance in your interview outcome is set by your **worst round**, not your best\n\nRe-test the topic in 1 week via flashcard, not by re-reading."
+    },
+    {
+      "id": "fc-meta-7",
+      "q": "How much does writing an implementation intention ('when X, then Y') actually improve prep follow-through?",
+      "a": "**Roughly 2x follow-through versus goal-setting alone** (Gollwitzer meta-analyses across 90+ studies).\n\nMechanism: 'when-then' plans convert intentions into **automatic environmental triggers** that fire without willpower on low-motivation days.\n\n- **Weak:** \"I will study more this week.\"\n- **Strong:** \"When I finish my morning coffee, then I open LeetCode and do one medium.\"\n\nBind the trigger to an existing daily anchor (coffee, commute, lunch)."
+    },
+    {
+      "id": "fc-meta-8",
+      "q": "How many concurrent interview processes should you keep active during a serious job search?",
+      "a": "**3-5 active processes at any given time.**\n\nWhy this band:\n\n- **Below 3:** any single rejection feels like a verdict; no competing-offer leverage\n- **3-5:** rejections become data; phone screens run in parallel; timeline compresses\n- **Above 5:** prep quality collapses, you confuse company details, calendar fragments\n\nTreat the pipeline as a portfolio, not a sequence."
+    },
+    {
+      "id": "fc-meta-9",
+      "q": "When comparing two offers, what is the single strongest predictor of your 2-year outcome in the role?",
+      "a": "**Manager quality.** Weight it heavily, often above $40-60k of comp delta.\n\nWhy it dominates:\n\n- **Growth:** great managers create scope, advocate for promo, unblock politically\n- **Learning rate:** weekly 1:1 quality compounds across 100+ weeks\n- **Tenure:** people quit managers, not companies; bad manager = 12-month exit\n- **Reference value:** the next role uses this manager as your top reference\n\nDo backchannel reference calls on the manager before signing."
+    },
+    {
+      "id": "fc-meta-10",
+      "q": "What is the one-line salary deflection when a recruiter pushes you for a specific number on the first call?",
+      "a": "**Anchor with a market band, then go silent.**\n\n- **Recruiter:** \"We really need a number to move forward, what are you targeting?\"\n- **You:** \"I want to focus on whether the role is a fit first. Market for FDE at your size is roughly $X to $Y total comp. Happy to get specific once we are aligned.\"\n\nThen **stop talking** and let them respond. Whoever speaks next loses the anchor."
+    },
+    {
+      "id": "fc-meta-11",
+      "q": "Which two tokens in a resume bullet do recruiters actually read during a 6-20 second skim?",
+      "a": "**The leading verb and the trailing number.**\n\nEverything in the middle is filler the eye skips during initial triage.\n\n- **Front-load the verb:** Shipped, Cut, Rebuilt, Owned (not 'Was responsible for')\n- **Back-load the metric:** end with the number that matters (latency, revenue, users)\n- **Example:** `Shipped X cutting p95 latency 40%` beats `Was responsible for working on latency improvements`\n\nIf a bullet has no number, it has no signal."
+    },
+    {
+      "id": "fc-meta-12",
+      "q": "What is Bezos's 70% rule and how does it apply to accepting interview offers?",
+      "a": "**When you have ~70% of the info you need, decide. Waiting for 90% costs more than acting on 70%.**\n\n- **Reversible decisions** (accepting an offer, picking a manager) should be made at 70%; you can still renege or leave in 6 months\n- **Irreversible decisions** (one-way doors) deserve closer to 90%\n- Holding for full info burns **optionality** (other offers expire) and **momentum** (the team moves on)\n\nMost engineers over-deliberate reversible calls and under-deliberate irreversible ones."
+    },
+    {
+      "id": "fc-meta-13",
+      "q": "When in your career should you negotiate equity refresh grants?",
+      "a": "**At offer time AND at every annual performance review.**\n\nMost engineers ask once at hire and never again, leaving real money on the table.\n\n- **At offer time:** get refresh-grant language explicitly in writing, not as a verbal 'we usually refresh top performers'\n- **At each review cycle:** ask directly, anchored to your impact and external market\n- **After a promo:** refresh is almost always negotiable as part of the promo package\n\nRefresh grants are negotiable, not automatic."
+    },
+    {
+      "id": "fc-meta-14",
+      "q": "What is a complete atomic-habits stack for daily interview prep that survives motivation collapse?",
+      "a": "**Four-layer stack, deployed together:**\n\n- **Implementation intention:** \"When morning coffee finishes, then 25 min of LeetCode.\"\n- **2-minute rule:** make start-cost under 30 seconds (laptop open, tab pinned night before)\n- **Habit stacking:** anchor prep to an existing daily ritual (coffee, commute, lunch)\n- **Environment design:** phone in another room, single-purpose browser profile, distractions off by default\n\nMotivation decays; infrastructure compounds."
+    },
+    {
+      "id": "fc-meta-15",
+      "q": "What is the discipline for processing an interview rejection without losing a week of prep momentum?",
+      "a": "**One scheduled 30-minute 'feel bad' block, then resume normal prep the next day.**\n\n- Give yourself the block, do not suppress the feeling; suppressed it leaks into prep for days\n- **Do not check email obsessively** the day after; fix a single check time\n- **Maintain 3-5 concurrent processes** so any single rejection is data, not a verdict\n- **Re-route energy** into the next-stage live pipelines, not into rumination\n\nA rejection is a low-resolution signal from one team on one day."
+    },
+    {
+      "id": "fc-meta-16",
+      "q": "What is the rough industry funnel from cold application to offer at the FDE / senior-IC level?",
+      "a": "**Plan volume backward from your target offer count.**\n\n- **100 cold applications** -> 10-15 recruiter screens\n- **10-15 recruiter screens** -> 4-6 onsites\n- **4-6 onsites** -> 1-2 offers\n\nReferrals roughly **5x the top-of-funnel conversion** (so 100 referred apps -> 5-7 offers).\n\nIf you want 2 offers in hand for leverage, you need ~200 cold apps OR ~40 referred apps in the pipeline. Plan accordingly."
+    },
+    {
+      "id": "fc-meta-17",
+      "q": "What is the right daily application volume during a full-time job search?",
+      "a": "**10-20 quality applications per day, front-loaded into Monday through Wednesday.**\n\n- **Below 5/day:** the pipeline starves; you cannot afford to be picky on offers\n- **10-20/day:** pipeline stays full, you can prioritize referrals + tailoring\n- **Above 30/day:** quality collapses, generic cover letters, you blacklist yourself with recruiters who recognize spam\n\n**Why Mon-Wed:** recruiters review queues early in the week; Friday apps sit until Monday."
+    },
+    {
+      "id": "fc-meta-18",
+      "q": "How much does a warm referral beat a cold application in recruiter-response rate?",
+      "a": "**Referrals see ~5-10x the response rate of cold apps and skip ATS keyword filters entirely.**\n\n- Cold app: lands in ATS, screened by keywords, often never seen by a human\n- Referral: hits recruiter inbox flagged with internal employee name, prioritized in queue\n\n**The rule:** spend 10 minutes finding a warm intro on LinkedIn before submitting cold. Even a 2nd-degree connection asking for a referral beats a cold submission.\n\nHighest ROI-per-minute activity in the entire search."
+    },
+    {
+      "id": "fc-meta-19",
+      "q": "In what order should you schedule your interview loops if you have a clear dream company?",
+      "a": "**Schedule dream companies LAST, never first.**\n\nReasoning:\n\n- **First-loop nerves** cost real performance; you need 2-3 lower-stakes loops as live reps\n- A **competing offer in hand** materially shifts how you negotiate at the dream company\n- Early loops surface weak round-types you can fix before the company you most want sees you\n- Recruiter timelines are usually flexible by 2-3 weeks if you ask\n\nApply to dream companies early; interview with them late."
+    },
+    {
+      "id": "fc-meta-20",
+      "q": "What is the minimum mock-interview cadence during active prep, and how should mocks be reviewed?",
+      "a": "**3 mocks per week minimum, with at least one recorded and reviewed at 1.5x speed.**\n\n- **Below 2/week:** live-performance skills decay; you regress between real loops\n- **3-5/week:** sweet spot, enough reps to fix issues mocks surface\n- **Above 5/week:** no time left to actually fix the issues you found\n\n**Review protocol:** watch the recording, write down 3 fixable issues, drill those specifically in the next mock."
+    },
+    {
+      "id": "fc-meta-21",
+      "q": "How should you allocate prep time across your strong and weak interview round-types?",
+      "a": "**Spend 60-70% of prep time on your single weakest round-type until it is no longer the bottleneck, then rotate.**\n\nWhy it works:\n\n- Loop outcome variance is set by your **worst round**, not your best\n- Even allocation across rounds (the default) leaves the bottleneck unmoved\n- Once the former weakest hits 'passable,' the new weakest takes the 60-70% slot\n\n**Anti-pattern:** spending more time on what you enjoy (usually your strongest) because it feels productive."
+    },
+    {
+      "id": "fc-meta-22",
+      "q": "What time-block structure for daily prep survives a real full-time job plus an active search?",
+      "a": "**Two fixed daily blocks, anchored to the same clock time, every weekday:**\n\n- **Morning, 45-60 min, pre-work:** high-cognitive work (algorithms, system design drills)\n- **Evening, 30 min, post-dinner:** low-cognitive work (applications, flashcards, follow-ups)\n\n**Discipline rules:**\n\n- Calendar-blocked with a real event, not a vague intention\n- Phone in another room during the morning block\n- Same time every day so the trigger becomes automatic"
+    },
+    {
+      "id": "fc-meta-23",
+      "q": "Why does interview prep collapse around week 4 for so many candidates, and how do you survive it?",
+      "a": "**Motivation decays predictably while novelty wears off and no offers have landed yet.** The dopamine of a new plan is gone; the dopamine of an offer has not arrived.\n\nCounter with **infrastructure, not willpower:**\n\n- Fixed time, fixed place, small daily target (1 problem + 10 flashcards)\n- Track **streak length**, not total hours\n- Pre-commit Monday's plan on Sunday so Monday-you does not decide\n- Lower the daily floor on bad days; never break the streak"
+    },
+    {
+      "id": "fc-meta-24",
+      "q": "How do you use a competing offer as leverage during negotiation without bluffing or burning bridges?",
+      "a": "**Share the real competing offer's total-comp band and decision deadline. Never invent offers; recruiters talk and the industry is small.**\n\n- **You:** \"I want to be transparent. I have an offer from [Co] at roughly $X total with a Friday deadline. I would genuinely prefer to join you. Can you help me close the gap on base / equity / sign-on?\"\n- **You:** \"What would be possible on your end before that deadline?\"\n\n**Real leverage beats fake leverage 10/10 times.** Fake offers get discovered and end careers."
+    },
+    {
+      "id": "fc-meta-25",
+      "q": "What are the standard equity vesting terms, and what is actually negotiable at offer time?",
+      "a": "**Standard package:** 4-year vest, 1-year cliff, monthly vest thereafter.\n\n**Negotiable levers (most engineers never ask):**\n\n- **Cliff length:** push for 6-month or no cliff (especially if leaving vested equity behind)\n- **Sign-on bonus:** explicitly to bridge the cliff period\n- **Refresh-grant language:** in writing, not 'we usually refresh top performers'\n- **Acceleration on acquisition:** single-trigger or double-trigger clauses\n- **Early-exercise / 83(b) eligibility:** matters for tax outcome on private co equity"
+    },
+    {
+      "id": "fc-meta-26",
+      "q": "What are the things you should NEVER say or do during compensation negotiation?",
+      "a": "**Red flags that cost you money or leverage:**\n\n- **Never give the first number** (you anchor against yourself)\n- **Never disclose your current salary** unprompted (illegal to ask in many states; never volunteer)\n- **Never say \"I just need $X to live on\"** (frames negotiation around your costs, not your value)\n- **Never accept verbally on the call** (always: \"Let me think it over and come back tomorrow\")\n- **Never fill silence after they state a number** (silence is your strongest tool)\n- **Never threaten to walk** unless you actually will"
+    },
+    {
+      "id": "fc-meta-27",
+      "q": "For a portfolio site, is it better to ship one deep case study or five medium-quality projects?",
+      "a": "**One deep case study beats five surface-level repos.** Hiring managers spend 2-3 minutes on a portfolio maximum.\n\n**Must-haves for the deep case study:**\n\n- **Problem framing:** what was the constraint, who was the user, why did it matter\n- **Tradeoffs:** what alternatives you considered and why you rejected them\n- **Metrics:** before/after numbers (latency, accuracy, cost, adoption)\n- **Code:** readable repo with a real README, not a dump\n- **Failure honesty:** what did not work and what you would do differently"
+    },
+    {
+      "id": "fc-meta-28",
+      "q": "For FDE / senior-IC roles, does LinkedIn or your personal site matter more for getting recruiter attention?",
+      "a": "**Both, but they do different jobs.**\n\n- **LinkedIn:** drives **top-of-funnel discovery** via recruiter search + 'open to work' beacon. 10x more inbound than a personal site for non-FAANG roles.\n- **Personal site:** **converts** after the recruiter clicks through; depth lives here\n\n**LinkedIn optimization priorities:**\n\n- **Headline:** role keywords + specialization (not just current title)\n- **First 2 lines of About:** these are what shows in search previews\n- **Open-to-work** flag set to recruiters-only if currently employed"
+    },
+    {
+      "id": "fc-meta-29",
+      "q": "How do you handle a recruiter going silent after what felt like a strong onsite?",
+      "a": "**Two follow-ups maximum, then move on. Two unanswered pings means the answer is no.**\n\n**Cadence:**\n\n- **Day 5-7 business:** one short, neutral follow-up. \"Checking in on next steps, still very interested in the team.\"\n- **Day 12-14 business:** one more, equally short. Reference one specific thing from the loop.\n- **Day 14+:** silence is the answer. Do not chain a third ping.\n\n**Re-route the energy into live pipelines.** Ghosting is information about them, not about you."
+    },
+    {
+      "id": "fc-meta-30",
+      "q": "What is the right format and timing for a post-interview thank-you email?",
+      "a": "**Within 24 hours, one email per interviewer, short and specific.**\n\n**Required ingredients in each note:**\n\n- **One concrete thing discussed** (not generic 'enjoyed the conversation') to demonstrate recall\n- **One new thought you had after the call** (a follow-up idea on the design, a relevant link, a corrected detail)\n- **Short:** one paragraph, no padding\n- **Sent within 24h** while you are still fresh in their mind\n\nThank-yous are **signal, not formality**: they show recall, taste, and async-writing chops."
+    }
+  ]
+}

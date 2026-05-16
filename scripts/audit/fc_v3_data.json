@@ -1,0 +1,205 @@
+{
+  "cat": "data",
+  "rewrites": [
+    {
+      "id": "fc-sql-1",
+      "q": "Which SQL window functions show up most in interviews, and what does each do?",
+      "a": "- **`ROW_NUMBER()`** -- unique sequential number per partition, arbitrary tiebreak\n- **`RANK()`** -- ties share a rank, leaves gaps\n- **`DENSE_RANK()`** -- ties share a rank, no gaps\n- **`LAG(col, n)` / `LEAD(col, n)`** -- previous/next nth row in the partition\n- **`SUM() / AVG() OVER (PARTITION BY ... ORDER BY ...)`** -- running aggregates without collapsing rows\n\nMost SQL screens hide one of these inside a wordy prompt."
+    },
+    {
+      "id": "fc-sql-2",
+      "q": "What is the NULL trap with `NOT IN` vs `NOT EXISTS` in SQL subqueries?",
+      "a": "- **`NOT IN`** -- if the subquery returns any `NULL`, the comparison evaluates to unknown, so the whole predicate returns no rows\n- **`NOT EXISTS`** -- NULL-safe and semantically equivalent for antijoins\n\n**Rule:** default to `NOT EXISTS` for antijoin filters."
+    },
+    {
+      "id": "fc-sql-3",
+      "q": "Given a composite index on `(a, b)`, which queries can actually use it?",
+      "a": "**Leftmost-prefix rule:** the index is usable only when the query references the leftmost column.\n\n- Uses index: `WHERE a = X`, `WHERE a = X AND b = Y`, `ORDER BY a`\n- Uses index: `WHERE a = X AND <anything else>`\n- **Cannot** use index: `WHERE b = Y` alone -- skips the leading column"
+    },
+    {
+      "id": "fc-sql-4",
+      "q": "What does a Slowly Changing Dimension (SCD) Type 2 schema look like in a warehouse?",
+      "a": "Each row carries history columns:\n- **`valid_from`** -- when this version became active\n- **`valid_to`** -- when superseded (`NULL` = current)\n- **`is_current`** -- boolean flag for cheap filtering\n\n**Update flow:** close the old row (`valid_to = now()`), insert a new one. Queries filter to the period of interest.\n\n**Example:** `WHERE valid_from <= '2026-01-01' AND (valid_to IS NULL OR valid_to > '2026-01-01')`"
+    },
+    {
+      "id": "fc-sql-5",
+      "q": "What is the difference between Change Data Capture (CDC) and polling for warehouse sync?",
+      "a": "**CDC**\n- Reads the DB transaction log (Postgres `WAL`, MySQL `binlog`)\n- Captures `INSERT`, `UPDATE`, and `DELETE` events\n- Low overhead, scales to high write volume\n\n**Polling**\n- Periodic `SELECT ... WHERE updated_at > last_run`\n- Misses deletes entirely\n- Burns DB CPU at scale\n\n**Default:** CDC for anything beyond toy volume."
+    },
+    {
+      "id": "fc-sql-6",
+      "q": "What are the 5 tiers of data-quality checks a pipeline should run?",
+      "a": "1. **Schema** -- column types present, non-null constraints honored\n2. **Volume** -- row count within expected band vs historical average\n3. **Freshness** -- latest event timestamp within `N` minutes\n4. **Distribution** -- category proportions and numeric ranges in bounds\n5. **Referential** -- foreign keys resolve to a parent row\n\n**Tools:** `dbt tests`, Great Expectations, Soda."
+    },
+    {
+      "id": "fc-sql-7",
+      "q": "What is the idempotent partitioned-write pattern for batch pipelines?",
+      "a": "For each scheduled run of date `D`:\n1. `DELETE FROM target WHERE date = D`\n2. `INSERT INTO target SELECT ... WHERE date = D`\n\n**Why it works:** re-running the same task converges to the same state -- safe for backfills and retries.\n\n**Anti-pattern:** plain `APPEND` without a partition key -- every backfill duplicates rows."
+    },
+    {
+      "id": "fc-sql-8",
+      "q": "Which SQL pattern computes a running total without collapsing per-row detail?",
+      "a": "Use a window aggregate, not `GROUP BY`.\n\n**Example:** `SELECT date, amount, SUM(amount) OVER (PARTITION BY group_id ORDER BY date) AS running_total FROM t`\n\n- **`GROUP BY`** -- collapses rows, loses per-row context\n- **`SUM() OVER (...)`** -- keeps every row, attaches the cumulative value"
+    },
+    {
+      "id": "fc-sql-9",
+      "q": "What is the canonical SQL pattern for selecting the top N rows per group?",
+      "a": "1. Assign a rank inside each group with `ROW_NUMBER()`\n2. Filter to `rn <= N` in an outer query or CTE\n\n**Example:** `SELECT * FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY group_id ORDER BY metric DESC) AS rn FROM t) x WHERE rn <= 3`\n\nUse `DENSE_RANK()` instead if ties should all count."
+    },
+    {
+      "id": "fc-sql-10",
+      "q": "What do the SQL `LAG()` and `LEAD()` window functions do, and when do you reach for them?",
+      "a": "- **`LAG(col, n)`** -- value from the previous nth row in the partition\n- **`LEAD(col, n)`** -- value from the next nth row\n\n**Common uses:**\n- Period-over-period diffs (`value - LAG(value)`)\n- Session deltas between events\n- Funnel conversion (next step timestamp)\n\n**Example:** `LAG(amount, 1) OVER (PARTITION BY user_id ORDER BY event_ts)`"
+    },
+    {
+      "id": "fc-sql-11",
+      "q": "Can a composite index on `(a, b, c)` serve a query with `WHERE b = X` alone?",
+      "a": "**No.** The leftmost-prefix rule requires the query to use the leading column.\n\n- Usable: `WHERE a = X`, `WHERE a = X AND b = Y`, `WHERE a = X AND b = Y AND c = Z`\n- Not usable: `WHERE b = X`, `WHERE c = X`, `WHERE b = X AND c = Y`\n\n**Fix:** add a separate index on `(b)` if that filter pattern is hot."
+    },
+    {
+      "id": "fc-sql-12",
+      "q": "What is a covering index and why is it faster than a normal index?",
+      "a": "A **covering index** contains every column the query needs -- key columns plus `INCLUDE` columns.\n\n- Database satisfies the query from the index alone\n- No heap/table fetch for the row data\n- Reduces I/O significantly on wide rows\n\n**Example:** `CREATE INDEX idx ON orders (user_id) INCLUDE (status, total)`"
+    },
+    {
+      "id": "fc-sql-13",
+      "q": "What is the relationship between Postgres MVCC and `VACUUM`?",
+      "a": "**MVCC** keeps multiple row versions so readers never block writers.\n\n- `UPDATE` and `DELETE` leave **dead tuples** behind (the old version)\n- `VACUUM` reclaims the dead-tuple space for reuse\n- `ANALYZE` refreshes planner statistics used for query plans\n- `VACUUM FULL` rewrites the table to release disk back to the OS (locks)\n\n**Symptom of skipping it:** bloated tables, slow scans, stale plans."
+    },
+    {
+      "id": "fc-sql-14",
+      "q": "What is the fundamental difference between OLTP and OLAP databases?",
+      "a": "**OLTP** (transactional)\n- Row-oriented storage\n- Single-record reads and writes\n- Normalized schema\n- Examples: Postgres, MySQL\n\n**OLAP** (analytical)\n- Columnar storage\n- Batch aggregates over many rows\n- Denormalized (star schema)\n- Examples: Snowflake, BigQuery, ClickHouse"
+    },
+    {
+      "id": "fc-sql-15",
+      "q": "What is the difference between a star schema and a snowflake schema in a warehouse?",
+      "a": "**Star schema**\n- One fact table joined to denormalized dimension tables\n- Fewer joins, faster analytical queries\n- Default for BI workloads\n\n**Snowflake schema**\n- Dimensions normalized into sub-dimensions\n- More joins, smaller storage\n- Useful when dim hierarchies change often\n\n**Default:** star, unless you have a clear normalization reason."
+    },
+    {
+      "id": "fc-sql-16",
+      "q": "What is the `MERGE` / `UPSERT` pattern for idempotent loads?",
+      "a": "Use the engine's atomic merge construct keyed on a stable natural key.\n\n**ANSI / Snowflake / BigQuery:** `MERGE INTO target USING source ON keys WHEN MATCHED THEN UPDATE WHEN NOT MATCHED THEN INSERT`\n\n**Postgres:** `INSERT INTO target (...) VALUES (...) ON CONFLICT (key) DO UPDATE SET ...`\n\n**Why it works:** combined with a deterministic key, re-runs converge to the same state -- safe to replay."
+    },
+    {
+      "id": "fc-sql-17",
+      "q": "What should you do when analytics queries on a 1TB Postgres table slow to a crawl?",
+      "a": "Row-store Postgres is poor at full-table aggregate scans. Options:\n\n- Move the analytics workload to a columnar engine: **Snowflake**, **BigQuery**, **ClickHouse**, **DuckDB**\n- Replicate hot tables via CDC to the warehouse, query there\n- Stay in-Postgres with a columnar extension: **`pg_duckdb`** or **`pg_mooncake`**\n- Partition + `BRIN` index time-series tables for cheap pruning\n\n**Default move:** ship to a columnar warehouse."
+    },
+    {
+      "id": "fc-sql-18",
+      "q": "What are the layers of the medallion architecture used in lakehouses?",
+      "a": "Standard layering for Delta Lake / Iceberg pipelines:\n\n- **Bronze** -- raw ingest, schema-on-read, immutable\n- **Silver** -- cleaned, deduped, type-cast, joined to references\n- **Gold** -- business-ready aggregates and marts consumed by BI\n\n**Why:** each layer is reprocessable from the prior layer, isolating quality fixes from consumers."
+    },
+    {
+      "id": "fc-sql-19",
+      "q": "What is the purpose of a schema registry in a streaming system?",
+      "a": "A central service that stores Avro / Protobuf / JSON schemas with compatibility rules.\n\n- **Backward compat** -- new consumer can read old messages\n- **Forward compat** -- old consumer can read new messages\n- **Full compat** -- both\n\n**Why it matters:** producers and consumers can deploy independently without breaking each other. Confluent Schema Registry is the canonical example."
+    },
+    {
+      "id": "fc-sql-20",
+      "q": "What is the 2026 state of open table formats -- Iceberg vs Delta vs Hudi?",
+      "a": "Three open table formats over Parquet adding ACID, time travel, and schema evolution.\n\n- **Iceberg** -- industry consolidation winner. Databricks acquired Tabular (2024); AWS S3 Tables, Snowflake, BigQuery support it natively\n- **Delta** -- still leads inside Databricks / Spark; **Delta UniForm** publishes Iceberg metadata for interop\n- **Hudi** -- specializes in record-level upserts and streaming ingestion\n- **Apache XTable** -- translates metadata across all three\n\n**Default for greenfield:** Iceberg."
+    },
+    {
+      "id": "fc-sql-21",
+      "q": "How do `ROW_NUMBER()`, `RANK()`, and `DENSE_RANK()` differ on a tie?",
+      "a": "Two rows tied at position 2 produce different sequences:\n\n- **`ROW_NUMBER()`** -- `1, 2, 3, 4` -- arbitrary tiebreak, always unique\n- **`RANK()`** -- `1, 2, 2, 4` -- ties share the rank, skips the next number\n- **`DENSE_RANK()`** -- `1, 2, 2, 3` -- ties share the rank, no gap\n\n**Pick:** `ROW_NUMBER` for top-N (one winner per group), `DENSE_RANK` when ties should all qualify."
+    },
+    {
+      "id": "fc-sql-22",
+      "q": "What does the SQL `NTILE(4)` window function do?",
+      "a": "Divides an ordered partition into roughly equal buckets and labels each row.\n\n- **`NTILE(4)`** -- quartiles, label 1 to 4\n- **`NTILE(10)`** -- deciles\n- **`NTILE(100)`** -- percentile bands\n\n**Example:** `NTILE(4) OVER (ORDER BY revenue) AS quartile`\n\n**Use case:** customer segmentation, percentile rankings, A/B test bucketing."
+    },
+    {
+      "id": "fc-sql-23",
+      "q": "What is the difference between `ROWS` and `RANGE` in a SQL window frame?",
+      "a": "- **`ROWS BETWEEN N PRECEDING AND CURRENT ROW`** -- counts physical rows in the partition\n- **`RANGE BETWEEN N PRECEDING AND CURRENT ROW`** -- counts logical values of the `ORDER BY` column; ties are grouped\n\n**Gotcha:** the default frame when you omit it is `RANGE UNBOUNDED PRECEDING TO CURRENT ROW`. On duplicate timestamps this lumps tied rows together -- a subtle bug source.\n\n**Rule of thumb:** if you want exactly N rows, always say `ROWS` explicitly."
+    },
+    {
+      "id": "fc-sql-24",
+      "q": "What SQL pattern deduplicates rows while keeping the latest version per key?",
+      "a": "1. Assign a row number per natural key, ordered by recency\n2. Keep `rn = 1` in an outer query or CTE\n\n**Example:** `SELECT * FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY natural_key ORDER BY updated_at DESC) AS rn FROM events) x WHERE rn = 1`\n\n**Use case:** CDC stream landing tables, replayed Kafka events, late-arriving updates."
+    },
+    {
+      "id": "fc-sql-25",
+      "q": "How do you write an antijoin in SQL -- rows in `A` with no match in `B`?",
+      "a": "Two safe patterns:\n\n- **`LEFT JOIN` + `IS NULL`** -- `SELECT a.* FROM a LEFT JOIN b ON a.id = b.a_id WHERE b.a_id IS NULL`\n- **`NOT EXISTS`** -- `SELECT a.* FROM a WHERE NOT EXISTS (SELECT 1 FROM b WHERE b.a_id = a.id)`\n\n**Avoid `NOT IN`:** breaks the moment `B` contains any `NULL` -- predicate becomes unknown and returns zero rows.\n\n**Default:** `NOT EXISTS`."
+    },
+    {
+      "id": "fc-sql-26",
+      "q": "Why does a `LEFT JOIN` sometimes inflate the row count, and how do you fix it?",
+      "a": "The right table has multiple matching rows per left key, so each left row fans out into a Cartesian-style multiplication.\n\n**Fixes:**\n- Pre-aggregate the right side in a CTE before joining\n- Join on a column that is unique in the right table\n- `DISTINCT ON (key)` in Postgres to keep one match\n- Window-then-filter: `ROW_NUMBER()` + `WHERE rn = 1`\n\n**Diagnose:** check the count of the right table grouped by the join key."
+    },
+    {
+      "id": "fc-sql-27",
+      "q": "When should you use a CTE vs a subquery vs a temp table?",
+      "a": "- **Subquery / CTE** -- inline; the planner usually fuses them into the outer plan (Postgres 12+ inlines non-recursive CTEs)\n- **Temp table** -- materialized; statistics are collected; reused across multiple queries in the session\n- **Materialized CTE** -- force materialization via `WITH ... AS MATERIALIZED` when the same expensive intermediate is referenced multiple times\n\n**Pick temp table when:** the intermediate is large, expensive, and reused."
+    },
+    {
+      "id": "fc-sql-28",
+      "q": "When do you pick B-tree, hash, GIN, or BRIN indexes in Postgres?",
+      "a": "- **B-tree** -- equality and range queries; the default choice\n- **Hash** -- equality only; rarely beats B-tree, mostly legacy\n- **GIN** -- multi-value columns: arrays, `jsonb`, full-text search via `tsvector`\n- **BRIN** -- huge tables where rows are physically ordered (time-series, append-only logs); tiny on disk\n\n**Rule:** start with B-tree; reach for GIN/BRIN when the data shape demands it."
+    },
+    {
+      "id": "fc-sql-29",
+      "q": "What is index selectivity and why does it matter for query performance?",
+      "a": "**Selectivity** = distinct values / total rows.\n\n- **High selectivity** (e.g. `user_id`, `email`) -- index is effective, planner uses it\n- **Low selectivity** (e.g. `is_active` boolean, `country` with 5 values) -- index is mostly useless; planner correctly picks a sequential scan\n\n**Fix for low selectivity:** partial indexes (`WHERE is_active = true`) or covering indexes that include the hot columns."
+    },
+    {
+      "id": "fc-sql-30",
+      "q": "What is the difference between `EXPLAIN` and `EXPLAIN ANALYZE` in Postgres?",
+      "a": "- **`EXPLAIN`** -- shows the planner's estimated plan and cost without running the query\n- **`EXPLAIN ANALYZE`** -- actually executes the query and prints real row counts and timings per node\n- **`EXPLAIN (ANALYZE, BUFFERS)`** -- adds shared/local buffer hits and reads -- the I/O signal\n\n**Why it matters:** estimate-vs-actual skew is the usual root cause of bad plans. Only `ANALYZE` exposes it."
+    },
+    {
+      "id": "fc-sql-31",
+      "q": "What is the N+1 query problem and how do you fix it?",
+      "a": "**Bug:** code fetches a list of N parent rows, then issues one child query per parent -- `N + 1` round trips total.\n\n**Example:** loading 100 users, then 100 separate queries for each user's orders.\n\n**Fixes:**\n- A single `JOIN` returning parents and children\n- One batch `WHERE child.parent_id IN (...)` query\n- ORM eager loading: SQLAlchemy `selectinload`, Django `prefetch_related`, ActiveRecord `includes`"
+    },
+    {
+      "id": "fc-sql-32",
+      "q": "What is the difference between `WHERE`, `GROUP BY`, and `HAVING`?",
+      "a": "Execution order:\n\n1. **`WHERE`** -- filter individual rows before grouping\n2. **`GROUP BY`** -- collapse rows by key\n3. **`HAVING`** -- filter aggregated groups after grouping\n\n**Gotcha:** you cannot reference an aggregate (`SUM`, `COUNT`) in `WHERE` -- only in `HAVING`.\n\n**Example:** `SELECT city, COUNT(*) FROM users WHERE active = true GROUP BY city HAVING COUNT(*) > 10`"
+    },
+    {
+      "id": "fc-sql-33",
+      "q": "What is the difference between `ROLLUP`, `CUBE`, and `GROUPING SETS`?",
+      "a": "All emit multiple grouping levels in a single pass instead of `UNION ALL`.\n\n- **`ROLLUP (a, b, c)`** -- hierarchical subtotals: `(a,b,c)`, `(a,b)`, `(a)`, `()` -- ends at grand total\n- **`CUBE (a, b, c)`** -- every subset, `2^n` combinations\n- **`GROUPING SETS ((a,b),(a,c),())`** -- explicit list of grouping combos\n\n**Use case:** reporting dashboards that need subtotals + totals together."
+    },
+    {
+      "id": "fc-sql-34",
+      "q": "Why is columnar storage so much faster than row storage for analytics queries?",
+      "a": "- Each column is stored contiguously on disk\n- `SELECT SUM(amount) FROM big_table` reads only the `amount` column's pages -- not the whole row\n- Adjacent values compress well (RLE, dictionary, delta encoding)\n- Vectorized execution processes column chunks in CPU SIMD instructions\n\n**Row stores** must read every column of every row -- huge I/O waste on wide tables for analytic scans."
+    },
+    {
+      "id": "fc-sql-35",
+      "q": "What is the difference between partitioning and sharding a database?",
+      "a": "**Partitioning**\n- One database splits a table into segments by key (date, hash, range)\n- Same node, same instance\n- Enables prune-on-scan -- planner skips irrelevant partitions\n\n**Sharding**\n- Data split across multiple nodes / databases\n- Horizontal scale across machines\n- Requires routing logic and cross-shard query handling\n\n**Rule:** partition first; shard only when one node can't hold the data or handle the write rate."
+    },
+    {
+      "id": "fc-sql-36",
+      "q": "What is the transactional outbox pattern, and what problem does it solve?",
+      "a": "**Problem:** dual-write race -- updating the DB and publishing to Kafka in two steps risks one succeeding and the other failing.\n\n**Pattern:**\n1. In the same DB transaction, write the business row **and** an `outbox` row\n2. A separate relay process tails the outbox table (or via CDC on it)\n3. Relay publishes to Kafka and marks the outbox row sent\n\n**Guarantee:** the event ships if and only if the transaction committed -- no dual-write race."
+    },
+    {
+      "id": "fc-sql-37",
+      "q": "What is the difference between Lambda and Kappa architectures for real-time analytics?",
+      "a": "**Lambda**\n- Parallel batch layer (Spark/Hive) and speed/streaming layer (Flink/Kafka Streams)\n- Results merged at query time\n- Logic must be implemented twice -- maintenance burden\n\n**Kappa**\n- Single streaming pipeline\n- Reprocess history by replaying the log from offset 0\n- One codebase\n\n**Modern stacks** (Flink, Materialize, RisingWave) favor Kappa."
+    },
+    {
+      "id": "fc-sql-38",
+      "q": "What is the standard dbt model layering convention?",
+      "a": "1. **`staging`** -- one model per source table; cleanup, renames, type casts only (1:1)\n2. **`intermediate`** -- joins, business logic, reusable derived models\n3. **`marts`** -- fact and dim tables consumed by BI and downstream apps\n\n**Conventions:**\n- Tests and docs live alongside models in YAML\n- `ref()` between models builds the DAG\n- `sources` define external tables and their freshness SLAs"
+    },
+    {
+      "id": "fc-sql-39",
+      "q": "What is the difference between SCD Type 1, Type 2, and Type 4?",
+      "a": "- **Type 1** -- overwrite the row in place; no history retained. Use when only the current value matters\n- **Type 2** -- insert a new row per change with `valid_from` / `valid_to`; full history. **Default for analytics**\n- **Type 4** -- keep the current row in the main table and push prior versions to a separate history table\n\n**Pick Type 2** unless storage cost or query simplicity dominates -- most analytics needs history."
+    },
+    {
+      "id": "fc-sql-40",
+      "q": "What is the 2026 tradeoff between Snowflake, BigQuery, and Redshift?",
+      "a": "**Snowflake**\n- Separated storage and compute, per-warehouse scaling\n- Multi-cloud, strong governance and sharing\n\n**BigQuery**\n- Serverless, slot-based pricing\n- Deepest GCP and ML integration (`BigQuery ML`, Vertex)\n\n**Redshift**\n- AWS-native; `RA3` instances separate storage from compute\n- Cheapest at steady high utilization, but more tuning (sort/dist keys)\n\n**Default greenfield pick:** Snowflake or BigQuery depending on cloud."
+    }
+  ]
+}

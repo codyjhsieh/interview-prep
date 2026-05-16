@@ -1,0 +1,1471 @@
+{
+  "cat": "coding",
+  "lessons": [
+    {
+      "id": "g-1",
+      "type": "concept",
+      "name": "BFS \u2014 what it does and how to code it from memory",
+      "module_id": "cod-graphs",
+      "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+      "cat": "coding"
+    },
+    {
+      "id": "g-2",
+      "type": "concept",
+      "name": "Shortest path between two nodes in a social graph (10M nodes)",
+      "module_id": "cod-graphs",
+      "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+      "cat": "coding"
+    },
+    {
+      "id": "g-3",
+      "type": "concept",
+      "name": "Infection spread (multi-source BFS) \u2014 start every source on layer 0",
+      "module_id": "cod-graphs",
+      "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+      "cat": "coding"
+    },
+    {
+      "id": "g-4",
+      "type": "drill",
+      "name": "Drill: write BFS in Python in 4 min",
+      "module_id": "cod-graphs",
+      "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+      "cat": "coding"
+    },
+    {
+      "id": "g-5",
+      "type": "concept",
+      "name": "DFS \u2014 recursion, backtracking, and when to use it over BFS",
+      "module_id": "cod-graphs",
+      "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+      "cat": "coding"
+    },
+    {
+      "id": "g-6",
+      "type": "concept",
+      "name": "Union-Find (DSU) \u2014 connecting components fast",
+      "module_id": "cod-graphs",
+      "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+      "cat": "coding"
+    },
+    {
+      "id": "g-LC1",
+      "type": "concept",
+      "name": "Word Ladder II \u2014 why BFS-then-DFS, not pure BFS",
+      "module_id": "cod-graphs",
+      "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+      "cat": "coding"
+    },
+    {
+      "id": "g-LC2",
+      "type": "concept",
+      "name": "Shortest Path in Grid with K Obstacle Eliminations \u2014 state-space BFS",
+      "module_id": "cod-graphs",
+      "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+      "cat": "coding"
+    },
+    {
+      "id": "g-LC3",
+      "type": "concept",
+      "name": "Bus Routes \u2014 model as a graph of routes, not stops",
+      "module_id": "cod-graphs",
+      "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+      "cat": "coding"
+    },
+    {
+      "id": "g-LC4",
+      "type": "concept",
+      "name": "Open the Lock \u2014 implicit state graph + dead ends",
+      "module_id": "cod-graphs",
+      "module_name": "Graphs & BFS \u2014 most common FDE pattern",
+      "cat": "coding"
+    },
+    {
+      "id": "a-1",
+      "type": "concept",
+      "name": "Two pointers \u2014 when \"linear sweep with two indices\" is the trick",
+      "module_id": "cod-arrays",
+      "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+      "cat": "coding"
+    },
+    {
+      "id": "a-2",
+      "type": "concept",
+      "name": "Sliding window \u2014 variable vs fixed",
+      "module_id": "cod-arrays",
+      "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+      "cat": "coding"
+    },
+    {
+      "id": "a-3",
+      "type": "concept",
+      "name": "Binary search \u2014 beyond \"find element in sorted array\"",
+      "module_id": "cod-arrays",
+      "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+      "cat": "coding"
+    },
+    {
+      "id": "a-4",
+      "type": "concept",
+      "name": "Prefix sums + difference arrays",
+      "module_id": "cod-arrays",
+      "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+      "cat": "coding"
+    },
+    {
+      "id": "a-LC1",
+      "type": "concept",
+      "name": "Trapping Rain Water \u2014 two-pointer \"ruled-out\" argument",
+      "module_id": "cod-arrays",
+      "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+      "cat": "coding"
+    },
+    {
+      "id": "a-LC2",
+      "type": "concept",
+      "name": "Sliding Window Maximum \u2014 monotonic deque trick",
+      "module_id": "cod-arrays",
+      "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+      "cat": "coding"
+    },
+    {
+      "id": "a-LC3",
+      "type": "concept",
+      "name": "Median of Two Sorted Arrays \u2014 partition by binary search",
+      "module_id": "cod-arrays",
+      "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+      "cat": "coding"
+    },
+    {
+      "id": "a-LC4",
+      "type": "concept",
+      "name": "Subarrays with K Different Integers \u2014 atMost(K) \u2212 atMost(K\u22121)",
+      "module_id": "cod-arrays",
+      "module_name": "Array techniques \u2014 two pointers, sliding window, binary search",
+      "cat": "coding"
+    },
+    {
+      "id": "ag-cod-1",
+      "type": "concept",
+      "name": "Dijkstra \u2014 shortest path with weighted edges",
+      "module_id": "cod-advgraphs",
+      "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+      "cat": "coding"
+    },
+    {
+      "id": "ag-cod-2",
+      "type": "concept",
+      "name": "Topological sort \u2014 ordering tasks with dependencies",
+      "module_id": "cod-advgraphs",
+      "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+      "cat": "coding"
+    },
+    {
+      "id": "ag-cod-3",
+      "type": "concept",
+      "name": "Monotonic stack \u2014 \"next greater / smaller element\"",
+      "module_id": "cod-advgraphs",
+      "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+      "cat": "coding"
+    },
+    {
+      "id": "ag-cod-4",
+      "type": "concept",
+      "name": "Bit manipulation \u2014 XOR tricks, subset enumeration, bitmasks",
+      "module_id": "cod-advgraphs",
+      "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+      "cat": "coding"
+    },
+    {
+      "id": "ag-LC1",
+      "type": "concept",
+      "name": "Cheapest Flights Within K Stops \u2014 Bellman-Ford vs modified Dijkstra",
+      "module_id": "cod-advgraphs",
+      "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+      "cat": "coding"
+    },
+    {
+      "id": "ag-LC2",
+      "type": "concept",
+      "name": "Alien Dictionary \u2014 topological sort from inferred edges",
+      "module_id": "cod-advgraphs",
+      "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+      "cat": "coding"
+    },
+    {
+      "id": "ag-LC3",
+      "type": "concept",
+      "name": "Critical Connections \u2014 Tarjan's bridge-finding algorithm",
+      "module_id": "cod-advgraphs",
+      "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+      "cat": "coding"
+    },
+    {
+      "id": "ag-LC4",
+      "type": "concept",
+      "name": "Largest Rectangle in Histogram \u2014 monotonic stack invariant",
+      "module_id": "cod-advgraphs",
+      "module_name": "Advanced graphs \u2014 Dijkstra, topo sort, monotonic stack",
+      "cat": "coding"
+    },
+    {
+      "id": "h-1",
+      "type": "question",
+      "name": "Q: Two-sum / pair-sum to target",
+      "module_id": "cod-hashing",
+      "module_name": "Hash maps & strings",
+      "cat": "coding"
+    },
+    {
+      "id": "h-2",
+      "type": "question",
+      "name": "Q: First non-repeating character",
+      "module_id": "cod-hashing",
+      "module_name": "Hash maps & strings",
+      "cat": "coding"
+    },
+    {
+      "id": "h-3",
+      "type": "question",
+      "name": "Q: LRU cache, O(1) get/put",
+      "module_id": "cod-hashing",
+      "module_name": "Hash maps & strings",
+      "cat": "coding"
+    },
+    {
+      "id": "h-4",
+      "type": "question",
+      "name": "Q: Longest substring without repeating characters \u2014 hash + variable-size window",
+      "module_id": "cod-hashing",
+      "module_name": "Hash maps & strings",
+      "cat": "coding"
+    },
+    {
+      "id": "h-LC1",
+      "type": "concept",
+      "name": "Minimum Window Substring \u2014 sliding window with counter",
+      "module_id": "cod-hashing",
+      "module_name": "Hash maps & strings",
+      "cat": "coding"
+    },
+    {
+      "id": "h-LC2",
+      "type": "concept",
+      "name": "Substring with Concatenation of All Words \u2014 windowed hash check",
+      "module_id": "cod-hashing",
+      "module_name": "Hash maps & strings",
+      "cat": "coding"
+    },
+    {
+      "id": "h-LC3",
+      "type": "concept",
+      "name": "First Missing Positive \u2014 index-as-hash in O(N) time, O(1) space",
+      "module_id": "cod-hashing",
+      "module_name": "Hash maps & strings",
+      "cat": "coding"
+    },
+    {
+      "id": "h-LC4",
+      "type": "concept",
+      "name": "Longest Substring with At Most K Distinct Characters",
+      "module_id": "cod-hashing",
+      "module_name": "Hash maps & strings",
+      "cat": "coding"
+    },
+    {
+      "id": "p-1",
+      "type": "question",
+      "name": "Q: Parse & clean a 1GB JSONL file",
+      "module_id": "cod-prod",
+      "module_name": "Production-flavored coding",
+      "cat": "coding"
+    },
+    {
+      "id": "p-2",
+      "type": "question",
+      "name": "Q: Retry-with-backoff decorator",
+      "module_id": "cod-prod",
+      "module_name": "Production-flavored coding",
+      "cat": "coding"
+    },
+    {
+      "id": "p-3",
+      "type": "question",
+      "name": "Q: Flatten a nested list of arbitrary depth",
+      "module_id": "cod-prod",
+      "module_name": "Production-flavored coding",
+      "cat": "coding"
+    },
+    {
+      "id": "p-4",
+      "type": "question",
+      "name": "Q: Thread-safe singleton",
+      "module_id": "cod-prod",
+      "module_name": "Production-flavored coding",
+      "cat": "coding"
+    },
+    {
+      "id": "p-LC1",
+      "type": "concept",
+      "name": "LRU Cache \u2014 hash map + doubly linked list",
+      "module_id": "cod-prod",
+      "module_name": "Production-flavored coding",
+      "cat": "coding"
+    },
+    {
+      "id": "p-LC2",
+      "type": "concept",
+      "name": "Design In-Memory File System \u2014 trie of dicts",
+      "module_id": "cod-prod",
+      "module_name": "Production-flavored coding",
+      "cat": "coding"
+    },
+    {
+      "id": "p-LC3",
+      "type": "concept",
+      "name": "Time-Based Key-Value Store \u2014 binary search on timestamps",
+      "module_id": "cod-prod",
+      "module_name": "Production-flavored coding",
+      "cat": "coding"
+    },
+    {
+      "id": "p-LC4",
+      "type": "concept",
+      "name": "Snake Game \u2014 deque + set for O(1) self-collision check",
+      "module_id": "cod-prod",
+      "module_name": "Production-flavored coding",
+      "cat": "coding"
+    },
+    {
+      "id": "m-1",
+      "type": "concept",
+      "name": "Heaps \u2014 when (and why) to reach for one",
+      "module_id": "cod-misc",
+      "module_name": "Trees, heaps, DP \u2014 short ladder",
+      "cat": "coding"
+    },
+    {
+      "id": "m-2",
+      "type": "question",
+      "name": "Q: Cycle detection in linked list",
+      "module_id": "cod-misc",
+      "module_name": "Trees, heaps, DP \u2014 short ladder",
+      "cat": "coding"
+    },
+    {
+      "id": "m-3",
+      "type": "concept",
+      "name": "Dynamic programming \u2014 recognizing when to use it",
+      "module_id": "cod-misc",
+      "module_name": "Trees, heaps, DP \u2014 short ladder",
+      "cat": "coding"
+    },
+    {
+      "id": "m-4",
+      "type": "question",
+      "name": "Q: Trie insert / search",
+      "module_id": "cod-misc",
+      "module_name": "Trees, heaps, DP \u2014 short ladder",
+      "cat": "coding"
+    },
+    {
+      "id": "m-LC1",
+      "type": "concept",
+      "name": "Find Median from Data Stream \u2014 two heaps, balanced",
+      "module_id": "cod-misc",
+      "module_name": "Trees, heaps, DP \u2014 short ladder",
+      "cat": "coding"
+    },
+    {
+      "id": "m-LC2",
+      "type": "concept",
+      "name": "Merge K Sorted Lists \u2014 heap of head pointers",
+      "module_id": "cod-misc",
+      "module_name": "Trees, heaps, DP \u2014 short ladder",
+      "cat": "coding"
+    },
+    {
+      "id": "m-LC3",
+      "type": "concept",
+      "name": "Edit Distance \u2014 2D DP with three operations",
+      "module_id": "cod-misc",
+      "module_name": "Trees, heaps, DP \u2014 short ladder",
+      "cat": "coding"
+    },
+    {
+      "id": "m-LC4",
+      "type": "concept",
+      "name": "Longest Increasing Subsequence \u2014 patience sort O(N log N)",
+      "module_id": "cod-misc",
+      "module_name": "Trees, heaps, DP \u2014 short ladder",
+      "cat": "coding"
+    },
+    {
+      "id": "bt-1",
+      "type": "concept",
+      "name": "The backtracking template (subsets / power set)",
+      "module_id": "cod-backtrack",
+      "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+      "cat": "coding"
+    },
+    {
+      "id": "bt-2",
+      "type": "concept",
+      "name": "Permutations \u2014 used/visited bookkeeping",
+      "module_id": "cod-backtrack",
+      "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+      "cat": "coding"
+    },
+    {
+      "id": "bt-3",
+      "type": "concept",
+      "name": "Combinations & combination sum \u2014 pruning on the path",
+      "module_id": "cod-backtrack",
+      "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+      "cat": "coding"
+    },
+    {
+      "id": "bt-4",
+      "type": "concept",
+      "name": "N-Queens \u2014 pruning with diagonal sets",
+      "module_id": "cod-backtrack",
+      "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+      "cat": "coding"
+    },
+    {
+      "id": "bt-5",
+      "type": "concept",
+      "name": "Word search on a grid \u2014 DFS with in-place visited",
+      "module_id": "cod-backtrack",
+      "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+      "cat": "coding"
+    },
+    {
+      "id": "bt-LC1",
+      "type": "concept",
+      "name": "Remove Invalid Parentheses \u2014 min-removal backtracking with prune + dedup",
+      "module_id": "cod-backtrack",
+      "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+      "cat": "coding"
+    },
+    {
+      "id": "bt-LC2",
+      "type": "concept",
+      "name": "Sudoku Solver \u2014 constraint propagation + backtracking",
+      "module_id": "cod-backtrack",
+      "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+      "cat": "coding"
+    },
+    {
+      "id": "bt-LC3",
+      "type": "concept",
+      "name": "Word Search II \u2014 Trie pruning makes it tractable",
+      "module_id": "cod-backtrack",
+      "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+      "cat": "coding"
+    },
+    {
+      "id": "bt-LC4",
+      "type": "concept",
+      "name": "Expression Add Operators \u2014 backtracking with multiplication carry",
+      "module_id": "cod-backtrack",
+      "module_name": "Backtracking \u2014 subsets, permutations, N-queens",
+      "cat": "coding"
+    },
+    {
+      "id": "iv-1",
+      "type": "concept",
+      "name": "Merge overlapping intervals \u2014 the canonical pattern",
+      "module_id": "cod-intervals",
+      "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+      "cat": "coding"
+    },
+    {
+      "id": "iv-2",
+      "type": "concept",
+      "name": "Insert interval \u2014 the three-phase walk",
+      "module_id": "cod-intervals",
+      "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+      "cat": "coding"
+    },
+    {
+      "id": "iv-3",
+      "type": "concept",
+      "name": "Meeting rooms II \u2014 min rooms via heap or sweep",
+      "module_id": "cod-intervals",
+      "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+      "cat": "coding"
+    },
+    {
+      "id": "iv-4",
+      "type": "concept",
+      "name": "Non-overlapping intervals \u2014 greedy by END",
+      "module_id": "cod-intervals",
+      "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+      "cat": "coding"
+    },
+    {
+      "id": "iv-LC1",
+      "type": "concept",
+      "name": "Employee Free Time \u2014 merge then complement",
+      "module_id": "cod-intervals",
+      "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+      "cat": "coding"
+    },
+    {
+      "id": "iv-LC2",
+      "type": "concept",
+      "name": "My Calendar III \u2014 max-overlap via sweep line / diff array",
+      "module_id": "cod-intervals",
+      "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+      "cat": "coding"
+    },
+    {
+      "id": "iv-LC3",
+      "type": "concept",
+      "name": "Meeting Rooms III \u2014 two heaps for room assignment",
+      "module_id": "cod-intervals",
+      "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+      "cat": "coding"
+    },
+    {
+      "id": "iv-LC4",
+      "type": "concept",
+      "name": "Data Stream as Disjoint Intervals \u2014 sorted dict + merge on insert",
+      "module_id": "cod-intervals",
+      "module_name": "Intervals \u2014 merge, insert, meeting rooms",
+      "cat": "coding"
+    },
+    {
+      "id": "tr-1",
+      "type": "concept",
+      "name": "Three traversals + level-order, iterative versions",
+      "module_id": "cod-trees",
+      "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+      "cat": "coding"
+    },
+    {
+      "id": "tr-2",
+      "type": "concept",
+      "name": "Lowest Common Ancestor \u2014 BST vs binary tree",
+      "module_id": "cod-trees",
+      "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+      "cat": "coding"
+    },
+    {
+      "id": "tr-3",
+      "type": "concept",
+      "name": "Serialize & deserialize binary tree (BFS encoding)",
+      "module_id": "cod-trees",
+      "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+      "cat": "coding"
+    },
+    {
+      "id": "tr-4",
+      "type": "concept",
+      "name": "Validate BST \u2014 pass min/max bounds, not just check children",
+      "module_id": "cod-trees",
+      "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+      "cat": "coding"
+    },
+    {
+      "id": "tr-5",
+      "type": "concept",
+      "name": "Kth smallest in BST \u2014 in-order with a counter",
+      "module_id": "cod-trees",
+      "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+      "cat": "coding"
+    },
+    {
+      "id": "tr-6",
+      "type": "concept",
+      "name": "Max path sum (binary tree) \u2014 return one, track best",
+      "module_id": "cod-trees",
+      "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+      "cat": "coding"
+    },
+    {
+      "id": "t-LC1",
+      "type": "concept",
+      "name": "Binary Tree Cameras \u2014 three-state DP on the tree",
+      "module_id": "cod-trees",
+      "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+      "cat": "coding"
+    },
+    {
+      "id": "t-LC2",
+      "type": "concept",
+      "name": "Construct Binary Tree from Preorder + Inorder \u2014 the index trick",
+      "module_id": "cod-trees",
+      "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+      "cat": "coding"
+    },
+    {
+      "id": "t-LC3",
+      "type": "concept",
+      "name": "Recover BST \u2014 Morris traversal finds two swapped nodes",
+      "module_id": "cod-trees",
+      "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+      "cat": "coding"
+    },
+    {
+      "id": "t-LC4",
+      "type": "concept",
+      "name": "Vertical Order Traversal \u2014 sort by (col, row, val)",
+      "module_id": "cod-trees",
+      "module_name": "Trees in depth \u2014 traversals, LCA, serialize, validate",
+      "cat": "coding"
+    },
+    {
+      "id": "gr-1",
+      "type": "concept",
+      "name": "Jump game \u2014 reach the end with greedy max-reach",
+      "module_id": "cod-greedy",
+      "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+      "cat": "coding"
+    },
+    {
+      "id": "gr-2",
+      "type": "concept",
+      "name": "Gas station \u2014 total + running min",
+      "module_id": "cod-greedy",
+      "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+      "cat": "coding"
+    },
+    {
+      "id": "gr-3",
+      "type": "concept",
+      "name": "Task scheduler \u2014 count buckets, formula",
+      "module_id": "cod-greedy",
+      "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+      "cat": "coding"
+    },
+    {
+      "id": "gr-4",
+      "type": "concept",
+      "name": "Interval scheduling maximization \u2014 pick by earliest end",
+      "module_id": "cod-greedy",
+      "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+      "cat": "coding"
+    },
+    {
+      "id": "gr-LC1",
+      "type": "concept",
+      "name": "Candy \u2014 two-pass greedy from each side",
+      "module_id": "cod-greedy",
+      "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+      "cat": "coding"
+    },
+    {
+      "id": "gr-LC2",
+      "type": "concept",
+      "name": "Patching Array \u2014 exchange-argument greedy",
+      "module_id": "cod-greedy",
+      "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+      "cat": "coding"
+    },
+    {
+      "id": "gr-LC3",
+      "type": "concept",
+      "name": "Minimum Refueling Stops \u2014 heap-greedy \"borrow from past\"",
+      "module_id": "cod-greedy",
+      "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+      "cat": "coding"
+    },
+    {
+      "id": "gr-LC4",
+      "type": "concept",
+      "name": "Jump Game IV \u2014 BFS vs greedy chunking",
+      "module_id": "cod-greedy",
+      "module_name": "Greedy \u2014 jump game, gas station, task scheduler",
+      "cat": "coding"
+    },
+    {
+      "id": "dp-1",
+      "type": "concept",
+      "name": "1D DP \u2014 house robber, climbing stairs",
+      "module_id": "cod-dp",
+      "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+      "cat": "coding"
+    },
+    {
+      "id": "dp-2",
+      "type": "concept",
+      "name": "2D DP \u2014 unique paths, edit distance",
+      "module_id": "cod-dp",
+      "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+      "cat": "coding"
+    },
+    {
+      "id": "dp-3",
+      "type": "concept",
+      "name": "0/1 Knapsack \u2014 bounded capacity, each item once",
+      "module_id": "cod-dp",
+      "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+      "cat": "coding"
+    },
+    {
+      "id": "dp-4",
+      "type": "concept",
+      "name": "LIS \u2014 patience sort gives O(N log N)",
+      "module_id": "cod-dp",
+      "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+      "cat": "coding"
+    },
+    {
+      "id": "dp-5",
+      "type": "concept",
+      "name": "Palindrome partition \u2014 interval DP",
+      "module_id": "cod-dp",
+      "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+      "cat": "coding"
+    },
+    {
+      "id": "dp-LC1",
+      "type": "concept",
+      "name": "Burst Balloons \u2014 interval DP with \"last to burst\"",
+      "module_id": "cod-dp",
+      "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+      "cat": "coding"
+    },
+    {
+      "id": "dp-LC2",
+      "type": "concept",
+      "name": "Distinct Subsequences \u2014 2D DP with branch on match/no-match",
+      "module_id": "cod-dp",
+      "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+      "cat": "coding"
+    },
+    {
+      "id": "dp-LC3",
+      "type": "concept",
+      "name": "Russian Doll Envelopes \u2014 sort + LIS variant",
+      "module_id": "cod-dp",
+      "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+      "cat": "coding"
+    },
+    {
+      "id": "dp-LC4",
+      "type": "concept",
+      "name": "Stone Game II \u2014 memoized recursion with state (i, M)",
+      "module_id": "cod-dp",
+      "module_name": "DP families \u2014 1D, 2D, knapsack, LIS, edit distance",
+      "cat": "coding"
+    },
+    {
+      "id": "ll-1",
+      "type": "concept",
+      "name": "Reverse a linked list \u2014 iterative + recursive",
+      "module_id": "cod-linked",
+      "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+      "cat": "coding"
+    },
+    {
+      "id": "ll-2",
+      "type": "concept",
+      "name": "Merge two sorted lists \u2014 dummy-head trick",
+      "module_id": "cod-linked",
+      "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+      "cat": "coding"
+    },
+    {
+      "id": "ll-3",
+      "type": "concept",
+      "name": "Fast/slow \u2014 cycle detect + find cycle start",
+      "module_id": "cod-linked",
+      "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+      "cat": "coding"
+    },
+    {
+      "id": "ll-4",
+      "type": "concept",
+      "name": "Copy list with random pointer \u2014 interleave or hashmap",
+      "module_id": "cod-linked",
+      "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+      "cat": "coding"
+    },
+    {
+      "id": "ll-LC1",
+      "type": "concept",
+      "name": "Reverse Nodes in K-Group \u2014 segment-by-segment reversal",
+      "module_id": "cod-linked",
+      "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+      "cat": "coding"
+    },
+    {
+      "id": "ll-LC2",
+      "type": "concept",
+      "name": "All O(1) Data Structure \u2014 keys grouped by count in a doubly-linked list of buckets",
+      "module_id": "cod-linked",
+      "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+      "cat": "coding"
+    },
+    {
+      "id": "ll-LC3",
+      "type": "concept",
+      "name": "LFU Cache \u2014 frequency buckets + ordered sets",
+      "module_id": "cod-linked",
+      "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+      "cat": "coding"
+    },
+    {
+      "id": "ll-LC4",
+      "type": "concept",
+      "name": "Sort List \u2014 merge sort on a linked list",
+      "module_id": "cod-linked",
+      "module_name": "Linked list patterns \u2014 reverse, merge, copy, fast/slow",
+      "cat": "coding"
+    },
+    {
+      "id": "st-1",
+      "type": "concept",
+      "name": "Valid parentheses \u2014 pair-match with stack",
+      "module_id": "cod-stack",
+      "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+      "cat": "coding"
+    },
+    {
+      "id": "st-2",
+      "type": "concept",
+      "name": "Min stack \u2014 O(1) min query",
+      "module_id": "cod-stack",
+      "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+      "cat": "coding"
+    },
+    {
+      "id": "st-3",
+      "type": "concept",
+      "name": "Decode string \u2014 nested k[content]",
+      "module_id": "cod-stack",
+      "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+      "cat": "coding"
+    },
+    {
+      "id": "st-LC1",
+      "type": "concept",
+      "name": "Basic Calculator IV \u2014 parse expressions with parens",
+      "module_id": "cod-stack",
+      "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+      "cat": "coding"
+    },
+    {
+      "id": "st-LC2",
+      "type": "concept",
+      "name": "Sum of Subarray Minimums \u2014 monotonic stack counting",
+      "module_id": "cod-stack",
+      "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+      "cat": "coding"
+    },
+    {
+      "id": "st-LC3",
+      "type": "concept",
+      "name": "Maximal Rectangle \u2014 apply histogram row-by-row",
+      "module_id": "cod-stack",
+      "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+      "cat": "coding"
+    },
+    {
+      "id": "st-LC4",
+      "type": "concept",
+      "name": "132 Pattern \u2014 descending monotonic stack",
+      "module_id": "cod-stack",
+      "module_name": "Stack patterns \u2014 valid parens, min stack, calculator",
+      "cat": "coding"
+    },
+    {
+      "id": "sel-1",
+      "type": "concept",
+      "name": "Quickselect \u2014 Kth largest in O(N) avg",
+      "module_id": "cod-select",
+      "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+      "cat": "coding"
+    },
+    {
+      "id": "sel-2",
+      "type": "concept",
+      "name": "Top-K with heap \u2014 streaming-friendly",
+      "module_id": "cod-select",
+      "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+      "cat": "coding"
+    },
+    {
+      "id": "sel-3",
+      "type": "concept",
+      "name": "Median of two sorted arrays \u2014 binary search",
+      "module_id": "cod-select",
+      "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+      "cat": "coding"
+    },
+    {
+      "id": "sel-LC1",
+      "type": "concept",
+      "name": "Sliding Window Median \u2014 two heaps + lazy deletion",
+      "module_id": "cod-select",
+      "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+      "cat": "coding"
+    },
+    {
+      "id": "sel-LC2",
+      "type": "concept",
+      "name": "Kth Largest Element in a Stream \u2014 min-heap of size K",
+      "module_id": "cod-select",
+      "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+      "cat": "coding"
+    },
+    {
+      "id": "sel-LC3",
+      "type": "concept",
+      "name": "Kth Smallest Element in Sorted Matrix \u2014 binary search on VALUE",
+      "module_id": "cod-select",
+      "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+      "cat": "coding"
+    },
+    {
+      "id": "sel-LC4",
+      "type": "concept",
+      "name": "Wiggle Sort II \u2014 sort + reverse-interleave (with O(N) extension)",
+      "module_id": "cod-select",
+      "module_name": "Selection \u2014 quickselect, top-K, median of two arrays",
+      "cat": "coding"
+    },
+    {
+      "id": "sm-1",
+      "type": "concept",
+      "name": "KMP \u2014 failure function for O(M+N) matching",
+      "module_id": "cod-strings",
+      "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+      "cat": "coding"
+    },
+    {
+      "id": "sm-2",
+      "type": "concept",
+      "name": "Rabin-Karp \u2014 rolling hash for fast substring match",
+      "module_id": "cod-strings",
+      "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+      "cat": "coding"
+    },
+    {
+      "id": "sm-3",
+      "type": "concept",
+      "name": "Z-function \u2014 every prefix-length match in O(N)",
+      "module_id": "cod-strings",
+      "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+      "cat": "coding"
+    },
+    {
+      "id": "str-LC1",
+      "type": "concept",
+      "name": "Shortest Palindrome \u2014 KMP failure function trick",
+      "module_id": "cod-strings",
+      "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+      "cat": "coding"
+    },
+    {
+      "id": "str-LC2",
+      "type": "concept",
+      "name": "Distinct Subsequences II \u2014 DP with last-occurrence subtraction",
+      "module_id": "cod-strings",
+      "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+      "cat": "coding"
+    },
+    {
+      "id": "str-LC3",
+      "type": "concept",
+      "name": "Wildcard Matching \u2014 DP with * (multi-char) and ? (single)",
+      "module_id": "cod-strings",
+      "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+      "cat": "coding"
+    },
+    {
+      "id": "str-LC4",
+      "type": "concept",
+      "name": "Longest Duplicate Substring \u2014 binary search + rolling hash",
+      "module_id": "cod-strings",
+      "module_name": "String matching \u2014 KMP, Rabin-Karp, rolling hash",
+      "cat": "coding"
+    }
+  ],
+  "cards": [
+    {
+      "id": "fc-cod-1",
+      "cat": "coding",
+      "module": "cod-graphs",
+      "lesson": "g-1",
+      "q": "BFS template essentials?",
+      "a": "deque + visited set; check visited at enqueue (not dequeue) to avoid re-enqueues; track level via separate counter or by queue-length-per-level loop."
+    },
+    {
+      "id": "fc-cod-2",
+      "cat": "coding",
+      "module": "cod-prod",
+      "lesson": "p-LC1",
+      "q": "LRU cache structure?",
+      "a": "Hash map (key\u2192node) + doubly-linked list. On get/put: detach node, insert at head, evict tail when over capacity. O(1) get/put."
+    },
+    {
+      "id": "fc-cod-3",
+      "cat": "coding",
+      "module": "cod-arrays",
+      "lesson": "a-1",
+      "q": "Two-pointer pattern works when\u2026",
+      "a": "(1) Array is sorted (or you can sort it). (2) Each step provably rules out one end. (3) You're looking for pairs, palindromes, or in-place modification. O(n\u00b2) \u2192 O(n)."
+    },
+    {
+      "id": "fc-cod-4",
+      "cat": "coding",
+      "module": "cod-arrays",
+      "lesson": "a-2",
+      "q": "Sliding window \u2014 when to choose fixed vs variable?",
+      "a": "Fixed: window size is given (e.g., \"max sum subarray of size k\"). Variable: window grows/shrinks to maintain an invariant (e.g., \"longest substring with no repeats\")."
+    },
+    {
+      "id": "fc-cod-5",
+      "cat": "coding",
+      "module": "cod-arrays",
+      "lesson": "a-3",
+      "q": "Binary search \"on the answer\" pattern?",
+      "a": "When the problem space (e.g., capacity, threshold) is monotonic \u2014 small fails, big works \u2014 define a predicate can_do(x) and binary search for the boundary. Example: \"smallest ship capacity for D days.\""
+    },
+    {
+      "id": "fc-cod-6",
+      "cat": "coding",
+      "module": "cod-graphs",
+      "lesson": "g-6",
+      "q": "Union-Find two optimizations?",
+      "a": "(1) Path compression in find \u2014 point every node directly to root. (2) Union by rank \u2014 attach smaller tree to bigger. Together: ~O(\u03b1(N)) per op \u2014 effectively constant."
+    },
+    {
+      "id": "fc-cod-7",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-cod-1",
+      "q": "Dijkstra vs Bellman-Ford?",
+      "a": "Dijkstra: non-negative weights only, O((V+E) log V) with heap. Bellman-Ford: handles negative weights, O(VE). Negatives break Dijkstra's \"lock-in once extracted\" invariant."
+    },
+    {
+      "id": "fc-cod-8",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-cod-3",
+      "q": "Monotonic stack \u2014 when?",
+      "a": "\"Next greater / smaller element\" patterns. Stack maintains decreasing values; new element pops until order is restored. Each element pushed once + popped once = O(n)."
+    },
+    {
+      "id": "fc-cod-9",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-cod-4",
+      "q": "Singleton XOR trick?",
+      "a": "Array has every value twice except one. XOR all values: pairs cancel (x ^ x = 0); singleton remains. O(n) time, O(1) memory."
+    },
+    {
+      "id": "fc-cod-10",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-cod-2",
+      "q": "Topo sort failure mode (Kahn's algorithm)?",
+      "a": "If the produced order has fewer than N nodes, there's a cycle. Cycle-detection comes free."
+    },
+    {
+      "id": "fc-cod-11",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-cod-4",
+      "q": "Bit-mask DP \u2014 when does it apply?",
+      "a": "When state includes \"which subset of N items is visited\" and N \u2264 ~20. Represent the visited set as an integer; iterate over all 2^N masks. TSP, set-cover variants."
+    },
+    {
+      "id": "fc-cod-12",
+      "cat": "coding",
+      "module": "cod-graphs",
+      "lesson": "g-4",
+      "q": "Why deque over list for BFS queue?",
+      "a": "list.pop(0) is O(n) (shifts every element). deque.popleft is O(1). At scale, the diff is asymptotic."
+    },
+    {
+      "id": "fc-cod-13",
+      "cat": "coding",
+      "module": "cod-graphs",
+      "lesson": "g-1",
+      "q": "Mark visited at enqueue or dequeue?",
+      "a": "Enqueue. Mark-at-dequeue lets the same node be enqueued by every neighbor before processing \u2014 memory blowup in dense graphs."
+    },
+    {
+      "id": "fc-cod-14",
+      "cat": "coding",
+      "module": "cod-dp",
+      "lesson": "dp-4",
+      "q": "LIS (longest increasing subsequence) optimal complexity?",
+      "a": "O(N log N) via patience sort: maintain \"tails\" array, binary search insert position. Pure DP is O(N\u00b2)."
+    },
+    {
+      "id": "fc-cod-15",
+      "cat": "coding",
+      "module": "cod-select",
+      "lesson": "sel-1",
+      "q": "K-th largest in unsorted N-element array?",
+      "a": "QuickSelect O(N) avg case, OR min-heap of size K \u2014 O(N log K). Beats full sort."
+    },
+    {
+      "id": "fc-cod-16",
+      "cat": "coding",
+      "module": "cod-select",
+      "lesson": "sel-2",
+      "q": "Top-K from a stream \u2014 data structure?",
+      "a": "Min-heap of size K. Each new item: if larger than min, pop min and push new. O(log K) per item, O(K) memory."
+    },
+    {
+      "id": "fc-cod-17",
+      "cat": "coding",
+      "module": "cod-misc",
+      "lesson": "m-LC1",
+      "q": "Streaming median \u2014 data structure?",
+      "a": "Two heaps: max-heap for lower half, min-heap for upper. Rebalance after insert. Median = root(s)."
+    },
+    {
+      "id": "fc-cod-18",
+      "cat": "coding",
+      "module": "cod-graphs",
+      "lesson": "g-5",
+      "q": "Connected components in a graph?",
+      "a": "DFS or BFS from each unvisited node. Each start = one new component. O(V+E)."
+    },
+    {
+      "id": "fc-cod-19",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-cod-2",
+      "q": "Cycle detection in directed graph?",
+      "a": "DFS with \"currently on stack\" set. Encountering a node on the stack = back-edge = cycle. Or Kahn's topo sort with count check."
+    },
+    {
+      "id": "fc-cod-20",
+      "cat": "coding",
+      "module": "cod-misc",
+      "lesson": "m-LC2",
+      "q": "For \"merge K sorted lists\" optimally?",
+      "a": "Min-heap of K head pointers. Pop smallest, push its next. O(N log K) \u2014 strictly better than pairwise merge or full sort for small K."
+    },
+    {
+      "id": "fc-cod-21",
+      "cat": "coding",
+      "module": "cod-arrays",
+      "lesson": "a-2",
+      "q": "Sliding window \u2014 invariant requirement?",
+      "a": "Monotone invariant: adding to window can't un-break the property once broken. Without monotonicity, sliding window may not apply."
+    },
+    {
+      "id": "fc-cod-22",
+      "cat": "coding",
+      "module": "cod-arrays",
+      "lesson": "a-1",
+      "q": "Two-pointer technique time/space?",
+      "a": "O(N) time, O(1) extra space on sorted arrays. Each pointer moves forward at most N times. Strictly better than hash-set on space."
+    },
+    {
+      "id": "fc-cod-23",
+      "cat": "coding",
+      "module": "cod-arrays",
+      "lesson": "a-3",
+      "q": "Binary search on the answer -- when does it apply?",
+      "a": "Use it when the answer space is monotonic (a predicate flips false-to-true exactly once). Binary search the boundary, evaluating the predicate each step. Classic: 'min capacity to ship in D days,' 'smallest max page in K splits.'"
+    },
+    {
+      "id": "fc-cod-24",
+      "cat": "coding",
+      "module": "cod-arrays",
+      "lesson": "a-4",
+      "q": "Prefix sums \u2014 what they buy you?",
+      "a": "Range-sum queries in O(1) after O(N) precompute. Difference: prefix[r]-prefix[l]. Use also for \"subarray sum equals K.\""
+    },
+    {
+      "id": "fc-cod-25",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-cod-4",
+      "q": "Bit manipulation: x & (x-1) does what?",
+      "a": "Clears the lowest set bit. Repeat to count bits. Used in Brian Kernighan's bit count."
+    },
+    {
+      "id": "fc-cod-26",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-cod-4",
+      "q": "Find the two singletons when every other number appears twice?",
+      "a": "XOR everything to get x = a ^ b. Pick any set bit of x (e.g., x & -x); split the array by that bit and XOR each half separately. Each half isolates one singleton."
+    },
+    {
+      "id": "fc-cod-27",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-cod-1",
+      "q": "Dijkstra fails on negative edges because?",
+      "a": "Locks in a node's distance once extracted from PQ. Negative edges can later offer a shorter path. Use Bellman-Ford instead."
+    },
+    {
+      "id": "fc-cod-28",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-LC1",
+      "q": "Bellman-Ford complexity + benefit?",
+      "a": "O(VE). Handles negative edges. Detects negative cycles (one extra relaxation pass \u2014 if any edge can still relax, cycle exists)."
+    },
+    {
+      "id": "fc-cod-29",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-LC4",
+      "q": "Largest Rectangle in Histogram -- key invariant?",
+      "a": "Use a stack of strictly increasing bar indices. When a shorter bar arrives, pop and compute the rectangle bounded by the popped bar's height; the width spans from the new top+1 to the current index. Each bar pushed and popped once -- O(N)."
+    },
+    {
+      "id": "fc-cod-30",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-cod-1",
+      "q": "A* vs Dijkstra?",
+      "a": "A* = Dijkstra + heuristic h(n). With admissible heuristic (never overestimates), A* finds optimal + prunes search dramatically when target known."
+    },
+    {
+      "id": "fc-cod-31",
+      "cat": "coding",
+      "module": "cod-graphs",
+      "lesson": "g-2",
+      "q": "Shortest path between two users in a 10M-node social graph -- which traversal?",
+      "a": "Bidirectional BFS from both endpoints, alternating the smaller frontier. Cuts the explored set from b^d to ~2*b^(d/2), which is decisive on high-fan-out social graphs."
+    },
+    {
+      "id": "fc-cod-32",
+      "cat": "coding",
+      "module": "cod-graphs",
+      "lesson": "g-3",
+      "q": "Multi-source BFS -- how do you seed the queue?",
+      "a": "Push every source onto the queue at the start with distance 0 and mark them all visited. The first time BFS reaches a node, that's its distance to the nearest source -- single pass, O(V+E)."
+    },
+    {
+      "id": "fc-cod-33",
+      "cat": "coding",
+      "module": "cod-graphs",
+      "lesson": "g-LC2",
+      "q": "Shortest path in grid with up to K obstacle removals -- what's the state?",
+      "a": "Augment the BFS state with remaining eliminations: (row, col, k_left). Visited is keyed on the full triple so the same cell can be reached with different budgets. Still BFS because all moves cost 1."
+    },
+    {
+      "id": "fc-cod-34",
+      "cat": "coding",
+      "module": "cod-graphs",
+      "lesson": "g-LC3",
+      "q": "Bus Routes (min buses to reach destination) -- what's the right graph?",
+      "a": "Build a graph of routes, not stops. Two routes are neighbors if they share any stop; BFS on routes counting hops. Stop-level BFS blows up because each stop has many neighbors via its route."
+    },
+    {
+      "id": "fc-cod-35",
+      "cat": "coding",
+      "module": "cod-advgraphs",
+      "lesson": "ag-LC3",
+      "q": "Tarjan bridge-finding -- what's the bridge condition?",
+      "a": "DFS tracks disc[u] (discovery time) and low[u] (lowest disc reachable via subtree + one back-edge). Edge (u,v) is a bridge iff low[v] > disc[u] -- v's subtree has no alternative route back."
+    },
+    {
+      "id": "fc-cod-36",
+      "cat": "coding",
+      "module": "cod-arrays",
+      "lesson": "a-LC1",
+      "q": "Trapping Rain Water two-pointer -- why is the lower side safe to advance?",
+      "a": "The water at index i depends on min(maxLeft, maxRight). If leftMax <= rightMax, the left side is the binding constraint, so water at L is leftMax - height[L] regardless of what's between. Move the lower pointer; the bound only grows."
+    },
+    {
+      "id": "fc-cod-37",
+      "cat": "coding",
+      "module": "cod-arrays",
+      "lesson": "a-LC2",
+      "q": "Sliding Window Maximum -- which structure gives O(N)?",
+      "a": "A monotonic deque storing indices with strictly decreasing values. Pop from back while incoming value is larger; pop from front when index falls out of the window. Front is always the window max."
+    },
+    {
+      "id": "fc-cod-38",
+      "cat": "coding",
+      "module": "cod-arrays",
+      "lesson": "a-LC4",
+      "q": "Subarrays with exactly K distinct integers -- the inclusion-exclusion trick?",
+      "a": "Compute atMost(K) - atMost(K-1). Each is a sliding-window count of subarrays with at most K distinct, which is monotone and trivially windowable. Direct 'exactly K' has no monotone invariant."
+    },
+    {
+      "id": "fc-cod-39",
+      "cat": "coding",
+      "module": "cod-hashing",
+      "lesson": "h-LC1",
+      "q": "Minimum Window Substring -- when do you shrink the window?",
+      "a": "Maintain a need-count map and a 'matched' counter equal to distinct chars fully satisfied. Expand right; while matched == required, record answer and shrink left, decrementing matched when a char drops below its need."
+    },
+    {
+      "id": "fc-cod-40",
+      "cat": "coding",
+      "module": "cod-hashing",
+      "lesson": "h-LC3",
+      "q": "First Missing Positive in O(N) time, O(1) space -- core trick?",
+      "a": "Use the array as a hash: for each value v in [1,N], swap it to index v-1. Then scan: first index where A[i] != i+1 gives the answer. Values out of range are ignored."
+    },
+    {
+      "id": "fc-cod-41",
+      "cat": "coding",
+      "module": "cod-intervals",
+      "lesson": "iv-3",
+      "q": "Meeting Rooms II -- min rooms via sweep line?",
+      "a": "Create +1 events at start times and -1 events at end times, sort (ends before starts on ties), sweep and track the running max. Equivalently: a min-heap of end times, peek vs each new start. Both O(N log N)."
+    },
+    {
+      "id": "fc-cod-42",
+      "cat": "coding",
+      "module": "cod-intervals",
+      "lesson": "iv-4",
+      "q": "Non-overlapping intervals -- why sort by end?",
+      "a": "Greedy by earliest end leaves the most room for what comes next; an exchange argument shows any optimal solution can be transformed into the earliest-end choice without loss. Sorting by start can keep a long interval that blocks many short ones."
+    },
+    {
+      "id": "fc-cod-43",
+      "cat": "coding",
+      "module": "cod-trees",
+      "lesson": "tr-2",
+      "q": "LCA in a generic binary tree -- the recursive pattern?",
+      "a": "Recurse left and right. If both sides return non-null, current node is the LCA. Otherwise propagate up the non-null side. O(N) with no parent pointers."
+    },
+    {
+      "id": "fc-cod-44",
+      "cat": "coding",
+      "module": "cod-trees",
+      "lesson": "tr-4",
+      "q": "Validate BST -- common bug?",
+      "a": "Comparing only against direct children fails on grandchildren. Pass down (lo, hi) bounds at each call, or do in-order traversal and verify strict increase. Inclusive vs strict matters: use strict (<, >) for standard BST."
+    },
+    {
+      "id": "fc-cod-45",
+      "cat": "coding",
+      "module": "cod-trees",
+      "lesson": "tr-6",
+      "q": "Max path sum in a binary tree -- return-vs-track split?",
+      "a": "At each node, recursively compute the best one-armed extension (max child gain, clipped at 0). Update a global best with node.val + leftGain + rightGain (path bends here). Return only the one-armed value -- a parent can't use a bend."
+    },
+    {
+      "id": "fc-cod-46",
+      "cat": "coding",
+      "module": "cod-trees",
+      "lesson": "t-LC2",
+      "q": "Build binary tree from preorder + inorder -- what makes it O(N)?",
+      "a": "Preorder gives the root; locate it in inorder to split left/right subtrees. Pre-hash inorder value -> index so the lookup is O(1), and recurse on index ranges. Without the hashmap it degrades to O(N^2)."
+    },
+    {
+      "id": "fc-cod-47",
+      "cat": "coding",
+      "module": "cod-dp",
+      "lesson": "dp-3",
+      "q": "0/1 knapsack -- why iterate capacity in reverse for 1D rolling?",
+      "a": "Each item can be used at most once. Iterating capacity descending guarantees dp[c-w] still reflects the previous row (no item yet), so you don't 'reuse' the item. Ascending iteration is the unbounded-knapsack form."
+    },
+    {
+      "id": "fc-cod-48",
+      "cat": "coding",
+      "module": "cod-dp",
+      "lesson": "dp-LC1",
+      "q": "Burst Balloons -- what's the DP state and why?",
+      "a": "dp[l][r] = max coins bursting all balloons strictly between sentinels at l and r. Pick which balloon i is burst LAST in (l, r): cost = nums[l] * nums[i] * nums[r] + dp[l][i] + dp[i][r]. Last-to-burst pins the neighbors so subproblems decouple."
+    },
+    {
+      "id": "fc-cod-49",
+      "cat": "coding",
+      "module": "cod-misc",
+      "lesson": "m-3",
+      "q": "When does a problem call for DP?",
+      "a": "When the answer has overlapping subproblems plus optimal substructure: same subcalls recur, and the optimal solution composes from optimal subsolutions. If subproblems don't repeat, it's plain divide-and-conquer or greedy."
+    },
+    {
+      "id": "fc-cod-50",
+      "cat": "coding",
+      "module": "cod-misc",
+      "lesson": "m-3",
+      "q": "Most common DP bug?",
+      "a": "Off-by-one in base case or transition indexing -- especially confusing 'index i means first i chars' vs 'first i+1 chars.' Pick one convention and write base cases that fit it. Second-most-common: forgetting to memoize a parameter that varies between calls."
+    },
+    {
+      "id": "fc-cod-51",
+      "cat": "coding",
+      "module": "cod-strings",
+      "lesson": "sm-1",
+      "q": "KMP -- what does the failure function store?",
+      "a": "f[i] = length of the longest proper prefix of pattern[0..i] that is also a suffix. On a mismatch at text position, jump pattern back to f[i-1] instead of restarting. Build in O(M), match in O(N) -- total O(M+N)."
+    },
+    {
+      "id": "fc-cod-52",
+      "cat": "coding",
+      "module": "cod-strings",
+      "lesson": "sm-2",
+      "q": "Rabin-Karp -- why is the hash 'rolling'?",
+      "a": "Treat the substring as a base-B number mod a prime. Sliding one char right: new_hash = (old_hash - leftChar * B^(L-1)) * B + rightChar, all mod p. O(1) per slide. Verify equal hashes by direct compare to dodge collisions."
+    },
+    {
+      "id": "fc-cod-53",
+      "cat": "coding",
+      "module": "cod-strings",
+      "lesson": "str-LC4",
+      "q": "Longest Duplicate Substring -- which two patterns combine?",
+      "a": "Binary search on the answer length L, plus rolling hash to test 'does any substring of length L repeat?' in O(N) per check. Total O(N log N), assuming you handle hash collisions (double hash or verify)."
+    },
+    {
+      "id": "fc-cod-54",
+      "cat": "coding",
+      "module": "cod-linked",
+      "lesson": "ll-3",
+      "q": "Floyd's tortoise-and-hare -- how do you find the cycle start?",
+      "a": "After fast meets slow inside the cycle, reset one pointer to the head and advance both one step at a time. They meet at the cycle's entry. Proof: distance from head to entry equals distance from meeting point to entry (mod cycle length)."
+    },
+    {
+      "id": "fc-cod-55",
+      "cat": "coding",
+      "module": "cod-linked",
+      "lesson": "ll-LC1",
+      "q": "Reverse Nodes in K-Group -- structural trick?",
+      "a": "Walk K nodes ahead to verify a full group exists, reverse those K in place, then connect the previous group's tail to the new head and recurse/loop on the rest. O(N) time, O(1) space (iterative)."
+    },
+    {
+      "id": "fc-cod-56",
+      "cat": "coding",
+      "module": "cod-linked",
+      "lesson": "ll-LC3",
+      "q": "LFU cache -- data structures for O(1) get/put?",
+      "a": "Hash key -> node, hash freq -> doubly-linked list of nodes at that freq, and a min-freq pointer. On access, bump the node to the next freq's list; evict from the min-freq list's tail. Each op O(1)."
+    },
+    {
+      "id": "fc-cod-57",
+      "cat": "coding",
+      "module": "cod-backtrack",
+      "lesson": "bt-LC3",
+      "q": "Word Search II -- why a trie beats per-word DFS?",
+      "a": "Insert all words into a trie. Run one DFS per board cell, walking the trie alongside the path; stop instantly when no child matches. Shared prefixes are explored once -- complexity goes from O(W * cells * 4^L) to roughly O(cells * 4^L)."
+    },
+    {
+      "id": "fc-cod-58",
+      "cat": "coding",
+      "module": "cod-stack",
+      "lesson": "st-LC2",
+      "q": "Sum of Subarray Minimums -- monotonic stack counting trick?",
+      "a": "For each index i, find PLE (previous less, strict on one side) and NLE (next less, non-strict on the other) using a monotonic stack. Contribution = A[i] * (i - PLE) * (NLE - i). Asymmetric strictness avoids double-counting equal mins."
+    },
+    {
+      "id": "fc-cod-59",
+      "cat": "coding",
+      "module": "cod-select",
+      "lesson": "sel-LC3",
+      "q": "Kth smallest in a sorted matrix -- binary search on what?",
+      "a": "Binary search on the value, not the index. For a candidate v, count cells <= v in O(N) via the staircase walk from bottom-left. Shrink lo/hi by whether the count is < K or >= K. O(N log(maxVal-minVal))."
+    },
+    {
+      "id": "fc-cod-60",
+      "cat": "coding",
+      "module": "cod-greedy",
+      "lesson": "gr-LC3",
+      "q": "Minimum Refueling Stops -- the 'borrow from the past' heap-greedy?",
+      "a": "Drive forward without stopping, dropping each reachable station's fuel into a max-heap as you pass it. When you run out before the next station/target, pop the largest remembered tank and add it -- one stop. Repeat until you reach target or the heap is empty."
+    }
+  ]
+}

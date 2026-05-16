@@ -1,0 +1,415 @@
+{
+  "cat": "cloud",
+  "lessons": [
+    {
+      "id": "cl-1",
+      "type": "concept",
+      "name": "AWS / GCP \u2014 the 8 services you must know cold",
+      "module_id": "cl-core",
+      "module_name": "Core cloud / DevOps",
+      "cat": "cloud"
+    },
+    {
+      "id": "cl-2",
+      "type": "concept",
+      "name": "Docker and Kubernetes \u2014 the mental model that gets you fluent",
+      "module_id": "cl-core",
+      "module_name": "Core cloud / DevOps",
+      "cat": "cloud"
+    },
+    {
+      "id": "cl-3",
+      "type": "concept",
+      "name": "Infrastructure as Code (Terraform) \u2014 why and how",
+      "module_id": "cl-core",
+      "module_name": "Core cloud / DevOps",
+      "cat": "cloud"
+    },
+    {
+      "id": "cl-4",
+      "type": "concept",
+      "name": "Compliance lingo \u2014 what SOC2/HIPAA/GDPR/PCI actually mean",
+      "module_id": "cl-core",
+      "module_name": "Core cloud / DevOps",
+      "cat": "cloud"
+    },
+    {
+      "id": "in-1",
+      "type": "concept",
+      "name": "OAuth 2.0 grant types decoded",
+      "module_id": "cl-integ",
+      "module_name": "Integrations & auth",
+      "cat": "cloud"
+    },
+    {
+      "id": "in-2",
+      "type": "concept",
+      "name": "Webhook signing + idempotency \u2014 the wire details",
+      "module_id": "cl-integ",
+      "module_name": "Integrations & auth",
+      "cat": "cloud"
+    },
+    {
+      "id": "in-4",
+      "type": "concept",
+      "name": "Observability stack \u2014 logs, metrics, traces",
+      "module_id": "cl-integ",
+      "module_name": "Integrations & auth",
+      "cat": "cloud"
+    },
+    {
+      "id": "in-5",
+      "type": "concept",
+      "name": "CI/CD pipelines \u2014 from commit to production safely",
+      "module_id": "cl-integ",
+      "module_name": "Integrations & auth",
+      "cat": "cloud"
+    },
+    {
+      "id": "in-3",
+      "type": "concept",
+      "name": "Enterprise auth \u2014 SAML, OIDC, SCIM crash course",
+      "module_id": "cl-integ",
+      "module_name": "Integrations & auth",
+      "cat": "cloud"
+    }
+  ],
+  "cards": [
+    {
+      "id": "fc-cl-1",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-1",
+      "q": "OAuth 2.1 grant types in 2026?",
+      "a": "Authorization Code + PKCE is now required for ALL clients (web, SPA, mobile, native \u2014 OAuth 2.1 removed the public/confidential distinction for PKCE). Client Credentials for server-to-server. Device Code for TV/CLI. Implicit and Resource Owner Password Credentials grants are removed."
+    },
+    {
+      "id": "fc-cl-2",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-2",
+      "q": "Webhook reliability checklist?",
+      "a": "(1) HMAC sign (timestamp + body). (2) Idempotency event_id. (3) Exponential backoff retries on 5xx + timeouts only. (4) DLQ after N fails. (5) Replay dashboard. (6) Documented SLA."
+    },
+    {
+      "id": "fc-cl-3",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-4",
+      "q": "Three pillars of observability?",
+      "a": "Logs (why did this request fail?), Metrics (is something wrong NOW?), Traces (where in the call graph is the slow span?). OpenTelemetry unifies emission across vendors."
+    },
+    {
+      "id": "fc-cl-4",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-5",
+      "q": "Canary vs blue-green vs rolling deploys?",
+      "a": "Canary: 1% \u2192 10% \u2192 50% with metric checks. Blue-green: full new environment, flip LB. Rolling: replace one instance at a time. Canary for risky changes with good metrics."
+    },
+    {
+      "id": "fc-cl-5",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-3",
+      "q": "SAML vs OIDC?",
+      "a": "SAML: XML-based, browser SSO, still common with enterprise IdPs (Okta, Entra ID, Ping). OIDC: JWT-based, built on OAuth 2.0, default for new/mobile/API integrations. For enterprise SaaS in 2026, support both \u2014 SAML for legacy IT, OIDC for everything new."
+    },
+    {
+      "id": "fc-cl-6",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-3",
+      "q": "SCIM does what?",
+      "a": "REST API for user/group provisioning lifecycle (create/update/disable). Lets customer's IdP automatically provision users in your system. Required for enterprise."
+    },
+    {
+      "id": "fc-cl-7",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-4",
+      "q": "What is a DPA?",
+      "a": "Data Processing Agreement \u2014 GDPR-required contract specifying how you process the customer's personal data. Covers sub-processors, residency, breach notification, right-to-delete."
+    },
+    {
+      "id": "fc-cl-8",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-4",
+      "q": "Logs vs metrics vs traces -- when to reach for each?",
+      "a": "Metrics: aggregate numeric time-series, cheap to store, drive alerts (is something wrong now?). Logs: discrete events, high-cardinality detail, answer 'why did this request fail?'. Traces: per-request causal graph across services, find the slow span. Use metrics to detect, traces to localize, logs to explain."
+    },
+    {
+      "id": "fc-cl-9",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-4",
+      "q": "OpenTelemetry \u2014 what is it?",
+      "a": "Vendor-neutral instrumentation library emitting logs/metrics/traces. Pluggable backends (Datadog, Jaeger, Honeycomb, etc.)."
+    },
+    {
+      "id": "fc-cl-10",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-4",
+      "q": "Senior debugging order?",
+      "a": "Metrics (what's wrong, narrow service) \u2192 Traces (find the slow span) \u2192 Logs (read the exception). Logs-first is junior."
+    },
+    {
+      "id": "fc-cl-11",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-4",
+      "q": "BYOK \u2014 Bring Your Own Keys?",
+      "a": "Customer holds encryption key in their KMS. They can revoke = your service can't decrypt their data. Strong enterprise trust boundary."
+    },
+    {
+      "id": "fc-cl-12",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-4",
+      "q": "PCI scope reduction strategy?",
+      "a": "Don't touch raw card data. Use Stripe/Adyen tokenization. PCI scope shrinks dramatically; compliance burden much smaller."
+    },
+    {
+      "id": "fc-cl-13",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-4",
+      "q": "GDPR data residency -- what does it actually require?",
+      "a": "EU personal data must stay in the EU unless the destination country has an adequacy decision or you use SCCs (Standard Contractual Clauses) plus a transfer impact assessment. Practical implication: run an EU region (Frankfurt, Ireland) and pin EU-tenant data to it; do not let logs/backups silently replicate to us-east-1."
+    },
+    {
+      "id": "fc-cl-14",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-3",
+      "q": "SAML SSO intermittent failure \u2014 top cause?",
+      "a": "Clock skew. Assertions arrive with timestamps outside tolerance window. Allow 60s tolerance on NotBefore/NotOnOrAfter."
+    },
+    {
+      "id": "fc-cl-15",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-3",
+      "q": "SCIM 2.0 -- the four endpoints that matter?",
+      "a": "POST /Users (create), PATCH /Users/{id} (update attributes), PATCH with active=false (deprovision/disable), and /Groups for role membership. The customer's IdP (Okta, Entra ID) calls these on a schedule so HR -> IdP -> your app stays in sync without manual user management."
+    },
+    {
+      "id": "fc-cl-16",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-2",
+      "q": "Air-gapped customer deploy?",
+      "a": "Helm chart in their cluster, with all images mirrored into their internal container registry. No outbound to your servers."
+    },
+    {
+      "id": "fc-cl-17",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-5",
+      "q": "Blue-green vs canary deploy?",
+      "a": "Blue-green: two parallel envs, atomic cutover via LB flip. Canary: gradual % traffic shift with metric gates. Canary for risk; B/G for atomic rollback."
+    },
+    {
+      "id": "fc-cl-18",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-2",
+      "q": "TLS cert auto-renewal pattern?",
+      "a": "ACME protocol (Let's Encrypt) + cert-manager in K8s. Manual rotation fails when certs expire on weekends + incidents."
+    },
+    {
+      "id": "fc-cl-19",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-5",
+      "q": "Auto-rollback on metric regression \u2014 tools?",
+      "a": "Argo Rollouts or Flagger (K8s-native, GitOps), Harness, or LaunchDarkly for flag-based rollback. Spinnaker still works but is fading. Watch error rate / latency / saturation for N minutes post-deploy and auto-revert on regression."
+    },
+    {
+      "id": "fc-cl-20",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-4",
+      "q": "Secret rotation without downtime?",
+      "a": "Dual-credential window: add new alongside old, roll services, remove old. Zero-downtime credential rotation."
+    },
+    {
+      "id": "fc-cl-21",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-2",
+      "q": "Service mesh value?",
+      "a": "Sidecars handle mTLS + retries + circuit-breaking + observability without code changes. Useful at scale; complex to operate."
+    },
+    {
+      "id": "fc-cl-22",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-3",
+      "q": "SAML vs OIDC vs OAuth 2.0 -- when do you reach for each?",
+      "a": "SAML: enterprise browser SSO into a SaaS app (XML assertions, IdP-initiated common). OIDC: modern SSO + identity (JWT id_token, mobile/SPA/API friendly, built on OAuth). OAuth 2.0: delegated authorization (access_token to call an API on a user's behalf) -- it is not authentication. Rule: SAML/OIDC answer 'who is the user?', OAuth answers 'what can this token do?'."
+    },
+    {
+      "id": "fc-cl-23",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-1",
+      "q": "Why is Authorization Code + PKCE the default in OAuth 2.1?",
+      "a": "PKCE (Proof Key for Code Exchange) binds the auth code to the original client via a code_verifier/code_challenge pair, defeating code interception on public clients (mobile, SPA). OAuth 2.1 made it mandatory for all clients -- public and confidential -- and removed Implicit and ROPC entirely."
+    },
+    {
+      "id": "fc-cl-24",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-1",
+      "q": "S3 vs GCS vs Azure Blob -- key differences?",
+      "a": "All three are object stores with 11 nines durability and lifecycle/IAM/encryption. S3 has the richest ecosystem (Athena, Glacier tiers, S3 Select) and strongest tooling. GCS has the cleanest consistency model and dual-region buckets. Azure Blob integrates tightly with AD/Entra and is mandatory in Microsoft-heavy enterprises. Pick by where the rest of your stack lives."
+    },
+    {
+      "id": "fc-cl-25",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-1",
+      "q": "PrivateLink vs VPN vs Direct Connect -- which when?",
+      "a": "PrivateLink (AWS) / Private Service Connect (GCP): expose a single service privately across VPCs/accounts without peering -- best for SaaS-to-customer. Site-to-site VPN: encrypted tunnel over the public internet, fast to set up, ~1 Gbps. Direct Connect / Cloud Interconnect: dedicated fiber, 10-100 Gbps, predictable latency, for big enterprise hybrid."
+    },
+    {
+      "id": "fc-cl-26",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-1",
+      "q": "IAM least-privilege -- what does 'good' look like in practice?",
+      "a": "Roles not users; one role per workload. Scope actions to specific resources (arn:aws:s3:::bucket/prefix/*), not '*'. Use session policies and permission boundaries to cap blast radius. Run Access Analyzer / IAM Recommender periodically to prune unused permissions. No long-lived access keys -- use IAM Roles for Service Accounts or Workload Identity."
+    },
+    {
+      "id": "fc-cl-27",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-1",
+      "q": "KMS key rotation -- automatic vs manual?",
+      "a": "AWS KMS auto-rotates symmetric CMKs yearly (no re-encrypt needed -- old key material stays for decrypt). Manual rotation is required for asymmetric keys and for customer-managed BYOK. Audit via CloudTrail kms:GenerateDataKey events. Rotating the data-encryption key (DEK) is cheap; rotating the master key (KEK) is rare and ceremonial."
+    },
+    {
+      "id": "fc-cl-28",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-1",
+      "q": "Secrets management -- Vault vs Secrets Manager vs Doppler?",
+      "a": "HashiCorp Vault: multi-cloud, dynamic secrets (short-lived DB creds), strongest model, ops-heavy. AWS Secrets Manager / GCP Secret Manager: cloud-native, IAM-integrated, automatic rotation hooks, cheap for single-cloud. Doppler/1Password Secrets: developer-friendly UX, good for app config across envs. Never commit secrets; use OIDC federation from CI so no static keys touch disk."
+    },
+    {
+      "id": "fc-cl-29",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-4",
+      "q": "CloudWatch vs Stackdriver vs Datadog -- tradeoffs?",
+      "a": "CloudWatch / Cloud Monitoring: cheapest, native, but weak cross-account UX and slow dashboards. Datadog: best dashboards, APM, and unified logs+metrics+traces, but cost scales painfully past ~100 hosts. Honeycomb / Grafana Cloud: strong on traces and high-cardinality. Rule: start native, move to Datadog when you have on-call rotations, build out OTel so the backend choice stays portable."
+    },
+    {
+      "id": "fc-cl-30",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-4",
+      "q": "SLI vs SLO vs SLA -- the precise definitions?",
+      "a": "SLI: the measurement (e.g., 'fraction of requests with latency < 300ms'). SLO: the internal target (e.g., 'SLI >= 99.9% over 30 days'). SLA: the customer contract with penalties (e.g., '99.5% or 10% credit'). SLO is always tighter than SLA. Error budget = 1 - SLO; when burned, freeze risky deploys."
+    },
+    {
+      "id": "fc-cl-31",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-5",
+      "q": "Terraform vs CDK -- when to pick which?",
+      "a": "Terraform: declarative HCL, multi-cloud, huge module ecosystem, state file is the source of truth -- great for infra teams managing many accounts. CDK (AWS/CDKTF): write infra in TypeScript/Python with loops/conditionals -- great for app teams who want infra colocated with code. CDK compiles to CloudFormation/Terraform under the hood. Default to Terraform for org-wide platforms, CDK for product squads."
+    },
+    {
+      "id": "fc-cl-32",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-1",
+      "q": "Autoscaling triggers -- which metric for which workload?",
+      "a": "Stateless web/API: target CPU 60-70% or requests-per-target (ALB). Queue workers: scale on queue depth / age of oldest message (SQS ApproximateAgeOfOldestMessage). GPU inference: scale on in-flight request count or token-throughput, not CPU. Avoid memory-based scaling for JVM/Python -- they hoard heap and never scale down."
+    },
+    {
+      "id": "fc-cl-33",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-1",
+      "q": "Lambda / Cloud Run cold-start mitigation -- the playbook?",
+      "a": "(1) Provisioned concurrency / min-instances = 1 for latency-critical paths. (2) Trim the deploy artifact -- bundle, tree-shake, drop SDKs you do not use. (3) Lazy-load heavy deps after the handler returns its first byte. (4) Prefer SnapStart (Lambda) or container CPU-always-allocated (Cloud Run gen2). (5) Move to a long-running container if p99 cold-start dominates."
+    },
+    {
+      "id": "fc-cl-34",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-1",
+      "q": "Multi-region failover -- active-active vs active-passive?",
+      "a": "Active-passive: primary serves traffic, standby replicates async, Route53/Cloud DNS health-check failover. RTO minutes, RPO seconds-to-minutes, cheap. Active-active: both regions serve, requires conflict-free writes (CRDTs, region-pinned tenants, or global DB like Spanner/DynamoDB Global Tables). RTO near zero, RPO near zero, 2x cost and much harder consistency story."
+    },
+    {
+      "id": "fc-cl-35",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-1",
+      "q": "Eventually-consistent reads -- when do they bite you?",
+      "a": "Read-after-write on a different replica returns stale data (DynamoDB eventually-consistent reads, S3 cross-region replication, read replicas). Bites you on: 'create resource then immediately GET it', dashboard 'undo' flows, and balance/quota checks. Fix: strong/consistent read for the immediate follow-up, or write-through cache keyed by request id."
+    },
+    {
+      "id": "fc-cl-36",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-4",
+      "q": "SOC 2 Type I vs Type II -- the difference enterprise buyers care about?",
+      "a": "Type I: a point-in-time snapshot -- controls were designed correctly on date X. Type II: controls operated effectively over a period (typically 6-12 months) with auditor sampling. Enterprise procurement almost always demands Type II; Type I is acceptable only as a bridge in year one. The five Trust Services Criteria: Security (always), Availability, Confidentiality, Processing Integrity, Privacy (pick based on product)."
+    },
+    {
+      "id": "fc-cl-37",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-4",
+      "q": "HIPAA -- what does 'covered' actually require for a SaaS vendor?",
+      "a": "Sign a BAA (Business Associate Agreement) with the covered entity. Implement Administrative, Physical, and Technical safeguards: access controls (unique user IDs, auto-logoff), audit logs of PHI access, encryption at rest and in transit, breach notification within 60 days. Use a HIPAA-eligible service list (AWS publishes one); a single non-eligible service in the data path breaks compliance."
+    },
+    {
+      "id": "fc-cl-38",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-4",
+      "q": "FedRAMP Moderate vs High -- when do you need which?",
+      "a": "FedRAMP Moderate: most federal SaaS (CUI, ~325 controls from NIST 800-53). FedRAMP High: law enforcement, emergency services, financial systems -- ~410 controls plus stricter background checks and US-citizen operator requirements. Practical path: build on AWS GovCloud or Azure Government, inherit their ATO, get a 3PAO audit. Authorization timeline is 12-18 months and ~$1-2M minimum."
+    },
+    {
+      "id": "fc-cl-39",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-1",
+      "q": "VPC peering vs Transit Gateway -- when to graduate?",
+      "a": "VPC peering: 1:1, non-transitive (A-B and B-C does not give A-C), free data transfer in-region -- fine for 2-5 VPCs. Transit Gateway / Network Connectivity Center: hub-and-spoke, transitive routing, supports VPN and Direct Connect attachments -- mandatory once you have 10+ VPCs or multi-account org. Cost is per-attachment per-hour plus data; budget for it."
+    },
+    {
+      "id": "fc-cl-40",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-2",
+      "q": "Service mesh basics -- Istio vs Linkerd?",
+      "a": "Both inject a sidecar proxy that handles mTLS, retries, circuit-breaking, and L7 telemetry without app code changes. Istio: feature-rich (Envoy-based, WASM extensions, traffic mirroring), heavier control plane, steep ops cost. Linkerd: Rust-based 'micro-proxy', simpler, lower CPU/memory overhead, fewer knobs. Default to Linkerd for most teams; pick Istio only if you need its specific traffic-policy features."
+    },
+    {
+      "id": "fc-cl-41",
+      "cat": "cloud",
+      "module": "cl-integ",
+      "lesson": "in-2",
+      "q": "Webhook idempotency -- the receiver-side pattern?",
+      "a": "Sender includes a stable event_id (UUID) per logical event and retries with the same id. Receiver stores processed event_ids in a dedupe table with a TTL longer than the sender's retry window (24-48h). On replay, look up the id: if seen, return 200 immediately without re-running side effects. Combine with HMAC signature + timestamp tolerance (~5 min) to block replays from attackers."
+    },
+    {
+      "id": "fc-cl-42",
+      "cat": "cloud",
+      "module": "cl-core",
+      "lesson": "cl-3",
+      "q": "Terraform state -- why remote backend + state locking matter?",
+      "a": "State file holds the mapping from HCL to real resource IDs plus secrets. Local state breaks team workflows and leaks creds into git. Remote backend (S3+DynamoDB, GCS, Terraform Cloud) gives shared state, encryption at rest, and a lock so two engineers cannot 'apply' concurrently and corrupt the file. Always enable versioning on the backend bucket so you can roll back a botched apply."
+    }
+  ]
+}

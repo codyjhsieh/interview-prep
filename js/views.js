@@ -15,6 +15,37 @@ function el(tag, cls, html) {
 }
 function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+/* Light-weight rich-text for flashcard Q/A. Lets card authors break a
+ * wall of text into structured beats without opening the door to raw
+ * HTML/XSS. Supported syntax:
+ *   - line-leading "- " or "* " → bullet item (consecutive items become <ul>)
+ *   - "**bold**"               → <b>bold</b>
+ *   - "`code`"                 → <code>code</code>
+ *   - blank line               → paragraph break
+ *   - single newline           → soft break (<br>)
+ * Everything else is HTML-escaped. */
+function richText(s) {
+  const raw = String(s ?? '');
+  const escape = (t) => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inline = (t) => escape(t)
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+    .replace(/`([^`]+)`/g, '<code style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:0.92em;background:rgba(15,23,42,0.06);padding:1px 4px;border-radius:3px">$1</code>');
+  const blocks = raw.split(/\n\n+/);
+  const out = [];
+  for (const block of blocks) {
+    const lines = block.split('\n');
+    const isList = lines.every(l => /^\s*[-*]\s+/.test(l));
+    if (isList && lines.length > 1) {
+      out.push('<ul style="margin:4px 0 4px 18px;padding:0;list-style:disc">' +
+        lines.map(l => '<li style="margin:2px 0">' + inline(l.replace(/^\s*[-*]\s+/, '')) + '</li>').join('') +
+        '</ul>');
+    } else {
+      out.push('<p style="margin:6px 0">' + lines.map(inline).join('<br>') + '</p>');
+    }
+  }
+  return out.join('');
+}
+
 /* iconHTML(name, opts) — inline a Lucide SVG icon via CSS mask so it
  * picks up the surrounding text color via currentColor. Files live in
  * assets/icons/ and were downloaded from the Lucide icon set
@@ -5300,7 +5331,7 @@ function renderFlashcards(state, hub) {
       <div class="flashcard-inner">
         <div class="flashcard-face">
           <div class="text-xs uppercase tracking-wide text-slate-400 mb-3 inline-flex items-center gap-1.5">${(() => { const _c = CATEGORIES.find(c => c.id === card.cat); return _c ? iconHTML(_c.icon, {size: 14}) : ''; })()} ${card.cat}${failCount > 0 ? ` · <span style="color:var(--bad)">✗ ${failCount} ${failCount === 1 ? 'fail' : 'fails'}</span>` : ''}</div>
-          <div class="text-xl font-display font-semibold leading-snug">${esc(card.q)}</div>
+          <div class="text-xl font-display font-semibold leading-snug">${richText(card.q)}</div>
           <div class="absolute bottom-5 right-6 text-xs text-slate-500">Click to reveal</div>
         </div>
         <div class="flashcard-face flashcard-back">
@@ -5308,7 +5339,7 @@ function renderFlashcards(state, hub) {
             <span>Answer</span>
             <a href="${reviewHref}" class="text-[11px] normal-case tracking-normal" style="color:var(--accent)" onclick="event.stopPropagation()">Review ${card.lesson ? 'lesson' : card.module ? 'module' : 'category'} →</a>
           </div>
-          <div class="text-[15px] leading-relaxed">${esc(card.a)}</div>
+          <div class="text-[15px] leading-relaxed">${richText(card.a)}</div>
           <div class="absolute bottom-5 right-6 text-xs text-slate-500">Click to flip back</div>
         </div>
       </div>

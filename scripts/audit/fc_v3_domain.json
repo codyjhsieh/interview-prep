@@ -1,0 +1,105 @@
+{
+  "cat": "domain",
+  "rewrites": [
+    {
+      "id": "fc-dom-1",
+      "q": "In hospitality data (venue bookings, shift reports), what's the classic timezone gotcha that produces wrong-day reports?",
+      "a": "A venue's **Saturday night** crosses UTC midnight, so naive day-of-week filtering on UTC timestamps splits a single service across two days.\n\n**Rule:** always convert to **venue-local time** before bucketing by day-of-week or business-day.\n\n- Store timestamps as UTC `timestamptz`\n- Attach the venue's IANA zone (e.g. `America/New_York`) to every venue row\n- Compute `local_date` at query time, not at write time (DST changes)\n- A **business day** often ends at 4am local, not midnight"
+    },
+    {
+      "id": "fc-dom-2",
+      "q": "What's the standard cold-start playbook for launching a two-sided marketplace?",
+      "a": "Two-sided liquidity is the single hardest marketplace problem, so the playbook is to **collapse it into a one-sided problem first**.\n\n- **Pre-seed one side** manually (recruit suppliers door-to-door, or fake demand with concierge ops)\n- **Drive demand to that seeded side** in a single concentrated geo, not nationally\n- **Prove utility in one metro** (NYC, SF) before expanding\n- **Expand city-by-city**, repeating the seed-then-demand loop\n\n**Implication:** spend on supply acquisition early; spend on demand only once supply density clears a usability threshold."
+    },
+    {
+      "id": "fc-dom-3",
+      "q": "When deploying an AI product into a hospital, what's the biggest non-technical hurdle and how does it shape your architecture?",
+      "a": "The hospital's **security and compliance review**, typically **8 to 16 weeks**, gates every deployment regardless of code quality.\n\n- Bake the review window into your project timeline from day one\n- Multi-tenant SaaS is usually **DOA** with hospital infosec\n- Standard pattern is **single-tenant in the customer's VPC** (or on-prem)\n- Expect questionnaires (HECVAT, SIG), pen-test reports, and a signed **BAA**\n\n**Implication:** your deploy story (Terraform into customer cloud, air-gap mode) is part of the product, not an afterthought."
+    },
+    {
+      "id": "fc-dom-4",
+      "q": "What is a HIPAA Business Associate Agreement (BAA) and when does your company need one?",
+      "a": "A **BAA** is a contract required whenever a vendor handles **PHI** (protected health information) on a covered entity's behalf. It binds the vendor to HIPAA's privacy and security rules and assigns breach-notification duties.\n\n- **No BAA == no PHI** can legally flow to you\n- Covered entities = providers, payers, clearinghouses; their vendors are **business associates**\n- Most cloud and LLM vendors (AWS, GCP, Azure, OpenAI, Anthropic) offer BAAs only on **specific (often higher-tier) plans**\n- Confirm BAA coverage for **every** subprocessor in your stack before architecting"
+    },
+    {
+      "id": "fc-dom-5",
+      "q": "What infrastructure and personnel requirements does a defense or federal-government FDE deployment add on top of a normal enterprise SaaS deploy?",
+      "a": "Public-sector workloads layer **three hard requirements** on top of commercial deployments.\n\n- **Air-gapped on-prem deploys** (no outbound internet; updates via approved media)\n- **FedRAMP High** for civilian agencies, **DoD IL5** (or IL6 for classified) for defense\n- **Cleared engineers** (Secret / TS / TS-SCI) on the deploy and support path\n\n**Implication:** procurement cycles are **months to years**, contracts are vehicle-based (GSA, OTA, SBIR), and your build/release pipeline needs a separate sovereign-cloud variant."
+    },
+    {
+      "id": "fc-dom-6",
+      "q": "What are the non-negotiable properties of a production fintech ledger?",
+      "a": "A correct ledger is **double-entry, append-only, and idempotent**. These three properties are load-bearing for audit and dispute resolution.\n\n- **Double-entry:** every transaction posts equal-and-opposite debits and credits; balances are derived, never stored as truth\n- **Append-only:** never `UPDATE` or `DELETE`; corrections are **offsetting entries** (reversal + new posting)\n- **Idempotent writes:** every API call carries an idempotency key so retries can't double-post\n- **Audit trail is sacred:** regulators and disputes both replay history from the log"
+    },
+    {
+      "id": "fc-dom-7",
+      "q": "What's the core UX and infrastructure challenge unique to multimodal generative AI (image, video, audio synthesis)?",
+      "a": "Inference takes **seconds to minutes**, not milliseconds, so synchronous request/response breaks down and the whole stack shifts to a **long-running-job pattern**.\n\n- **Async job queue** with durable job IDs (so refresh/disconnect is safe)\n- **Progress channel:** WebSocket push or client polling against a status endpoint\n- **Content moderation pre-gen** (prompt) and **post-gen** (output)\n- **Cancellation tokens** so users can kill expensive in-flight jobs and free GPU\n- Aggressive **caching** of identical prompts and **resumable** multi-step pipelines"
+    },
+    {
+      "id": "fc-dom-8",
+      "q": "What's the hardest UX problem in real-time voice AI today, and what's the current target latency?",
+      "a": "**Turn-taking and barge-in** (letting the user interrupt the model) are the hardest problems. Naive systems either talk over the user or leave awkward pauses.\n\n- Industry target is **sub-500ms end-to-end** via streaming **STT to LLM to TTS** overlap\n- **Neural turn-prediction** models have replaced VAD-only silence detection\n- Server-side **interruption handling** must cut TTS audio within ~100ms of detected speech\n- Low latency is **necessary but not sufficient**: natural turn boundaries are what make it feel human"
+    },
+    {
+      "id": "fc-dom-9",
+      "q": "Between PLG (product-led growth) and SLG (sales-led growth) motions, which one actually needs Forward Deployed Engineers and why?",
+      "a": "**SLG** needs FDEs; **PLG** generally does not.\n\n**SLG (sales-led, enterprise contracts)**\n- Deals are 6- to 7-figure, deployments are bespoke\n- FDE is the **customer-engineering arm**: integrations, custom workflows, on-site enablement\n- Without FDE, sold deals stall in pilot purgatory\n\n**PLG (self-serve, bottom-up adoption)**\n- Onboarding is the product; docs and DX replace humans\n- Support is community + tiered CSMs, not embedded engineers\n\n**Implication:** Palantir, Scale, Anthropic-enterprise = FDE-heavy; Linear, Vercel = PLG-light."
+    },
+    {
+      "id": "fc-dom-10",
+      "q": "In marketplace matching, when do you use greedy ranking versus ML ranking, and why does pure greedy fail?",
+      "a": "Pure **greedy by rating** maximizes short-term match quality but **starves new entrants**: they never accumulate ratings, so the supply pool calcifies and eventually shrinks.\n\n- **Greedy:** simple, explainable, good for early-stage when liquidity is low\n- **Bipartite (Hungarian, Gale-Shapley):** when matches are scarce and global optimality matters (ride-share dispatch, kidney exchange)\n- **ML rank with diversity injection** (5 to 10% traffic routed to newer or lower-ranked suppliers) keeps the supply side healthy and discovers latent winners\n\n**Implication:** treat exploration as a fixed cost of marketplace health, not a leak."
+    },
+    {
+      "id": "fc-dom-11",
+      "q": "When designing US money-movement, when do you pick ACH vs RTP/FedNow vs wire?",
+      "a": "**ACH**\n- Cost: **cents** per transfer; settles in **1-3 business days** (batch)\n- **Reversible** within ~60 days\n- Best for **payroll, recurring debits, B2C disbursements**\n\n**RTP / FedNow**\n- **Instant** (seconds), **24/7/365**, **irrevocable**\n- Capped (currently **$1M** on RTP)\n- Best for **payouts, just-in-time funding, instant refunds**\n\n**Wire (Fedwire, CHIPS)**\n- **Same-day**, irrevocable, **$15-30** fee\n- Best for **high-value B2B, real estate, treasury**\n\n**Implication:** speed and irreversibility are the levers; cheaper rails trade settlement time for cost."
+    },
+    {
+      "id": "fc-dom-12",
+      "q": "What's the cheapest practical way to stay PCI-DSS compliant when accepting card payments?",
+      "a": "**Never let raw PAN (the card number) touch your servers.** Scope is everything in PCI: the less you touch, the easier the audit.\n\n- Use a **tokenization vendor** (Stripe Elements, Spreedly, Basis Theory) via **iframe or hosted SDK**\n- Your servers see only an opaque token, never the PAN or CVV\n- This qualifies you for **SAQ-A**, the lightest self-assessment (essentially a checklist)\n- Touching PAN in plaintext pushes you into **SAQ-D** + full QSA audit + quarterly scans\n\n**Implication:** architecture choice on day one determines whether compliance costs $0 or $100K+/year."
+    },
+    {
+      "id": "fc-dom-13",
+      "q": "In fintech onboarding, what's the practical difference between KYC and KYB?",
+      "a": "**KYC (Know Your Customer)**\n- Verifies an **individual**\n- Inputs: government ID, selfie liveness, SSN, address\n- Screens: OFAC/sanctions, PEP, adverse media\n- Mostly **automated** (Persona, Alloy, Socure); minutes to verify\n\n**KYB (Know Your Business)**\n- Verifies a **business entity**\n- Inputs: EIN, formation docs, operating agreement\n- Requires **UBO** (ultimate beneficial owners, >25% ownership) discovery, then KYC on each UBO\n- Heavily **manual review**, document chasing; days to weeks\n\n**Implication:** KYB is the bottleneck for B2B fintech onboarding; budget for ops headcount, not just software."
+    },
+    {
+      "id": "fc-dom-14",
+      "q": "For new healthcare integrations in 2026, when do you use FHIR vs HL7 v2?",
+      "a": "**FHIR (Fast Healthcare Interoperability Resources)**\n- **REST / JSON**, resource-oriented (`Patient`, `Observation`, `MedicationRequest`)\n- Modern standard; **mandated for US patient-access APIs** under ONC/CMS rules\n- Used for **greenfield apps**, patient portals, third-party integrations\n\n**HL7 v2**\n- Pipe-delimited messages over **MLLP/TCP**\n- Still **dominant inside hospital walls** for ADT (admit/discharge/transfer), orders, lab results\n- Required when integrating with legacy EHRs (Epic, Cerner via interface engines)\n\n**Implication:** real production systems speak **both**: FHIR at the edge, HL7 v2 internally via a Mirth/Rhapsody engine."
+    },
+    {
+      "id": "fc-dom-15",
+      "q": "Why is **DAU/MAU** a misleading north-star metric for developer tools, and what should you use instead?",
+      "a": "Developer tools are **workflow tools, not consumer apps**. A developer using your CLI three days a week is highly engaged, but DAU/MAU would score them at 0.43 and look bad.\n\nBetter north stars:\n- **Integration depth:** commands run per active dev, languages/repos covered, % of workflow replaced\n- **Retained weekly active devs (WAU)** with cohort retention, not raw daily\n- **Time-to-first-value (TTFV):** signup -> first successful API call / build / deploy\n- **Paid seat expansion** within an org (the real PLG growth loop)\n\n**Implication:** optimizing for DAU pushes you toward notifications and engagement bait, which devs hate."
+    },
+    {
+      "id": "fc-dom-16",
+      "q": "What is \"eval gating\" at AI-first companies (Anthropic, OpenAI, Deepgram) and why is it considered table-stakes?",
+      "a": "**Eval gating** means treating evaluations as **CI for prompts and models**. Every change must pass a frozen golden-set with regression thresholds before merge.\n\n- **Frozen golden-set** of input/output pairs; thresholds per metric (accuracy, latency, safety)\n- **Prompt versioning:** prompts are code, stored in git, addressable by hash\n- **Shadow traffic** in prod: new prompt/model runs alongside old, deltas logged before cutover\n- **Per-PR eval runs** + dashboards in code review\n\n**Implication:** without eval gating, every prompt edit silently regresses quality and you only find out from customer complaints."
+    },
+    {
+      "id": "fc-dom-17",
+      "q": "Why do production AI apps need a model router, and how much does it actually save?",
+      "a": "**Mechanism:** different requests have different cost/latency/quality needs. A router classifies the request (intent, length, sensitivity) and dispatches to the **cheapest model that meets the SLO**.\n\n- **Haiku / small models:** classification, extraction, routing decisions\n- **Sonnet / mid models:** chat, summarization, most agent steps\n- **Opus / frontier:** hard reasoning, long-horizon planning, code review\n- Routing signal can be heuristic (token count, regex) or a tiny classifier\n\n**Implication:** cuts inference cost **5-10x** versus always-Opus with negligible quality loss, and gives you a graceful **fallback ladder** when a provider degrades."
+    },
+    {
+      "id": "fc-dom-18",
+      "q": "In hospitality, why does **RevPAR** beat raw occupancy as a north-star metric?",
+      "a": "**RevPAR (revenue per available room) = ADR x occupancy**, so it captures the price-vs-fill tradeoff that single metrics miss.\n\n- **Occupancy alone** rewards **fire-sale discounting**: fill rooms at any price\n- **ADR alone** (average daily rate) rewards **empty rooms** at premium prices\n- **RevPAR** forces the yield-management tradeoff and is the **industry-standard** comp metric\n- Restaurants have an analog: **RevPASH** (revenue per available seat-hour)\n\n**Implication:** when you see hotels heavily discounting on OTAs, it's almost always a RevPAR play, not a desperate occupancy grab."
+    },
+    {
+      "id": "fc-dom-19",
+      "q": "Why is integrating with restaurant POS systems (Toast, Square, Aloha, Micros) harder than typical SaaS API integration?",
+      "a": "**Three structural problems** make restaurant POS integration painful even when an API exists.\n\n- **Inconsistent menu modeling:** modifiers, combos, voids, comps, and 86'd items are represented differently in every POS\n- **Partial real-time APIs:** Toast and Square are reasonable; **Aloha and Micros often require polling or on-prem agents** because the POS is a Windows box in the back office\n- **Ticket-time semantics vary:** \"fired,\" \"served,\" \"closed\" mean different things per venue and per POS\n\n**Implication:** expect to write **per-POS adapters**, reconcile menu state **nightly**, and maintain a canonical menu model your app actually queries."
+    },
+    {
+      "id": "fc-dom-20",
+      "q": "What core features must an enterprise LLM gateway (Credal, Portkey, internal builds) provide, and who is the buyer?",
+      "a": "**Mechanism:** the gateway sits between internal apps and LLM providers as a single chokepoint for security, cost, and observability.\n\n- **Centralized API keys** with **per-team budgets and rate limits**\n- **PII redaction on egress** before prompts hit external providers\n- **Prompt/response logging** for audit and incident response\n- **Model abstraction:** swap providers (OpenAI to Anthropic to Bedrock) without app changes\n- **SSO + RBAC** so access follows employee status\n\n**Implication:** the buyer is **security/IT, not developers**. The pitch is observability and a kill switch, and DX is secondary to control."
+    }
+  ]
+}

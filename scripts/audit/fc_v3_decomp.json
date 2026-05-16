@@ -1,0 +1,135 @@
+{
+  "cat": "decomp",
+  "rewrites": [
+    {
+      "id": "fc-dec-1",
+      "q": "In a Palantir-style FDE problem-decomposition / case interview (e.g. 'design a 911 dispatch triage system'), what is the #1 instant-reject signal?",
+      "a": "**Antipattern:** jumping straight to tools or solutions before scoping the problem.\n\nRed flags that get you rejected:\n- Naming `Kafka`, `Snowflake`, or 'an LLM' in the first 60 seconds\n- Proposing an architecture before asking who the users are\n- Skipping the success metric, data sources, and constraints\n- Treating the prompt as a complete spec instead of a starting point\n\n**Senior move:** spend the first 10-15 min in the problem space before drawing a single box."
+    },
+    {
+      "id": "fc-dec-2",
+      "q": "What is the 5-step decomposition framework for a Palantir-style FDE case (e.g. designing a 911 dispatch triage tool)?",
+      "a": "1. **Clarify** - success metric, users, data available, constraints (latency, budget, regulation)\n2. **Stakeholder map** - dispatchers, callers, on-call engineers, legal/compliance, the person who can kill the project\n3. **Data sources** - call audio, CAD logs, GPS, historical incident outcomes; what is `Inputs` to the system\n4. **Tradeoffs** - two phased options with explicit pros/cons and a recommendation\n5. **Failure modes** - 3 specific failures, each with detection + rollback"
+    },
+    {
+      "id": "fc-dec-3",
+      "q": "In a 60-min Palantir-style decomposition round (e.g. the 911 dispatch prompt), how long should clarifying questions take?",
+      "a": "**Time budget:** 10-15 minutes on clarify alone.\n\n- Most candidates rush in under 3 min and start drawing boxes\n- The interviewer is testing whether you can stay in the problem space before solving\n- Discomfort is the signal you are doing it right\n\n**Senior:** lingers past the point where it feels awkward, then states an assumption and moves on.\n**Junior:** leaves step 1 the moment they have a plausible solution."
+    },
+    {
+      "id": "fc-dec-4",
+      "q": "In a decomp round, what is the `Inputs -> Logic -> Outputs` mental model and what goes in each box?",
+      "a": "**Pattern:** describe behavior in three boxes before naming any tech.\n\n- **Inputs** - data sources: logs, APIs, files, sensor streams, user actions\n- **Logic** - transformations, decisions, joins, model calls, business rules\n- **Outputs** - what the user sees or acts on: dashboards, alerts, reports, automated actions\n\nNaming `Airflow` or `Kafka` inside a box before you have scoped the problem is an instant-reject signal. Boxes describe behavior until implementation is explicitly on the table."
+    },
+    {
+      "id": "fc-dec-5",
+      "q": "What are the four 'killer phrases' that signal senior judgment in a Palantir-style decomp round?",
+      "a": "1. **'Before I propose anything...'** - signals you scope before solving\n2. **'The simplest version that delivers value...'** - signals MVP-first thinking and cost awareness\n3. **'X over Y because of this specific constraint - if it changes I would flip.'** - explicit tradeoff with conditional commitment\n4. **'Let me make an explicit assumption: X; please push back.'** - operates under ambiguity instead of bouncing it back"
+    },
+    {
+      "id": "fc-dec-6",
+      "q": "Senior signal: in a 60-min decomp round, how long should clarifying-question time feel uncomfortable before you start drawing?",
+      "a": "**Senior:** stays in clarify for 10-15 min, past the point where they want to start drawing. The discomfort is the signal.\n**Junior:** leaves step 1 the moment they have a plausible solution, usually under 3 min.\n\n- Drawing too early commits you to a shape before you understand the requirements\n- Interviewers explicitly probe whether you can sit in ambiguity\n- The cure for the urge to draw is to state an explicit assumption out loud, then keep clarifying"
+    },
+    {
+      "id": "fc-dec-7",
+      "q": "In a decomp round, when the interviewer says 'you decide' or 'it's up to you' on a scoping question, what do you do?",
+      "a": "**Pattern:** make an assumption explicit, write it down, invite pushback.\n\nExample dialog:\n- Interviewer: 'You decide whether it is batch or real-time.'\n- You: 'I will assume daily batch for the v1, since the SLA is next-day dispatch review. Flag me if you want me to design for real-time.'\n\nAsking back ('what would you prefer?') signals you cannot operate without a spec. Write the assumption on the board so the interviewer can correct it later."
+    },
+    {
+      "id": "fc-dec-8",
+      "q": "What is the structure of a good clarifying question in a decomp round?",
+      "a": "**Pattern:** `Are we doing A or B? Because if A, I would do X; if B, I would do Y.`\n\nExample on the 911 dispatch prompt:\n- 'Are we triaging calls in real-time during the call, or post-hoc for QA review? Because if real-time, I would design around sub-second latency and a confidence threshold; if post-hoc, I would batch overnight and optimize for recall.'\n\nGood clarifying questions are **specific**, **falsifiable**, and **branch into design-relevant alternatives**."
+    },
+    {
+      "id": "fc-dec-9",
+      "q": "How many failure modes should you name in a decomp answer, and what does each need to include?",
+      "a": "**Target:** 3 specific failure modes, each with a detection mechanism and a rollback plan.\n\n- 'Add monitoring' alone is a junior signal - it names no failure and no response\n- One failure mode signals naive optimism\n- Five-plus signals you cannot prioritize\n\n**Senior template:** `Failure X -> detect via Y -> roll back via Z.` Example: 'GPS dropout -> detect via stale-timestamp check -> fall back to last known route.'"
+    },
+    {
+      "id": "fc-dec-10",
+      "q": "In a decomp answer, how many solution options should you present and in what shape?",
+      "a": "**Pattern:** present **two** phased options with explicit tradeoffs, then a recommendation with rationale.\n\n- **One option** - signals no tradeoff awareness, no awareness of alternatives\n- **Two options** - the sweet spot: forces a tradeoff conversation\n- **Three or more** - signals indecision and inability to commit\n\nClose with: `I recommend Option A because of constraint X - if X changes, I would flip to B.`"
+    },
+    {
+      "id": "fc-dec-11",
+      "q": "What is one senior-signal phrase in a decomp round and why does it work?",
+      "a": "**Phrase:** `X over Y because of this specific constraint - if it changes I would flip the decision.`\n\nWhy it works:\n- **Explicit tradeoff** - you named the alternative you rejected\n- **Conditional commitment** - you committed but bounded the commitment to a constraint\n- **Invites correction** - if the interviewer disagrees on the constraint, the whole answer updates cleanly\n\nExample: 'Postgres over `DynamoDB` because the join patterns are relational - if write volume crossed 50k/s I would flip.'"
+    },
+    {
+      "id": "fc-dec-12",
+      "q": "Hospital prompt: a clinical decision-support tool has 12% adoption after 90 days. What is the first analytical split before proposing fixes?",
+      "a": "**Pattern:** product gaps vs adoption gaps - different root causes need different fixes.\n\n- **Product gap** - the tool does not solve the actual workflow problem; fix is product changes (UX, accuracy, integration)\n- **Adoption gap** - the tool works but no one uses it; fix is training, change management, champions, or incentives\n\n**Senior move:** name the split out loud before proposing any fix. Asking 'is this a product or adoption problem?' shapes the next 20 minutes of the conversation."
+    },
+    {
+      "id": "fc-dec-13",
+      "q": "In a Palantir-style decomp round, what should you draw FIRST on the whiteboard, and what counts as too early?",
+      "a": "**Draw:** `Inputs -> Logic -> Outputs` as three behavior boxes.\n\n- Boxes describe **behavior**, not tech, until implementation choices are explicitly on the table\n- Label inputs with data ('call audio, GPS, CAD logs'), not systems (`Kafka`)\n- Label logic with decisions ('classify urgency, route to nearest unit'), not frameworks\n\n**Antipattern:** writing `Kafka`, `Airflow`, or `OpenAI API` inside a box before scoping is an instant-reject signal - it commits you to a stack before you understand the problem."
+    },
+    {
+      "id": "fc-dec-14",
+      "q": "In a 60-min Palantir-style decomp round, what is the approximate time budget per phase?",
+      "a": "- **Clarify** - 10-15 min (success metric, users, constraints, data)\n- **Stakeholder map** - 3 min\n- **Data sources** - 5 min\n- **Tradeoffs** - 10 min (two phased options, recommendation)\n- **Failure modes** - 5 min (3 specific failures with detection + rollback)\n- **Buffer** - 10-15 min for whiteboard, interviewer questions, dead ends\n\nThe **shape** matters more than the exact minutes: clarify and tradeoffs should dominate."
+    },
+    {
+      "id": "fc-dec-15",
+      "q": "What are the three properties of a 'good' clarifying question in a decomp round?",
+      "a": "1. **Specific** - names a concrete dimension (latency, user role, frequency, data volume)\n2. **Falsifiable** - has a yes/no or A/B answer the interviewer can give in one sentence\n3. **Design-relevant** - the answer changes what you would build next\n\n**Antipattern:** vague openers like 'what does success look like?' or 'tell me more about the users' fail all three - they invite a monologue without branching your design."
+    },
+    {
+      "id": "fc-dec-16",
+      "q": "In a decomp round, what is the 'I don't know - you decide' trap and the correct response?",
+      "a": "**Trap:** bouncing ambiguity back to the interviewer ('what would you prefer?', 'what does the team usually do?') signals you cannot operate without a spec.\n\n**Correct response:**\n- State an explicit assumption out loud\n- Write it on the whiteboard so it is visible and correctable\n- Proceed as if it is true, then invite pushback\n\nExample: `I will assume daily batch ingestion; flag me if you want real-time.` The assumption is now a debuggable artifact, not a stalled conversation."
+    },
+    {
+      "id": "fc-dec-17",
+      "q": "In a Palantir-style decomp round, what is the interviewer actually grading?",
+      "a": "**They are grading HOW you think under ambiguity, not whether you pick the 'right' architecture.**\n\nPositive signals:\n- Clarify before solving\n- Name stakeholders beyond just end users\n- Surface tradeoffs with explicit alternatives\n- Anticipate failure modes with detection and rollback\n- State assumptions out loud\n\nKnowing the trendy tool (`LangChain`, `pgvector`, the model du jour) is irrelevant if you skipped the problem space. Process beats stack."
+    },
+    {
+      "id": "fc-dec-18",
+      "q": "What are the junior vs senior signal patterns in a Palantir-style decomp round?",
+      "a": "**Junior:**\n- Names tools first (`Kafka`, `Postgres`, OpenAI API) within 60 seconds\n- Proposes one solution, no alternatives\n- Treats the prompt as a complete spec\n- 'Add monitoring' as the only failure-mode answer\n\n**Senior:**\n- Scopes users, success metric, and constraints before drawing\n- Presents two phased options with explicit tradeoffs\n- Names 3 specific failure modes with detection + rollback\n- States assumptions out loud and invites pushback"
+    },
+    {
+      "id": "fc-dec-19",
+      "q": "Where did the decomposition interview format originate and where is it used today?",
+      "a": "- **Origin:** pioneered by **Palantir** for Forward Deployed Engineer (FDE) hiring, where engineers had to scope messy real-world problems with customers in the loop\n- **Today:** standard at **OpenAI**, **Anthropic**, and **Scale AI** for applied and research-engineering roles\n- **Shared bet:** messy real-world problems reveal judgment that LeetCode cannot - candidates who can scope, tradeoff, and anticipate failure beat candidates who only optimize algorithms"
+    },
+    {
+      "id": "fc-dec-20",
+      "q": "In a decomp round, when should you draw architecture on the whiteboard vs stay verbal?",
+      "a": "- **Stay verbal** during clarify and stakeholder mapping - drawing too early locks in a shape\n- **Draw** `Inputs -> Logic -> Outputs` once you have a scoped problem and an assumption-set the interviewer has not pushed back on\n- The diagram then anchors the **tradeoff** discussion: 'in Option A this box is batch, in Option B it is streaming'\n\n**Antipattern:** drawing in minute 2. You commit to a shape before you know the requirements and spend the rest of the round defending it."
+    },
+    {
+      "id": "fc-dec-21",
+      "q": "What are three common decomposition antipatterns that signal a coder, not an engineer?",
+      "a": "- **Tech-stack-first** - 'I would use `Spark` and `Snowflake`...' before scoping users or success metric\n- **Tool-as-solution** - 'use an LLM' without specifying inputs, outputs, or what the model decides\n- **Single-solution presentation** - one option, no alternative, no tradeoff named\n\nAll three skip the problem space and jump to implementation. The interviewer reads it as: this person can write code but cannot scope a project."
+    },
+    {
+      "id": "fc-dec-22",
+      "q": "In a decomp round, how do you handle a silent interviewer who is not nodding or asking follow-ups?",
+      "a": "**Pattern:** treat silence as 'show me more of your reasoning', not disapproval.\n\n- Keep thinking out loud\n- Check in with a forward-moving statement, not a question\n\nExample: `I am going to assume X and move to data sources - stop me if you want me to dig deeper here.`\n\n- Silence is rarely disapproval; it is usually the interviewer taking notes or waiting to see if you self-correct\n- Stalling out or asking 'is this right?' converts silence into a negative signal"
+    },
+    {
+      "id": "fc-dec-23",
+      "q": "Why should you sequence MVP-first in a decomp answer rather than leading with the fully-featured system?",
+      "a": "**Pattern:** pitch the simplest version that delivers value first, then layer enhancements.\n\nWhat each move signals:\n- **MVP first** - you can ship under constraints and have internalized cost\n- **Enhancements layered after** - you understand the roadmap and can sequence work\n- **Fully-featured system first** - you cannot prioritize, you over-engineer, you have not thought about cost or time to value\n\nThe MVP is not the answer - it is the **anchor** that lets you discuss tradeoffs around it."
+    },
+    {
+      "id": "fc-dec-24",
+      "q": "Logistics prompt: design a rerouting AI agent for a delivery fleet. What are three failure modes worth naming, each with detection and rollback?",
+      "a": "1. **GPS dropout** in tunnels or rural zones - detect with stale-timestamp checks on the location feed; fall back to last known route and notify driver\n2. **Model bias toward training-distribution cities** - monitor reroute success rate by region; if a new city underperforms, route traffic to the rule-based fallback and retrain\n3. **Cascading reroutes during incidents** (one accident triggers a storm of reroutes) - rate-limit per-driver reroutes and require human dispatcher approval above a threshold"
+    },
+    {
+      "id": "fc-dec-25",
+      "q": "In a decomp round, how do you frame failure modes for low-base-rate events (fraud, medical alerts, 911 high-priority calls)?",
+      "a": "**Pattern:** lead with **false-positive cost**, not raw accuracy.\n\n- At a 0.1% base rate, a 99% accurate model still drowns reviewers in false alarms (alert fatigue is the real failure)\n- Name the **precision target** explicitly, not just recall\n- Specify the **human-in-the-loop** step that gates action\n- Specify the **detect-and-rollback** mechanism for model drift (precision drops below threshold -> page on-call, route to manual review)\n\nAccuracy is a junior answer; precision under base-rate is the senior frame."
+    },
+    {
+      "id": "fc-dec-26",
+      "q": "In a decomp round, what does a stakeholder map add beyond just listing users?",
+      "a": "**Users** are who interacts with the system. **Stakeholders** are a strictly larger set:\n- Who **pays** for the system (budget owner)\n- Who is **regulated** by it (compliance, legal)\n- Who is **affected** but does not log in (the 911 caller, the patient, the driver being rerouted)\n- Who can **kill the project** (executive sponsor, head of safety)\n- Who is **on-call** when it breaks\n\nNaming the procurement lead, compliance officer, and on-call engineer scopes the problem in ways a pure user-story view misses."
+    }
+  ]
+}

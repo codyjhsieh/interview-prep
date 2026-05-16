@@ -1,0 +1,279 @@
+{
+  "cat": "domain",
+  "lessons": [
+    {
+      "id": "dai-1",
+      "type": "concept",
+      "name": "What AI-first companies (Deepgram, OpenAI, Anthropic) actually screen for",
+      "module_id": "dom-ai",
+      "module_name": "AI-first companies",
+      "cat": "domain"
+    },
+    {
+      "id": "dai-2",
+      "type": "concept",
+      "name": "Latency-critical AI (Deepgram, Tavily) \u2014 how to make AI fast",
+      "module_id": "dom-ai",
+      "module_name": "AI-first companies",
+      "cat": "domain"
+    },
+    {
+      "id": "dai-3",
+      "type": "concept",
+      "name": "Multimodal AI (Runway, Suno, Mirage) \u2014 the long-running-job pattern",
+      "module_id": "dom-ai",
+      "module_name": "AI-first companies",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-1",
+      "type": "concept",
+      "name": "Hospitality data model \u2014 entities, relationships, time-zone gotchas",
+      "module_id": "dom-hosp",
+      "module_name": "Hospitality / F&B",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-2",
+      "type": "concept",
+      "name": "Hospitality interview prompts \u2014 patterns you'll see",
+      "module_id": "dom-hosp",
+      "module_name": "Hospitality / F&B",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-3",
+      "type": "concept",
+      "name": "Reservation systems \u2014 inventory, overlap, race conditions",
+      "module_id": "dom-hosp",
+      "module_name": "Hospitality / F&B",
+      "cat": "domain"
+    },
+    {
+      "id": "dm-1",
+      "type": "concept",
+      "name": "Marketplace fundamentals \u2014 the five primitives",
+      "module_id": "dom-mkt",
+      "module_name": "Marketplace & fintech",
+      "cat": "domain"
+    },
+    {
+      "id": "dm-2",
+      "type": "concept",
+      "name": "Matching algorithms \u2014 greedy vs bipartite vs ML-ranked",
+      "module_id": "dom-mkt",
+      "module_name": "Marketplace & fintech",
+      "cat": "domain"
+    },
+    {
+      "id": "dm-3",
+      "type": "concept",
+      "name": "Fintech / payments (Coast) \u2014 the irreducible primitives",
+      "module_id": "dom-mkt",
+      "module_name": "Marketplace & fintech",
+      "cat": "domain"
+    },
+    {
+      "id": "dd-1",
+      "type": "concept",
+      "name": "Developer-tool north stars (Warp, Tavily)",
+      "module_id": "dom-dev",
+      "module_name": "Dev tools & infra",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-4",
+      "type": "concept",
+      "name": "Healthcare / regulated industry \u2014 what makes deployment different",
+      "module_id": "dom-dev",
+      "module_name": "Dev tools & infra",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-5",
+      "type": "concept",
+      "name": "Government / defense / public sector \u2014 Palantir-style FDE",
+      "module_id": "dom-dev",
+      "module_name": "Dev tools & infra",
+      "cat": "domain"
+    },
+    {
+      "id": "dh-6",
+      "type": "concept",
+      "name": "B2B SaaS at scale \u2014 PLG vs sales-led growth",
+      "module_id": "dom-dev",
+      "module_name": "Dev tools & infra",
+      "cat": "domain"
+    },
+    {
+      "id": "dd-2",
+      "type": "concept",
+      "name": "Enterprise LLM gateways (Credal) \u2014 what they actually do",
+      "module_id": "dom-dev",
+      "module_name": "Dev tools & infra",
+      "cat": "domain"
+    }
+  ],
+  "cards": [
+    {
+      "id": "fc-dom-1",
+      "cat": "domain",
+      "module": "dom-hosp",
+      "lesson": "dh-1",
+      "q": "Hospitality timezone gotcha?",
+      "a": "A venue's \"Saturday night\" crosses UTC midnight. Always compute venue-local timestamps before filtering by day-of-week. Common cause of \"wrong-day\" reports."
+    },
+    {
+      "id": "fc-dom-2",
+      "cat": "domain",
+      "module": "dom-mkt",
+      "lesson": "dm-1",
+      "q": "Marketplace cold-start playbook?",
+      "a": "Pre-seed one side (manually recruit, or fake demand), drive demand to it, prove utility in a single concentrated metro, then expand. Two-sided liquidity is the hardest problem."
+    },
+    {
+      "id": "fc-dom-3",
+      "cat": "domain",
+      "module": "dom-dev",
+      "lesson": "dh-4",
+      "q": "Healthcare deployment \u2014 biggest non-technical hurdle?",
+      "a": "8\u201316 week compliance review by the hospital's security team. Plan for this in your project timeline. Multi-tenant SaaS often DOA; single-tenant in customer VPC is standard."
+    },
+    {
+      "id": "fc-dom-4",
+      "cat": "domain",
+      "module": "dom-dev",
+      "lesson": "dh-4",
+      "q": "HIPAA BAA -- what is it and when do you need one?",
+      "a": "A Business Associate Agreement is a contract required whenever a vendor handles PHI on a covered entity's behalf. No BAA == no PHI can legally flow to you. Most cloud and LLM vendors offer BAAs only on specific (often higher-tier) plans, so confirm coverage before architecting."
+    },
+    {
+      "id": "fc-dom-5",
+      "cat": "domain",
+      "module": "dom-dev",
+      "lesson": "dh-5",
+      "q": "Defense / government FDE requirements?",
+      "a": "Air-gapped on-prem deploys + FedRAMP High / IL5 + cleared engineers. Procurement cycle is months-years."
+    },
+    {
+      "id": "fc-dom-6",
+      "cat": "domain",
+      "module": "dom-mkt",
+      "lesson": "dm-3",
+      "q": "Fintech ledger non-negotiables?",
+      "a": "Double-entry + append-only (never UPDATE/DELETE) + idempotent writes. Adjustments via offsetting entries. Audit trail is sacred."
+    },
+    {
+      "id": "fc-dom-7",
+      "cat": "domain",
+      "module": "dom-ai",
+      "lesson": "dai-3",
+      "q": "Multimodal AI UX challenge?",
+      "a": "Long-running inference (minutes). Need async job queue + WS/polling progress + content moderation pre+post-gen + cancellation tokens."
+    },
+    {
+      "id": "fc-dom-8",
+      "cat": "domain",
+      "module": "dom-ai",
+      "lesson": "dai-2",
+      "q": "Voice AI -- hardest UX problem in 2026?",
+      "a": "Turn-taking and barge-in (interruption) handling. Industry target is sub-500ms end-to-end via streaming STT to LLM to TTS overlap; neural turn-prediction models have replaced VAD-only silence detection. Low latency is necessary but not sufficient -- natural turn boundaries are what make it feel human."
+    },
+    {
+      "id": "fc-dom-9",
+      "cat": "domain",
+      "module": "dom-dev",
+      "lesson": "dh-6",
+      "q": "PLG vs SLG growth motion \u2014 which needs FDE?",
+      "a": "SLG (sales-led, enterprise customers). FDE is the customer-engineering arm. PLG companies usually don't need traditional FDE."
+    },
+    {
+      "id": "fc-dom-10",
+      "cat": "domain",
+      "module": "dom-mkt",
+      "lesson": "dm-2",
+      "q": "Matching algorithms \u2014 greedy vs ML?",
+      "a": "Greedy by rating starves new entrants. ML rank with diversity injection (5-10% to newer suppliers) keeps supply healthy."
+    },
+    {
+      "id": "fc-dom-11",
+      "cat": "domain",
+      "module": "dom-mkt",
+      "lesson": "dm-3",
+      "q": "ACH vs RTP vs wire -- when do you pick each?",
+      "a": "ACH is cheap (cents) and batch-settled in 1-3 business days, reversible, best for payroll and recurring debits. RTP/FedNow is instant (seconds), irrevocable, 24/7, capped (currently $1M on RTP), best for payouts and just-in-time funding. Wires are same-day, irrevocable, expensive ($15-30), and used for high-value B2B and real estate."
+    },
+    {
+      "id": "fc-dom-12",
+      "cat": "domain",
+      "module": "dom-mkt",
+      "lesson": "dm-3",
+      "q": "PCI DSS scope -- cheapest way to stay compliant?",
+      "a": "Never let raw PAN (card number) touch your servers. Use a tokenization vendor (Stripe Elements, Spreedly, Basis Theory) with an iframe or SDK so your environment qualifies for SAQ-A (the lightest level). Touching PAN in plaintext pushes you into SAQ-D and a full audit."
+    },
+    {
+      "id": "fc-dom-13",
+      "cat": "domain",
+      "module": "dom-mkt",
+      "lesson": "dm-3",
+      "q": "KYC vs KYB -- what's the practical difference?",
+      "a": "KYC verifies an individual (government ID, selfie, SSN, sanctions screening). KYB verifies a business (EIN, formation docs, UBO/beneficial owners >25%, then KYC on each). KYB is slower, manual, and the bottleneck for B2B fintech onboarding."
+    },
+    {
+      "id": "fc-dom-14",
+      "cat": "domain",
+      "module": "dom-dev",
+      "lesson": "dh-4",
+      "q": "FHIR vs HL7 v2 -- which do new healthcare integrations use?",
+      "a": "FHIR (REST/JSON, resource-oriented) is the modern standard and mandated for US patient-access APIs under ONC/CMS rules. HL7 v2 (pipe-delimited, MLLP/TCP) still dominates inside hospital walls for ADT, orders, and lab results. Greenfield integrations build on FHIR; integrations with legacy EHRs still require HL7 v2."
+    },
+    {
+      "id": "fc-dom-15",
+      "cat": "domain",
+      "module": "dom-dev",
+      "lesson": "dd-1",
+      "q": "Devtool north star -- why DAU/MAU misleads?",
+      "a": "Devtools are workflow tools, not consumer apps -- a developer using your CLI 3 days a week is highly engaged. Better north stars are integration-depth (commands run per active dev, languages/repos covered), retained weekly active devs, and time-to-first-value (signup to first successful call)."
+    },
+    {
+      "id": "fc-dom-16",
+      "cat": "domain",
+      "module": "dom-ai",
+      "lesson": "dai-1",
+      "q": "AI-first eval gating -- what is it?",
+      "a": "Treating evals as CI: every prompt or model change must pass a frozen golden-set with regression thresholds before merge. Combined with prompt versioning (prompts are code, stored in git, addressable by hash) and shadow traffic in prod. Without it, prompt edits silently regress quality."
+    },
+    {
+      "id": "fc-dom-17",
+      "cat": "domain",
+      "module": "dom-ai",
+      "lesson": "dai-2",
+      "q": "Model routing -- why production AI apps need it?",
+      "a": "Different requests have different cost/latency/quality needs. A router classifies the request (intent, length, sensitivity) and dispatches to the cheapest model that meets the SLO -- e.g. Haiku for classification, Sonnet for chat, Opus for hard reasoning. Cuts cost 5-10x vs always-Opus with negligible quality loss."
+    },
+    {
+      "id": "fc-dom-18",
+      "cat": "domain",
+      "module": "dom-hosp",
+      "lesson": "dh-1",
+      "q": "Hospitality -- why RevPAR beats occupancy as a north star?",
+      "a": "RevPAR (revenue per available room) = ADR x occupancy. Occupancy alone rewards fire-sale discounting; ADR alone rewards empty rooms. RevPAR captures the price-vs-fill tradeoff and is the industry-standard yield metric. Restaurants have an analog: revenue per available seat-hour (RevPASH)."
+    },
+    {
+      "id": "fc-dom-19",
+      "cat": "domain",
+      "module": "dom-hosp",
+      "lesson": "dh-3",
+      "q": "Restaurant POS integration -- why is it harder than it looks?",
+      "a": "POS systems (Toast, Square, Aloha, Micros) have inconsistent menu modeling (modifiers, combos, voids), partial real-time APIs (Toast is good; Aloha often requires polling or on-prem agents), and ticket-time semantics that vary by venue. Expect to write per-POS adapters and reconcile menu state nightly."
+    },
+    {
+      "id": "fc-dom-20",
+      "cat": "domain",
+      "module": "dom-dev",
+      "lesson": "dd-2",
+      "q": "Enterprise LLM gateway -- what core features must it have?",
+      "a": "Centralized API keys with per-team budgets and rate limits, PII redaction on egress, prompt/response logging for audit, model abstraction (swap providers without app changes), and SSO + RBAC. Sells to security/IT, not developers -- the buyer wants observability and a kill switch."
+    }
+  ]
+}

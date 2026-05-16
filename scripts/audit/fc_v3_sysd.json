@@ -1,0 +1,255 @@
+{
+  "cat": "sysd",
+  "rewrites": [
+    {
+      "id": "fc-sd-1",
+      "q": "What 4-step frame should you use to structure a system design interview answer?",
+      "a": "**Step 1 - Requirements:** functional needs plus non-functional (`QPS`, latency, consistency, durability).\n\n**Step 2 - Capacity estimate:** back-of-envelope numbers (users, writes/sec, storage growth).\n\n**Step 3 - High-level boxes:** API gateway, services, storage, async pipeline.\n\n**Step 4 - Deep dive:** pick one hard subproblem the interviewer signals interest in and go deep."
+    },
+    {
+      "id": "fc-sd-2",
+      "q": "When designing a multi-tenant SaaS database, how do silo, pool, and bridge isolation compare?",
+      "a": "**Silo** (DB per tenant)\n- Max isolation, easiest compliance story\n- Highest cost, hardest cross-tenant analytics\n\n**Pool** (shared DB + shared schema, `tenant_id` column)\n- Cheapest, easy ops\n- Noisy-neighbor risk; auditors distrust app-level filtering\n\n**Bridge** (shared instance, schema per tenant)\n- Logical isolation, per-tenant migrations\n- Middle-ground cost and isolation\n\nMatch the pattern to the customer's compliance posture."
+    },
+    {
+      "id": "fc-sd-3",
+      "q": "What belongs on a production webhook reliability checklist when you're the sender?",
+      "a": "- **HMAC sign** every payload over `(timestamp + raw body)`\n- Require client-supplied **idempotency keys**\n- **Exponential backoff** retries with a DLQ for poison messages\n- Dashboard for **manual replay**\n- Signed **timestamp + skew window** (e.g., 5 min) to block replay attacks\n- Documented **delivery-latency SLA** so consumers can alert"
+    },
+    {
+      "id": "fc-sd-4",
+      "q": "In consistent hashing, what is the cost of adding the Nth node to the ring?",
+      "a": "Roughly **`1/N` of keys remap** to the new node.\n\nWith **virtual nodes** (typically 100-200 vnodes per physical server), the load redistributes evenly across all existing nodes instead of being yanked from a single neighbor.\n\nWithout vnodes, the new node would inherit one neighbor's slice and create a hot spot."
+    },
+    {
+      "id": "fc-sd-5",
+      "q": "How do CAP and PACELC differ, and why is PACELC more useful in practice?",
+      "a": "**CAP:** during a network partition, you must choose **Consistency or Availability**.\n\n**PACELC:** adds the **E**lse clause: when there's no partition, you still trade **Latency vs Consistency**.\n\nPACELC is more useful because it covers the **steady-state** tradeoff (which is 99.9% of the time), not just the failure mode."
+    },
+    {
+      "id": "fc-sd-6",
+      "q": "When designing a social feed, when do you pick push fan-out, pull fan-out, or a hybrid?",
+      "a": "**Push** (fan-out-on-write)\n- Low read latency; precomputed timelines\n- Write amplification for users with millions of followers\n\n**Pull** (fan-out-on-read)\n- Cheap writes\n- Expensive reads for users who follow many accounts\n\n**Hybrid**\n- Push for normal users, pull for celebrities above a follower threshold\n- Best of both; standard at Twitter/Instagram scale"
+    },
+    {
+      "id": "fc-sd-7",
+      "q": "Why are idempotency keys non-negotiable for any side-effecting API like payments or email sends?",
+      "a": "**Mechanism:**\n- Client generates a unique key per logical operation (`charge_card`, `send_email`, `deploy`)\n- Server stores `(key, response)` in a dedupe table\n- Duplicate requests return the **cached response** instead of re-executing\n\n**Without this:** network retries, agent loops, and at-least-once queues cause **double-charges** and duplicate side effects."
+    },
+    {
+      "id": "fc-sd-8",
+      "q": "Why does naive per-server in-memory rate limiting fail in a load-balanced fleet?",
+      "a": "**Symptom:** a client hitting `N` servers can exceed the cap by `N`x. A 100 req/sec limit becomes 1000 req/sec across 10 instances.\n\n**Cause:** each server tracks counters **independently** with no shared state.\n\n**Fix:** centralized `Redis` sliding-window counter, mutated by a **Lua script** so the read-modify-write is atomic across all app servers."
+    },
+    {
+      "id": "fc-sd-9",
+      "q": "Which multi-tenancy isolation pattern should you propose for a regulated enterprise customer demanding data residency?",
+      "a": "**Silo** (DB-per-tenant) is the default safe answer, or at minimum **bridge** (schema-per-tenant).\n\n**Why pool fails:**\n- Tenant separation is enforced in **app code** via `tenant_id` filters\n- Auditors treat this as insufficient for `HIPAA`, `SOC 2 Type II`, or `GDPR` data-residency claims\n- One missing `WHERE tenant_id = ?` clause leaks data across tenants"
+    },
+    {
+      "id": "fc-sd-10",
+      "q": "In a hybrid feed system, what celebrity-threshold heuristic flips a user from push to pull fan-out?",
+      "a": "Above some follower count (commonly **`1M+`**), switch that user from push to pull.\n\n**How it works:**\n- The celebrity's posts are NOT fanned out at write time\n- Their followers **query the celebrity's timeline** at read time\n- The follower's feed merges their pushed feed with pulled celebrity posts\n\nThis caps write amplification per post at the threshold."
+    },
+    {
+      "id": "fc-sd-11",
+      "q": "When does the CAP tradeoff actually bind a distributed system?",
+      "a": "**Only during a network partition.**\n\nOn a healthy network you can have strong consistency AND availability simultaneously.\n\nThe CAP choice is what your system does when nodes **can't talk to each other**:\n- **AP:** serve stale or divergent data\n- **CP:** refuse writes until quorum is restored\n\nMost of the time you're not partitioned, so PACELC matters more."
+    },
+    {
+      "id": "fc-sd-12",
+      "q": "How do you classify Cassandra vs Spanner under PACELC?",
+      "a": "**`Cassandra` = PA/EL**\n- During Partition: Available (tunable per-query consistency)\n- Else: Latency-optimized (eventual consistency by default)\n\n**`Spanner` = PC/EC**\n- During Partition: Consistent (refuses writes without quorum)\n- Else: Consistent via `TrueTime` + Paxos (pays latency cost)\n\nDifferent defaults, different workloads: high-throughput writes vs global strong consistency."
+    },
+    {
+      "id": "fc-sd-13",
+      "q": "Why do consistent-hashing implementations use virtual nodes instead of one slot per server?",
+      "a": "**Without vnodes:**\n- Adding one node pulls `~1/N` of load **from a single neighbor**\n- Creates hot spots during scale events\n- Variance in slice sizes leads to uneven baseline load\n\n**With vnodes** (~100-200 per physical node):\n- New node draws load **evenly from every existing node**\n- Removal is the inverse: load spreads across all survivors\n- Smoothes out hash-ring variance"
+    },
+    {
+      "id": "fc-sd-14",
+      "q": "Why is true exactly-once delivery impossible across system boundaries, and what do you do instead?",
+      "a": "**Why impossible:** network failures make it indistinguishable whether the message was delivered and the ack was lost, or the message was lost.\n\n**Practical answer:**\n- **At-least-once delivery + idempotent receivers** (the standard pattern)\n- At-most-once only if loss is acceptable\n\n**`Kafka`'s 'exactly-once':** scoped to a single Kafka transaction (producer to consumer within Kafka), not end-to-end across external systems."
+    },
+    {
+      "id": "fc-sd-15",
+      "q": "What two patterns prevent a cache stampede when a popular key expires?",
+      "a": "**Pattern 1 - Singleflight / request coalescing**\n- Only one request rebuilds the value\n- All other concurrent requests **wait on the in-flight result**\n- Prevents `N` duplicate origin calls\n\n**Pattern 2 - Refresh-ahead**\n- Rebuild the value **before TTL expires**\n- Serve the stale value during recomputation\n- No thundering herd because the cache is never empty"
+    },
+    {
+      "id": "fc-sd-16",
+      "q": "When one key in Redis becomes a hot key, how do you fix it?",
+      "a": "**Symptom:** one `Redis` node CPU-pegged while the rest sit idle.\n\n**Cause:** consistent hashing maps a single key to a single node; traffic concentration on that key can't be sharded away.\n\n**Fix:** **replicate the hot key** across `N` shards as `key_1..key_N`.\n- Clients pick a random replica for reads\n- Writes fan out to all `N` (acceptable for read-heavy hot keys)\n- Scales read throughput linearly with replica count"
+    },
+    {
+      "id": "fc-sd-17",
+      "q": "Why use Redis with Lua scripts for a global rate limiter instead of in-memory counters?",
+      "a": "**Lua scripts run atomically on the Redis server**, so the read-modify-write of a sliding-window counter happens in a single hop with no race condition across `N` application servers.\n\n**Why in-memory fails:**\n- Each app server tracks its own counter\n- Client hitting 10 servers gets 10x the intended limit\n- No global enforcement is possible without shared state"
+    },
+    {
+      "id": "fc-sd-18",
+      "q": "When rate-limiting an API, when do you pick token bucket over sliding-window counter?",
+      "a": "**Token bucket**\n- Allows **bursts up to bucket size**, then refills at a steady rate\n- Good for API quotas that should absorb spikes (e.g., batch jobs)\n\n**Sliding-window counter**\n- Cheap and approximate (`O(1)` memory per key)\n- **Smooths traffic** but rejects bursts\n- Good for protecting fragile backends\n\n**Rule:** pick by how much burstiness you want to tolerate."
+    },
+    {
+      "id": "fc-sd-19",
+      "q": "How do you size the idempotency-key TTL on a webhook receiver?",
+      "a": "**Rule:** TTL must exceed the **sender's max retry window**.\n\n**Reference points:**\n- `Stripe` retries up to ~3 days\n- Some platforms retry for up to a week\n\n**Failure modes:**\n- **TTL too short:** late retries slip past the dedupe table and cause **duplicate processing**\n- **TTL too long:** storage grows unboundedly\n\nCheck the docs for every sender you ingest from."
+    },
+    {
+      "id": "fc-sd-20",
+      "q": "When two users send messages in a chat conversation simultaneously, how do you order them deterministically?",
+      "a": "**Server-assigned monotonic per-conversation sequence number**, issued by whichever shard owns that conversation.\n\n**Why not wall-clock timestamps:**\n- Client clocks drift\n- Server clocks across regions drift\n- Ties are common at millisecond resolution\n\nA deterministic per-conversation sequence guarantees **the same ordering for every viewer** of the chat."
+    },
+    {
+      "id": "fc-sd-21",
+      "q": "Range sharding vs hash sharding: when do you pick range?",
+      "a": "**Range sharding** (pick when):\n- Queries need ordered scans (`BETWEEN`, `ORDER BY date`)\n- Time-series or pagination workloads\n- Risk: **hot partitions** when writes concentrate on a recent range (today's date)\n\n**Hash sharding** (default):\n- Distributes load evenly\n- Destroys range queries; scatter-gather across all shards\n- Use a **composite key** (hash + range) to get both"
+    },
+    {
+      "id": "fc-sd-22",
+      "q": "Read replicas break read-your-writes consistency for a user who just posted; what's the standard fix?",
+      "a": "**Session pinning.**\n\n**Mechanism:**\n1. User writes through the primary, server captures the LSN (or sets a timer for `N` seconds)\n2. For that user's subsequent reads, route to the **primary** until the LSN reaches the replica (or the timer expires)\n3. Other users keep reading from replicas\n\n**Result:** the writer sees their own update; you preserve read scale for everyone else."
+    },
+    {
+      "id": "fc-sd-23",
+      "q": "What is the saga pattern for distributed transactions, and when do you use it?",
+      "a": "**Mechanism:**\n1. Break a transaction into a sequence of **local steps**, each owned by one service\n2. Each step has a **compensating action** that semantically undoes it\n3. On failure mid-sequence, run compensations **in reverse order**\n\n**When to use:**\n- 2PC is impractical (cross-service, cross-region, third-party APIs)\n- You can tolerate **eventual consistency** between steps\n- Standard for microservices and payment flows"
+    },
+    {
+      "id": "fc-sd-24",
+      "q": "What does a circuit breaker do, and what are its three states?",
+      "a": "**Goal:** prevent cascading failures when a downstream dependency is unhealthy.\n\n**States:**\n1. **CLOSED:** calls pass through normally; track failure rate\n2. **OPEN:** after `N` failures or `X%` failure rate, fast-fail without calling downstream\n3. **HALF_OPEN:** after a cooldown, allow limited probe traffic; success closes the breaker, failure re-opens it\n\nProtects upstream from running out of threads/connections waiting on a dead dependency."
+    },
+    {
+      "id": "fc-sd-25",
+      "q": "In an event-sourced system, where is the source of truth and how do reads work?",
+      "a": "**Source of truth:** an **append-only event log**. Current state is derived by **replaying events**.\n\n**Reads (CQRS):**\n- **Read-model projections** consume the log and build query-optimized views\n- **Snapshots** speed up replay (skip ahead, replay from snapshot)\n- Projections can be **rebuilt from scratch** at any time by re-reading the log\n\nLog retention = your history; projections = your indexes."
+    },
+    {
+      "id": "fc-sd-26",
+      "q": "What back-of-envelope latency numbers should you have memorized for capacity planning?",
+      "a": "- **`L1` cache:** `~1 ns`\n- **Main memory:** `~100 ns`\n- **SSD random read:** `~100 us`\n- **Network RTT within a DC:** `~0.5 ms`\n- **Disk seek (HDD):** `~10 ms`\n- **Cross-region RTT:** `~50-150 ms`\n\nThese numbers tell you whether a design needs **caching** (DB too slow), **replication** (cross-region too slow), or **async** (anything user-facing must be sub-second)."
+    },
+    {
+      "id": "fc-sd-27",
+      "q": "How do you quickly estimate QPS for a system with 100M DAU and 10 requests per user per day?",
+      "a": "**Math:**\n- `100M * 10 = 1B requests/day`\n- `1B / 86400 sec ~= 11.5k QPS average`\n- Peak is typically **2-5x average** -> plan for `~30-60k QPS`\n\n**Rule:** capacity-plan to **peak, not average**, and add headroom (~30%) for retries and bursts.\n\nThis kind of estimate should take 30 seconds on the whiteboard."
+    },
+    {
+      "id": "fc-sd-28",
+      "q": "Token bucket vs leaky bucket: what's the difference and when do you pick each?",
+      "a": "**Token bucket**\n- Tokens accumulate up to a max\n- **Bursts allowed** up to bucket size\n- Common for API quotas (Stripe, AWS)\n\n**Leaky bucket**\n- Requests drain at a **fixed rate** from a queue\n- Bursts are **smoothed but queued** (adds latency)\n- Common for traffic shaping (network routers)\n\n**Rule:** token bucket lets clients burst; leaky bucket forces them to spread out."
+    },
+    {
+      "id": "fc-sd-29",
+      "q": "Cache-aside vs write-through vs write-behind: when do you use each pattern?",
+      "a": "**Cache-aside** (lazy loading)\n- App reads cache; on miss, reads DB and populates cache\n- Most common; simple; cache can go stale\n\n**Write-through**\n- Writes go to cache + DB **synchronously**\n- Cache stays consistent; writes are slower\n- Good when reads dominate and staleness is unacceptable\n\n**Write-behind** (write-back)\n- Writes hit cache; DB is updated **async**\n- Fast writes; risks data loss on cache crash\n- Use only for tolerable-loss data (metrics, counters)"
+    },
+    {
+      "id": "fc-sd-30",
+      "q": "LRU vs LFU cache eviction: when does each win?",
+      "a": "**`LRU`** (least-recently-used)\n- Evicts the entry untouched longest\n- Good for **recency-biased** workloads (news feeds, sessions, recent files)\n- Simple to implement (`O(1)` with hashmap + doubly-linked list)\n\n**`LFU`** (least-frequently-used)\n- Evicts the entry with the lowest hit count\n- Good for **stable hot sets** where one-time bursts shouldn't evict popular items\n- Needs **decay** (e.g., `TinyLFU`) to forget historical frequencies"
+    },
+    {
+      "id": "fc-sd-31",
+      "q": "Sync vs async replication: what's the tradeoff and when do you pick each?",
+      "a": "**Sync replication**\n- Primary waits for replica ack before responding\n- **Zero data loss** (`RPO = 0`) but **higher latency**\n- Write stalls if a replica is slow or down\n\n**Async replication**\n- Primary responds immediately; replicates in background\n- **Low latency** but `RPO > 0` on primary failure\n- Standard for cross-region replication\n\n**Semi-sync:** wait for **one** replica's ack (compromise; common in `MySQL`, `Postgres`)."
+    },
+    {
+      "id": "fc-sd-32",
+      "q": "In Raft, what triggers a new leader election?",
+      "a": "**Trigger:** a follower's **randomized election timeout** expires without receiving a heartbeat from the leader (typical range `150-300 ms`).\n\n**Sequence:**\n1. Follower increments its `term` and becomes a **candidate**\n2. Votes for itself, sends `RequestVote` RPCs to all peers\n3. Wins if it receives a **majority quorum** of votes\n4. On win, sends heartbeats and becomes leader\n\n**Why randomized:** prevents split votes when multiple followers time out simultaneously."
+    },
+    {
+      "id": "fc-sd-33",
+      "q": "Raft vs Paxos: what's the practical difference?",
+      "a": "Both achieve consensus over an asynchronous network with **majority quorum**.\n\n**`Raft`**\n- Designed for **understandability**\n- Explicit **leader, log replication, election** as named subproblems\n- Standard in `etcd`, `Consul`, `CockroachDB`, `TiKV`\n\n**`Paxos` (Multi-Paxos)**\n- Older, more flexible\n- **Notoriously hard** to implement correctly\n- Used in `Spanner`, `Chubby`, `ZooKeeper` (ZAB is a Paxos variant)"
+    },
+    {
+      "id": "fc-sd-34",
+      "q": "2PC vs saga for distributed transactions: which dominates in microservices and why?",
+      "a": "**`2PC` (two-phase commit)**\n- `prepare` + `commit` across all participants\n- **Blocks if coordinator fails** (participants hold locks indefinitely)\n- Requires `XA`-capable resources\n- Rare in modern microservices\n\n**Saga**\n- Chain of local transactions with **compensations**\n- Non-blocking; eventually consistent; no global lock\n- Works across services, regions, and third-party APIs\n\n**Sagas dominate** because microservices can't afford `2PC`'s blocking semantics."
+    },
+    {
+      "id": "fc-sd-35",
+      "q": "What dual-write problem does the transactional outbox pattern solve?",
+      "a": "**Problem:** if you write to the DB then publish to `Kafka` as two separate operations, a crash between them leaves DB and message broker **out of sync**.\n\n**Solution:**\n1. In the same DB transaction, write the business row AND insert into an **`outbox` table**\n2. A relay process (or `CDC`) **reads from `outbox`** and publishes to the broker\n3. Mark rows as published (or delete) after broker ack\n\n**Guarantee:** at-least-once delivery, atomic with the DB commit."
+    },
+    {
+      "id": "fc-sd-36",
+      "q": "CDC vs polling for draining the outbox table: which do you pick?",
+      "a": "**Polling**\n- Read the `outbox` table on a schedule\n- Simple but adds latency (poll interval)\n- Bad cursors can miss rows; needs careful watermarking\n\n**`CDC`** (Change Data Capture)\n- Tools like `Debezium` or `Postgres` logical replication tail the `WAL`\n- Streams changes in **near real-time** with no app changes\n- Handles ordering and exactly-once-per-change semantics\n\n**`CDC` is the modern default** for high-volume systems."
+    },
+    {
+      "id": "fc-sd-37",
+      "q": "In Kafka, how is message ordering guaranteed and what does that mean for partition-key design?",
+      "a": "**Guarantee:** ordering is guaranteed **only within a single partition**.\n\n**Mechanism:**\n- Producers pick partition by **key hash** (same key -> same partition)\n- To preserve **per-entity order** (e.g., per user, per account), use that entity's ID as the partition key\n- Cross-partition order is **not guaranteed**\n\n**Tradeoff:** keying narrowly preserves order but risks **hot partitions**; keying broadly distributes load but loses entity-level ordering."
+    },
+    {
+      "id": "fc-sd-38",
+      "q": "Kafka vs SQS vs Kinesis vs RabbitMQ: which do you pick for which workload?",
+      "a": "**`Kafka`**\n- High throughput, **replayable log**, consumer groups\n- You operate it (or `MSK`/`Confluent` Cloud)\n\n**`SQS`**\n- Simple managed queue; no ordering (standard) or `FIFO` with low throughput\n- Best for decoupling work, not event streaming\n\n**`Kinesis`**\n- AWS-managed log similar to Kafka; tight AWS integration; lower throughput ceiling\n\n**`RabbitMQ`**\n- Rich routing (topics, headers, RPC); lower throughput; classic queue semantics"
+    },
+    {
+      "id": "fc-sd-39",
+      "q": "When designing webhook signature verification, what exactly goes into the HMAC?",
+      "a": "**Input:** `HMAC-SHA256(timestamp + raw_body, shared_secret)`\n\n**Receiver checks:**\n- Signature matches\n- **Timestamp within skew window** (e.g., 5 min) to block replay\n- Secret has been **rotated** within the rotation window\n\n**Critical detail:** sign the **raw body bytes**, not the parsed JSON. Re-serialization changes whitespace and key order, breaking verification."
+    },
+    {
+      "id": "fc-sd-40",
+      "q": "What's the difference between SAML SP-initiated and IDP-initiated flows, and which is preferred?",
+      "a": "**SP-initiated** (preferred)\n1. User visits the app (SP)\n2. SP redirects to IDP with an `AuthnRequest`\n3. User authenticates at IDP\n4. IDP posts a **signed assertion** back to the SP's `ACS` URL\n\n**IDP-initiated**\n1. User starts at the IDP dashboard (e.g., Okta tile)\n2. IDP posts the assertion directly to the SP\n\n**SP-init is more secure** because the SP issues the `AuthnRequest` and can validate the response was solicited (prevents unsolicited assertion attacks)."
+    },
+    {
+      "id": "fc-sd-41",
+      "q": "When selling enterprise SSO, when do you pick OIDC vs SAML, and what does SCIM add?",
+      "a": "**`OIDC`** (OAuth 2.0 + identity layer)\n- `JWT` ID tokens, JSON over HTTPS\n- Pick for **modern web/mobile** apps\n\n**`SAML`** (XML assertions, older)\n- Dominant in **enterprise B2B**\n- Required when selling to customers whose IDPs (`Okta`, `Azure AD`, `ADFS`) are SAML-first\n\n**`SCIM`** (System for Cross-domain Identity Management)\n- **User provisioning/deprovisioning** protocol\n- Works alongside both `OIDC` and `SAML`\n- Required for enterprise lifecycle automation"
+    },
+    {
+      "id": "fc-sd-42",
+      "q": "In a BYOC (bring-your-own-cloud) deploy, what does the vendor manage vs what stays in the customer's account?",
+      "a": "**Vendor's account** (control plane)\n- Orchestration, billing, deployment automation, vendor-side observability\n\n**Customer's VPC/account** (data plane)\n- Runtime workloads, customer data storage, customer-controlled networking\n- Customer data **never leaves their cloud**\n\n**Glue:** vendor uses **cross-account `IAM` roles** to deploy and manage the data plane.\n\n**Tradeoff:** costs the vendor more (per-customer infra), but unlocks regulated industries (finance, healthcare, gov)."
+    },
+    {
+      "id": "fc-sd-43",
+      "q": "When designing a URL shortener, what are the main short-code generation strategies?",
+      "a": "**Strategy 1 - Hash + base62**\n- `hash(url)`, take top `N` chars, base62-encode\n- Deterministic; needs collision check\n\n**Strategy 2 - Auto-increment ID + base62**\n- Compact; sequential\n- **Leaks total volume** to anyone who looks\n\n**Strategy 3 - Pre-generated pool**\n- Generate random codes offline, hand out from a queue\n- No write contention; easy to scale\n\n**Sizing:** 7 base62 chars = `62^7 ~= 3.5T codes`."
+    },
+    {
+      "id": "fc-sd-44",
+      "q": "How do hedged requests reduce p99 latency, and what's the cost?",
+      "a": "**Mechanism:**\n1. Send the request to **one replica**\n2. If no response within (e.g.) `p95` latency, send a **duplicate to a second replica**\n3. Take whichever returns first\n4. **Cancel the loser** to save work\n\n**Result:** dramatic `p99` reduction with low extra load (only the slow ~5% are duplicated).\n\n**Origin:** Google's 'The Tail at Scale' paper.\n\n**Caveat:** requires idempotent reads; not safe for side-effecting calls without dedup."
+    },
+    {
+      "id": "fc-sd-45",
+      "q": "In W3C trace context, which header propagates the trace across service boundaries?",
+      "a": "**`traceparent` header** carries:\n- `version` (1 byte)\n- `trace-id` (16 bytes, unique per request)\n- `parent-span-id` (8 bytes, the caller's span)\n- `flags` (sampling, etc.)\n\n**`tracestate` header** carries vendor-specific metadata.\n\n**Rule:** every service MUST propagate `traceparent` on outgoing calls so spans across services **join into one trace**. `OpenTelemetry` SDKs handle this automatically via context propagation."
+    },
+    {
+      "id": "fc-sd-46",
+      "q": "What are the three pillars of observability and what question does each answer?",
+      "a": "**Logs** - 'what happened?'\n- Discrete events; high cardinality\n- Expensive at scale; best for forensics\n\n**Metrics** - 'how much / how often?'\n- Aggregated time series; cheap\n- Best for **alerting** and dashboards\n\n**Traces** - 'how did this request flow?'\n- Latency breakdown per span; dependency mapping\n- Best for debugging **cross-service** slowness\n\nYou need all three; **none subsumes the others**."
+    },
+    {
+      "id": "fc-sd-47",
+      "q": "What is a 'cell' in cell-based architecture, and what problem does it solve?",
+      "a": "**Cell:** an isolated, full-stack slice of the system (compute + DB + cache) that serves a **partition of users**.\n\n**Properties:**\n- Cells share nothing at runtime\n- A **router** maps tenant -> cell\n- Bad deploys, noisy tenants, and bugs are contained to **one cell**\n\n**Problem solved:** **blast radius** of any failure is capped at `1/N` of users.\n\n**Used by:** `AWS` (many services), `Slack`, `Stripe`, `Shopify`."
+    },
+    {
+      "id": "fc-sd-48",
+      "q": "When picking a wire format, when do you pick gRPC vs REST vs GraphQL?",
+      "a": "**`gRPC`**\n- Internal **service-to-service**\n- Strong typing (`protobuf`), `HTTP/2` streaming, low latency\n- Bad for browsers without a proxy\n\n**`REST`**\n- **Public APIs**; broadest client support\n- HTTP caching; easy to debug with `curl`\n\n**`GraphQL`**\n- **Client-driven queries**; avoids over/under-fetching\n- Good for mobile and aggregation layers over many backends\n- Caching and rate-limiting are harder\n\n**Rule:** pick by client (browser/mobile/internal) and evolution needs."
+    },
+    {
+      "id": "fc-sd-49",
+      "q": "For vector search at billion-scale, how do HNSW, IVF, and PQ compare?",
+      "a": "**`HNSW`** (Hierarchical Navigable Small World)\n- Hierarchical graph index\n- **High recall, low latency**\n- **High memory** (full vectors in RAM)\n\n**`IVF`** (Inverted File Index)\n- Cluster vectors into Voronoi cells\n- Query scans top-`N` cells\n- **Lower memory**, tunable recall via `nprobe`\n\n**`PQ`** (Product Quantization)\n- Compress vectors into short codes\n- `8-16x smaller`; **lossy**\n\n**Production stacks** often combine **`IVF + PQ`** for billion-scale recall/cost tradeoffs."
+    },
+    {
+      "id": "fc-sd-50",
+      "q": "What geo-indexing structure do you use for real-time ride-matching at Uber scale?",
+      "a": "**`Geohash` or `S2` cell IDs** as the shard/index key.\n\n**Mechanism:**\n1. Drivers publish `(cell_id, lat, lng)` every few seconds to `Redis` **sorted sets** keyed by cell\n2. To match a rider, query **nearby cells** (neighboring geohashes or `S2` cover of the search radius)\n3. Pick the closest driver from the union\n\n**Alternatives:**\n- **Quadtrees / R-trees** for variable-density regions (e.g., dense urban + sparse rural in one index)"
+    }
+  ]
+}

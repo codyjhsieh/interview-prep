@@ -1,0 +1,95 @@
+{
+  "cat": "client",
+  "rewrites": [
+    {
+      "id": "fc-cli-1",
+      "q": "A customer's production integration just went down during their launch window and they call you furious. How do you run the ADO framework live?",
+      "a": "**Acknowledge:** mirror the impact in their words, not boilerplate.\n- 'I hear this is blocking your launch today.'\n\n**Diagnose:** think out loud so they see motion.\n- 'Pulling the logs now, can you confirm the last known good time?'\n\n**Offer:** commit a concrete next checkpoint with an owner.\n- 'Fix or workaround by 4pm, written update either way.'\n\nNever blame their environment in the moment."
+    },
+    {
+      "id": "fc-cli-2",
+      "q": "Interviewer asks you to demonstrate ADO with one literal sentence per phase. What do you say?",
+      "a": "**Acknowledge:**\n- 'I hear this is blocking your launch.'\n\n**Diagnose:**\n- 'Checking the logs now, can you confirm when it last worked?'\n\n**Offer:**\n- 'I'll have a fix or a workaround by 4pm, and I'll send a written update either way.'\n\nEach sentence names impact, action, or a time-bound commit, never feelings or filler."
+    },
+    {
+      "id": "fc-cli-3",
+      "q": "Your live demo crashes mid-presentation in front of the customer's executive team. How do you recover?",
+      "a": "**Acknowledge:** name it, do not minimize.\n- 'That's not the experience I wanted to show, let me get you a working view.'\n\n**Diagnose + show progress on two tracks:**\n- Visible track: switch to recorded demo or screenshots.\n- Backend track: someone debugs in parallel.\n\n**Offer:**\n- Written RCA within 24 hours, do not blame their network in the room."
+    },
+    {
+      "id": "fc-cli-4",
+      "q": "A customer demands 6 weeks of work in 3 days. How do you respond without saying yes or no on the spot?",
+      "a": "**Diagnose the real deadline first:**\n- 'What happens on day 4 if this isn't done?' Stated deadlines are often softer than real ones.\n\n**Decompose to the 20% that unblocks them:**\n- Find the minimum slice that hits their actual outcome.\n\n**Offer with explicit tradeoffs:**\n- Two options, cut scope or slip date, written so they choose."
+    },
+    {
+      "id": "fc-cli-5",
+      "q": "You fixed a customer-facing bug yesterday and the exact same symptom returns 2 hours later. How do you respond?",
+      "a": "**Acknowledge as Sev1, not as a regression debate:**\n- 'Treating this as Sev1, the prior fix did not hold.'\n\n**Diagnose visibly:**\n- Commit to specific timeline, status update every 4 hours.\n\n**Offer:**\n- Written RCA covering why the first fix missed.\n\nDefending the original fix in the moment kills trust faster than the bug did."
+    },
+    {
+      "id": "fc-cli-6",
+      "q": "How should you format a weekly written status update so a busy customer actually reads it?",
+      "a": "Four labeled bullets, lead with outcomes not activity:\n\n- **Shipped this week:** what landed in their hands.\n- **In flight:** what's moving, with owner.\n- **Risks / blockers:** what could slip and what you need.\n- **Next week:** the one or two things that matter.\n\nFive short bullets beat three paragraphs every time."
+    },
+    {
+      "id": "fc-cli-7",
+      "q": "The customer's IT or security team is blocking your integration on policy grounds. How do you move forward?",
+      "a": "**Acknowledge their mandate, do not route around them:**\n- 'You own this risk, I want to make it easy to clear.'\n\n**Diagnose what they actually need:**\n- Ask which control or framework, SOC2 vs internal policy.\n\n**Offer a structured security review:**\n- SOC2 docs, architecture diagram, sub-processor list, named security contact.\n\nBypassing IT wins the week and loses the account."
+    },
+    {
+      "id": "fc-cli-8",
+      "q": "Your main customer-side champion just told you they're leaving the company in 3 weeks. What do you do?",
+      "a": "- Treat champion loss as a **retention risk event**, not a goodbye email.\n- Ask for a warm intro to the replacement before they leave.\n- Re-confirm scope, timeline, and success metrics with the new owner in writing.\n- Get the outgoing champion to forward the last status update with context.\n- Flag the transition internally so account and exec sponsors know."
+    },
+    {
+      "id": "fc-cli-9",
+      "q": "A CFO asks why your AI model gave a different number this week than last week on the same input. How do you explain stochastic variability?",
+      "a": "- Lead with a **weather forecast analogy**, same inputs, distribution of outcomes.\n- Show the **confidence range**, not just the point estimate.\n- Anchor on the **95th-percentile worst case** so they can plan around it.\n- Point to **leading indicators** that tell you when the range is widening.\n\nCFOs trust quant ranges, not adjectives."
+    },
+    {
+      "id": "fc-cli-10",
+      "q": "Walk through what each letter of ADO actually means in a client-sim round.",
+      "a": "**Acknowledge:**\n- Mirror impact in the customer's words, not 'sorry for the inconvenience.'\n\n**Diagnose:**\n- Think out loud so they see progress and can add context.\n\n**Offer:**\n- A concrete next step with a named owner and a time, even if the step is just 'I'll write back by 5pm.'"
+    },
+    {
+      "id": "fc-cli-11",
+      "q": "Mid-roleplay, the interviewer asks a technical question you genuinely don't know. How do you recover without bluffing?",
+      "a": "- Say **'I don't know yet'**, not 'I don't know.'\n- State **what you would check** to find out, e.g. 'I'd pull the request logs and check the auth layer.'\n- Commit to a **time** you'll come back with the answer.\n- Move the conversation forward, do not stall on the unknown.\n\nBluffing is the single fastest way to fail the round."
+    },
+    {
+      "id": "fc-cli-12",
+      "q": "A customer asks for something you think is a mistake. When do you push back and when do you just do it?",
+      "a": "**Push back when it hurts their outcome:**\n- Bad data, unsafe rollout, wrong success metric.\n\n**Acquiesce on low-cost preference items:**\n- UI choices, report format, naming.\n\n**Always name the tradeoff out loud:**\n- 'If we ship it that way, here's the risk, the call is yours.'\n\nThe choice stays theirs, the framing stays yours."
+    },
+    {
+      "id": "fc-cli-13",
+      "q": "You need to tell a customer that a promised feature is going to slip by 2 weeks. How do you structure the message?",
+      "a": "- **Lead with the headline and impact** in sentence one, not the backstory.\n- State **what you're doing about it** and who owns each piece.\n- Name the **next checkpoint** with a date.\n- Offer a workaround if one exists.\n\nBurying bad news mid-paragraph or waiting for the next standing meeting is the anti-pattern interviewers flag."
+    },
+    {
+      "id": "fc-cli-14",
+      "q": "What are the top anti-patterns that fail candidates in a client simulation round?",
+      "a": "- **Defensiveness:** 'well, actually...' or arguing the customer's framing.\n- **Blaming their environment** or team in the live moment.\n- **Over-promising a fix time** you cannot hit.\n- **Ending the turn without a committed next step** (no owner, no time).\n\nAny one of these is usually a no-hire signal on its own."
+    },
+    {
+      "id": "fc-cli-15",
+      "q": "You're 3 weeks into an engagement and something is going sideways. When and how should you escalate to your manager?",
+      "a": "**Escalate when:**\n- The issue threatens the contract or renewal.\n- It needs a resource or policy decision above your level.\n- You've missed a committed timeline twice.\n\n**How to escalate:**\n- Lead with a **recommendation**, not a problem dump.\n- 'Here's what's happening and what I'd like to do, I need X from you.'\n- Escalate early, surprises cost more than asks."
+    },
+    {
+      "id": "fc-cli-16",
+      "q": "Halfway through the engagement, you realize the original scope won't fit the deadline. How do you renegotiate without losing trust?",
+      "a": "- **Re-anchor on the business outcome**, not the feature list.\n- Show the **current burn-down** so the math is shared, not asserted.\n- Present **two options with explicit tradeoffs**:\n- Cut scope X, hit the original date.\n- Keep scope X, slip the date by N weeks.\n- Let the customer pick. **Never silently de-scope**, that is how trust dies."
+    },
+    {
+      "id": "fc-cli-17",
+      "q": "Your data shows the project the customer wants to build won't hit their business goal. How do you recommend killing it gracefully?",
+      "a": "- Frame the recommendation as **protecting their outcome**, not retreating.\n- Show the **data** on why the current path misses the goal.\n- Propose the **smaller bet** that would hit it instead.\n- Offer to **keep the relationship warm** even if they pause.\n\nCredibility goes up, not down, when you can say 'we shouldn't build this.'"
+    },
+    {
+      "id": "fc-cli-18",
+      "q": "What signals are client-sim interviewers actually grading you on behind the rubric?",
+      "a": "- **Composure under pressure:** no flinching, no filler words, no defensive tone.\n- **Customer-first framing:** their outcome named before your product.\n- **Concrete next step:** owner + time + written follow-up committed in the turn.\n- **Clean ADO loop:** every reply ends with an Offer, not a feeling.\n\nPolish matters less than landing the loop."
+    }
+  ]
+}
