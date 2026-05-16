@@ -832,10 +832,6 @@ function mountConceptActivity(container, lesson, state, opts = {}) {
     </details>
 
     <div id="ca-stage" class="hidden"></div>
-    <div id="ca-summary" class="hidden mt-4 pt-4 border-t border-[color:var(--hairline)]">
-      <div class="text-xs muted uppercase tracking-wider mb-2" style="letter-spacing:0.08em">Key insight</div>
-      <div class="text-[14px] leading-relaxed">${lesson.body}</div>
-    </div>
     <div id="ca-quiz" class="hidden mt-4 pt-4 border-t border-[color:var(--hairline)]"></div>
     <!-- Self-rate widget — drives concept-review SRS scheduling -->
     <div id="ca-selfrate" class="hidden mt-4 pt-4 border-t border-[color:var(--hairline)]">
@@ -851,7 +847,6 @@ function mountConceptActivity(container, lesson, state, opts = {}) {
     </div>
   `;
   const stage = container.querySelector('#ca-stage');
-  const summary = container.querySelector('#ca-summary');
   const quizSlot = container.querySelector('#ca-quiz');
   const selfRateBox = container.querySelector('#ca-selfrate');
   const recallBlock = container.querySelector('#ca-recall');
@@ -871,11 +866,13 @@ function mountConceptActivity(container, lesson, state, opts = {}) {
   };
 
   const reveal = () => {
-    summary.classList.remove('hidden');
-    summary.classList.add('fade-in-up');
+    // Lesson body is already shown at the top of the modal -- no need to
+    // re-render it under a "Key insight" header. Just surface the self-rate
+    // widget (and any final quiz) and fire engagement.
     selfRateBox.classList.remove('hidden');
+    selfRateBox.classList.add('fade-in-up');
     mountFinalQuiz();
-    summary.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    selfRateBox.scrollIntoView({ behavior:'smooth', block:'nearest' });
     onEngaged();
   };
 
