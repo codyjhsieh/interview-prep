@@ -1,0 +1,38 @@
+[
+  {
+    "id": "fc-beh-13",
+    "issue": "Outdated: OpenAI replaced its 2018 charter in late April 2026 with five new core principles. Original four-pillar list (AGI focus / Intensity / Scale / Make something people love) is a mix of charter pillars and culture slogans and no longer matches the current public framing.",
+    "new_q": "OpenAI values to know (2026)?",
+    "new_a": "Charter still anchors on AGI that benefits humanity; updated April 2026 to five operational principles: Democratization, Empowerment, Universal Prosperity, Resilience, Adaptability. Culture also stresses intensity + scale + shipping products people love. Have a specific reason for the role, not a generic mission quote."
+  },
+  {
+    "id": "fc-beh-14",
+    "issue": "Outdated 2026: Anthropic released RSP v3.0 on Feb 24 2026 — dropped the hard pause/training-stop commitment in favor of a published Frontier Safety Roadmap + 3-6 month risk assessments. Card still implies the old RSP framing.",
+    "new_q": "Anthropic interview signal (2026)?",
+    "new_a": "Real engagement with safety: RSP v3.0 (Feb 2026, replaces hard pauses with a public Frontier Safety Roadmap + recurring risk assessments), Constitutional AI, and the Acceptable Use Policy. Expect ethical-dilemma scenarios; generic \\'I do the right thing\\' answers fail."
+  },
+  {
+    "id": "fc-cl-19",
+    "issue": "Currency: in 2026 Argo Rollouts is the K8s-native default and Flagger/Flux + LaunchDarkly/Harness are now more commonly cited than Spinnaker, which is in decline. Card should reflect the modern landscape.",
+    "new_q": "Auto-rollback on metric regression — tools?",
+    "new_a": "Argo Rollouts or Flagger (K8s-native, GitOps), Harness, or LaunchDarkly for flag-based rollback. Spinnaker still works but is fading. Watch error rate / latency / saturation for N minutes post-deploy and auto-revert on regression."
+  },
+  {
+    "id": "fc-dom-8",
+    "issue": "Stands-alone + currency: vague. 2026 voice AI moved past pure latency to streaming pipelines + neural turn-prediction models (e.g., barge-in handling, sub-500ms end-to-end). Expand with concrete 2026 detail.",
+    "new_q": "Voice AI 2026 — hardest UX problem?",
+    "new_a": "Turn-taking + barge-in (interruption) handling. Industry target is sub-500ms end-to-end via streaming STT→LLM→TTS overlap; neural turn-prediction models have replaced VAD-only silence detection. Sub-500ms latency is necessary but not sufficient — natural turn boundaries are what make it \\'feel human.\\'"
+  },
+  {
+    "id": "fc-cli-6",
+    "issue": "Stands-alone: contains a broken HTML tag (<span class=\\'icon-check\\'></span>) and raw emoji glyphs that won\\'t render cleanly in flashcard text. Rewrite to be plain text + self-describing.",
+    "new_q": "Writing customer status updates — format?",
+    "new_a": "Four labeled bullets: Shipped this week, In flight, Risks/blockers, Next week. 5 short bullets read better than 3 paragraphs; lead with outcomes, not activity."
+  },
+  {
+    "id": "fc-cli-8",
+    "issue": "Duplicate ID with fc-cl-8 (cloud category). Should be renamed to fc-cli-8b or similar to avoid collision in flashcard storage/keying.",
+    "new_q": null,
+    "new_a": null
+  }
+]

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "fc-sd-11",
+    "issue": "Typo \\'Pacific PACELC\\' — should just be PACELC; also acronyms (CAP/PACELC) deserve a one-line expansion for self-containment.",
+    "new_q": "CAP theorem — when does the tradeoff actually apply?",
+    "new_a": "Only during a network PARTITION: pick Availability or Consistency. On a healthy network you can have both. PACELC extends CAP by adding the steady-state Else clause: even without partitions, you trade Latency vs Consistency."
+  },
+  {
+    "id": "fc-sd-13",
+    "issue": "\\'Add N+1th node\\' is ambiguous about the starting state; clarify going from N to N+1 nodes.",
+    "new_q": "Consistent hashing: scaling from N to N+1 nodes — what fraction of keys remap?",
+    "new_a": "Roughly 1/(N+1) of keys move to the new node. With virtual nodes, the load redistributes evenly across existing nodes instead of from a single neighbor."
+  },
+  {
+    "id": "fc-sd-19",
+    "issue": "\\'~30 days typical\\' is asserted without context; webhook retry windows vary by provider (Stripe 3 days, GitHub ~8h, etc.). Generalize.",
+    "new_q": "Idempotency key TTL on a webhook receiver — how to size it?",
+    "new_a": "TTL must exceed the sender\\'s max retry window (e.g., Stripe ~3 days, others up to weeks). Sized too short, late retries slip past the dedupe table and cause duplicate processing."
+  },
+  {
+    "id": "fc-sd-22",
+    "issue": "RYW acronym is used in the answer without definition; minor self-containment fix.",
+    "new_q": "Read-replica lag breaks read-your-writes — fix?",
+    "new_a": "Session pinning: route a user\\'s reads to the primary for N seconds after their write, so they see their own update. Other users keep reading from replicas, preserving scale."
+  },
+  {
+    "id": "fc-sql-17",
+    "issue": "Still accurate but missing 2025/2026 in-Postgres options (pg_duckdb, pg_mooncake, Hydra) that let you stay in Postgres for moderate analytics.",
+    "new_q": "Analytics on a 1TB Postgres table — what to do?",
+    "new_a": "Move the analytics workload to a columnar engine: Snowflake / ClickHouse / DuckDB / BigQuery. Row-store Postgres is poor at full-table aggregate scans. If you must stay in-Postgres, extensions like pg_duckdb or pg_mooncake bolt a columnar engine onto Postgres."
+  },
+  {
+    "id": "fc-sql-20",
+    "issue": "Outdated as of 2025/2026: Databricks acquired Tabular (Iceberg creators) mid-2024 for >$1B; Snowflake, AWS S3 Tables, BigQuery, and Databricks all now back Iceberg. Iceberg is the clear industry standard.",
+    "new_q": "Iceberg vs Delta vs Hudi — what\\'s the 2026 state?",
+    "new_a": "Three open table formats over Parquet adding ACID, time travel, and schema evolution to data lakes. Iceberg has won industry consolidation (Databricks acquired Tabular 2024; AWS S3 Tables, Snowflake, BigQuery all support it natively). Delta still leads inside Databricks/Spark; Hudi specializes in record-level upserts. Cross-format projects (Delta UniForm, Apache XTable) blur the lines."
+  },
+  {
+    "id": "fc-beh-9",
+    "issue": "Question is framed as Palantir-specific but the failure pattern is generic; answer doesn\\'t reflect actual 2026 Palantir-specific red flags (perks/comp, mixing up Foundry vs Gotham, surface-level \\'why Palantir\\').",
+    "new_q": "Biggest behavioral red flags in a Palantir interview?",
+    "new_a": "(1) Fake-failure dodges (\\'I work too hard\\', \\'I don\\'t really fail\\'). (2) Surface-level \\'why Palantir\\' — citing comp/perks/\\'cool problems\\' instead of specifics. (3) Mixing up Foundry (commercial) and Gotham (gov). (4) Inability to justify a technical choice. Cultural-fit signals weigh heavily; they reject strong technical candidates over these."
+  }
+]

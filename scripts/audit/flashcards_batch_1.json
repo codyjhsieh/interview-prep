@@ -1,0 +1,284 @@
+[
+ {
+  "id": "fc-rag-1",
+  "cat": "ai",
+  "q": "When should you NOT build a RAG?",
+  "a": "When your knowledge base fits in ~200k tokens \u2014 Anthropic\\'s public guidance says full-context + prompt caching is often faster and cheaper than building retrieval infra. Also: when answers don\\'t depend on private/fresh data."
+ },
+ {
+  "id": "fc-rag-2",
+  "cat": "ai",
+  "q": "Sparse vs dense vs hybrid retrieval \u2014 when to use each?",
+  "a": "Sparse (BM25) for rare terms, codes, names. Dense (vector) for paraphrase, semantic intent. Hybrid + reciprocal rank fusion is the production default. Add a cross-encoder re-ranker on top-k."
+ },
+ {
+  "id": "fc-rag-3",
+  "cat": "ai",
+  "q": "Why temperature=0 for extraction tasks?",
+  "a": "Determinism + minimum hallucination. Pair with structured outputs and retry-on-invalid. Creative tasks want 0.5\u20130.8."
+ },
+ {
+  "id": "fc-rag-4",
+  "cat": "ai",
+  "q": "Three LLM eval layers?",
+  "a": "Unit (deterministic checks: schema/regex/length/refusal), System (golden Q\u2192A sets scored by LLM-as-judge + human spot-check), Production (online thumbs/escalation/regret)."
+ },
+ {
+  "id": "fc-rag-5",
+  "cat": "ai",
+  "q": "Agent vs chain \u2014 what\\'s the real distinction?",
+  "a": "A chain has a fixed graph (LLM fills steps). An agent chooses the next step, including which tool to call. Agents trade determinism for flexibility \u2014 most \"agents\" should be chains."
+ },
+ {
+  "id": "fc-dec-1",
+  "cat": "decomp",
+  "q": "What is the #1 instant-reject signal in a decomposition round?",
+  "a": "Jumping to specific tools or solutions before asking clarifying questions and scoping the problem."
+ },
+ {
+  "id": "fc-dec-2",
+  "cat": "decomp",
+  "q": "Decomposition 5-step framework?",
+  "a": "1. Clarify (success metric, users, data, constraints). 2. Stakeholder map. 3. Data sources. 4. Tradeoffs. 5. Failure modes."
+ },
+ {
+  "id": "fc-cod-1",
+  "cat": "coding",
+  "q": "BFS template essentials?",
+  "a": "deque + visited set; check visited at enqueue (not dequeue) to avoid re-enqueues; track level via separate counter or by queue-length-per-level loop."
+ },
+ {
+  "id": "fc-cod-2",
+  "cat": "coding",
+  "q": "LRU cache structure?",
+  "a": "Hash map (key\u2192node) + doubly-linked list. On get/put: detach node, insert at head, evict tail when over capacity. O(1) get/put."
+ },
+ {
+  "id": "fc-sd-1",
+  "cat": "sysd",
+  "q": "4-step system design frame?",
+  "a": "Requirements (functional + non-functional) \u2192 capacity estimate \u2192 high-level boxes \u2192 deep-dive on a hard subproblem."
+ },
+ {
+  "id": "fc-sd-2",
+  "cat": "sysd",
+  "q": "Multi-tenancy: silo vs pool vs bridge?",
+  "a": "Silo: DB-per-tenant (max isolation). Pool: shared DB with tenant_id (cheapest, noisy-neighbor risk). Bridge: shared schema, per-tenant DB. Match to customer compliance."
+ },
+ {
+  "id": "fc-sd-3",
+  "cat": "sysd",
+  "q": "Webhook reliability checklist?",
+  "a": "HMAC sign, idempotency keys, exponential backoff retries with DLQ, dashboard for replay, signed timestamps with skew limit, document delivery-latency SLA."
+ },
+ {
+  "id": "fc-beh-1",
+  "cat": "behav",
+  "q": "STAR weighting for FDE rounds?",
+  "a": "Situation: 2\u20133 sentences MAX. Task: clarify YOUR ownership. Action: ~60% of the story. Result: both technical outcome and quantified business impact."
+ },
+ {
+  "id": "fc-beh-2",
+  "cat": "behav",
+  "q": "5 required FDE stories?",
+  "a": "Production fix under live pressure; client pushback; deployment failure ownership; explaining a technical limit; decision under incomplete info."
+ },
+ {
+  "id": "fc-cli-1",
+  "cat": "client",
+  "q": "ADO framework?",
+  "a": "Acknowledge impact \u2192 Diagnose visibly \u2192 Own the resolution timeline. Never blame the customer\\'s environment in the moment."
+ },
+ {
+  "id": "fc-sql-1",
+  "cat": "data",
+  "q": "Window functions to know cold?",
+  "a": "ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD, SUM/AVG OVER (PARTITION BY\u2026). Most SQL screens hide one inside a wordy prompt."
+ },
+ {
+  "id": "fc-sql-2",
+  "cat": "data",
+  "q": "NOT IN vs NOT EXISTS \u2014 what\\'s the trap?",
+  "a": "NOT IN returns NULL on any NULL in the subquery (then unknown \u2192 no match). NOT EXISTS is safer and equivalent semantically."
+ },
+ {
+  "id": "fc-cl-1",
+  "cat": "cloud",
+  "q": "OAuth 2.0 grant types in 2026?",
+  "a": "Authorization code (web with backend, +PKCE for SPAs/mobile), client credentials (server-to-server), device code (TV/CLI). Implicit is deprecated."
+ },
+ {
+  "id": "fc-ai-6",
+  "cat": "ai",
+  "q": "Why does CoT (chain-of-thought) work?",
+  "a": "Each token\\'s prediction can attend to all prior tokens. Reasoning written FIRST means the answer benefits from that reasoning. Without CoT, the answer comes before any reasoning compute can be spent."
+ },
+ {
+  "id": "fc-ai-7",
+  "cat": "ai",
+  "q": "Production pattern for CoT + machine-readable output?",
+  "a": "Wrap reasoning in tags: <thinking>...</thinking> then <answer>{json}</answer>. Parse only the JSON. Reasoning is logged for debugging, never shown to users."
+ },
+ {
+  "id": "fc-ai-8",
+  "cat": "ai",
+  "q": "Three reasons to fine-tune (vs RAG / prompting)?",
+  "a": "(1) Narrow classification with latency budget. (2) Proprietary format / jargon / style the base model lacks. (3) Distillation: large\u2192small for cost. NEVER for \"teaching facts\" \u2014 that\\'s RAG."
+ },
+ {
+  "id": "fc-ai-9",
+  "cat": "ai",
+  "q": "Five controls for bounding agent autonomy?",
+  "a": "(1) Action allowlist. (2) Per-conversation spend cap. (3) Max-step budget. (4) Human-in-the-loop on irreversible actions. (5) Per-step observability (every input/output logged)."
+ },
+ {
+  "id": "fc-ai-10",
+  "cat": "ai",
+  "q": "Top failure mode in multi-agent systems?",
+  "a": "~80% of failures are context loss between handoffs. The receiving agent doesn\\'t have what the sending agent assumed it would. Solution: full trajectory logging + explicit state passing."
+ },
+ {
+  "id": "fc-ai-11",
+  "cat": "ai",
+  "q": "Why is temperature 0 not perfectly deterministic in 2026?",
+  "a": "Mixed-precision math (FP16/BF16) + batched inference introduce small variations. Treat T=0 as \"very stable\" not \"deterministic.\" Always validate output + retry-on-invalid."
+ },
+ {
+  "id": "fc-ai-12",
+  "cat": "ai",
+  "q": "Best embedding choice for a customer requiring VPC-only deploys?",
+  "a": "Local open-source models (BGE family \u2014 Apache 2.0; Voyage with domain variants). API-based embeddings (OpenAI, Cohere) need outbound network calls \u2014 not VPC-compatible."
+ },
+ {
+  "id": "fc-ai-13",
+  "cat": "ai",
+  "q": "Anti-pattern in prompt injection defense?",
+  "a": "Relying on the LLM\\'s judgment to enforce policy. The LLM is generative \u2014 it can be fooled. Always add deterministic validators between LLM output and side effects (refunds, emails, deploys)."
+ },
+ {
+  "id": "fc-ai-14",
+  "cat": "ai",
+  "q": "RAGAS metrics for RAG evaluation?",
+  "a": "Faithfulness (answer uses retrieved context, not hallucinated), Answer relevance (addresses the question), Context precision / recall (retriever quality)."
+ },
+ {
+  "id": "fc-ai-15",
+  "cat": "ai",
+  "q": "When should you use full-context over RAG?",
+  "a": "When knowledge base fits in ~200k tokens AND prompt caching is supported. Anthropic public guidance: simpler architecture, often cheaper, no retrieval-miss risk."
+ },
+ {
+  "id": "fc-cod-3",
+  "cat": "coding",
+  "q": "Two-pointer pattern works when\u2026",
+  "a": "(1) Array is sorted (or you can sort it). (2) Each step provably rules out one end. (3) You\\'re looking for pairs, palindromes, or in-place modification. O(n\u00b2) \u2192 O(n)."
+ },
+ {
+  "id": "fc-cod-4",
+  "cat": "coding",
+  "q": "Sliding window \u2014 when to choose fixed vs variable?",
+  "a": "Fixed: window size is given (e.g., \"max sum subarray of size k\"). Variable: window grows/shrinks to maintain an invariant (e.g., \"longest substring with no repeats\")."
+ },
+ {
+  "id": "fc-cod-5",
+  "cat": "coding",
+  "q": "Binary search \"on the answer\" pattern?",
+  "a": "When the problem space (e.g., capacity, threshold) is monotonic \u2014 small fails, big works \u2014 define a predicate can_do(x) and binary search for the boundary. Example: \"smallest ship capacity for D days.\""
+ },
+ {
+  "id": "fc-cod-6",
+  "cat": "coding",
+  "q": "Union-Find two optimizations?",
+  "a": "(1) Path compression in find \u2014 point every node directly to root. (2) Union by rank \u2014 attach smaller tree to bigger. Together: ~O(\u03b1(N)) per op \u2014 effectively constant."
+ },
+ {
+  "id": "fc-cod-7",
+  "cat": "coding",
+  "q": "Dijkstra vs Bellman-Ford?",
+  "a": "Dijkstra: non-negative weights only, O((V+E) log V) with heap. Bellman-Ford: handles negative weights, O(VE). Negatives break Dijkstra\\'s \"lock-in once extracted\" invariant."
+ },
+ {
+  "id": "fc-cod-8",
+  "cat": "coding",
+  "q": "Monotonic stack \u2014 when?",
+  "a": "\"Next greater / smaller element\" patterns. Stack maintains decreasing values; new element pops until order is restored. Each element pushed once + popped once = O(n)."
+ },
+ {
+  "id": "fc-cod-9",
+  "cat": "coding",
+  "q": "Singleton XOR trick?",
+  "a": "Array has every value twice except one. XOR all values: pairs cancel (x ^ x = 0); singleton remains. O(n) time, O(1) memory."
+ },
+ {
+  "id": "fc-cod-10",
+  "cat": "coding",
+  "q": "Topo sort failure mode (Kahn\\'s algorithm)?",
+  "a": "If the produced order has fewer than N nodes, there\\'s a cycle. Cycle-detection comes free."
+ },
+ {
+  "id": "fc-cod-11",
+  "cat": "coding",
+  "q": "Bit-mask DP \u2014 when does it apply?",
+  "a": "When state includes \"which subset of N items is visited\" and N \u2264 ~20. Represent the visited set as an integer; iterate over all 2^N masks. TSP, set-cover variants."
+ },
+ {
+  "id": "fc-sd-4",
+  "cat": "sysd",
+  "q": "Consistent hashing add/remove cost?",
+  "a": "When adding the Nth node, ~1/N of keys remap to it. With virtual nodes (typically K=100-200 per server), load redistributes evenly across the existing nodes."
+ },
+ {
+  "id": "fc-sd-5",
+  "cat": "sysd",
+  "q": "CAP vs PACELC?",
+  "a": "CAP: during PARTITION, choose Consistency or Availability. PACELC adds: Else (no partition), choose Latency or Consistency. PACELC is more useful \u2014 it covers steady-state tradeoffs."
+ },
+ {
+  "id": "fc-sd-6",
+  "cat": "sysd",
+  "q": "When to fan-out push vs pull for feeds?",
+  "a": "Push (fanout-on-write): low read latency, write amplification for celebs. Pull (fanout-on-read): low write cost, high read for high-followed users. Hybrid above a celebrity threshold."
+ },
+ {
+  "id": "fc-sd-7",
+  "cat": "sysd",
+  "q": "Idempotency key + side-effecting tool?",
+  "a": "Every charge_card / send_email / deploy call gets a unique key. Server-side de-dupe table rejects duplicates. Non-negotiable for retries + agent loops."
+ },
+ {
+  "id": "fc-sd-8",
+  "cat": "sysd",
+  "q": "Per-server in-memory rate limit failure mode at scale?",
+  "a": "Each server enforces independently. A customer making 1k req/sec across N servers can pass each server\\'s 100/sec limit. Fix: Redis sliding-window with Lua for atomicity."
+ },
+ {
+  "id": "fc-sd-9",
+  "cat": "sysd",
+  "q": "Three multi-tenancy patterns?",
+  "a": "(1) Pool \u2014 shared DB + tenant_id. (2) Silo \u2014 dedicated DB per tenant. (3) Bridge \u2014 shared schema, per-tenant DB. Match isolation to compliance posture."
+ },
+ {
+  "id": "fc-sql-3",
+  "cat": "data",
+  "q": "Composite index (a, b) \u2014 which queries use it?",
+  "a": "Queries filtering on a, or (a + anything), or starting with a in ORDER BY. Queries filtering on b alone CANNOT use it \u2014 leftmost-prefix rule."
+ },
+ {
+  "id": "fc-sql-4",
+  "cat": "data",
+  "q": "SCD Type 2 schema?",
+  "a": "Each row has valid_from + valid_to (NULL = current) + is_current flag. Updates close the old row (valid_to = now) and insert a new one. Queries filter to the period."
+ },
+ {
+  "id": "fc-sql-5",
+  "cat": "data",
+  "q": "CDC vs polling?",
+  "a": "CDC reads the transaction log (Postgres WAL, MySQL binlog) \u2014 captures INSERT/UPDATE/DELETE. Polling SELECTs miss deletes. CDC scales, polls don\\'t."
+ },
+ {
+  "id": "fc-sql-6",
+  "cat": "data",
+  "q": "5 tiers of data-quality checks?",
+  "a": "(1) Schema (types, non-null). (2) Volume (row count vs avg). (3) Freshness (latest event \u2264 N min). (4) Distribution (proportions, ranges). (5) Referential (FKs resolve)."
+ }
+]

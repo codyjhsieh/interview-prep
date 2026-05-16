@@ -1,0 +1,80 @@
+[
+  {
+    "id": "fc-rag-1",
+    "issue": "stale: 200k token figure outdated — Claude Sonnet/Opus 4.6+ now have 1M context window GA at standard pricing (Mar 2026)",
+    "new_q": null,
+    "new_a": "When your knowledge base fits in the model\\'s context window (Claude Sonnet/Opus 4.6+ ship a 1M-token window GA at standard pricing) — full-context + prompt caching is often faster and cheaper than building retrieval infra. Also skip RAG when answers don\\'t depend on private or fresh data."
+  },
+  {
+    "id": "fc-ai-15",
+    "issue": "stale: same 200k figure; duplicates fc-rag-1 logic — update to reflect 1M GA",
+    "new_q": "When should you use full-context loading over RAG?",
+    "new_a": "When the knowledge base fits in the model\\'s context window (Claude Sonnet/Opus 4.6+ support 1M tokens GA in 2026) and prompt caching is available — you get a simpler architecture, often lower cost via cache reads at ~10% of input price, and zero retrieval-miss risk."
+  },
+  {
+    "id": "fc-cli-1",
+    "issue": "context-missing: \"ADO framework\" is a custom acronym a candidate cold-reading the card cannot decode",
+    "new_q": "ADO framework for handling an angry-customer / outage moment?",
+    "new_a": "Acknowledge the impact in their words, Diagnose visibly (think out loud so they see progress), Own the resolution timeline with a concrete next checkpoint. Never blame the customer\\'s environment in the moment."
+  },
+  {
+    "id": "fc-beh-1",
+    "issue": "context-missing: \"FDE\" undefined — Forward Deployed Engineer is Palantir-specific jargon",
+    "new_q": "STAR weighting for Forward Deployed Engineer (FDE) behavioral rounds?",
+    "new_a": "Situation: 2-3 sentences MAX. Task: clarify YOUR ownership (FDE rounds probe individual accountability). Action: ~60% of the story, focus on technical + customer decisions you made. Result: both technical outcome and quantified business impact."
+  },
+  {
+    "id": "fc-beh-2",
+    "issue": "context-missing: \"FDE\" undefined",
+    "new_q": "Five must-have stories for a Forward Deployed Engineer (FDE) loop?",
+    "new_a": "(1) Production fix under live customer pressure. (2) Pushing back on a client request. (3) Owning a deployment failure end-to-end. (4) Explaining a hard technical limit to a non-technical stakeholder. (5) Making a decision with incomplete information."
+  },
+  {
+    "id": "fc-dec-1",
+    "issue": "context-missing: \"decomposition round\" is non-standard interview jargon",
+    "new_q": "What is the #1 instant-reject signal in a problem-decomposition / case interview?",
+    "new_a": "Jumping to specific tools or solutions before asking clarifying questions and scoping the problem (users, success metric, constraints, data)."
+  },
+  {
+    "id": "fc-cl-1",
+    "issue": "stale: OAuth 2.1 is the 2026 baseline — mandates PKCE for ALL clients (not just SPAs) and removes implicit + password grants",
+    "new_q": "OAuth 2.1 grant types in 2026?",
+    "new_a": "Authorization Code + PKCE is now required for ALL clients (web, SPA, mobile, native — OAuth 2.1 removed the public/confidential distinction for PKCE). Client Credentials for server-to-server. Device Code for TV/CLI. Implicit and Resource Owner Password Credentials grants are removed."
+  },
+  {
+    "id": "fc-ai-10",
+    "issue": "stale/inaccurate: \"~80%\" figure isn\\'t supported by current research; Cemri et al. 2025 taxonomy puts coordination/inter-agent failures around 37%, context loss specifically ~3%",
+    "new_q": null,
+    "new_a": "Inter-agent coordination failures dominate (~37% of multi-agent bug reports per Cemri et al. 2025), and the biggest sub-pattern is the receiving agent missing context the sender assumed it had — wrong assumptions, dropped history, mismatched reasoning vs action. Fix: full trajectory logging, explicit state passing, and shared scratchpads instead of implicit handoffs."
+  },
+  {
+    "id": "fc-ai-12",
+    "issue": "inaccurate: Voyage is an API service (acquired by MongoDB 2024) — not a local/VPC-deployable option without their managed-cloud / private-deploy contract; grouping it with BGE misleads",
+    "new_q": null,
+    "new_a": "Self-hosted open-source models — BGE-M3 (Apache 2.0), Nomic Embed, GTE — run inside the VPC with no egress. API-based embeddings (OpenAI, Cohere, Voyage) need outbound network calls, so they\\'re only an option if the customer accepts a private-deployment contract that runs the provider\\'s model inside their VPC."
+  },
+  {
+    "id": "fc-sd-2",
+    "issue": "inaccurate: Bridge pattern is shared DB instance with SEPARATE schemas per tenant — the card has it backwards (\"shared schema, per-tenant DB\")",
+    "new_q": null,
+    "new_a": "Silo: dedicated DB per tenant (max isolation, highest cost). Pool: shared DB + shared schema with a tenant_id column (cheapest, noisy-neighbor risk). Bridge: shared DB instance with a separate schema per tenant (middle ground — logical isolation, easier per-tenant migrations). Match the pattern to the customer\\'s compliance posture."
+  },
+  {
+    "id": "fc-sd-9",
+    "issue": "inaccurate: same Bridge mis-definition as fc-sd-2; also duplicates fc-sd-2 — fix the definition",
+    "new_q": null,
+    "new_a": "(1) Pool — shared DB, shared schema, tenant_id column. (2) Silo — dedicated DB per tenant. (3) Bridge — shared DB, separate schema per tenant. Match isolation level to compliance posture and blast-radius tolerance."
+  },
+  {
+    "id": "fc-ai-11",
+    "issue": "minor: \"in 2026\" framing is fine but the answer should name the canonical cause (non-associative float reduction in batched matmul) for interview credibility",
+    "new_q": null,
+    "new_a": "Floating-point math is non-associative, and batched GPU inference reorders reductions depending on batch size and kernel scheduling — so identical inputs at T=0 can produce slightly different logits and occasionally different tokens. Treat T=0 as \"very stable,\" not \"deterministic\"; always validate output and retry-on-invalid."
+  },
+  {
+    "id": "fc-ai-7",
+    "issue": "stale: in 2026 the standard pattern is native structured outputs / tool-use schemas + extended-thinking blocks, not regex-parsing <thinking>/<answer> tags",
+    "new_q": null,
+    "new_a": "Use the provider\\'s native structured outputs or tool-use schema (Anthropic extended thinking, OpenAI Structured Outputs) so reasoning lives in a separate thinking block and the final answer is schema-validated JSON. Reasoning is logged for debugging; only the validated JSON is returned to users."
+  }
+]

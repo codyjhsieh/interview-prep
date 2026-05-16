@@ -1,0 +1,284 @@
+[
+ {
+  "id": "fc-sql-7",
+  "cat": "data",
+  "q": "Idempotent partitioned writes pattern?",
+  "a": "Each task run for date D first DELETEs WHERE date=D, then inserts. Safe to re-run. Never APPEND without a partition key \u2014 backfills will duplicate."
+ },
+ {
+  "id": "fc-beh-3",
+  "cat": "behav",
+  "q": "Palantir failure-story bar?",
+  "a": "Real, specific, owned, with the actual mechanism + cost + systemic change you made afterward. \"I work too hard\" / \"I helped with...\" are instant-reject signals."
+ },
+ {
+  "id": "fc-beh-4",
+  "cat": "behav",
+  "q": "OpenAI values to know?",
+  "a": "(1) AGI focus. (2) Intensity. (3) Scale. (4) Make something people love. Read the Charter; have a specific reason for the FDE role, not just \"OpenAI.\""
+ },
+ {
+  "id": "fc-beh-5",
+  "cat": "behav",
+  "q": "Anthropic values to know?",
+  "a": "AI safety, beneficial AI, responsible scaling (RSP), Constitutional AI. Expect ethical-dilemma scenarios. Surface depth on safety, not generic concern."
+ },
+ {
+  "id": "fc-beh-6",
+  "cat": "behav",
+  "q": "\"Why are you leaving?\" \u2014 strongest framing?",
+  "a": "Pull-not-push: focus on what attracts you to the new role; light positive about current. Never badmouth \u2014 signals you\\'ll do the same at the new place in a year."
+ },
+ {
+  "id": "fc-beh-7",
+  "cat": "behav",
+  "q": "\"Disagree and commit\" \u2014 what most candidates miss?",
+  "a": "The COMMIT half. Telling a story where you disagreed AND won is incomplete. Stronger: disagreed, brought data, lost, executed fully, validated the team\\'s view in hindsight."
+ },
+ {
+  "id": "fc-beh-8",
+  "cat": "behav",
+  "q": "5 required FDE stories?",
+  "a": "(1) Production fix under pressure. (2) Pushing back on a customer. (3) Deployment failure ownership. (4) Explaining a technical limit. (5) Decision under incomplete info."
+ },
+ {
+  "id": "fc-cl-2",
+  "cat": "cloud",
+  "q": "Webhook reliability checklist?",
+  "a": "(1) HMAC sign (timestamp + body). (2) Idempotency event_id. (3) Exponential backoff retries on 5xx + timeouts only. (4) DLQ after N fails. (5) Replay dashboard. (6) Documented SLA."
+ },
+ {
+  "id": "fc-cl-3",
+  "cat": "cloud",
+  "q": "Three pillars of observability?",
+  "a": "Logs (why did this request fail?), Metrics (is something wrong NOW?), Traces (where in the call graph is the slow span?). OpenTelemetry unifies emission across vendors."
+ },
+ {
+  "id": "fc-cl-4",
+  "cat": "cloud",
+  "q": "Canary vs blue-green vs rolling deploys?",
+  "a": "Canary: 1% \u2192 10% \u2192 50% with metric checks. Blue-green: full new environment, flip LB. Rolling: replace one instance at a time. Canary for risky changes with good metrics."
+ },
+ {
+  "id": "fc-cl-5",
+  "cat": "cloud",
+  "q": "SAML vs OIDC?",
+  "a": "SAML: XML, browser SSO, common with legacy IdPs (Okta SAML, ADFS). OIDC: JWT, modern, mobile-friendly, built on OAuth 2.0. Support both for enterprise."
+ },
+ {
+  "id": "fc-cl-6",
+  "cat": "cloud",
+  "q": "SCIM does what?",
+  "a": "REST API for user/group provisioning lifecycle (create/update/disable). Lets customer\\'s IdP automatically provision users in your system. Required for enterprise."
+ },
+ {
+  "id": "fc-cl-7",
+  "cat": "cloud",
+  "q": "What is a DPA?",
+  "a": "Data Processing Agreement \u2014 GDPR-required contract specifying how you process the customer\\'s personal data. Covers sub-processors, residency, breach notification, right-to-delete."
+ },
+ {
+  "id": "fc-dec-3",
+  "cat": "decomp",
+  "q": "How long should clarifying questions take in a 60-min decomp round?",
+  "a": "10\u201315 minutes. Most candidates rush in 3 minutes. The interviewer is testing whether you can stay in the problem space before solving."
+ },
+ {
+  "id": "fc-dec-4",
+  "cat": "decomp",
+  "q": "I \u2192 L \u2192 O mental model \u2014 what goes where?",
+  "a": "Inputs = data sources (logs, APIs, files). Logic = transformations, decisions, joins. Outputs = what the user sees/acts on (dashboards, alerts, reports)."
+ },
+ {
+  "id": "fc-dec-5",
+  "cat": "decomp",
+  "q": "4 killer phrases in decomp rounds?",
+  "a": "(1) \"Before I propose anything\u2026\" (2) \"The simplest version that delivers value\u2026\" (3) \"X over Y because of this specific constraint \u2014 if it changes I\\'d flip.\" (4) \"Let me make an explicit assumption: X; please push back.\""
+ },
+ {
+  "id": "fc-dom-1",
+  "cat": "domain",
+  "q": "Hospitality timezone gotcha?",
+  "a": "A venue\\'s \"Saturday night\" crosses UTC midnight. Always compute venue-local timestamps before filtering by day-of-week. Common cause of \"wrong-day\" reports."
+ },
+ {
+  "id": "fc-dom-2",
+  "cat": "domain",
+  "q": "Marketplace cold-start playbook?",
+  "a": "Pre-seed one side (manually recruit, or fake demand), drive demand to it, prove utility in a single concentrated metro, then expand. Two-sided liquidity is the hardest problem."
+ },
+ {
+  "id": "fc-dom-3",
+  "cat": "domain",
+  "q": "Healthcare deployment \u2014 biggest non-technical hurdle?",
+  "a": "8\u201316 week compliance review by the hospital\\'s security team. Plan for this in your project timeline. Multi-tenant SaaS often DOA; single-tenant in customer VPC is standard."
+ },
+ {
+  "id": "fc-meta-1",
+  "cat": "meta",
+  "q": "Highest-leverage prep activity?",
+  "a": "Recording yourself in mock interviews and watching back at 1.5x. Painful at first, transformative within a week. Catches speech tics, length-of-action issues, body language."
+ },
+ {
+  "id": "fc-meta-2",
+  "cat": "meta",
+  "q": "When to ask for interview feedback after rejection?",
+  "a": "Always, once, professionally. Most recruiters decline; the ones who reply give priceless intel. \"Thanks for letting me know. If you have any feedback on the interview, I\\'d genuinely appreciate even 1-2 sentences.\""
+ },
+ {
+  "id": "fc-meta-3",
+  "cat": "meta",
+  "q": "Pre-offer comp expectations script?",
+  "a": "\"I want to focus on whether the role is a strong fit before talking numbers. That said, market for FDE roles at companies your size is roughly $X-$Y total comp. Happy to be more specific once we\\'re aligned.\""
+ },
+ {
+  "id": "fc-meta-4",
+  "cat": "meta",
+  "q": "Resume bullet formula?",
+  "a": "[Action verb] [system you owned] [the specific technical mechanism] [quantified customer/business outcome]. Recruiters skim 6-20 seconds \u2014 the verb + the number carry the signal."
+ },
+ {
+  "id": "fc-dec-6",
+  "cat": "decomp",
+  "q": "Time budget for clarifying questions in a 60-min decomp round?",
+  "a": "10-15 minutes. Most candidates rush this; senior pattern stays in step 1 longer than feels comfortable."
+ },
+ {
+  "id": "fc-dec-7",
+  "cat": "decomp",
+  "q": "When interviewer says \"you decide\"?",
+  "a": "Make explicit assumption out loud + invite correction: \"I\\'ll assume X \u2014 please push back if wrong.\" Write it on the board."
+ },
+ {
+  "id": "fc-dec-8",
+  "cat": "decomp",
+  "q": "Structure of a good clarifying question?",
+  "a": "\"Are we doing A or B? Because if A, I\\'d do X; if B, I\\'d do Y.\" Specific, falsifiable, branches into design-relevant alternatives."
+ },
+ {
+  "id": "fc-dec-9",
+  "cat": "decomp",
+  "q": "How many failure modes should you name in a decomp answer?",
+  "a": "3 specific ones with detection mechanism + rollback. \"Add monitoring\" alone is junior."
+ },
+ {
+  "id": "fc-dec-10",
+  "cat": "decomp",
+  "q": "The \"decomposition shape\" \u2014 how many solution options?",
+  "a": "TWO phased options with explicit tradeoffs + recommendation + rationale. One = no tradeoff awareness. Three = indecisive."
+ },
+ {
+  "id": "fc-dec-11",
+  "cat": "decomp",
+  "q": "A senior signal phrase in decomp?",
+  "a": "\"X over Y because of this specific constraint \u2014 if it changes I\\'d flip the decision.\" Explicit tradeoff + conditional commitment."
+ },
+ {
+  "id": "fc-dec-12",
+  "cat": "decomp",
+  "q": "Hospital adoption (12% after 90 days) \u2014 first analytical split?",
+  "a": "Product gaps vs adoption gaps. Different fixes: product needs product changes; adoption needs training/change-mgmt/incentives."
+ },
+ {
+  "id": "fc-dec-13",
+  "cat": "decomp",
+  "q": "What to draw FIRST on the whiteboard?",
+  "a": "Inputs \u2192 Logic \u2192 Outputs. Boxes describe BEHAVIOR (not tech) until you discuss implementation choices."
+ },
+ {
+  "id": "fc-ai-16",
+  "cat": "ai",
+  "q": "Tagged-thinking pattern for CoT + structured output?",
+  "a": "<thinking>...</thinking> then <answer>{json}</answer>. Parse only the answer; log thinking for debugging."
+ },
+ {
+  "id": "fc-ai-17",
+  "cat": "ai",
+  "q": "For a stable system prompt sent many times, what cuts cost ~90%?",
+  "a": "Prompt caching. Provider caches the model\\'s internal state for the prefix; subsequent requests reuse the computation."
+ },
+ {
+  "id": "fc-ai-18",
+  "cat": "ai",
+  "q": "Cross-encoder re-rank pipeline order?",
+  "a": "Fast retrieval (top 50) \u2192 cross-encoder re-rank \u2192 top 5 \u2192 into LLM prompt. Cross-encoders too slow at full corpus scale."
+ },
+ {
+  "id": "fc-ai-19",
+  "cat": "ai",
+  "q": "Best chunk strategy for a structured contract with numbered clauses?",
+  "a": "Structural splitting on clause hierarchy + recursive fallback for long clauses. Preserves meaning + makes citations precise."
+ },
+ {
+  "id": "fc-ai-20",
+  "cat": "ai",
+  "q": "Function calling vs MCP \u2014 what\\'s the diff?",
+  "a": "Function calling = vendor-specific (OpenAI/Anthropic). MCP = open protocol for LLM\u2194tool integrations, interoperable across providers."
+ },
+ {
+  "id": "fc-ai-21",
+  "cat": "ai",
+  "q": "Why do agent retries need idempotency keys?",
+  "a": "Network blip \u2192 response lost \u2192 LLM retries \u2192 without idempotency keys, side effects (charges, emails) fire twice."
+ },
+ {
+  "id": "fc-ai-22",
+  "cat": "ai",
+  "q": "How do you detect LLM-judge drift?",
+  "a": "Monthly: re-grade ~30 examples by hand, confirm judge agreement \u2265 85%. If drift, re-write rubric or swap judge model."
+ },
+ {
+  "id": "fc-ai-23",
+  "cat": "ai",
+  "q": "For a customer in a VPC, which embedding model?",
+  "a": "Local open-source (BGE family, Apache 2.0) or domain variants (Voyage Legal). API embedders (OpenAI/Cohere) need outbound."
+ },
+ {
+  "id": "fc-ai-24",
+  "cat": "ai",
+  "q": "Pinecone vs pgvector \u2014 when pgvector wins?",
+  "a": "Customer already on Postgres + sub-1M docs. Zero new infra; SQL filters mix with vector search. Migration easy later."
+ },
+ {
+  "id": "fc-ai-25",
+  "cat": "ai",
+  "q": "Three Anthropic-specific concepts to know?",
+  "a": "(1) Constitutional AI. (2) Responsible Scaling Policy (RSP). (3) Long-context + prompt caching. Read these before interviewing."
+ },
+ {
+  "id": "fc-ai-26",
+  "cat": "ai",
+  "q": "Indirect prompt injection mitigation?",
+  "a": "Tag retrieved/external content with <untrusted_content>...</untrusted_content> + instruct model to treat as DATA not instructions. Imperfect but reduces risk."
+ },
+ {
+  "id": "fc-ai-27",
+  "cat": "ai",
+  "q": "Speculative decoding explained?",
+  "a": "Small fast model drafts tokens; big model validates in parallel. Most drafts pass \u2192 2-3\u00d7 speedup at big-model quality."
+ },
+ {
+  "id": "fc-ai-28",
+  "cat": "ai",
+  "q": "Voice agent UX hardest problem in 2026?",
+  "a": "Turn-taking (knowing when human is done) + interruption handling. Latency is necessary but not sufficient for \"feels human.\""
+ },
+ {
+  "id": "fc-cod-12",
+  "cat": "coding",
+  "q": "Why deque over list for BFS queue?",
+  "a": "list.pop(0) is O(n) (shifts every element). deque.popleft is O(1). At scale, the diff is asymptotic."
+ },
+ {
+  "id": "fc-cod-13",
+  "cat": "coding",
+  "q": "Mark visited at enqueue or dequeue?",
+  "a": "Enqueue. Mark-at-dequeue lets the same node be enqueued by every neighbor before processing \u2014 memory blowup in dense graphs."
+ },
+ {
+  "id": "fc-cod-14",
+  "cat": "coding",
+  "q": "LIS (longest increasing subsequence) optimal complexity?",
+  "a": "O(N log N) via patience sort: maintain \"tails\" array, binary search insert position. Pure DP is O(N\u00b2)."
+ }
+]

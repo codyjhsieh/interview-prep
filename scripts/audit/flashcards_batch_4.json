@@ -1,0 +1,278 @@
+[
+ {
+  "id": "fc-beh-11",
+  "cat": "behav",
+  "q": "STAR weighting for FDE \u2014 biggest section?",
+  "a": "Action ~60% of the story. Be specific about both technical and interpersonal moves you made."
+ },
+ {
+  "id": "fc-beh-12",
+  "cat": "behav",
+  "q": "5 required FDE stories?",
+  "a": "(1) Production fix under pressure. (2) Pushing back on customer. (3) Deployment failure ownership. (4) Explaining a technical limit. (5) Decision under incomplete info."
+ },
+ {
+  "id": "fc-beh-13",
+  "cat": "behav",
+  "q": "OpenAI values to know?",
+  "a": "(1) AGI focus. (2) Intensity. (3) Scale. (4) Make something people love. Read the Charter; have a specific reason for the role."
+ },
+ {
+  "id": "fc-beh-14",
+  "cat": "behav",
+  "q": "Anthropic interview signal?",
+  "a": "Real engagement with safety + RSP + Constitutional AI. Ethical-dilemma scenarios common. Generic \"I do the right thing\" fails."
+ },
+ {
+  "id": "fc-beh-15",
+  "cat": "behav",
+  "q": "\"Tell me about a time you disagreed with your manager\" \u2014 what most candidates skip?",
+  "a": "The COMMIT half: executing fully on the team\\'s decision, even when you lost. Often stronger when you were partly wrong + did your share."
+ },
+ {
+  "id": "fc-beh-16",
+  "cat": "behav",
+  "q": "\"Tell me about mentoring someone\" \u2014 what makes it strong?",
+  "a": "Specific person + specific gap + your approach + measurable outcome (promotion, project shipped, observable behavior change)."
+ },
+ {
+  "id": "fc-cl-8",
+  "cat": "cloud",
+  "q": "Three pillars of observability?",
+  "a": "Logs (why did this fail), Metrics (is something wrong NOW), Traces (where in the call graph). OpenTelemetry unifies emission."
+ },
+ {
+  "id": "fc-cl-9",
+  "cat": "cloud",
+  "q": "OpenTelemetry \u2014 what is it?",
+  "a": "Vendor-neutral instrumentation library emitting logs/metrics/traces. Pluggable backends (Datadog, Jaeger, Honeycomb, etc.)."
+ },
+ {
+  "id": "fc-cl-10",
+  "cat": "cloud",
+  "q": "Senior debugging order?",
+  "a": "Metrics (what\\'s wrong, narrow service) \u2192 Traces (find the slow span) \u2192 Logs (read the exception). Logs-first is junior."
+ },
+ {
+  "id": "fc-cl-11",
+  "cat": "cloud",
+  "q": "BYOK \u2014 Bring Your Own Keys?",
+  "a": "Customer holds encryption key in their KMS. They can revoke = your service can\\'t decrypt their data. Strong enterprise trust boundary."
+ },
+ {
+  "id": "fc-cl-12",
+  "cat": "cloud",
+  "q": "PCI scope reduction strategy?",
+  "a": "Don\\'t touch raw card data. Use Stripe/Adyen tokenization. PCI scope shrinks dramatically; compliance burden much smaller."
+ },
+ {
+  "id": "fc-cl-13",
+  "cat": "cloud",
+  "q": "DPA \u2014 what is it?",
+  "a": "Data Processing Agreement. GDPR-required contract specifying how you handle customer\\'s personal data. Sub-processors, residency, breach windows."
+ },
+ {
+  "id": "fc-cl-14",
+  "cat": "cloud",
+  "q": "SAML SSO intermittent failure \u2014 top cause?",
+  "a": "Clock skew. Assertions arrive with timestamps outside tolerance window. Allow 60s tolerance on NotBefore/NotOnOrAfter."
+ },
+ {
+  "id": "fc-cl-15",
+  "cat": "cloud",
+  "q": "SCIM \u2014 what does it do?",
+  "a": "REST API for user/group provisioning. Customer\\'s IdP automatically creates/updates/disables users in your system. Enterprise required."
+ },
+ {
+  "id": "fc-cl-16",
+  "cat": "cloud",
+  "q": "Air-gapped customer deploy?",
+  "a": "Helm chart in their cluster, with all images mirrored into their internal container registry. No outbound to your servers."
+ },
+ {
+  "id": "fc-cl-17",
+  "cat": "cloud",
+  "q": "Blue-green vs canary deploy?",
+  "a": "Blue-green: two parallel envs, atomic cutover via LB flip. Canary: gradual % traffic shift with metric gates. Canary for risk; B/G for atomic rollback."
+ },
+ {
+  "id": "fc-cl-18",
+  "cat": "cloud",
+  "q": "TLS cert auto-renewal pattern?",
+  "a": "ACME protocol (Let\\'s Encrypt) + cert-manager in K8s. Manual rotation fails when certs expire on weekends + incidents."
+ },
+ {
+  "id": "fc-cl-19",
+  "cat": "cloud",
+  "q": "Auto-rollback on metric regression \u2014 tools?",
+  "a": "Spinnaker, Argo Rollouts. Watch metrics for N min post-deploy; if error rate / latency spikes, auto-revert. Standard for high-traffic services."
+ },
+ {
+  "id": "fc-cl-20",
+  "cat": "cloud",
+  "q": "Secret rotation without downtime?",
+  "a": "Dual-credential window: add new alongside old, roll services, remove old. Zero-downtime credential rotation."
+ },
+ {
+  "id": "fc-cl-21",
+  "cat": "cloud",
+  "q": "Service mesh value?",
+  "a": "Sidecars handle mTLS + retries + circuit-breaking + observability without code changes. Useful at scale; complex to operate."
+ },
+ {
+  "id": "fc-dom-4",
+  "cat": "domain",
+  "q": "Healthcare deploy \u2014 biggest non-technical hurdle?",
+  "a": "8-16 week compliance review by hospital security teams. Plan for it. Single-tenant in customer VPC is often required (HIPAA)."
+ },
+ {
+  "id": "fc-dom-5",
+  "cat": "domain",
+  "q": "Defense / government FDE requirements?",
+  "a": "Air-gapped on-prem deploys + FedRAMP High / IL5 + cleared engineers. Procurement cycle is months-years."
+ },
+ {
+  "id": "fc-dom-6",
+  "cat": "domain",
+  "q": "Fintech ledger non-negotiables?",
+  "a": "Double-entry + append-only (never UPDATE/DELETE) + idempotent writes. Adjustments via offsetting entries. Audit trail is sacred."
+ },
+ {
+  "id": "fc-dom-7",
+  "cat": "domain",
+  "q": "Multimodal AI UX challenge?",
+  "a": "Long-running inference (minutes). Need async job queue + WS/polling progress + content moderation pre+post-gen + cancellation tokens."
+ },
+ {
+  "id": "fc-dom-8",
+  "cat": "domain",
+  "q": "Voice AI 2026 UX hardest problem?",
+  "a": "Turn-taking + interruption handling. Latency is necessary but not sufficient for \"feels human.\""
+ },
+ {
+  "id": "fc-dom-9",
+  "cat": "domain",
+  "q": "PLG vs SLG growth motion \u2014 which needs FDE?",
+  "a": "SLG (sales-led, enterprise customers). FDE is the customer-engineering arm. PLG companies usually don\\'t need traditional FDE."
+ },
+ {
+  "id": "fc-dom-10",
+  "cat": "domain",
+  "q": "Matching algorithms \u2014 greedy vs ML?",
+  "a": "Greedy by rating starves new entrants. ML rank with diversity injection (5-10% to newer suppliers) keeps supply healthy."
+ },
+ {
+  "id": "fc-meta-5",
+  "cat": "meta",
+  "q": "Lowest-ROI prep activity?",
+  "a": "Re-reading concepts you already know. Testing yourself + practicing under pressure is higher-leverage per hour."
+ },
+ {
+  "id": "fc-meta-6",
+  "cat": "meta",
+  "q": "Kill criterion for stopping prep on a topic?",
+  "a": "Can you teach it aloud + answer 3 follow-ups in 5 min? Yes \u2192 move on. Deeper study has diminishing returns past that."
+ },
+ {
+  "id": "fc-meta-7",
+  "cat": "meta",
+  "q": "Implementation intention effect size?",
+  "a": "~2\u00d7 follow-through vs goal-setting alone (Gollwitzer). \"When X, then Y\" plans turn intentions into automatic triggers."
+ },
+ {
+  "id": "fc-meta-8",
+  "cat": "meta",
+  "q": "Concurrent process portfolio target during search?",
+  "a": "3-5 concurrent processes. Gives competing-offer leverage + risk diversification + faster timeline."
+ },
+ {
+  "id": "fc-meta-9",
+  "cat": "meta",
+  "q": "Strongest predictor of 2-year role outcome?",
+  "a": "Manager quality. Worth weighting heavily in offer comparison even at \u00b1$40k diff."
+ },
+ {
+  "id": "fc-meta-10",
+  "cat": "meta",
+  "q": "Salary expectations script?",
+  "a": "\"Want to focus on whether the role is a fit. Market for FDE at your size is roughly $X-$Y total comp. Happy to be specific once aligned.\""
+ },
+ {
+  "id": "fc-meta-11",
+  "cat": "meta",
+  "q": "Resume bullet formula?",
+  "a": "[Verb] [system you owned] [specific mechanism] [quantified outcome]. Recruiters skim 6-20 sec \u2014 verb + number carry signal."
+ },
+ {
+  "id": "fc-meta-12",
+  "cat": "meta",
+  "q": "70% rule for decisions?",
+  "a": "When you have 70% of the info you need, decide. Waiting for 90% usually costs more than acting on 70%. Especially for reversible decisions."
+ },
+ {
+  "id": "fc-meta-13",
+  "cat": "meta",
+  "q": "When to negotiate equity refresh?",
+  "a": "At offer time AND every annual review. Refresh grants are negotiable, not automatic. Most engineers leave money on the table."
+ },
+ {
+  "id": "fc-meta-14",
+  "cat": "meta",
+  "q": "Atomic-habit prep stack?",
+  "a": "(1) Implementation intention (when-then). (2) 2-minute rule (start cost <30s). (3) Habit stacking (after coffee \u2192 study). (4) Environment design (pinned tab)."
+ },
+ {
+  "id": "fc-meta-15",
+  "cat": "meta",
+  "q": "Rejection processing discipline?",
+  "a": "30-min \"feel bad\" block \u2192 resume next day. Don\\'t check email obsessively (fix time). Maintain 3-5 concurrent processes so rejections are data, not verdicts."
+ },
+ {
+  "id": "fc-cli-2",
+  "cat": "client",
+  "q": "ADO framework expanded?",
+  "a": "Acknowledge impact (\"I hear you\") \u2192 Diagnose visibly (\"checking X now, can you tell me Y?\") \u2192 Own resolution timeline (\"status by EOD, here\\'s plan\")."
+ },
+ {
+  "id": "fc-cli-3",
+  "cat": "client",
+  "q": "Demo failure recovery?",
+  "a": "Acknowledge + run two tracks: visible (show recorded version) + backend (debug). Never blame customer\\'s env in the moment. RCA within 24h."
+ },
+ {
+  "id": "fc-cli-4",
+  "cat": "client",
+  "q": "Customer demands 6 weeks in 3 days \u2014 move?",
+  "a": "Decompose to the 20% that unblocks them + document tradeoffs + get the REAL deadline (often softer than stated)."
+ },
+ {
+  "id": "fc-cli-5",
+  "cat": "client",
+  "q": "Same problem recurs 2 hours after fix \u2014 response?",
+  "a": "Own as Sev1 + commit specific timeline + status updates every 4 hours. Defending the prior fix kills trust further."
+ },
+ {
+  "id": "fc-cli-6",
+  "cat": "client",
+  "q": "Writing customer status updates \u2014 format?",
+  "a": "<span class=\"icon-check\"></span> Shipped this week \u00b7 \ud83d\udea7 In flight \u00b7 \u26a0\ufe0f Risks/blockers \u00b7 \ud83d\udcc5 Next week. 5 bullets read better than 3 paragraphs."
+ },
+ {
+  "id": "fc-cli-7",
+  "cat": "client",
+  "q": "Customer\\'s IT team blocks integration \u2014 move?",
+  "a": "Structured security review proposal (SOC2 docs + architecture + sub-processor list). Bypassing them = political damage."
+ },
+ {
+  "id": "fc-cli-8",
+  "cat": "client",
+  "q": "A customer-side champion is leaving \u2014 what next?",
+  "a": "Get reintroduced to replacement + re-confirm scope/timeline with new owner. Champion loss = retention risk."
+ },
+ {
+  "id": "fc-cli-9",
+  "cat": "client",
+  "q": "Explaining stochastic AI to a CFO?",
+  "a": "Weather-forecast analogy + show confidence range + 95th-percentile worst case + leading indicators. Quant always wins with CFOs."
+ }
+]

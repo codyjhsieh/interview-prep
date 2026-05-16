@@ -1,0 +1,68 @@
+[
+  {
+    "id": "fc-beh-4",
+    "issue": "OpenAI values list is vague (\\'AGI focus\\', \\'Intensity\\', \\'Scale\\') and not tied to the actual Charter; FDE acronym is undefined; misses 2025/2026 restructuring (OpenAI Group PBC + OpenAI Foundation).",
+    "new_q": "OpenAI Charter principles and 2025/2026 context to know for an interview?",
+    "new_a": "Four Charter principles: Broadly Distributed Benefits, Long-Term Safety, Technical Leadership, Cooperative Orientation. As of Oct 2025, OpenAI restructured: the for-profit is now OpenAI Group PBC under the OpenAI Foundation (nonprofit). Have a specific reason for the Forward Deployed Engineer (FDE) role, not just \\'OpenAI\\'."
+  },
+  {
+    "id": "fc-beh-5",
+    "issue": "Should reflect Anthropic\\'s Feb 2026 RSP v3.0 update (two-track approach, Frontier Safety Roadmap) and that hard pre-training safety limit was removed.",
+    "new_q": null,
+    "new_a": "AI safety, beneficial AI, Constitutional AI, and the Responsible Scaling Policy (RSP v3.0, Feb 2026) — which moved to a two-track model (Anthropic-only mitigations + industry-wide map) and added a public Frontier Safety Roadmap. Expect ethical-dilemma scenarios; surface depth on safety, not generic concern."
+  },
+  {
+    "id": "fc-beh-8",
+    "issue": "\\'FDE\\' acronym undefined — card doesn\\'t stand alone.",
+    "new_q": "5 required Forward Deployed Engineer (FDE) stories?",
+    "new_a": null
+  },
+  {
+    "id": "fc-cl-5",
+    "issue": "Outdated framing — ADFS is largely deprecated by 2026 and \\'Okta SAML\\' as an example of legacy is misleading. SAML is still common in enterprise but OIDC is now the default for new integrations.",
+    "new_q": null,
+    "new_a": "SAML: XML-based, browser SSO, still common with enterprise IdPs (Okta, Entra ID, Ping). OIDC: JWT-based, built on OAuth 2.0, default for new/mobile/API integrations. For enterprise SaaS in 2026, support both — SAML for legacy IT, OIDC for everything new."
+  },
+  {
+    "id": "fc-dec-3",
+    "issue": "Near-duplicate of fc-dec-6 (same question, same answer time budget). One of the two should be consolidated.",
+    "new_q": null,
+    "new_a": "10–15 minutes. Most candidates rush in under 3 minutes. The interviewer is testing whether you can stay in the problem space before solving — senior candidates linger longer than feels comfortable. (See also fc-dec-6.)"
+  },
+  {
+    "id": "fc-dec-6",
+    "issue": "Exact duplicate of fc-dec-3 — both ask the same thing with the same 10–15 min answer.",
+    "new_q": "Senior signal: how long should clarifying-question time feel uncomfortable?",
+    "new_a": "Past the point where you want to start drawing — typically 10–15 min in a 60-min round. The discomfort is the signal you\\'re doing it right; juniors leave step 1 the moment they have a plausible solution."
+  },
+  {
+    "id": "fc-ai-20",
+    "issue": "Outdated as of 2026: MCP was donated to the Agentic AI Foundation (Linux Foundation) in Dec 2025 and is now adopted by OpenAI, Google, Microsoft — calling function-calling \\'vendor-specific\\' vs MCP \\'open\\' undersells how dominant MCP has become.",
+    "new_q": null,
+    "new_a": "Function calling = each provider\\'s native tool-use API (OpenAI, Anthropic, Google) — tightly coupled to the model. MCP (Model Context Protocol) = open standard (donated to Linux Foundation\\'s Agentic AI Foundation in Dec 2025) for LLM↔tool integration; now supported by OpenAI, Anthropic, Google, Microsoft. Use MCP for portable tool servers, function calling for in-prompt one-offs."
+  },
+  {
+    "id": "fc-ai-23",
+    "issue": "\\'Voyage Legal\\' is not a current product name; Voyage AI\\'s current line is voyage-3.5 / voyage-3-large / voyage-law-2. Card should also note BGE-M3 as the 2026 default open-source pick.",
+    "new_q": null,
+    "new_a": "Self-hostable open-source (BGE-M3 is the 2026 default; multi-lingual, dense+sparse) or domain-specific (e.g. voyage-law-2, voyage-code-3 — self-hostable for enterprise). Avoid API-only embedders (OpenAI text-embedding-3, Cohere) when egress from the VPC is prohibited."
+  },
+  {
+    "id": "fc-ai-24",
+    "issue": "Scale threshold is stale — 2026 consensus puts pgvector\\'s comfort zone closer to <10M (with HNSW), not <1M.",
+    "new_q": null,
+    "new_a": "Customer already on Postgres + corpus under ~10M vectors (HNSW index handles this comfortably on a well-provisioned instance). Zero new infra; SQL filters compose with vector search. Migrate to Pinecone/Qdrant/etc. above ~50M or when you need horizontal autoscaling."
+  },
+  {
+    "id": "fc-ai-25",
+    "issue": "Outdated — RSP is now v3.0 (Feb 2026); should also nudge toward Claude\\'s extended thinking and tool use, which are current interview hot-buttons.",
+    "new_q": null,
+    "new_a": "(1) Constitutional AI. (2) Responsible Scaling Policy v3.0 (Feb 2026: two-track commitments + Frontier Safety Roadmap). (3) Long-context + prompt caching + extended thinking. Read the latest RSP and the Claude docs before interviewing."
+  },
+  {
+    "id": "fc-ai-28",
+    "issue": "Can be sharpened with the 2026 concrete latency target (~600–700ms end-to-end) and current technique names.",
+    "new_q": null,
+    "new_a": "Turn-taking (detecting end-of-utterance via prosody + semantics, not VAD alone) and adaptive interruption handling (distinguishing backchannels like \\'mm-hmm\\' from real barge-ins). End-to-end latency under ~600–700ms is necessary but not sufficient for \\'feels human\\'."
+  }
+]

@@ -1,0 +1,284 @@
+[
+ {
+  "id": "fc-cod-15",
+  "cat": "coding",
+  "q": "K-th largest in unsorted N-element array?",
+  "a": "QuickSelect O(N) avg case, OR min-heap of size K \u2014 O(N log K). Beats full sort."
+ },
+ {
+  "id": "fc-cod-16",
+  "cat": "coding",
+  "q": "Top-K from a stream \u2014 data structure?",
+  "a": "Min-heap of size K. Each new item: if larger than min, pop min and push new. O(log K) per item, O(K) memory."
+ },
+ {
+  "id": "fc-cod-17",
+  "cat": "coding",
+  "q": "Streaming median \u2014 data structure?",
+  "a": "Two heaps: max-heap for lower half, min-heap for upper. Rebalance after insert. Median = root(s)."
+ },
+ {
+  "id": "fc-cod-18",
+  "cat": "coding",
+  "q": "Connected components in a graph?",
+  "a": "DFS or BFS from each unvisited node. Each start = one new component. O(V+E)."
+ },
+ {
+  "id": "fc-cod-19",
+  "cat": "coding",
+  "q": "Cycle detection in directed graph?",
+  "a": "DFS with \"currently on stack\" set. Encountering a node on the stack = back-edge = cycle. Or Kahn\\'s topo sort with count check."
+ },
+ {
+  "id": "fc-cod-20",
+  "cat": "coding",
+  "q": "For \"merge K sorted lists\" optimally?",
+  "a": "Min-heap of K head pointers. Pop smallest, push its next. O(N log K) \u2014 strictly better than pairwise merge or full sort for small K."
+ },
+ {
+  "id": "fc-cod-21",
+  "cat": "coding",
+  "q": "Sliding window \u2014 invariant requirement?",
+  "a": "Monotone invariant: adding to window can\\'t un-break the property once broken. Without monotonicity, sliding window may not apply."
+ },
+ {
+  "id": "fc-cod-22",
+  "cat": "coding",
+  "q": "Two-pointer technique time/space?",
+  "a": "O(N) time, O(1) extra space on sorted arrays. Each pointer moves forward at most N times. Strictly better than hash-set on space."
+ },
+ {
+  "id": "fc-cod-23",
+  "cat": "coding",
+  "q": "Binary search \"on the answer\" \u2014 when?",
+  "a": "When answer space is monotonic: predicate(x) \u2014 small fails, big works. Boundary searchable in O(log N) evaluations of predicate."
+ },
+ {
+  "id": "fc-cod-24",
+  "cat": "coding",
+  "q": "Prefix sums \u2014 what they buy you?",
+  "a": "Range-sum queries in O(1) after O(N) precompute. Difference: prefix[r]-prefix[l]. Use also for \"subarray sum equals K.\""
+ },
+ {
+  "id": "fc-cod-25",
+  "cat": "coding",
+  "q": "Bit manipulation: x & (x-1) does what?",
+  "a": "Clears the lowest set bit. Repeat to count bits. Used in Brian Kernighan\\'s bit count."
+ },
+ {
+  "id": "fc-cod-26",
+  "cat": "coding",
+  "q": "XOR singleton trick?",
+  "a": "Array has every value twice except one. XOR all values: pairs cancel; singleton remains. O(N) time, O(1) memory."
+ },
+ {
+  "id": "fc-cod-27",
+  "cat": "coding",
+  "q": "Dijkstra fails on negative edges because?",
+  "a": "Locks in a node\\'s distance once extracted from PQ. Negative edges can later offer a shorter path. Use Bellman-Ford instead."
+ },
+ {
+  "id": "fc-cod-28",
+  "cat": "coding",
+  "q": "Bellman-Ford complexity + benefit?",
+  "a": "O(VE). Handles negative edges. Detects negative cycles (one extra relaxation pass \u2014 if any edge can still relax, cycle exists)."
+ },
+ {
+  "id": "fc-cod-29",
+  "cat": "coding",
+  "q": "Monotonic stack \u2014 pattern recognition?",
+  "a": "\"Next greater/smaller element,\" \"stock span,\" \"trapping rain water.\" Each element pushed once + popped once = O(N)."
+ },
+ {
+  "id": "fc-cod-30",
+  "cat": "coding",
+  "q": "A* vs Dijkstra?",
+  "a": "A* = Dijkstra + heuristic h(n). With admissible heuristic (never overestimates), A* finds optimal + prunes search dramatically when target known."
+ },
+ {
+  "id": "fc-sd-10",
+  "cat": "sysd",
+  "q": "Why hybrid push/pull for feeds?",
+  "a": "Pure push: celebs cause write amplification. Pure pull: high-followers users slow reads. Hybrid: push for normal, pull for celebs above threshold."
+ },
+ {
+  "id": "fc-sd-11",
+  "cat": "sysd",
+  "q": "CAP \u2014 when does it apply?",
+  "a": "During a PARTITION. With healthy network, you can have both. Pacific PACELC adds the steady-state latency-vs-consistency dimension."
+ },
+ {
+  "id": "fc-sd-12",
+  "cat": "sysd",
+  "q": "PACELC for Cassandra default?",
+  "a": "PA/EL \u2014 availability + low latency (default; tunable per-query). Spanner is PC/EC \u2014 consistency always."
+ },
+ {
+  "id": "fc-sd-13",
+  "cat": "sysd",
+  "q": "Consistent hashing add N+1th node \u2014 what fraction remaps?",
+  "a": "Roughly 1/(N+1) of keys. With virtual nodes, those keys redistribute evenly across the existing nodes."
+ },
+ {
+  "id": "fc-sd-14",
+  "cat": "sysd",
+  "q": "For \"exactly-once\" semantics?",
+  "a": "Effectively impossible in distributed systems. Settle for \"at-least-once + idempotent receivers\" or \"at-most-once + accept loss.\""
+ },
+ {
+  "id": "fc-sd-15",
+  "cat": "sysd",
+  "q": "Cache stampede mitigation?",
+  "a": "Singleflight (only one request rebuilds, others wait) OR refresh-ahead (rebuild before TTL expires, serve stale during)."
+ },
+ {
+  "id": "fc-sd-16",
+  "cat": "sysd",
+  "q": "Hot keys in Redis \u2014 fix?",
+  "a": "Replicate hot keys across multiple nodes + load-balance reads. Consistent hashing doesn\\'t help when ONE key is hot."
+ },
+ {
+  "id": "fc-sd-17",
+  "cat": "sysd",
+  "q": "For cross-server rate limiting?",
+  "a": "Redis with Lua script \u2014 atomic + low-latency. In-memory per-server can\\'t enforce a global cap."
+ },
+ {
+  "id": "fc-sd-18",
+  "cat": "sysd",
+  "q": "Token bucket vs sliding-window for rate limits?",
+  "a": "Token bucket: tolerates bursts up to bucket size. Sliding-window counter: cheap + approximate. Pick by burst tolerance."
+ },
+ {
+  "id": "fc-sd-19",
+  "cat": "sysd",
+  "q": "Idempotency on webhook receivers \u2014 TTL?",
+  "a": "Dedupe table TTL longer than retry window (~30 days typical). Shorter risks duplicates that arrive late."
+ },
+ {
+  "id": "fc-sd-20",
+  "cat": "sysd",
+  "q": "For chat ordering with simultaneous sends?",
+  "a": "Server-assigned per-conversation sequence number. Wall-clock skews. Sequence is monotonic + deterministic."
+ },
+ {
+  "id": "fc-sd-21",
+  "cat": "sysd",
+  "q": "Range vs hash sharding \u2014 range when?",
+  "a": "When you need range queries (e.g., \"rows where date BETWEEN X and Y\"). Risk: hot partitions. Hash distributes evenly but kills ranges."
+ },
+ {
+  "id": "fc-sd-22",
+  "cat": "sysd",
+  "q": "Read-replica lag fix for read-your-writes?",
+  "a": "Session pinning: route user reads to primary for N seconds after their write. Gives RYW consistency without sacrificing replica scaling for others."
+ },
+ {
+  "id": "fc-sd-23",
+  "cat": "sysd",
+  "q": "SAGA pattern for distributed transactions?",
+  "a": "Each step has compensating action. On failure, run compensations in reverse. Standard when 2PC is impractical."
+ },
+ {
+  "id": "fc-sd-24",
+  "cat": "sysd",
+  "q": "Circuit breaker pattern goal?",
+  "a": "Prevent cascading failures. After N failures, open breaker \u2192 fast-fail subsequent calls \u2192 probe for recovery. Don\\'t overload the downstream."
+ },
+ {
+  "id": "fc-sd-25",
+  "cat": "sysd",
+  "q": "Event sourcing \u2014 source of truth?",
+  "a": "Append-only event log. Current state derived by replaying events. Snapshots + projections are derived views for fast reads."
+ },
+ {
+  "id": "fc-sql-8",
+  "cat": "data",
+  "q": "Window function for \"running total\"?",
+  "a": "SUM(amount) OVER (PARTITION BY group ORDER BY date). GROUP BY collapses; you\\'d lose per-row detail."
+ },
+ {
+  "id": "fc-sql-9",
+  "cat": "data",
+  "q": "For \"top N per group\"?",
+  "a": "ROW_NUMBER() OVER (PARTITION BY group ORDER BY metric DESC) \u2192 filter rn \u2264 N in an outer query."
+ },
+ {
+  "id": "fc-sql-10",
+  "cat": "data",
+  "q": "LAG/LEAD functions do what?",
+  "a": "LAG(col, n): previous nth row\\'s value. LEAD: next. Useful for diffs, deltas, conversion funnels."
+ },
+ {
+  "id": "fc-sql-11",
+  "cat": "data",
+  "q": "Composite index on (a, b, c) \u2014 usable for WHERE b=X?",
+  "a": "NO. Leftmost-prefix rule: must use leftmost column (a). WHERE a=X, (a, b), (a, b, c) all work; skipping a doesn\\'t."
+ },
+ {
+  "id": "fc-sql-12",
+  "cat": "data",
+  "q": "Covering index \u2014 what is it?",
+  "a": "Index that contains all columns needed by query (key + INCLUDE columns). DB satisfies query from index alone; no table fetch."
+ },
+ {
+  "id": "fc-sql-13",
+  "cat": "data",
+  "q": "Postgres MVCC + VACUUM relationship?",
+  "a": "UPDATE/DELETE leave dead tuples (multi-version concurrency). VACUUM reclaims dead-tuple space + ANALYZE updates planner statistics."
+ },
+ {
+  "id": "fc-sql-14",
+  "cat": "data",
+  "q": "OLAP vs OLTP \u2014 fundamental difference?",
+  "a": "OLTP: row-oriented, single-record write/read, normalized (Postgres, MySQL). OLAP: columnar, batch aggregates, denormalized (Snowflake, ClickHouse)."
+ },
+ {
+  "id": "fc-sql-15",
+  "cat": "data",
+  "q": "Star schema vs snowflake?",
+  "a": "Star: fact + denormalized dim tables. Fewer joins, faster queries. Snowflake: normalized dims (more joins). Star = analytical default."
+ },
+ {
+  "id": "fc-sql-16",
+  "cat": "data",
+  "q": "Idempotent partitioned writes?",
+  "a": "DELETE WHERE partition=X then INSERT. Task is replayable; re-runs don\\'t duplicate. Standard pipeline pattern."
+ },
+ {
+  "id": "fc-sql-17",
+  "cat": "data",
+  "q": "For analytics on a 1TB Postgres table?",
+  "a": "Move analytics workload to columnar OLAP (Snowflake / ClickHouse / DuckDB). Postgres is bad at aggregate scans on big tables."
+ },
+ {
+  "id": "fc-sql-18",
+  "cat": "data",
+  "q": "Medallion architecture layers?",
+  "a": "Bronze (raw) \u2192 Silver (cleaned/normalized) \u2192 Gold (business-ready aggregates). Standard layer model for Delta Lake / Iceberg."
+ },
+ {
+  "id": "fc-sql-19",
+  "cat": "data",
+  "q": "Schema registry purpose?",
+  "a": "Avro/Protobuf schemas tracked centrally with backward/forward compat rules. Lets producers + consumers evolve independently."
+ },
+ {
+  "id": "fc-sql-20",
+  "cat": "data",
+  "q": "Iceberg vs Delta vs Hudi?",
+  "a": "Three open table formats over Parquet. Provide ACID + time travel + schema evolution on data lakes. Iceberg is most vendor-neutral; Delta is Databricks-leaning."
+ },
+ {
+  "id": "fc-beh-9",
+  "cat": "behav",
+  "q": "Top \"kill phrase\" in Palantir behavioral?",
+  "a": "\"My weakness is I work too hard\" / \"I don\\'t really fail.\" Fake-failure dodges are instant rejects."
+ },
+ {
+  "id": "fc-beh-10",
+  "cat": "behav",
+  "q": "\"Why are you leaving?\" \u2014 strongest framing?",
+  "a": "Pull-not-push: what attracts you forward; light positive on current employer. Never badmouth \u2014 signals you\\'ll do same about them later."
+ }
+]
