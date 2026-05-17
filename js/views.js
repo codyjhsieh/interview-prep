@@ -4942,7 +4942,11 @@ function renderCompanies(state, hub) {
     // to subsequent animation frames so the tap → first-paint feels
     // instant. Was a single 129-card forEach + a 129-tween GSAP stagger
     // which together dominated mobile tap-to-paint time (~1 s).
-    const INITIAL = 18, CHUNK = 18;
+    // CHUNK dropped from 18 -> 8 (2026-05-17): each chunk's _buildCompanyCard
+    // batch was producing ~150ms long tasks on throttled mobile per the
+    // perf clickthrough. Same total cards, same order, just one extra
+    // rAF tick per 10 cards -- imperceptible end-state.
+    const INITIAL = 18, CHUNK = 8;
     const frag1 = document.createDocumentFragment();
     for (let i = 0; i < Math.min(INITIAL, filtered.length); i++) {
       frag1.appendChild(_buildCompanyCard(filtered[i]));

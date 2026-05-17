@@ -393,6 +393,16 @@ body:has(> .fixed.inset-0[class*="z-5"]) {
   overflow: hidden;
   overscroll-behavior: none;
 }
+/* Pause the ambient color-well drift on body::before while a modal is
+ * open. The modal wrapper's backdrop-filter samples those pixels every
+ * frame; if the source is animating, the blur has to re-composite
+ * continuously and tanks scroll FPS inside the modal. Paused = blur
+ * cache is stable, modal scroll stays smooth. The 32s drift cycle
+ * resuming a few seconds later is imperceptible. */
+body:has(> .fixed.inset-0[class*="z-4"])::before,
+body:has(> .fixed.inset-0[class*="z-5"])::before {
+  animation-play-state: paused;
+}
 html:has(body > .fixed.inset-0[class*="z-4"]),
 html:has(body > .fixed.inset-0[class*="z-5"]) {
   overflow: hidden;
@@ -2394,6 +2404,19 @@ code {
 /* Make block children breathe. We're forgiving of authored authors: code,
  * lists, callouts, and tables all get clear above/below space. */
 .lesson-prose pre        { margin: 1.05em 0; }
+/* Off-screen code blocks + tables skip paint/layout when scrolling
+ * through a long lesson. Each <pre> has Prism tokens applied, plus
+ * background + border-radius + box-shadow, plus the prism CSS theme
+ * paints token spans. With several blocks per lesson that adds up to
+ * 30-50% of the per-frame paint budget while scrolling. content-
+ * visibility:auto skips both layout and paint when the element is
+ * outside the viewport; contain-intrinsic-size keeps the scrollbar
+ * position stable. No visual change to on-screen blocks. */
+.lesson-prose pre,
+.lesson-prose table {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 160px;
+}
 .lesson-prose ul,
 .lesson-prose ol         { margin: 0.95em 0 0.95em 22px; }
 .lesson-prose ul li,
