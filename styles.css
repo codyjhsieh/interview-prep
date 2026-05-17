@@ -2189,6 +2189,13 @@ table { display: block; max-width: 100%; overflow-x: auto; }
   .card .text-2xl { font-size: 1.3rem; }
   .text-sm, p.text-sm, div.text-sm { font-size: 14.5px; }
   .text-xs { font-size: 12.5px; }
+  /* iOS Safari auto-zooms any form control whose computed font-size is
+   * less than 16px when the user focuses it. The free-recall textarea
+   * (text-[13px]) and STAR story textareas were triggering this. Pin
+   * every form control to 16px on mobile, regardless of utility class.
+   * Higher specificity than text-[13px] / text-sm via the input/textarea
+   * type selector. */
+  input, textarea, select { font-size: 16px !important; }
   /* The "ALL CAPS section eyebrows" should never go below 11px */
   .eyebrow, .uppercase.tracking-wider { font-size: 11px; letter-spacing: 0.08em; }
 
