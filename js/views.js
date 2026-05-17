@@ -6039,6 +6039,55 @@ function renderProfile(state, hub) {
       </form>
     </div>
 
+    ${(() => {
+      // XP audit — last 14 days' breakdown by kind. Renders only if at
+      // least one history entry has the events field populated (post-
+      // 2026-05-17 awardXP() upgrade). Lets users answer "where did
+      // today's 140 XP come from?" without grepping state.
+      const hist = (state.history || []).slice(-14).reverse();
+      const hasEvents = hist.some(h => h.events && Object.keys(h.events).length);
+      if (!hasEvents) return '';
+      const labelFor = (k) => ({
+        lesson: 'Lessons', flashcard: 'Flashcards', app: 'Job apps',
+        quest: 'Daily quests', quiz: 'Lightning quiz', bfs: 'BFS game',
+        lru: 'LRU game', decomp: 'Decomp game', roleplay: 'Roleplay game',
+        'free-recall': 'Free recall', story: 'STAR story',
+        mock: 'Mock prep', 'mock-practice': 'Mock practice',
+        'mock-interview': 'Mock interview', focus: 'Focus session',
+      }[k] || k);
+      return `
+    <div class="card">
+      <h3 class="font-display font-semibold text-lg mb-3">XP audit
+        <span class="text-xs text-slate-400 font-normal">last 14 days, by source</span></h3>
+      <div class="space-y-3">
+        ${hist.map(h => {
+          const events = h.events || {};
+          const eventsXP = h.eventsXP || {};
+          const kinds = Object.entries(eventsXP)
+            .sort((a, b) => b[1] - a[1]);
+          const tracked = kinds.reduce((s, [_, v]) => s + v, 0);
+          const untracked = (h.xp || 0) - tracked;
+          return `
+          <div class="border-l-2 pl-3" style="border-color:var(--accent)">
+            <div class="flex items-baseline justify-between gap-2">
+              <div class="text-sm font-medium font-mono">${esc(h.date)}</div>
+              <div class="text-sm font-mono numeric"><b>+${h.xp || 0}</b> XP</div>
+            </div>
+            <div class="text-[12px] mt-1 flex flex-wrap gap-x-3 gap-y-0.5 muted">
+              ${kinds.length === 0 ? '<span class="dim">no events recorded</span>' : kinds.map(([k, xp]) =>
+                `<span><b style="color:var(--text)">${esc(labelFor(k))}</b> ${events[k] || 0}× <span class="dim">+${xp}</span></span>`
+              ).join('')}
+              ${untracked > 0
+                ? `<span style="color:var(--warn)"><b>untracked</b> <span class="dim">+${untracked}</span></span>`
+                : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="text-[11px] muted mt-3">Untracked = XP awarded before this build started recording event kinds (2026-05-17). New awards always log their source.</div>
+    </div>`;
+    })()}
+
     <div class="card">
       <h3 class="font-display font-semibold text-lg mb-3">Badges <span class="text-xs text-slate-400">${earned.length}/${BADGES.length}</span></h3>
       <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">

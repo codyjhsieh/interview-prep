@@ -184,11 +184,29 @@ function awardXP(state, amount, reason) {
   state.todayXP += finalXP;
   state.level = levelFromXP(state.xp);
 
-  // History
+  /* History + audit trail.
+   *
+   * Every awardXP call writes:
+   *   - hentry.xp           cumulative XP earned that day
+   *   - hentry.events[k]    count of awards of kind k (lesson, flashcard, ...)
+   *   - hentry.eventsXP[k]  total XP attributed to kind k
+   *
+   * So "what's in my todayXP=140?" can be answered without grepping:
+   *   {lesson: 5, flashcard: 7, focus: 3}  with xp split per-kind.
+   *
+   * Migration: old history entries (no events field) work unchanged --
+   * the breakdown just shows up empty until next award. */
   const today = todayKey();
-  const hentry = state.history.find(h => h.date === today);
-  if (hentry) { hentry.xp += finalXP; }
-  else { state.history.push({ date: today, xp: finalXP, lessons: 0 }); }
+  let hentry = state.history.find(h => h.date === today);
+  if (!hentry) {
+    hentry = { date: today, xp: 0, lessons: 0, events: {}, eventsXP: {} };
+    state.history.push(hentry);
+  }
+  hentry.xp += finalXP;
+  if (!hentry.events)   hentry.events   = {};
+  if (!hentry.eventsXP) hentry.eventsXP = {};
+  hentry.events[reason]   = (hentry.events[reason]   || 0) + 1;
+  hentry.eventsXP[reason] = (hentry.eventsXP[reason] || 0) + finalXP;
   // cap history at 365
   if (state.history.length > 365) state.history.splice(0, state.history.length - 365);
 
