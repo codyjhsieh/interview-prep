@@ -259,6 +259,28 @@ const JOURNEY = [
     dwell: 3500,
     kind: 'nav',
   },
+
+  /* ---- Pill nav tour ----
+   * Tap the actual tab-bar items (mobile pill nav at <900px viewport).
+   * This is the user's real navigation path on mobile -- captures any
+   * cost the plain `location.hash =` jumps don't, like the click handler,
+   * scroll-to-top, nav-minimized class toggle, and pill-morph state.
+   * Five taps in ~2.5s simulates someone bouncing between sections. */
+  {
+    label: 'pillnav:tour',
+    go: async (page) => {
+      const tabs = ['dashboard', 'curriculum', 'flashcards', 'companies', 'dashboard'];
+      for (const route of tabs) {
+        await page.evaluate((r) => {
+          const tab = document.querySelector(`#liquid-tabbar .tab-item[data-route="${r}"]`);
+          if (tab) tab.click();
+        }, route);
+        await new Promise(res => setTimeout(res, 450));
+      }
+    },
+    dwell: 1500,
+    kind: 'interaction',
+  },
 ];
 
 async function main() {
