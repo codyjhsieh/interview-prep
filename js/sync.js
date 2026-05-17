@@ -28,19 +28,36 @@ window.SYNC = (function () {
   const SYNC_ENDPOINT = 'https://interview-prep-sync.codyjhsieh.workers.dev';
 
   const CODE_KEY     = 'fdeprep.syncCode.v1';
-  // KV-conservative tuning (2026-05-15): 15s poll + visibility gate.
-  // At 2.5s + always-on, two devices alone burned ~69k reads/day (69%
-  // of the 100k free-tier ceiling). At 15s + visibility-paused, the
-  // same two devices cost ~1.5k reads/day (≤2%). Cross-device sync
-  // still lands in <15s while either tab is visible, and the focus
-  // listener below pulls instantly on tab return.
-  const POLL_MS      = 15000;
-  const PUSH_DEBOUNCE_MS = 1000;
-  const STORAGE_KEY  = 'fdeprep.v1';            // matches GAMI.STORAGE_KEY
+  /* KV economics — the binding constraint is WRITES (1k/day on the free
+   * tier), not reads (100k/day). Each push = 1 KV write + 1 KV read
+   * (worker re-reads to bump _seq monotonically). Each poll = 1 KV read.
+   *
+   * Historical tuning:
+   *   2026-05-15: POLL 2.5s -> 15s + visibility gate. Reads dropped from
+   *               ~69k/day (two devices) to ~1.5k/day.
+   *   2026-05-17: PUSH_DEBOUNCE 1s -> 15s + content-hash gate. Active
+   *               flashcard sessions used to burn ~5/min in writes
+   *               (~150 in a 30-min session). With 15s + hash gate that
+   *               drops to ~4/min only when state truly changed.
+   *
+   * Budget at current tuning, 1 active device, 30-min daily session:
+   *   reads  ≈ (15-min visible / 20s poll) + (30-min active / 20s poll)
+   *           = 45 + 90 = ~135/day. Trivial vs 100k budget.
+   *   writes ≈ 30-min session × ~3 writes/min = ~90/day. Well under 1k.
+   *
+   * Cross-device latency: worst-case 35s end-to-end (15s debounce +
+   * 20s poll). focus listener pulls instantly on tab return so the
+   * "swap devices and pick up where you left off" flow stays snappy. */
+  const POLL_MS          = 20000;
+  const PUSH_DEBOUNCE_MS = 15000;
+  const MIN_POLL_GAP_MS  = 5000;                // floor between focus-driven pulls
+  const STORAGE_KEY      = 'fdeprep.v1';        // matches GAMI.STORAGE_KEY
 
   let pollTimer = null;
   let pushTimer = null;
   let pushPending = false;
+  let lastPolledAt = 0;
+  let lastPushedHash = null;                    // hash of the last state we PUT
   // lastSeenRemoteSeq — monotonic counter from the Worker (stamped per
   // code, not per device). Drives "is the remote newer than what I
   // already saw" without relying on Date.now() agreement between
@@ -115,12 +132,33 @@ window.SYNC = (function () {
   }
 
   // ── Network ─────────────────────────────────────────────────────────
+  /* Cheap rolling hash over a JSON-stringified slice. We only care
+   * about "did anything meaningful change", not a cryptographic
+   * digest — DJB2-style is plenty and avoids pulling in a hash lib. */
+  function hashState(s) {
+    if (!s) return 0;
+    // Exclude fields that change every save but don't reflect user
+    // progress (updatedAt is set inside this function; _seq is server-
+    // owned). Without this exclusion we'd push every save by definition.
+    const { updatedAt: _u, _seq: _s, _sv: _v, ...rest } = s;
+    const str = JSON.stringify(rest);
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+    return h;
+  }
+
   async function pushNow() {
     if (!isConfigured()) return;
     const code = getCode();
     if (!code) return;
     const state = window.APP && window.APP.getState ? window.APP.getState() : null;
     if (!state) return;
+    // Content-hash gate: if the meaningful state hasn't actually
+    // changed since the last push, skip. This catches the common case
+    // of saveImmediate firing on route changes / re-renders where no
+    // user-visible state moved (saves ~30-50% of writes in typical use).
+    const h = hashState(state);
+    if (h === lastPushedHash) { setStatus('synced'); return; }
     state.updatedAt = Date.now();
     try {
       const res = await fetch(`${SYNC_ENDPOINT}/state/${normalizeCode(code)}`, {
@@ -141,6 +179,7 @@ window.SYNC = (function () {
           }
         } catch (_) {}
         lastSeenRemoteUpdatedAt = state.updatedAt;
+        lastPushedHash = h;
         setStatus('synced');
       } else {
         setStatus('error');
@@ -396,6 +435,13 @@ window.SYNC = (function () {
 
   async function pollOnce() {
     if (pushPending) return;                  // local changes queued — let the PUT settle first
+    const now = Date.now();
+    // Floor between consecutive polls — focus + visibilitychange can
+    // both fire when switching back to the tab, and on iOS standalone
+    // they sometimes double-fire. Without this floor every tab return
+    // would cost 2 KV reads.
+    if (now - lastPolledAt < MIN_POLL_GAP_MS) return;
+    lastPolledAt = now;
     setStatus('polling');
     const remote = await pullNow();
     if (!remote) { setStatus('paired'); return; }
@@ -518,6 +564,13 @@ window.SYNC = (function () {
       };
       window.GAMI.__syncWrapped = true;
     }
+    // Seed the push-content-hash from the local state so the very
+    // first saveImmediate after init doesn't fire a no-op push if
+    // nothing actually changed since the last shutdown.
+    try {
+      const s = window.APP && window.APP.getState && window.APP.getState();
+      if (s) lastPushedHash = hashState(s);
+    } catch (_) {}
     // Start the pull loop if we already had a paired code.
     if (getCode() && isConfigured()) startLoop();
     // Pull on focus so coming back from another device feels instant.
