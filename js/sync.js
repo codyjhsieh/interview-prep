@@ -406,11 +406,11 @@ window.SYNC = (function () {
     const fresher = (bTimestamp || 0) >= (aTimestamp || 0) ? b : a;
     // Start with all of fresher's fields, then explicit per-field overrides.
     const merged = { ...a, ...fresher };
-    // Monotonic numeric stats: union via max. NOTE: vitality is NOT in
-    // this list — vitality is paired with lastFedAt (snapshot at the
-    // moment of last feed), so max-merging independently would mix a
-    // stale snapshot with a newer timestamp and inflate live vitality.
-    for (const k of ['form', 'ageDays', 'eatenTodayXP', 'deathCount']) {
+    // Monotonic numeric stats: union via max. eatenTodayXP is NOT in
+    // this list -- it's a DAILY counter that resets each day, so a
+    // max-merge can clobber today's correct reset-to-0 with yesterday's
+    // stale value (the same bug class as the vitality / lastFedAt pair).
+    for (const k of ['form', 'ageDays', 'deathCount']) {
       merged[k] = Math.max(a[k] || 0, b[k] || 0);
     }
     // Vitality + lastFedAt: merge as a PAIR from whichever side has
@@ -420,8 +420,25 @@ window.SYNC = (function () {
     const fedSide = bFed >= aFed ? b : a;
     merged.vitality  = fedSide.vitality || 0;
     merged.lastFedAt = fedSide.lastFedAt || 0;
-    // Date strings: take the later one (works for YYYY-MM-DD compare)
-    for (const k of ['lastTickDate', 'lastFedDate', 'lastEatenDate']) {
+    // eatenTodayXP + lastEatenDate: merge as a PAIR from the fresher
+    // calendar day. Whichever side last ate "today" owns the counter;
+    // if both ate today, take max (multiple feeds that day are
+    // additive). If one side hasn't ticked over yet, the other side's
+    // reset wins.
+    const aEatDate = a.lastEatenDate || '';
+    const bEatDate = b.lastEatenDate || '';
+    if (aEatDate === bEatDate) {
+      merged.eatenTodayXP = Math.max(a.eatenTodayXP || 0, b.eatenTodayXP || 0);
+      merged.lastEatenDate = aEatDate;
+    } else if (bEatDate > aEatDate) {
+      merged.eatenTodayXP  = b.eatenTodayXP || 0;
+      merged.lastEatenDate = bEatDate;
+    } else {
+      merged.eatenTodayXP  = a.eatenTodayXP || 0;
+      merged.lastEatenDate = aEatDate;
+    }
+    // Other date strings: take the later one (works for YYYY-MM-DD compare)
+    for (const k of ['lastTickDate', 'lastFedDate']) {
       const da = a[k] || '', db = b[k] || '';
       merged[k] = db > da ? db : da;
     }
