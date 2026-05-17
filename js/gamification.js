@@ -231,19 +231,18 @@ function awardXP(state, amount, reason) {
   return { state, xpGained: finalXP, bonusLabel, levelUp: undefined, crossedFeedGoal };
 }
 
-/* Manual feed — called when the user clicks "Drop food" and a pile spawns
- * in the scene. Each pile is worth +8 vitality (capped at 100) and shifts
- * body form by +1 if the user is on the workout path (todayXP > goal*1.5)
- * else -1 (sedentary → chubby). This replaces the previous automatic
- * vitality bump that fired the moment todayXP crossed the goal. */
-/* Manual feed — called when the user drops a food pile. Each pile
- * restores +20 vitality (so 5 piles = full restore from zero). Pile
- * cost is 10 XP earned today (see foodPilesAvailable in petState).
+/* Manual feed — called when the user drops a food pile. XP-to-
+ * vitality is now 1:1 -- a 10-XP pile restores +10 vitality. The
+ * previous +20-per-pile scheme was a free 2x multiplier that let a
+ * sub-day of effort fully heal Bit; with 1:1 it takes the full
+ * 100-XP-worth of piles (10 piles) to restore from 0 to 100, which
+ * matches the 100-pts-per-24h decay rate exactly. Each pile still
+ * shifts body form per the workout-vs-sedentary threshold below.
  *
- * The new vitality model: a snapshot value lives in p.vitality + a
- * timestamp p.lastFedAt; the displayed value decays linearly from
- * that snapshot at 100 points per 24 hours. Feeding RESETS the
- * snapshot to (current live + bonus) and writes a fresh lastFedAt.
+ * Vitality model: a snapshot value lives in p.vitality + a timestamp
+ * p.lastFedAt; the displayed value decays linearly from that snapshot
+ * at 100 points per 24 hours. Feeding RESETS the snapshot to
+ * (current live + bonus) and writes a fresh lastFedAt.
  */
 function feedPetWithPile(state) {
   if (!state || !state.pet) return false;
@@ -252,7 +251,7 @@ function feedPetWithPile(state) {
   // before adding the bonus. Without this, every feed event would
   // discard accumulated decay (you could feed once a day and stay
   // at 100 forever).
-  p.vitality = Math.min(100, _liveVitality(p) + 20);
+  p.vitality = Math.min(100, _liveVitality(p) + 10);
   p.lastFedAt = Date.now();
   const today = todayKey();
   p.lastFedDate = today;

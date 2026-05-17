@@ -3472,7 +3472,7 @@ function renderPetCard(state, p) {
       <summary class="text-[11px] muted cursor-pointer hover:opacity-80">How feeding works ▾</summary>
       <ul class="list-muted mt-2 text-[11.5px]" style="font-size:11.5px">
         <li>Vitality decays <b>100 → 0</b> over 24 h since the last feed.</li>
-        <li>Every 10 XP earned today = 1 food pile. Each drop consumes one pile: <b>+20 vitality</b> (cap 100).</li>
+        <li>Every 10 XP earned today = 1 food pile. Each drop consumes one pile: <b>+10 vitality</b> (cap 100).</li>
         <li><b>Hit ${Math.round(p.goal*1.5)} XP today</b> → body shifts toward <b>Jacked</b>; less than ${p.goal} → toward <b>Chubby</b>.</li>
         <li><b>24 h with no feed</b> → vitality 0. Cross a midnight at 0 → ${esc(p.name)} dies.</li>
         <li>Death resets all pet stats; a new baby hatches tomorrow. Skull counter sticks.</li>
