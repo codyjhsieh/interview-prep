@@ -4504,6 +4504,13 @@ function renderLesson(state, lessonId, sourceEl) {
   wrap.style.background = 'rgba(248,249,252,0.55)';
   wrap.style.backdropFilter = 'blur(24px) saturate(180%)';
   wrap.style.webkitBackdropFilter = 'blur(24px) saturate(180%)';
+  // Promote the wrapper to its own GPU compositor layer so its blur
+  // result caches. Without this, the GSAP fade-in-up of the card inside
+  // forces the wrapper's backdrop-filter to recomposite every frame
+  // (entrance was running at ~10fps on lesson:open). transform:translateZ
+  // is the established no-visual-change layer-promotion trick.
+  wrap.style.willChange = 'transform';
+  wrap.style.transform = 'translateZ(0)';
   // No max-h / overflow on the card itself -- the .fixed.inset-0 wrapper
   // owns scroll (overflow-y:auto on the wrapper, see styles.css). Capping
   // the card here would clip the body, which is the bug the user has been

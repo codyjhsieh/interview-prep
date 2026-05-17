@@ -9,14 +9,27 @@ const hasGSAP = typeof gsap !== 'undefined';
 
 function viewIn(el) {
   if (!hasGSAP || !el) return;
-  gsap.fromTo(el, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power3.out' });
+  // Force GPU layer promotion BEFORE the animation starts so each frame
+  // is a pure compositor op (no re-raster of the card subtree, which is
+  // expensive on the lesson modal due to backdrop-filter + Prism token
+  // spans). will-change is cleared on complete so the layer can release.
+  el.style.willChange = 'transform, opacity';
+  gsap.fromTo(el, { y: 14, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 0.45, ease: 'power3.out',
+    onComplete: () => { el.style.willChange = ''; },
+  });
 }
 
 function stagger(els, opts={}) {
   if (!hasGSAP || !els || !els.length) return;
+  for (const e of els) e.style.willChange = 'transform, opacity';
   gsap.fromTo(els,
     { y: 16, opacity: 0 },
-    { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out', stagger: opts.stagger || 0.05 }
+    {
+      y: 0, opacity: 1, duration: 0.5, ease: 'power3.out',
+      stagger: opts.stagger || 0.05,
+      onComplete: () => { for (const e of els) e.style.willChange = ''; },
+    }
   );
 }
 

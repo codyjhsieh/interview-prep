@@ -567,6 +567,59 @@ const JOURNEY = [
     kind: 'scroll',
   },
 
+  /* ----------------- Fade-in window measurements --------------------- */
+  /* Tight 600ms dwells -- just the fade animation, no idle tail. Captures
+   * FPS during the visual entrance specifically. If the GPU layer is set
+   * up correctly via will-change, every frame here should be ~16ms. */
+  {
+    label: 'fade:curriculum',
+    go: async (page) => {
+      // Force a hash change to dashboard first so curriculum is a "new" route
+      // and fade-in fires (rather than no-op if we were already there).
+      await page.evaluate(() => { location.hash = '#dashboard'; });
+      await new Promise(r => setTimeout(r, 200));
+      await page.evaluate(() => { location.hash = '#curriculum'; });
+    },
+    wait: 'h1:has-text("Curriculum")',
+    dwell: 600,
+    kind: 'interaction',
+  },
+  {
+    label: 'fade:companies',
+    go: async (page) => {
+      await page.evaluate(() => { location.hash = '#dashboard'; });
+      await new Promise(r => setTimeout(r, 200));
+      await page.evaluate(() => { location.hash = '#companies'; });
+    },
+    wait: 'h1:has-text("Companies")',
+    timeout: 20000,
+    dwell: 600,
+    kind: 'interaction',
+  },
+  {
+    label: 'fade:flashcards',
+    go: async (page) => {
+      await page.evaluate(() => { location.hash = '#dashboard'; });
+      await new Promise(r => setTimeout(r, 200));
+      await page.evaluate(() => { location.hash = '#flashcards'; });
+    },
+    wait: '.flashcard',
+    dwell: 600,
+    kind: 'interaction',
+  },
+  {
+    label: 'fade:lesson-modal',
+    go: async (page) => {
+      // Open lesson modal (uses ANIM.viewIn fade-in-up).
+      await page.evaluate(() => { location.hash = '#category/coding'; });
+      await new Promise(r => setTimeout(r, 400));
+      await page.evaluate(() => document.querySelector('[data-open]')?.click());
+    },
+    wait: '.fixed.inset-0 h2',
+    dwell: 700,
+    kind: 'interaction',
+  },
+
   /* ------------------ Other secondary routes ------------------------- */
   {
     label: 'sources:nav',
