@@ -748,9 +748,19 @@ function mountPet3D(container, p) {
   // kick off the load and re-enter once it resolves. Returning a pseudo-
   // handle keeps existing callers happy; the loading spinner already in
   // the container masks the brief delay.
+  //
+  // CRITICAL: when the recursive mountPet3D runs after Three.js loads, it
+  // builds the real handle but its return value goes nowhere (no caller
+  // awaits the .then). The dashboard already wrote the pseudo-handle to
+  // host._petHandle, so Drop-food click ends up reading undefined.dropFood
+  // and silently no-ops. Write the real handle back onto container._petHandle
+  // so the click handler can find it once Three lands.
   if (!window.THREE) {
     if (window.LAZY && window.LAZY.three) {
-      window.LAZY.three().then(() => mountPet3D(container, p)).catch(() => {});
+      window.LAZY.three().then(() => {
+        const real = mountPet3D(container, p);
+        if (real && container) container._petHandle = real;
+      }).catch(() => {});
     }
     return { dispose: () => {} };
   }
