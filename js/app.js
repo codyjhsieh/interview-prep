@@ -390,8 +390,12 @@ function startFocusSession(focusMin = 50, breakMin = 10) {
       ANIM.confettiBurst('s');
       if (phase === 'focus') {
         ANIM.toast({ icon: VIEWS.iconHTML('coffee', {size: 18}), title:'Focus block done', body:`Take a ${breakMin}-min break — research-backed.` });
-        const r = GAMI.awardXP(state, 25, 'focus');
-        afterStateChange();
+        // Pomodoros used to award +25 XP per block (silently -- no event
+        // record, just bumped state.xp + history.xp). Removed because
+        // running 3 Pomodoros while reading was the easiest path to the
+        // daily goal, which devalued the curriculum/flashcards/jobApps
+        // calibrated effort costs. Focus blocks now stand on their own
+        // ergonomic value (timer + break enforcement).
         phase = 'break'; secsLeft = breakMin * 60;
       } else {
         ANIM.toast({ icon: VIEWS.iconHTML('rocket', {size: 18}), title:'Break done', body:'Back to it. Next focus block started.' });
