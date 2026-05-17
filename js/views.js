@@ -593,6 +593,43 @@ function _shortAngle(from, to) {
  * Sun position is calibrated so the window (at world (~1, 3, -4)) receives
  * direct light during the day and the sun visibly tracks east → west.
  */
+/* Compute today's sunrise + sunset for a default location (NYC,
+ * 40.7128°N, 74.006°W). Pure JS, no API. Standard NOAA-style formula:
+ * solar declination + equation-of-time + hour-angle. Accurate to a
+ * few minutes -- plenty for sky-color phasing.
+ *
+ * Returns hours-since-local-midnight (e.g. 5.71 = 5:42 am). The user's
+ * timezone is derived from `date.getTimezoneOffset()` so this works
+ * everywhere without geolocation prompts. Latitude is hardcoded for
+ * NYC since the app is NYC-focused; trivial to swap if needed. */
+function _solarTimes(date, lat = 40.7128, lng = -74.006) {
+  const rad = Math.PI / 180;
+  const startOfYear = new Date(date.getFullYear(), 0, 0);
+  const doy = Math.floor((date - startOfYear) / 86400000);
+  const B = 2 * Math.PI * (doy - 81) / 365;
+  // Solar declination (radians)
+  const decl = 23.44 * rad * Math.sin(B);
+  // Equation of time (minutes)
+  const eqTime = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+  // Hour angle at sunrise (degrees → hours)
+  const latR = lat * rad;
+  const cosH = -Math.tan(latR) * Math.tan(decl);
+  if (cosH > 1 || cosH < -1) {
+    // Polar night/day fallback: keep classic 6am/6pm so the scene still cycles.
+    return { sunrise: 6, sunset: 18, dawn: 5.25, dusk: 18.75 };
+  }
+  const H = Math.acos(cosH) / rad / 15;
+  // Solar noon, in *UTC* hours, then shift to user's local time.
+  const solarNoonUTC = 12 - lng / 15 - eqTime / 60;
+  const tzOffsetHrs = -date.getTimezoneOffset() / 60;
+  const noonLocal = solarNoonUTC + tzOffsetHrs;
+  const sunrise = noonLocal - H;
+  const sunset  = noonLocal + H;
+  // Civil twilight is ~30-35 minutes either side of true sunrise/set
+  // (sun 6° below horizon). Close enough for sky-color blending.
+  return { sunrise, sunset, dawn: sunrise - 0.55, dusk: sunset + 0.55 };
+}
+
 function _sunPhysicsParams(forceHour) {
   const now = new Date();
   let h;
@@ -619,26 +656,40 @@ function _sunPhysicsParams(forceHour) {
   };
   const smoothstep = (t) => t * t * (3 - 2 * t);
 
-  // ── Keyframes: a continuous 24-hour color/light spectrum ────────────
-  // Every palette field (sun color/intensity, ambient, sky, floor tint,
-  // wall color, shadow ratio) is defined at a handful of anchor hours.
-  // For any given h we find the bracketing pair, smoothstep, and lerp —
-  // so there are NO step transitions anywhere in the day. Add an anchor
-  // to refine a particular hour band (e.g. golden hour).
+  // ── Solar anchors for the current date ───────────────────────────────
+  // Pull actual sunrise / sunset / civil twilight for today (NYC by
+  // default). The 24-hour palette below is anchored to these events,
+  // not fixed clock times -- so summer days have a wider golden hour
+  // window, winter dusk lands at 16:40, etc.
+  const solar = _solarTimes(now);
+  const sr = solar.sunrise;
+  const ss = solar.sunset;
+  const dawn = solar.dawn;        // ~35 min before sunrise (civil twilight)
+  const dusk = solar.dusk;        // ~35 min after sunset
+  const goldenAM = sr + 1.0;      // first warming after sunrise
+  const noon = (sr + ss) / 2;     // solar noon (peak sun)
+  const goldenPM = ss - 1.0;      // golden hour before sunset
+  const lateEve = ss + 1.5;       // post-dusk blue, lights starting
+
+  // ── Keyframes anchored to today's solar events ──────────────────────
+  // Each entry pins (color, intensity) for the listed hour. The
+  // bracketing pair is lerped via smoothstep so the lighting glides
+  // smoothly between anchors. Adjust the times above -- not the
+  // palette -- to shift phases.
   const KEYFRAMES = [
-    // h    | sunC    sunI | ambC    ambI | skyC    | floor   | wallC   | shK
-    { h: 0,    sunC:0x8aa6cc, sunI:0.30, ambC:0x2e3b5e, ambI:0.36, skyC:0x1c2a48, floor:0x8090b8, wallC:0x4F5A77, shK:0.88 },
-    { h: 4,    sunC:0x8aa6cc, sunI:0.30, ambC:0x2e3b5e, ambI:0.36, skyC:0x1c2a48, floor:0x8090b8, wallC:0x4F5A77, shK:0.88 },
-    { h: 5.5,  sunC:0xa890b0, sunI:0.40, ambC:0x6a5878, ambI:0.45, skyC:0x6a4870, floor:0xb0a0c0, wallC:0x7a6880, shK:0.83 },
-    { h: 6.5,  sunC:0xffb87a, sunI:0.65, ambC:0xffc8a0, ambI:0.55, skyC:0xffd0a0, floor:0xffeed8, wallC:0xF6DCC4, shK:0.76 },
-    { h: 8,    sunC:0xfff0d2, sunI:0.85, ambC:0xfff8ec, ambI:0.55, skyC:0xb8dcf0, floor:0xfff4e0, wallC:0xF4E6CE, shK:0.74 },
-    { h: 12,   sunC:0xfff4d8, sunI:1.05, ambC:0xffffff, ambI:0.55, skyC:0x9ed0f0, floor:0xffffff, wallC:0xF2E2C6, shK:0.72 },
-    { h: 15,   sunC:0xfff0c8, sunI:0.95, ambC:0xfff8e0, ambI:0.55, skyC:0xa8d4ec, floor:0xfff8e8, wallC:0xEFD8B8, shK:0.74 },
-    { h: 17,   sunC:0xff8048, sunI:0.85, ambC:0xff9c70, ambI:0.60, skyC:0xff8d54, floor:0xffd8b8, wallC:0xE8B894, shK:0.76 },
-    { h: 18,   sunC:0xc06078, sunI:0.55, ambC:0x9a607a, ambI:0.52, skyC:0x8a4868, floor:0xc0a0b0, wallC:0xa07088, shK:0.80 },
-    { h: 19,   sunC:0x5a6890, sunI:0.36, ambC:0x3a4870, ambI:0.42, skyC:0x2a3858, floor:0xa0a8c0, wallC:0x5a6680, shK:0.86 },
-    { h: 20.5, sunC:0x8aa6cc, sunI:0.32, ambC:0x2e3b5e, ambI:0.38, skyC:0x1e2c4a, floor:0x90a0c0, wallC:0x4F5A77, shK:0.88 },
-    { h: 24,   sunC:0x8aa6cc, sunI:0.30, ambC:0x2e3b5e, ambI:0.36, skyC:0x1c2a48, floor:0x8090b8, wallC:0x4F5A77, shK:0.88 },
+    // h         | sunC    sunI | ambC    ambI | skyC    | floor   | wallC   | shK
+    { h: 0,        sunC:0x8aa6cc, sunI:0.30, ambC:0x2e3b5e, ambI:0.36, skyC:0x1c2a48, floor:0x8090b8, wallC:0x4F5A77, shK:0.88 },
+    { h: dawn-1,   sunC:0x8aa6cc, sunI:0.30, ambC:0x2e3b5e, ambI:0.36, skyC:0x1c2a48, floor:0x8090b8, wallC:0x4F5A77, shK:0.88 },
+    { h: dawn,     sunC:0xa890b0, sunI:0.40, ambC:0x6a5878, ambI:0.45, skyC:0x6a4870, floor:0xb0a0c0, wallC:0x7a6880, shK:0.83 },
+    { h: sr,       sunC:0xffb87a, sunI:0.65, ambC:0xffc8a0, ambI:0.55, skyC:0xffd0a0, floor:0xffeed8, wallC:0xF6DCC4, shK:0.76 },
+    { h: goldenAM, sunC:0xfff0d2, sunI:0.85, ambC:0xfff8ec, ambI:0.55, skyC:0xb8dcf0, floor:0xfff4e0, wallC:0xF4E6CE, shK:0.74 },
+    { h: noon,     sunC:0xfff4d8, sunI:1.05, ambC:0xffffff, ambI:0.55, skyC:0x9ed0f0, floor:0xffffff, wallC:0xF2E2C6, shK:0.72 },
+    { h: goldenPM, sunC:0xfff0c8, sunI:0.95, ambC:0xfff8e0, ambI:0.55, skyC:0xa8d4ec, floor:0xfff8e8, wallC:0xEFD8B8, shK:0.74 },
+    { h: ss,       sunC:0xff8048, sunI:0.85, ambC:0xff9c70, ambI:0.60, skyC:0xff8d54, floor:0xffd8b8, wallC:0xE8B894, shK:0.76 },
+    { h: dusk,     sunC:0xc06078, sunI:0.55, ambC:0x9a607a, ambI:0.52, skyC:0x8a4868, floor:0xc0a0b0, wallC:0xa07088, shK:0.80 },
+    { h: lateEve,  sunC:0x5a6890, sunI:0.36, ambC:0x3a4870, ambI:0.42, skyC:0x2a3858, floor:0xa0a8c0, wallC:0x5a6680, shK:0.86 },
+    { h: Math.min(23, lateEve + 1.5), sunC:0x8aa6cc, sunI:0.32, ambC:0x2e3b5e, ambI:0.38, skyC:0x1e2c4a, floor:0x90a0c0, wallC:0x4F5A77, shK:0.88 },
+    { h: 24,       sunC:0x8aa6cc, sunI:0.30, ambC:0x2e3b5e, ambI:0.36, skyC:0x1c2a48, floor:0x8090b8, wallC:0x4F5A77, shK:0.88 },
   ];
 
   // Find the bracketing keyframe pair for the current hour.
@@ -647,7 +698,8 @@ function _sunPhysicsParams(forceHour) {
     if (h >= KEYFRAMES[k].h && h < KEYFRAMES[k + 1].h) { i = k; break; }
   }
   const A = KEYFRAMES[i], B = KEYFRAMES[i + 1];
-  const t = smoothstep((h - A.h) / (B.h - A.h));
+  const span = Math.max(0.01, B.h - A.h);
+  const t = smoothstep((h - A.h) / span);
   const lerp = (a, b) => a * (1 - t) + b * t;
   const sunColor     = lerpHex(A.sunC,  B.sunC,  t);
   const sunIntensity = lerp(A.sunI, B.sunI);
@@ -658,11 +710,12 @@ function _sunPhysicsParams(forceHour) {
   const wallColor    = lerpHex(A.wallC, B.wallC, t);
   const shadowK      = lerp(A.shK,  B.shK);
 
-  // Sun/moon position: ONE continuous arc parameterized by h. The sin/cos
-  // of (h-6)/12·π puts the light east at sunrise, zenith at noon, west at
-  // sunset, and naturally below-horizon (negative sin) at night. We clamp
-  // Y above the window so the ray always angles down into the room.
-  const angle = ((h - 6) / 12) * Math.PI;
+  // Sun/moon position: arc parameterized by progress through the
+  // *actual* daylight window. At sunrise the light is east-horizon,
+  // at noon zenith, at sunset west-horizon. Outside daylight we clamp
+  // height so the ray still angles into the room (moonlight stand-in).
+  const dayProgress = (h - sr) / Math.max(0.5, ss - sr);
+  const angle = dayProgress * Math.PI;
   const R = 5;
   const sunPos = [
     Math.cos(angle) * R,
@@ -670,21 +723,22 @@ function _sunPhysicsParams(forceHour) {
     -10,
   ];
 
-  // Coarse phase label kept for downstream code that branches on it
-  // (ray color, isDay checks). Derived from the hour, not a step palette.
+  // Coarse phase label, anchored to real solar events. Downstream code
+  // (ray color, isDay checks) branches on these.
   let phase;
-  if      (h < 5)     phase = 'night';
-  else if (h < 7.5)   phase = 'dawn';
-  else if (h < 16.5)  phase = 'day';
-  else if (h < 17.75) phase = 'sunset';
-  else if (h < 19)    phase = 'dusk';
-  else if (h < 24)    phase = 'late';
-  else                phase = 'night';
+  if      (h < dawn)     phase = 'night';
+  else if (h < sr)       phase = 'dawn';
+  else if (h < goldenPM) phase = 'day';
+  else if (h < ss)       phase = 'sunset';
+  else if (h < dusk)     phase = 'dusk';
+  else if (h < lateEve)  phase = 'late';
+  else                   phase = 'night';
 
   return {
     phase, hour: h, sunPos,
     sunColor, sunIntensity, ambColor, ambIntensity, skyColor, floorTint,
-    wallColor, shadowK,                                  // pre-lerped, ready
+    wallColor, shadowK,
+    sunrise: sr, sunset: ss,                 // exposed for any downstream UI
   };
 }
 
