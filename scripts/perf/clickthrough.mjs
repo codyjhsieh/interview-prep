@@ -50,6 +50,36 @@ const JSON_PATH   = path.join(ROOT, 'scripts/perf/perf-report.json');
 /* Smooth-scrolls the viewport from current Y to targetY over durMs.
  * Frames are driven by rAF inside the page so we measure real paint
  * cost, not the discrete jumps that page.mouse.wheel() produces. */
+/* Click a CSS selector inside the page. Quietly no-ops if not found,
+ * so journey steps that depend on data-driven elements (e.g. a card
+ * that only appears after some setup) don't break the whole run. */
+async function clickSel(page, sel) {
+  await page.evaluate((s) => {
+    const el = document.querySelector(s);
+    if (el) el.click();
+  }, sel);
+}
+
+/* Click the Nth matching element (0-indexed). */
+async function clickNth(page, sel, n) {
+  await page.evaluate(({ s, i }) => {
+    const all = document.querySelectorAll(s);
+    if (all[i]) all[i].click();
+  }, { s: sel, i: n });
+}
+
+/* Type into an input/textarea, dispatching real events so listeners fire. */
+async function typeInto(page, sel, text) {
+  await page.evaluate(({ s, t }) => {
+    const el = document.querySelector(s);
+    if (!el) return;
+    el.focus();
+    el.value = t;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }, { s: sel, t: text });
+}
+
 async function pageScroll(page, targetYFrac, durMs = 1500) {
   await page.evaluate(({ frac, dur }) => {
     return new Promise((resolve) => {
@@ -68,6 +98,20 @@ async function pageScroll(page, targetYFrac, durMs = 1500) {
   }, { frac: targetYFrac, dur: durMs });
 }
 
+/* JOURNEY — an extensive e2e sequence covering every real user flow.
+ *
+ * Step shape:
+ *   { label, go(page), wait?, dwell?, timeout?, kind }
+ *
+ * Kinds:
+ *   load          initial page load
+ *   nav           hash navigation (no continuous motion)
+ *   scroll        rAF-driven scroll tween (continuous motion -> tightest FPS test)
+ *   interaction   any click / type / drag (single-event reaction)
+ *   stress        rapid bursts (multiple events back-to-back)
+ *
+ * Steps quietly no-op if a selector isn't found, so the journey doesn't
+ * abort when a card / button isn't yet rendered. */
 const JOURNEY = [
   {
     label: 'cold-load',
@@ -281,7 +325,280 @@ const JOURNEY = [
     dwell: 1500,
     kind: 'interaction',
   },
+
+  /* ------------------ Additional category drill-down ----------------- */
+  {
+    label: 'category/ai:nav',
+    go: (page) => page.evaluate(() => { location.hash = '#category/ai'; }),
+    wait: 'h1:has-text("AI / LLM Production")',
+    kind: 'nav',
+  },
+  {
+    label: 'category/ai:scroll',
+    go: (page) => pageScroll(page, 1.0, 1800),
+    dwell: 2000,
+    kind: 'scroll',
+  },
+  {
+    label: 'category/ai:expand-module',
+    go: (page) => clickNth(page, '#mod-list details > summary', 2),
+    dwell: 1000,
+    kind: 'interaction',
+  },
+  {
+    label: 'category/sysd:nav',
+    go: (page) => page.evaluate(() => { location.hash = '#category/sysd'; }),
+    wait: 'h1:has-text("System Design")',
+    kind: 'nav',
+  },
+  {
+    label: 'category/behav:nav',
+    go: (page) => page.evaluate(() => { location.hash = '#category/behav'; }),
+    wait: 'h1:has-text("Behavioral")',
+    kind: 'nav',
+  },
+
+  /* -------------------- Multiple lesson types ------------------------ */
+  {
+    label: 'lesson-2:open-concept',
+    go: async (page) => {
+      // Navigate to AI category and open the 2nd lesson (different lesson body).
+      await page.evaluate(() => { location.hash = '#category/ai'; });
+      await new Promise(r => setTimeout(r, 600));
+      await clickNth_inPage(page, '[data-open]', 1);
+    },
+    wait: '.fixed.inset-0 h2',
+    dwell: 2500,
+    kind: 'interaction',
+  },
+  {
+    label: 'lesson-2:click-mcq',
+    go: async (page) => {
+      // Click an answer option if it's an MCQ-style activity.
+      await clickSel(page, '[data-opt="0"]');
+    },
+    dwell: 1500,
+    kind: 'interaction',
+  },
+  {
+    label: 'lesson-2:close',
+    go: (page) => clickSel(page, '[data-close="lesson"]'),
+    kind: 'interaction',
+  },
+
+  /* ----------------- Full flashcard review session ------------------- */
+  {
+    label: 'flashcards:back',
+    go: (page) => page.evaluate(() => { location.hash = '#flashcards'; }),
+    wait: '.flashcard',
+    kind: 'nav',
+  },
+  {
+    label: 'flashcards:rate-good-x2',
+    go: async (page) => {
+      // Flip then rate, twice, like a real review session.
+      for (let i = 0; i < 2; i++) {
+        await clickSel(page, '.flashcard-inner');
+        await new Promise(r => setTimeout(r, 450));
+        await clickSel(page, '[data-rate="3"]');
+        await new Promise(r => setTimeout(r, 600));
+      }
+    },
+    wait: '.flashcard',
+    dwell: 1500,
+    kind: 'interaction',
+  },
+  {
+    label: 'flashcards:rate-again',
+    go: async (page) => {
+      await clickSel(page, '.flashcard-inner');
+      await new Promise(r => setTimeout(r, 350));
+      await clickSel(page, '[data-rate="1"]');
+    },
+    wait: '.flashcard',
+    dwell: 1500,
+    kind: 'interaction',
+  },
+
+  /* ----------------- Companies search + filter + drill --------------- */
+  {
+    label: 'companies:back',
+    go: (page) => page.evaluate(() => { location.hash = '#companies'; }),
+    wait: 'h1:has-text("Companies")',
+    timeout: 20000,
+    dwell: 2500,
+    kind: 'nav',
+  },
+  {
+    label: 'companies:search-type',
+    go: async (page) => {
+      const sel = '#companies-search, input[placeholder*="Search"], input[type="search"]';
+      await typeInto(page, sel, 'ai');
+    },
+    dwell: 1500,
+    kind: 'interaction',
+  },
+  {
+    label: 'companies:clear-search',
+    go: (page) => typeInto(page, '#companies-search, input[placeholder*="Search"], input[type="search"]', ''),
+    dwell: 1500,
+    kind: 'interaction',
+  },
+  {
+    label: 'companies:filter-ai',
+    go: (page) => clickSel(page, '[data-vfilter="ai"], [data-filter="ai"]'),
+    dwell: 1500,
+    kind: 'interaction',
+  },
+  {
+    label: 'companies:filter-all',
+    go: (page) => clickSel(page, '[data-vfilter="all"], [data-filter="all"]'),
+    dwell: 1500,
+    kind: 'interaction',
+  },
+  {
+    label: 'companies:open-first',
+    go: (page) => clickSel(page, '#co-grid > a.card'),
+    wait: '#view',
+    dwell: 2000,
+    kind: 'interaction',
+  },
+  {
+    label: 'company-detail:scroll',
+    go: (page) => pageScroll(page, 1.0, 1500),
+    dwell: 1700,
+    kind: 'scroll',
+  },
+  {
+    label: 'companies:back-from-detail',
+    go: (page) => page.evaluate(() => { location.hash = '#companies'; }),
+    wait: 'h1:has-text("Companies")',
+    timeout: 20000,
+    dwell: 2000,
+    kind: 'nav',
+  },
+
+  /* --------------------- Dashboard interactions ---------------------- */
+  {
+    label: 'dashboard:back',
+    go: (page) => page.evaluate(() => { location.hash = '#dashboard'; }),
+    wait: '#view',
+    dwell: 3500,
+    kind: 'nav',
+  },
+  {
+    label: 'dashboard:drop-food',
+    go: (page) => clickSel(page, '[data-pet-drop-food]:not([disabled])'),
+    dwell: 2000,
+    kind: 'interaction',
+  },
+  {
+    label: 'dashboard:scroll-down-up',
+    go: async (page) => {
+      await pageScroll(page, 1.0, 1500);
+      await new Promise(r => setTimeout(r, 250));
+      await pageScroll(page, 0.0, 1500);
+    },
+    dwell: 1800,
+    kind: 'scroll',
+  },
+
+  /* ----------------------- Sheet + nav stress ------------------------ */
+  {
+    label: 'more-sheet:open',
+    go: (page) => clickSel(page, '[data-more-toggle]'),
+    wait: '#more-sheet',
+    dwell: 1500,
+    kind: 'interaction',
+  },
+  {
+    label: 'more-sheet:close',
+    go: (page) => page.evaluate(() => {
+      const scrim = document.querySelector('#more-sheet [data-close], #more-sheet .more-sheet-scrim');
+      if (scrim) scrim.click();
+    }),
+    dwell: 1200,
+    kind: 'interaction',
+  },
+  {
+    label: 'pillnav:rapid',
+    go: async (page) => {
+      // 8 rapid taps — stress test for view-swap cost.
+      const seq = ['curriculum','flashcards','companies','dashboard','curriculum','flashcards','companies','dashboard'];
+      for (const r of seq) {
+        await page.evaluate((route) => {
+          const t = document.querySelector(`#liquid-tabbar .tab-item[data-route="${route}"]`);
+          if (t) t.click();
+        }, r);
+        await new Promise(res => setTimeout(res, 220));
+      }
+    },
+    dwell: 1500,
+    kind: 'stress',
+  },
+  {
+    label: 'hash-burst',
+    go: async (page) => {
+      // 6 hash changes back-to-back without click handlers (pure router cost).
+      const routes = ['#curriculum','#flashcards','#companies','#review','#prep','#dashboard'];
+      for (const h of routes) {
+        await page.evaluate((hh) => { location.hash = hh; }, h);
+        await new Promise(res => setTimeout(res, 180));
+      }
+    },
+    dwell: 1500,
+    kind: 'stress',
+  },
+
+  /* ------------------------ Long-list scrolls ------------------------ */
+  {
+    label: 'curriculum:scroll-stress',
+    go: async (page) => {
+      await page.evaluate(() => { location.hash = '#curriculum'; });
+      await new Promise(r => setTimeout(r, 600));
+      // Bottom, top, bottom -- three full scrolls in succession.
+      await pageScroll(page, 1.0, 1200);
+      await new Promise(r => setTimeout(r, 200));
+      await pageScroll(page, 0.0, 1200);
+      await new Promise(r => setTimeout(r, 200));
+      await pageScroll(page, 1.0, 1200);
+    },
+    dwell: 1500,
+    kind: 'scroll',
+  },
+
+  /* ------------------ Other secondary routes ------------------------- */
+  {
+    label: 'sources:nav',
+    go: (page) => page.evaluate(() => { location.hash = '#sources'; }),
+    wait: '#view',
+    kind: 'nav',
+  },
+  {
+    label: 'coverage:nav',
+    go: (page) => page.evaluate(() => { location.hash = '#coverage'; }),
+    wait: '#view',
+    kind: 'nav',
+  },
+  {
+    label: 'profile:nav',
+    go: (page) => page.evaluate(() => { location.hash = '#profile'; }),
+    wait: '#view',
+    kind: 'nav',
+  },
+  {
+    label: 'stories:nav',
+    go: (page) => page.evaluate(() => { location.hash = '#stories'; }),
+    wait: '#view',
+    kind: 'nav',
+  },
 ];
+
+/* Helper used by lesson-2:open-concept above. Defined down here so we
+ * don't have to forward-reference clickNth in the JOURNEY array. */
+function clickNth_inPage(page, sel, n) {
+  return clickNth(page, sel, n);
+}
 
 async function main() {
   const agentSrc = await readFile(path.join(__dirname, 'agent.js'), 'utf8');

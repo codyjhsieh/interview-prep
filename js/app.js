@@ -600,7 +600,20 @@ function bindEvents() {
     }
   });
 
-  window.addEventListener('hashchange', render);
+  /* Coalesce hashchange events: if multiple fire in rapid succession
+   * (user mashes tabs, browser back/forward, programmatic redirects),
+   * skip the intermediates and only render the final state. Without
+   * this, the perf clickthrough showed 6 hashchanges in 180ms = 6 full
+   * innerHTML swaps stacking up and blocking the main thread for 1s+.
+   * The rAF batch means we render at most once per frame on rapid
+   * navigation. */
+  let _renderQueued = false;
+  function renderCoalesced() {
+    if (_renderQueued) return;
+    _renderQueued = true;
+    requestAnimationFrame(() => { _renderQueued = false; render(); });
+  }
+  window.addEventListener('hashchange', renderCoalesced);
 }
 
 function findLesson(id) {

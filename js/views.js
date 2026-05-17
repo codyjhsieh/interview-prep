@@ -4803,6 +4803,11 @@ function bindApplyToggles(container) {
   });
 }
 
+/* Module-scoped cache that survives route changes. Companies grid has
+ * 138 cards; rebuilding from scratch on every entry was costing 10-14
+ * long tasks per nav. Cache hits make re-entry ~free. */
+const _coCardCacheModule = new Map();
+
 function renderCompanies(state, hub) {
   const container = el('div','fade-in space-y-4');
   const verifiedAt = window.DATA && window.DATA.COMPANIES_VERIFIED_AT;
@@ -4928,41 +4933,80 @@ function renderCompanies(state, hub) {
     return cardEl;
   }
 
-  function paintCompanies() {
-    grid.innerHTML = '';
-    const q = curQuery.trim().toLowerCase();
-    const filtered = scoredCos
-      .filter(c => curVFilter === 'all' || c.vertical === curVFilter)
-      .filter(c => {
-        if (!q) return true;
-        const hay = (c.name+' '+c.sub+' '+(c.notes||'')+' '+(c.badges||[]).join(' ')+' '+(c.lead||'')+' '+(c.jobs||[]).map(j=>j.title).join(' ')).toLowerCase();
-        return hay.includes(q);
-      });
-    // Render the visible-above-fold chunk synchronously; defer the rest
-    // to subsequent animation frames so the tap → first-paint feels
-    // instant. Was a single 129-card forEach + a 129-tween GSAP stagger
-    // which together dominated mobile tap-to-paint time (~1 s).
-    // CHUNK dropped from 18 -> 8 (2026-05-17): each chunk's _buildCompanyCard
-    // batch was producing ~150ms long tasks on throttled mobile per the
-    // perf clickthrough. Same total cards, same order, just one extra
-    // rAF tick per 10 cards -- imperceptible end-state.
-    const INITIAL = 18, CHUNK = 8;
-    const frag1 = document.createDocumentFragment();
-    for (let i = 0; i < Math.min(INITIAL, filtered.length); i++) {
-      frag1.appendChild(_buildCompanyCard(filtered[i]));
+  /* Card-node cache. Module-scoped so it survives route changes;
+   * search/filter re-renders just toggle display:none on existing
+   * nodes instead of rebuilding 138 cards from scratch. Re-entering
+   * #companies after a detour is now ~free (DOM nodes attach back to
+   * the new grid via appendChild + return to the same map entries). */
+  const _coCardCache = _coCardCacheModule;
+  function _getOrBuildCard(scored) {
+    let entry = _coCardCache.get(scored.id);
+    if (!entry) {
+      entry = { el: _buildCompanyCard(scored), scored };
+      _coCardCache.set(scored.id, entry);
     }
-    grid.appendChild(frag1);
-    let cursor = INITIAL;
-    const paintNext = () => {
-      if (cursor >= filtered.length) return;
-      const end = Math.min(cursor + CHUNK, filtered.length);
+    return entry.el;
+  }
+
+  function _coHay(c) {
+    return (c.name+' '+c.sub+' '+(c.notes||'')+' '+(c.badges||[]).join(' ')+' '+(c.lead||'')+' '+(c.jobs||[]).map(j=>j.title).join(' ')).toLowerCase();
+  }
+
+  /* paintCompanies is called on initial mount AND on every search/filter
+   * change. First call: build the cards (chunked across rAFs for initial
+   * paint). Subsequent calls: walk the existing nodes, toggle visibility,
+   * and append any newly-needed cards (rare, since the corpus is stable).
+   * No DOM teardown -> no long tasks on filter clicks / keystrokes. */
+  function paintCompanies() {
+    const q = curQuery.trim().toLowerCase();
+    const matches = new Set();
+    for (const c of scoredCos) {
+      if (curVFilter !== 'all' && c.vertical !== curVFilter) continue;
+      if (q && !_coHay(c).includes(q)) continue;
+      matches.add(c.id);
+    }
+
+    // First mount: chunked render of just the matching set.
+    if (grid.childElementCount === 0) {
+      const visible = scoredCos.filter(c => matches.has(c.id));
+      const INITIAL = 18, CHUNK = 8;
+      const frag1 = document.createDocumentFragment();
+      for (let i = 0; i < Math.min(INITIAL, visible.length); i++) {
+        frag1.appendChild(_getOrBuildCard(visible[i]));
+      }
+      grid.appendChild(frag1);
+      let cursor = INITIAL;
+      const paintNext = () => {
+        if (cursor >= visible.length) return;
+        const end = Math.min(cursor + CHUNK, visible.length);
+        const f = document.createDocumentFragment();
+        for (let i = cursor; i < end; i++) f.appendChild(_getOrBuildCard(visible[i]));
+        grid.appendChild(f);
+        cursor = end;
+        if (cursor < visible.length) requestAnimationFrame(paintNext);
+      };
+      if (visible.length > INITIAL) requestAnimationFrame(paintNext);
+      return;
+    }
+
+    // Re-render path: toggle display on cached nodes. Add any missing
+    // cards (e.g. first time a vertical-filter shows a previously-unseen
+    // company) in chunks at the end.
+    const toAdd = [];
+    for (const c of scoredCos) {
+      const entry = _coCardCache.get(c.id);
+      if (matches.has(c.id)) {
+        if (entry) entry.el.style.display = '';
+        else toAdd.push(c);
+      } else if (entry) {
+        entry.el.style.display = 'none';
+      }
+    }
+    if (toAdd.length) {
       const f = document.createDocumentFragment();
-      for (let i = cursor; i < end; i++) f.appendChild(_buildCompanyCard(filtered[i]));
+      for (const c of toAdd) f.appendChild(_getOrBuildCard(c));
       grid.appendChild(f);
-      cursor = end;
-      if (cursor < filtered.length) requestAnimationFrame(paintNext);
-    };
-    if (filtered.length > INITIAL) requestAnimationFrame(paintNext);
+    }
   }
 
   function paintRoles() {
@@ -5085,8 +5129,25 @@ function renderCompanies(state, hub) {
     });
   });
   const search = container.querySelector('#co-search');
-  search.addEventListener('input', e => { curQuery = e.target.value; paint(); });
-  search.addEventListener('keydown', e => { if (e.key === 'Escape') { search.value=''; curQuery=''; paint(); search.blur(); } });
+  // Debounce search input so each keystroke doesn't trigger an immediate
+  // repaint. 150ms is below the perceptual "instant" threshold (~200ms)
+  // and coalesces runs of rapid typing. With the card-cache above, the
+  // repaint itself is now cheap, but debouncing still saves N-1 calls
+  // when the user types "react" (5 calls -> 1).
+  let _searchDebounce = 0;
+  search.addEventListener('input', e => {
+    curQuery = e.target.value;
+    clearTimeout(_searchDebounce);
+    _searchDebounce = setTimeout(paint, 150);
+  });
+  search.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      search.value = ''; curQuery = '';
+      clearTimeout(_searchDebounce);
+      paint();
+      search.blur();
+    }
+  });
 }
 
 function renderCompany(state, hub, id) {
@@ -6059,11 +6120,21 @@ function renderSources(state, hub) {
       </div>
     </div>
   `;
+  // Skeleton (header) lands sync so the route paints immediately;
+  // tier cards build in one rAF so the synchronous innerHTML+parse cost
+  // doesn't show up as a 500ms long task during the nav.
   container.innerHTML = `
     <div>
       <h1 class="font-display text-3xl font-bold">Sources & methodology</h1>
       <p class="text-slate-400 mt-1 text-sm max-w-2xl">Every pattern in the curriculum is corroborated across ≥2 sources or is established CS canon. Primary sources are weighted heavier. Treat individual Glassdoor entries as signal-in-aggregate only.</p>
     </div>
+    <div id="srcs-body"></div>
+  `;
+  hub.appendChild(container);
+  requestAnimationFrame(() => {
+    const body = container.querySelector('#srcs-body');
+    if (!body) return;
+    body.innerHTML = `
     ${tierCard('Primary — editorially reviewed or first-party', tier('primary'), '#7CF1C2')}
     ${tierCard('Aggregate — community signal, useful in triangulation', tier('aggregate'), '#FFB95C')}
     ${tierCard('Secondary — niche prep blogs, cross-check before relying', tier('secondary'), '#A78BFA')}
@@ -6074,7 +6145,7 @@ function renderSources(state, hub) {
       <p class="text-sm text-slate-300 mt-2 leading-relaxed">Specific verbatim questions attributed to individual companies are <i>illustrative</i> — pulled from public patterns and vertical norms. Always verify with the current JD, your recruiter, and recent candidate writeups before relying on specific phrasing. Smaller portfolio companies (e.g. Bikky, Airgoods, Nory, Hang, Mirage, Felicity, Coast) have sparse public 2026 interview reports; their sample prompts are pattern-matched to vertical, not sourced verbatim.</p>
     </div>
   `;
-  hub.appendChild(container);
+  });
 }
 
 /* ====================== MOCKS ====================== */
