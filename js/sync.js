@@ -39,18 +39,23 @@ window.SYNC = (function () {
    *               flashcard sessions used to burn ~5/min in writes
    *               (~150 in a 30-min session). With 15s + hash gate that
    *               drops to ~4/min only when state truly changed.
+   *   2026-05-17b: Doubled all intervals to halve usage for users who
+   *                spend hours/day in the app. POLL 20s -> 40s,
+   *                PUSH_DEBOUNCE 15s -> 30s, MIN_POLL_GAP 5s -> 10s.
    *
-   * Budget at current tuning, 1 active device, 30-min daily session:
-   *   reads  ≈ (15-min visible / 20s poll) + (30-min active / 20s poll)
-   *           = 45 + 90 = ~135/day. Trivial vs 100k budget.
-   *   writes ≈ 30-min session × ~3 writes/min = ~90/day. Well under 1k.
+   * Budget at current tuning, 1 active device, 2 hours of active
+   * interaction across an 8-hour visible window:
+   *   reads  ≈ 8h × 90/hr = ~720/day. Trivial vs 100k budget.
+   *   writes ≈ 2h × 2/min = ~150/day with hash gate. Well under 1k.
    *
-   * Cross-device latency: worst-case 35s end-to-end (15s debounce +
-   * 20s poll). focus listener pulls instantly on tab return so the
-   * "swap devices and pick up where you left off" flow stays snappy. */
-  const POLL_MS          = 20000;
-  const PUSH_DEBOUNCE_MS = 15000;
-  const MIN_POLL_GAP_MS  = 5000;                // floor between focus-driven pulls
+   * Cross-device latency: worst-case 70s end-to-end (30s debounce +
+   * 40s poll). focus listener still pulls instantly on tab return so
+   * the "swap devices and pick up where you left off" flow stays
+   * snappy -- the latency is only for changes propagating WHILE both
+   * tabs are visible. */
+  const POLL_MS          = 40000;
+  const PUSH_DEBOUNCE_MS = 30000;
+  const MIN_POLL_GAP_MS  = 10000;               // floor between focus-driven pulls
   const STORAGE_KEY      = 'fdeprep.v1';        // matches GAMI.STORAGE_KEY
 
   let pollTimer = null;
