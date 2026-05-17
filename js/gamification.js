@@ -411,27 +411,78 @@ function removeLastJobApp(state) {
 
 function dueCards(state, allCards, limit=20, pinFirstId=null) {
   const now = Date.now();
-  const out = allCards
+  const due = allCards
     .map(c => ({ card: c, meta: state.flashcards[c.id] }))
     .filter(({ meta }) => !meta || meta.due <= now);
-  // Shuffle so repeated sessions don't drill the same order. Fisher-Yates.
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
+
+  /* Strategic ordering — random within, structured across.
+   *
+   * The aim: when you crack open the flashcards page, the first cards
+   * you see should reinforce ONE lesson at a time (cluster by lesson
+   * so the concepts compound), and the lessons themselves should march
+   * down the curriculum priority order (Tier 1 first, Tier 4 last).
+   * Within those constraints, every other axis is randomized so
+   * repeated sessions don't drill the identical sequence -- the user
+   * still sees fresh-feeling sessions, just with pedagogical structure.
+   *
+   * Sort keys (in priority order):
+   *   1. Category tier      ascending  (1 = highest ROI per curriculum)
+   *   2. Random per-cat tag stable in this call  (within same tier,
+   *                                               shuffle which cat goes first)
+   *   3. Module curriculum index   ascending  (curriculum order within cat)
+   *   4. Random per-lesson tag stable in this call  (cluster lessons; order
+   *                                                  of clusters within a
+   *                                                  module is shuffled)
+   *   5. Random per-card  (shuffle WITHIN a lesson cluster)
+   *
+   * Resume-pinning is applied LAST, so it overrides everything if set. */
+  const DATA = (typeof window !== 'undefined' && window.DATA) || {};
+  const CATEGORIES = DATA.CATEGORIES || [];
+  const MODULES    = DATA.MODULES    || [];
+  const tierOf = (catId) => {
+    const c = CATEGORIES.find(x => x.id === catId);
+    return c ? (c.tier || 4) : 4;
+  };
+  const moduleIndex = new Map(MODULES.map((m, i) => [m.id, i]));
+  const modIdx = (moduleId) => moduleIndex.has(moduleId) ? moduleIndex.get(moduleId) : 9999;
+
+  // Stable per-call random keys so the sort is deterministic during the
+  // sort itself (multiple comparisons reference the same key).
+  const catKey = new Map();
+  const lessonKey = new Map();
+  const cardKey = new Map();
+  for (const d of due) {
+    const c = d.card;
+    if (!catKey.has(c.cat))       catKey.set(c.cat, Math.random());
+    const lessonId = c.lesson || `__no_${c.cat}`;
+    if (!lessonKey.has(lessonId)) lessonKey.set(lessonId, Math.random());
+    cardKey.set(c.id, Math.random());
   }
-  // If the caller wants a specific card pinned to the front (e.g. user is
-  // returning from "Review lesson" and we need to resume on that card),
-  // hoist it out of the shuffled list and prepend. The card might not be
-  // in the first `limit` after shuffling -- pinning ensures it survives
-  // the slice below.
+
+  due.sort((a, b) => {
+    const ac = a.card, bc = b.card;
+    const at = tierOf(ac.cat), bt = tierOf(bc.cat);
+    if (at !== bt) return at - bt;
+    const ak = catKey.get(ac.cat), bk = catKey.get(bc.cat);
+    if (ac.cat !== bc.cat) return ak - bk;
+    const am = modIdx(ac.module), bm = modIdx(bc.module);
+    if (am !== bm) return am - bm;
+    const al = lessonKey.get(ac.lesson || `__no_${ac.cat}`);
+    const bl = lessonKey.get(bc.lesson || `__no_${bc.cat}`);
+    if (al !== bl) return al - bl;
+    return cardKey.get(ac.id) - cardKey.get(bc.id);
+  });
+
+  // Resume-pin: hoist the user's last card to position 0 if requested.
+  // Survives the slice below.
   if (pinFirstId) {
-    const pinIdx = out.findIndex(d => d.card.id === pinFirstId);
+    const pinIdx = due.findIndex(d => d.card.id === pinFirstId);
     if (pinIdx > 0) {
-      const [pinned] = out.splice(pinIdx, 1);
-      out.unshift(pinned);
+      const [pinned] = due.splice(pinIdx, 1);
+      due.unshift(pinned);
     }
   }
-  return out.slice(0, limit);
+  return due.slice(0, limit);
 }
 
 /* ---------- Wrong-answer SRS queue ----------
