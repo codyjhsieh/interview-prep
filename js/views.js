@@ -3943,15 +3943,15 @@ function renderDashboard(state, hub) {
   const _rampEase = 3 * _rampT * _rampT - 2 * _rampT * _rampT * _rampT;   // smoothstep
   const _rampedTarget = (k) =>
     Math.round(TARGET_START[k] + (TARGET_ELITE[k] - TARGET_START[k]) * _rampEase);
+  // TARGETS holds *today's* ramped values, used by the legend pills
+  // ("8/5/12" etc). The dashed climbing curves in the SVG show the
+  // full goal trajectory across the window, so no separate "Day N/21
+  // · X% to elite" text is rendered -- the chart says it visually.
   const TARGETS = {
     flashcard: _rampedTarget('flashcard'),
     lesson:    _rampedTarget('lesson'),
     app:       _rampedTarget('app'),
   };
-  const _rampPct = Math.round(_rampT * 100);
-  const _rampLabel = _rampT >= 1
-    ? 'Elite locked'
-    : `Day ${_daysSinceAnchor}/${RAMP_DAYS} · ${_rampPct}% to elite`;
 
   const COLORS = { flashcard: '#7CF1C2', lesson: '#FFB95C', app: '#8B5CF6' };
   const RANGE_KEY = 'fdeprep.dailyEffortRange.v1';
