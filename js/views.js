@@ -3427,7 +3427,7 @@ function openPetLifecyclePreview() {
         activity: _activity, fedToday: true,
         ageDays: s.stage === 'baby' ? 1 : s.stage === 'teen' ? 5 : 12,
         // Show 1 food pile when activity is "eat" so Bit has something to consume
-        foodPilesAvailable: _activity === 'eat' ? 1 : 0, pileXP: 10,
+        foodPilesAvailable: _activity === 'eat' ? 1 : 0, pileXP: 5,
         lastTickDate: new Date().toISOString().slice(0,10),
         forceHour: s.hour,
         bodyHue: 0x9CC7E6,                              // preview keeps a stable color
@@ -3536,7 +3536,7 @@ function renderPetCard(state, p) {
       <summary class="text-[11px] muted cursor-pointer hover:opacity-80">How feeding works ▾</summary>
       <ul class="list-muted mt-2 text-[11.5px]" style="font-size:11.5px">
         <li>Vitality decays <b>100 → 0</b> over 24 h since the last feed.</li>
-        <li>Every 10 XP earned today = 1 food pile. Each drop consumes one pile: <b>+10 vitality</b> (cap 100).</li>
+        <li>Every 5 XP earned today = 1 food pile. Each drop consumes one pile: <b>+5 vitality</b> (cap 100).</li>
         <li><b>Hit ${Math.round(p.goal*1.5)} XP today</b> → body shifts toward <b>Jacked</b>; less than ${p.goal} → toward <b>Chubby</b>.</li>
         <li><b>24 h with no feed</b> → vitality 0. Cross a midnight at 0 → ${esc(p.name)} dies.</li>
         <li>Death resets all pet stats; a new baby hatches tomorrow. Skull counter sticks.</li>

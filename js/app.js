@@ -448,7 +448,10 @@ function bindEvents() {
       const petHandle = host && host._petHandle;
       if (petHandle && typeof petHandle.dropFood === 'function') {
         const st = APP.getState();
-        const PILE_XP = 10;
+        // Keep in sync with PILE_XP in gamification.js petState(). Local
+        // shadow because app.js doesn't import from gamification.js -- it
+        // talks to the GAMI namespace only.
+        const PILE_XP = 5;
         const todayXP = st.todayXP || 0;
         const eaten = (st.pet && st.pet.eatenTodayXP) || 0;
         const avail = Math.floor(Math.max(0, todayXP - eaten) / PILE_XP);

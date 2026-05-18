@@ -232,12 +232,14 @@ function awardXP(state, amount, reason) {
 }
 
 /* Manual feed — called when the user drops a food pile. XP-to-
- * vitality is now 1:1 -- a 10-XP pile restores +10 vitality. The
- * previous +20-per-pile scheme was a free 2x multiplier that let a
- * sub-day of effort fully heal Bit; with 1:1 it takes the full
- * 100-XP-worth of piles (10 piles) to restore from 0 to 100, which
- * matches the 100-pts-per-24h decay rate exactly. Each pile still
- * shifts body form per the workout-vs-sedentary threshold below.
+ * vitality is 1:1 -- a 5-XP pile restores +5 vitality. With 1:1 it
+ * takes the full 100 XP worth of piles (20 piles) to restore Bit from
+ * 0 to 100 vitality, which matches the 100-pts-per-24h decay rate
+ * exactly. Halving the unit cost from 10 to 5 keeps the daily total
+ * unchanged but adds granularity -- a 7-XP day can still drop one
+ * pile (vs zero at the 10-XP unit), and the feeding gesture happens
+ * twice as often per session. Each pile still shifts body form per
+ * the workout-vs-sedentary threshold below.
  *
  * Vitality model: a snapshot value lives in p.vitality + a timestamp
  * p.lastFedAt; the displayed value decays linearly from that snapshot
@@ -251,7 +253,7 @@ function feedPetWithPile(state) {
   // before adding the bonus. Without this, every feed event would
   // discard accumulated decay (you could feed once a day and stay
   // at 100 forever).
-  p.vitality = Math.min(100, _liveVitality(p) + 10);
+  p.vitality = Math.min(100, _liveVitality(p) + 5);
   p.lastFedAt = Date.now();
   const today = todayKey();
   p.lastFedDate = today;
@@ -958,10 +960,10 @@ function petState(state) {
   // food via the "Drop food" button, which calls feedPetWithPile().
   const justFed = (todayXP >= goal) && p.lastFedDate !== today;
 
-  // Food piles: every 10 XP earned today = 1 pile. Each drop consumes
-  // one pile (eatenTodayXP += 10). Available = earned − consumed.
+  // Food piles: every 5 XP earned today = 1 pile. Each drop consumes
+  // one pile (eatenTodayXP += 5). Available = earned − consumed.
   // Vitality caps at 100; form math runs per drop.
-  const PILE_XP = 10;
+  const PILE_XP = 5;
   const uneatenXP = Math.max(0, todayXP - (p.eatenTodayXP || 0));
   const foodPilesAvailable = Math.floor(uneatenXP / PILE_XP);
 
