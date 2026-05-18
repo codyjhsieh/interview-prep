@@ -503,21 +503,70 @@ const JOURNEY = [
     kind: 'scroll',
   },
 
-  /* ----------------------- Sheet + nav stress ------------------------ */
+  /* ------------- More sheet animation + navigation flow -------------- */
+  /* Each step's dwell is tightly scoped to the actual animation window
+   * so FPS isn't diluted by idle frames. Sheet entrance is 420ms
+   * (--spring-overshoot), exit is 320ms (--spring-settle). */
   {
-    label: 'more-sheet:open',
+    label: 'more:open',
     go: (page) => clickSel(page, '[data-more-toggle]'),
-    wait: '#more-sheet',
-    dwell: 1500,
+    wait: '#more-sheet.open',
+    dwell: 500,         // 420ms entrance + 80ms settle
     kind: 'interaction',
   },
   {
-    label: 'more-sheet:close',
+    label: 'more:scroll-list',
     go: (page) => page.evaluate(() => {
-      const scrim = document.querySelector('#more-sheet [data-close], #more-sheet .more-sheet-scrim');
-      if (scrim) scrim.click();
+      return new Promise((resolve) => {
+        const panel = document.querySelector('#more-sheet .more-sheet-panel');
+        if (!panel) return resolve();
+        const start = panel.scrollTop;
+        const end = panel.scrollHeight - panel.clientHeight;
+        if (end <= 0) return resolve();
+        const t0 = performance.now(), dur = 800;
+        function step(t) {
+          const k = Math.min(1, (t - t0) / dur);
+          panel.scrollTop = start + (end - start) * k;
+          if (k < 1) requestAnimationFrame(step);
+          else resolve();
+        }
+        requestAnimationFrame(step);
+      });
     }),
-    dwell: 1200,
+    dwell: 900,
+    kind: 'scroll',
+  },
+  {
+    label: 'more:close-scrim',
+    go: (page) => clickSel(page, '#more-sheet .more-sheet-scrim'),
+    dwell: 380,         // 320ms exit + 60ms settle
+    kind: 'interaction',
+  },
+  {
+    label: 'more:reopen',
+    go: (page) => clickSel(page, '[data-more-toggle]'),
+    wait: '#more-sheet.open',
+    dwell: 500,
+    kind: 'interaction',
+  },
+  {
+    label: 'more:nav-via-profile',
+    /* Tap the Profile row inside the sheet. Two animations fire in
+     * parallel: sheet exit (320ms) and the destination route mount.
+     * Captures the "tap → both transitions finish" experience. */
+    go: (page) => clickSel(page, '#more-sheet .more-sheet-row[data-route="profile"]'),
+    wait: 'h1:has-text("Profile")',
+    dwell: 700,
+    kind: 'interaction',
+  },
+  {
+    label: 'more:return-to-dashboard',
+    /* Go back from #profile to #dashboard via the tab bar's Today
+     * button. After the fix in 6397957, the More pill also un-highlights
+     * here; captures any flicker / paint cost of that transition. */
+    go: (page) => clickSel(page, '#liquid-tabbar .tab-item[data-route="dashboard"]'),
+    wait: '#view',
+    dwell: 800,
     kind: 'interaction',
   },
   {
