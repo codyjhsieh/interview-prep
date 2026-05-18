@@ -261,7 +261,16 @@ function _petSpriteSVG(stage, body, activity, fedToday) {
   let overlay = '';
   if (sleeping) overlay = `<text x="80" y="14" font-family="monospace" font-size="11" fill="${pal.eye}" font-weight="bold">Zz</text>`;
   if (eating)   overlay = `<text x="78" y="40" font-family="monospace" font-size="14" fill="${pal.body}">✨</text>`;
-  if (sick)     overlay = `<text x="78" y="20" font-family="monospace" font-size="12" fill="${pal.dark}">~</text>`;
+  if (sick) {
+    // Multiple wobble lines + sweat drop + green sickly aura — clearly
+    // unhealthy at a glance instead of one small ~ overhead.
+    overlay = `
+      <text x="20" y="22" font-family="monospace" font-size="14" fill="#7BA67A" font-weight="bold">~</text>
+      <text x="78" y="20" font-family="monospace" font-size="14" fill="#7BA67A" font-weight="bold">~</text>
+      <text x="50" y="14" font-family="monospace" font-size="12" fill="#7BA67A" font-weight="bold">~~</text>
+      <circle cx="92" cy="48" r="2.2" fill="#7CC8E0" opacity="0.85"/>
+      <circle cx="92" cy="48" r="1.2" fill="#FFFFFF" opacity="0.6"/>`;
+  }
   return `<svg viewBox="0 0 112 112" width="112" height="112" shape-rendering="crispEdges">${rects.join('')}${overlay}</svg>`;
 }
 
@@ -3213,9 +3222,29 @@ function mountPet3D(container, p) {
       facing.rotation.x = -squat * 0.6;
     } else if (activity === 'sick' || activity === 'eat') {
       if (activity === 'sick') {
+        // Misery suite: violent shiver + knee buckling + chest collapse +
+        // head droop + side-to-side sway + periodic cough spasm. Was a
+        // single 3.5mm sin-wave x jitter -- not nearly dramatic enough
+        // to telegraph "feed me NOW" at a glance.
         const startX = petGroup.userData.startX || 0;
-        petGroup.position.x = startX + Math.sin(t * 14) * 0.035;
-        bodyGroup.scale.y = breath - Math.abs(Math.sin(t * 14)) * 0.06;
+        const shiver = Math.sin(t * 11) * 0.085;            // violent x jitter (up from 0.035 @ 14Hz)
+        const knees  = Math.abs(Math.sin(t * 5.5)) * 0.07;  // Y dip — legs buckle in/out
+        const chest  = Math.abs(Math.sin(t * 11)) * 0.15;   // chest collapses (up from 0.06)
+        const sway   = Math.sin(t * 1.4) * 0.12;            // slow side-to-side list (drunk gravity)
+        // Cough spasm — every ~3.2s a short ~0.5s violent convulsion
+        const coughT = (t % 3.2) / 3.2;
+        const coughActive = coughT < 0.16;
+        const cough = coughActive ? Math.sin((coughT / 0.16) * Math.PI) : 0;
+
+        petGroup.position.x = startX + shiver + sway * 0.5;
+        petGroup.position.y = -knees - cough * 0.18;
+        bodyGroup.scale.y = breath - chest - cough * 0.22;
+        bodyGroup.scale.x = 1 + cough * 0.18;                // body bulges out on cough
+        // Head droops forward (sick posture); jolts further on cough
+        headGroup.rotation.x = 0.25 + cough * 0.4;
+        // Body wobbles: slow Z list + chest-driven forward tilt
+        facing.rotation.z = sway;
+        facing.rotation.x = chest * 0.5;
       }
     }
 
