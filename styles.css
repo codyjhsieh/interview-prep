@@ -1425,6 +1425,76 @@ code, pre, .font-mono {
   transition: width 0.6s var(--ease);
 }
 
+/* =========================================================================
+ * Daily-effort legend pills — Liquid Glass mini-cards. One per metric.
+ * Sit in a 3-col grid below the SVG chart on the dashboard. Each pill
+ * pulls its accent color from --accent-c (set inline per pill) so the
+ * left-edge fade matches the line color in the chart above.
+ *
+ * Mobile gets a tighter padding + smaller font so three pills fit
+ * comfortably on a 375px viewport without breaking to two rows.
+ * ========================================================================= */
+.effort-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px 7px 9px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent-c) 8%, var(--regular) 92%);
+  border: 1px solid color-mix(in srgb, var(--accent-c) 22%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -1px 0 rgba(15,23,42,0.04),
+    0 1px 2px rgba(15,23,42,0.04);
+  /* Subtle ambient glow underneath, matching the chart-line glow recipe */
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+.effort-pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent-c) 8%, transparent) 0%,
+    transparent 55%);
+}
+.effort-pill-dot {
+  width: 8px; height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent-c) 60%, transparent);
+}
+.effort-pill-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.15;
+}
+.effort-pill-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.effort-pill-val {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 1px;
+}
+.effort-pill-val.effort-pill-hit { color: var(--accent); }
+.effort-pill-val .dim { font-weight: 400; font-size: 0.82em; opacity: 0.55; }
+@media (max-width: 640px) {
+  .effort-pill { padding: 6px 8px 6px 8px; gap: 6px; border-radius: 9px; }
+  .effort-pill-dot { width: 7px; height: 7px; }
+  .effort-pill-label { font-size: 9.5px; letter-spacing: 0.03em; }
+  .effort-pill-val { font-size: 13px; }
+}
+
 /* CSS-only ring — no SVG bounding box, perfectly circular */
 .ring {
   position: relative;

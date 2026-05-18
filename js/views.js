@@ -3956,7 +3956,7 @@ function renderDashboard(state, hub) {
   const COLORS = { flashcard: '#7CF1C2', lesson: '#FFB95C', app: '#8B5CF6' };
   const RANGE_KEY = 'fdeprep.dailyEffortRange.v1';
   const VALID_RANGES = [7, 14, 30];
-  let _selectedRange = 14;
+  let _selectedRange = 7;
   try {
     const stored = parseInt(localStorage.getItem(RANGE_KEY), 10);
     if (VALID_RANGES.includes(stored)) _selectedRange = stored;
@@ -4097,19 +4097,24 @@ function renderDashboard(state, hub) {
         ${_rampT < 1 ? `<span class="dim">→ elite ${TARGET_ELITE.flashcard}/${TARGET_ELITE.lesson}/${TARGET_ELITE.app}</span>` : ''}
       </div>
       <div data-effort-chart>${buildEffortSVG(_selectedRange)}</div>
-      <div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-[12px]">
-        <span class="inline-flex items-center gap-1.5">
-          <span style="width:9px;height:9px;border-radius:999px;background:${COLORS.flashcard};box-shadow:0 0 6px ${COLORS.flashcard}55;display:inline-block"></span>
-          Flashcards <span class="numeric muted">${_todayFlashcards}/${TARGETS.flashcard}</span>
-        </span>
-        <span class="inline-flex items-center gap-1.5">
-          <span style="width:9px;height:9px;border-radius:999px;background:${COLORS.lesson};box-shadow:0 0 6px ${COLORS.lesson}55;display:inline-block"></span>
-          Lessons <span class="numeric muted">${_todayLessons}/${TARGETS.lesson}</span>
-        </span>
-        <span class="inline-flex items-center gap-1.5">
-          <span style="width:9px;height:9px;border-radius:999px;background:${COLORS.app};box-shadow:0 0 6px ${COLORS.app}55;display:inline-block"></span>
-          Apps <span class="numeric muted">${_todayApps}/${TARGETS.app}</span>
-        </span>
+      <div class="grid grid-cols-3 gap-2 mt-3" data-effort-legend>
+        ${[
+          { label: 'Flashcards', count: _todayFlashcards, target: TARGETS.flashcard, color: COLORS.flashcard },
+          { label: 'Lessons',    count: _todayLessons,    target: TARGETS.lesson,    color: COLORS.lesson },
+          { label: 'Apps',       count: _todayApps,       target: TARGETS.app,       color: COLORS.app },
+        ].map(item => {
+          const hit = item.count >= item.target;
+          return `
+          <div class="effort-pill" style="--accent-c: ${item.color}">
+            <div class="effort-pill-dot" style="background:${item.color}"></div>
+            <div class="effort-pill-body">
+              <div class="effort-pill-label">${item.label}</div>
+              <div class="effort-pill-val numeric ${hit ? 'effort-pill-hit' : ''}">
+                ${item.count}<span class="dim">/${item.target}</span>
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
       </div>
     `;
     effort.querySelectorAll('[data-effort-range]').forEach(tab => {
