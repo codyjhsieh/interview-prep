@@ -3921,147 +3921,176 @@ function renderDashboard(state, hub) {
   const _todayApps = Object.values(state.jobApps || {})
     .filter(a => a && a.applied && _isTodayMs(a.ts)).length;
 
-  // Build a 14-day window ending today. Even if history has gaps, we
-  // emit a fixed-length array so the x-axis is uniform.
-  const WINDOW_DAYS = 14;
   const TARGETS = { flashcard: 5, lesson: 5, app: 10 };
-  const histByDate = Object.fromEntries((state.history || []).map(h => [h.date, h]));
-  const days = [];
-  for (let i = WINDOW_DAYS - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const k = d.toISOString().slice(0, 10);
-    const h = histByDate[k];
-    const isToday = k === _todayStr;
-    const ev = (h && h.events) || {};
-    days.push({
-      date: k,
-      flashcard: isToday ? _todayFlashcards : (ev.flashcard || 0),
-      lesson:    isToday ? _todayLessons    : (ev.lesson    || 0),
-      app:       isToday ? _todayApps       : (ev.app       || 0),
-    });
-  }
-
-  // SVG layout. 100% width of the card; height fixed. Y axis is % of
-  // target (0..100% common range, capped at 150% so an over-achiever day
-  // doesn't squash the rest). 14 x-positions evenly spread.
-  const W = 320, H = 110, PAD_L = 6, PAD_R = 6, PAD_T = 8, PAD_B = 8;
-  const Y_MAX = 1.5;   // 150% of target = top of chart
-  const sx = (i) => PAD_L + (i / (WINDOW_DAYS - 1)) * (W - PAD_L - PAD_R);
-  const sy = (frac) => PAD_T + (1 - Math.min(Y_MAX, frac) / Y_MAX) * (H - PAD_T - PAD_B);
-
-  // Catmull-Rom -> cubic Bezier. Produces a smooth flowing curve
-  // through all sample points -- gives the chart an ambient, organic
-  // feel matching the Liquid Glass color wells elsewhere instead of
-  // sharp polyline corners.
-  const smoothPath = (pts) => {
-    if (!pts.length) return '';
-    if (pts.length === 1) return `M${pts[0][0]},${pts[0][1]}`;
-    let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p0 = pts[i - 1] || pts[i];
-      const p1 = pts[i];
-      const p2 = pts[i + 1];
-      const p3 = pts[i + 2] || p2;
-      const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
-      const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
-      const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
-      const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
-      d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
-    }
-    return d;
-  };
-  const points = (key, target) => days.map((d, i) => [sx(i), sy(d[key] / target)]);
-  const linePath = (key, target) => smoothPath(points(key, target));
-  const areaPath = (key, target) => {
-    const p = points(key, target);
-    if (!p.length) return '';
-    const base = H - PAD_B;
-    return smoothPath(p) + ` L${p[p.length-1][0].toFixed(1)},${base} L${p[0][0].toFixed(1)},${base} Z`;
-  };
-  const todayDot = (key, target, color) => {
-    const p = days[days.length - 1];
-    const x = sx(days.length - 1), y = sy(p[key] / target);
-    return `
-      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="${color}" opacity="0.18"/>
-      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.4" fill="${color}"/>`;
-  };
-  const goalY = sy(1).toFixed(1);
-
   const COLORS = { flashcard: '#7CF1C2', lesson: '#FFB95C', app: '#8B5CF6' };
+  const RANGE_KEY = 'fdeprep.dailyEffortRange.v1';
+  const VALID_RANGES = [7, 14, 30];
+  let _selectedRange = 14;
+  try {
+    const stored = parseInt(localStorage.getItem(RANGE_KEY), 10);
+    if (VALID_RANGES.includes(stored)) _selectedRange = stored;
+  } catch (_) {}
+  const histByDate = Object.fromEntries((state.history || []).map(h => [h.date, h]));
 
+  /* Build the {date,flashcard,lesson,app} samples for a N-day window
+   * ending today. Pre-audit-trail days lack the events field; their
+   * flashcard/app counts read as 0 (truthful). Today uses LIVE counts
+   * from raw timestamps so just-taken actions appear without waiting
+   * for the next awardXP. */
+  const buildDays = (windowDays) => {
+    const out = [];
+    for (let i = windowDays - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const k = d.toISOString().slice(0, 10);
+      const h = histByDate[k];
+      const isToday = k === _todayStr;
+      const ev = (h && h.events) || {};
+      out.push({
+        date: k,
+        flashcard: isToday ? _todayFlashcards : (ev.flashcard || 0),
+        lesson:    isToday ? _todayLessons    : (ev.lesson    || 0),
+        app:       isToday ? _todayApps       : (ev.app       || 0),
+      });
+    }
+    return out;
+  };
+
+  /* SVG chart for a given window. Returns a complete <svg>...</svg>
+   * string so we can swap the chart on range-toggle without rebuilding
+   * the surrounding card. Stroke width and today-dot radius scale
+   * down slightly as the window widens so a 30-day view doesn't read
+   * as a thick scribble. */
+  const buildEffortSVG = (windowDays) => {
+    const days = buildDays(windowDays);
+    const W = 320, H = 110, PAD_L = 6, PAD_R = 6, PAD_T = 8, PAD_B = 8;
+    const Y_MAX = 1.5;
+    const sx = (i) => PAD_L + (i / (windowDays - 1)) * (W - PAD_L - PAD_R);
+    const sy = (frac) => PAD_T + (1 - Math.min(Y_MAX, frac) / Y_MAX) * (H - PAD_T - PAD_B);
+    // Catmull-Rom -> cubic Bezier. Smooth flowing curve through all
+    // points, matches the ambient color-well aesthetic.
+    const smoothPath = (pts) => {
+      if (!pts.length) return '';
+      if (pts.length === 1) return `M${pts[0][0]},${pts[0][1]}`;
+      let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[i - 1] || pts[i];
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const p3 = pts[i + 2] || p2;
+        const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+        const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+        const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+        const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+        d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+      }
+      return d;
+    };
+    const points = (key, target) => days.map((d, i) => [sx(i), sy(d[key] / target)]);
+    const linePath = (key, target) => smoothPath(points(key, target));
+    const areaPath = (key, target) => {
+      const p = points(key, target);
+      if (!p.length) return '';
+      const base = H - PAD_B;
+      return smoothPath(p) + ` L${p[p.length-1][0].toFixed(1)},${base} L${p[0][0].toFixed(1)},${base} Z`;
+    };
+    const todayDot = (key, target, color) => {
+      const p = days[days.length - 1];
+      const x = sx(days.length - 1), y = sy(p[key] / target);
+      const r = windowDays <= 7 ? 3 : (windowDays <= 14 ? 2.4 : 2);
+      return `
+        <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r * 2.1).toFixed(1)}" fill="${color}" opacity="0.18"/>
+        <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${color}"/>`;
+    };
+    const goalY = sy(1).toFixed(1);
+    const strokeW = windowDays <= 7 ? 1.8 : (windowDays <= 14 ? 1.6 : 1.4);
+    return `
+      <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block">
+        <defs>
+          <linearGradient id="grad-flashcard" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"  stop-color="${COLORS.flashcard}" stop-opacity="0.42"/>
+            <stop offset="100%" stop-color="${COLORS.flashcard}" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="grad-lesson" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"  stop-color="${COLORS.lesson}" stop-opacity="0.36"/>
+            <stop offset="100%" stop-color="${COLORS.lesson}" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="grad-app" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"  stop-color="${COLORS.app}" stop-opacity="0.36"/>
+            <stop offset="100%" stop-color="${COLORS.app}" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="effort-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.2" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <line x1="${PAD_L}" y1="${goalY}" x2="${W - PAD_R}" y2="${goalY}"
+              stroke="rgba(15,23,42,0.15)" stroke-width="0.6" stroke-dasharray="2 4"/>
+        <path d="${areaPath('app',       TARGETS.app)}"       fill="url(#grad-app)"/>
+        <path d="${areaPath('lesson',    TARGETS.lesson)}"    fill="url(#grad-lesson)"/>
+        <path d="${areaPath('flashcard', TARGETS.flashcard)}" fill="url(#grad-flashcard)"/>
+        <path d="${linePath('app',       TARGETS.app)}"
+              fill="none" stroke="${COLORS.app}"       stroke-width="${strokeW}"
+              stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
+        <path d="${linePath('lesson',    TARGETS.lesson)}"
+              fill="none" stroke="${COLORS.lesson}"    stroke-width="${strokeW}"
+              stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
+        <path d="${linePath('flashcard', TARGETS.flashcard)}"
+              fill="none" stroke="${COLORS.flashcard}" stroke-width="${strokeW}"
+              stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
+        ${todayDot('app',       TARGETS.app,       COLORS.app)}
+        ${todayDot('lesson',    TARGETS.lesson,    COLORS.lesson)}
+        ${todayDot('flashcard', TARGETS.flashcard, COLORS.flashcard)}
+      </svg>`;
+  };
+
+  const rangeLabel = (n) => n === 7 ? '7d' : (n === 14 ? '2w' : '30d');
   const effort = el('div','card');
   effort.setAttribute('data-card', 'daily-effort');
-  effort.innerHTML = `
-    <div class="flex items-baseline justify-between mb-3">
-      <h3 class="font-display font-semibold text-lg">Daily effort</h3>
-      <div class="text-[11px] muted">last ${WINDOW_DAYS} days · % of target</div>
-    </div>
-    <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block">
-      <defs>
-        <!-- Vertical translucent gradients — each line gets a soft area
-             fade underneath, mirroring the ambient color-well aesthetic
-             that runs across the whole app. -->
-        <linearGradient id="grad-flashcard" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stop-color="${COLORS.flashcard}" stop-opacity="0.42"/>
-          <stop offset="100%" stop-color="${COLORS.flashcard}" stop-opacity="0"/>
-        </linearGradient>
-        <linearGradient id="grad-lesson" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stop-color="${COLORS.lesson}" stop-opacity="0.36"/>
-          <stop offset="100%" stop-color="${COLORS.lesson}" stop-opacity="0"/>
-        </linearGradient>
-        <linearGradient id="grad-app" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"  stop-color="${COLORS.app}" stop-opacity="0.36"/>
-          <stop offset="100%" stop-color="${COLORS.app}" stop-opacity="0"/>
-        </linearGradient>
-        <!-- Soft glow on the strokes; matches the diffuse-halo nav-pill
-             vocabulary already established in styles.css. -->
-        <filter id="effort-glow" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="1.2" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-
-      <!-- Goal line at 100% of target -->
-      <line x1="${PAD_L}" y1="${goalY}" x2="${W - PAD_R}" y2="${goalY}"
-            stroke="rgba(15,23,42,0.15)" stroke-width="0.6" stroke-dasharray="2 4"/>
-
-      <!-- Area fills (back to front, lightest first) -->
-      <path d="${areaPath('app',       TARGETS.app)}"       fill="url(#grad-app)"/>
-      <path d="${areaPath('lesson',    TARGETS.lesson)}"    fill="url(#grad-lesson)"/>
-      <path d="${areaPath('flashcard', TARGETS.flashcard)}" fill="url(#grad-flashcard)"/>
-
-      <!-- Curved stroke lines with soft glow -->
-      <path d="${linePath('app',       TARGETS.app)}"
-            fill="none" stroke="${COLORS.app}"       stroke-width="1.6"
-            stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
-      <path d="${linePath('lesson',    TARGETS.lesson)}"
-            fill="none" stroke="${COLORS.lesson}"    stroke-width="1.6"
-            stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
-      <path d="${linePath('flashcard', TARGETS.flashcard)}"
-            fill="none" stroke="${COLORS.flashcard}" stroke-width="1.6"
-            stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
-
-      <!-- Today markers — small dot inside a soft halo, mirrors sync-pill aesthetic -->
-      ${todayDot('app',       TARGETS.app,       COLORS.app)}
-      ${todayDot('lesson',    TARGETS.lesson,    COLORS.lesson)}
-      ${todayDot('flashcard', TARGETS.flashcard, COLORS.flashcard)}
-    </svg>
-    <div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-[12px]">
-      <span class="inline-flex items-center gap-1.5">
-        <span style="width:9px;height:9px;border-radius:999px;background:${COLORS.flashcard};box-shadow:0 0 6px ${COLORS.flashcard}55;display:inline-block"></span>
-        Flashcards <span class="numeric muted">${_todayFlashcards}/${TARGETS.flashcard}</span>
-      </span>
-      <span class="inline-flex items-center gap-1.5">
-        <span style="width:9px;height:9px;border-radius:999px;background:${COLORS.lesson};box-shadow:0 0 6px ${COLORS.lesson}55;display:inline-block"></span>
-        Lessons <span class="numeric muted">${_todayLessons}/${TARGETS.lesson}</span>
-      </span>
-      <span class="inline-flex items-center gap-1.5">
-        <span style="width:9px;height:9px;border-radius:999px;background:${COLORS.app};box-shadow:0 0 6px ${COLORS.app}55;display:inline-block"></span>
-        Apps <span class="numeric muted">${_todayApps}/${TARGETS.app}</span>
-      </span>
-    </div>
-  `;
+  const renderEffortCard = () => {
+    effort.innerHTML = `
+      <div class="flex items-baseline justify-between mb-3 gap-2 flex-wrap">
+        <h3 class="font-display font-semibold text-lg">Daily effort</h3>
+        <div class="flex items-center gap-2">
+          <div class="tabs" data-effort-tabs>
+            ${VALID_RANGES.map(n => `
+              <div class="tab ${n === _selectedRange ? 'active' : ''}" data-effort-range="${n}">${rangeLabel(n)}</div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      <div data-effort-chart>${buildEffortSVG(_selectedRange)}</div>
+      <div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-[12px]">
+        <span class="inline-flex items-center gap-1.5">
+          <span style="width:9px;height:9px;border-radius:999px;background:${COLORS.flashcard};box-shadow:0 0 6px ${COLORS.flashcard}55;display:inline-block"></span>
+          Flashcards <span class="numeric muted">${_todayFlashcards}/${TARGETS.flashcard}</span>
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <span style="width:9px;height:9px;border-radius:999px;background:${COLORS.lesson};box-shadow:0 0 6px ${COLORS.lesson}55;display:inline-block"></span>
+          Lessons <span class="numeric muted">${_todayLessons}/${TARGETS.lesson}</span>
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <span style="width:9px;height:9px;border-radius:999px;background:${COLORS.app};box-shadow:0 0 6px ${COLORS.app}55;display:inline-block"></span>
+          Apps <span class="numeric muted">${_todayApps}/${TARGETS.app}</span>
+        </span>
+      </div>
+    `;
+    effort.querySelectorAll('[data-effort-range]').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const next = parseInt(tab.dataset.effortRange, 10);
+        if (!VALID_RANGES.includes(next) || next === _selectedRange) return;
+        _selectedRange = next;
+        try { localStorage.setItem(RANGE_KEY, String(next)); } catch (_) {}
+        // Swap chart + active-tab class only; no full re-render needed.
+        effort.querySelectorAll('[data-effort-range]').forEach(t => {
+          t.classList.toggle('active', parseInt(t.dataset.effortRange, 10) === next);
+        });
+        const slot = effort.querySelector('[data-effort-chart]');
+        if (slot) slot.innerHTML = buildEffortSVG(next);
+      });
+    });
+  };
+  renderEffortCard();
   container.appendChild(effort);
 
   // SRS review tiles — surface only when there's something due / queued
