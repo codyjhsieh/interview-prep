@@ -3222,29 +3222,32 @@ function mountPet3D(container, p) {
       facing.rotation.x = -squat * 0.6;
     } else if (activity === 'sick' || activity === 'eat') {
       if (activity === 'sick') {
-        // Misery suite: violent shiver + knee buckling + chest collapse +
-        // head droop + side-to-side sway + periodic cough spasm. Was a
-        // single 3.5mm sin-wave x jitter -- not nearly dramatic enough
-        // to telegraph "feed me NOW" at a glance.
+        // Misery suite, calibrated for a tiny pet (body ~0.4-0.5u tall,
+        // walk hop ~0.085u peak). Amplitudes here are all sub-walk-hop
+        // so they read as "weak, sickly motion" rather than "athletic
+        // bouncing around the floor." The DRAMA comes from layering
+        // five small motions + a periodic cough spasm, not from any
+        // one big movement.
         const startX = petGroup.userData.startX || 0;
-        const shiver = Math.sin(t * 11) * 0.085;            // violent x jitter (up from 0.035 @ 14Hz)
-        const knees  = Math.abs(Math.sin(t * 5.5)) * 0.07;  // Y dip — legs buckle in/out
-        const chest  = Math.abs(Math.sin(t * 11)) * 0.15;   // chest collapses (up from 0.06)
-        const sway   = Math.sin(t * 1.4) * 0.12;            // slow side-to-side list (drunk gravity)
-        // Cough spasm — every ~3.2s a short ~0.5s violent convulsion
+        const shiver = Math.sin(t * 11) * 0.022;            // 11Hz x-tremor, ~22mm peak
+        const knees  = Math.abs(Math.sin(t * 5.5)) * 0.018; // ~18mm Y-dip — knees giving out
+        const chest  = Math.abs(Math.sin(t * 11)) * 0.05;   // 5% breath collapse on each shudder
+        const sway   = Math.sin(t * 1.4) * 0.06;            // ~3.4deg slow Z list (drunk gravity)
+        // Cough spasm — every ~3.2s a short ~0.5s convulsion. This IS
+        // the dramatic beat; everything else is the trembling backdrop.
         const coughT = (t % 3.2) / 3.2;
         const coughActive = coughT < 0.16;
         const cough = coughActive ? Math.sin((coughT / 0.16) * Math.PI) : 0;
 
-        petGroup.position.x = startX + shiver + sway * 0.5;
-        petGroup.position.y = -knees - cough * 0.18;
-        bodyGroup.scale.y = breath - chest - cough * 0.22;
-        bodyGroup.scale.x = 1 + cough * 0.18;                // body bulges out on cough
+        petGroup.position.x = startX + shiver + sway * 0.4;
+        petGroup.position.y = -knees - cough * 0.05;        // ~50mm cough dip (~60% of walk hop)
+        bodyGroup.scale.y = breath - chest - cough * 0.12;  // 12% extra chest collapse on cough
+        bodyGroup.scale.x = 1 + cough * 0.08;               // 8% x-bulge on cough
         // Head droops forward (sick posture); jolts further on cough
-        headGroup.rotation.x = 0.25 + cough * 0.4;
+        headGroup.rotation.x = 0.18 + cough * 0.22;          // ~10deg constant + ~12deg cough jolt
         // Body wobbles: slow Z list + chest-driven forward tilt
         facing.rotation.z = sway;
-        facing.rotation.x = chest * 0.5;
+        facing.rotation.x = chest * 0.4;
       }
     }
 
