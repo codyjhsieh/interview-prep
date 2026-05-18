@@ -4136,13 +4136,7 @@ function renderDashboard(state, hub) {
           </div>
         </div>
       </div>
-      <div class="flex items-baseline gap-2 mb-3 text-[11.5px] muted">
-        <span style="color:${_rampT >= 1 ? 'var(--accent)' : 'var(--text)'}">${_rampLabel}</span>
-        <span class="dim">·</span>
-        <span>targets <span class="numeric">${TARGETS.flashcard}/${TARGETS.lesson}/${TARGETS.app}</span></span>
-        ${_rampT < 1 ? `<span class="dim">→ elite ${TARGET_ELITE.flashcard}/${TARGET_ELITE.lesson}/${TARGET_ELITE.app}</span>` : ''}
-      </div>
-      <div data-effort-chart>${buildEffortSVG(_selectedRange)}</div>
+      <div data-effort-chart class="mt-3">${buildEffortSVG(_selectedRange)}</div>
       <div class="grid grid-cols-3 gap-2 mt-3" data-effort-legend>
         ${[
           { label: 'Flashcards', count: _todayFlashcards, target: TARGETS.flashcard, color: COLORS.flashcard },
