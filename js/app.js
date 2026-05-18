@@ -216,8 +216,17 @@ function openMoreSheet() {
 function setActiveTabbar(routeId) {
   const bar = document.getElementById('liquid-tabbar');
   if (!bar) return;
+  // The More button doesn't carry data-route -- it's a <button> with
+  // data-more-toggle. Treat it as "active" whenever the current route
+  // is one of its secondary destinations, so the pill nav always
+  // shows where the user is in the IA hierarchy. Without this, every
+  // route inside the More sheet (Games, STAR Bank, Mocks, Coverage,
+  // Infographics, Sources, Profile) left every pill un-highlighted.
+  const moreOwnsRoute = TABBAR_MORE_ROUTES.some(r => r.id === routeId);
   bar.querySelectorAll('.tab-item').forEach(a => {
-    a.classList.toggle('active', a.dataset.route === routeId);
+    const isMore = a.hasAttribute('data-more-toggle');
+    const matches = isMore ? moreOwnsRoute : a.dataset.route === routeId;
+    a.classList.toggle('active', matches);
   });
 }
 
