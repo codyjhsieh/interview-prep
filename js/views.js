@@ -3963,11 +3963,25 @@ function renderDashboard(state, hub) {
   } catch (_) {}
   const histByDate = Object.fromEntries((state.history || []).map(h => [h.date, h]));
 
-  /* Build the {date,flashcard,lesson,app} samples for a N-day window
-   * ending today. Pre-audit-trail days lack the events field; their
-   * flashcard/app counts read as 0 (truthful). Today uses LIVE counts
-   * from raw timestamps so just-taken actions appear without waiting
-   * for the next awardXP. */
+  /* Compute the ramped target for an arbitrary day key (YYYY-MM-DD).
+   * Used to draw the goal curve so the user can see the bar climbing
+   * over the window, not just sitting flat at today's value. */
+  const _rampedTargetOn = (dateKey, metric) => {
+    const days = Math.max(0, Math.floor(
+      (new Date(dateKey) - new Date(_anchorDate)) / 86400000
+    ));
+    const t = Math.min(1, days / RAMP_DAYS);
+    const ease = 3 * t * t - 2 * t * t * t;
+    return TARGET_START[metric] + (TARGET_ELITE[metric] - TARGET_START[metric]) * ease;
+  };
+
+  /* Build the {date,flashcard,lesson,app, *_target} samples for a N-day
+   * window ending today. Pre-audit-trail days lack the events field;
+   * their flashcard/app counts read as 0 (truthful). Today uses LIVE
+   * counts from raw timestamps so just-taken actions appear without
+   * waiting for the next awardXP. Per-day goal values are computed
+   * from the smoothstep ramp so the dashed goal curves reflect the
+   * actual bar on each day. */
   const buildDays = (windowDays) => {
     const out = [];
     for (let i = windowDays - 1; i >= 0; i--) {
@@ -3982,6 +3996,9 @@ function renderDashboard(state, hub) {
         flashcard: isToday ? _todayFlashcards : (ev.flashcard || 0),
         lesson:    isToday ? _todayLessons    : (ev.lesson    || 0),
         app:       isToday ? _todayApps       : (ev.app       || 0),
+        flashcard_target: _rampedTargetOn(k, 'flashcard'),
+        lesson_target:    _rampedTargetOn(k, 'lesson'),
+        app_target:       _rampedTargetOn(k, 'app'),
       });
     }
     return out;
@@ -4017,24 +4034,36 @@ function renderDashboard(state, hub) {
       }
       return d;
     };
-    const points = (key, target) => days.map((d, i) => [sx(i), sy(d[key] / target)]);
-    const linePath = (key, target) => smoothPath(points(key, target));
-    const areaPath = (key, target) => {
-      const p = points(key, target);
+    // Normalize against ELITE target (constant top reference) so the
+    // dashed goal curves can climb visibly over the window instead of
+    // sitting flat at 100%. Today's-target line lands wherever it lands
+    // on the ramp (start: 20-63%, elite: 100%).
+    const points = (key, eliteTarget) =>
+      days.map((d, i) => [sx(i), sy(d[key] / eliteTarget)]);
+    const linePath = (key, eliteTarget) => smoothPath(points(key, eliteTarget));
+    const goalPoints = (key, eliteTarget) =>
+      days.map((d, i) => [sx(i), sy(d[key + '_target'] / eliteTarget)]);
+    const goalPath = (key, eliteTarget) => smoothPath(goalPoints(key, eliteTarget));
+    const areaPath = (key, eliteTarget) => {
+      const p = points(key, eliteTarget);
       if (!p.length) return '';
       const base = H - PAD_B;
       return smoothPath(p) + ` L${p[p.length-1][0].toFixed(1)},${base} L${p[0][0].toFixed(1)},${base} Z`;
     };
-    const todayDot = (key, target, color) => {
+    const todayDot = (key, eliteTarget, color) => {
       const p = days[days.length - 1];
-      const x = sx(days.length - 1), y = sy(p[key] / target);
+      const x = sx(days.length - 1), y = sy(p[key] / eliteTarget);
       const r = windowDays <= 7 ? 3 : (windowDays <= 14 ? 2.4 : 2);
       return `
         <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r * 2.1).toFixed(1)}" fill="${color}" opacity="0.18"/>
         <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${color}"/>`;
     };
-    const goalY = sy(1).toFixed(1);
+    // Top reference at 100% of elite -- the ceiling all goal lines
+    // converge toward. Subtle so it doesn't compete with the climbing
+    // goal curves.
+    const eliteY = sy(1).toFixed(1);
     const strokeW = windowDays <= 7 ? 1.8 : (windowDays <= 14 ? 1.6 : 1.4);
+    const goalStrokeW = (strokeW * 0.7).toFixed(2);
     return `
       <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block">
         <defs>
@@ -4055,23 +4084,40 @@ function renderDashboard(state, hub) {
             <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
-        <line x1="${PAD_L}" y1="${goalY}" x2="${W - PAD_R}" y2="${goalY}"
-              stroke="rgba(15,23,42,0.15)" stroke-width="0.6" stroke-dasharray="2 4"/>
-        <path d="${areaPath('app',       TARGETS.app)}"       fill="url(#grad-app)"/>
-        <path d="${areaPath('lesson',    TARGETS.lesson)}"    fill="url(#grad-lesson)"/>
-        <path d="${areaPath('flashcard', TARGETS.flashcard)}" fill="url(#grad-flashcard)"/>
-        <path d="${linePath('app',       TARGETS.app)}"
+        <!-- Elite ceiling (100% of elite target) — light dashed reference -->
+        <line x1="${PAD_L}" y1="${eliteY}" x2="${W - PAD_R}" y2="${eliteY}"
+              stroke="rgba(15,23,42,0.10)" stroke-width="0.5" stroke-dasharray="2 5"/>
+        <!-- Area fills (performance) -->
+        <path d="${areaPath('app',       TARGET_ELITE.app)}"       fill="url(#grad-app)"/>
+        <path d="${areaPath('lesson',    TARGET_ELITE.lesson)}"    fill="url(#grad-lesson)"/>
+        <path d="${areaPath('flashcard', TARGET_ELITE.flashcard)}" fill="url(#grad-flashcard)"/>
+        <!-- Goal ramp curves (per metric, dashed). Climb from start-target
+             to elite as the user moves through the 21-day window. -->
+        <path d="${goalPath('app',       TARGET_ELITE.app)}"
+              fill="none" stroke="${COLORS.app}"       stroke-width="${goalStrokeW}"
+              stroke-dasharray="3 3" opacity="0.55"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="${goalPath('lesson',    TARGET_ELITE.lesson)}"
+              fill="none" stroke="${COLORS.lesson}"    stroke-width="${goalStrokeW}"
+              stroke-dasharray="3 3" opacity="0.55"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="${goalPath('flashcard', TARGET_ELITE.flashcard)}"
+              fill="none" stroke="${COLORS.flashcard}" stroke-width="${goalStrokeW}"
+              stroke-dasharray="3 3" opacity="0.55"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Performance curves (solid + glow) -->
+        <path d="${linePath('app',       TARGET_ELITE.app)}"
               fill="none" stroke="${COLORS.app}"       stroke-width="${strokeW}"
               stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
-        <path d="${linePath('lesson',    TARGETS.lesson)}"
+        <path d="${linePath('lesson',    TARGET_ELITE.lesson)}"
               fill="none" stroke="${COLORS.lesson}"    stroke-width="${strokeW}"
               stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
-        <path d="${linePath('flashcard', TARGETS.flashcard)}"
+        <path d="${linePath('flashcard', TARGET_ELITE.flashcard)}"
               fill="none" stroke="${COLORS.flashcard}" stroke-width="${strokeW}"
               stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
-        ${todayDot('app',       TARGETS.app,       COLORS.app)}
-        ${todayDot('lesson',    TARGETS.lesson,    COLORS.lesson)}
-        ${todayDot('flashcard', TARGETS.flashcard, COLORS.flashcard)}
+        ${todayDot('app',       TARGET_ELITE.app,       COLORS.app)}
+        ${todayDot('lesson',    TARGET_ELITE.lesson,    COLORS.lesson)}
+        ${todayDot('flashcard', TARGET_ELITE.flashcard, COLORS.flashcard)}
       </svg>`;
   };
 
