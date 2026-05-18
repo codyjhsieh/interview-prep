@@ -3921,7 +3921,38 @@ function renderDashboard(state, hub) {
   const _todayApps = Object.values(state.jobApps || {})
     .filter(a => a && a.applied && _isTodayMs(a.ts)).length;
 
-  const TARGETS = { flashcard: 5, lesson: 5, app: 10 };
+  /* Ramped daily targets — smoothstep climb from realistic-start to
+   * elite-locked over 21 calendar days. Anchored to the user's first
+   * history entry so a brand-new user starts at day 0 = realistic.
+   *
+   *   Day 0  -> { flashcard: 5,  lesson: 5, app: 10 }   realistic start
+   *   Day 7  -> { flashcard: 11, lesson: 6, app: 13 }
+   *   Day 14 -> { flashcard: 22, lesson: 8, app: 18 }
+   *   Day 21+-> { flashcard: 25, lesson: 8, app: 20 }   elite locked
+   *
+   * Calendar-day progression: time off doesn't pause the bar. Forces
+   * consistency -- the market doesn't pause for vacations. */
+  const RAMP_DAYS = 21;
+  const TARGET_START = { flashcard: 5,  lesson: 5, app: 10 };
+  const TARGET_ELITE = { flashcard: 25, lesson: 8, app: 20 };
+  const _anchorDate = ((state.history || [])[0] && state.history[0].date) || _todayStr;
+  const _daysSinceAnchor = Math.max(0, Math.floor(
+    (new Date(_todayStr) - new Date(_anchorDate)) / 86400000
+  ));
+  const _rampT = Math.min(1, _daysSinceAnchor / RAMP_DAYS);
+  const _rampEase = 3 * _rampT * _rampT - 2 * _rampT * _rampT * _rampT;   // smoothstep
+  const _rampedTarget = (k) =>
+    Math.round(TARGET_START[k] + (TARGET_ELITE[k] - TARGET_START[k]) * _rampEase);
+  const TARGETS = {
+    flashcard: _rampedTarget('flashcard'),
+    lesson:    _rampedTarget('lesson'),
+    app:       _rampedTarget('app'),
+  };
+  const _rampPct = Math.round(_rampT * 100);
+  const _rampLabel = _rampT >= 1
+    ? 'Elite locked'
+    : `Day ${_daysSinceAnchor}/${RAMP_DAYS} · ${_rampPct}% to elite`;
+
   const COLORS = { flashcard: '#7CF1C2', lesson: '#FFB95C', app: '#8B5CF6' };
   const RANGE_KEY = 'fdeprep.dailyEffortRange.v1';
   const VALID_RANGES = [7, 14, 30];
@@ -4049,7 +4080,7 @@ function renderDashboard(state, hub) {
   effort.setAttribute('data-card', 'daily-effort');
   const renderEffortCard = () => {
     effort.innerHTML = `
-      <div class="flex items-baseline justify-between mb-3 gap-2 flex-wrap">
+      <div class="flex items-baseline justify-between mb-1 gap-2 flex-wrap">
         <h3 class="font-display font-semibold text-lg">Daily effort</h3>
         <div class="flex items-center gap-2">
           <div class="tabs" data-effort-tabs>
@@ -4058,6 +4089,12 @@ function renderDashboard(state, hub) {
             `).join('')}
           </div>
         </div>
+      </div>
+      <div class="flex items-baseline gap-2 mb-3 text-[11.5px] muted">
+        <span style="color:${_rampT >= 1 ? 'var(--accent)' : 'var(--text)'}">${_rampLabel}</span>
+        <span class="dim">·</span>
+        <span>targets <span class="numeric">${TARGETS.flashcard}/${TARGETS.lesson}/${TARGETS.app}</span></span>
+        ${_rampT < 1 ? `<span class="dim">→ elite ${TARGET_ELITE.flashcard}/${TARGET_ELITE.lesson}/${TARGET_ELITE.app}</span>` : ''}
       </div>
       <div data-effort-chart>${buildEffortSVG(_selectedRange)}</div>
       <div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-[12px]">
