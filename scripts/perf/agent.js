@@ -132,7 +132,50 @@
         domContentLoaded: nav ? nav.domContentLoadedEventEnd : null,
         loadEvent: nav ? nav.loadEventEnd : null,
         firstContentfulPaint: fcp ? fcp.startTime : null,
+        // Headline web-vital times — pulled from the same nav entry for
+        // a complete loading breakdown. All in ms.
+        dnsMs:           nav ? (nav.domainLookupEnd - nav.domainLookupStart) : null,
+        connectMs:       nav ? (nav.connectEnd      - nav.connectStart)      : null,
+        ttfbMs:          nav ? (nav.responseStart   - nav.requestStart)      : null,
+        responseMs:      nav ? (nav.responseEnd     - nav.responseStart)     : null,
+        domInteractive:  nav ? nav.domInteractive                              : null,
       };
+    },
+    /* Resource-loading breakdown for the Loading section of the report.
+     * Aggregates everything fetched during page load (and after) by file
+     * type, plus surfaces the slowest individual resources. */
+    resourceBreakdown() {
+      const r = performance.getEntriesByType('resource') || [];
+      const byType = { script: { count:0, bytes:0, ms:0 }, css: { count:0, bytes:0, ms:0 },
+                       font: { count:0, bytes:0, ms:0 },   img: { count:0, bytes:0, ms:0 },
+                       fetch:{ count:0, bytes:0, ms:0 },   other:{ count:0, bytes:0, ms:0 } };
+      const classify = (e) => {
+        const t = e.initiatorType;
+        if (t === 'script') return 'script';
+        if (t === 'link' || t === 'css' || (e.name||'').endsWith('.css')) return 'css';
+        if ((e.name||'').match(/\.(woff2?|ttf|otf|eot)(\?|$)/) || (e.name||'').includes('fonts.g')) return 'font';
+        if (t === 'img'    || (e.name||'').match(/\.(png|jpg|jpeg|svg|webp|gif|avif)(\?|$)/)) return 'img';
+        if (t === 'fetch'  || t === 'xmlhttprequest') return 'fetch';
+        return 'other';
+      };
+      for (const e of r) {
+        const k = classify(e);
+        byType[k].count++;
+        byType[k].bytes += (e.transferSize || 0);
+        byType[k].ms += (e.responseEnd - e.startTime);
+      }
+      const slowest = r
+        .map(e => ({
+          name: (e.name || '').replace(/^https?:\/\/[^/]+/, ''),
+          type: classify(e),
+          ms: e.responseEnd - e.startTime,
+          bytes: e.transferSize || 0,
+          cached: (e.transferSize === 0 && e.decodedBodySize > 0),
+        }))
+        .sort((a, b) => b.ms - a.ms)
+        .slice(0, 8);
+      const total = Object.values(byType).reduce((s, t) => s + t.bytes, 0);
+      return { byType, slowest, totalBytes: total, totalCount: r.length };
     },
   };
 })();

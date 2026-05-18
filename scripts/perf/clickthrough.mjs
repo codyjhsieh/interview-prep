@@ -683,20 +683,29 @@ async function main() {
   // load. Wait a beat before reading.
   await page.waitForTimeout(500);
   const navTiming = await page.evaluate(() => window.__perf.navTiming());
-  console.log(`  FCP ${Math.round(navTiming.firstContentfulPaint)}ms · DOMContentLoaded ${Math.round(navTiming.domContentLoaded)}ms · load ${Math.round(navTiming.loadEvent)}ms`);
+  const resources = await page.evaluate(() => window.__perf.resourceBreakdown());
+  console.log(`  FCP ${Math.round(navTiming.firstContentfulPaint)}ms · DOMContentLoaded ${Math.round(navTiming.domContentLoaded)}ms · load ${Math.round(navTiming.loadEvent)}ms · resources ${resources.totalCount} (${(resources.totalBytes/1024).toFixed(0)}KB)`);
 
   const rows = [];
   for (const step of JOURNEY) {
     process.stdout.write(`  ${step.label.padEnd(22)} `);
     try {
+      // Capture nav-to-paint: time from when go() starts to when the
+      // wait selector first resolves. This is the user-perceived load
+      // latency for each route (click -> content visible).
+      const tGo = Date.now();
       await step.go(page);
+      let navToPaintMs = null;
       if (step.wait) {
         if (typeof step.wait === 'string') {
-          // Heavy routes under 4× throttle (companies grid) can need >6s.
           await page.waitForSelector(step.wait, { timeout: step.timeout || 15000 });
+          navToPaintMs = Date.now() - tGo;
         } else {
           await new Promise(r => setTimeout(r, step.wait));
         }
+      } else {
+        // No wait selector -- treat nav-to-paint as time-to-go-complete
+        navToPaintMs = Date.now() - tGo;
       }
       // Settle for one frame after the wait.
       await page.waitForTimeout(150);
@@ -705,12 +714,14 @@ async function main() {
       const m = await page.evaluate(() => window.__perf.endRoute());
       if (m) {
         m.kind = step.kind;
+        m.navToPaintMs = navToPaintMs;
         rows.push(m);
         const status = m.fps < 30 ? '✗' : m.fps < 50 ? '~' : '✓';
         const heapStr = m.heapDelta != null
           ? `${m.heapDelta >= 0 ? '+' : ''}${(m.heapDelta / 1e6).toFixed(2)}MB`
           : '-';
-        console.log(`${status} fps=${m.fps.toFixed(1)}  p95frame=${m.p95Ms.toFixed(1)}ms  longTasks=${m.longTaskCount}  heapΔ=${heapStr}`);
+        const navStr = navToPaintMs != null ? `${navToPaintMs}ms` : '-';
+        console.log(`${status} fps=${m.fps.toFixed(1)}  p95frame=${m.p95Ms.toFixed(1)}ms  paint=${navStr.padStart(6)}  longTasks=${m.longTaskCount}  heapΔ=${heapStr}`);
       } else {
         console.log('— no metrics');
       }
@@ -730,6 +741,7 @@ async function main() {
     viewport: '390x844 @2x',
     walltimeSec: ((Date.now() - startWall) / 1000).toFixed(1),
     navTiming,
+    resources,
     rows,
   };
   await writeFile(JSON_PATH, JSON.stringify(report, null, 2));
@@ -805,16 +817,90 @@ function renderMarkdown(r) {
   lines.push(`Total long tasks: **${totalLong}** (cumulative blocking **${fmt(totalLongMs, 0)} ms**). Net heap growth: **${heapStr(totalHeapDelta)}**.`);
   lines.push('');
 
-  /* ---- Initial paint ---- */
-  lines.push(`## Initial paint`);
+  /* ====================== LOADING SECTION ====================== */
+  lines.push(`# 📥 Loading`);
+  lines.push('');
+  lines.push(`*How fast the page becomes usable — initial paint, request waterfall, per-route nav latency, and what's hitting the network.*`);
+  lines.push('');
+
+  // ---- Initial paint ----
+  lines.push(`## Initial paint timings`);
   lines.push('');
   lines.push(`| Metric | Value | Verdict |`);
   lines.push(`|---|---|---|`);
   const fcp = r.navTiming.firstContentfulPaint || 0;
   const fcpVerdict = fcp < 1800 ? '✓ good' : fcp < 3000 ? '~ needs work' : '✗ poor';
   lines.push(`| First Contentful Paint | ${fmt(fcp)} ms | ${fcpVerdict} |`);
+  lines.push(`| DOM Interactive | ${fmt(r.navTiming.domInteractive)} ms | — |`);
   lines.push(`| DOMContentLoaded | ${fmt(r.navTiming.domContentLoaded)} ms | — |`);
   lines.push(`| load event | ${fmt(r.navTiming.loadEvent)} ms | — |`);
+  lines.push('');
+
+  // ---- Network waterfall slices (cold load) ----
+  lines.push(`## Cold-load network slices`);
+  lines.push('');
+  lines.push(`Time spent in each phase of the very first navigation.`);
+  lines.push('');
+  lines.push(`| Phase | ms |`);
+  lines.push(`|---|---|`);
+  lines.push(`| DNS lookup | ${fmt(r.navTiming.dnsMs)} |`);
+  lines.push(`| Connect (TCP + TLS) | ${fmt(r.navTiming.connectMs)} |`);
+  lines.push(`| TTFB (time to first byte) | ${fmt(r.navTiming.ttfbMs)} |`);
+  lines.push(`| Response download | ${fmt(r.navTiming.responseMs)} |`);
+  lines.push('');
+
+  // ---- Resource breakdown by type ----
+  if (r.resources) {
+    lines.push(`## Resources by type`);
+    lines.push('');
+    lines.push(`Everything fetched during this run, grouped by initiator. Big totals here are the easiest targets for code-splitting / deferring.`);
+    lines.push('');
+    lines.push(`| Type | Count | Bytes | Cumulative load ms |`);
+    lines.push(`|---|---|---|---|`);
+    for (const [k, v] of Object.entries(r.resources.byType)) {
+      if (!v.count) continue;
+      lines.push(`| ${k} | ${v.count} | ${(v.bytes / 1024).toFixed(1)} KB | ${fmt(v.ms, 0)} |`);
+    }
+    lines.push(`| **Total** | **${r.resources.totalCount}** | **${(r.resources.totalBytes / 1024).toFixed(1)} KB** | — |`);
+    lines.push('');
+
+    // ---- Slowest individual resources ----
+    if (r.resources.slowest && r.resources.slowest.length) {
+      lines.push(`## Slowest individual resources`);
+      lines.push('');
+      lines.push(`| # | Resource | Type | ms | Bytes | Cached |`);
+      lines.push(`|---|---|---|---|---|---|`);
+      r.resources.slowest.forEach((s, i) => {
+        const shortName = s.name.length > 60 ? s.name.slice(0, 57) + '...' : s.name;
+        lines.push(`| ${i + 1} | \`${shortName}\` | ${s.type} | ${fmt(s.ms, 0)} | ${(s.bytes / 1024).toFixed(1)} KB | ${s.cached ? '✓' : ''} |`);
+      });
+      lines.push('');
+    }
+  }
+
+  // ---- Per-route nav-to-paint latency ----
+  const navRows = rows.filter(m => m.navToPaintMs != null && m.kind !== 'load');
+  if (navRows.length) {
+    lines.push(`## Per-route nav-to-paint`);
+    lines.push('');
+    lines.push(`Time from \`go()\` (click / hash-change) to when the route's expected content selector first resolves. This is the user-perceived "click → content visible" latency, NOT FPS.`);
+    lines.push('');
+    lines.push(`| Step | Kind | Nav-to-paint | Verdict |`);
+    lines.push(`|---|---|---|---|`);
+    const sorted = [...navRows].sort((a, b) => b.navToPaintMs - a.navToPaintMs);
+    for (const m of sorted) {
+      const v = m.navToPaintMs < 200 ? '✓' : m.navToPaintMs < 600 ? '~' : '✗';
+      lines.push(`| \`${m.label}\` | ${m.kind} | ${m.navToPaintMs} ms | ${v} |`);
+    }
+    lines.push('');
+    lines.push(`Verdict bands: ✓ <200ms (snappy) · ~ 200-600ms (perceptible) · ✗ ≥600ms (visible lag).`);
+    lines.push('');
+  }
+
+  /* ====================== FPS / SMOOTHNESS SECTION ====================== */
+  lines.push(`# 🎞 FPS / Smoothness`);
+  lines.push('');
+  lines.push(`*Frame-budget pressure once a route is rendered — sustained FPS, p95 frame duration, frame-distribution shape.*`);
   lines.push('');
 
   /* ---- By kind ---- */
@@ -852,37 +938,62 @@ function renderMarkdown(r) {
   }
   lines.push('');
 
-  /* ---- Worst-of ---- */
-  lines.push(`## Worst-of leaderboard`);
-  lines.push('');
-  lines.push(`### Lowest sustained FPS`);
+  /* ---- FPS Worst-of ---- */
+  lines.push(`## Lowest sustained FPS`);
   lines.push('');
   for (let i = 0; i < worstFps.length; i++) {
     const m = worstFps[i];
     lines.push(`${i + 1}. \`${m.label}\` — **${fmt(m.fps)} fps** · p95 frame ${fmt(m.p95Ms)} ms · ${m.longTaskCount} long tasks`);
   }
   lines.push('');
+
+  /* ====================== MEMORY + LONG TASKS SECTION ====================== */
+  lines.push(`# 🧠 Memory + Long tasks`);
+  lines.push('');
+  lines.push(`*JS heap growth and main-thread blockers. Long tasks (≥50ms) are what kill TBT and interaction latency.*`);
+  lines.push('');
+
   if (worstLongTask.length) {
-    lines.push(`### Worst single main-thread block`);
+    lines.push(`## Worst single main-thread block`);
     lines.push('');
+    lines.push(`| # | Step | Max single task | Total long tasks |`);
+    lines.push(`|---|---|---|---|`);
     for (let i = 0; i < worstLongTask.length; i++) {
       const m = worstLongTask[i];
-      lines.push(`${i + 1}. \`${m.label}\` — **${fmt(m.maxLongTaskMs)} ms** single task · ${m.longTaskCount} total long tasks`);
+      lines.push(`| ${i + 1} | \`${m.label}\` | **${fmt(m.maxLongTaskMs)} ms** | ${m.longTaskCount} |`);
     }
     lines.push('');
   }
-  if (heapWinners.length) {
-    lines.push(`### Largest heap growth (potential leaks)`);
+
+  // ---- Long-task hotspots (any route with > 0) ----
+  const ltHotspots = rows.filter(m => m.longTaskCount > 0).sort((a, b) => b.longTaskMs - a.longTaskMs).slice(0, 8);
+  if (ltHotspots.length) {
+    lines.push(`## Long-task hotspots`);
     lines.push('');
+    lines.push(`| Step | Count | Total ms | Max single | Avg single |`);
+    lines.push(`|---|---|---|---|---|`);
+    for (const m of ltHotspots) {
+      const avg = m.longTaskCount ? (m.longTaskMs / m.longTaskCount) : 0;
+      lines.push(`| \`${m.label}\` | ${m.longTaskCount} | ${fmt(m.longTaskMs, 0)} | ${fmt(m.maxLongTaskMs, 0)} ms | ${fmt(avg, 0)} ms |`);
+    }
+    lines.push('');
+  }
+
+  if (heapWinners.length) {
+    lines.push(`## Largest heap growth (potential leaks)`);
+    lines.push('');
+    lines.push(`| # | Step | Heap Δ | Heap after |`);
+    lines.push(`|---|---|---|---|`);
     for (let i = 0; i < heapWinners.length; i++) {
       const m = heapWinners[i];
-      lines.push(`${i + 1}. \`${m.label}\` — **+${(m.heapDelta / 1e6).toFixed(1)} MB** · ${m.fps.toFixed(1)} fps`);
+      const after = m.heapAfter != null ? `${(m.heapAfter / 1e6).toFixed(1)} MB` : '—';
+      lines.push(`| ${i + 1} | \`${m.label}\` | **+${(m.heapDelta / 1e6).toFixed(1)} MB** | ${after} |`);
     }
     lines.push('');
   }
 
   /* ---- Narrative recommendations ---- */
-  lines.push(`## Recommendations`);
+  lines.push(`# 🎯 Recommendations`);
   lines.push('');
   const recs = [];
   const scrollArr = byKind.scroll || [];
