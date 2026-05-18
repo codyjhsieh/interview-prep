@@ -3889,6 +3889,116 @@ function renderDashboard(state, hub) {
   `;
   container.appendChild(stats);
 
+  /* ===== Daily effort — 14-day normalized line chart =====================
+   * Three calibrated daily targets, plotted over the last 14 days as a
+   * single line chart so all three sit on the same y-axis (% of target):
+   *
+   *   Flashcards : 5/day  (matches q-flash5 quest)
+   *   Lessons    : 5/day  (one curriculum subcategory)
+   *   Apps       : 10/day (10 × 9 XP = half the 180 XP goal)
+   *
+   * Source per day:
+   *   - history[d].events.{flashcard,lesson,app}  (post 2026-05-17 audit
+   *     trail, written by awardXP)
+   *   - For today specifically, prefer LIVE counts from raw timestamps
+   *     (completedLessons.ts / jobApps[*].ts / flashcards[*].lastReviewed)
+   *     because today's history.events may not yet reflect the very
+   *     latest interaction (the next awardXP call will catch it up).
+   *   - Pre-audit-trail days have no events field; their flashcard/app
+   *     counts read as 0 (truthful: we don't know retroactively).
+   */
+  const _todayStr = GAMI.todayKey();
+  const _isTodayMs = (ms) => {
+    if (!ms) return false;
+    const d = new Date(ms);
+    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}` === _todayStr;
+  };
+  const _todayFlashcards = Object.values(state.flashcards || {})
+    .filter(f => _isTodayMs(f.lastReviewed)).length;
+  const _todayLessons = Object.values(state.completedLessons || {})
+    .filter(l => _isTodayMs(l.ts)).length;
+  const _todayApps = Object.values(state.jobApps || {})
+    .filter(a => a && a.applied && _isTodayMs(a.ts)).length;
+
+  // Build a 14-day window ending today. Even if history has gaps, we
+  // emit a fixed-length array so the x-axis is uniform.
+  const WINDOW_DAYS = 14;
+  const TARGETS = { flashcard: 5, lesson: 5, app: 10 };
+  const histByDate = Object.fromEntries((state.history || []).map(h => [h.date, h]));
+  const days = [];
+  for (let i = WINDOW_DAYS - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const k = d.toISOString().slice(0, 10);
+    const h = histByDate[k];
+    const isToday = k === _todayStr;
+    const ev = (h && h.events) || {};
+    days.push({
+      date: k,
+      flashcard: isToday ? _todayFlashcards : (ev.flashcard || 0),
+      lesson:    isToday ? _todayLessons    : (ev.lesson    || 0),
+      app:       isToday ? _todayApps       : (ev.app       || 0),
+    });
+  }
+
+  // SVG layout. 100% width of the card; height fixed. Y axis is % of
+  // target (0..100% common range, capped at 150% so an over-achiever day
+  // doesn't squash the rest). 14 x-positions evenly spread.
+  const W = 320, H = 90, PAD_L = 4, PAD_R = 4, PAD_T = 4, PAD_B = 4;
+  const Y_MAX = 1.5;   // 150% of target = top of chart
+  const sx = (i) => PAD_L + (i / (WINDOW_DAYS - 1)) * (W - PAD_L - PAD_R);
+  const sy = (frac) => PAD_T + (1 - Math.min(Y_MAX, frac) / Y_MAX) * (H - PAD_T - PAD_B);
+  const polyline = (key, target) => {
+    const pts = days.map((d, i) => `${sx(i).toFixed(1)},${sy(d[key] / target).toFixed(1)}`).join(' ');
+    return pts;
+  };
+  const dots = (key, target, color) => days.map((d, i) => {
+    const x = sx(i), y = sy(d[key] / target);
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${i === days.length - 1 ? 2.4 : 1.4}" fill="${color}"/>`;
+  }).join('');
+  const goalY = sy(1).toFixed(1);
+
+  const COLORS = { flashcard: '#7CF1C2', lesson: '#FFB95C', app: '#8B5CF6' };
+
+  const effort = el('div','card');
+  effort.setAttribute('data-card', 'daily-effort');
+  effort.innerHTML = `
+    <div class="flex items-baseline justify-between mb-3">
+      <h3 class="font-display font-semibold text-lg">Daily effort</h3>
+      <div class="text-[11px] muted">last ${WINDOW_DAYS} days · % of target</div>
+    </div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block">
+      <!-- Goal line at 100% of target -->
+      <line x1="${PAD_L}" y1="${goalY}" x2="${W - PAD_R}" y2="${goalY}"
+            stroke="rgba(15,23,42,0.18)" stroke-width="0.6" stroke-dasharray="3 3"/>
+      <polyline points="${polyline('flashcard', TARGETS.flashcard)}"
+                fill="none" stroke="${COLORS.flashcard}" stroke-width="1.6"/>
+      <polyline points="${polyline('lesson', TARGETS.lesson)}"
+                fill="none" stroke="${COLORS.lesson}" stroke-width="1.6"/>
+      <polyline points="${polyline('app', TARGETS.app)}"
+                fill="none" stroke="${COLORS.app}" stroke-width="1.6"/>
+      ${dots('flashcard', TARGETS.flashcard, COLORS.flashcard)}
+      ${dots('lesson',    TARGETS.lesson,    COLORS.lesson)}
+      ${dots('app',       TARGETS.app,       COLORS.app)}
+    </svg>
+    <div class="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-[12px]">
+      <span class="inline-flex items-center gap-1.5">
+        <span style="width:9px;height:9px;border-radius:2px;background:${COLORS.flashcard};display:inline-block"></span>
+        Flashcards <span class="numeric muted">${_todayFlashcards}/${TARGETS.flashcard}</span>
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span style="width:9px;height:9px;border-radius:2px;background:${COLORS.lesson};display:inline-block"></span>
+        Lessons <span class="numeric muted">${_todayLessons}/${TARGETS.lesson}</span>
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span style="width:9px;height:9px;border-radius:2px;background:${COLORS.app};display:inline-block"></span>
+        Apps <span class="numeric muted">${_todayApps}/${TARGETS.app}</span>
+      </span>
+    </div>
+  `;
+  container.appendChild(effort);
+
   // SRS review tiles — surface only when there's something due / queued
   if (missedTotal > 0 || conceptReviewsTotal > 0) {
     const reviews = el('div','grid grid-cols-1 sm:grid-cols-2 gap-4');
