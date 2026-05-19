@@ -854,12 +854,18 @@ body:has(> .fixed.inset-0[class*="z-5"]) #liquid-tabbar {
  * routes that don't fit in the tab bar. Closes on backdrop tap, Esc, or
  * selecting a route. */
 #more-sheet { display: block; }
+/* Wrapper deliberately avoids `fixed inset-0 z-50` Tailwind classes —
+   the body's `:has(> .fixed.inset-0[class*="z-5"])` selector would
+   otherwise globally bump --glass-blur to 84px and invalidate every
+   dashboard card's backdrop-filter on the same frame the entrance
+   starts. Positioning here, freeze behaviors below via .more-sheet-open. */
+.more-sheet-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+}
 .more-sheet-scrim {
   position: absolute; inset: 0;
-  /* Was rgba 0.20 + a full-viewport backdrop blur(8px) — every pixel
-     on screen got blurred when the sheet opened, dominating the
-     tap-to-paint latency. Solid tint instead reads visually similar
-     (the sheet is opaque on top anyway) at near-zero compositing cost. */
   background: rgba(15, 23, 42, 0.42);
   opacity: 0;
   transition: opacity 0.28s var(--spring-settle);
@@ -874,25 +880,41 @@ body:has(> .fixed.inset-0[class*="z-5"]) #liquid-tabbar {
   overflow-y: auto;
   border-radius: 26px;
   padding: 20px 18px 22px;
-  transform: translateY(110%);
-  /* Exit uses --spring-settle (decelerate into rest); entrance overrides
-     to --spring-overshoot below. Splitting the curves makes both
-     directions feel Apple-correct instead of bouncy-on-the-way-out. */
+  background: rgba(255, 255, 255, 0.97);
+  /* Single cheap drop-shadow instead of .card's 5-layer inset stack.
+     Inset rims need to recomposite every transform frame; one flat
+     shadow can be cached by the compositor as a static layer. */
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.22);
+  /* Isolate paint + layout so the entrance can't dirty anything else. */
+  contain: layout style paint;
+  isolation: isolate;
+  transform: translateY(110%) translateZ(0);
+  /* Exit uses --spring-settle; entrance overrides to --spring-overshoot
+     below. Splitting curves keeps both directions Apple-correct. */
   transition: transform 0.32s var(--spring-settle);
   will-change: transform;
-  /* OVERRIDE the .card class: the panel inherits .card for the box-shadow
-     + radius styling, but the panel is BIG (up to 72vh × full width) and
-     animates every frame for 320 ms during the slide-in. Compositing a
-     60-px backdrop-blur for that area at 60 fps is the dominant cost on
-     tap. Solid substrate reads visually similar (the panel is opaque
-     enough that the blur barely shows through). */
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  background: rgba(255, 255, 255, 0.97);
 }
 #more-sheet.open .more-sheet-panel {
-  transform: translateY(0);
+  transform: translateY(0) translateZ(0);
   transition: transform 0.42s var(--spring-overshoot);
+}
+
+/* Freeze behaviors opted into AFTER append, via JS-toggled body class.
+   These replicate what the old `:has()`-based modal rules did but only
+   for what the More sheet actually needs (scroll lock + tabbar recede +
+   pause ambient drift). We deliberately do NOT bump --glass-blur here —
+   the scrim already darkens the page enough that the depth cue from the
+   blur ramp isn't worth its recomposite cost for this sheet. */
+body.more-sheet-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+body.more-sheet-open::before {
+  animation-play-state: paused;
+}
+body.more-sheet-open #liquid-tabbar {
+  transform: translateX(-50%) scale(0.92) translateY(4px);
+  opacity: 0.6;
 }
 
 .more-sheet-handle {

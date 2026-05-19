@@ -161,11 +161,22 @@ function openMoreSheet() {
   if (document.getElementById('more-sheet')) return;             // already open
   const wrap = document.createElement('div');
   wrap.id = 'more-sheet';
-  wrap.className = 'fixed inset-0 z-50';
+  // Note: NOT `fixed inset-0 z-50` — that would match the body's
+  // `:has(> .fixed.inset-0[class*="z-5"])` rule which globally bumps
+  // --glass-blur to 84px and re-invalidates every dashboard card's
+  // backdrop-filter the same frame the entrance animates. We position
+  // via a dedicated class instead and opt into the freeze behaviors
+  // explicitly via `body.more-sheet-open`.
+  wrap.className = 'more-sheet-wrap';
   const ver = _appVersion();
+  // Panel intentionally does NOT carry `.card` — that class brings a
+  // large multi-layer box-shadow that has to rasterize over the panel's
+  // ~95vw × up-to-72vh area every frame of the slide-in, and on iOS
+  // Safari the shadow recomposite is the dominant cost for the chop.
+  // We re-add a single cheap drop-shadow on .more-sheet-panel below.
   wrap.innerHTML = `
     <div class="more-sheet-scrim" data-close></div>
-    <div class="more-sheet-panel card" role="dialog" aria-label="More routes">
+    <div class="more-sheet-panel" role="dialog" aria-label="More routes">
       <div class="more-sheet-handle" aria-hidden="true"></div>
       <div class="text-[11px] uppercase tracking-wider muted mb-3" style="letter-spacing:0.22em">More</div>
       <div class="more-sheet-list">
@@ -181,9 +192,18 @@ function openMoreSheet() {
     </div>
   `;
   document.body.appendChild(wrap);
-  requestAnimationFrame(() => wrap.classList.add('open'));         // trigger entrance
+  // Double-rAF pre-warm: the first frame lets the browser lay out the
+  // panel, rasterize its drop-shadow, and decode the row SVGs while
+  // it's still at translateY(110%) (offscreen). Only on the second
+  // frame do we flip `.open` and start the transform transition, so
+  // the entrance animates against an already-warm compositor layer.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.body.classList.add('more-sheet-open');
+    wrap.classList.add('open');
+  }));
   const close = () => {
     wrap.classList.remove('open');
+    document.body.classList.remove('more-sheet-open');
     setTimeout(() => wrap.remove(), 320);
     document.removeEventListener('keydown', onKey);
   };
