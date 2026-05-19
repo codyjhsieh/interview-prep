@@ -7,6 +7,7 @@
 window.GAMI = (function () {
 
 const STORAGE_KEY = 'fdeprep.v1';
+const DEVICE_KEY  = 'fdeprep.deviceId.v1';
 
 // Fallback for any old browser without structuredClone (browser target is modern, but be safe)
 const clone = (typeof structuredClone === 'function')
@@ -91,6 +92,29 @@ function reset() {
   localStorage.removeItem(STORAGE_KEY);
 }
 
+function deviceId() {
+  try {
+    let id = localStorage.getItem(DEVICE_KEY);
+    if (!id) {
+      const rand = (typeof crypto !== 'undefined' && crypto.getRandomValues)
+        ? Array.from(crypto.getRandomValues(new Uint32Array(2))).map(n => n.toString(36)).join('')
+        : Math.random().toString(36).slice(2);
+      id = `d${Date.now().toString(36)}${rand}`;
+      localStorage.setItem(DEVICE_KEY, id);
+    }
+    return id;
+  } catch (_) {
+    return 'device';
+  }
+}
+
+function awardEventId(ts, reason) {
+  const rand = (typeof crypto !== 'undefined' && crypto.getRandomValues)
+    ? crypto.getRandomValues(new Uint32Array(1))[0].toString(36)
+    : Math.random().toString(36).slice(2);
+  return `${deviceId()}:${ts}:${reason}:${rand}`;
+}
+
 /* ---------- Dates ---------- */
 function todayKey(d = new Date()) {
   const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
@@ -136,7 +160,8 @@ function levelProgress(xp) {
  * eventsXP is NOT backfilled: the per-award XP included a variable
  * +9% bonus, so reverse-engineering per-kind XP totals from counts
  * would invent fake numbers. The dashboard XP-breakdown card simply
- * skips entries that lack eventsXP. */
+ * skips entries that lack eventsXP. New writes append hentry.awards[]
+ * records, which sync can union by id across multiple devices. */
 function _backfillHistoryEvents(state) {
   if (!state.history || !state.history.length) return;
   // Fast-skip if every entry already has events.
@@ -168,6 +193,29 @@ function _backfillHistoryEvents(state) {
     if (h.events) continue;
     h.events = counts.get(h.date) || { flashcard: 0, lesson: 0, app: 0 };
   }
+}
+
+function _historyEntryFor(state, date) {
+  if (!Array.isArray(state.history)) state.history = [];
+  let hentry = state.history.find(h => h.date === date);
+  if (!hentry) {
+    hentry = { date, xp: 0, lessons: 0, events: {}, eventsXP: {}, awards: [] };
+    state.history.push(hentry);
+  }
+  if (!hentry.events)   hentry.events   = {};
+  if (!hentry.eventsXP) hentry.eventsXP = {};
+  if (!Array.isArray(hentry.awards)) hentry.awards = [];
+  return hentry;
+}
+
+function appendHistoryAward(state, date, reason, xp, ts = Date.now()) {
+  const hentry = _historyEntryFor(state, date);
+  const event = { id: awardEventId(ts, reason), ts, reason, xp };
+  hentry.awards.push(event);
+  hentry.xp += xp;
+  hentry.events[reason] = (hentry.events[reason] || 0) + 1;
+  hentry.eventsXP[reason] = (hentry.eventsXP[reason] || 0) + xp;
+  return event;
 }
 
 function tickDay(state) {
@@ -234,23 +282,19 @@ function awardXP(state, amount, reason) {
    *   - hentry.xp           cumulative XP earned that day
    *   - hentry.events[k]    count of awards of kind k (lesson, flashcard, ...)
    *   - hentry.eventsXP[k]  total XP attributed to kind k
+   *   - hentry.awards[]     append-only per-award records with stable ids
    *
    * So "what's in my todayXP=140?" can be answered without grepping:
    *   {lesson: 5, flashcard: 7, focus: 3}  with xp split per-kind.
    *
-   * Migration: old history entries (no events field) work unchanged --
-   * the breakdown just shows up empty until next award. */
+   * Sync safety: awards[] is the source of truth for new writes. Two
+   * devices can both award XP on the same day; sync unions award ids
+   * and recomputes the aggregate fields instead of taking max().
+   *
+   * Migration: old history entries (no awards field) work unchanged --
+   * sync treats their aggregate xp as a legacy base. */
   const today = todayKey();
-  let hentry = state.history.find(h => h.date === today);
-  if (!hentry) {
-    hentry = { date: today, xp: 0, lessons: 0, events: {}, eventsXP: {} };
-    state.history.push(hentry);
-  }
-  hentry.xp += finalXP;
-  if (!hentry.events)   hentry.events   = {};
-  if (!hentry.eventsXP) hentry.eventsXP = {};
-  hentry.events[reason]   = (hentry.events[reason]   || 0) + 1;
-  hentry.eventsXP[reason] = (hentry.eventsXP[reason] || 0) + finalXP;
+  const awardEvent = appendHistoryAward(state, today, reason, finalXP);
   // cap history at 365
   if (state.history.length > 365) state.history.splice(0, state.history.length - 365);
 
@@ -272,7 +316,7 @@ function awardXP(state, amount, reason) {
     }
   }
 
-  return { state, xpGained: finalXP, bonusLabel, levelUp: undefined, crossedFeedGoal };
+  return { state, xpGained: finalXP, bonusLabel, levelUp: undefined, crossedFeedGoal, awardId: awardEvent.id };
 }
 
 /* Manual feed — called when the user drops a food pile. XP-to-
@@ -373,7 +417,7 @@ function logJobApp(state) {
   // is curriculum). Floor at XP_APP_BASE for small-goal users.
   const perAppXP = Math.max(XP_APP_BASE, Math.round(goal / 20));
   const award = awardXP(state, perAppXP, 'app');
-  const entry = { date: todayKey(), ts: Date.now(), xp: award.xpGained };
+  const entry = { date: todayKey(), ts: Date.now(), xp: award.xpGained, awardId: award.awardId };
   state.jobApps.push(entry);
   // Cap retained history (~1y of heavy use) to keep state size bounded.
   if (state.jobApps.length > 1000) state.jobApps.splice(0, state.jobApps.length - 1000);
@@ -395,6 +439,7 @@ function applyRole(state, roleKey, meta) {
   const award = awardXP(state, perAppXP, 'app');
   const entry = {
     date: todayKey(), ts: Date.now(), xp: award.xpGained,
+    awardId: award.awardId,
     roleKey,
     company: meta && meta.company,
     title:   meta && meta.title,
@@ -419,8 +464,7 @@ function unapplyRole(state, roleKey) {
   // Only refund todayXP + today's history if the entry is today.
   if (removed.date === todayKey()) {
     state.todayXP = Math.max(0, (state.todayXP || 0) - xp);
-    const hentry  = (state.history || []).find(h => h.date === removed.date);
-    if (hentry) hentry.xp = Math.max(0, (hentry.xp || 0) - xp);
+    appendHistoryAward(state, removed.date, 'app_undo', -xp);
   }
   if (!state.jobAppsDeletedTs) state.jobAppsDeletedTs = {};
   if (removed.ts != null) state.jobAppsDeletedTs[removed.ts] = Date.now();
@@ -458,8 +502,7 @@ function removeLastJobApp(state) {
   state.xp      = Math.max(0, (state.xp      || 0) - xp);
   state.todayXP = Math.max(0, (state.todayXP || 0) - xp);
   state.level   = levelFromXP(state.xp);
-  const hentry  = (state.history || []).find(h => h.date === today);
-  if (hentry) hentry.xp = Math.max(0, (hentry.xp || 0) - xp);
+  appendHistoryAward(state, today, 'app_undo', -xp);
   // Tombstone the deleted ts so the other paired device's union merge
   // filters this entry back out instead of resurrecting it.
   if (!state.jobAppsDeletedTs) state.jobAppsDeletedTs = {};

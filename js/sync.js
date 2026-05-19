@@ -4,12 +4,13 @@
  * credential). One device generates a code, the other enters it; both
  * then share a single state blob via the Worker. Local state is the
  * source of truth between sync events; remote state is fetched on a
- * 5-second poll and merged in when newer.
+ * 40-second visibility-gated poll and merged in when newer.
  *
  * Hooks:
  *   - On window load: if a code is stored, fetch remote and merge
  *   - On every GAMI.saveImmediate(state): debounced PUT to remote
- *   - Every 5 sec (when paired): GET remote; if newer, merge in
+ *   - Every 40 sec (when paired and visible): GET remote; if newer,
+ *     merge in
  *   - On window focus: GET remote immediately so coming back from
  *     another device feels instant
  *
@@ -70,6 +71,7 @@ window.SYNC = (function () {
   // state blobs that pre-date _seq.
   let lastSeenRemoteSeq = 0;
   let lastSeenRemoteUpdatedAt = 0;
+  let lastSeenRemoteHash = null;
   let statusCb = null;
   let lastStatus = 'idle';
 
@@ -184,6 +186,7 @@ window.SYNC = (function () {
           }
         } catch (_) {}
         lastSeenRemoteUpdatedAt = state.updatedAt;
+        lastSeenRemoteHash = hashState(state);
         lastPushedHash = h;
         setStatus('synced');
       } else {
@@ -216,8 +219,10 @@ window.SYNC = (function () {
    * the last sync; we need to combine them without losing work.
    *
    * Strategy per field family:
-   *   - Append-only arrays (history, jobApps, mocks): union by ts/date,
-   *     summing/maxing values for same-key entries (history.xp).
+   *   - Append-only arrays (jobApps, mocks): union by ts.
+   *   - History audit trail: union per-award IDs and recompute daily
+   *     aggregate counters; legacy aggregate-only entries are preserved
+   *     as a base amount.
    *   - Keyed maps with inner timestamps (flashcards, missedQuestions,
    *     conceptReviews, starStories): union keys; for overlapping keys,
    *     keep the entry with the newer inner timestamp.
@@ -294,14 +299,30 @@ window.SYNC = (function () {
     if ((a.streak?.count || 0) >= (b.streak?.count || 0)) merged.streak = a.streak;
     else                                                    merged.streak = b.streak;
 
-    // Monotonic counters
-    merged.xp    = Math.max(a.xp    || 0, b.xp    || 0);
-    merged.level = Math.max(a.level || 0, b.level || 0);
+    // XP is mostly monotonic, but job-app undos create negative audit
+    // events. Treat retained history as the ledger and preserve any
+    // lifetime XP outside the retained history as a legacy base. This
+    // converges concurrent awards (+ events from both devices) and
+    // propagates same-day refunds instead of letting max(xp) resurrect
+    // deleted app XP.
+    const mergedHistoryXp = historyXpTotal(merged.history);
+    const legacyXpBase = Math.max(
+      0,
+      (a.xp || 0) - historyXpTotal(a.history),
+      (b.xp || 0) - historyXpTotal(b.history)
+    );
+    merged.xp = Math.max(0, legacyXpBase + mergedHistoryXp);
+    merged.level = (a.xp != null || b.xp != null)
+      ? levelFromXP(merged.xp)
+      : Math.max(a.level || 0, b.level || 0);
 
-    // Today values come from the fresher side as a pair so they stay
-    // consistent (todayXP belongs to todayDate, not yesterday's).
-    merged.todayXP   = fresher.todayXP   || 0;
+    // Today date comes from the fresher side, but today's XP comes
+    // from the merged audit ledger when that date is present. This
+    // keeps concurrent awards additive and lets same-day undo events
+    // reduce todayXP on other devices.
     merged.todayDate = fresher.todayDate || null;
+    const todayEntry = merged.todayDate && (merged.history || []).find(h => h.date === merged.todayDate);
+    merged.todayXP = todayEntry ? Math.max(0, todayEntry.xp || 0) : (fresher.todayXP || 0);
 
     merged.updatedAt = Math.max(aT, bT);
     // Propagate the higher _seq so the merged state carries the most
@@ -312,17 +333,84 @@ window.SYNC = (function () {
 
   function unionHistory(la, lb) {
     const map = {};
-    for (const h of (la || [])) if (h && h.date) map[h.date] = { ...h };
+    for (const h of (la || [])) if (h && h.date) map[h.date] = cloneHistoryEntry(h);
     for (const h of (lb || [])) {
       if (!h || !h.date) continue;
       const cur = map[h.date];
-      if (!cur) { map[h.date] = { ...h }; continue; }
-      // Same-date conflict: take the max — both sides may have written
-      // independently; max is the most-progress interpretation.
-      cur.xp      = Math.max(cur.xp      || 0, h.xp      || 0);
-      cur.lessons = Math.max(cur.lessons || 0, h.lessons || 0);
+      if (!cur) { map[h.date] = cloneHistoryEntry(h); continue; }
+      map[h.date] = mergeHistoryEntry(cur, h);
     }
     return Object.values(map).sort((x, y) => x.date.localeCompare(y.date));
+  }
+
+  function historyXpTotal(history) {
+    return (history || []).reduce((sum, h) => sum + (Number(h && h.xp) || 0), 0);
+  }
+
+  function levelFromXP(xp) {
+    xp = Math.max(0, xp || 0);
+    let n = 1;
+    while (Math.round(100 * n * (n + 1) / 2) <= xp) n++;
+    return n;
+  }
+
+  function cloneHistoryEntry(h) {
+    return {
+      ...h,
+      events:   { ...(h.events || {}) },
+      eventsXP: { ...(h.eventsXP || {}) },
+      awards:   Array.isArray(h.awards) ? h.awards.map(a => ({ ...a })) : undefined,
+    };
+  }
+
+  function awardKey(a) {
+    if (!a) return null;
+    if (a.id) return String(a.id);
+    if (a.ts != null) return `${a.ts}:${a.reason || ''}:${a.xp || 0}`;
+    return JSON.stringify(a);
+  }
+
+  function awardSum(h) {
+    return (Array.isArray(h.awards) ? h.awards : [])
+      .reduce((sum, a) => sum + (Number(a && a.xp) || 0), 0);
+  }
+
+  function mergeHistoryEntry(a, b) {
+    const byId = new Map();
+    for (const src of [a, b]) {
+      for (const ev of (Array.isArray(src.awards) ? src.awards : [])) {
+        const k = awardKey(ev);
+        if (k && !byId.has(k)) byId.set(k, { ...ev, id: ev.id || k });
+      }
+    }
+    const awards = Array.from(byId.values()).sort((x, y) => (x.ts || 0) - (y.ts || 0));
+    const legacyBase = Math.max(
+      0,
+      (a.xp || 0) - awardSum(a),
+      (b.xp || 0) - awardSum(b)
+    );
+    const events = {};
+    const eventsXP = {};
+    if (legacyBase > 0) {
+      events.legacy = 1;
+      eventsXP.legacy = legacyBase;
+    }
+    for (const ev of awards) {
+      const reason = ev.reason || 'unknown';
+      const xp = Number(ev.xp) || 0;
+      events[reason] = (events[reason] || 0) + 1;
+      eventsXP[reason] = (eventsXP[reason] || 0) + xp;
+    }
+    return {
+      ...a,
+      ...b,
+      date: a.date || b.date,
+      xp: legacyBase + awards.reduce((sum, ev) => sum + (Number(ev.xp) || 0), 0),
+      lessons: Math.max(a.lessons || 0, b.lessons || 0),
+      events,
+      eventsXP,
+      awards,
+    };
   }
 
   function unionByTs(la, lb) {
@@ -519,17 +607,25 @@ window.SYNC = (function () {
     // the Worker hasn't been upgraded yet).
     const remoteSeq = remote._seq || 0;
     const localSeq  = local._seq  || 0;
+    const remoteHash = hashState(remote);
+    const localHash = hashState(local);
     if (remoteSeq && localSeq) {
-      if (remoteSeq <= localSeq)             return;
-      if (remoteSeq <= lastSeenRemoteSeq)    return;
+      // KV does not provide compare-and-swap for the Worker read-modify-
+      // write that stamps _seq. Rare simultaneous PUTs can therefore
+      // produce equal _seq values with different content. In that case,
+      // merge by content instead of skipping on sequence equality.
+      if (remoteSeq < localSeq) return;
+      if (remoteSeq === localSeq && remoteHash === localHash) return;
+      if (remoteSeq <= lastSeenRemoteSeq && remoteHash === lastSeenRemoteHash) return;
     } else {
       const remoteT = remote.updatedAt || 0;
-      if (remoteT <= (local.updatedAt || 0)) return;
-      if (remoteT <= lastSeenRemoteUpdatedAt) return;
+      if (remoteT < (local.updatedAt || 0) && remoteHash === localHash) return;
+      if (remoteT <= lastSeenRemoteUpdatedAt && remoteHash === lastSeenRemoteHash) return;
     }
     const merged = mergeStates(local, remote);
     lastSeenRemoteSeq = Math.max(lastSeenRemoteSeq, remoteSeq);
     lastSeenRemoteUpdatedAt = Math.max(lastSeenRemoteUpdatedAt, remote.updatedAt || 0);
+    lastSeenRemoteHash = remoteHash;
     // ─── Convergence fix ───────────────────────────────────────────
     // If the merged state added local-only data not present in remote
     // (e.g. concurrent edits where the other device's push overwrote
@@ -537,14 +633,7 @@ window.SYNC = (function () {
     // up. Without this, our local stays correct but KV — and therefore
     // the other device — sits in the partial state until something
     // else triggers a push.
-    const mergedAddsLocal =
-      (merged.jobApps && merged.jobApps.length > (remote.jobApps || []).length) ||
-      (merged.history && merged.history.length > (remote.history || []).length) ||
-      (Object.keys(merged.completedLessons || {}).length >
-        Object.keys(remote.completedLessons || {}).length) ||
-      (merged.mocks && merged.mocks.length > (remote.mocks || []).length) ||
-      ((merged.xp || 0) > (remote.xp || 0));
-    if (mergedAddsLocal) scheduleSync();
+    if (hashState(merged) !== remoteHash) scheduleSync();
     // Use the SOFT setter so the live view doesn't flash on every
     // poll. setStateFromSync swaps state + refreshes only the header
     // chips; the current view's cards stay put until next navigation.
@@ -593,7 +682,7 @@ window.SYNC = (function () {
       if (window.APP && window.APP.setState) window.APP.setState(merged);
       else localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
       // Push merged state up SYNCHRONOUSLY before returning, so the
-      // other device's next 5s poll sees the union without waiting on
+      // other device's next poll sees the union without waiting on
       // the 1s debounce. Closes the race where the seeding device
       // could otherwise miss the merge between pair() and the next push.
       await pushNow();

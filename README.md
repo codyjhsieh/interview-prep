@@ -41,7 +41,7 @@ python3 -m http.server 8000      # then http://localhost:8000
 ## Tests
 
 ```sh
-node scripts/sync-stress.mjs     # 50 unit + e2e tests for the sync layer
+node scripts/sync-stress.mjs     # unit + e2e tests for the sync layer
 node tests/window-beam.test.js   # sun-beam geometry math
 ```
 

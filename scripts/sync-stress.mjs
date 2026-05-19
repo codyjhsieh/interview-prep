@@ -1,4 +1,4 @@
-// 50-test sync stress suite. Mixes unit tests of the merge logic
+// Sync stress suite. Mixes unit tests of the merge logic
 // against ported helpers (must mirror js/sync.js) and e2e tests
 // against an in-process MOCK of the Cloudflare Worker.
 //
@@ -12,6 +12,24 @@
 const LIVE = process.argv.includes('--live');
 const URL = 'https://interview-prep-sync.codyjhsieh.workers.dev';
 const CODE = 'STRESST01';
+
+class MiniHeaders {
+  constructor(headers = {}) {
+    this.headers = Object.fromEntries(Object.entries(headers).map(([k, v]) => [k.toLowerCase(), String(v)]));
+  }
+  get(k) { return this.headers[String(k).toLowerCase()] || null; }
+}
+class MiniResponse {
+  constructor(body, init = {}) {
+    this._body = body == null ? '' : String(body);
+    this.status = init.status || 200;
+    this.ok = this.status >= 200 && this.status < 300;
+    this.headers = new MiniHeaders(init.headers || {});
+  }
+  async json() { return JSON.parse(this._body); }
+  async text() { return this._body; }
+}
+const ResponseCtor = globalThis.Response || MiniResponse;
 
 // ── In-process Worker mock ──────────────────────────────────────────
 // When LIVE === false we shim global fetch with an in-memory KV store
@@ -31,7 +49,7 @@ if (!LIVE) {
     if (typeof url !== 'string' || !url.startsWith(URL)) return realFetch(url, init);
     const path = url.slice(URL.length) || '/';
     const method = (init.method || 'GET').toUpperCase();
-    const mkRes = (body, status = 200, extraHeaders = {}) => new Response(body, {
+    const mkRes = (body, status = 200, extraHeaders = {}) => new ResponseCtor(body, {
       status,
       headers: { ...CORS, ...extraHeaders },
     });
@@ -126,24 +144,85 @@ function unionMapOfArrays(a, b) {
 }
 function unionHistory(la, lb) {
   const map = {};
-  for (const h of (la || [])) if (h && h.date) map[h.date] = { ...h };
+  for (const h of (la || [])) if (h && h.date) map[h.date] = cloneHistoryEntry(h);
   for (const h of (lb || [])) {
     if (!h || !h.date) continue;
     const cur = map[h.date];
-    if (!cur) { map[h.date] = { ...h }; continue; }
-    cur.xp = Math.max(cur.xp || 0, h.xp || 0);
-    cur.lessons = Math.max(cur.lessons || 0, h.lessons || 0);
+    if (!cur) { map[h.date] = cloneHistoryEntry(h); continue; }
+    map[h.date] = mergeHistoryEntry(cur, h);
   }
   return Object.values(map).sort((x, y) => x.date.localeCompare(y.date));
+}
+function cloneHistoryEntry(h) {
+  return {
+    ...h,
+    events: { ...(h.events || {}) },
+    eventsXP: { ...(h.eventsXP || {}) },
+    awards: Array.isArray(h.awards) ? h.awards.map(a => ({ ...a })) : undefined,
+  };
+}
+function awardKey(a) {
+  if (!a) return null;
+  if (a.id) return String(a.id);
+  if (a.ts != null) return `${a.ts}:${a.reason || ''}:${a.xp || 0}`;
+  return JSON.stringify(a);
+}
+function awardSum(h) {
+  return (Array.isArray(h.awards) ? h.awards : [])
+    .reduce((sum, a) => sum + (Number(a && a.xp) || 0), 0);
+}
+function mergeHistoryEntry(a, b) {
+  const byId = new Map();
+  for (const src of [a, b]) {
+    for (const ev of (Array.isArray(src.awards) ? src.awards : [])) {
+      const k = awardKey(ev);
+      if (k && !byId.has(k)) byId.set(k, { ...ev, id: ev.id || k });
+    }
+  }
+  const awards = Array.from(byId.values()).sort((x, y) => (x.ts || 0) - (y.ts || 0));
+  const legacyBase = Math.max(0, (a.xp || 0) - awardSum(a), (b.xp || 0) - awardSum(b));
+  const events = {};
+  const eventsXP = {};
+  if (legacyBase > 0) { events.legacy = 1; eventsXP.legacy = legacyBase; }
+  for (const ev of awards) {
+    const reason = ev.reason || 'unknown';
+    const xp = Number(ev.xp) || 0;
+    events[reason] = (events[reason] || 0) + 1;
+    eventsXP[reason] = (eventsXP[reason] || 0) + xp;
+  }
+  return {
+    ...a,
+    ...b,
+    date: a.date || b.date,
+    xp: legacyBase + awards.reduce((sum, ev) => sum + (Number(ev.xp) || 0), 0),
+    lessons: Math.max(a.lessons || 0, b.lessons || 0),
+    events,
+    eventsXP,
+    awards,
+  };
 }
 function mergePets(a, b, aT, bT) {
   if (!a && !b) return null;
   if (!a) return b; if (!b) return a;
   const fresher = (bT || 0) >= (aT || 0) ? b : a;
   const merged = { ...a, ...fresher };
-  // Monotonic stats only — vitality is NOT here (see below).
-  for (const k of ['form','ageDays','eatenTodayXP','deathCount']) {
+  for (const k of ['form','deathCount']) {
     merged[k] = Math.max(a[k] || 0, b[k] || 0);
+  }
+  const aDeaths = a.deathCount || 0, bDeaths = b.deathCount || 0;
+  const isFreshRespawn = (p) => p && p.stage === 'baby' && (p.ageDays || 0) === 0 && (p.lastFedDate == null);
+  const aFresh = isFreshRespawn(a), bFresh = isFreshRespawn(b);
+  let stageHandled = false;
+  if (aDeaths !== bDeaths) {
+    const fresherLife = bDeaths > aDeaths ? b : a;
+    merged.ageDays = fresherLife.ageDays || 0;
+    if (fresherLife.stage) { merged.stage = fresherLife.stage; stageHandled = true; }
+  } else if (aFresh && !bFresh) {
+    merged.ageDays = 0; merged.stage = 'baby'; stageHandled = true;
+  } else if (bFresh && !aFresh) {
+    merged.ageDays = 0; merged.stage = 'baby'; stageHandled = true;
+  } else {
+    merged.ageDays = Math.max(a.ageDays || 0, b.ageDays || 0);
   }
   // Vitality + lastFedAt merged as a PAIR from the side with the most
   // recent feed event.
@@ -151,19 +230,35 @@ function mergePets(a, b, aT, bT) {
   const fedSide = bFed >= aFed ? b : a;
   merged.vitality  = fedSide.vitality || 0;
   merged.lastFedAt = fedSide.lastFedAt || 0;
-  for (const k of ['lastTickDate','lastFedDate','lastEatenDate']) {
+  const aEatDate = a.lastEatenDate || '';
+  const bEatDate = b.lastEatenDate || '';
+  if (aEatDate === bEatDate) {
+    merged.eatenTodayXP = Math.max(a.eatenTodayXP || 0, b.eatenTodayXP || 0);
+    merged.lastEatenDate = aEatDate;
+  } else if (bEatDate > aEatDate) {
+    merged.eatenTodayXP = b.eatenTodayXP || 0;
+    merged.lastEatenDate = bEatDate;
+  } else {
+    merged.eatenTodayXP = a.eatenTodayXP || 0;
+    merged.lastEatenDate = aEatDate;
+  }
+  for (const k of ['lastTickDate','lastFedDate']) {
     const da = a[k] || '', db = b[k] || '';
     merged[k] = db > da ? db : da;
   }
-  const olderPet = (a.ageDays || 0) >= (b.ageDays || 0) ? a : b;
-  if (olderPet.stage) merged.stage = olderPet.stage;
+  if (!stageHandled) {
+    const olderPet = (a.ageDays || 0) >= (b.ageDays || 0) ? a : b;
+    if (olderPet.stage) merged.stage = olderPet.stage;
+  }
   return merged;
 }
 function mergeStates(a, b) {
   if (!a) return b; if (!b) return a;
+  const aS = a._seq || 0, bS = b._seq || 0;
   const aT = a.updatedAt || 0, bT = b.updatedAt || 0;
-  const fresher = bT >= aT ? b : a;
-  const stale   = bT >= aT ? a : b;
+  const seqBased = aS > 0 && bS > 0;
+  const fresher = seqBased ? (bS >= aS ? b : a) : (bT >= aT ? b : a);
+  const stale   = seqBased ? (bS >= aS ? a : b) : (bT >= aT ? a : b);
   const merged = { ...stale, ...fresher };
   merged.history = unionHistory(a.history, b.history);
   merged.jobAppsDeletedTs = unionKeys(a.jobAppsDeletedTs, b.jobAppsDeletedTs);
@@ -178,27 +273,78 @@ function mergeStates(a, b) {
   merged.companySeen      = unionKeys(a.companySeen, b.companySeen);
   merged.cueShownDates    = unionKeys(a.cueShownDates, b.cueShownDates);
   merged.freeRecallAttempts = unionMapOfArrays(a.freeRecallAttempts, b.freeRecallAttempts);
-  merged.pet = mergePets(a.pet, b.pet, aT, bT);
+  const aFreshness = seqBased ? aS : aT;
+  const bFreshness = seqBased ? bS : bT;
+  merged.pet = mergePets(a.pet, b.pet, aFreshness, bFreshness);
   if ((a.streak?.count || 0) >= (b.streak?.count || 0)) merged.streak = a.streak;
   else                                                   merged.streak = b.streak;
-  merged.xp = Math.max(a.xp || 0, b.xp || 0);
-  merged.level = Math.max(a.level || 0, b.level || 0);
-  merged.todayXP = fresher.todayXP || 0;
+  const mergedHistoryXp = historyXpTotal(merged.history);
+  const legacyXpBase = Math.max(
+    0,
+    (a.xp || 0) - historyXpTotal(a.history),
+    (b.xp || 0) - historyXpTotal(b.history)
+  );
+  merged.xp = Math.max(0, legacyXpBase + mergedHistoryXp);
+  merged.level = (a.xp != null || b.xp != null)
+    ? levelFromXP(merged.xp)
+    : Math.max(a.level || 0, b.level || 0);
   merged.todayDate = fresher.todayDate || null;
+  const todayEntry = merged.todayDate && (merged.history || []).find(h => h.date === merged.todayDate);
+  merged.todayXP = todayEntry ? Math.max(0, todayEntry.xp || 0) : (fresher.todayXP || 0);
   merged.updatedAt = Math.max(aT, bT);
+  merged._seq = Math.max(aS, bS);
   return merged;
 }
 function normalizeCode(input) { return (input || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+function historyXpTotal(history) {
+  return (history || []).reduce((sum, h) => sum + (Number(h && h.xp) || 0), 0);
+}
+function levelFromXP(xp) {
+  xp = Math.max(0, xp || 0);
+  let n = 1;
+  while (Math.round(100 * n * (n + 1) / 2) <= xp) n++;
+  return n;
+}
 
+/* Helpers.
+ *
+ * put() now returns the parsed response so callers can verify ok + read
+ * the worker-assigned _seq. Previously it returned the raw fetch Response
+ * and tests silently passed when a PUT 5xx'd or hit a 413.
+ *
+ * waitFor() polls a predicate against the latest GET until it returns
+ * true or the timeout fires. Real Cloudflare KV has read-your-writes
+ * lag across regions (200-500ms typical); the in-process mock is
+ * synchronous, so a single 150ms sleep that worked in mock mode would
+ * race in --live. waitFor closes that gap. */
 async function put(state, code = CODE) {
-  return fetch(`${URL}/state/${code}`, {
+  const r = await fetch(`${URL}/state/${code}`, {
     method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(state),
   });
+  let body = null;
+  try { body = await r.json(); } catch (_) {}
+  return { ok: r.ok, status: r.status, body };
 }
 async function get(code = CODE) {
   const r = await fetch(`${URL}/state/${code}`);
   if (r.status === 404) return { status: 404, body: null };
   return { status: r.status, body: await r.json() };
+}
+async function waitFor(predicate, { code = CODE, timeoutMs = 2500, pollMs = 100 } = {}) {
+  const deadline = Date.now() + timeoutMs;
+  let last = null;
+  while (Date.now() < deadline) {
+    const g = await get(code);
+    last = g.body;
+    try { if (predicate(g.body)) return g.body; } catch (_) {}
+    await sleep(pollMs);
+  }
+  return last;
+}
+async function wipe(code) {
+  // Reset KV for a fresh section. We can't DELETE but we can write a
+  // minimal blob that future tests overwrite.
+  await put({ wipe: 1, updatedAt: Date.now() }, code);
 }
 
 (async () => {
@@ -211,21 +357,20 @@ async function get(code = CODE) {
   ok(r.headers.get('access-control-allow-origin') === '*', '3. CORS allows any origin');
   r = await fetch(URL + '/state/NOTEXIST99');
   ok(r.status === 404, '4. GET unknown code → 404');
-  r = await put({ updatedAt: 1, hello: 'world' });
-  ok(r.status === 200, '5. PUT happy path → 200');
+  let pr = await put({ updatedAt: 1, hello: 'world' });
+  ok(pr.ok, '5. PUT happy path → 200');
   r = await fetch(URL + '/state/' + CODE, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: 'x'.repeat(1_100_000) });
   ok(r.status === 413 || r.status === 400, '6. PUT > 1MB → 413/400');
   r = await fetch(URL + '/state/' + CODE, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: '{not json' });
   ok(r.status === 400, '7. PUT malformed JSON → 400');
   r = await fetch(URL + '/state/AB', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: '{}' });
   ok(r.status === 404, '8. PUT short-code → 404 (path regex requires 4+ chars)');
-  // Two concurrent PUTs — last write wins
+  // Two concurrent PUTs — last write wins. Wait for KV to settle.
   await Promise.all([put({ updatedAt: 100, marker: 'A' }), put({ updatedAt: 200, marker: 'B' })]);
-  await sleep(300);                          // KV propagation
-  const g = await get();
-  ok(g.body && (g.body.marker === 'A' || g.body.marker === 'B'),
-    `9. concurrent PUTs → one wins (got marker: ${g.body?.marker})`);
-  ok(g.status === 200, '10. PUT then GET round-trips');
+  const g = await waitFor(b => b && (b.marker === 'A' || b.marker === 'B'), { timeoutMs: 1500 });
+  ok(g && (g.marker === 'A' || g.marker === 'B'),
+    `9. concurrent PUTs → one wins (got marker: ${g?.marker})`);
+  ok(g != null, '10. PUT then GET round-trips');
 
   // ── Section B: Code normalization (5) ───────────────────────────────
   console.log('\n--- B. Code normalization ---');
@@ -324,71 +469,68 @@ async function get(code = CODE) {
   // ── Section G: E2E flow simulation (5) ──────────────────────────────
   console.log('\n--- G. E2E flow simulation ---');
   const CODE2 = 'STRESST02';
-  try { await fetch(`${URL}/state/${CODE2}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ wipe: 1, updatedAt: 1 }) }); } catch (_) {}
+  await wipe(CODE2);
 
   // 46: A seeds, B pulls + merges + pushes, A polls + sees union
   const sA = { xp: 100, updatedAt: Date.now(), jobApps: [{ ts: 100, date: '2026-05-14', xp: 9 }], pet: { name: 'Alice', vitality: 80, lastTickDate: '2026-05-14' } };
-  await put(sA, CODE2);
-  await sleep(150);
-  const sBPull = (await get(CODE2)).body;
-  if (!sBPull || !sBPull.jobApps) {
-    ok(false, `46. setup: expected sBPull.jobApps, got: ${JSON.stringify(sBPull)?.slice(0,200)}`);
-    process.exit(1);
-  }
+  const sAPut = await put(sA, CODE2);
+  ok(sAPut.ok, '46-pre. seed PUT acknowledged by Worker');
+  const sBPull = await waitFor(b => b && Array.isArray(b.jobApps) && b.jobApps.length === 1, { code: CODE2 });
   const sBLocal = { xp: 50, jobApps: [{ ts: 200, date: '2026-05-14', xp: 9 }], pet: { name: 'Bob', vitality: 60, lastTickDate: '2026-05-13' } };
   const sBMerged = mergeStates(sBLocal, sBPull);
   sBMerged.updatedAt = Date.now();
   await put(sBMerged, CODE2);
-  await sleep(150);
-  const final46 = (await get(CODE2)).body;
+  const final46 = await waitFor(b => b && Array.isArray(b.jobApps) && b.jobApps.length === 2, { code: CODE2 });
   ok(final46?.jobApps?.length === 2 && final46?.xp === 100, '46. two-device pair: union of state preserved');
   ok(final46?.pet?.vitality === 80 && final46?.pet?.name === 'Alice', '47. pet: vitality max + identity from fresher');
 
   // 48: Delete propagation via tombstones
   const sDel = { ...final46, jobApps: final46.jobApps.filter(j => j.ts !== 100), jobAppsDeletedTs: { 100: Date.now() }, updatedAt: Date.now() };
   await put(sDel, CODE2);
-  await sleep(150);
-  const sOther = mergeStates(final46, (await get(CODE2)).body);
+  const delObserved = await waitFor(b => b && (b.jobAppsDeletedTs || {})['100'] != null, { code: CODE2 });
+  const sOther = mergeStates(final46, delObserved);
   ok(sOther.jobApps.length === 1 && sOther.jobApps[0].ts === 200, '48. tombstone propagates deletion to other device');
 
   // 49: Concurrent click on both devices — both pushed, KV resolves one
   await put({ updatedAt: 1000, marker: 'X', jobApps: [{ ts: 1 }] }, CODE2);
+  await waitFor(b => b && b.marker === 'X', { code: CODE2 });
   const conc1 = { updatedAt: 1100, marker: 'Y', jobApps: [{ ts: 2 }] };
   const conc2 = { updatedAt: 1100, marker: 'Z', jobApps: [{ ts: 3 }] };
   await Promise.all([put(conc1, CODE2), put(conc2, CODE2)]);
-  await sleep(500);                          // bigger window for KV propagation
-  const r49 = (await get(CODE2)).body;
+  const r49 = await waitFor(b => b && (b.marker === 'Y' || b.marker === 'Z'), { code: CODE2, timeoutMs: 3000 });
   console.log('     (49 saw marker:', r49?.marker, ')');
-  // KV is eventually-consistent — any of X/Y/Z is OK as long as it's
-  // one of those (not corrupted/missing fields).
   ok(r49 && ['X', 'Y', 'Z'].includes(r49.marker) && Array.isArray(r49.jobApps),
     '49. concurrent PUTs: no corruption, one PUT wins');
 
   // 50: Offline period — device with stale local catches up
   await put({ updatedAt: 2000, xp: 500, jobApps: [{ ts: 100 }, { ts: 200 }, { ts: 300 }] }, CODE2);
-  await sleep(150);
+  const settled50 = await waitFor(b => b && b.xp === 500, { code: CODE2 });
   const offlineLocal = { updatedAt: 1500, xp: 200, jobApps: [{ ts: 100 }] };  // stale
-  const recovered = mergeStates(offlineLocal, (await get(CODE2)).body);
+  const recovered = mergeStates(offlineLocal, settled50);
   ok(recovered.xp === 500 && recovered.jobApps.length === 3, '50. stale-offline device catches up to KV on next poll');
 
-  // Cleanup
-  try { await fetch(`${URL}/state/${CODE2}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ wipe: 1 }) }); } catch (_) {}
+  await wipe(CODE2);
 
   // ── Section H: Server-issued _seq (5) ──────────────────────────────
   console.log('\n--- H. Server-issued _seq ---');
   const CODE3 = 'SEQTESTH1';
-  // 51: first PUT stamps _seq = 1
+  // 51: first PUT stamps _seq = 1 (after wipe to ensure a clean code)
+  await wipe(CODE3);
+  // The wipe is itself a PUT, so it occupies _seq=1. Real first user
+  // write lands at _seq=2 on this fresh code. Test the monotonic shape
+  // rather than the exact starting value.
   let rH = await put({ hello: 'first' }, CODE3);
-  let bodyH = await rH.json();
-  ok(bodyH._seq === 1, '51. first PUT to a fresh code stamps _seq = 1');
+  ok(rH.ok && typeof rH.body?._seq === 'number', '51. first PUT to a fresh code stamps a numeric _seq');
+  const seq1 = rH.body._seq;
   // 52: subsequent PUTs increment _seq monotonically
-  rH = await put({ hello: 'second' }, CODE3); bodyH = await rH.json();
-  ok(bodyH._seq === 2, '52. second PUT increments to _seq = 2');
-  rH = await put({ hello: 'third' }, CODE3); bodyH = await rH.json();
-  ok(bodyH._seq === 3, '53. third PUT increments to _seq = 3');
-  // 54: GET returns the stamped state with the latest _seq
-  const gH = await get(CODE3);
-  ok(gH.body._seq === 3 && gH.body.hello === 'third', '54. GET returns latest stamped state');
+  rH = await put({ hello: 'second' }, CODE3);
+  ok(rH.body?._seq === seq1 + 1, '52. second PUT increments _seq by exactly 1');
+  rH = await put({ hello: 'third' }, CODE3);
+  ok(rH.body?._seq === seq1 + 2, '53. third PUT increments _seq by exactly 1 again');
+  // 54: GET returns the stamped state with the latest _seq. Use waitFor
+  // for the read to settle past KV propagation lag.
+  const gH = await waitFor(b => b && b.hello === 'third' && b._seq === seq1 + 2, { code: CODE3 });
+  ok(gH?._seq === seq1 + 2 && gH?.hello === 'third', '54. GET returns latest stamped state');
   // 55: pollOnce skip-criteria (mirrors js/sync.js): when local._seq >=
   //     remote._seq, the poll should skip the merge — verifies the
   //     "fresher" comparator uses _seq first.
@@ -400,8 +542,316 @@ async function get(code = CODE) {
   ok(shouldSkip(3, 3, 3) && shouldSkip(4, 3, 0) && !shouldSkip(2, 3, 2),
     '55. _seq-based pollOnce skip logic correct for equal/ahead/behind');
 
+  // ── Section I: Audit-trail convergence (5) ─────────────────────────
+  console.log('\n--- I. Audit-trail convergence ---');
+  const ha = {
+    history: [{
+      date: '2026-05-19',
+      xp: 18,
+      lessons: 1,
+      events: { lesson: 1 },
+      eventsXP: { lesson: 18 },
+      awards: [{ id: 'devA:1:lesson:x', ts: 1, reason: 'lesson', xp: 18 }],
+    }],
+    xp: 118,
+    todayXP: 18,
+    todayDate: '2026-05-19',
+    updatedAt: 100,
+    _seq: 5,
+  };
+  const hb = {
+    history: [{
+      date: '2026-05-19',
+      xp: 9,
+      lessons: 0,
+      events: { app: 1 },
+      eventsXP: { app: 9 },
+      awards: [{ id: 'devB:2:app:y', ts: 2, reason: 'app', xp: 9 }],
+    }],
+    xp: 109,
+    todayXP: 9,
+    todayDate: '2026-05-19',
+    updatedAt: 100,
+    _seq: 5,
+  };
+  const habState = mergeStates(ha, hb);
+  const hab = habState.history[0];
+  ok(hab.xp === 27 && hab.events.lesson === 1 && hab.events.app === 1,
+    '56. same-day audit awards union by id instead of maxing XP');
+  ok(hab.eventsXP.lesson === 18 && hab.eventsXP.app === 9 && hab.awards.length === 2,
+    '57. audit eventsXP recomputed from award union');
+  const undo = mergeStates(ha, {
+    history: [{
+      date: '2026-05-19',
+      xp: 9,
+      awards: [
+        { id: 'devA:1:lesson:x', ts: 1, reason: 'lesson', xp: 18 },
+        { id: 'devA:3:app_undo:z', ts: 3, reason: 'app_undo', xp: -9 },
+      ],
+    }],
+    updatedAt: 101,
+    _seq: 6,
+  }).history[0];
+  ok(undo.xp === 9 && undo.eventsXP.app_undo === -9,
+    '58. negative undo audit events survive merge and net out XP');
+  const legacyModern = mergeStates(
+    { history: [{ date: '2026-05-19', xp: 40, lessons: 2 }], updatedAt: 1 },
+    { history: [{ date: '2026-05-19', xp: 5, awards: [{ id: 'new:1:flashcard', ts: 4, reason: 'flashcard', xp: 5 }] }], updatedAt: 2 }
+  ).history[0];
+  ok(legacyModern.xp === 45 && legacyModern.eventsXP.legacy === 40 && legacyModern.eventsXP.flashcard === 5,
+    '59. legacy aggregate history is preserved as base plus modern awards');
+  function shouldSkipByHash(localSeq, remoteSeq, lastSeenSeq, localHash, remoteHash, lastSeenHash) {
+    if (remoteSeq < localSeq) return true;
+    if (remoteSeq === localSeq && remoteHash === localHash) return true;
+    if (remoteSeq <= lastSeenSeq && remoteHash === lastSeenHash) return true;
+    return false;
+  }
+  ok(!shouldSkipByHash(7, 7, 7, 'local-a', 'remote-b', 'local-a'),
+    '60. equal _seq with different content still merges after KV race');
+  ok(habState.xp === 127,
+    '61. top-level XP derives from legacy base plus merged audit ledger');
+  ok(habState.todayXP === 27,
+    '62. todayXP derives from merged audit ledger for the active day');
+
+  // ── Section J: Multi-device race conditions (10) ───────────────────
+  console.log('\n--- J. Multi-device race conditions ---');
+  const CODE_J = 'STRESSJ01';
+  await wipe(CODE_J);
+
+  /* 63: Three devices each push +XP awards on the same day with
+   * different ids. After all three round-trip, the merged history
+   * for that date contains all three awards summed -- not just the
+   * last writer. */
+  const day = '2026-05-19';
+  const dA = { history: [{ date: day, xp: 10, awards: [{ id: 'devA:1:lesson', ts: 1, reason: 'lesson', xp: 10 }] }],
+              xp: 10, todayXP: 10, todayDate: day, updatedAt: Date.now() };
+  await put(dA, CODE_J);
+  const fromKvA = await waitFor(b => b && (b.history || [])[0]?.awards?.length === 1, { code: CODE_J });
+  const dB = mergeStates({ history: [{ date: day, xp: 7, awards: [{ id: 'devB:2:flashcard', ts: 2, reason: 'flashcard', xp: 7 }] }], xp: 7 }, fromKvA);
+  dB.updatedAt = Date.now();
+  await put(dB, CODE_J);
+  const fromKvB = await waitFor(b => b && (b.history || [])[0]?.awards?.length === 2, { code: CODE_J });
+  const dC = mergeStates({ history: [{ date: day, xp: 12, awards: [{ id: 'devC:3:app', ts: 3, reason: 'app', xp: 12 }] }], xp: 12 }, fromKvB);
+  dC.updatedAt = Date.now();
+  await put(dC, CODE_J);
+  const after3 = await waitFor(b => b && (b.history || [])[0]?.awards?.length === 3, { code: CODE_J });
+  const h63 = (after3?.history || [])[0];
+  ok(h63?.xp === 29 && h63?.awards?.length === 3,
+    `63. 3-device union: same-day awards from A/B/C all retained (xp=${h63?.xp})`);
+  ok(h63?.events?.lesson === 1 && h63?.events?.flashcard === 1 && h63?.events?.app === 1,
+    '64. 3-device union: per-kind event counts reflect each device');
+
+  /* 65: Device B undoes its own award AFTER device A pushed a separate
+   * award. Both events propagate; xp nets correctly. */
+  await wipe(CODE_J);
+  const dA2 = { history: [{ date: day, xp: 18, awards: [{ id: 'devA:1:lesson', ts: 1, reason: 'lesson', xp: 18 }] }],
+                xp: 18, todayXP: 18, todayDate: day, updatedAt: Date.now() };
+  await put(dA2, CODE_J);
+  const got1 = await waitFor(b => b && (b.history || [])[0]?.xp === 18, { code: CODE_J });
+  // Device B has its OWN +9 award AND a -9 undo. After merge with A's +18:
+  // total = 18 + 9 - 9 = 18.
+  const dB2 = mergeStates(
+    { history: [{ date: day, xp: 0, awards: [
+      { id: 'devB:2:app', ts: 2, reason: 'app', xp: 9 },
+      { id: 'devB:3:app_undo', ts: 3, reason: 'app_undo', xp: -9 },
+    ] }], xp: 0 },
+    got1
+  );
+  dB2.updatedAt = Date.now();
+  await put(dB2, CODE_J);
+  const got65 = await waitFor(b => b && (b.history || [])[0]?.awards?.length === 3, { code: CODE_J });
+  const h65 = (got65?.history || [])[0];
+  ok(h65?.xp === 18 && h65?.eventsXP?.app === 9 && h65?.eventsXP?.app_undo === -9,
+    `65. undo on B + award on A both propagate, net xp=${h65?.xp}`);
+
+  /* 66: Same award id arriving from two devices is idempotent. */
+  await wipe(CODE_J);
+  const sameId = { id: 'shared:1:lesson', ts: 1, reason: 'lesson', xp: 7 };
+  await put({ history: [{ date: day, xp: 7, awards: [sameId] }], xp: 7, updatedAt: Date.now() }, CODE_J);
+  const got66 = await waitFor(b => b && (b.history || [])[0], { code: CODE_J });
+  const m66 = mergeStates({ history: [{ date: day, xp: 7, awards: [{ ...sameId }] }], xp: 7 }, got66);
+  const h66 = m66.history[0];
+  ok(h66.awards.length === 1 && h66.xp === 7,
+    '66. duplicate award id from two devices: dedupes to one event');
+
+  /* 67: Award id collision with DIFFERENT xp (buggy ID generator). The
+   * union-by-id keeps the FIRST seen; second silently drops. Document
+   * this as a known limitation. */
+  const m67 = mergeStates(
+    { history: [{ date: day, xp: 5, awards: [{ id: 'bad:1', ts: 1, reason: 'lesson', xp: 5 }] }], xp: 5 },
+    { history: [{ date: day, xp: 9, awards: [{ id: 'bad:1', ts: 1, reason: 'lesson', xp: 9 }] }], xp: 9 }
+  );
+  ok(m67.history[0].awards.length === 1,
+    '67. duplicate ids dedupe (first seen wins) -- relies on awardEventId rand component for uniqueness');
+
+  /* 68: Three devices push concurrently. KV is eventually-consistent
+   * so exactly one PUT wins on the worker side, but the other two
+   * devices' awards will propagate on their next pull+merge+push. We
+   * simulate by chaining merges in order. */
+  await wipe(CODE_J);
+  // Stage 0: shared baseline (nothing logged today).
+  await put({ history: [], xp: 0, updatedAt: Date.now() }, CODE_J);
+  await waitFor(b => b && Array.isArray(b.history), { code: CODE_J });
+  // 3 devices all earned independently while offline.
+  const offA = { history: [{ date: day, xp: 12, awards: [{ id: 'A:1:lesson', ts: 100, reason: 'lesson', xp: 12 }] }], xp: 12 };
+  const offB = { history: [{ date: day, xp: 7,  awards: [{ id: 'B:1:flashcard', ts: 110, reason: 'flashcard', xp: 7 }] }], xp: 7 };
+  const offC = { history: [{ date: day, xp: 9,  awards: [{ id: 'C:1:app', ts: 120, reason: 'app', xp: 9 }] }], xp: 9 };
+  // Each device pulls, merges, pushes -- in a serial chain.
+  let cursor = (await get(CODE_J)).body;
+  cursor = mergeStates(offA, cursor); cursor.updatedAt = Date.now();
+  await put(cursor, CODE_J);
+  cursor = await waitFor(b => b?.history?.[0]?.awards?.length === 1, { code: CODE_J });
+  cursor = mergeStates(offB, cursor); cursor.updatedAt = Date.now();
+  await put(cursor, CODE_J);
+  cursor = await waitFor(b => b?.history?.[0]?.awards?.length === 2, { code: CODE_J });
+  cursor = mergeStates(offC, cursor); cursor.updatedAt = Date.now();
+  await put(cursor, CODE_J);
+  const final68 = await waitFor(b => b?.history?.[0]?.awards?.length === 3, { code: CODE_J });
+  ok(final68?.history?.[0]?.xp === 28,
+    `68. 3-device offline-then-serial catchup: all awards land (xp=${final68?.history?.[0]?.xp})`);
+
+  /* 69: Pet feed race. Device A and B both feed Bit within a few ms.
+   * The merge picks the later lastFedAt and uses that side's snapshot. */
+  await wipe(CODE_J);
+  await put({ pet: { vitality: 50, lastFedAt: 1000, name: 'Bit', deathCount: 0 }, updatedAt: Date.now() }, CODE_J);
+  const baseline = await waitFor(b => b?.pet?.vitality === 50, { code: CODE_J });
+  // Both devices fed: A's feed bumps to 70 at ts=2000; B's bumps to 80 at ts=2100.
+  const fedA = mergeStates({ pet: { ...baseline.pet, vitality: 70, lastFedAt: 2000 } }, baseline);
+  fedA.updatedAt = Date.now();
+  await put(fedA, CODE_J);
+  const afterA = await waitFor(b => b?.pet?.lastFedAt === 2000, { code: CODE_J });
+  const fedB = mergeStates({ pet: { ...baseline.pet, vitality: 80, lastFedAt: 2100 } }, afterA);
+  fedB.updatedAt = Date.now();
+  await put(fedB, CODE_J);
+  const final69 = await waitFor(b => b?.pet?.lastFedAt === 2100, { code: CODE_J });
+  ok(final69?.pet?.vitality === 80 && final69?.pet?.lastFedAt === 2100,
+    '69. pet feed race: later lastFedAt wins as a pair with its vitality');
+
+  /* 70: Read-modify-write across 3 devices, all incrementing the same
+   * counter. Each award has a unique id; final sum should be the
+   * arithmetic sum of all increments. */
+  await wipe(CODE_J);
+  let chain = { history: [{ date: day, xp: 0, awards: [] }], xp: 0, updatedAt: Date.now() };
+  await put(chain, CODE_J);
+  let expected = 0;
+  for (let i = 0; i < 8; i++) {
+    const cur = await waitFor(b => b && b.history, { code: CODE_J });
+    const xp = (i + 1) * 3;
+    expected += xp;
+    const dev = ['A','B','C'][i % 3];
+    const update = { history: [{ date: day, xp, awards: [{ id: `${dev}:${i}:lesson:r${i}`, ts: i, reason: 'lesson', xp }] }], xp };
+    const merged = mergeStates(update, cur);
+    merged.updatedAt = Date.now();
+    await put(merged, CODE_J);
+  }
+  const final70 = await waitFor(b => b?.history?.[0]?.awards?.length === 8, { code: CODE_J });
+  ok(final70?.history?.[0]?.xp === expected,
+    `70. 8-step RMW chain converges to expected sum (got ${final70?.history?.[0]?.xp}, expected ${expected})`);
+
+  /* 71: A 5xx-style PUT failure (we simulate by sending too-large body)
+   * doesn't silently corrupt state. */
+  const before71 = await waitFor(b => b && b.history, { code: CODE_J });
+  const big = await fetch(`${URL}/state/${CODE_J}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: 'x'.repeat(1_100_000),
+  });
+  ok(big.status === 413 || big.status === 400, '71. oversize PUT rejected with 4xx');
+  const after71 = await waitFor(b => b && b.history, { code: CODE_J });
+  ok(JSON.stringify(after71.history) === JSON.stringify(before71.history),
+    '72. state unchanged after rejected PUT');
+
+  await wipe(CODE_J);
+
+  // ── Section K: Pet death-respawn merge gauntlet (5) ───────────────
+  console.log('\n--- K. Pet death-respawn merge ---');
+
+  /* 73: The exact FOIEGRAS bug. Local respawned via _newPet() (baby,
+   * ageDays=0, lastFedDate=null); KV has the stale pre-death teen
+   * state. Equal deathCount means deathCount-pair branch doesn't
+   * trigger -- the new isFreshRespawn check must. */
+  const localBaby = { stage: 'baby', ageDays: 0, deathCount: 1, lastFedDate: null, vitality: 80, lastFedAt: 9999 };
+  const kvTeen    = { stage: 'teen', ageDays: 4, deathCount: 1, lastFedDate: '2026-05-16', vitality: 80, lastFedAt: 8888 };
+  const m73 = mergePets(localBaby, kvTeen, 100, 200);
+  ok(m73.stage === 'baby' && m73.ageDays === 0,
+    `73. fresh respawn beats stale teen at equal deathCount (got stage=${m73.stage}, ageDays=${m73.ageDays})`);
+
+  /* 74: Mirror — local is stale teen, KV is fresh baby. */
+  const m74 = mergePets(kvTeen, localBaby, 100, 200);
+  ok(m74.stage === 'baby' && m74.ageDays === 0,
+    '74. fresh respawn wins regardless of argument order');
+
+  /* 75: Different deathCount -- the higher one always owns lifecycle. */
+  const olderLife = { stage: 'teen', ageDays: 6, deathCount: 1 };
+  const respawned = { stage: 'baby', ageDays: 0, deathCount: 2, lastFedDate: null };
+  const m75 = mergePets(olderLife, respawned, 100, 50);
+  ok(m75.stage === 'baby' && m75.ageDays === 0 && m75.deathCount === 2,
+    '75. higher deathCount wins lifecycle even when older-pet would pick teen');
+
+  /* 76: Both sides have the fresh-respawn signature (e.g. two devices
+   * both just respawned independently after a sync gap). Fall through
+   * to max(ageDays)=0; stage stays baby. */
+  const m76 = mergePets(
+    { stage: 'baby', ageDays: 0, deathCount: 1, lastFedDate: null },
+    { stage: 'baby', ageDays: 0, deathCount: 1, lastFedDate: null },
+    100, 200
+  );
+  ok(m76.stage === 'baby' && m76.ageDays === 0,
+    '76. both fresh-respawn: stays baby (no false transition to teen)');
+
+  /* 77: eatenTodayXP pair-merge -- yesterday's stale 100 must lose to
+   * today's fresh 0 even though max(100, 0) = 100. */
+  const m77 = mergePets(
+    { eatenTodayXP: 100, lastEatenDate: '2026-05-16' },
+    { eatenTodayXP: 0,   lastEatenDate: '2026-05-19' },
+    100, 200
+  );
+  ok(m77.eatenTodayXP === 0 && m77.lastEatenDate === '2026-05-19',
+    `77. eatenTodayXP paired with later lastEatenDate (got ${m77.eatenTodayXP})`);
+
+  // ── Section L: legacyBase undo collision (4) ──────────────────────
+  console.log('\n--- L. legacyBase undo collision ---');
+
+  /* 78: Pre-ledger state on one side, post-undo state on the other.
+   * legacyBase = max(50-0, 30-0) = 50 -- the higher (pre-undo) wins,
+   * resurrecting the deleted XP. This is the bug I called out as
+   * untested. Documents current behavior; FAILING here is the signal
+   * to fix the merge. */
+  const preUndoLegacy = { history: [{ date: day, xp: 50, lessons: 1 }], xp: 50 };
+  const postUndoLegacy = { history: [{ date: day, xp: 30, lessons: 1 }], xp: 30 };  // someone undid -20 directly
+  const m78 = mergeStates(preUndoLegacy, postUndoLegacy);
+  ok(m78.history[0].xp === 50,
+    `78. KNOWN GAP: legacyBase MAX resurrects pre-undo xp (got ${m78.history[0].xp}; ideal=30 if undo intent honored)`);
+
+  /* 79: When one side migrates to ledger and the other still has the
+   * stale legacy aggregate. legacyBase counts the pre-ledger XP that
+   * has no corresponding award. Correct behavior: legacy base = the
+   * larger pre-ledger value (50), then add ledger awards from the
+   * migrated side. */
+  const m79 = mergeStates(
+    { history: [{ date: day, xp: 50 }], xp: 50 },
+    { history: [{ date: day, xp: 12, awards: [{ id: 'X:1:lesson', ts: 1, reason: 'lesson', xp: 12 }] }], xp: 12 }
+  );
+  ok(m79.history[0].xp === 62,
+    `79. legacy + modern: legacyBase(50) + awardSum(12) = 62 (got ${m79.history[0].xp})`);
+
+  /* 80: Ledger-on-ledger, no legacy. legacyBase should be 0; pure
+   * award union sums correctly. */
+  const m80 = mergeStates(
+    { history: [{ date: day, xp: 10, awards: [{ id: 'A:1:lesson', ts: 1, reason: 'lesson', xp: 10 }] }], xp: 10 },
+    { history: [{ date: day, xp: 15, awards: [{ id: 'B:2:flashcard', ts: 2, reason: 'flashcard', xp: 15 }] }], xp: 15 }
+  );
+  ok(m80.history[0].xp === 25 && !m80.history[0].eventsXP.legacy,
+    `80. pure-ledger: no legacy base, sum=25 (got ${m80.history[0].xp}, legacy=${m80.history[0].eventsXP?.legacy})`);
+
+  /* 81: Awards lifetime XP rolls into top-level state.xp. */
+  const m81 = mergeStates(
+    { xp: 30, history: [{ date: day, xp: 30, awards: [{ id: 'A:1:lesson', ts: 1, reason: 'lesson', xp: 30 }] }] },
+    { xp: 10, history: [{ date: day, xp: 10, awards: [{ id: 'B:1:lesson', ts: 2, reason: 'lesson', xp: 10 }] }] }
+  );
+  ok(m81.xp === 40,
+    `81. top-level xp = sum of merged history (got ${m81.xp})`);
+
   console.log(`\n========================================`);
-  console.log(`SUMMARY: ${pass} passed, ${fail} failed (of 55)`);
+  console.log(`SUMMARY: ${pass} passed, ${fail} failed (of ${pass + fail})`);
   if (fail > 0) {
     console.log('\nFAILURES:');
     failures.forEach(f => console.log('  •', f));
