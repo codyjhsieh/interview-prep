@@ -421,13 +421,24 @@ window.SYNC = (function () {
     }
     // ageDays + stage: pair with deathCount. The side that has MORE
     // deaths logged is the one whose pet has more recently respawned,
-    // so its (ageDays, stage) are the fresh-life values. Equal
-    // deathCount -> fall back to the older pet (higher ageDays).
+    // so its (ageDays, stage) are the fresh-life values.
+    // Equal deathCount -> still check for a "fresh respawn marker":
+    // stage='baby' AND ageDays===0 AND lastFedDate===null is the
+    // unambiguous signature of _newPet() having just run. That side
+    // wins, otherwise fall back to older pet (higher ageDays).
     const aDeaths = a.deathCount || 0, bDeaths = b.deathCount || 0;
+    const isFreshRespawn = (p) => p && p.stage === 'baby' && (p.ageDays || 0) === 0 && (p.lastFedDate == null);
+    const aFresh = isFreshRespawn(a), bFresh = isFreshRespawn(b);
     if (aDeaths !== bDeaths) {
       const fresherLife = bDeaths > aDeaths ? b : a;
       merged.ageDays = fresherLife.ageDays || 0;
       if (fresherLife.stage) merged.stage = fresherLife.stage;
+    } else if (aFresh && !bFresh) {
+      merged.ageDays = 0;
+      merged.stage = 'baby';
+    } else if (bFresh && !aFresh) {
+      merged.ageDays = 0;
+      merged.stage = 'baby';
     } else {
       merged.ageDays = Math.max(a.ageDays || 0, b.ageDays || 0);
       // Stage pick from the older pet (handled below by olderPet logic).
