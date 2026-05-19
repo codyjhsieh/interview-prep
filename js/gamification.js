@@ -127,8 +127,52 @@ function levelProgress(xp) {
 }
 
 /* ---------- Streak management ---------- */
+/* One-shot backfill: derive history[date].events counts from raw
+ * timestamps (flashcards.lastReviewed, completedLessons[].ts,
+ * jobApps[].ts) for entries written before the audit-trail commit
+ * (79c7c69). Idempotent -- after the first pass every entry has an
+ * .events field and the function early-returns on its existence check.
+ *
+ * eventsXP is NOT backfilled: the per-award XP included a variable
+ * +9% bonus, so reverse-engineering per-kind XP totals from counts
+ * would invent fake numbers. The dashboard XP-breakdown card simply
+ * skips entries that lack eventsXP. */
+function _backfillHistoryEvents(state) {
+  if (!state.history || !state.history.length) return;
+  // Fast-skip if every entry already has events.
+  let needsBackfill = false;
+  for (const h of state.history) { if (!h.events) { needsBackfill = true; break; } }
+  if (!needsBackfill) return;
+
+  const counts = new Map();          // date -> { flashcard, lesson, app }
+  const bump = (date, kind) => {
+    if (!date) return;
+    if (!counts.has(date)) counts.set(date, { flashcard: 0, lesson: 0, app: 0 });
+    counts.get(date)[kind] += 1;
+  };
+  const dateOf = (ts) => ts ? new Date(ts).toISOString().slice(0, 10) : null;
+
+  for (const meta of Object.values(state.flashcards || {})) {
+    bump(dateOf(meta && meta.lastReviewed), 'flashcard');
+  }
+  for (const meta of Object.values(state.completedLessons || {})) {
+    // New shape {ts,xp}; very old shape was `true` (no ts -- can't bucket).
+    const ts = (meta && typeof meta === 'object') ? meta.ts : null;
+    bump(dateOf(ts), 'lesson');
+  }
+  for (const app of (state.jobApps || [])) {
+    bump(dateOf(app && app.ts), 'app');
+  }
+
+  for (const h of state.history) {
+    if (h.events) continue;
+    h.events = counts.get(h.date) || { flashcard: 0, lesson: 0, app: 0 };
+  }
+}
+
 function tickDay(state) {
   const today = todayKey();
+  _backfillHistoryEvents(state);
   if (state.todayDate !== today) {
     state.todayDate = today;
     state.todayXP = 0;

@@ -410,8 +410,27 @@ window.SYNC = (function () {
     // this list -- it's a DAILY counter that resets each day, so a
     // max-merge can clobber today's correct reset-to-0 with yesterday's
     // stale value (the same bug class as the vitality / lastFedAt pair).
-    for (const k of ['form', 'ageDays', 'deathCount']) {
+    // ageDays is ALSO not in this list -- it resets to 0 on death/
+    // respawn (see _newPet in gamification.js). A naive Math.max merge
+    // would keep KV's stale pre-death age and effectively cancel the
+    // respawn (observed on FOIEGRAS audit 2026-05-19: deathCount went
+    // 0->1 but ageDays stayed at 4 because the post-respawn local
+    // state synced against pre-death KV).
+    for (const k of ['form', 'deathCount']) {
       merged[k] = Math.max(a[k] || 0, b[k] || 0);
+    }
+    // ageDays + stage: pair with deathCount. The side that has MORE
+    // deaths logged is the one whose pet has more recently respawned,
+    // so its (ageDays, stage) are the fresh-life values. Equal
+    // deathCount -> fall back to the older pet (higher ageDays).
+    const aDeaths = a.deathCount || 0, bDeaths = b.deathCount || 0;
+    if (aDeaths !== bDeaths) {
+      const fresherLife = bDeaths > aDeaths ? b : a;
+      merged.ageDays = fresherLife.ageDays || 0;
+      if (fresherLife.stage) merged.stage = fresherLife.stage;
+    } else {
+      merged.ageDays = Math.max(a.ageDays || 0, b.ageDays || 0);
+      // Stage pick from the older pet (handled below by olderPet logic).
     }
     // Vitality + lastFedAt: merge as a PAIR from whichever side has
     // the most recent feed event. The "latest feed" defines both the
@@ -442,9 +461,14 @@ window.SYNC = (function () {
       const da = a[k] || '', db = b[k] || '';
       merged[k] = db > da ? db : da;
     }
-    // Stage: pick from the older pet (higher ageDays)
-    const olderPet = (a.ageDays || 0) >= (b.ageDays || 0) ? a : b;
-    if (olderPet.stage) merged.stage = olderPet.stage;
+    // Stage: only fall back to older-pet pick when deathCount is equal
+    // (otherwise the death-paired branch above already set merged.stage
+    // to the fresh-life pet's stage). This guards against
+    // overwriting the post-respawn 'baby' with KV's pre-death 'teen'.
+    if ((a.deathCount || 0) === (b.deathCount || 0)) {
+      const olderPet = (a.ageDays || 0) >= (b.ageDays || 0) ? a : b;
+      if (olderPet.stage) merged.stage = olderPet.stage;
+    }
     return merged;
   }
 
