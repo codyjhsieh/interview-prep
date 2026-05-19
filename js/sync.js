@@ -426,22 +426,32 @@ window.SYNC = (function () {
     // stage='baby' AND ageDays===0 AND lastFedDate===null is the
     // unambiguous signature of _newPet() having just run. That side
     // wins, otherwise fall back to older pet (higher ageDays).
+    //
+    // stageHandled flag: any branch that explicitly sets merged.stage
+    // MUST set this so the older-pet fallback below doesn't clobber
+    // it. Earlier version set stage='baby' here, then the older-pet
+    // fallback re-applied stage='teen' because deathCount was equal --
+    // the exact bug observed on FOIEGRAS where the merge picked baby,
+    // then immediately overwrote it.
     const aDeaths = a.deathCount || 0, bDeaths = b.deathCount || 0;
     const isFreshRespawn = (p) => p && p.stage === 'baby' && (p.ageDays || 0) === 0 && (p.lastFedDate == null);
     const aFresh = isFreshRespawn(a), bFresh = isFreshRespawn(b);
+    let stageHandled = false;
     if (aDeaths !== bDeaths) {
       const fresherLife = bDeaths > aDeaths ? b : a;
       merged.ageDays = fresherLife.ageDays || 0;
-      if (fresherLife.stage) merged.stage = fresherLife.stage;
+      if (fresherLife.stage) { merged.stage = fresherLife.stage; stageHandled = true; }
     } else if (aFresh && !bFresh) {
       merged.ageDays = 0;
       merged.stage = 'baby';
+      stageHandled = true;
     } else if (bFresh && !aFresh) {
       merged.ageDays = 0;
       merged.stage = 'baby';
+      stageHandled = true;
     } else {
       merged.ageDays = Math.max(a.ageDays || 0, b.ageDays || 0);
-      // Stage pick from the older pet (handled below by olderPet logic).
+      // Stage pick from the older pet (handled by olderPet logic below).
     }
     // Vitality + lastFedAt: merge as a PAIR from whichever side has
     // the most recent feed event. The "latest feed" defines both the
@@ -472,11 +482,11 @@ window.SYNC = (function () {
       const da = a[k] || '', db = b[k] || '';
       merged[k] = db > da ? db : da;
     }
-    // Stage: only fall back to older-pet pick when deathCount is equal
-    // (otherwise the death-paired branch above already set merged.stage
-    // to the fresh-life pet's stage). This guards against
-    // overwriting the post-respawn 'baby' with KV's pre-death 'teen'.
-    if ((a.deathCount || 0) === (b.deathCount || 0)) {
+    // Stage fallback: ONLY if no explicit branch above already set it.
+    // Without this guard, even when the fresh-respawn branch correctly
+    // picked baby, the older-pet pick fires (because deathCount is
+    // equal) and overwrites stage back to teen.
+    if (!stageHandled) {
       const olderPet = (a.ageDays || 0) >= (b.ageDays || 0) ? a : b;
       if (olderPet.stage) merged.stage = olderPet.stage;
     }
