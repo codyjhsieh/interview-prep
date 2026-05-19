@@ -3493,6 +3493,12 @@ function openPetLifecyclePreview() {
 function renderPetCard(state, p) {
   const card = el('div','card pet-card overflow-hidden');
   card.setAttribute('data-card', 'pet');
+  // Identity fingerprint that determines the 3D scene geometry. If any
+  // of these change via sync (e.g. respawn flips stage='baby', ageDays=0),
+  // the surgical pet-card update detects the mismatch and rebuilds the
+  // canvas. Without the stamp, the 3D model stays at the previous stage
+  // until a full route render (see app.js updatePetCardInPlace).
+  card.setAttribute('data-pet-key', `${p.stage || ''}|${p.body || ''}|${p.bodyHue || ''}`);
   // Status line — blunter when health is low.
   const statusLine = {
     'walk':    `${p.name} is wandering around`,
@@ -5890,20 +5896,12 @@ function renderFlashcards(state, hub) {
       b.addEventListener('click', () => {
         const q = parseInt(b.dataset.rate, 10);
         const r = GAMI.reviewCard(state, card.id, q);
-        // Track failures by card / cat / module / lesson so the user can
-        // see what's sticking. byCard is always populated; byModule and
-        // byLesson are populated only for cards that explicitly carry
-        // those fields. byCat is the always-available aggregate.
-        if (q === 1) {
-          if (!state.flashcardFailStats) {
-            state.flashcardFailStats = { byCat: {}, byModule: {}, byLesson: {}, byCard: {} };
-          }
-          const s = state.flashcardFailStats;
-          s.byCard[card.id]  = (s.byCard[card.id]  || 0) + 1;
-          s.byCat[card.cat]  = (s.byCat[card.cat]  || 0) + 1;
-          if (card.module) s.byModule[card.module] = (s.byModule[card.module] || 0) + 1;
-          if (card.lesson) s.byLesson[card.lesson] = (s.byLesson[card.lesson] || 0) + 1;
-        }
+        // Track failures via event ledger so two devices offline-failing
+        // the same card don't collapse to max(1,1)=1. recordFlashcardFail
+        // appends an event with a stable id + refreshes the cached
+        // flashcardFailStats counters. Sync unions the events by id and
+        // re-derives the stats after a merge.
+        if (q === 1) GAMI.recordFlashcardFail(state, card);
         APP.afterStateChange();
         ANIM.toast({ icon: q===1 ? iconHTML('refresh-cw',{size:18}) : q===4 ? iconHTML('zap',{size:18}) : iconHTML('check',{size:18}), title:`+${r.xpGained} XP${r.bonusLabel||''}`, body: q===1?'Rescheduled tomorrow.':'Logged.' });
         GAMI.bumpQuestProgress(state, 'flashcard');
@@ -7364,5 +7362,6 @@ return {
   renderJobAppsCard,              // exposed for sync's surgical per-card updates
   openPetLifecyclePreview,
   iconHTML,                       // exposed so app.js/animations.js toasts can use Lucide too
+  mountPet3D,                     // exposed so app.js can rebuild the 3D scene after a sync pull changes pet identity (stage / body / bodyHue)
 };
 })();

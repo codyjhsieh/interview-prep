@@ -46,6 +46,14 @@ const DEFAULT_STATE = {
      byCard tracks per-card; byCat/byModule/byLesson aggregate. Used for the
      "× N fails" badge on cards and for a future regrouped-by-weakness view. */
   flashcardFailStats: { byCat: {}, byModule: {}, byLesson: {}, byCard: {} },
+  /* Append-only fail-event log. Each entry: { id, ts, cardId, cat,
+     module, lesson }. flashcardFailStats above is a derived cache --
+     authoritative count is the LENGTH of this array per axis.
+     Solves the race where two devices both fail the same card offline:
+     the old per-key max merge picked one count, losing the other; the
+     ledger unions by id so both fails count. Capped at 2000 entries
+     to keep state size bounded under heavy review. */
+  flashcardFailEvents: [],
   companySeen: {},               // companyId -> true
   visitedSources: false,
   rewardsRoll: 0,                // variable-reward seed bump
@@ -378,6 +386,57 @@ function logLessonComplete(state, lessonId, baseXP) {
 }
 
 /* ---------- Spaced repetition (SM-2 simplified) ---------- */
+/* Flashcard-fail event ledger + derived stats.
+ *
+ * recordFlashcardFail() appends an immutable {id, ts, cardId, cat,
+ * module, lesson} event and refreshes the cached aggregate counts.
+ * Stable per-device ids (devXYZ:ts:flashcard-fail:rand) so two
+ * devices that both record a fail for the same card offline union
+ * by id instead of being collapsed to max(a,b)=1 by the merge.
+ *
+ * deriveFlashcardFailStats(events) rebuilds the byCard/byCat/byModule/
+ * byLesson counts from the event log. Used by sync after merging
+ * the ledgers. */
+function recordFlashcardFail(state, card) {
+  if (!card) return;
+  if (!Array.isArray(state.flashcardFailEvents)) state.flashcardFailEvents = [];
+  const ts = Date.now();
+  const ev = {
+    id: awardEventId(ts, 'flashcard-fail'),
+    ts,
+    cardId: card.id,
+    cat:    card.cat || null,
+    module: card.module || null,
+    lesson: card.lesson || null,
+  };
+  state.flashcardFailEvents.push(ev);
+  if (state.flashcardFailEvents.length > 2000) {
+    state.flashcardFailEvents.splice(0, state.flashcardFailEvents.length - 2000);
+  }
+  // INCREMENTAL cache bump. Don't re-derive the cache from events --
+  // doing so would wipe out any legacy pre-ledger fails (those have no
+  // event records). Counterpart on the merge side computes
+  // legacyBase = cached - count(own events) for each axis/key and adds
+  // it back, so historical fails survive cross-device merges too.
+  if (!state.flashcardFailStats) state.flashcardFailStats = { byCat: {}, byModule: {}, byLesson: {}, byCard: {} };
+  const s = state.flashcardFailStats;
+  if (ev.cardId) s.byCard[ev.cardId]   = (s.byCard[ev.cardId]   || 0) + 1;
+  if (ev.cat)    s.byCat[ev.cat]       = (s.byCat[ev.cat]       || 0) + 1;
+  if (ev.module) s.byModule[ev.module] = (s.byModule[ev.module] || 0) + 1;
+  if (ev.lesson) s.byLesson[ev.lesson] = (s.byLesson[ev.lesson] || 0) + 1;
+}
+function deriveFlashcardFailStats(events) {
+  const stats = { byCat: {}, byModule: {}, byLesson: {}, byCard: {} };
+  for (const e of (events || [])) {
+    if (!e) continue;
+    if (e.cardId) stats.byCard[e.cardId]   = (stats.byCard[e.cardId]   || 0) + 1;
+    if (e.cat)    stats.byCat[e.cat]       = (stats.byCat[e.cat]       || 0) + 1;
+    if (e.module) stats.byModule[e.module] = (stats.byModule[e.module] || 0) + 1;
+    if (e.lesson) stats.byLesson[e.lesson] = (stats.byLesson[e.lesson] || 0) + 1;
+  }
+  return stats;
+}
+
 function reviewCard(state, cardId, quality /* 1..4 */) {
   const card = state.flashcards[cardId] || { ease: 2.5, interval: 0, due: 0, reps: 0, lapses: 0 };
   // Quality 1=again, 2=hard, 3=good, 4=easy
@@ -1252,6 +1311,7 @@ return {
   applyRole, unapplyRole, isRoleApplied,
   feedPetWithPile,
   reviewCard, dueCards,
+  recordFlashcardFail, deriveFlashcardFailStats,
   recordWrongAnswer, reviewMissedQuestion, dueMissedQuestions, totalMissedCount,
   scheduleConceptReview, dueConceptReviews, totalConceptReviewsCount,
   logFreeRecall,

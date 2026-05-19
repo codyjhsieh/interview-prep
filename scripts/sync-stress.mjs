@@ -128,6 +128,79 @@ function mergeByInnerTs(a, b, ts) {
   }
   return out;
 }
+function mergeFlashcardFailLedger(a, b) {
+  // Ported from js/sync.js -- union the fail-event ledgers by id then
+  // recompute the cached stats. Falls back to per-key max only if both
+  // sides have no events at all.
+  const aEvents = Array.isArray(a.flashcardFailEvents) ? a.flashcardFailEvents : [];
+  const bEvents = Array.isArray(b.flashcardFailEvents) ? b.flashcardFailEvents : [];
+  if (!aEvents.length && !bEvents.length) {
+    const aFs = a.flashcardFailStats || {}, bFs = b.flashcardFailStats || {};
+    const mx = (x, y) => {
+      const out = { ...(x || {}) };
+      for (const k of Object.keys(y || {})) out[k] = Math.max(out[k] || 0, y[k] || 0);
+      return out;
+    };
+    return {
+      flashcardFailEvents: [],
+      flashcardFailStats: {
+        byCat:    mx(aFs.byCat,    bFs.byCat),
+        byModule: mx(aFs.byModule, bFs.byModule),
+        byLesson: mx(aFs.byLesson, bFs.byLesson),
+        byCard:   mx(aFs.byCard,   bFs.byCard),
+      },
+    };
+  }
+  const seen = new Set();
+  const union = [];
+  for (const src of [aEvents, bEvents]) {
+    for (const ev of src) {
+      const key = ev?.id || `${ev?.ts || ''}:${ev?.cardId || ''}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      union.push(ev);
+    }
+  }
+  union.sort((x, y) => (x.ts || 0) - (y.ts || 0));
+  // legacyBase preservation: see js/sync.js for full rationale. Each
+  // device may carry pre-ledger fails in its cache that have no event
+  // records. legacy = max(0, cached - derived); we add back the larger
+  // of the two devices' legacies on top of the union-derived count.
+  const deriveAxes = (events) => {
+    const out = { byCat: {}, byModule: {}, byLesson: {}, byCard: {} };
+    for (const e of events) {
+      if (!e) continue;
+      if (e.cardId) out.byCard[e.cardId]   = (out.byCard[e.cardId]   || 0) + 1;
+      if (e.cat)    out.byCat[e.cat]       = (out.byCat[e.cat]       || 0) + 1;
+      if (e.module) out.byModule[e.module] = (out.byModule[e.module] || 0) + 1;
+      if (e.lesson) out.byLesson[e.lesson] = (out.byLesson[e.lesson] || 0) + 1;
+    }
+    return out;
+  };
+  const aDerived = deriveAxes(aEvents);
+  const bDerived = deriveAxes(bEvents);
+  const unionDerived = deriveAxes(union);
+  const aCached = a.flashcardFailStats || {};
+  const bCached = b.flashcardFailStats || {};
+  const stats = { byCat: {}, byModule: {}, byLesson: {}, byCard: {} };
+  for (const axis of ['byCat', 'byModule', 'byLesson', 'byCard']) {
+    const uMap = unionDerived[axis];
+    const aMap = aCached[axis] || {};
+    const bMap = bCached[axis] || {};
+    const aDM = aDerived[axis];
+    const bDM = bDerived[axis];
+    const allKeys = new Set([
+      ...Object.keys(uMap), ...Object.keys(aMap), ...Object.keys(bMap),
+    ]);
+    for (const k of allKeys) {
+      const aLegacy = Math.max(0, (aMap[k] || 0) - (aDM[k] || 0));
+      const bLegacy = Math.max(0, (bMap[k] || 0) - (bDM[k] || 0));
+      stats[axis][k] = (uMap[k] || 0) + Math.max(aLegacy, bLegacy);
+    }
+  }
+  return { flashcardFailEvents: union, flashcardFailStats: stats };
+}
+
 function unionMapOfArrays(a, b) {
   const out = { ...(a || {}) };
   for (const k of Object.keys(b || {})) {
@@ -273,6 +346,9 @@ function mergeStates(a, b) {
   merged.companySeen      = unionKeys(a.companySeen, b.companySeen);
   merged.cueShownDates    = unionKeys(a.cueShownDates, b.cueShownDates);
   merged.freeRecallAttempts = unionMapOfArrays(a.freeRecallAttempts, b.freeRecallAttempts);
+  const failMerged = mergeFlashcardFailLedger(a, b);
+  merged.flashcardFailEvents = failMerged.flashcardFailEvents;
+  merged.flashcardFailStats  = failMerged.flashcardFailStats;
   const aFreshness = seqBased ? aS : aT;
   const bFreshness = seqBased ? bS : bT;
   merged.pet = mergePets(a.pet, b.pet, aFreshness, bFreshness);
@@ -849,6 +925,80 @@ async function wipe(code) {
   );
   ok(m81.xp === 40,
     `81. top-level xp = sum of merged history (got ${m81.xp})`);
+
+  // ── Section M: Flashcard fail-event ledger (5) ────────────────────
+  console.log('\n--- M. Flashcard fail-event ledger ---');
+
+  /* 82: Two devices both fail the same card offline. With the old
+   * per-key max merge: max(1, 1) = 1 (lost one fail). With the new
+   * ledger: both events union by id, count = 2. */
+  const failA = { flashcardFailEvents: [{ id: 'devA:1:flashcard-fail:r1', ts: 1, cardId: 'fc-001', cat: 'ai' }] };
+  const failB = { flashcardFailEvents: [{ id: 'devB:2:flashcard-fail:r2', ts: 2, cardId: 'fc-001', cat: 'ai' }] };
+  const mFail = mergeStates(failA, failB);
+  ok(mFail.flashcardFailStats.byCard['fc-001'] === 2,
+    `82. two devices, same card offline-failed: ledger unions to 2 (not max=1) (got ${mFail.flashcardFailStats.byCard['fc-001']})`);
+
+  /* 83: Same event id from both sides is idempotent. */
+  const sharedEv = { id: 'shared:1:flashcard-fail:r', ts: 1, cardId: 'fc-002', cat: 'sysd' };
+  const m83 = mergeStates(
+    { flashcardFailEvents: [sharedEv] },
+    { flashcardFailEvents: [{ ...sharedEv }] }
+  );
+  ok(m83.flashcardFailEvents.length === 1 && m83.flashcardFailStats.byCard['fc-002'] === 1,
+    '83. duplicate fail id dedupes (idempotent across re-pulls)');
+
+  /* 84: byCat / byModule / byLesson aggregate correctly across many events. */
+  const events84 = [
+    { id: 'A:1:flashcard-fail:1', ts: 1, cardId: 'a', cat: 'ai',    module: 'm-ai',  lesson: 'l1' },
+    { id: 'A:2:flashcard-fail:2', ts: 2, cardId: 'b', cat: 'ai',    module: 'm-ai',  lesson: 'l2' },
+    { id: 'B:3:flashcard-fail:3', ts: 3, cardId: 'c', cat: 'coding', module: 'm-cod', lesson: 'l3' },
+  ];
+  const m84 = mergeStates({ flashcardFailEvents: events84.slice(0, 2) }, { flashcardFailEvents: events84.slice(2) });
+  ok(m84.flashcardFailStats.byCat.ai === 2 && m84.flashcardFailStats.byCat.coding === 1,
+    `84. byCat aggregates from union (got ai=${m84.flashcardFailStats.byCat.ai}, coding=${m84.flashcardFailStats.byCat.coding})`);
+  ok(m84.flashcardFailStats.byModule['m-ai'] === 2 && m84.flashcardFailStats.byLesson.l3 === 1,
+    '85. byModule / byLesson derived correctly from union');
+
+  /* 86: Legacy fallback path -- no events on either side, stats merge
+   * by per-key max (preserves old behavior for clients that haven't
+   * recorded any new fails yet). */
+  const m86 = mergeStates(
+    { flashcardFailStats: { byCat: { ai: 3 }, byCard: { 'x': 3 }, byModule: {}, byLesson: {} } },
+    { flashcardFailStats: { byCat: { ai: 5 }, byCard: { 'x': 5 }, byModule: {}, byLesson: {} } }
+  );
+  ok(m86.flashcardFailStats.byCard['x'] === 5,
+    `86. legacy (no events on either side): falls back to per-key max (got ${m86.flashcardFailStats.byCard['x']})`);
+
+  /* 87: Mixed legacy + ledger. Device A has 5 cached pre-ledger fails on
+   * card X but no events. Device B has 0 cache + 1 new event. Merged
+   * must preserve A's legacy AND count B's new event: 5 + 1 = 6. */
+  const m87 = mergeStates(
+    { flashcardFailStats: { byCat: {}, byCard: { 'X': 5 }, byModule: {}, byLesson: {} } },
+    { flashcardFailEvents: [{ id: 'devB:1:flashcard-fail:r', ts: 1, cardId: 'X' }],
+      flashcardFailStats: { byCat: {}, byCard: { 'X': 1 }, byModule: {}, byLesson: {} } },
+  );
+  ok(m87.flashcardFailStats.byCard['X'] === 6,
+    `87. legacy (A=5 cached, no events) + new event from B: merged=6 (got ${m87.flashcardFailStats.byCard['X']})`);
+
+  /* 88: Both devices carry the SAME 3 legacy fails on card Y. Neither has
+   * events. After one device records a new ledger fail, merge should be
+   * 3 + 1 = 4 (legacies don't double-count -- we take max, not sum). */
+  const m88 = mergeStates(
+    { flashcardFailStats: { byCat: {}, byCard: { 'Y': 3 }, byModule: {}, byLesson: {} } },
+    { flashcardFailEvents: [{ id: 'devB:1:flashcard-fail:r', ts: 1, cardId: 'Y' }],
+      flashcardFailStats: { byCat: {}, byCard: { 'Y': 4 }, byModule: {}, byLesson: {} } },
+  );
+  ok(m88.flashcardFailStats.byCard['Y'] === 4,
+    `88. shared legacy doesn't double-count: max(aLegacy=3, bLegacy=3) + union(1) = 4 (got ${m88.flashcardFailStats.byCard['Y']})`);
+
+  /* 89: byCat axis preserves legacy too (not just byCard). */
+  const m89 = mergeStates(
+    { flashcardFailStats: { byCat: { ai: 7 }, byCard: {}, byModule: {}, byLesson: {} } },
+    { flashcardFailEvents: [{ id: 'devB:1:flashcard-fail:r', ts: 1, cardId: 'q', cat: 'ai' }],
+      flashcardFailStats: { byCat: { ai: 1 }, byCard: { q: 1 }, byModule: {}, byLesson: {} } },
+  );
+  ok(m89.flashcardFailStats.byCat.ai === 8,
+    `89. byCat legacy preserved on cross-device merge (got ${m89.flashcardFailStats.byCat.ai})`);
 
   console.log(`\n========================================`);
   console.log(`SUMMARY: ${pass} passed, ${fail} failed (of ${pass + fail})`);

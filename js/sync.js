@@ -271,18 +271,81 @@ window.SYNC = (function () {
     // would be more accurate but requires per-increment timestamps;
     // max preserves the high-water mark from each device, which is
     // good enough for the "what\'s sticking?" use case.)
-    const aFs = a.flashcardFailStats || {}, bFs = b.flashcardFailStats || {};
-    const mergeMaxCount = (x, y) => {
-      const out = { ...(x || {}) };
-      for (const k of Object.keys(y || {})) out[k] = Math.max(out[k] || 0, y[k] || 0);
-      return out;
-    };
-    merged.flashcardFailStats = {
-      byCat:    mergeMaxCount(aFs.byCat,    bFs.byCat),
-      byModule: mergeMaxCount(aFs.byModule, bFs.byModule),
-      byLesson: mergeMaxCount(aFs.byLesson, bFs.byLesson),
-      byCard:   mergeMaxCount(aFs.byCard,   bFs.byCard),
-    };
+    // Flashcard-fail merge: union the event ledgers by id, then
+    // re-derive the cached aggregate stats. Replaces the old per-key
+    // max merge which lost the second device's offline fails (same
+    // bug class the XP audit ledger solved). Falls back to per-key
+    // max on legacy clients that never wrote any events: at least
+    // the high-water mark is preserved while events accumulate.
+    const aEvents = Array.isArray(a.flashcardFailEvents) ? a.flashcardFailEvents : [];
+    const bEvents = Array.isArray(b.flashcardFailEvents) ? b.flashcardFailEvents : [];
+    if (aEvents.length || bEvents.length) {
+      const seenIds = new Set();
+      const unioned = [];
+      for (const src of [aEvents, bEvents]) {
+        for (const ev of src) {
+          if (!ev) continue;
+          const key = ev.id || `${ev.ts || ''}:${ev.cardId || ''}`;
+          if (seenIds.has(key)) continue;
+          seenIds.add(key);
+          unioned.push(ev);
+        }
+      }
+      unioned.sort((x, y) => (x.ts || 0) - (y.ts || 0));
+      if (unioned.length > 2000) unioned.splice(0, unioned.length - 2000);
+      merged.flashcardFailEvents = unioned;
+      // Preserve legacy pre-ledger fails: each device's cached count may
+      // include fails recorded before the event ledger existed (no event
+      // records). legacyBase per key = max(0, cached - derived). We add
+      // back max(aLegacy, bLegacy) so historical fails survive merges.
+      const deriveAxes = (events) => {
+        const out = { byCat: {}, byModule: {}, byLesson: {}, byCard: {} };
+        for (const e of events) {
+          if (!e) continue;
+          if (e.cardId) out.byCard[e.cardId]   = (out.byCard[e.cardId]   || 0) + 1;
+          if (e.cat)    out.byCat[e.cat]       = (out.byCat[e.cat]       || 0) + 1;
+          if (e.module) out.byModule[e.module] = (out.byModule[e.module] || 0) + 1;
+          if (e.lesson) out.byLesson[e.lesson] = (out.byLesson[e.lesson] || 0) + 1;
+        }
+        return out;
+      };
+      const aDerived = deriveAxes(aEvents);
+      const bDerived = deriveAxes(bEvents);
+      const unionDerived = deriveAxes(unioned);
+      const aCached = a.flashcardFailStats || {};
+      const bCached = b.flashcardFailStats || {};
+      const stats = { byCat: {}, byModule: {}, byLesson: {}, byCard: {} };
+      for (const axis of ['byCat', 'byModule', 'byLesson', 'byCard']) {
+        const uMap = unionDerived[axis];
+        const aMap = aCached[axis] || {};
+        const bMap = bCached[axis] || {};
+        const aDM = aDerived[axis];
+        const bDM = bDerived[axis];
+        const allKeys = new Set([
+          ...Object.keys(uMap), ...Object.keys(aMap), ...Object.keys(bMap),
+        ]);
+        for (const k of allKeys) {
+          const aLegacy = Math.max(0, (aMap[k] || 0) - (aDM[k] || 0));
+          const bLegacy = Math.max(0, (bMap[k] || 0) - (bDM[k] || 0));
+          stats[axis][k] = (uMap[k] || 0) + Math.max(aLegacy, bLegacy);
+        }
+      }
+      merged.flashcardFailStats = stats;
+    } else {
+      const aFs = a.flashcardFailStats || {}, bFs = b.flashcardFailStats || {};
+      const mergeMaxCount = (x, y) => {
+        const out = { ...(x || {}) };
+        for (const k of Object.keys(y || {})) out[k] = Math.max(out[k] || 0, y[k] || 0);
+        return out;
+      };
+      merged.flashcardFailStats = {
+        byCat:    mergeMaxCount(aFs.byCat,    bFs.byCat),
+        byModule: mergeMaxCount(aFs.byModule, bFs.byModule),
+        byLesson: mergeMaxCount(aFs.byLesson, bFs.byLesson),
+        byCard:   mergeMaxCount(aFs.byCard,   bFs.byCard),
+      };
+      merged.flashcardFailEvents = [];
+    }
 
     // Free-recall: array-per-key, concat + dedupe by ts
     merged.freeRecallAttempts = unionMapOfArrays(a.freeRecallAttempts, b.freeRecallAttempts);

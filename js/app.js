@@ -885,9 +885,12 @@ function syncSurgicalUpdates(currentState) {
 }
 
 // Pet update — replace the right-panel innerHTML with the freshly-rendered
-// version from the buffer. The left (3D canvas) host is preserved because
-// we don't touch it. Drop-food button on the swapped panel inherits the
-// delegated handler in bindEvents, so it keeps working.
+// version from the buffer. The left (3D canvas) host is preserved while
+// the pet's identity (stage / body / bodyHue) is unchanged. If sync
+// brought in a new lifecycle state (e.g. respawn flipped teen -> baby),
+// the data-pet-key stamps differ and we tear down + remount the 3D scene
+// so the visual matches. Drop-food button on the swapped panel inherits
+// the delegated handler in bindEvents, so it keeps working.
 function updatePetCardInPlace(liveCard, bufCard) {
   if (!liveCard || !bufCard) return;
   // Update header line (status text changes with activity)
@@ -898,7 +901,33 @@ function updatePetCardInPlace(liveCard, bufCard) {
   const livePanel = liveCard.querySelector('.pet-panel');
   const bufPanel  = bufCard.querySelector('.pet-panel');
   if (livePanel && bufPanel) livePanel.innerHTML = bufPanel.innerHTML;
-  // 3D host is left alone — canvas stays mounted, animation loop continues.
+
+  // 3D rebuild on identity change. Compare data-pet-key stamps; if they
+  // disagree, dispose the old canvas and mount fresh from current state.
+  // Without this, sync-merged respawns leave the user looking at the
+  // pre-respawn stage until they navigate away and back -- exactly the
+  // bug observed on FOIEGRAS after the (deathCount, stage) merge fix.
+  const liveKey = liveCard.getAttribute('data-pet-key');
+  const bufKey  = bufCard.getAttribute('data-pet-key');
+  if (liveKey !== bufKey) {
+    liveCard.setAttribute('data-pet-key', bufKey || '');
+    const liveHost = liveCard.querySelector('#pet-room-3d-host');
+    if (liveHost) {
+      if (liveHost._petHandle && typeof liveHost._petHandle.dispose === 'function') {
+        try { liveHost._petHandle.dispose(); } catch (_) {}
+      }
+      liveHost._petHandle = null;
+      liveHost.innerHTML = '';
+      const st = (window.APP && window.APP.getState) ? window.APP.getState() : null;
+      if (st && window.VIEWS && window.VIEWS.mountPet3D) {
+        try {
+          const newPet = { ...(st.pet || {}), lastTickDate: st.pet && st.pet.lastTickDate, autoSpawnFood: false };
+          const newHandle = window.VIEWS.mountPet3D(liveHost, newPet);
+          if (newHandle) liveHost._petHandle = newHandle;
+        } catch (e) { console.warn('[sync] pet rebuild after key change failed:', e); }
+      }
+    }
+  }
 }
 
 /*
