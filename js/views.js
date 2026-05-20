@@ -3956,14 +3956,18 @@ function renderDashboard(state, hub) {
    *   Day 7   -> 21
    *   Day 10+ -> 25  elite locked
    *
-   * FLASHCARDS / LESSONS (21-day ramp, unchanged):
-   *   Day 0   -> { flashcard: 5,  lesson: 5 }
+   * FLASHCARDS / LESSONS (21-day ramp):
+   *   Day 0   -> { flashcard: 5,  lesson: 3 }   lessons softened
    *   Day 21+ -> { flashcard: 25, lesson: 8 }
+   *
+   * Lessons are heavier per unit than flashcards (5–10 min each + an
+   * interactive), so the day-0 ask of 3 keeps "do today's curriculum"
+   * to ≤30 min for a returning user mid-week.
    *
    * Calendar-day progression: time off doesn't pause the bar. Forces
    * consistency -- the market doesn't pause for vacations. */
   const RAMP_DAYS = { flashcard: 21, lesson: 21, app: 10 };
-  const TARGET_START = { flashcard: 5,  lesson: 5, app: 4 };
+  const TARGET_START = { flashcard: 5,  lesson: 3, app: 4 };
   const TARGET_ELITE = { flashcard: 25, lesson: 8, app: 25 };
   const _historyAnchor = ((state.history || [])[0] && state.history[0].date) || _todayStr;
   // Per-metric anchor — apps can have an explicit override set via
