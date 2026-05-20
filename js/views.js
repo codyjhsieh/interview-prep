@@ -4083,36 +4083,34 @@ function renderDashboard(state, hub) {
       }
       return d;
     };
-    // Normalize against ELITE target (constant top reference) so the
-    // dashed goal curves can climb visibly over the window instead of
-    // sitting flat at 100%. Today's-target line lands wherever it lands
-    // on the ramp (start: 20-63%, elite: 100%).
-    const points = (key, eliteTarget) =>
-      days.map((d, i) => [sx(i), sy(d[key] / eliteTarget)]);
-    const linePath = (key, eliteTarget) => smoothPath(points(key, eliteTarget));
-    const goalPoints = (key, eliteTarget) =>
-      days.map((d, i) => [sx(i), sy(d[key + '_target'] / eliteTarget)]);
-    const goalPath = (key, eliteTarget) => smoothPath(goalPoints(key, eliteTarget));
-    const areaPath = (key, eliteTarget) => {
-      const p = points(key, eliteTarget);
+    // Normalize each metric against its OWN day-specific target. After
+    // this, 100% means "hit today's goal" for any of the three metrics,
+    // and all three goal lines collapse onto one shared horizontal at
+    // y=sy(1). Cleaner read than the old elite-normalized version,
+    // where the three dashed goal curves climbed at different rates and
+    // a 60% reading was ambiguous (which target?).
+    const norm = (val, target) => (target > 0 ? val / target : 0);
+    const points = (key) =>
+      days.map((d, i) => [sx(i), sy(norm(d[key], d[key + '_target']))]);
+    const linePath = (key) => smoothPath(points(key));
+    const areaPath = (key) => {
+      const p = points(key);
       if (!p.length) return '';
       const base = H - PAD_B;
       return smoothPath(p) + ` L${p[p.length-1][0].toFixed(1)},${base} L${p[0][0].toFixed(1)},${base} Z`;
     };
-    const todayDot = (key, eliteTarget, color) => {
+    const todayDot = (key, color) => {
       const p = days[days.length - 1];
-      const x = sx(days.length - 1), y = sy(p[key] / eliteTarget);
+      const x = sx(days.length - 1), y = sy(norm(p[key], p[key + '_target']));
       const r = windowDays <= 7 ? 3 : (windowDays <= 14 ? 2.4 : 2);
       return `
         <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r * 2.1).toFixed(1)}" fill="${color}" opacity="0.18"/>
         <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${color}"/>`;
     };
-    // Top reference at 100% of elite -- the ceiling all goal lines
-    // converge toward. Subtle so it doesn't compete with the climbing
-    // goal curves.
-    const eliteY = sy(1).toFixed(1);
+    // Single shared goal line at y=100% — every metric's "target hit"
+    // lands here. Replaces the three per-metric climbing dashed curves.
+    const goalY = sy(1).toFixed(1);
     const strokeW = windowDays <= 7 ? 1.8 : (windowDays <= 14 ? 1.6 : 1.4);
-    const goalStrokeW = (strokeW * 0.7).toFixed(2);
     return `
       <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block">
         <defs>
@@ -4133,40 +4131,27 @@ function renderDashboard(state, hub) {
             <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
-        <!-- Elite ceiling (100% of elite target) — light dashed reference -->
-        <line x1="${PAD_L}" y1="${eliteY}" x2="${W - PAD_R}" y2="${eliteY}"
-              stroke="rgba(15,23,42,0.10)" stroke-width="0.5" stroke-dasharray="2 5"/>
-        <!-- Area fills (performance) -->
-        <path d="${areaPath('app',       TARGET_ELITE.app)}"       fill="url(#grad-app)"/>
-        <path d="${areaPath('lesson',    TARGET_ELITE.lesson)}"    fill="url(#grad-lesson)"/>
-        <path d="${areaPath('flashcard', TARGET_ELITE.flashcard)}" fill="url(#grad-flashcard)"/>
-        <!-- Goal ramp curves (per metric, dashed). Climb from start-target
-             to elite as the user moves through the 21-day window. -->
-        <path d="${goalPath('app',       TARGET_ELITE.app)}"
-              fill="none" stroke="${COLORS.app}"       stroke-width="${goalStrokeW}"
-              stroke-dasharray="3 3" opacity="0.55"
-              stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="${goalPath('lesson',    TARGET_ELITE.lesson)}"
-              fill="none" stroke="${COLORS.lesson}"    stroke-width="${goalStrokeW}"
-              stroke-dasharray="3 3" opacity="0.55"
-              stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="${goalPath('flashcard', TARGET_ELITE.flashcard)}"
-              fill="none" stroke="${COLORS.flashcard}" stroke-width="${goalStrokeW}"
-              stroke-dasharray="3 3" opacity="0.55"
-              stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Single shared goal line at 100% of today's per-metric target.
+             Every performance line "hitting goal" lands on this row. -->
+        <line x1="${PAD_L}" y1="${goalY}" x2="${W - PAD_R}" y2="${goalY}"
+              stroke="rgba(15,23,42,0.32)" stroke-width="0.9" stroke-dasharray="4 4"/>
+        <!-- Area fills (performance, normalized per-day) -->
+        <path d="${areaPath('app')}"       fill="url(#grad-app)"/>
+        <path d="${areaPath('lesson')}"    fill="url(#grad-lesson)"/>
+        <path d="${areaPath('flashcard')}" fill="url(#grad-flashcard)"/>
         <!-- Performance curves (solid + glow) -->
-        <path d="${linePath('app',       TARGET_ELITE.app)}"
+        <path d="${linePath('app')}"
               fill="none" stroke="${COLORS.app}"       stroke-width="${strokeW}"
               stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
-        <path d="${linePath('lesson',    TARGET_ELITE.lesson)}"
+        <path d="${linePath('lesson')}"
               fill="none" stroke="${COLORS.lesson}"    stroke-width="${strokeW}"
               stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
-        <path d="${linePath('flashcard', TARGET_ELITE.flashcard)}"
+        <path d="${linePath('flashcard')}"
               fill="none" stroke="${COLORS.flashcard}" stroke-width="${strokeW}"
               stroke-linecap="round" stroke-linejoin="round" filter="url(#effort-glow)"/>
-        ${todayDot('app',       TARGET_ELITE.app,       COLORS.app)}
-        ${todayDot('lesson',    TARGET_ELITE.lesson,    COLORS.lesson)}
-        ${todayDot('flashcard', TARGET_ELITE.flashcard, COLORS.flashcard)}
+        ${todayDot('app',       COLORS.app)}
+        ${todayDot('lesson',    COLORS.lesson)}
+        ${todayDot('flashcard', COLORS.flashcard)}
       </svg>`;
   };
 
