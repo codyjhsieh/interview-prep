@@ -356,37 +356,6 @@ window.SYNC = (function () {
     // Free-recall: array-per-key, concat + dedupe by ts
     merged.freeRecallAttempts = unionMapOfArrays(a.freeRecallAttempts, b.freeRecallAttempts);
 
-    // Per-game stats — union by game id. For each game, union solved-
-    // puzzle maps and keep the better attempt per puzzle (lower timeSec
-    // wins; same as the local engine's keep-best logic). Same merge
-    // shape can extend to future games without changing this branch.
-    const aGS = a.gameStats || {};
-    const bGS = b.gameStats || {};
-    const mergedGS = {};
-    const gameIds = new Set([...Object.keys(aGS), ...Object.keys(bGS)]);
-    gameIds.forEach(gid => {
-      if (gid === 'crossword') {
-        const aSolved = (aGS.crossword && aGS.crossword.solved) || {};
-        const bSolved = (bGS.crossword && bGS.crossword.solved) || {};
-        const out = { ...aSolved };
-        for (const pid of Object.keys(bSolved)) {
-          const x = out[pid], y = bSolved[pid];
-          if (!x) { out[pid] = y; continue; }
-          // Keep the better attempt: lower timeSec wins; on tie, fewer
-          // reveals; on tie, later ts (last writer).
-          const xBetter = (x.timeSec || 0) < (y.timeSec || 0)
-            || ((x.timeSec || 0) === (y.timeSec || 0) && (x.reveals || 0) < (y.reveals || 0))
-            || ((x.timeSec || 0) === (y.timeSec || 0) && (x.reveals || 0) === (y.reveals || 0) && (x.ts || 0) >= (y.ts || 0));
-          out[pid] = xBetter ? x : y;
-        }
-        mergedGS.crossword = { solved: out };
-      } else {
-        // Generic future-game fallback: shallow-merge with later-ts wins
-        mergedGS[gid] = Object.assign({}, aGS[gid] || {}, bGS[gid] || {});
-      }
-    });
-    merged.gameStats = mergedGS;
-
     // Pet: deep-merge so name / color / stats all sync. Stats (vitality,
     // form, ageDays, etc.) are unioned via max; date fields take the
     // later string; identity fields (name, bodyHue) come from the
