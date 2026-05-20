@@ -3940,8 +3940,12 @@ function renderDashboard(state, hub) {
     .filter(f => _isTodayMs(f.lastReviewed)).length;
   const _todayLessons = Object.values(state.completedLessons || {})
     .filter(l => _isTodayMs(l.ts)).length;
-  const _todayApps = Object.values(state.jobApps || {})
-    .filter(a => a && a.applied && _isTodayMs(a.ts)).length;
+  // Bugfix: previously filtered on `a.applied`, but neither logJobApp
+  // nor applyRole sets that field — so _todayApps was always 0 and the
+  // chart never reflected app logging. Match the apps-card logic: any
+  // jobApps entry with today's ts counts.
+  const _todayApps = (Array.isArray(state.jobApps) ? state.jobApps : [])
+    .filter(a => a && _isTodayMs(a.ts)).length;
 
   /* Ramped daily targets — smoothstep climb from realistic-start to
    * elite-locked. Per-metric ramp length: apps ramp faster than
