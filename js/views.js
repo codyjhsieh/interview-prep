@@ -6159,6 +6159,7 @@ function renderSyncSection(sync) {
       </p>
       <div class="flex flex-wrap items-center gap-3">
         <div class="font-mono text-2xl tracking-[0.18em]" style="user-select:all">${esc(sync.code).replace(/(.{4})/, '$1-').replace(/(.{4})-(.{4})/,'$1-$2')}</div>
+        <button class="btn" data-sync-now>Sync now</button>
         <button class="btn btn-ghost" data-sync-unpair>Unpair this device</button>
       </div>
       <div id="sync-status" class="text-[11.5px] muted mt-3" style="min-height:1em">${esc(sync.last || 'idle')}</div>
@@ -6536,6 +6537,26 @@ function renderProfile(state, hub) {
     window.SYNC.unpair();
     hub.innerHTML = '';
     VIEWS.renderProfile(APP.getState(), hub);
+  });
+  // Manual push — bypasses the 30s push-debounce. Useful when active
+  // use keeps resetting the debounce timer and the auto-push never fires.
+  const syncNowBtn = container.querySelector('[data-sync-now]');
+  if (syncNowBtn) syncNowBtn.addEventListener('click', async () => {
+    if (!window.SYNC || !window.SYNC.pushNow) return;
+    const orig = syncNowBtn.textContent;
+    syncNowBtn.disabled = true;
+    syncNowBtn.textContent = 'Syncing…';
+    try {
+      await window.SYNC.pushNow();
+      syncNowBtn.textContent = 'Synced ✓';
+    } catch (_) {
+      syncNowBtn.textContent = 'Failed';
+    } finally {
+      setTimeout(() => {
+        syncNowBtn.disabled = false;
+        syncNowBtn.textContent = orig;
+      }, 1200);
+    }
   });
 }
 

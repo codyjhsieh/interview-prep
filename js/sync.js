@@ -56,11 +56,17 @@ window.SYNC = (function () {
    * tabs are visible. */
   const POLL_MS          = 40000;
   const PUSH_DEBOUNCE_MS = 30000;
+  // Hard cap on debounce starvation: even under continuous activity, the
+  // first dirty saveImmediate forces a push within this window. Without
+  // this, a user actively earning XP keeps resetting the debounce timer
+  // and the push never fires until they go idle for 30s.
+  const PUSH_MAX_WAIT_MS = 60000;
   const MIN_POLL_GAP_MS  = 10000;               // floor between focus-driven pulls
   const STORAGE_KEY      = 'fdeprep.v1';        // matches GAMI.STORAGE_KEY
 
   let pollTimer = null;
   let pushTimer = null;
+  let pushMaxWaitTimer = null;                  // fires PUSH_MAX_WAIT_MS after first dirty save
   let pushPending = false;
   let lastPolledAt = 0;
   let lastPushedHash = null;                    // hash of the last state we PUT
@@ -349,6 +355,37 @@ window.SYNC = (function () {
 
     // Free-recall: array-per-key, concat + dedupe by ts
     merged.freeRecallAttempts = unionMapOfArrays(a.freeRecallAttempts, b.freeRecallAttempts);
+
+    // Per-game stats — union by game id. For each game, union solved-
+    // puzzle maps and keep the better attempt per puzzle (lower timeSec
+    // wins; same as the local engine's keep-best logic). Same merge
+    // shape can extend to future games without changing this branch.
+    const aGS = a.gameStats || {};
+    const bGS = b.gameStats || {};
+    const mergedGS = {};
+    const gameIds = new Set([...Object.keys(aGS), ...Object.keys(bGS)]);
+    gameIds.forEach(gid => {
+      if (gid === 'crossword') {
+        const aSolved = (aGS.crossword && aGS.crossword.solved) || {};
+        const bSolved = (bGS.crossword && bGS.crossword.solved) || {};
+        const out = { ...aSolved };
+        for (const pid of Object.keys(bSolved)) {
+          const x = out[pid], y = bSolved[pid];
+          if (!x) { out[pid] = y; continue; }
+          // Keep the better attempt: lower timeSec wins; on tie, fewer
+          // reveals; on tie, later ts (last writer).
+          const xBetter = (x.timeSec || 0) < (y.timeSec || 0)
+            || ((x.timeSec || 0) === (y.timeSec || 0) && (x.reveals || 0) < (y.reveals || 0))
+            || ((x.timeSec || 0) === (y.timeSec || 0) && (x.reveals || 0) === (y.reveals || 0) && (x.ts || 0) >= (y.ts || 0));
+          out[pid] = xBetter ? x : y;
+        }
+        mergedGS.crossword = { solved: out };
+      } else {
+        // Generic future-game fallback: shallow-merge with later-ts wins
+        mergedGS[gid] = Object.assign({}, aGS[gid] || {}, bGS[gid] || {});
+      }
+    });
+    merged.gameStats = mergedGS;
 
     // Pet: deep-merge so name / color / stats all sync. Stats (vitality,
     // form, ageDays, etc.) are unioned via max; date fields take the
@@ -647,8 +684,31 @@ window.SYNC = (function () {
   // ── Lifecycle ───────────────────────────────────────────────────────
   function scheduleSync() {
     pushPending = true;
+    // Debounce: every new save resets a 30s "quiet period" timer. Good
+    // for batching bursts of saves (e.g. multiple awardXP within seconds).
     clearTimeout(pushTimer);
-    pushTimer = setTimeout(() => { pushPending = false; pushNow(); }, PUSH_DEBOUNCE_MS);
+    pushTimer = setTimeout(() => {
+      pushPending = false;
+      clearTimeout(pushMaxWaitTimer);
+      pushMaxWaitTimer = null;
+      pushNow();
+    }, PUSH_DEBOUNCE_MS);
+    // Max-wait cap: the FIRST dirty save also arms a hard-cap timer that
+    // cannot be reset by subsequent saves. If continuous activity keeps
+    // resetting pushTimer for longer than PUSH_MAX_WAIT_MS, this fires
+    // and forces the push anyway. Without this, an active user never
+    // syncs to KV.
+    if (!pushMaxWaitTimer) {
+      pushMaxWaitTimer = setTimeout(() => {
+        pushMaxWaitTimer = null;
+        if (pushPending) {
+          clearTimeout(pushTimer);
+          pushTimer = null;
+          pushPending = false;
+          pushNow();
+        }
+      }, PUSH_MAX_WAIT_MS);
+    }
   }
 
   async function pollOnce() {
@@ -797,7 +857,26 @@ window.SYNC = (function () {
     // Belt + suspenders for iOS standalone webviews: visibilitychange
     // sometimes fires without a corresponding window.focus event.
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && getCode() && isConfigured()) pollOnce();
+      if (!getCode() || !isConfigured()) return;
+      if (document.visibilityState === 'visible') {
+        pollOnce();
+      } else if (pushPending) {
+        // Hiding the tab — flush any debounced push immediately so the
+        // user's latest progress lands in KV before they switch away.
+        clearTimeout(pushTimer); pushTimer = null;
+        clearTimeout(pushMaxWaitTimer); pushMaxWaitTimer = null;
+        pushPending = false;
+        pushNow();
+      }
+    });
+    // Pagehide fires for back/forward cache + tab close. Last chance to
+    // flush before the page is frozen or unloaded.
+    window.addEventListener('pagehide', () => {
+      if (!getCode() || !isConfigured() || !pushPending) return;
+      clearTimeout(pushTimer); pushTimer = null;
+      clearTimeout(pushMaxWaitTimer); pushMaxWaitTimer = null;
+      pushPending = false;
+      pushNow();
     });
   }
 
