@@ -3648,9 +3648,15 @@ function renderJobAppsCard(state) {
   const apps     = Array.isArray(state.jobApps) ? state.jobApps : [];
   const count    = apps.filter(j => j.date === todayKey).length;
   const goal     = (state.user && state.user.goal) || 60;
-  const perApp   = Math.max(1, Math.round(goal / 20));
-  const target   = 10;                      // 10 apps = half goal
-  const pct      = Math.min(100, Math.round((count / target) * 100));
+  const baseXP   = Math.max(1, Math.round(goal / 20));
+  // Ramped target — shared source of truth with the daily-effort chart.
+  // Day 0: 2 (very achievable). Day 10+: 25 (elite locked).
+  const target   = GAMI.dailyAppTarget(state);
+  const pct      = Math.min(100, Math.round((count / Math.max(1, target)) * 100));
+  // Morning bonus: 2× per-app XP if logged before 11am local. Strong
+  // nudge to front-load apps when reply rates are highest.
+  const morning  = GAMI.appMorningBonusActive();
+  const perApp   = morning ? baseXP * GAMI.APP_MORNING_BONUS_MULT : baseXP;
 
   const canRemove = count > 0;
   const card = el('div', 'card');
@@ -3675,14 +3681,23 @@ function renderJobAppsCard(state) {
       </div>
     </div>
     <div class="bar mt-3"><i style="width:${pct}%; transition: width 0.4s var(--spring-overshoot)"></i></div>
+    ${morning
+      ? `<div class="morning-bonus-banner mt-3" role="status">
+           <span class="mb-icon" aria-hidden="true">🌅</span>
+           <span class="mb-body"><b>2× morning bonus active</b> · expires at ${GAMI.APP_MORNING_CUTOFF_HOUR}:00. Apply now while reply rates are highest.</span>
+         </div>`
+      : `<div class="text-[11.5px] muted mt-2" style="opacity:0.7">
+           <span aria-hidden="true">🌅</span> Morning 2× bonus next: tomorrow before ${GAMI.APP_MORNING_CUTOFF_HOUR}:00.
+         </div>`}
     <div class="text-xs muted mt-2">
-      Each app = <span class="font-mono numeric" style="color:var(--accent)">+${perApp}</span> XP. <strong>10 = half daily goal (${goal}).</strong>
+      Each app = <span class="font-mono numeric" style="color:var(--accent)">+${perApp}</span> XP${morning ? ' <span style="color:var(--accent)">(2×)</span>' : ''}. <strong>${target} = today’s target.</strong>
     </div>
   `;
 
   card.querySelector('[data-app-add]').addEventListener('click', () => {
     const st = (window.APP && window.APP.getState) ? window.APP.getState() : state;
-    const { xpGained } = GAMI.logJobApp(st);
+    const result = GAMI.logJobApp(st);
+    const { xpGained, morningBonus } = result;
     GAMI.saveImmediate(st);
     card.replaceWith(renderJobAppsCard(st));
     // Refresh the header chips (Today XP / Level / streak) so the locally-
@@ -3692,9 +3707,10 @@ function renderJobAppsCard(state) {
     }
     if (window.ANIM && window.ANIM.toast) {
       const remaining = target - (count + 1);
+      const prefix = morningBonus ? '🌅 Morning bonus · ' : '';
       window.ANIM.toast({
         title: 'Application logged',
-        body:  `+${xpGained} XP — ${remaining > 0 ? `${remaining} more to half goal` : 'half goal reached'}.`,
+        body:  `${prefix}+${xpGained} XP${morningBonus ? ' (2×)' : ''} — ${remaining > 0 ? `${remaining} more to today’s target` : 'target hit'}.`,
       });
     }
   });
@@ -3928,27 +3944,36 @@ function renderDashboard(state, hub) {
     .filter(a => a && a.applied && _isTodayMs(a.ts)).length;
 
   /* Ramped daily targets — smoothstep climb from realistic-start to
-   * elite-locked over 21 calendar days. Anchored to the user's first
-   * history entry so a brand-new user starts at day 0 = realistic.
+   * elite-locked. Per-metric ramp length: apps ramp faster than
+   * flashcards/lessons because the cost of one app is lower and
+   * front-loading the queue matters more (response rates highest in
+   * the first week of a search).
    *
-   *   Day 0  -> { flashcard: 5,  lesson: 5, app: 10 }   realistic start
-   *   Day 7  -> { flashcard: 11, lesson: 6, app: 13 }
-   *   Day 14 -> { flashcard: 22, lesson: 8, app: 18 }
-   *   Day 21+-> { flashcard: 25, lesson: 8, app: 20 }   elite locked
+   * APPS (10-day ramp):
+   *   Day 0   -> 2   very achievable; "log 2 today" is doable on any day
+   *   Day 3   -> 7
+   *   Day 5   -> 13
+   *   Day 7   -> 20
+   *   Day 10+ -> 25  elite locked
+   *
+   * FLASHCARDS / LESSONS (21-day ramp, unchanged):
+   *   Day 0   -> { flashcard: 5,  lesson: 5 }
+   *   Day 21+ -> { flashcard: 25, lesson: 8 }
    *
    * Calendar-day progression: time off doesn't pause the bar. Forces
    * consistency -- the market doesn't pause for vacations. */
-  const RAMP_DAYS = 21;
-  const TARGET_START = { flashcard: 5,  lesson: 5, app: 10 };
-  const TARGET_ELITE = { flashcard: 25, lesson: 8, app: 20 };
+  const RAMP_DAYS = { flashcard: 21, lesson: 21, app: 10 };
+  const TARGET_START = { flashcard: 5,  lesson: 5, app: 2 };
+  const TARGET_ELITE = { flashcard: 25, lesson: 8, app: 25 };
   const _anchorDate = ((state.history || [])[0] && state.history[0].date) || _todayStr;
   const _daysSinceAnchor = Math.max(0, Math.floor(
     (new Date(_todayStr) - new Date(_anchorDate)) / 86400000
   ));
-  const _rampT = Math.min(1, _daysSinceAnchor / RAMP_DAYS);
-  const _rampEase = 3 * _rampT * _rampT - 2 * _rampT * _rampT * _rampT;   // smoothstep
-  const _rampedTarget = (k) =>
-    Math.round(TARGET_START[k] + (TARGET_ELITE[k] - TARGET_START[k]) * _rampEase);
+  const _smoothstep = (t) => 3 * t * t - 2 * t * t * t;
+  const _rampedTarget = (k) => {
+    const t = Math.min(1, _daysSinceAnchor / RAMP_DAYS[k]);
+    return Math.round(TARGET_START[k] + (TARGET_ELITE[k] - TARGET_START[k]) * _smoothstep(t));
+  };
   // TARGETS holds *today's* ramped values, used by the legend pills
   // ("8/5/12" etc). The dashed climbing curves in the SVG show the
   // full goal trajectory across the window, so no separate "Day N/21
@@ -3976,9 +4001,8 @@ function renderDashboard(state, hub) {
     const days = Math.max(0, Math.floor(
       (new Date(dateKey) - new Date(_anchorDate)) / 86400000
     ));
-    const t = Math.min(1, days / RAMP_DAYS);
-    const ease = 3 * t * t - 2 * t * t * t;
-    return TARGET_START[metric] + (TARGET_ELITE[metric] - TARGET_START[metric]) * ease;
+    const t = Math.min(1, days / RAMP_DAYS[metric]);
+    return TARGET_START[metric] + (TARGET_ELITE[metric] - TARGET_START[metric]) * _smoothstep(t);
   };
 
   /* Build the {date,flashcard,lesson,app, *_target} samples for a N-day

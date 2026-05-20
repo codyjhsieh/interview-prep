@@ -468,19 +468,54 @@ function reviewCard(state, cardId, quality /* 1..4 */) {
  * The actual `xpGained` (including any random-multiplier bonus from
  * awardXP) is what we store on the entry, so unlogging via
  * `removeLastJobApp` can subtract exactly that amount back out. */
+/* Morning bonus — every app logged before 11am local pays out 2× XP.
+ * Single-purpose mechanic: cold-applying in the morning has higher
+ * response rates (every applicant-tracking blog says so) and it's also
+ * the easiest hour to procrastinate past. The XP doubler is a flat,
+ * visible, hard-to-ignore nudge.
+ *
+ * Cutoff is 11:00 local — generous enough to catch realistic-morning
+ * starts (8–10am) without rewarding the "just-woke-up-at-noon" lie. */
+const APP_MORNING_CUTOFF_HOUR = 11;
+const APP_MORNING_BONUS_MULT  = 2;
+function appMorningBonusActive() {
+  return new Date().getHours() < APP_MORNING_CUTOFF_HOUR;
+}
+function appMorningMultiplier() {
+  return appMorningBonusActive() ? APP_MORNING_BONUS_MULT : 1;
+}
+
+/* Daily application target — ramped smoothstep, start very achievable
+ * and elite-locked fast. Source of truth so the dashboard apps card and
+ * the daily-effort chart agree. */
+const APP_RAMP_DAYS  = 10;
+const APP_TARGET_START = 2;
+const APP_TARGET_ELITE = 25;
+function dailyAppTarget(state) {
+  const anchor = (state.history && state.history[0] && state.history[0].date) || todayKey();
+  const days   = Math.max(0, Math.floor((new Date(todayKey()) - new Date(anchor)) / 86400000));
+  const t      = Math.min(1, days / APP_RAMP_DAYS);
+  const ease   = 3 * t * t - 2 * t * t * t;
+  return Math.round(APP_TARGET_START + (APP_TARGET_ELITE - APP_TARGET_START) * ease);
+}
+
 function logJobApp(state) {
   tickDay(state);
   if (!Array.isArray(state.jobApps)) state.jobApps = [];
   const goal = (state.user && state.user.goal) || 60;
-  // Per-app XP: goal/20 so 10 apps = half a day's goal (the other half
-  // is curriculum). Floor at XP_APP_BASE for small-goal users.
-  const perAppXP = Math.max(XP_APP_BASE, Math.round(goal / 20));
-  const award = awardXP(state, perAppXP, 'app');
-  const entry = { date: todayKey(), ts: Date.now(), xp: award.xpGained, awardId: award.awardId };
+  // Per-app XP: goal/20 floor XP_APP_BASE. Morning 2× multiplier applies
+  // before awardXP so the random-multiplier bonus stacks on top of it.
+  const baseXP = Math.max(XP_APP_BASE, Math.round(goal / 20));
+  const mult   = appMorningMultiplier();
+  const award  = awardXP(state, baseXP * mult, 'app');
+  const entry = {
+    date: todayKey(), ts: Date.now(), xp: award.xpGained, awardId: award.awardId,
+    morning: mult > 1 ? true : undefined,
+  };
   state.jobApps.push(entry);
   // Cap retained history (~1y of heavy use) to keep state size bounded.
   if (state.jobApps.length > 1000) state.jobApps.splice(0, state.jobApps.length - 1000);
-  return { entry, ...award };
+  return { entry, ...award, morningBonus: mult > 1 };
 }
 
 /* Toggle-on a specific role as "applied to". Same XP rules as logJobApp
@@ -493,9 +528,10 @@ function applyRole(state, roleKey, meta) {
   if (!Array.isArray(state.jobApps)) state.jobApps = [];
   if (state.jobApps.some(j => j.roleKey === roleKey)) return null;   // already applied
   const goal = (state.user && state.user.goal) || 60;
-  // Match logJobApp — goal/20, floor XP_APP_BASE.
-  const perAppXP = Math.max(XP_APP_BASE, Math.round(goal / 20));
-  const award = awardXP(state, perAppXP, 'app');
+  // Match logJobApp — goal/20, floor XP_APP_BASE, 2× before 11am local.
+  const baseXP = Math.max(XP_APP_BASE, Math.round(goal / 20));
+  const mult   = appMorningMultiplier();
+  const award  = awardXP(state, baseXP * mult, 'app');
   const entry = {
     date: todayKey(), ts: Date.now(), xp: award.xpGained,
     awardId: award.awardId,
@@ -503,10 +539,11 @@ function applyRole(state, roleKey, meta) {
     company: meta && meta.company,
     title:   meta && meta.title,
     url:     meta && meta.url,
+    morning: mult > 1 ? true : undefined,
   };
   state.jobApps.push(entry);
   if (state.jobApps.length > 1000) state.jobApps.splice(0, state.jobApps.length - 1000);
-  return { entry, ...award };
+  return { entry, ...award, morningBonus: mult > 1 };
 }
 
 /* Toggle-off — remove the jobApp entry matching roleKey, refund its
@@ -1309,6 +1346,8 @@ return {
   STORAGE_KEY, load, save, saveImmediate, reset,
   tickDay, awardXP, logLessonComplete, logJobApp, removeLastJobApp,
   applyRole, unapplyRole, isRoleApplied,
+  dailyAppTarget, appMorningBonusActive, appMorningMultiplier,
+  APP_MORNING_CUTOFF_HOUR, APP_MORNING_BONUS_MULT,
   feedPetWithPile,
   reviewCard, dueCards,
   recordFlashcardFail, deriveFlashcardFailStats,

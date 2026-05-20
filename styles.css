@@ -2848,3 +2848,43 @@ blockquote {
   transform: rotate(45deg) scale(1);
   opacity: 1;
 }
+
+/* ─── Morning bonus banner on the apps card ───────────────────────────
+ * Active before 11am local. Warm-sunrise gradient + amber accent so the
+ * "log apps now" nudge reads as a high-signal CTA, not just chrome. */
+.morning-bonus-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: #6b3a0a;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, #FFB95C 22%, #fff),
+    color-mix(in srgb, #FFB95C 8%, #fff)
+  );
+  border: 1px solid color-mix(in srgb, #FFB95C 40%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    0 2px 6px -2px color-mix(in srgb, #FFB95C 50%, transparent);
+  animation: mb-pulse 2.6s var(--spring-settle) infinite;
+}
+.morning-bonus-banner .mb-icon { font-size: 16px; line-height: 1; flex-shrink: 0; }
+.morning-bonus-banner .mb-body { flex: 1; }
+.morning-bonus-banner b { font-weight: 700; color: #b45309; }
+@keyframes mb-pulse {
+  0%,100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 2px 6px -2px color-mix(in srgb, #FFB95C 50%, transparent); }
+  50%     { box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 4px 14px -4px color-mix(in srgb, #FFB95C 80%, transparent); }
+}
+@media (prefers-color-scheme: dark) {
+  .morning-bonus-banner {
+    color: #fde9c2;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, #FFB95C 28%, transparent),
+      color-mix(in srgb, #FFB95C 8%, transparent)
+    );
+  }
+  .morning-bonus-banner b { color: #FFB95C; }
+}
