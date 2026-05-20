@@ -489,7 +489,7 @@ function appMorningMultiplier() {
  * and elite-locked fast. Source of truth so the dashboard apps card and
  * the daily-effort chart agree. */
 const APP_RAMP_DAYS  = 10;
-const APP_TARGET_START = 2;
+const APP_TARGET_START = 4;
 const APP_TARGET_ELITE = 25;
 function dailyAppTarget(state) {
   // Anchor priority: explicit state.appsRampAnchor (set when user

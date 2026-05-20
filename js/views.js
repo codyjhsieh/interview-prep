@@ -3950,10 +3950,10 @@ function renderDashboard(state, hub) {
    * the first week of a search).
    *
    * APPS (10-day ramp):
-   *   Day 0   -> 2   very achievable; "log 2 today" is doable on any day
-   *   Day 3   -> 7
-   *   Day 5   -> 13
-   *   Day 7   -> 20
+   *   Day 0   -> 4   day-one ask is non-trivial — sets the tone
+   *   Day 3   -> 9
+   *   Day 5   -> 15
+   *   Day 7   -> 21
    *   Day 10+ -> 25  elite locked
    *
    * FLASHCARDS / LESSONS (21-day ramp, unchanged):
@@ -3963,7 +3963,7 @@ function renderDashboard(state, hub) {
    * Calendar-day progression: time off doesn't pause the bar. Forces
    * consistency -- the market doesn't pause for vacations. */
   const RAMP_DAYS = { flashcard: 21, lesson: 21, app: 10 };
-  const TARGET_START = { flashcard: 5,  lesson: 5, app: 2 };
+  const TARGET_START = { flashcard: 5,  lesson: 5, app: 4 };
   const TARGET_ELITE = { flashcard: 25, lesson: 8, app: 25 };
   const _historyAnchor = ((state.history || [])[0] && state.history[0].date) || _todayStr;
   // Per-metric anchor — apps can have an explicit override set via
