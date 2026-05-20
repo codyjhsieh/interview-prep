@@ -3965,15 +3965,25 @@ function renderDashboard(state, hub) {
   const RAMP_DAYS = { flashcard: 21, lesson: 21, app: 10 };
   const TARGET_START = { flashcard: 5,  lesson: 5, app: 2 };
   const TARGET_ELITE = { flashcard: 25, lesson: 8, app: 25 };
-  const _anchorDate = ((state.history || [])[0] && state.history[0].date) || _todayStr;
-  const _daysSinceAnchor = Math.max(0, Math.floor(
-    (new Date(_todayStr) - new Date(_anchorDate)) / 86400000
-  ));
+  const _historyAnchor = ((state.history || [])[0] && state.history[0].date) || _todayStr;
+  // Per-metric anchor — apps can have an explicit override set via
+  // state.appsRampAnchor so "start the apps ramp today" is a one-line
+  // state change. Flashcards/lessons keep history-anchored ramps.
+  const _anchorForMetric = (k) =>
+    (k === 'app' && state.appsRampAnchor) ? state.appsRampAnchor : _historyAnchor;
   const _smoothstep = (t) => 3 * t * t - 2 * t * t * t;
   const _rampedTarget = (k) => {
-    const t = Math.min(1, _daysSinceAnchor / RAMP_DAYS[k]);
+    const anchor = _anchorForMetric(k);
+    const days = Math.max(0, Math.floor((new Date(_todayStr) - new Date(anchor)) / 86400000));
+    const t = Math.min(1, days / RAMP_DAYS[k]);
     return Math.round(TARGET_START[k] + (TARGET_ELITE[k] - TARGET_START[k]) * _smoothstep(t));
   };
+  // Used downstream by the legacy "_daysSinceAnchor" reference if any
+  // remains; keep the global history-day count so non-app metrics still
+  // show day-N progress consistently with the chart axis.
+  const _daysSinceAnchor = Math.max(0, Math.floor(
+    (new Date(_todayStr) - new Date(_historyAnchor)) / 86400000
+  ));
   // TARGETS holds *today's* ramped values, used by the legend pills
   // ("8/5/12" etc). The dashed climbing curves in the SVG show the
   // full goal trajectory across the window, so no separate "Day N/21
@@ -3998,8 +4008,9 @@ function renderDashboard(state, hub) {
    * Used to draw the goal curve so the user can see the bar climbing
    * over the window, not just sitting flat at today's value. */
   const _rampedTargetOn = (dateKey, metric) => {
+    const anchor = _anchorForMetric(metric);
     const days = Math.max(0, Math.floor(
-      (new Date(dateKey) - new Date(_anchorDate)) / 86400000
+      (new Date(dateKey) - new Date(anchor)) / 86400000
     ));
     const t = Math.min(1, days / RAMP_DAYS[metric]);
     return TARGET_START[metric] + (TARGET_ELITE[metric] - TARGET_START[metric]) * _smoothstep(t);

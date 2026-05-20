@@ -492,7 +492,13 @@ const APP_RAMP_DAYS  = 10;
 const APP_TARGET_START = 2;
 const APP_TARGET_ELITE = 25;
 function dailyAppTarget(state) {
-  const anchor = (state.history && state.history[0] && state.history[0].date) || todayKey();
+  // Anchor priority: explicit state.appsRampAnchor (set when user
+  // chooses "start today") → first-history date → today. The override
+  // lets a returning user (whose history starts weeks ago) reset the
+  // apps ramp without affecting flashcard/lesson ramps.
+  const anchor = state.appsRampAnchor
+    || (state.history && state.history[0] && state.history[0].date)
+    || todayKey();
   const days   = Math.max(0, Math.floor((new Date(todayKey()) - new Date(anchor)) / 86400000));
   const t      = Math.min(1, days / APP_RAMP_DAYS);
   const ease   = 3 * t * t - 2 * t * t * t;
