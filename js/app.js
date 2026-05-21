@@ -735,10 +735,18 @@ function init() {
     // already in the DOM and the gate fades to reveal a live app.
     render();
     maybeShowLoginGate();
-    // Auto-save safeguards
-    window.addEventListener('visibilitychange', () => GAMI.saveImmediate(state));
-    window.addEventListener('beforeunload', () => GAMI.saveImmediate(state));
-    setInterval(() => GAMI.saveImmediate(state), 20000);
+    // Auto-save safeguards. CRITICAL: these write to localStorage only
+    // (GAMI.save), NOT GAMI.saveImmediate. sync.js wraps saveImmediate
+    // to set pushPending=true, which gates pollOnce. If the periodic
+    // 20s save fires saveImmediate, the app perpetually has
+    // pushPending=true → poll is blocked → pulls only succeed in tiny
+    // windows between max-wait expiry and the next periodic save. Real
+    // state-changing actions (logJobApp, feed, lesson complete, etc.)
+    // already call saveImmediate explicitly; this is just a safety net
+    // against losing the in-memory state on a crash/reload.
+    window.addEventListener('visibilitychange', () => { try { GAMI.save(state); } catch(_) {} });
+    window.addEventListener('beforeunload',    () => { try { GAMI.save(state); } catch(_) {} });
+    setInterval(() => { try { GAMI.save(state); } catch(_) {} }, 20000);
 
     // Liquid Glass tab bar — minimize-on-scroll. Passive listener for
     // jank-free scroll handling; the work is rAF-throttled.
