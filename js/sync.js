@@ -701,18 +701,25 @@ window.SYNC = (function () {
     const localSeq  = local._seq  || 0;
     const remoteHash = hashState(remote);
     const localHash = hashState(local);
+    // Helper: on a no-change poll, flash the 'pulled' green pulse before
+    // returning. Gives the user a visible "I just polled and we're in
+    // sync" heartbeat. Previously, no-change polls were silent — the
+    // indicator stayed at gentle gray ('paired') forever and users had
+    // no signal that polling was alive. The brief flare consumes no KV
+    // writes; it's purely a CSS state toggle.
+    const settleNoChange = () => setStatus('pulled');
     if (remoteSeq && localSeq) {
       // KV does not provide compare-and-swap for the Worker read-modify-
       // write that stamps _seq. Rare simultaneous PUTs can therefore
       // produce equal _seq values with different content. In that case,
       // merge by content instead of skipping on sequence equality.
-      if (remoteSeq < localSeq) return;
-      if (remoteSeq === localSeq && remoteHash === localHash) return;
-      if (remoteSeq <= lastSeenRemoteSeq && remoteHash === lastSeenRemoteHash) return;
+      if (remoteSeq < localSeq)                                           { settleNoChange(); return; }
+      if (remoteSeq === localSeq && remoteHash === localHash)             { settleNoChange(); return; }
+      if (remoteSeq <= lastSeenRemoteSeq && remoteHash === lastSeenRemoteHash) { settleNoChange(); return; }
     } else {
       const remoteT = remote.updatedAt || 0;
-      if (remoteT < (local.updatedAt || 0) && remoteHash === localHash) return;
-      if (remoteT <= lastSeenRemoteUpdatedAt && remoteHash === lastSeenRemoteHash) return;
+      if (remoteT < (local.updatedAt || 0) && remoteHash === localHash)   { settleNoChange(); return; }
+      if (remoteT <= lastSeenRemoteUpdatedAt && remoteHash === lastSeenRemoteHash) { settleNoChange(); return; }
     }
     const merged = mergeStates(local, remote);
     lastSeenRemoteSeq = Math.max(lastSeenRemoteSeq, remoteSeq);
