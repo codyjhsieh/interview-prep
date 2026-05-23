@@ -360,6 +360,11 @@ function feedPetWithPile(state) {
   } else {
     p.form = Math.max(-50, (p.form || 0) - 1);
   }
+  // Audit trail — each drop is a 0-XP event in today's history. Until
+  // now drops only mutated eatenTodayXP (a single counter), so "did I
+  // really drop 10 piles?" was unverifiable across devices. Per-drop
+  // event lets us reconstruct the feeding timeline.
+  try { appendHistoryAward(state, today, 'food', 0); } catch (_) {}
   return true;
 }
 
@@ -987,6 +992,10 @@ function _petTick(p, today, state) {
   let daysElapsed = daysBetween(p.lastTickDate || today, today);
   if (daysElapsed <= 0) { p.lastTickDate = today; return p; }
   daysElapsed = Math.min(daysElapsed, 30);
+  // Snapshot pre-tick lifecycle state so we can detect transitions
+  // (death, stage advance) after the tick block and write audit events.
+  const _preDeathCount = p.deathCount || 0;
+  const _preStage      = p.stage;
 
   // ── DAILY-GOAL RULE ─────────────────────────────────────────────────
   // For every *complete* calendar day from p.lastTickDate (inclusive) up
@@ -1039,6 +1048,18 @@ function _petTick(p, today, state) {
   }
   if (p.stage === 'baby' && p.ageDays >= 3) p.stage = 'teen';
   if (p.stage === 'teen' && p.ageDays >= 8) p.stage = 'adult';
+  // Audit trail — lifecycle transitions get 0-XP events in today's
+  // history. Captures death + stage advancement so the timeline can
+  // show "Bit evolved to teen on 2026-05-24" without diffing snapshots.
+  // Per-device duplicate risk is low (both devices would need to
+  // converge on the same tick within the same calendar day); a stable
+  // dedupe key per (date, eventKind) can be added later if it happens.
+  if (state) {
+    try {
+      if ((p.deathCount || 0) > _preDeathCount) appendHistoryAward(state, today, 'pet-death', 0);
+      if (p.stage !== _preStage)                appendHistoryAward(state, today, `pet-${p.stage}`, 0);
+    } catch (_) {}
+  }
   return p;
 }
 
