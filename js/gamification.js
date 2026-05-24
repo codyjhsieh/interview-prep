@@ -490,12 +490,21 @@ function appMorningMultiplier() {
   return appMorningBonusActive() ? APP_MORNING_BONUS_MULT : 1;
 }
 
-/* Daily application target — ramped smoothstep, start very achievable
- * and elite-locked fast. Source of truth so the dashboard apps card and
- * the daily-effort chart agree. */
-const APP_RAMP_DAYS  = 10;
-const APP_TARGET_START = 4;
-const APP_TARGET_ELITE = 25;
+/* Daily application target — ramped smoothstep, tuned for habit
+ * psychology rather than aspirational benchmarks:
+ *   - START=1: two-minute-rule day 0. A "bad day" can still hit "log
+ *     one application." Hitting the target preserves the streak and
+ *     reinforces the identity ("I am someone who applies daily")
+ *     instead of breaking it.
+ *   - ELITE=15: a number you can sustain for *months* of active job-
+ *     searching without burnout. 25/day is sprint territory and
+ *     rewards quantity over quality; 15/day is heavy but sustainable.
+ *   - RAMP=21 days: matches the habit-formation literature midpoint
+ *     (21-66 days range). Slow enough that the early streak compounds.
+ * Source of truth so the dashboard apps card + chart agree. */
+const APP_RAMP_DAYS  = 21;
+const APP_TARGET_START = 1;
+const APP_TARGET_ELITE = 15;
 function dailyAppTarget(state) {
   // Anchor priority: explicit state.appsRampAnchor (set when user
   // chooses "start today") → first-history date → today. The override

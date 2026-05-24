@@ -3954,32 +3954,34 @@ function renderDashboard(state, hub) {
   const _todayApps = (Array.isArray(state.jobApps) ? state.jobApps : [])
     .filter(a => a && _isTodayMs(a.ts)).length;
 
-  /* Ramped daily targets — smoothstep climb from realistic-start to
-   * elite-locked. Per-metric ramp length: apps ramp faster than
-   * flashcards/lessons because the cost of one app is lower and
-   * front-loading the queue matters more (response rates highest in
-   * the first week of a search).
+  /* Ramped daily targets — tuned for habit psychology, not aspiration.
    *
-   * APPS (10-day ramp):
-   *   Day 0   -> 4   day-one ask is non-trivial — sets the tone
-   *   Day 3   -> 9
-   *   Day 5   -> 15
-   *   Day 7   -> 21
-   *   Day 10+ -> 25  elite locked
+   * Day 0 of every metric is intentionally tiny so a "bad day" can
+   * still hit the target. Two-minute-rule applied: starting cost
+   * < 2 minutes. Streak preserved → identity reinforced ("I am someone
+   * who reviews flashcards / completes lessons / applies daily").
    *
-   * FLASHCARDS / LESSONS (21-day ramp):
-   *   Day 0   -> { flashcard: 5,  lesson: 3 }   lessons softened
-   *   Day 21+ -> { flashcard: 25, lesson: 8 }
+   * ELITE numbers chosen to be sustainable for *months* of active prep,
+   * not sprint ceilings. Hitting elite for years should feel possible.
    *
-   * Lessons are heavier per unit than flashcards (5–10 min each + an
-   * interactive), so the day-0 ask of 3 keeps "do today's curriculum"
-   * to ≤30 min for a returning user mid-week.
+   * RAMP DAYS aligned with habit formation literature (21–66 days
+   * range; 30 days is the defensible midpoint for behavior change).
+   * Apps uses 21 because active job-search is time-bounded, not a
+   * lifetime habit.
+   *
+   *   FLASHCARDS  (30-day ramp): 2 → 20
+   *   LESSONS     (30-day ramp): 1 → 5
+   *   APPS        (21-day ramp): 1 → 15
+   *
+   * Day-0 combined effort: ~10 min (1 flashcard + 1 lesson + 1 app).
+   * Day-30 combined effort: ~90-120 min/day. Sustainable elite, not
+   * sprint territory.
    *
    * Calendar-day progression: time off doesn't pause the bar. Forces
-   * consistency -- the market doesn't pause for vacations. */
-  const RAMP_DAYS = { flashcard: 21, lesson: 21, app: 10 };
-  const TARGET_START = { flashcard: 5,  lesson: 3, app: 4 };
-  const TARGET_ELITE = { flashcard: 25, lesson: 8, app: 25 };
+   * consistency — the market doesn't pause for vacations. */
+  const RAMP_DAYS = { flashcard: 30, lesson: 30, app: 21 };
+  const TARGET_START = { flashcard: 2, lesson: 1, app: 1 };
+  const TARGET_ELITE = { flashcard: 20, lesson: 5, app: 15 };
   const _historyAnchor = ((state.history || [])[0] && state.history[0].date) || _todayStr;
   // Per-metric anchor — apps can have an explicit override set via
   // state.appsRampAnchor so "start the apps ramp today" is a one-line
