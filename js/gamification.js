@@ -502,9 +502,9 @@ function appMorningMultiplier() {
  *   - RAMP=21 days: matches the habit-formation literature midpoint
  *     (21-66 days range). Slow enough that the early streak compounds.
  * Source of truth so the dashboard apps card + chart agree. */
-const APP_RAMP_DAYS  = 21;
-const APP_TARGET_START = 1;
-const APP_TARGET_ELITE = 15;
+const APP_RAMP_DAYS  = 14;
+const APP_TARGET_START = 2;
+const APP_TARGET_ELITE = 20;
 function dailyAppTarget(state) {
   // Anchor priority: explicit state.appsRampAnchor (set when user
   // chooses "start today") → first-history date → today. The override

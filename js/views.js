@@ -3969,19 +3969,25 @@ function renderDashboard(state, hub) {
    * Apps uses 21 because active job-search is time-bounded, not a
    * lifetime habit.
    *
-   *   FLASHCARDS  (30-day ramp): 2 → 20
-   *   LESSONS     (30-day ramp): 1 → 5
-   *   APPS        (21-day ramp): 1 → 15
+   *   FLASHCARDS  (21-day ramp): 3 → 30
+   *   LESSONS     (21-day ramp): 1 → 8
+   *   APPS        (14-day ramp): 2 → 20
    *
-   * Day-0 combined effort: ~10 min (1 flashcard + 1 lesson + 1 app).
-   * Day-30 combined effort: ~90-120 min/day. Sustainable elite, not
-   * sprint territory.
+   * Aggressive variant: elite ceilings sit at "real prep grind" levels
+   * (30 cards ≈ 25 min review; 8 lessons ≈ 60-90 min; 20 apps ≈ 3-4 hr
+   * focused applying) while day-0 stays tiny (2-min rule). Ramps use
+   * the habit-lit *lower bound* (21d) so momentum doesn't stall;
+   * apps uses 14d because active job-search needs urgency.
+   *
+   * Day-0 combined: ~12 min total (3 fc + 1 lesson + 2 apps).
+   * Day-21+ elite: 4-5 hrs/day. Pushing but sustainable for an active
+   * prep cycle, not a permanent lifestyle.
    *
    * Calendar-day progression: time off doesn't pause the bar. Forces
    * consistency — the market doesn't pause for vacations. */
-  const RAMP_DAYS = { flashcard: 30, lesson: 30, app: 21 };
-  const TARGET_START = { flashcard: 2, lesson: 1, app: 1 };
-  const TARGET_ELITE = { flashcard: 20, lesson: 5, app: 15 };
+  const RAMP_DAYS = { flashcard: 21, lesson: 21, app: 14 };
+  const TARGET_START = { flashcard: 3, lesson: 1, app: 2 };
+  const TARGET_ELITE = { flashcard: 30, lesson: 8, app: 20 };
   const _historyAnchor = ((state.history || [])[0] && state.history[0].date) || _todayStr;
   // Per-metric anchor — apps can have an explicit override set via
   // state.appsRampAnchor so "start the apps ramp today" is a one-line
