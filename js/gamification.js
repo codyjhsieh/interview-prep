@@ -373,7 +373,11 @@ function feedPetWithPile(state) {
 // With these values: 10 apps × 9 XP = 90, 5 lessons × 18 XP = 90,
 // total 180 — exactly hitting goal. Tuned 2026-05-15.
 const XP_LESSON_MULT = 1.5;       // 12-XP lesson → 18; 20-XP drill → 30
-const XP_APP_BASE    = 6;         // hard floor; actual = max(this, goal/20)
+const XP_APP_BASE    = 15;        // hard floor; actual = max(this, goal/12)
+                                  // Re-weighted upward because applications
+                                  // are the actual job-getting bottleneck.
+                                  // One app = roughly one mid-weight lesson
+                                  // worth of XP, before morning 2× bonus.
 
 function logLessonComplete(state, lessonId, baseXP) {
   if (state.completedLessons[lessonId]) {
@@ -458,10 +462,10 @@ function reviewCard(state, cardId, quality /* 1..4 */) {
   card.due = Date.now() + card.interval * 86400000;
   state.flashcards[cardId] = card;
 
-  // XP based on quality. Calibrated low so flashcards feel like a warm-up,
+  // XP based on quality. Capped LOW (1-2) so flashcards stay maintenance,
   // not the primary XP driver — daily goal should come from lessons + apps.
   // Was 5/10/15/20; 10 Good cards used to clear the entire 180 daily goal.
-  const xpMap = { 1: 1, 2: 2, 3: 3, 4: 4 };
+  const xpMap = { 1: 1, 2: 1, 3: 2, 4: 2 };
   return awardXP(state, xpMap[quality] || 2, 'flashcard');
 }
 
@@ -554,7 +558,7 @@ function logJobApp(state) {
   const goal = (state.user && state.user.goal) || 60;
   // Per-app XP: goal/20 floor XP_APP_BASE. Morning 2× multiplier applies
   // before awardXP so the random-multiplier bonus stacks on top of it.
-  const baseXP = Math.max(XP_APP_BASE, Math.round(goal / 20));
+  const baseXP = Math.max(XP_APP_BASE, Math.round(goal / 12));
   const mult   = appMorningMultiplier();
   const award  = awardXP(state, baseXP * mult, 'app');
   const entry = {
@@ -578,7 +582,7 @@ function applyRole(state, roleKey, meta) {
   if (state.jobApps.some(j => j.roleKey === roleKey)) return null;   // already applied
   const goal = (state.user && state.user.goal) || 60;
   // Match logJobApp — goal/20, floor XP_APP_BASE, 2× before 11am local.
-  const baseXP = Math.max(XP_APP_BASE, Math.round(goal / 20));
+  const baseXP = Math.max(XP_APP_BASE, Math.round(goal / 12));
   const mult   = appMorningMultiplier();
   const award  = awardXP(state, baseXP * mult, 'app');
   const entry = {
