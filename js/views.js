@@ -4118,6 +4118,19 @@ function renderDashboard(state, hub) {
     // lands here. Replaces the three per-metric climbing dashed curves.
     const goalY = sy(1).toFixed(1);
     const strokeW = windowDays <= 7 ? 1.8 : (windowDays <= 14 ? 1.6 : 1.4);
+
+    // Apps two-tier: chart still normalizes against stretch (so the
+    // shared 100% goal line keeps its meaning "you hit the calendar
+    // ramp target"). When today's realistic is BELOW today's stretch
+    // (i.e. you're behind the ramp), draw a lighter apps-colored
+    // reference line at sy(realistic/stretch) — the "today's realistic"
+    // floor. When realistic >= stretch (you're at or ahead of ramp),
+    // the existing 100% line IS realistic and the extra line would be
+    // redundant noise, so we skip it.
+    const _appTargets = (window.GAMI && window.GAMI.dailyAppTargets) ? window.GAMI.dailyAppTargets(state) : null;
+    const _appRealisticY = (_appTargets && _appTargets.realistic < _appTargets.stretch && _appTargets.stretch > 0)
+      ? sy(_appTargets.realistic / _appTargets.stretch).toFixed(1)
+      : null;
     return `
       <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block">
         <defs>
@@ -4142,6 +4155,14 @@ function renderDashboard(state, hub) {
              Every performance line "hitting goal" lands on this row. -->
         <line x1="${PAD_L}" y1="${goalY}" x2="${W - PAD_R}" y2="${goalY}"
               stroke="rgba(15,23,42,0.32)" stroke-width="0.9" stroke-dasharray="4 4"/>
+        ${_appRealisticY ? `
+        <!-- Apps two-tier: lighter reference line for today's realistic
+             (recent avg + 1), apps-colored so it visually associates
+             with the purple app line. Only shown when realistic <
+             stretch — i.e. when you're behind the ramp. -->
+        <line x1="${PAD_L}" y1="${_appRealisticY}" x2="${W - PAD_R}" y2="${_appRealisticY}"
+              stroke="${COLORS.app}" stroke-width="0.7" stroke-dasharray="2 4" opacity="0.55"/>
+        ` : ''}
         <!-- Area fills (performance, normalized per-day) -->
         <path d="${areaPath('app')}"       fill="url(#grad-app)"/>
         <path d="${areaPath('lesson')}"    fill="url(#grad-lesson)"/>
