@@ -510,6 +510,35 @@ function dailyAppTarget(state) {
   return Math.round(APP_TARGET_START + (APP_TARGET_ELITE - APP_TARGET_START) * ease);
 }
 
+/* Two-tier app targets — "realistic" meets the user where they are
+ * (recent average + 1), "stretch" is the calendar-day ramp (where the
+ * user *should* be at this point in the 10-day ramp).
+ *
+ * Shipping both makes the gap visible: a user behind the ramp sees
+ * "realistic 5 · stretch 12" rather than just "12" (demoralizing) or
+ * just "5" (hides reality). For a candidate with a long employment
+ * gap, that gap-as-information is the right design.
+ *
+ * `realistic` falls back to `stretch` when there isn't enough recent
+ * history (<3 days with app data) — without a baseline, the calendar
+ * ramp IS the realistic target. */
+function dailyAppTargets(state) {
+  const stretch = dailyAppTarget(state);
+  const hist = (state.history || []);
+  // Use the last 7 calendar days with any app activity. Days with 0
+  // apps DO count toward the average — they're real signal about
+  // sustained pace, and excluding them would let "5 apps once a week"
+  // produce a realistic target of 5.
+  const last7 = hist.slice(-7);
+  if (last7.length < 3) return { realistic: stretch, stretch };
+  const sum = last7.reduce((acc, h) => acc + ((h.events && h.events.app) || 0), 0);
+  const avg = sum / last7.length;
+  // +1 buffer so today's realistic is always a small stretch above the
+  // recent average — never a coast.
+  const realistic = Math.max(APP_TARGET_START, Math.min(APP_TARGET_ELITE, Math.round(avg + 1)));
+  return { realistic, stretch };
+}
+
 function logJobApp(state) {
   tickDay(state);
   if (!Array.isArray(state.jobApps)) state.jobApps = [];
@@ -1353,7 +1382,7 @@ return {
   STORAGE_KEY, load, save, saveImmediate, reset,
   tickDay, awardXP, logLessonComplete, logJobApp, removeLastJobApp,
   applyRole, unapplyRole, isRoleApplied,
-  dailyAppTarget, appMorningBonusActive, appMorningMultiplier,
+  dailyAppTarget, dailyAppTargets, appMorningBonusActive, appMorningMultiplier,
   APP_MORNING_CUTOFF_HOUR, APP_MORNING_BONUS_MULT,
   isPetDead,
   feedPetWithPile,

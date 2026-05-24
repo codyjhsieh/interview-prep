@@ -3649,9 +3649,13 @@ function renderJobAppsCard(state) {
   const count    = apps.filter(j => j.date === todayKey).length;
   const goal     = (state.user && state.user.goal) || 60;
   const baseXP   = Math.max(1, Math.round(goal / 20));
-  // Ramped target — shared source of truth with the daily-effort chart.
-  // Day 0: 2 (very achievable). Day 10+: 25 (elite locked).
-  const target   = GAMI.dailyAppTarget(state);
+  // Two-tier target: realistic = recent-average + 1 buffer; stretch =
+  // calendar-day ramp position. The gap between them is the signal —
+  // hiding either would lie about the day. Progress bar tracks the
+  // realistic target so an "OK day" feels like winning; the stretch
+  // number sits beside it as the "great day" reference.
+  const { realistic, stretch } = GAMI.dailyAppTargets(state);
+  const target   = realistic;       // progress bar denominator
   const pct      = Math.min(100, Math.round((count / Math.max(1, target)) * 100));
   // Morning bonus: 2× per-app XP if logged before 11am local. Strong
   // nudge to front-load apps when reply rates are highest.
@@ -3665,7 +3669,10 @@ function renderJobAppsCard(state) {
     <div class="flex items-center justify-between gap-3 flex-wrap">
       <div class="min-w-0">
         <div class="text-xs muted uppercase tracking-wider">Job applications today</div>
-        <div class="text-3xl font-bold mt-1 numeric">${count} <span class="text-sm muted font-normal">/ ${target}</span></div>
+        <div class="text-3xl font-bold mt-1 numeric">${count} <span class="text-sm muted font-normal">/ ${realistic}</span></div>
+        ${stretch > realistic
+          ? `<div class="text-[11.5px] muted mt-0.5" title="Stretch goal is today's position on the 10-day ramp. Realistic = recent average + 1.">stretch <span class="numeric" style="color:var(--accent)">${stretch}</span> · ${count >= stretch ? 'crushed it' : count >= realistic ? `${stretch - count} above realistic` : 'meet realistic first'}</div>`
+          : `<div class="text-[11.5px] muted mt-0.5">aligned with ramp · stretch ${stretch}</div>`}
       </div>
       <!-- Single stepper control: one visual pill with a divider, − on
            the left, + on the right. Two click targets, one button. -->
@@ -3690,7 +3697,7 @@ function renderJobAppsCard(state) {
            <span aria-hidden="true">🌅</span> Morning 2× bonus next: tomorrow before ${GAMI.APP_MORNING_CUTOFF_HOUR}:00.
          </div>`}
     <div class="text-xs muted mt-2">
-      Each app = <span class="font-mono numeric" style="color:var(--accent)">+${perApp}</span> XP${morning ? ' <span style="color:var(--accent)">(2×)</span>' : ''}. <strong>${target} = today’s target.</strong>
+      Each app = <span class="font-mono numeric" style="color:var(--accent)">+${perApp}</span> XP${morning ? ' <span style="color:var(--accent)">(2×)</span>' : ''}. <strong>${realistic}</strong> realistic · <strong>${stretch}</strong> stretch.
     </div>
   `;
 
