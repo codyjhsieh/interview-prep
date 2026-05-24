@@ -992,75 +992,54 @@ function _petTick(p, today, state) {
   let daysElapsed = daysBetween(p.lastTickDate || today, today);
   if (daysElapsed <= 0) { p.lastTickDate = today; return p; }
   daysElapsed = Math.min(daysElapsed, 30);
-  // Snapshot pre-tick lifecycle state so we can detect transitions
-  // (death, stage advance) after the tick block and write audit events.
-  const _preDeathCount = p.deathCount || 0;
-  const _preStage      = p.stage;
+  // Snapshot pre-tick lifecycle state so we can detect stage transitions
+  // after the tick block and write audit events.
+  const _preStage = p.stage;
 
-  // ── DAILY-GOAL RULE ─────────────────────────────────────────────────
-  // For every *complete* calendar day from p.lastTickDate (inclusive) up
-  // to (but not including) today, look at how much XP the user earned:
+  // ── New model: death is a DERIVED predicate, not stored state ──────
+  // Pet is "dead" when _liveVitality(p, now) === 0 — i.e. more than
+  // 24h have passed since the last feed without enough fuel to keep
+  // the snapshot above the decay curve. This is purely a computed
+  // function of (p.vitality, p.lastFedAt, now); it isn't recorded on
+  // the pet object and doesn't trigger any state change inside this
+  // function.
   //
-  //   • 0 XP (full skip)           → counts toward p.consecutiveSkipDays.
-  //                                  ONE skip is OK; a SECOND consecutive
-  //                                  skip (counter reaches 2) → death.
-  //   • 0 < XP < goal (shortfall)  → vitality -= 30 × (1 - XP/goal),
-  //                                  i.e. heavier penalty the further
-  //                                  short of the goal you were. Also
-  //                                  resets the consecutive-skip counter
-  //                                  (any nonzero XP day breaks a run).
-  //   • XP >= goal (kept up)       → no penalty + reset skip counter.
-  //                                  Manual food drops are still the
-  //                                  only way to actively top up
-  //                                  vitality at that point.
+  // Why this matters for sync: the old model auto-respawned dead pets
+  // here (Object.assign(p, _newPet(...))), which silently mutated
+  // (stage, ageDays, lastFedDate, lastTickDate, deathCount) every
+  // calendar rollover. Two paired devices ticking near-simultaneously
+  // produced racy respawn states the merge couldn't always reconcile,
+  // hence the recurring "Bit died again between sessions / phantom
+  // day-0" bug class.
   //
-  // The consecutive-skip counter is persisted on the pet so the rule
-  // works correctly across _petTick invocations (e.g. user opens day
-  // N+1 having skipped day N, gets the "1 skip used" state — then opens
-  // day N+3 having ALSO skipped N+2: the counter reaches 2, death).
-  //
-  // Grace period: a brand-new pet (ageDays === 0) is exempt on its very
-  // first day after creation, otherwise creating Bit at 11 PM and not
-  // earning the goal in the remaining hour would kill him by morning.
-  // ── Vitality is now purely time-since-fed (see _liveVitality).
-  // _petTick no longer subtracts vitality based on yesterday's XP — that
-  // would double-count with the live decay. Death = the live value
-  // crossing 0 (i.e. went >24h without a feed). consecutiveSkipDays is
-  // kept zero-pinned for legacy data shapes but unused in the new model.
+  // Under the new rule, _petTick only handles aging + form drift.
+  // Liveness/death is observed at render time via _liveVitality.
+  // deathCount is no longer auto-incremented; if we eventually add an
+  // explicit user "revive" action it can bump it deterministically.
   p.consecutiveSkipDays = 0;
-  if (_liveVitality(p) === 0 && (p.ageDays > 0 || daysElapsed > 1)) {
-    p.vitality = 0;
-    // (handed off to the death branch lower in this function)
-  }
-  // Form & age advance every day regardless
   for (let i = 0; i < daysElapsed; i++) {
     if (p.form > 0)      p.form = Math.max(0, p.form - 1);
     else if (p.form < 0) p.form = Math.min(0, p.form + 1);
     p.ageDays += 1;
-    if (p.vitality === 0) break;
   }
   p.lastTickDate = today;
-  if (p.vitality === 0) {
-    const oldName = p.name;
-    const deaths = (p.deathCount || 0) + 1;
-    Object.assign(p, _newPet(oldName));
-    p.deathCount = deaths;
-  }
   if (p.stage === 'baby' && p.ageDays >= 3) p.stage = 'teen';
   if (p.stage === 'teen' && p.ageDays >= 8) p.stage = 'adult';
-  // Audit trail — lifecycle transitions get 0-XP events in today's
-  // history. Captures death + stage advancement so the timeline can
-  // show "Bit evolved to teen on 2026-05-24" without diffing snapshots.
-  // Per-device duplicate risk is low (both devices would need to
-  // converge on the same tick within the same calendar day); a stable
-  // dedupe key per (date, eventKind) can be added later if it happens.
-  if (state) {
-    try {
-      if ((p.deathCount || 0) > _preDeathCount) appendHistoryAward(state, today, 'pet-death', 0);
-      if (p.stage !== _preStage)                appendHistoryAward(state, today, `pet-${p.stage}`, 0);
-    } catch (_) {}
+  // Audit trail — stage transitions get 0-XP events in today's history
+  // so the timeline can show "Bit evolved to teen on 2026-05-24"
+  // without diffing snapshots.
+  if (state && p.stage !== _preStage) {
+    try { appendHistoryAward(state, today, `pet-${p.stage}`, 0); } catch (_) {}
   }
   return p;
+}
+
+/* Public: is this pet currently dead?
+ * Derived from (vitality snapshot, lastFedAt, now). No stored "dead"
+ * flag — feed Bit when this returns true and he reanimates from the
+ * fed-now decay snapshot. */
+function isPetDead(p) {
+  return !!p && _liveVitality(p) === 0;
 }
 
 function _petBody(p) {
@@ -1185,6 +1164,7 @@ function petState(state) {
     activity: _petActivity(p, today, justFed, liveVit),
     vitality: liveVit,                  // continuously-decaying display value
     vitalityStored: p.vitality,         // raw value persisted between days
+    dead: liveVit === 0,                // derived predicate; feed to revive
     consecutiveSkipDays: p.consecutiveSkipDays || 0,   // 0 = fresh, 1 = used skip credit
     form: p.form,
     ageDays: p.ageDays,
@@ -1375,6 +1355,7 @@ return {
   applyRole, unapplyRole, isRoleApplied,
   dailyAppTarget, appMorningBonusActive, appMorningMultiplier,
   APP_MORNING_CUTOFF_HOUR, APP_MORNING_BONUS_MULT,
+  isPetDead,
   feedPetWithPile,
   reviewCard, dueCards,
   recordFlashcardFail, deriveFlashcardFailStats,
