@@ -7074,10 +7074,25 @@ function _mockPickRoundType(rng) {
   return MOCK_ROUND_WEIGHTS[0];
 }
 
+/* "Meta" / round-explainer lessons that describe what an interview round
+ * IS rather than giving a practice question. These belong in the
+ * curriculum (the user should read them once) but they're noise in a
+ * mock-interview rotation — picking "What IS the project deep-dive
+ * round?" as a behavioral round to "practice" is incoherent.
+ *
+ * Detection: title-pattern match for explainer language. Conservative —
+ * only filters lessons whose name explicitly signals meta/intro. */
+function _isMetaLesson(l) {
+  const n = (l && l.name) || '';
+  return /^(what\s+is|the\s+\w+\s+round\s+explained|why\s+the\s+|when\s+the\s+\w+\s+round\b)/i.test(n)
+      || /\b(round\s+explained|round\s+exists|round\?$)/i.test(n)
+      || /^STAR\s+weighting\b/i.test(n);
+}
+
 function _allMockCandidates() {
   return MODULES.flatMap(m =>
     m.lessons
-      .filter(l => l.type === 'concept' && l.interactive)
+      .filter(l => l.type === 'concept' && l.interactive && !_isMetaLesson(l))
       .map(l => ({ lesson: l, mod: m, cat: m.cat }))
   );
 }
@@ -7105,27 +7120,34 @@ function _seededRng(seed) {
 function _pickMockTopicsWeighted(rng, state, opts) {
   const opts2 = opts || {};
   const excludeIds = new Set(opts2.excludeIds || []);
-  const preferUncompleted = !!opts2.preferUncompleted;
+  // preferUncompleted was an option; it's now the default behavior (the
+  // picker always prefers fresh lessons when any exist for the round
+  // type). Daily and practice mode share the same selection rule.
   const all = _allMockCandidates().filter(x => !excludeIds.has(x.lesson.id));
 
   const picked = [];
-  const usedTypes = new Set();
+  const typeCounts = {};
   // Up to 12 draws to safely fill 3 slots even with type-collisions
   for (let attempt = 0; attempt < 12 && picked.length < 3; attempt++) {
     const def = _mockPickRoundType(rng);
-    // Coding can repeat; everything else: dedupe
-    if (def.type !== 'coding' && usedTypes.has(def.type)) continue;
+    const cur = typeCounts[def.type] || 0;
+    // Cap coding at 2 (real loops have 2× coding ~30% of the time, but
+    // 3× coding in a single 30-min session is wasted reps with zero
+    // conceptual through-line). All other types cap at 1.
+    const cap = def.type === 'coding' ? 2 : 1;
+    if (cur >= cap) continue;
     let pool = all.filter(def.predicate);
-    if (preferUncompleted) {
-      const fresh = pool.filter(x => !state.completedLessons[x.lesson.id]);
-      if (fresh.length) pool = fresh;
-    }
+    // Always prefer uncompleted lessons over completed ones. Previously
+    // only practice mode did this — daily mode was wasting slots on
+    // already-done lessons, which is bad UX in both contexts.
+    const fresh = pool.filter(x => !state.completedLessons[x.lesson.id]);
+    if (fresh.length) pool = fresh;
     // Don't repeat the same lesson within a single mock
     pool = pool.filter(x => !picked.find(p => p.lesson.id === x.lesson.id));
     if (!pool.length) continue;
     const idx = Math.floor(rng() * pool.length);
     picked.push(Object.assign({}, pool[idx], { roundType: def.type }));
-    usedTypes.add(def.type);
+    typeCounts[def.type] = cur + 1;
   }
   // Backstop: if weighted draws couldn't satisfy 3 (very rare), fall back
   // to filling with any remaining concept-with-interactive lessons.
