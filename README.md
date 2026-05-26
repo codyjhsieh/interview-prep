@@ -12,9 +12,9 @@ Mobile (iPhone 17 Pro portrait) — re-generated via
 
 | Today | Curriculum | Flashcards (SM-2) |
 |:-:|:-:|:-:|
-| ![Dashboard](docs/screenshots/01-dashboard.png) | ![Curriculum](docs/screenshots/02-curriculum.png) | ![Flashcards](docs/screenshots/03-flashcards.png) |
+| <img src="docs/screenshots/01-dashboard.png" alt="Dashboard" width="240"> | <img src="docs/screenshots/02-curriculum.png" alt="Curriculum" width="240"> | <img src="docs/screenshots/03-flashcards.png" alt="Flashcards" width="240"> |
 | **Drop-food → Bit eats** | **Flashcard flip + rate** | **Company detail (scroll)** |
-| ![Drop food](docs/screenshots/10-drop-food.gif) | ![Flashcard flip](docs/screenshots/11-flashcard-flip.gif) | ![Company detail](docs/screenshots/04-company-detail.gif) |
+| <img src="docs/screenshots/10-drop-food.gif" alt="Drop food" width="240"> | <img src="docs/screenshots/11-flashcard-flip.gif" alt="Flashcard flip" width="240"> | <img src="docs/screenshots/04-company-detail.gif" alt="Company detail" width="240"> |
 
 ## What's in it
 
