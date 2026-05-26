@@ -4,6 +4,18 @@ Static vanilla HTML/CSS/JS prep app for Forward-Deployed-Engineer and SDE
 interviews. No build step, no bundler. Hosted on GitHub Pages at
 <https://codyhsieh.com/interview-prep/>.
 
+## Screenshots
+
+Mobile (iPhone 14 portrait) — re-generated via `node scripts/screenshots.mjs`.
+
+| Today | Curriculum | Coding category |
+|:-:|:-:|:-:|
+| ![Dashboard](docs/screenshots/01-dashboard.png) | ![Curriculum](docs/screenshots/02-curriculum.png) | ![Coding category](docs/screenshots/03-category.png) |
+| **Flashcards (SM-2)** | **Companies (138 NYC roles)** | **Company detail (interview bank)** |
+| ![Flashcards](docs/screenshots/04-flashcards.png) | ![Companies](docs/screenshots/05-companies.png) | ![Company detail](docs/screenshots/06-company-detail.png) |
+| **Games index** | **Prep tools (mocks · STAR)** | **Profile & sync** |
+| ![Games](docs/screenshots/07-games.png) | ![Prep tools](docs/screenshots/08-prep.png) | ![Profile](docs/screenshots/09-profile.png) |
+
 ## What's in it
 
 - **10 curriculum categories**, ~150 concept lessons, ~760 interactive items
@@ -38,11 +50,13 @@ Single-file modules: `js/data.js` (curriculum) · `js/views.js` (UI) ·
 python3 -m http.server 8000      # then http://localhost:8000
 ```
 
-## Tests
+## Tests + tooling
 
 ```sh
 node scripts/sync-stress.mjs     # unit + e2e tests for the sync layer
 node tests/window-beam.test.js   # sun-beam geometry math
+node scripts/perf/clickthrough.mjs  # Playwright trace through all routes (writes scripts/perf/perf-report.md)
+node scripts/screenshots.mjs     # Re-generate README screenshots (needs `python3 -m http.server 8000` running)
 ```
 
 ## Cross-device sync setup
