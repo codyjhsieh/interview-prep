@@ -6,15 +6,15 @@ interviews. No build step, no bundler. Hosted on GitHub Pages at
 
 ## Screenshots
 
-Mobile (iPhone 14 portrait) — re-generated via `node scripts/screenshots.mjs`.
+Mobile (iPhone 17 Pro portrait) — re-generated via
+`node scripts/screenshots.mjs` (stills) and `node scripts/screenshot-gifs.mjs`
+(interactive GIFs).
 
-| Today | Curriculum | Coding category |
+| Today | Curriculum | Flashcards (SM-2) |
 |:-:|:-:|:-:|
-| ![Dashboard](docs/screenshots/01-dashboard.png) | ![Curriculum](docs/screenshots/02-curriculum.png) | ![Coding category](docs/screenshots/03-category.png) |
-| **Flashcards (SM-2)** | **Companies (138 NYC roles)** | **Company detail (interview bank)** |
-| ![Flashcards](docs/screenshots/04-flashcards.png) | ![Companies](docs/screenshots/05-companies.png) | ![Company detail](docs/screenshots/06-company-detail.png) |
-| **Games index** | **Prep tools (mocks · STAR)** | **Profile & sync** |
-| ![Games](docs/screenshots/07-games.png) | ![Prep tools](docs/screenshots/08-prep.png) | ![Profile](docs/screenshots/09-profile.png) |
+| ![Dashboard](docs/screenshots/01-dashboard.png) | ![Curriculum](docs/screenshots/02-curriculum.png) | ![Flashcards](docs/screenshots/03-flashcards.png) |
+| **Drop-food → Bit eats** | **Flashcard flip + rate** | **Company detail (scroll)** |
+| ![Drop food](docs/screenshots/10-drop-food.gif) | ![Flashcard flip](docs/screenshots/11-flashcard-flip.gif) | ![Company detail](docs/screenshots/04-company-detail.gif) |
 
 ## What's in it
 
@@ -56,7 +56,8 @@ python3 -m http.server 8000      # then http://localhost:8000
 node scripts/sync-stress.mjs     # unit + e2e tests for the sync layer
 node tests/window-beam.test.js   # sun-beam geometry math
 node scripts/perf/clickthrough.mjs  # Playwright trace through all routes (writes scripts/perf/perf-report.md)
-node scripts/screenshots.mjs     # Re-generate README screenshots (needs `python3 -m http.server 8000` running)
+node scripts/screenshots.mjs     # Re-generate README stills (needs `python3 -m http.server 8000` running)
+node scripts/screenshot-gifs.mjs # Re-generate README interactive GIFs
 ```
 
 ## Cross-device sync setup

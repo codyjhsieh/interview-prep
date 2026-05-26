@@ -4,9 +4,10 @@
  *   python3 -m http.server 8000 &                 # in repo root
  *   node scripts/screenshots.mjs                  # writes docs/screenshots/*.png
  *
- * Output viewport: iPhone 14 (390 × 844 @2x) since the user is on mobile
+ * Output viewport: iPhone 17 Pro (402 × 874 @3x) since the user is on mobile
  * half the time and the README benefits from showing the actual day-to-day
- * shape, not the desktop variant. PNGs land in docs/screenshots/. */
+ * shape. Minimalist hero set — Today, Curriculum, Flashcards, Company detail.
+ * PNGs land in docs/screenshots/. */
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -85,24 +86,22 @@ const DEMO_STATE = {
   visitedSources: true, mocks: [], stories: {}, applied: {},
 };
 
+/* Note: the company-detail hero is a scrolling GIF rather than a still —
+ * see scripts/screenshot-gifs.mjs (04-company-detail.gif). It scans the
+ * Stripe header through the interview-bank rounds, which a single viewport
+ * can't show. */
 const VIEWS = [
-  { id:'01-dashboard',   route:'#dashboard',   waitFor:'[data-card="hero"]', label:'Dashboard' },
-  { id:'02-curriculum',  route:'#curriculum',  waitFor:'.card', label:'Curriculum' },
-  { id:'03-category',    route:'#category/coding', waitFor:'.card', label:'Category — Coding' },
-  { id:'04-flashcards',  route:'#flashcards',  waitFor:'.card', label:'Flashcards' },
-  { id:'05-companies',   route:'#companies',   waitFor:'#co-grid, .card', label:'Companies list' },
-  { id:'06-company-detail', route:'#company/stripe', waitFor:'.card', label:'Company detail (interview bank)' },
-  { id:'07-games',       route:'#games',       waitFor:'.card', label:'Games index' },
-  { id:'08-prep',        route:'#prep',        waitFor:'.card', label:'Prep tools (mocks/STAR)' },
-  { id:'09-profile',     route:'#profile',     waitFor:'.card', label:'Profile + sync' },
+  { id:'01-dashboard',  route:'#dashboard',  waitFor:'[data-card="hero"]', label:'Dashboard (Today)' },
+  { id:'02-curriculum', route:'#curriculum', waitFor:'.card',              label:'Curriculum' },
+  { id:'03-flashcards', route:'#flashcards', waitFor:'.card',              label:'Flashcards (SM-2)' },
 ];
 
 async function main() {
   await mkdir(OUT, { recursive: true });
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
-    viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+    viewport: { width: 402, height: 874 }, deviceScaleFactor: 3,
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
   });
   // Inject the demo state + skip the login gate BEFORE any page script
   // runs, so we never see the login overlay.
@@ -127,6 +126,13 @@ async function main() {
       try { await page.waitForSelector(v.waitFor, { timeout: 6000 }); } catch (_) {}
       // Settle entrance animations + lazy-load
       await page.waitForTimeout(900);
+      if (v.scrollToText) {
+        await page.evaluate(text => {
+          const el = [...document.querySelectorAll('h1,h2,h3,h4')].find(n => n.textContent.includes(text));
+          if (el) el.scrollIntoView({ block: 'start' });
+        }, v.scrollToText);
+        await page.waitForTimeout(400);
+      }
       await page.screenshot({
         path: path.join(OUT, `${v.id}.png`),
         fullPage: false,                // viewport only — keeps file size sane
