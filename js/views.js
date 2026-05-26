@@ -7035,61 +7035,124 @@ function _mockSeededShuffle(arr, seed) {
 }
 
 // Pick 3 lessons from 3 different tier-1 categories, deterministic per day
-function _pickMockTopics(state) {
-  const today = GAMI.todayKey();
-  const seed = parseInt(today.replaceAll('-', ''), 10);
-  // Tier-1 categories: technical core (ai, decomp, sysd, coding)
-  const tier1 = CATEGORIES.filter(c => c.tier === 1).map(c => c.id);
-  // Candidate lessons: concept-type with an `interactive` activity, in a tier-1 category
-  const candidates = MODULES.flatMap(m =>
+/* Mock-interview round-type distribution.
+ *
+ * Calibrated from the 138-company INTERVIEW_QUESTIONS_2026 bank (round-
+ * type frequency, normalized; see js/interview-questions-2026.js).
+ *
+ * Empirical signal:
+ *   coding         105% of companies (universal, often 2× per loop)
+ *   behavioral      93%
+ *   system_design   79%
+ *   take_home       23%   (skip — takehomes are async, not live mocks)
+ *   debugging        9%
+ *   api_design       7%
+ *   applied_ai       8%   (mostly at AI labs)
+ *
+ * Weights below are normalized so 3 weighted draws produce a realistic
+ * mock loop. Coding deliberately gets the dominant slot — LeetCode-medium
+ * is bucketed into "coding" in every public dataset, and lots of public
+ * candidate writeups gloss over the round as "coding round" without
+ * specifying LC vs production-flavor. Underweighting coding would
+ * over-rotate to exotic rounds users won't actually see. */
+const MOCK_ROUND_WEIGHTS = [
+  { type: 'coding',        weight: 0.50, predicate: x => x.cat === 'coding' && x.mod.id !== 'cod-debugging' },
+  { type: 'system_design', weight: 0.22, predicate: x => x.cat === 'sysd'   && x.mod.id !== 'sd-api-design' },
+  { type: 'behavioral',    weight: 0.18, predicate: x => x.cat === 'behav' },
+  { type: 'debugging',     weight: 0.05, predicate: x => x.mod.id === 'cod-debugging' },
+  { type: 'api_design',    weight: 0.03, predicate: x => x.mod.id === 'sd-api-design' },
+  { type: 'applied_ai',    weight: 0.02, predicate: x => x.cat === 'ai' },
+];
+
+function _mockPickRoundType(rng) {
+  const r = rng();
+  let acc = 0;
+  for (const def of MOCK_ROUND_WEIGHTS) {
+    acc += def.weight;
+    if (r < acc) return def;
+  }
+  return MOCK_ROUND_WEIGHTS[0];
+}
+
+function _allMockCandidates() {
+  return MODULES.flatMap(m =>
     m.lessons
       .filter(l => l.type === 'concept' && l.interactive)
       .map(l => ({ lesson: l, mod: m, cat: m.cat }))
-  ).filter(x => tier1.includes(x.cat));
-  const shuffled = _mockSeededShuffle(candidates, seed);
-  // Greedy pick: one per distinct category, up to 3
-  const picked = [];
-  const usedCats = new Set();
-  for (const c of shuffled) {
-    if (usedCats.has(c.cat)) continue;
-    picked.push(c);
-    usedCats.add(c.cat);
-    if (picked.length === 3) break;
-  }
-  return picked;
+  );
 }
 
-// Practice-mode topic picker — true random, prefers UNCOMPLETED tier-1 concepts.
-// Used by #mock/practice for unlimited reps on topics the user hasn't reviewed.
-function _pickPracticeTopics(state, excludeIds = []) {
-  const tier1 = CATEGORIES.filter(c => c.tier === 1).map(c => c.id);
-  const exclude = new Set(excludeIds);
-  const allConcepts = MODULES.flatMap(m =>
-    m.lessons
-      .filter(l => l.type === 'concept' && l.interactive && !exclude.has(l.id))
-      .map(l => ({ lesson: l, mod: m, cat: m.cat }))
-  ).filter(x => tier1.includes(x.cat));
-  const uncompleted = allConcepts.filter(x => !state.completedLessons[x.lesson.id]);
-  // Prefer uncompleted; if fewer than 3 available, fall back to any tier-1 concept
-  let pool = uncompleted.length >= 3 ? uncompleted : allConcepts;
-  // True random (Math.random — fresh each call, no seeding)
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+function _seededRng(seed) {
+  // Mulberry32 — deterministic per-seed PRNG
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* Pick 3 mock topics with round-types drawn from the real distribution
+ * above. Coding is allowed to repeat (real loops have 2× coding ~30% of
+ * the time). All other types are dedupe-preferred so a single mock
+ * doesn't draw 2× system_design when in real life that's rare.
+ *
+ * Used by daily mode (seeded by date for determinism) and practice
+ * mode (Math.random). Falls back gracefully: if a chosen round-type
+ * has no available lessons, drop into the next-highest-weight type. */
+function _pickMockTopicsWeighted(rng, state, opts) {
+  const opts2 = opts || {};
+  const excludeIds = new Set(opts2.excludeIds || []);
+  const preferUncompleted = !!opts2.preferUncompleted;
+  const all = _allMockCandidates().filter(x => !excludeIds.has(x.lesson.id));
+
   const picked = [];
-  const usedCats = new Set();
-  for (const c of shuffled) {
-    if (usedCats.has(c.cat)) continue;
-    picked.push(c); usedCats.add(c.cat);
-    if (picked.length === 3) break;
+  const usedTypes = new Set();
+  // Up to 12 draws to safely fill 3 slots even with type-collisions
+  for (let attempt = 0; attempt < 12 && picked.length < 3; attempt++) {
+    const def = _mockPickRoundType(rng);
+    // Coding can repeat; everything else: dedupe
+    if (def.type !== 'coding' && usedTypes.has(def.type)) continue;
+    let pool = all.filter(def.predicate);
+    if (preferUncompleted) {
+      const fresh = pool.filter(x => !state.completedLessons[x.lesson.id]);
+      if (fresh.length) pool = fresh;
+    }
+    // Don't repeat the same lesson within a single mock
+    pool = pool.filter(x => !picked.find(p => p.lesson.id === x.lesson.id));
+    if (!pool.length) continue;
+    const idx = Math.floor(rng() * pool.length);
+    picked.push(Object.assign({}, pool[idx], { roundType: def.type }));
+    usedTypes.add(def.type);
   }
-  // If we couldn't satisfy one-per-distinct-category, allow repeats
+  // Backstop: if weighted draws couldn't satisfy 3 (very rare), fall back
+  // to filling with any remaining concept-with-interactive lessons.
   if (picked.length < 3) {
-    for (const c of shuffled) {
+    for (const c of all) {
       if (picked.find(p => p.lesson.id === c.lesson.id)) continue;
-      picked.push(c);
+      picked.push(Object.assign({}, c, { roundType: 'coding' }));
       if (picked.length === 3) break;
     }
   }
   return picked;
+}
+
+function _pickMockTopics(state) {
+  const today = GAMI.todayKey();
+  const seed = parseInt(today.replaceAll('-', ''), 10);
+  return _pickMockTopicsWeighted(_seededRng(seed), state, { preferUncompleted: false });
+}
+
+// Practice-mode topic picker — true random, prefers UNCOMPLETED concepts.
+// Same weighted round-type distribution as daily mode so practice trains
+// against the realistic loop shape, not a flat-uniform sample.
+function _pickPracticeTopics(state, excludeIds = []) {
+  return _pickMockTopicsWeighted(Math.random, state, {
+    preferUncompleted: true,
+    excludeIds,
+  });
 }
 
 // Hardness heuristic for category-quiz items: prefer scenario-framed
