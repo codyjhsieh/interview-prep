@@ -3462,7 +3462,7 @@ function openPetLifecyclePreview() {
         ageDays: s.stage === 'baby' ? 1 : s.stage === 'teen' ? 5 : 12,
         // Show 1 food pile when activity is "eat" so Bit has something to consume
         foodPilesAvailable: _activity === 'eat' ? 1 : 0, pileXP: 5,
-        lastTickDate: new Date().toISOString().slice(0,10),
+        lastTickDate: GAMI.todayKey(),
         forceHour: s.hour,
         bodyHue: 0x9CC7E6,                              // preview keeps a stable color
       });
@@ -3644,7 +3644,12 @@ const verticalLabel = {
  * a count.
  */
 function renderJobAppsCard(state) {
-  const todayKey = new Date().toISOString().slice(0, 10);
+  // CRITICAL: use the same local-midnight rollover as logJobApp /
+  // tickDay / chart / streak. The old `new Date().toISOString().slice(0,10)`
+  // shadow rolled the apps card to "tomorrow" 4 hours early on the
+  // east coast (UTC-4 in EDT), so evening apps were silently filtered
+  // out of today's count even though they were correctly stored.
+  const todayKey = GAMI.todayKey();
   const apps     = Array.isArray(state.jobApps) ? state.jobApps : [];
   const count    = apps.filter(j => j.date === todayKey).length;
   const goal     = (state.user && state.user.goal) || 60;
@@ -4053,7 +4058,11 @@ function renderDashboard(state, hub) {
     for (let i = windowDays - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const k = d.toISOString().slice(0, 10);
+      // Same local-midnight rule as the rest of the app. The previous
+      // toISOString().slice(0,10) shifted the per-day buckets by up to
+      // 4-5 hours on EDT, so the rightmost cell mis-aligned with
+      // _todayStr (which uses GAMI.todayKey, local-midnight).
+      const k = GAMI.todayKey(d);
       const h = histByDate[k];
       const isToday = k === _todayStr;
       const ev = (h && h.events) || {};

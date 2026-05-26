@@ -183,7 +183,11 @@ function _backfillHistoryEvents(state) {
     if (!counts.has(date)) counts.set(date, { flashcard: 0, lesson: 0, app: 0 });
     counts.get(date)[kind] += 1;
   };
-  const dateOf = (ts) => ts ? new Date(ts).toISOString().slice(0, 10) : null;
+  // Local-midnight bucketing — must match the rest of the app (tickDay,
+  // state.todayDate, logJobApp entries). Using toISOString() here would
+  // bucket evening-local activity into the next UTC day, mismatching
+  // history dates with state.todayDate by up to one full row.
+  const dateOf = (ts) => ts ? todayKey(new Date(ts)) : null;
 
   for (const meta of Object.values(state.flashcards || {})) {
     bump(dateOf(meta && meta.lastReviewed), 'flashcard');
