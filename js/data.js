@@ -257,8 +257,8 @@ const CATEGORIES = [
   },
   {
     id: 'decomp', name: 'Decomposition & Case Study', icon: 'puzzle',
-    weight: 18, track: 'fde', tier: 1, roi: 5,
-    blurb: 'Most-asked FDE round + biggest learning gap for candidates. The Palantir-pioneered round now standard at OpenAI, Anthropic, Scale. They grade how you think, not your answer.',
+    weight: 10, track: 'fde', tier: 2, roi: 3,
+    blurb: 'Specialty FDE round (Palantir-pioneered, now standard at OpenAI/Anthropic/Scale). Demoted from Tier 1: most Wave-1 AI-startup targets weight applied-AI + agent depth over case-study format. Worth practicing before any Palantir-flavored loop but not the daily-driver category.',
   },
   {
     id: 'sysd',   name: 'System Design',                icon: 'building-2',
