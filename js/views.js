@@ -5693,11 +5693,67 @@ function renderCompany(state, hub, id) {
         <div class="space-y-2" id="co-jobs-list">${jobsHTML}</div>
         <p class="text-[11px] muted mt-3">Postings verified live on ${esc((window.DATA && window.DATA.COMPANIES_VERIFIED_AT) || 'recently')}. If a link is dead, the role was filled or pulled since verification.</p>
       </div>` : ''}
+
+    ${_interviewQuestionsCardHTML(c)}
   `;
   hub.appendChild(container);
   // Wire up the apply-toggle checkboxes on this view.
   const jobsList = container.querySelector('#co-jobs-list');
   if (jobsList) bindApplyToggles(jobsList);
+}
+
+/* Interview-question bank card. Renders only for Tier-A companies with
+ * compiled 2024-2025 public-source data (see js/interview-questions-2026.js).
+ * Tier B/C companies (no public interview data) render nothing — by design;
+ * fabricating sample questions for sub-30-headcount startups would be worse
+ * than honest silence. */
+function _interviewQuestionsCardHTML(c) {
+  const bank = (typeof window !== 'undefined' && window.INTERVIEW_QUESTIONS_2026) || {};
+  const rec = bank[c.id];
+  if (!rec) return '';
+  const confColor = rec.confidence === 'high' ? 'var(--accent)' :
+                    rec.confidence === 'med'  ? 'var(--warn)'   : 'var(--muted)';
+  const confLabel = rec.confidence === 'high' ? 'High confidence' :
+                    rec.confidence === 'med'  ? 'Med confidence' :
+                                                'Low confidence — loop-shape inferred';
+  const typeLabel = {
+    coding: 'Coding', system_design: 'System Design', ml_design: 'ML Design',
+    applied_ai: 'Applied AI', ml_internals: 'LLM Internals',
+    ml_research: 'ML Research', behavioral: 'Behavioral', take_home: 'Take-home',
+    debugging: 'Debugging', api_design: 'API Design', fde_case: 'FDE Case',
+    frontend: 'Frontend',
+  };
+  const roundsHTML = (rec.rounds || []).map(r => {
+    const label = typeLabel[r.type] || r.type;
+    const qs = (r.sample_questions || []).map(q => `<li>${esc(q)}</li>`).join('');
+    return `
+      <div class="ivq-round">
+        <div class="ivq-round-head">
+          <span class="ivq-round-tag">${esc(label)}</span>
+        </div>
+        ${qs ? `<ul class="ivq-qs">${qs}</ul>` : ''}
+        ${r.notes ? `<div class="ivq-notes">${esc(r.notes)}</div>` : ''}
+      </div>`;
+  }).join('');
+  const sourcesHTML = (rec.sources || []).map(s =>
+    `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title || s.url)}</a>${s.year ? ` <span class="dim text-[10.5px]">· ${esc(String(s.year))}</span>` : ''}</li>`
+  ).join('');
+  return `
+    <div class="card">
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-2">
+        <h3 class="font-display font-semibold text-lg">Interview loop · 2024-2025</h3>
+        <span class="text-[11px] font-medium" style="color:${confColor}">${esc(confLabel)}</span>
+      </div>
+      ${rec.loop_shape ? `<p class="text-[13.5px] leading-relaxed muted mb-4">${esc(rec.loop_shape)}</p>` : ''}
+      <div class="space-y-3">${roundsHTML}</div>
+      ${rec.role_notes ? `<div class="ivq-role-notes mt-4"><b>Role notes:</b> ${esc(rec.role_notes)}</div>` : ''}
+      ${sourcesHTML ? `
+        <details class="mt-4">
+          <summary class="text-[12px] muted cursor-pointer hover:text-[color:var(--text)]">Sources (${(rec.sources || []).length})</summary>
+          <ul class="ivq-sources">${sourcesHTML}</ul>
+        </details>` : ''}
+      <p class="text-[10.5px] dim mt-3">Compiled from public 2024-2025 candidate writeups. Always cross-check with your recruiter before relying on specifics.</p>
+    </div>`;
 }
 
 /* ====================== FLASHCARDS ====================== */
