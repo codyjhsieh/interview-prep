@@ -864,6 +864,13 @@ function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt
 function syncSurgicalUpdates(currentState) {
   const view = document.getElementById('view');
   if (!view || !window.VIEWS) return;
+  // Tick the day BEFORE rendering into the buffer. render() does this at
+  // the top of every paint; this path (driven by sync poll, focus, and
+  // visibilitychange on iOS PWA resume) is what fires first after local
+  // midnight when the app was suspended overnight. Without ticking here,
+  // the dashboard would render with stale todayXP / fresh eatenTodayXP
+  // and show phantom food piles until the user navigated.
+  try { GAMI.tickDay(currentState); } catch (_) {}
   const route = parseHash().route;
 
   // Render the matching view into a detached buffer so we can pull

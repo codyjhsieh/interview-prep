@@ -237,6 +237,16 @@ function tickDay(state) {
     state.todayDate = today;
     state.todayXP = 0;
   }
+  // Roll the pet's "eaten today" counter in lockstep with todayXP. Both
+  // are "today" concepts and must reset atomically — splitting them
+  // (eatenTodayXP in petState, todayXP here) produced a window where iOS
+  // PWA resume after midnight ran the sync path (which calls petState
+  // but NOT tickDay), zeroing eatenTodayXP while todayXP kept yesterday's
+  // value. The dashboard then showed phantom food piles = floor(stale/5).
+  if (state.pet && state.pet.lastEatenDate !== today) {
+    state.pet.eatenTodayXP = 0;
+    state.pet.lastEatenDate = today;
+  }
   // Reconcile todayXP against history[today].xp. The merge function in
   // sync.js takes MAX on per-date history entries but takes the fresher
   // side\'s todayXP — those rules disagree when devices diverge, and
@@ -1181,13 +1191,10 @@ function petState(state) {
   _petTick(state.pet, today, state);
   const p = state.pet;
 
-  // Reset the "eaten today" counter when the calendar day rolls over.
-  // This is independent of _petTick so it fires even on the same day if
-  // state was loaded from an earlier session.
-  if (p.lastEatenDate !== today) {
-    p.eatenTodayXP = 0;
-    p.lastEatenDate = today;
-  }
+  // Note: the eatenTodayXP/lastEatenDate rollover used to live here but
+  // moved into tickDay() so both day-counters reset atomically in one
+  // place. petState now trusts that tickDay has run; every caller of
+  // petState (render, syncSurgicalUpdates) ticks first.
 
   // justFed is purely a flag for the activity-selection function (so Bit
   // briefly shows 'eat' on goal-crossing). It NO LONGER auto-increments
