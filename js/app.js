@@ -469,6 +469,15 @@ function bindEvents() {
       VIEWS.openPetLifecyclePreview();
       return;
     }
+    // Pet — respawn after death. Opens the Liquid Glass confirmation
+    // modal rather than respawning directly so the user sees one
+    // consistent UI path for a meaningful (non-reversible) action.
+    if (e.target?.closest && e.target.closest('[data-pet-respawn]')) {
+      if (VIEWS && typeof VIEWS.renderPetDeathGate === 'function') {
+        VIEWS.renderPetDeathGate(APP.getState());
+      }
+      return;
+    }
     // Pet — drop food. Delegated here (rather than inline in renderDashboard)
     // so the handler survives sync-driven pet-panel swaps.
     const dropFoodBtn = e.target?.closest && e.target.closest('[data-pet-drop-food]');
@@ -944,6 +953,21 @@ function updatePetCardInPlace(liveCard, bufCard) {
   // bug observed on FOIEGRAS after the (deathCount, stage) merge fix.
   const liveKey = liveCard.getAttribute('data-pet-key');
   const bufKey  = bufCard.getAttribute('data-pet-key');
+  // Mid-session death: if the buffer's key is the first to surface the
+  // dead state, fire the modal here. Without this, vitality decaying
+  // to 0 while the user sits on the dashboard would only show the
+  // tombstone (after rebuild below) but never the popup, since
+  // syncSurgicalUpdates skips renderDashboard's rAF mount path.
+  const wasDead = /\|dead$/.test(liveKey || '');
+  const isDead  = /\|dead$/.test(bufKey || '');
+  if (!wasDead && isDead) {
+    try {
+      const st = (window.APP && window.APP.getState) ? window.APP.getState() : null;
+      if (st && window.VIEWS && window.VIEWS.renderPetDeathGate) {
+        window.VIEWS.renderPetDeathGate(st);
+      }
+    } catch (_) {}
+  }
   if (liveKey !== bufKey) {
     liveCard.setAttribute('data-pet-key', bufKey || '');
     const liveHost = liveCard.querySelector('#pet-room-3d-host');
@@ -956,7 +980,12 @@ function updatePetCardInPlace(liveCard, bufCard) {
       const st = (window.APP && window.APP.getState) ? window.APP.getState() : null;
       if (st && window.VIEWS && window.VIEWS.mountPet3D) {
         try {
-          const newPet = { ...(st.pet || {}), lastTickDate: st.pet && st.pet.lastTickDate, autoSpawnFood: false };
+          // Carry the derived `dead` predicate here too. mountPet3D
+          // branches on it to render the tombstone; without it, this
+          // rebuild path would always show the alive Bit even when the
+          // pet card was supposed to flip to grave state.
+          const newPet = { ...(st.pet || {}), lastTickDate: st.pet && st.pet.lastTickDate, autoSpawnFood: false,
+                           dead: !!(window.GAMI && window.GAMI.isPetDead && window.GAMI.isPetDead(st.pet)) };
           const newHandle = window.VIEWS.mountPet3D(liveHost, newPet);
           if (newHandle) liveHost._petHandle = newHandle;
         } catch (e) { console.warn('[sync] pet rebuild after key change failed:', e); }

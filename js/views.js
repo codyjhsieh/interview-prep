@@ -2170,8 +2170,10 @@ function mountPet3D(container, p) {
   const petColor = (tintedR << 16) | (tintedG << 8) | tintedB;
   const petMat = new T.MeshStandardMaterial({ color: petColor, flatShading: true, roughness: 0.65 });
 
-  // ---- Death state (lifecycle preview only) — tombstone instead of pet ----
-  if (p.stage === 'dead') {
+  // ---- Death state — tombstone instead of pet ----
+  // Fires for the live "your pet died" path (p.dead=true, derived from
+  // _liveVitality === 0) AND for the lifecycle preview (p.stage='dead').
+  if (p.dead || p.stage === 'dead') {
     const tombMat = new T.MeshStandardMaterial({ color: 0x6b7280, flatShading: true, roughness: 0.85 });
     const tombDarkMat = new T.MeshStandardMaterial({ color: 0x4b5563, flatShading: true, roughness: 0.85 });
     // Main slab
@@ -3498,19 +3500,23 @@ function renderPetCard(state, p) {
   // the surgical pet-card update detects the mismatch and rebuilds the
   // canvas. Without the stamp, the 3D model stays at the previous stage
   // until a full route render (see app.js updatePetCardInPlace).
-  card.setAttribute('data-pet-key', `${p.stage || ''}|${p.body || ''}|${p.bodyHue || ''}`);
+  // Key includes p.dead so a flip from alive → dead (or vice versa via
+  // respawn) trips the data-pet-key mismatch in updatePetCardInPlace and
+  // forces a 3D scene rebuild (tombstone ↔ pet).
+  card.setAttribute('data-pet-key', `${p.stage || ''}|${p.body || ''}|${p.bodyHue || ''}|${p.dead ? 'dead' : 'alive'}`);
   // Status line — blunter when health is low.
-  const statusLine = {
-    'walk':    `${p.name} is wandering around`,
-    'idle':    `${p.name} is hanging out`,
-    'eat':     `${p.name} is eating! +1 day alive`,
-    'sleep':   `${p.name} is napping`,
-    'play':    `${p.name} is playing`,
-    'workout': `${p.name} is at the gym`,
-    'sick':    `${p.name} is wheezing and dying — feed NOW`,
-    'beg':     `${p.name} is starving — hit your XP goal or watch it die`,
-    'droop':   `${p.name} is sad — needs you`,
-  }[p.activity] || `${p.name} is here`;
+  const statusLine = p.dead ? `${p.name} has died — respawn below`
+    : ({
+      'walk':    `${p.name} is wandering around`,
+      'idle':    `${p.name} is hanging out`,
+      'eat':     `${p.name} is eating! +1 day alive`,
+      'sleep':   `${p.name} is napping`,
+      'play':    `${p.name} is playing`,
+      'workout': `${p.name} is at the gym`,
+      'sick':    `${p.name} is wheezing and dying — feed NOW`,
+      'beg':     `${p.name} is starving — hit your XP goal or watch it die`,
+      'droop':   `${p.name} is sad — needs you`,
+    }[p.activity] || `${p.name} is here`);
 
   const stageLabel = p.stage === 'baby' ? `Baby · day ${p.ageDays}`
                    : p.stage === 'teen' ? `Teen · day ${p.ageDays}`
@@ -3560,11 +3566,15 @@ function renderPetCard(state, p) {
             : `<b>${p.xpToFeed} XP</b> to today's goal`}
         </div>
         <div class="flex flex-wrap gap-2 pt-1">
-          <button class="btn btn-primary !py-1.5 !px-3 text-[12.5px]"
-                  data-pet-drop-food
-                  ${p.foodPilesAvailable > 0 ? '' : 'disabled style="opacity:0.45;cursor:not-allowed"'}>
-            <span class="inline-flex items-center gap-1.5">${iconHTML('carrot', {size: 14})} Drop food${p.foodPilesAvailable > 0 ? ` <span class="numeric ml-1">×${p.foodPilesAvailable}</span>` : ''}</span>
-          </button>
+          ${p.dead
+            ? `<button class="btn btn-primary !py-1.5 !px-3 text-[12.5px]" data-pet-respawn>
+                 <span class="inline-flex items-center gap-1.5">${iconHTML('refresh-cw', {size: 14})} Respawn</span>
+               </button>`
+            : `<button class="btn btn-primary !py-1.5 !px-3 text-[12.5px]"
+                       data-pet-drop-food
+                       ${p.foodPilesAvailable > 0 ? '' : 'disabled style="opacity:0.45;cursor:not-allowed"'}>
+                 <span class="inline-flex items-center gap-1.5">${iconHTML('carrot', {size: 14})} Drop food${p.foodPilesAvailable > 0 ? ` <span class="numeric ml-1">×${p.foodPilesAvailable}</span>` : ''}</span>
+               </button>`}
           <a href="#curriculum" class="btn !py-1.5 !px-3 text-[12.5px]">Earn XP →</a>
           <button class="btn !py-1.5 !px-3 text-[12.5px]" data-pet-lifecycle><span class="inline-flex items-center gap-1.5">${iconHTML('eye', {size: 14})} Stages</span></button>
         </div>
@@ -3891,6 +3901,14 @@ function renderDashboard(state, hub) {
       // The drop-food click handler is registered via event delegation
       // in app.js (bindEvents) so it survives sync-driven pet-panel
       // swaps. It reads host._petHandle to find the scene.
+
+      // Auto-open the death modal on first dashboard paint where Bit is
+      // dead. Mounted to document.body (not the card), with the same
+      // document.contains guard above so the buffer render in
+      // syncSurgicalUpdates doesn't double-mount it.
+      if (pet && pet.dead) {
+        try { renderPetDeathGate(state); } catch (e) { console.warn('[pet] death gate mount failed:', e); }
+      }
     }
   }));
 
@@ -7590,12 +7608,166 @@ function renderMockInterview(state, hub, mode) {
   }
 }
 
+/*
+ * Pet-death modal. Apple Liquid Glass material recipe — mirrors the
+ * sign-in gate at renderLoginGate above (same blur/saturate stack,
+ * spring transitions, lg-card / lg-btn / lg-link classes). Fires when
+ * the dashboard paints with a dead pet (live vitality === 0) so the
+ * user gets a clear "Bit died — respawn?" affordance instead of the
+ * tombstone sitting silent in the room.
+ *
+ * Idempotent — refuses to mount if the gate is already in the DOM.
+ * Dismissed by either Respawn (which fires the respawn + full
+ * re-render) or Later (closes the modal but leaves the tombstone).
+ */
+function renderPetDeathGate(state) {
+  if (document.getElementById('pet-death-gate')) return;
+
+  if (!document.getElementById('pet-death-gate-css')) {
+    const css = document.createElement('style');
+    css.id = 'pet-death-gate-css';
+    css.textContent = `
+      #pet-death-gate {
+        position: fixed; inset: 0; z-index: 95;
+        display: grid; place-items: center; padding: 1.5rem;
+        background: rgba(15,23,42,0.18);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
+        backdrop-filter:        blur(20px) saturate(160%);
+        opacity: 0;
+        transition: opacity 0.38s var(--spring-settle, cubic-bezier(0.16,1,0.3,1));
+      }
+      #pet-death-gate.visible { opacity: 1; }
+      #pet-death-gate.dismiss { opacity: 0; }
+
+      #pet-death-gate .lg-card {
+        position: relative;
+        max-width: 360px; width: 100%;
+        padding: 28px 24px 22px;
+        border-radius: 28px;
+        text-align: center;
+        background: color-mix(in srgb, var(--regular, rgba(255,255,255,0.58)) 80%, var(--card-tint, transparent) 20%);
+        -webkit-backdrop-filter: blur(40px) saturate(220%) brightness(1.08) contrast(1.04);
+        backdrop-filter:        blur(40px) saturate(220%) brightness(1.08) contrast(1.04);
+        box-shadow:
+          inset  0  1px 0 rgba(255,255,255,0.95),
+          inset  0 -1px 0 rgba(15,23,42,0.06),
+          inset  1px 0 0 rgba(255,255,255,0.55),
+          inset -1px 0 0 rgba(255,255,255,0.30),
+          0 22px 50px -18px rgba(15,23,42,0.28),
+          0 6px 16px -8px rgba(15,23,42,0.14);
+        opacity: 0;
+        transform: translateY(8px) scale(0.96);
+        transition:
+          opacity 0.45s var(--spring-settle, cubic-bezier(0.16,1,0.3,1)),
+          transform 0.55s var(--spring-overshoot, cubic-bezier(0.34,1.56,0.64,1));
+      }
+      #pet-death-gate.visible .lg-card { opacity: 1; transform: translateY(0) scale(1); }
+      #pet-death-gate.dismiss .lg-card {
+        opacity: 0; transform: scale(0.97);
+        transition:
+          opacity 0.28s var(--spring-settle, cubic-bezier(0.16,1,0.3,1)),
+          transform 0.32s var(--spring-settle, cubic-bezier(0.16,1,0.3,1));
+      }
+
+      #pet-death-gate .lg-icon {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 56px; height: 56px;
+        border-radius: 16px;
+        background: rgba(15,23,42,0.06);
+        color: var(--muted, #6B7785);
+        margin-bottom: 16px;
+      }
+      #pet-death-gate h2 {
+        font-size: 22px;
+        letter-spacing: -0.01em;
+        margin-bottom: 8px;
+      }
+      #pet-death-gate p {
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--text, #0F172A);
+        margin-bottom: 6px;
+      }
+      #pet-death-gate p.muted {
+        font-size: 12px;
+        color: var(--muted, #6B7785);
+        margin-bottom: 18px;
+      }
+
+      #pet-death-gate .lg-btn {
+        width: 100%;
+        margin-top: 4px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: none;
+        background: var(--accent, #0EA371);
+        color: #fff;
+        font-weight: 600;
+        font-size: 15px;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        transition: transform 0.18s var(--spring-settle, cubic-bezier(0.16,1,0.3,1));
+      }
+      #pet-death-gate .lg-btn:active { transform: scale(0.985); }
+
+      #pet-death-gate .lg-link {
+        background: none; border: none; padding: 8px 0 0;
+        font-size: 13px;
+        color: var(--muted, #6B7785);
+        font-weight: 500;
+        cursor: pointer;
+      }
+    `;
+    document.head.appendChild(css);
+  }
+
+  const p = (state && state.pet) || {};
+  const name = p.name || 'Bit';
+  const priorDeaths = p.deathCount || 0;
+
+  const gate = document.createElement('div');
+  gate.id = 'pet-death-gate';
+  gate.setAttribute('role', 'dialog');
+  gate.setAttribute('aria-modal', 'true');
+  gate.innerHTML = `
+    <div class="lg-card">
+      <div class="lg-icon">${iconHTML('skull', { size: 28 })}</div>
+      <h2 class="font-display font-semibold">${esc(name)} has died</h2>
+      <p>Vitality hit 0. Start fresh with a new baby — your XP, streak, and skull count all stick.</p>
+      ${priorDeaths > 0 ? `<p class="muted">Lives lost so far: ${priorDeaths}</p>` : ''}
+      <button class="lg-btn" type="button" data-respawn>
+        <span class="inline-flex items-center justify-center gap-1.5">${iconHTML('refresh-cw', { size: 15 })} Respawn as baby</span>
+      </button>
+      <button class="lg-link" type="button" data-later>Later</button>
+    </div>
+  `;
+  document.body.appendChild(gate);
+  requestAnimationFrame(() => requestAnimationFrame(() => gate.classList.add('visible')));
+
+  const dismiss = () => {
+    gate.classList.remove('visible');
+    gate.classList.add('dismiss');
+    setTimeout(() => { try { gate.remove(); } catch (_) {} }, 420);
+  };
+
+  gate.querySelector('[data-respawn]').addEventListener('click', () => {
+    try { GAMI.respawnPet(state); GAMI.saveImmediate(state); } catch (e) { console.warn('[pet] respawn failed:', e); }
+    dismiss();
+    // Full re-render so the pet card's data-pet-key (now 'alive') trips
+    // the surgical-update mismatch path and rebuilds the 3D scene.
+    if (window.APP && typeof window.APP.afterStateChange === 'function') {
+      window.APP.afterStateChange();
+    }
+  });
+  gate.querySelector('[data-later]').addEventListener('click', dismiss);
+}
+
 return {
   renderDashboard, renderCurriculum, renderCategory, renderLesson,
   renderCompanies, renderCompany, renderFlashcards, renderInfographics,
   renderCoverage, renderProfile, renderSources, renderMocks, renderStories,
   renderPrep, renderReview, renderMockInterview,
-  renderLoginGate,
+  renderLoginGate, renderPetDeathGate,
   renderJobAppsCard,              // exposed for sync's surgical per-card updates
   openPetLifecyclePreview,
   iconHTML,                       // exposed so app.js/animations.js toasts can use Lucide too

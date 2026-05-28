@@ -1098,6 +1098,19 @@ function isPetDead(p) {
   return !!p && _liveVitality(p) === 0;
 }
 
+/* Public: respawn a dead pet as a fresh baby. Preserves the user-chosen
+ * name and increments deathCount so the skull counter sticks across
+ * lives. New bodyHue and stage='baby' so the 3D scene visibly resets.
+ * Caller is responsible for persisting state + triggering a re-render. */
+function respawnPet(state) {
+  if (!state) return state;
+  const prior = state.pet || {};
+  const fresh = _newPet(prior.name || 'Bit');
+  fresh.deathCount = (prior.deathCount || 0) + 1;
+  state.pet = fresh;
+  return state;
+}
+
 function _petBody(p) {
   if (p.stage === 'baby') return 'baby';
   if (p.form >  25) return 'jacked';
@@ -1160,7 +1173,8 @@ function _liveVitality(p /* legacy 2nd/3rd args ignored */) {
 }
 
 function _petActivity(p, today, justFed, liveVitality) {
-  // Simplified to five polished states:
+  // Simplified to six polished states:
+  //   dead  → live vitality has hit 0 (must respawn to clear)
   //   walk  → default during waking hours (dominant)
   //   play  → occasional burst of hopping
   //   sleep → late night / early morning
@@ -1170,6 +1184,7 @@ function _petActivity(p, today, justFed, liveVitality) {
   // display value) so Bit can drift into 'sick' mid-day as the user
   // falls behind pace — not just at midnight rollover.
   const v = (liveVitality != null) ? liveVitality : p.vitality;
+  if (v <= 0)             return 'dead';
   if (justFed)            return 'eat';
   if (v < 25)             return 'sick';
   const h = new Date().getHours();
@@ -1408,7 +1423,7 @@ return {
   applyRole, unapplyRole, isRoleApplied,
   dailyAppTarget, dailyAppTargets, appMorningBonusActive, appMorningMultiplier,
   APP_MORNING_CUTOFF_HOUR, APP_MORNING_BONUS_MULT,
-  isPetDead,
+  isPetDead, respawnPet,
   feedPetWithPile,
   reviewCard, dueCards,
   recordFlashcardFail, deriveFlashcardFailStats,
