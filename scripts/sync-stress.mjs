@@ -307,12 +307,15 @@ function mergePets(a, b, aT, bT) {
   const bEatDate = b.lastEatenDate || '';
   if (aEatDate === bEatDate) {
     merged.eatenTodayXP = Math.max(a.eatenTodayXP || 0, b.eatenTodayXP || 0);
+    merged.carryoverXP  = Math.min(a.carryoverXP  || 0, b.carryoverXP  || 0);
     merged.lastEatenDate = aEatDate;
   } else if (bEatDate > aEatDate) {
     merged.eatenTodayXP = b.eatenTodayXP || 0;
+    merged.carryoverXP  = b.carryoverXP  || 0;
     merged.lastEatenDate = bEatDate;
   } else {
     merged.eatenTodayXP = a.eatenTodayXP || 0;
+    merged.carryoverXP  = a.carryoverXP  || 0;
     merged.lastEatenDate = aEatDate;
   }
   for (const k of ['lastTickDate','lastFedDate']) {

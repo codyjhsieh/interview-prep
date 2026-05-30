@@ -492,12 +492,23 @@ function bindEvents() {
         const PILE_XP = 5;
         const todayXP = st.todayXP || 0;
         const eaten = (st.pet && st.pet.eatenTodayXP) || 0;
-        const avail = Math.floor(Math.max(0, todayXP - eaten) / PILE_XP);
+        const carry = (st.pet && st.pet.carryoverXP) || 0;
+        const todayUnspent = Math.max(0, todayXP - eaten);
+        const avail = Math.floor((todayUnspent + carry) / PILE_XP);
         if (avail > 0) {
           const fx = (Math.random() * 2 - 1) * 2.0;
           const fz = (Math.random() * 2 - 1) * 2.0;
           petHandle.dropFood(fx, fz);
-          st.pet.eatenTodayXP = eaten + PILE_XP;
+          // Spend the pile against carryover XP first, then today's
+          // bucket. Keeps "fresh" XP from today visible in the today
+          // bar for as long as possible, and the rollover counter
+          // doesn't compound forever.
+          if (carry >= PILE_XP) {
+            st.pet.carryoverXP = carry - PILE_XP;
+          } else {
+            st.pet.carryoverXP = 0;
+            st.pet.eatenTodayXP = eaten + (PILE_XP - carry);
+          }
           if (typeof GAMI !== 'undefined' && GAMI.feedPetWithPile) GAMI.feedPetWithPile(st);
           if (typeof GAMI !== 'undefined' && GAMI.saveImmediate) GAMI.saveImmediate(st);
           afterStateChange();          // updates header + surgical refresh of cards (incl. pet)

@@ -233,7 +233,15 @@ function appendHistoryAward(state, date, reason, xp, ts = Date.now()) {
 function tickDay(state) {
   const today = todayKey();
   _backfillHistoryEvents(state);
-  if (state.todayDate !== today) {
+  // Compute unspent food-pile XP from yesterday BEFORE the todayXP reset
+  // below clobbers it. Capturing the delta here lets the rollover branch
+  // push leftover piles into pet.carryoverXP so they survive midnight.
+  const isNewDay = state.todayDate !== today;
+  const isPetNewDay = !!state.pet && state.pet.lastEatenDate !== today;
+  const priorUnspent = (isNewDay && isPetNewDay)
+    ? Math.max(0, (state.todayXP || 0) - ((state.pet && state.pet.eatenTodayXP) || 0))
+    : 0;
+  if (isNewDay) {
     state.todayDate = today;
     state.todayXP = 0;
   }
@@ -243,7 +251,8 @@ function tickDay(state) {
   // PWA resume after midnight ran the sync path (which calls petState
   // but NOT tickDay), zeroing eatenTodayXP while todayXP kept yesterday's
   // value. The dashboard then showed phantom food piles = floor(stale/5).
-  if (state.pet && state.pet.lastEatenDate !== today) {
+  if (isPetNewDay) {
+    state.pet.carryoverXP = (state.pet.carryoverXP || 0) + priorUnspent;
     state.pet.eatenTodayXP = 0;
     state.pet.lastEatenDate = today;
   }
@@ -1006,6 +1015,7 @@ function _newPet(name = 'Bit') {
     name,
     eatenTodayXP: 0,        // XP-worth that Bit has visually eaten today
     lastEatenDate: null,    // resets eatenTodayXP each day
+    carryoverXP: 0,         // food-pile XP earned but not dropped — rolls over at midnight
     bodyHue: _randomHue(),  // fresh body color per life
   };
 }
@@ -1039,6 +1049,7 @@ function _migratePet(p) {
   if (p.stage == null)        p.stage = 'baby';
   if (p.eatenTodayXP == null) p.eatenTodayXP = 0;
   if (p.lastEatenDate == null) p.lastEatenDate = null;
+  if (p.carryoverXP == null) p.carryoverXP = 0;
   if (p.bodyHue == null)      p.bodyHue = _randomHue();
   return p;
 }
@@ -1218,10 +1229,13 @@ function petState(state) {
   const justFed = (todayXP >= goal) && p.lastFedDate !== today;
 
   // Food piles: every 5 XP earned today = 1 pile. Each drop consumes
-  // one pile (eatenTodayXP += 5). Available = earned − consumed.
+  // one pile. Available = (today's earned − today's consumed) + carryover
+  // from prior days. carryoverXP accumulates at midnight from any unspent
+  // XP and is decremented first when the user drops food (see app.js).
   // Vitality caps at 100; form math runs per drop.
   const PILE_XP = 5;
-  const uneatenXP = Math.max(0, todayXP - (p.eatenTodayXP || 0));
+  const todayUnspent = Math.max(0, todayXP - (p.eatenTodayXP || 0));
+  const uneatenXP = todayUnspent + (p.carryoverXP || 0);
   const foodPilesAvailable = Math.floor(uneatenXP / PILE_XP);
 
   const liveVit = _liveVitality(p, todayXP, goal);
@@ -1245,6 +1259,7 @@ function petState(state) {
     xpToFeed: Math.max(0, goal - todayXP),
     xpProgress: Math.min(100, Math.round((todayXP / goal) * 100)),
     eatenTodayXP: p.eatenTodayXP || 0,
+    carryoverXP: p.carryoverXP || 0,
     foodPilesAvailable,
     pileXP: PILE_XP,
   };

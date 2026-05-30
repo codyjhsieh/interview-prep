@@ -617,21 +617,27 @@ window.SYNC = (function () {
     const fedSide = bFed >= aFed ? b : a;
     merged.vitality  = fedSide.vitality || 0;
     merged.lastFedAt = fedSide.lastFedAt || 0;
-    // eatenTodayXP + lastEatenDate: merge as a PAIR from the fresher
-    // calendar day. Whichever side last ate "today" owns the counter;
-    // if both ate today, take max (multiple feeds that day are
-    // additive). If one side hasn't ticked over yet, the other side's
-    // reset wins.
+    // eatenTodayXP + lastEatenDate + carryoverXP: merge as a TRIPLE from
+    // the fresher calendar day. Whichever side last ate "today" owns the
+    // counters; if both ate today, eatenTodayXP takes max (multiple feeds
+    // that day are additive) and carryoverXP takes MIN (it's a wallet —
+    // whichever device drained more is the truthful balance, since drops
+    // only decrement carryoverXP). If one side hasn't ticked over yet,
+    // the other side's reset wins outright (its post-rollover values
+    // include the midnight push from unspent → carryover).
     const aEatDate = a.lastEatenDate || '';
     const bEatDate = b.lastEatenDate || '';
     if (aEatDate === bEatDate) {
       merged.eatenTodayXP = Math.max(a.eatenTodayXP || 0, b.eatenTodayXP || 0);
+      merged.carryoverXP  = Math.min(a.carryoverXP  || 0, b.carryoverXP  || 0);
       merged.lastEatenDate = aEatDate;
     } else if (bEatDate > aEatDate) {
       merged.eatenTodayXP  = b.eatenTodayXP || 0;
+      merged.carryoverXP   = b.carryoverXP  || 0;
       merged.lastEatenDate = bEatDate;
     } else {
       merged.eatenTodayXP  = a.eatenTodayXP || 0;
+      merged.carryoverXP   = a.carryoverXP  || 0;
       merged.lastEatenDate = aEatDate;
     }
     // Other date strings: take the later one (works for YYYY-MM-DD compare)
