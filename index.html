@@ -105,7 +105,7 @@
      utility classes applied — likely a content-blocker / Private Relay issue
      hitting the runtime JIT bundle. Build with: npm run build:css. The
      content set in tailwind.config.js scans index.html + js/**.js. -->
-<link rel="stylesheet" href="tw.css?v=2026-05-27-3" />
+<link rel="stylesheet" href="tw.css?v=2026-05-27-4" />
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -178,7 +178,7 @@
   else window.addEventListener('load', () => setTimeout(prefetch, 200), { once: true });
 })();
 </script>
-<link rel="stylesheet" href="styles.css?v=2026-05-27-3" />
+<link rel="stylesheet" href="styles.css?v=2026-05-27-4" />
 </head>
 <body>
 
@@ -247,25 +247,25 @@
 <!-- ?v=<build> cache-busts every deploy. The version string is bumped
      manually in tandem with sync.js / app.js / views.js changes so the
      browser + GH Pages CDN can't serve stale JS to paired devices. -->
-<script src="js/data.js?v=2026-05-27-3"></script>
+<script src="js/data.js?v=2026-05-27-4"></script>
 <!-- Tier-A 2024-2025 interview question bank (22 companies, 71 sources) -->
-<script src="js/interview-questions-2026.js?v=2026-05-27-3"></script>
-<script src="js/quotes.js?v=2026-05-27-3"></script>
-<script src="js/gamification.js?v=2026-05-27-3"></script>
-<script src="js/animations.js?v=2026-05-27-3"></script>
-<script src="js/infographics.js?v=2026-05-27-3"></script>
-<script src="js/games.js?v=2026-05-27-3"></script>
-<script src="js/views.js?v=2026-05-27-3"></script>
-<script src="js/app.js?v=2026-05-27-3"></script>
+<script src="js/interview-questions-2026.js?v=2026-05-27-4"></script>
+<script src="js/quotes.js?v=2026-05-27-4"></script>
+<script src="js/gamification.js?v=2026-05-27-4"></script>
+<script src="js/animations.js?v=2026-05-27-4"></script>
+<script src="js/infographics.js?v=2026-05-27-4"></script>
+<script src="js/games.js?v=2026-05-27-4"></script>
+<script src="js/views.js?v=2026-05-27-4"></script>
+<script src="js/app.js?v=2026-05-27-4"></script>
 <!-- Cross-device sync via Cloudflare Worker + KV. Idle until paired
      (no network calls). Wraps GAMI.saveImmediate to PUT remotely
      and polls every 40s while visible for changes from other devices. -->
-<script src="js/sync.js?v=2026-05-27-3"></script>
+<script src="js/sync.js?v=2026-05-27-4"></script>
 <script>window.SYNC && window.SYNC.init();</script>
 <!-- Liquid Glass: adaptive substrate tinting. Loads after app so cards
      are already in the DOM. Cards published after dashboard render are
      picked up by the module's MutationObserver. -->
-<script src="js/glass-adaptive.js?v=2026-05-27-3"></script>
+<script src="js/glass-adaptive.js?v=2026-05-27-4"></script>
 
 <!-- Auto-refresh on new deploy. iOS Add-to-Home-Screen webviews keep
      the same standalone session alive across launches, so a manual

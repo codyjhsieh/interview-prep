@@ -823,7 +823,7 @@ function mountConceptActivity(container, lesson, state, opts = {}) {
         <span>✏️</span><span>Free-recall: write what you remember (optional, +5 XP)</span>
       </summary>
       <div class="mt-3">
-        <textarea id="ca-recall-text" rows="3" class="w-full text-[13px]" placeholder="In 1-2 sentences: what does this concept say? Don't peek at the body — even a wrong attempt boosts retention."></textarea>
+        <textarea id="ca-recall-text" rows="3" class="w-full text-[13px]" placeholder="${esc(lesson.recallPrompt || "In 1-2 sentences: what does this concept say? Don't peek at the body — even a wrong attempt boosts retention.")}"></textarea>
         <div class="flex items-center justify-end gap-2 mt-2">
           <button class="btn btn-ghost text-[12.5px]" id="ca-recall-skip">Skip recall</button>
           <button class="btn btn-primary text-[12.5px]" id="ca-recall-submit">Submit + see activity →</button>

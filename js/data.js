@@ -10273,6 +10273,262 @@ The negotiation conversation usually takes 2-3 rounds over a week. Stay friendly
 },
 
 {
+  cat: "behav",
+  id: "behav-intro",
+  name: "Recruiter & HM intro calls",
+  intro: "EVERY one of the 138 companies in the question bank opens their loop with a recruiter screen (some add an HM intro right after). Get cut here and the rest of the loop never happens. This round isn't graded on technical depth — it's graded on whether you can compress your story, name your motivation cleanly, and not fumble salary/timeline/location. Each lesson's free-recall prompt asks you to draft <i>your</i> version against your actual resume — the curriculum body stays generic, the practice is personal.",
+  sources: [
+    "https://www.thejobsauce.com/blog (recruiter-screen patterns)",
+    "https://interviewing.io/blog (FAANG recruiter-screen breakdowns)",
+    "https://www.levels.fyi/blog (compensation negotiation framework)",
+    "https://www.kalzumeus.com/2012/01/23/salary-negotiation/ (Patrick McKenzie — the canonical reference)",
+  ],
+  lessons: [
+    { id: "bi-1", type: "concept", name: "The 90-second self-pitch", xp: 12, time: 8,
+      recallPrompt: "Draft YOUR 90-second pitch. Map your resume's biggest arcs (Amazon → Intel → BrainPOP → Independent) into Now/Past/Future. Aim for 4 sentences, 1 named number, 1 forward-looking line.",
+      body: `<b>The prompt you'll hear:</b> <i>"Tell me about yourself"</i> / <i>"Walk me through your background briefly."</i> Always within the first 2 minutes of a recruiter call. Always.
+<br><br>
+<b>The wrong instinct:</b> chronological resume read-through. <i>"I graduated in 2018, worked at Amazon for three years on search ads, then went to Intel for an internship — wait, that was before — then BrainPOP, where I…"</i> By minute 3 you're correcting yourself, the recruiter has stopped listening, and you've burned 25% of a 30-minute call introducing yourself.
+<br><br>
+<b>The right structure:</b> <b>Now / Past / Future</b>. Three beats. ~90 seconds total. Out loud, timed. If you can't say it in 90 seconds you don't know it well enough yet.
+<br><br>
+<b style="color:var(--accent)">NOW (~20 sec).</b> What are you doing right now and why does the listener care? <b>One number.</b>
+<br>
+<i>"Right now I'm building Edith.media — an editorial marketplace where freelance writers pitch publishers. I built it solo on Next.js + Supabase; it's live with 100+ writers across three partner publishers."</i>
+<br><br>
+<b style="color:var(--accent)">PAST (~50 sec).</b> The 1-2 stops that explain how you got here. Theme-based, not chronological. Pick the arc the role cares about.
+<br>
+<i>"Before that, three years at Amazon as an SDE on search ads — I owned the offline Spark pipeline that processed about 35% of US search ad data monthly. Then six months at BrainPOP building LLM-powered content-classification systems on Vertex AI. The thread across both: I keep ending up at the intersection of ML infra and real product surface."</i>
+<br><br>
+<b style="color:var(--accent)">FUTURE (~20 sec).</b> What you're looking for + why this conversation. Forward, not backward.
+<br>
+<i>"I'm looking to get back into a high-leverage IC seat at a company shipping AI products to real users — which is why your FDE role caught my eye."</i>
+<br><br>
+<b>Why this lands.</b> Recruiter walks away with: (1) named current project + one number (signals you ship), (2) one credible past credential (Amazon), (3) a clean reason for why this role specifically. They can repeat your story to the hiring manager. That's the bar.
+<br><br>
+<b>The five killers.</b>
+<ol class="list-muted">
+  <li><b>No number.</b> "I work on machine learning" without "35% of search ad data" is forgettable.</li>
+  <li><b>Resume read-through.</b> "I went to Berkeley, graduated in 2018, joined Amazon, then…" — they have the resume. Skip.</li>
+  <li><b>Apologetic framing.</b> "I've been bouncing around a bit" / "I haven't done X yet" — never apologize for your trajectory in the first 90 seconds.</li>
+  <li><b>No forward line.</b> Ending on past tense ("…and that's where I am now") makes the recruiter ask "and what are you looking for?" — wasted question slot.</li>
+  <li><b>Hedging on "founder."</b> If you call yourself a founder, own it. "I built X, it's live with N users" beats "I've been kind of working on a side thing."</li>
+</ol>`,
+      interactive: { type: "mcq",
+        q: "Recruiter opens: \"Tell me about yourself.\" Best opening sentence?",
+        options: [
+          "\"Well I graduated from Berkeley in 2018 with a degree in EECS, and then I joined Amazon…\"",
+          "\"Right now I'm building Edith.media — an editorial marketplace, live with 100+ writers across three publishers. Before that, three years at Amazon SDE on search ads ML infra, then six months at BrainPOP shipping LLM content-classification on Vertex AI. I'm looking to get back into a senior IC seat shipping AI to real users — which is why your FDE role caught my eye.\"",
+          "\"I'm a software engineer with experience in machine learning and full-stack development, looking for new opportunities.\"",
+          "\"I've kind of been doing a lot of different things — some founder stuff, some ML work — it's hard to summarize but I'll try.\""
+        ],
+        correct: 1,
+        explain: "B uses Now/Past/Future, has one named number (100+ writers), one credible past credential (Amazon, with specifics), and a forward line that explains why THIS role. A is a resume read-through (recruiter has the resume). C is content-free generic. D apologizes for the trajectory, which is fatal — never open with hedging." } },
+
+    { id: "bi-2", type: "concept", name: "\"Walk me through your resume\"", xp: 12, time: 8,
+      recallPrompt: "Time yourself. Out loud, walk through Amazon → BrainPOP → Independent Founder in 5-6 minutes. Note where you over-spent (probably Amazon) and where you under-spent (probably the gap/founder period).",
+      body: `<b>The prompt:</b> <i>"Walk me through your resume"</i> — not to be confused with \"tell me about yourself.\" This one is longer (5-8 min budget), more chronological, and probes for gaps + transitions. It usually shows up in the HM intro (not the recruiter screen).
+<br><br>
+<b>The trap most candidates fall into:</b> equal time per role. Six minutes ÷ four jobs = 90 seconds each. Result: you spend the same time on a 3-year Amazon role and a 4-month internship. The interviewer can't tell what matters.
+<br><br>
+<b>The correct allocation:</b> <b>weight time by relevance to the role they're hiring for</b>, not by tenure. For an FDE/SDE role in 2026:
+<br><br>
+<table style="margin:8px 0;font-size:13px;border-collapse:collapse;width:100%">
+<tr><td style="vertical-align:top;width:50%;padding:6px 10px;border-right:1px solid var(--hairline)"><b>EXPECTED (chronological, equal weight)</b><br>Berkeley (45s) → Adobe (45s) → Intel (45s) → Amazon (90s) → BrainPOP (90s) → Founder (90s)<br><br>= 6 min, but the recruiter remembers nothing specific.</td>
+<td style="vertical-align:top;width:50%;padding:6px 10px"><b style="color:var(--accent)">STRONG (weighted by relevance)</b><br>Berkeley (10s, name+year only) → Amazon (2 min, the production-ML stuff) → BrainPOP (1.5 min, LLM infra) → Founder (2 min, end-to-end shipping)<br><br>= 5.5 min, the recruiter has 3 stories to repeat.</td></tr>
+</table>
+<b>The 3 transitions you have to nail.</b> Recruiters and HMs probe transitions, not roles. Each transition needs a one-sentence answer.
+<br><br>
+<b>Transition 1: Amazon → BrainPOP (Jun 2022 → Jul 2023).</b> 13-month gap. Why did you leave Amazon? Why did you join BrainPOP?
+<br><i>Strong:</i> <i>"I left Amazon after three years because I'd hit the ceiling of what I could learn on offline data pipelines without going deeper into modeling. BrainPOP was an opportunity to build production LLM systems directly on a real user-facing product — that's the work I wanted next."</i>
+<br><br>
+<b>Transition 2: BrainPOP → Independent (Dec 2023 → Oct 2024).</b> The 10-month gap between leaving BrainPOP and starting Edith.media. This is the gap recruiters will ask about most.
+<br><i>Strong (write yours):</i> <i>"BrainPOP wound down its AI work at end of 2023. I spent the next ~10 months [SPECIFIC TRUTH: contracted, traveled, prototyped, took time off, etc.]. The Edith.media work started in earnest in late 2024 after one of the publisher conversations turned into a real demand signal."</i>
+<br>
+<b>The wrong version:</b> <i>"After BrainPOP I just kind of figured out what to do next."</i> ("Figured out" is recruiter-radar for "didn't have a plan.")
+<br><br>
+<b>Transition 3: Independent → seeking a job.</b> Most-asked: "you're a founder — why are you looking?" Bad answers: "founding is hard," "I miss steady income." Good answer: <i>"Edith.media is still running and I'll keep it going as a side project, but the ceiling on what I can learn solo is real — I want to be in a team again, shipping bigger systems with engineers I learn from."</i>
+<br><br>
+<b>What to compress:</b> internships (Adobe, Intel — 10 seconds each: "I interned at Adobe and Intel during undergrad, mostly ML infrastructure work"). Berkeley (5 seconds: name, year, EECS). Courses/projects (skip unless asked).
+<br><br>
+<b>What to dwell on:</b> the role most-relevant to what they're hiring for. For most FDE/SDE roles in 2026, that's Amazon (longest, most legible) + the founder work (most recent, most ownership signal). BrainPOP is a useful middle bridge.`,
+      interactive: { type: "mcq",
+        q: "HM says \"walk me through your resume, you have about 6 minutes.\" You have 4 roles + 2 internships + degree. Best time allocation?",
+        options: [
+          "Equal time per role: 60 seconds each, plus the degree.",
+          "Strict chronological order, dwell on the earliest role (foundational), skim the recent ones.",
+          "Skim degree + internships (~20 seconds total), spend 90s on Amazon, 60s on BrainPOP, ~90s on the current founder work, ~30s on transitions and forward look.",
+          "Spend 4 minutes on the most recent (current work), 2 minutes on everything else combined."
+        ],
+        correct: 2,
+        explain: "C weights by relevance: deep on the roles that matter for the target job (Amazon's production-ML credibility, BrainPOP's LLM work, current end-to-end shipping), skims undergrad + internships (10s each), explicitly budgets for transitions. A is the equal-time trap — recruiter remembers nothing. B inverts: oldest roles are least relevant. D over-indexes on recency at the cost of the credibility roles." } },
+
+    { id: "bi-3", type: "concept", name: "\"Why are you looking?\" / \"Why us?\"", xp: 12, time: 8,
+      recallPrompt: "Pick ONE company from your target list (Stripe / Anthropic / Ramp / wherever). In writing, draft your \"why are you looking\" answer AND your \"why this company specifically\" answer. Each should be 2-3 sentences, forward-looking, name something specific to that company you couldn't say about anyone else.",
+      body: `<b>The two prompts always come back-to-back.</b> If you nail \"why are you looking?\" but fumble \"why us?\", the recruiter assumes you're spraying applications. If you nail \"why us?\" but fumble \"why looking?\", they assume you're escaping something.
+<br><br>
+<b>"Why are you looking?" — the rule.</b> <b style="color:var(--accent)">Forward-looking, never backward-looking.</b> Frame what you're going TO, not what you're getting away FROM.
+<br><br>
+<table style="margin:8px 0;font-size:13px;border-collapse:collapse;width:100%">
+<tr><td style="vertical-align:top;width:50%;padding:6px 10px;border-right:1px solid var(--hairline)"><b style="color:var(--bad)">WRONG (backward)</b><br><i>"I'm tired of founding solo."</i><br><i>"BrainPOP was disorganized."</i><br><i>"I want more stable income."</i><br><br>Each one signals: <b>escape</b>. Recruiter wonders what's wrong with you that you keep leaving.</td>
+<td style="vertical-align:top;width:50%;padding:6px 10px"><b style="color:var(--accent)">RIGHT (forward)</b><br><i>"I want to be in a team again — shipping bigger systems with people I learn from. Solo founding has been a great learning loop but the ceiling on what I can absorb alone is real, and I'm at it."</i><br><br>Signals: <b>ambition</b>. Recruiter sees you as someone with momentum, not someone running away.</td></tr>
+</table>
+<b>The "founder-going-IC" version specifically.</b> Recruiters pattern-match this as "couldn't make it work" unless you actively reframe. The reframe:
+<br>
+<i>"Edith.media is still running — I'm going to keep it as a side project. But I want to be back in a high-velocity engineering team. The pace and the talent density I had at Amazon working alongside other senior engineers is what I miss most, and what I learn the most from."</i>
+<br><br>
+Three things that does:
+<ol class="list-muted">
+  <li>Keeps the founder work alive (you didn't fail — you're just shifting allocation).</li>
+  <li>Names what you're going to (team velocity, talent density) — concrete + flattering.</li>
+  <li>References a credible past comp (Amazon) — anchors them.</li>
+</ol>
+<br>
+<b>"Why us?" — the rule.</b> <b style="color:var(--accent)">Name something specific to THIS company that you couldn't say about three other companies.</b> Generic "I love your mission" answers signal you applied to 30 places.
+<br><br>
+<b>Specificity ladder, weakest → strongest:</b>
+<ol class="list-muted">
+  <li><b style="color:var(--bad)">Tier 4 (instant tell):</b> <i>"I really admire the mission."</i> / <i>"I've used your product and love it."</i></li>
+  <li><b style="color:var(--bad)">Tier 3 (still generic):</b> <i>"You're working on important problems in payments / AI / etc."</i></li>
+  <li><b style="color:var(--warn)">Tier 2 (acceptable):</b> <i>"The team's writeup on [specific blog post / paper / engineering blog] resonated with how I think about [topic]."</i></li>
+  <li><b style="color:var(--accent)">Tier 1 (hire-signal):</b> <i>"I've been thinking about [specific technical problem they're solving] since I dealt with [your own related work]. Your approach with [specific detail from their docs/blog/paper] is the closest match I've seen to what I'd build — and I want to build the next version of it with the team that already shipped the first."</i></li>
+</ol>
+<b>The 10-minute prep that gets you to Tier 1:</b> read the company's most recent engineering blog post / paper / changelog. Find ONE technical decision they made. Write 2 sentences on why that decision was non-obvious and what it tells you about the team. Recite those 2 sentences in the call. That's it. Most candidates skip this — that's exactly why it works.
+<br><br>
+<b>Worked example for Stripe (FDE role):</b>
+<br>
+<i>"I've spent the last year shipping production systems where idempotency is the hardest part of correctness — Edith.media's editor-decision flow has to be replay-safe under realtime sync, and I've internalized that idempotency is mostly about good keys, not retry loops. Stripe's writeup on idempotency keys is what made that click for me originally. Building FDE work on top of Stripe's primitives — where the customer's domain logic also has to be replay-safe — is exactly the loop I want to spend the next two years getting good at."</i>
+<br><br>
+Notice: cites a specific Stripe artifact (the idempotency-keys writeup), connects it to your own work, names the forward arc ("the next two years"). Tier 1.`,
+      interactive: { type: "mcq",
+        q: "You're applying for a Forward Deployed Engineer role at Stripe. Best answer to \"why Stripe specifically?\"",
+        options: [
+          "\"I really admire Stripe's mission and have always wanted to work on payments.\"",
+          "\"Stripe is solving important problems at scale, and I'd love to be part of that.\"",
+          "\"I've spent the last year shipping production systems where idempotency was the hardest part of correctness — Stripe's writeup on idempotency keys is what made the pattern click for me originally. Building FDE work on top of Stripe's primitives, where the customer's logic also has to be replay-safe, is exactly the loop I want to spend the next two years getting good at.\"",
+          "\"I've used Stripe in my own projects and the developer experience is great.\""
+        ],
+        correct: 2,
+        explain: "C is Tier 1 specificity: names a real Stripe artifact (idempotency-keys writeup), connects it to YOUR own work, and names a forward arc. A and B are interchangeable across 30 companies — instant signal you're spraying. D is closer but stops at \"DX is great\" — that's a user comment, not an engineer's why." } },
+
+    { id: "bi-4", type: "concept", name: "Salary, timeline, location, sponsorship", xp: 12, time: 7,
+      recallPrompt: "Write your actual answers, on paper: (1) salary range you're targeting, (2) timeline urgency, (3) on-site / hybrid / remote preference + which cities you'd consider, (4) sponsorship status. If any feels uncertain, that's the one to drill before your next recruiter call — uncertainty in the call sounds like you don't know what you want.",
+      body: `These four questions are <b>filters</b>, not behavioral signals. The recruiter is checking whether you fit the role's constraints. A weak answer here gets you screened out faster than a weak technical signal — because the recruiter can't justify advancing someone who's a comp/timeline/location mismatch.
+<br><br>
+<b>1. Salary.</b> The single most-mishandled question on a recruiter call.
+<br><br>
+<b style="color:var(--bad)">What candidates do wrong:</b>
+<ul class="list-muted">
+  <li>Name a number first ("I'm looking for $200k"). Almost always too low — you're anchoring against your own ceiling, not theirs.</li>
+  <li>Give a tight range ("$200-220k"). They'll book the bottom.</li>
+  <li>Get defensive ("I'd rather discuss that later"). Reads as inexperienced — comp is a normal part of the process.</li>
+</ul>
+<b style="color:var(--accent)">The 3-move pattern:</b>
+<ol class="list-muted">
+  <li><b>Defer first, politely.</b> "Before I throw out a number, do you have a band you're working with for this role? I'd hate to be the one who anchors it low."</li>
+  <li><b>If they push back ("we'd rather hear yours first"):</b> name a <i>wide</i> range pegged to public data. "Based on what I've seen on levels.fyi for [role] at [their stage], the total comp band looks like $230-310k all-in. I'd want to be somewhere in the upper half of that, but the exact number depends on the role's scope and the equity terms."</li>
+  <li><b>Never commit to a single number on the recruiter call.</b> That's for the offer-negotiation conversation, not the screen.</li>
+</ol>
+<i>Why this works:</i> levels.fyi is public; you're anchoring on market data, not your hopes. Naming the band up-front signals you've done your research. Saying \"upper half\" without specifying the exact number leaves room.
+<br><br>
+<b>2. Timeline.</b> "When are you looking to make a decision?"
+<br><br>
+<b>Signal urgency without seeming desperate.</b> <i>"I'm actively interviewing — I'd like to have offers in hand in the next 4-6 weeks so I can compare them side-by-side. Not pegged to a hard deadline beyond that."</i>
+<br>
+<b>What kills you:</b> <i>"I'm just exploring."</i> (Recruiter deprioritizes you immediately.) <i>"I need to decide by Friday."</i> (Reads as desperate or already-have-a-competing-offer-you-shouldn't-mention-yet.)
+<br><br>
+<b>3. Location / remote / hybrid.</b> "Are you in NYC? Are you open to on-site / hybrid?"
+<br><br>
+<b>Be concrete.</b> Don't say "flexible" — that reads as you don't know what you want. Say: <i>"I'm based in [city]. For the right role I'd consider on-site in NYC or hybrid; I'd want to understand your team's specific rhythm before committing to a relocation."</i>
+<br>
+<b>For purely remote roles:</b> just say <i>"I'm based in [city], available for remote with travel for off-sites — that's actually my preference."</i> Done.
+<br><br>
+<b>4. Sponsorship.</b> "Will you need visa sponsorship now or in the future?"
+<br><br>
+<b>Just answer the question.</b> <i>"No, I'm a US citizen — no sponsorship needed."</i> (Or whatever your actual status is.) Don't volunteer extra information. Don't hedge.
+<br><br>
+<b>The two compound questions that masquerade as filters.</b>
+<br><br>
+<b>"What other companies are you talking to?"</b> This is asking three things: (1) what's your social proof / status, (2) what's your urgency, (3) is there a competing offer we should be aware of.
+<br>
+<b>Strong answer:</b> name 2-3 specific companies in your tier, generic on stage. <i>"I'm in the middle of conversations with [Stripe / Anthropic / a couple of Series-B AI infra companies] — early stages mostly, nothing at offer yet."</i>
+<br>
+<b>What kills:</b> "I'd rather not say" (defensive), or naming companies way out of their tier (you're either lying or really not their fit).
+<br><br>
+<b>"Why did you leave [previous role]?"</b> Already covered in bi-3 — forward-looking, never backward-looking.`,
+      interactive: { type: "mcq",
+        q: "Recruiter asks: \"What kind of salary range are you targeting?\" You're 4 minutes into a 30-minute screen. Best move?",
+        options: [
+          "\"I'm looking for around $220k base.\" (Name a specific number to show confidence.)",
+          "\"I'd rather not get into compensation details this early.\" (Defer entirely.)",
+          "\"Before I throw out a number, do you have a band for this role? I'd hate to anchor low. If you'd rather hear mine first — based on what I see on levels.fyi for similar roles, the all-in band looks like $230-310k, and I'd want to be in the upper half. The exact number depends on the role's scope and equity terms.\"",
+          "\"I'm flexible on comp — what's important is the right role.\" (Signal you're not money-motivated.)"
+        ],
+        correct: 2,
+        explain: "C is the 3-move pattern: defer first, fall back to a public-data anchor (levels.fyi), name a wide range, refuse to commit to a single number on a screen. A anchors to your own ceiling — almost always low. B reads as defensive/inexperienced. D actively hurts you — recruiter hears \"easy to lowball,\" not \"mission-driven.\"" } },
+
+    { id: "bi-5", type: "concept", name: "Red flags + how to pre-empt them", xp: 13, time: 9,
+      recallPrompt: "Pick the ONE red flag a recruiter is most likely to probe on your resume (gap, short stint, founder-credibility, ML-to-product pivot). Write your 60-second pre-empt out loud. Time it. Refine until it lands in 60 seconds with the structure: acknowledge → specific truth → forward bridge.",
+      body: `Recruiters scan a resume in ~30 seconds. They're not looking for what's there — they're looking for what to <b>probe</b>. Their job is to surface anything that'll embarrass them with the hiring manager if it comes up later.
+<br><br>
+<b>The four red-flag patterns recruiters specifically scan for:</b>
+<ol class="list-muted">
+  <li><b>Gaps &gt; 6 months</b> between jobs without an explanation</li>
+  <li><b>Short stints</b> (&lt; 1 year), especially recent ones</li>
+  <li><b>Founder credibility</b> — was this a real venture or a "I'm between jobs" disguise?</li>
+  <li><b>Career pivots</b> — did the candidate actually choose this direction or are they desperate?</li>
+</ol>
+<b>The rule:</b> <b style="color:var(--accent)">pre-empt every flag in your 90-second pitch (bi-1) or your resume-walkthrough (bi-2)</b>. If you don't, the recruiter brings it up — and the question lands worse than your own preempt would have.
+<br><br>
+<b>Pre-empt pattern (60 seconds each):</b>
+<ol class="list-muted">
+  <li><b>Acknowledge (10s):</b> name the thing. <i>"So you'll see a ~10-month gap between BrainPOP and the founder work — let me cover that."</i> Saying it yourself reframes the question from "what is this candidate hiding?" to "this candidate has nothing to hide."</li>
+  <li><b>Specific truth (30s):</b> what you were ACTUALLY doing, with one concrete artifact. <i>"After BrainPOP wound down its AI work in Dec 2023, I spent that period [contracting at X for Y / building a prototype for Edith.media / traveling and self-directed learning on Z]. The concrete output was [one specific thing — a paper, a prototype, a customer conversation, a course]."</i></li>
+  <li><b>Forward bridge (20s):</b> connect to why you're here now. <i>"The Edith.media conversations started getting serious in late 2024 — first real publisher signed in October, that's when 'Independent Founder' on the resume actually kicks in."</i></li>
+</ol>
+<b>Worked pre-empts for each red-flag pattern.</b>
+<br><br>
+<b>1. The gap.</b> Dec 2023 → Oct 2024.
+<br>
+<b style="color:var(--bad)">Fatal:</b> <i>"I was just figuring out what to do next."</i> (Sounds aimless.)
+<br>
+<b style="color:var(--accent)">Strong:</b> <i>"After BrainPOP I spent ~10 months on focused self-directed work — built the first prototype of Edith.media, ran ~20 discovery interviews including a regulatory lead at Estée Lauder for a separate AI compliance project, and took some time to think hard about where AI engineering was headed. By October the publisher conversations turned into real signal, and that's when I went full-time on Edith."</i>
+<br><br>
+<b>2. The short stint.</b> BrainPOP, 6 months (Jul → Dec 2023).
+<br>
+<b style="color:var(--bad)">Fatal:</b> <i>"It didn't really work out."</i> / <i>"There were some management issues."</i> (Both signal: fired, or unprofessional.)
+<br>
+<b style="color:var(--accent)">Strong:</b> <i>"I joined BrainPOP specifically to ship LLM-powered test-bank generation on Vertex AI. The project shipped, the AI-content roadmap then narrowed at the end of the year, and I wrapped up cleanly to look for the next deeper LLM problem. The work itself was real — happy to walk through the cosine-similarity classification system anytime."</i>
+<br><br>
+<b>3. Founder credibility.</b> Recruiter's silent question: "is this a real company or a fig leaf?"
+<br>
+<b style="color:var(--bad)">Fatal:</b> hedging on tense ("I've been kind of working on a thing"). Vague metrics ("we have some users"). Refusing to discuss revenue.
+<br>
+<b style="color:var(--accent)">Strong:</b> <i>"Edith.media is live with 100+ writers across three partner publishers. Solo bootstrapped, not VC-funded — I built it to validate the editorial-marketplace thesis. It's monetizing [specific way], and it's at the stage where I can keep it running as a side project while joining a team for the next chapter. Happy to share metrics if it'd help."</i>
+<br>
+Note: <i>even saying "100+ writers" is real</i>. That's a public-facing, falsifiable number. Recruiters can tell when founders won't quantify — that's when they assume there's nothing to quantify.
+<br><br>
+<b>4. The ML-to-FDE pivot.</b> Your resume reads ML / AI-leaning. The role you're applying for is FDE/SDE. Recruiter wonders: are you settling, or did you actually choose this?
+<br>
+<b style="color:var(--bad)">Fatal:</b> <i>"I'm open to either ML or product engineering roles."</i> (Signals you'll take whatever.)
+<br>
+<b style="color:var(--accent)">Strong:</b> <i>"My background is ML-heavy, but the work I've gotten the most out of is the slice where ML meets a real product surface — at Amazon it was the Spark pipeline feeding live ad auctions, at BrainPOP it was LLM output going straight into student-facing content, at Edith.media it's full-stack from Postgres to UI. Pure-research ML I'd already know I wasn't a fit for. The FDE shape — where you're forced to own the system end-to-end and ship to a real customer — is exactly the through-line I keep coming back to."</i>
+<br><br>
+<b>The meta-lesson.</b> Every red flag has the same shape: acknowledge → specific truth (with one artifact / number) → forward bridge. Saying it yourself defuses it. Hiding it amplifies it. <b style="color:var(--accent)">Recruiters reward candor when it's paired with specificity.</b> Vague candor sounds like an excuse; specific candor sounds like ownership.`,
+      interactive: { type: "mcq",
+        q: "You have a 10-month gap on your resume between two jobs. Recruiter asks: \"I see there's a stretch from Dec 2023 to Oct 2024 — what were you doing then?\" Best answer?",
+        options: [
+          "\"Honestly, I was just figuring out what to do next.\"",
+          "\"I took some time off — I think everyone deserves a break sometimes.\"",
+          "\"After my last role wound down, I spent ~10 months on focused self-directed work — built the first prototype of what's now Edith.media, ran about 20 customer-discovery interviews on a separate AI compliance project (Kodo AI), and did some deliberate reading on where AI engineering was headed. By October the Edith publisher conversations turned into real signal and I went full-time on it.\"",
+          "\"I'd rather not get into too much detail — it was a complicated period.\""
+        ],
+        correct: 2,
+        explain: "C follows the pre-empt pattern: acknowledges the gap, names specific truthful activities (Edith prototype, 20 customer interviews, Kodo AI), includes a concrete artifact (\"20 interviews\"), and bridges forward to the current work. A is the \"figuring out\" answer that signals no plan. B is content-free. D actively raises a flag where there wasn't one — \"complicated\" makes the recruiter assume the worst." } },
+  ],
+},
+
+{
   cat: "coding",
   id: "cod-concurrency",
   name: "Concurrency \u2014 race conditions, locks, deadlocks",

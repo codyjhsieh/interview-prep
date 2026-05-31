@@ -7060,24 +7060,32 @@ function _mockSeededShuffle(arr, seed) {
  * type frequency, normalized; see js/interview-questions-2026.js).
  *
  * Empirical signal:
- *   coding         105% of companies (universal, often 2× per loop)
- *   behavioral      93%
- *   system_design   79%
- *   take_home       23%   (skip — takehomes are async, not live mocks)
- *   debugging        9%
- *   api_design       7%
- *   applied_ai       8%   (mostly at AI labs)
+ *   recruiter_intro 100% of companies (every loop starts with one)
+ *   coding          105% of companies (universal, often 2× per loop)
+ *   behavioral       93%
+ *   system_design    79%
+ *   take_home        23%   (skip — takehomes are async, not live mocks)
+ *   debugging         9%
+ *   api_design        7%
+ *   applied_ai        8%   (mostly at AI labs)
  *
  * Weights below are normalized so 3 weighted draws produce a realistic
  * mock loop. Coding deliberately gets the dominant slot — LeetCode-medium
  * is bucketed into "coding" in every public dataset, and lots of public
  * candidate writeups gloss over the round as "coding round" without
  * specifying LC vs production-flavor. Underweighting coding would
- * over-rotate to exotic rounds users won't actually see. */
+ * over-rotate to exotic rounds users won't actually see.
+ *
+ * `intro` is the recruiter/HM intro call — universal in every loop and
+ * the highest-cut-rate round across all 138 companies. Weighted ~12% so
+ * roughly 1-in-3 mock sessions surfaces one, without crowding out the
+ * coding slots. Behavioral drops 18→13% because intro covers a chunk
+ * of what behav used to absorb (motivation, story compression). */
 const MOCK_ROUND_WEIGHTS = [
-  { type: 'coding',        weight: 0.50, predicate: x => x.cat === 'coding' && x.mod.id !== 'cod-debugging' },
+  { type: 'coding',        weight: 0.44, predicate: x => x.cat === 'coding' && x.mod.id !== 'cod-debugging' },
   { type: 'system_design', weight: 0.22, predicate: x => x.cat === 'sysd'   && x.mod.id !== 'sd-api-design' },
-  { type: 'behavioral',    weight: 0.18, predicate: x => x.cat === 'behav' },
+  { type: 'behavioral',    weight: 0.12, predicate: x => x.cat === 'behav'  && x.mod.id !== 'behav-intro' },
+  { type: 'intro',         weight: 0.12, predicate: x => x.mod.id === 'behav-intro' },
   { type: 'debugging',     weight: 0.05, predicate: x => x.mod.id === 'cod-debugging' },
   { type: 'api_design',    weight: 0.03, predicate: x => x.mod.id === 'sd-api-design' },
   { type: 'applied_ai',    weight: 0.02, predicate: x => x.cat === 'ai' },
