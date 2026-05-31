@@ -10285,8 +10285,9 @@ The negotiation conversation usually takes 2-3 rounds over a week. Stay friendly
   ],
   lessons: [
     { id: "bi-1", type: "concept", name: "The 90-second self-pitch", xp: 12, time: 8,
-      recallPrompt: "Draft YOUR 90-second pitch. Map your resume's biggest arcs (Amazon → Intel → BrainPOP → Independent) into Now/Past/Future. Aim for 4 sentences, 1 named number, 1 forward-looking line.",
-      body: `<b>The prompt you'll hear:</b> <i>"Tell me about yourself"</i> / <i>"Walk me through your background briefly."</i> Always within the first 2 minutes of a recruiter call. Always.
+      recallPrompt: "OUT LOUD first — say your 90-second pitch into a voice memo or to ChatGPT voice. Time it. Then type a 1-line gist below so the SRS system can schedule a re-encounter. (Map Amazon → Intel → BrainPOP → Independent into Now/Past/Future. 4 sentences, 1 number, 1 forward line.)",
+      body: `<div style="background:rgba(14,163,113,0.06); border-left:3px solid var(--accent); padding:10px 14px; margin:0 0 14px; border-radius:6px"><b style="color:var(--accent)">🎙 Rehearse this OUT LOUD first.</b> Read the body once, then close it. Say your answer into a voice memo, to a friend, or to ChatGPT voice mode (prompt: <i>"You are a senior recruiter doing a 30-min screen for a Forward Deployed Engineer role. Open with: tell me about yourself."</i>). Time yourself. Play it back. The MCQ below only checks recognition — the speak-out-loud rep IS the training.</div>
+<b>The prompt you'll hear:</b> <i>"Tell me about yourself"</i> / <i>"Walk me through your background briefly."</i> Always within the first 2 minutes of a recruiter call. Always.
 <br><br>
 <b>The wrong instinct:</b> chronological resume read-through. <i>"I graduated in 2018, worked at Amazon for three years on search ads, then went to Intel for an internship — wait, that was before — then BrainPOP, where I…"</i> By minute 3 you're correcting yourself, the recruiter has stopped listening, and you've burned 25% of a 30-minute call introducing yourself.
 <br><br>
@@ -10326,8 +10327,9 @@ The negotiation conversation usually takes 2-3 rounds over a week. Stay friendly
         explain: "B uses Now/Past/Future, has one named number (100+ writers), one credible past credential (Amazon, with specifics), and a forward line that explains why THIS role. A is a resume read-through (recruiter has the resume). C is content-free generic. D apologizes for the trajectory, which is fatal — never open with hedging." } },
 
     { id: "bi-2", type: "concept", name: "\"Walk me through your resume\"", xp: 12, time: 8,
-      recallPrompt: "Time yourself. Out loud, walk through Amazon → BrainPOP → Independent Founder in 5-6 minutes. Note where you over-spent (probably Amazon) and where you under-spent (probably the gap/founder period).",
-      body: `<b>The prompt:</b> <i>"Walk me through your resume"</i> — not to be confused with \"tell me about yourself.\" This one is longer (5-8 min budget), more chronological, and probes for gaps + transitions. It usually shows up in the HM intro (not the recruiter screen).
+      recallPrompt: "OUT LOUD — walk through Amazon → BrainPOP → Independent Founder in 5-6 minutes, into a voice memo. Time it. Note where you over-spent (probably Amazon) and where you under-spent (probably the gap/founder period). Type a 1-line gist below.",
+      body: `<div style="background:rgba(14,163,113,0.06); border-left:3px solid var(--accent); padding:10px 14px; margin:0 0 14px; border-radius:6px"><b style="color:var(--accent)">🎙 Rehearse this OUT LOUD first.</b> Time it on your phone. Aim for 5-6 minutes total — most candidates blow past 8. Alternative: open ChatGPT voice mode and prompt <i>"You are a hiring manager. Ask me to walk you through my resume. Stop me if I ramble."</i> Let it interrupt you. That's the actual rep.</div>
+<b>The prompt:</b> <i>"Walk me through your resume"</i> — not to be confused with \"tell me about yourself.\" This one is longer (5-8 min budget), more chronological, and probes for gaps + transitions. It usually shows up in the HM intro (not the recruiter screen).
 <br><br>
 <b>The trap most candidates fall into:</b> equal time per role. Six minutes ÷ four jobs = 90 seconds each. Result: you spend the same time on a 3-year Amazon role and a 4-month internship. The interviewer can't tell what matters.
 <br><br>
@@ -10364,8 +10366,9 @@ The negotiation conversation usually takes 2-3 rounds over a week. Stay friendly
         explain: "C weights by relevance: deep on the roles that matter for the target job (Amazon's production-ML credibility, BrainPOP's LLM work, current end-to-end shipping), skims undergrad + internships (10s each), explicitly budgets for transitions. A is the equal-time trap — recruiter remembers nothing. B inverts: oldest roles are least relevant. D over-indexes on recency at the cost of the credibility roles." } },
 
     { id: "bi-3", type: "concept", name: "\"Why are you looking?\" / \"Why us?\"", xp: 12, time: 8,
-      recallPrompt: "Pick ONE company from your target list (Stripe / Anthropic / Ramp / wherever). In writing, draft your \"why are you looking\" answer AND your \"why this company specifically\" answer. Each should be 2-3 sentences, forward-looking, name something specific to that company you couldn't say about anyone else.",
-      body: `<b>The two prompts always come back-to-back.</b> If you nail \"why are you looking?\" but fumble \"why us?\", the recruiter assumes you're spraying applications. If you nail \"why us?\" but fumble \"why looking?\", they assume you're escaping something.
+      recallPrompt: "OUT LOUD into a voice memo: pick ONE company (Stripe / Anthropic / Ramp), record your \"why looking + why us\" pair (2 minutes total). Play it back. If \"why us\" could be said about any other company, do it again. Type a 1-line gist of your final version below.",
+      body: `<div style="background:rgba(14,163,113,0.06); border-left:3px solid var(--accent); padding:10px 14px; margin:0 0 14px; border-radius:6px"><b style="color:var(--accent)">🎙 Rehearse this OUT LOUD first.</b> Pick ONE target company. Open ChatGPT voice and prompt: <i>"You are a recruiter at [company]. Ask me: why are you looking right now? And why [company] specifically?"</i> Answer back-to-back. The "why us" answer must reference something specific to that company you couldn't say about three others — record yourself and listen for genericness.</div>
+<b>The two prompts always come back-to-back.</b> If you nail \"why are you looking?\" but fumble \"why us?\", the recruiter assumes you're spraying applications. If you nail \"why us?\" but fumble \"why looking?\", they assume you're escaping something.
 <br><br>
 <b>"Why are you looking?" — the rule.</b> <b style="color:var(--accent)">Forward-looking, never backward-looking.</b> Frame what you're going TO, not what you're getting away FROM.
 <br><br>
@@ -10412,8 +10415,9 @@ Notice: cites a specific Stripe artifact (the idempotency-keys writeup), connect
         explain: "C is Tier 1 specificity: names a real Stripe artifact (idempotency-keys writeup), connects it to YOUR own work, and names a forward arc. A and B are interchangeable across 30 companies — instant signal you're spraying. D is closer but stops at \"DX is great\" — that's a user comment, not an engineer's why." } },
 
     { id: "bi-4", type: "concept", name: "Salary, timeline, location, sponsorship", xp: 12, time: 7,
-      recallPrompt: "Write your actual answers, on paper: (1) salary range you're targeting, (2) timeline urgency, (3) on-site / hybrid / remote preference + which cities you'd consider, (4) sponsorship status. If any feels uncertain, that's the one to drill before your next recruiter call — uncertainty in the call sounds like you don't know what you want.",
-      body: `These four questions are <b>filters</b>, not behavioral signals. The recruiter is checking whether you fit the role's constraints. A weak answer here gets you screened out faster than a weak technical signal — because the recruiter can't justify advancing someone who's a comp/timeline/location mismatch.
+      recallPrompt: "OUT LOUD into a voice memo: deliver your 4 answers (salary / timeline / location / sponsorship) back-to-back as if a recruiter just asked. If any answer comes out wobbly, you don't actually know yet — go nail it down BEFORE your next real call. Type a 1-line gist below.",
+      body: `<div style="background:rgba(14,163,113,0.06); border-left:3px solid var(--accent); padding:10px 14px; margin:0 0 14px; border-radius:6px"><b style="color:var(--accent)">🎙 Rehearse this OUT LOUD first.</b> Especially the salary one — wobble here is fatal. Open ChatGPT voice mode and prompt: <i>"You are a recruiter doing a 30-min screen. Ask me about salary expectations, timeline, location preference, and visa status — one at a time, like a real call."</i> Answer each cold. Listen back for hedging or filler.</div>
+These four questions are <b>filters</b>, not behavioral signals. The recruiter is checking whether you fit the role's constraints. A weak answer here gets you screened out faster than a weak technical signal — because the recruiter can't justify advancing someone who's a comp/timeline/location mismatch.
 <br><br>
 <b>1. Salary.</b> The single most-mishandled question on a recruiter call.
 <br><br>
@@ -10468,8 +10472,9 @@ Notice: cites a specific Stripe artifact (the idempotency-keys writeup), connect
         explain: "C is the 3-move pattern: defer first, fall back to a public-data anchor (levels.fyi), name a wide range, refuse to commit to a single number on a screen. A anchors to your own ceiling — almost always low. B reads as defensive/inexperienced. D actively hurts you — recruiter hears \"easy to lowball,\" not \"mission-driven.\"" } },
 
     { id: "bi-5", type: "concept", name: "Red flags + how to pre-empt them", xp: 13, time: 9,
-      recallPrompt: "Pick the ONE red flag a recruiter is most likely to probe on your resume (gap, short stint, founder-credibility, ML-to-product pivot). Write your 60-second pre-empt out loud. Time it. Refine until it lands in 60 seconds with the structure: acknowledge → specific truth → forward bridge.",
-      body: `Recruiters scan a resume in ~30 seconds. They're not looking for what's there — they're looking for what to <b>probe</b>. Their job is to surface anything that'll embarrass them with the hiring manager if it comes up later.
+      recallPrompt: "OUT LOUD into a voice memo, deliver your 60-second pre-empt for the ONE red flag a recruiter is most likely to probe (gap / short stint / founder credibility / ML→FDE pivot). Structure: acknowledge → specific truth → forward bridge. Time it. Re-record until it lands in 60 sec without filler. Type a 1-line gist below.",
+      body: `<div style="background:rgba(14,163,113,0.06); border-left:3px solid var(--accent); padding:10px 14px; margin:0 0 14px; border-radius:6px"><b style="color:var(--accent)">🎙 Rehearse this OUT LOUD first.</b> Pick your single biggest flag. Open ChatGPT voice mode and prompt: <i>"You are a recruiter. Ask me a sharp follow-up question about [the gap / the short stint / the founder thing / the ML-to-FDE pivot]. Don't soften it."</i> Let it interrupt and probe. Re-record until your pre-empt lands cold in 60 seconds without filler.</div>
+Recruiters scan a resume in ~30 seconds. They're not looking for what's there — they're looking for what to <b>probe</b>. Their job is to surface anything that'll embarrass them with the hiring manager if it comes up later.
 <br><br>
 <b>The four red-flag patterns recruiters specifically scan for:</b>
 <ol class="list-muted">

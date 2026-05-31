@@ -4427,6 +4427,7 @@ function renderDashboard(state, hub) {
       <div class="flex gap-2 mt-4 flex-wrap">
         <a class="btn btn-primary" href="#review/missed">Drill missed (SRS) →</a>
         <a class="btn" href="#mock/practice">Practice mock →</a>
+        <a class="btn" href="#mock/intro" style="border-color:var(--accent); color:var(--accent)">Intro-call mock →</a>
       </div>
       `}
     `;
@@ -4445,8 +4446,11 @@ function renderDashboard(state, hub) {
     const cta = el('div','card thin');
     cta.innerHTML = `
       <div class="flex items-center justify-between gap-3 flex-wrap">
-        <div class="text-[13px] muted">Want extra reps? Run an unlimited practice mock over topics you haven't completed.</div>
-        <a class="btn" href="#mock/practice">Practice mock →</a>
+        <div class="text-[13px] muted">Want extra reps? Run an unlimited practice mock or drill the recruiter intro call.</div>
+        <div class="flex gap-2 flex-wrap">
+          <a class="btn" href="#mock/practice">Practice mock →</a>
+          <a class="btn" href="#mock/intro" style="border-color:var(--accent); color:var(--accent)">Intro-call mock →</a>
+        </div>
       </div>`;
     container.appendChild(cta);
   }
@@ -6766,6 +6770,15 @@ function renderMocks(state, hub) {
       <p class="text-slate-400 mt-1 text-sm">Recording mocks is the single highest-leverage prep activity. Log each one; review the painful parts.</p>
     </div>
     <div class="card">
+      <h3 class="font-display font-semibold text-lg mb-3">Run a mock now</h3>
+      <p class="text-[12.5px] muted mb-3">Three modes. Daily and practice run the weighted-realistic loop (coding-heavy with sysd / behav / occasional intro). Intro-call drills <b>only</b> the recruiter/HM screen — pitch, resume walkthrough, why-looking, salary, red flags — with a forced speak-out-loud rehearsal protocol.</p>
+      <div class="flex flex-wrap gap-2">
+        <a class="btn btn-primary" href="#mock"><span class="inline-flex items-center gap-1.5">${iconHTML('flame', {size: 14})} Daily mock</span></a>
+        <a class="btn" href="#mock/practice"><span class="inline-flex items-center gap-1.5">${iconHTML('refresh-cw', {size: 14})} Practice mock</span></a>
+        <a class="btn" href="#mock/intro" style="border-color:var(--accent); color:var(--accent)"><span class="inline-flex items-center gap-1.5">${iconHTML('message-circle', {size: 14})} Intro-call mock</span></a>
+      </div>
+    </div>
+    <div class="card">
       <h3 class="font-display font-semibold text-lg mb-3">Log a mock</h3>
       <form id="mock-form" class="grid sm:grid-cols-4 gap-3">
         <select name="vertical" class="bg-ink-900 border border-ink-600 rounded-lg px-3 py-2">
@@ -7204,6 +7217,25 @@ function _pickPracticeTopics(state, excludeIds = []) {
   });
 }
 
+// Intro-call mode: pick 3 random lessons from behav-intro ONLY. Bypasses
+// the round-type weighting because the entire session is one round-type.
+// All 5 behav-intro lessons are distinct facets (90-sec pitch, resume
+// walkthrough, why-looking, salary, red flags) so any 3-of-5 produces a
+// coherent rehearsal loop.
+function _pickIntroTopics(state) {
+  const mod = MODULES.find(m => m.id === 'behav-intro');
+  if (!mod) return [];
+  const all = mod.lessons
+    .filter(l => l.type === 'concept' && l.interactive)
+    .map(l => ({ lesson: l, mod, cat: mod.cat, roundType: 'intro' }));
+  // Shuffle in-place; take first 3. Math.random — re-rolls every session.
+  for (let i = all.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [all[i], all[j]] = [all[j], all[i]];
+  }
+  return all.slice(0, 3);
+}
+
 // Hardness heuristic for category-quiz items: prefer scenario-framed
 // questions with longer explanations and balanced option lengths
 function _isMediumHard(q) {
@@ -7242,46 +7274,57 @@ function _pickTestQuestions(topics) {
 function renderMockInterview(state, hub, mode) {
   const today = GAMI.todayKey();
   const isPractice = mode === 'practice';
-  const sessionKey = isPractice ? 'activeMockPractice' : 'activeMockInterview';
+  const isIntro    = mode === 'intro';
+  // Each mode gets its own session slot so they don't clobber each other.
+  // Daily mock is keyed by date (one fresh draw per day). Practice + intro
+  // re-roll per session — neither is gated by the daily quest.
+  const sessionKey = isIntro    ? 'activeMockIntro'
+                   : isPractice ? 'activeMockPractice'
+                   :              'activeMockInterview';
 
   // Daily mode: reset stale state if it's a new day.
-  // Practice mode: reset when completed (so each visit starts a fresh practice session),
+  // Practice + intro modes: reset when completed (each visit starts fresh),
   // but resume an in-progress one if the user reloaded mid-session.
   const existing = state[sessionKey];
-  const stale = isPractice
+  const stale = (isPractice || isIntro)
     ? (!existing || existing.completed)
     : (!existing || existing.date !== today);
   if (stale) {
+    // Lock topic ids in state so reload/back doesn't reshuffle mid-session.
+    let initialTopicIds = null;
+    if (isPractice) initialTopicIds = _pickPracticeTopics(state).map(x => x.lesson.id);
+    else if (isIntro) initialTopicIds = _pickIntroTopics(state).map(x => x.lesson.id);
     state[sessionKey] = {
       date: today,
-      mode: isPractice ? 'practice' : 'daily',
-      sessionId: isPractice ? `prac-${Date.now()}` : `daily-${today}`,
+      mode: isIntro ? 'intro' : isPractice ? 'practice' : 'daily',
+      sessionId: isIntro    ? `intro-${Date.now()}`
+               : isPractice ? `prac-${Date.now()}`
+               :              `daily-${today}`,
       phase: 'briefing',
       currentTopic: 0,
       testAnswers: [],
       completed: false,
-      // Practice mode locks in its randomly-picked topics in state so reload doesn't reshuffle
-      topicIds: isPractice ? _pickPracticeTopics(state).map(x => x.lesson.id) : null,
+      topicIds: initialTopicIds,
     };
     GAMI.saveImmediate(state);
   }
   const session = state[sessionKey];
 
-  // Resolve topic objects from ids (practice) or seeded picker (daily)
+  // Resolve topic objects from ids (practice + intro) or seeded picker (daily)
   let topics;
-  if (isPractice && Array.isArray(session.topicIds)) {
+  if ((isPractice || isIntro) && Array.isArray(session.topicIds)) {
     topics = session.topicIds
       .map(lid => {
         for (const m of MODULES) {
           const l = m.lessons.find(x => x.id === lid);
-          if (l) return { lesson: l, mod: m, cat: m.cat };
+          if (l) return { lesson: l, mod: m, cat: m.cat, roundType: isIntro ? 'intro' : undefined };
         }
         return null;
       })
       .filter(Boolean);
     // If somehow we have fewer than 3 (e.g., a lesson was removed), re-roll
     if (topics.length < 3) {
-      topics = _pickPracticeTopics(state);
+      topics = isIntro ? _pickIntroTopics(state) : _pickPracticeTopics(state);
       session.topicIds = topics.map(x => x.lesson.id);
       GAMI.saveImmediate(state);
     }
@@ -7307,14 +7350,29 @@ function renderMockInterview(state, hub, mode) {
   // ── Phase 1: briefing ─────────────────────────────────────────────────
   function paintBriefing() {
     const totalMin = topics.reduce((s, t) => s + (t.lesson.time || 8), 0) + 12; // +12 for the test
+    const titleSuffix = isIntro ? ' · intro call' : isPractice ? ' · practice' : '';
+    const subtitle = isIntro
+      ? `Recruiter / hiring-manager intro-call practice — 3 facets drawn from the 5-lesson intro module (pitch, resume walkthrough, why-looking, salary, red flags). ≈ ${totalMin} min. <b style="color:var(--accent)">This round only works if you actually speak out loud.</b> Read each body, then SAY your answer — into your phone's voice memo, to a friend, or to ChatGPT voice mode (prompt it: "you are a senior recruiter doing a 30-min screen for an FDE role; ask me [the lesson's prompt]"). The MCQ at the end of each topic only tests recognition; the rehearsal is the actual training.`
+      : isPractice
+      ? `Practice run — 3 topics from areas you haven't completed yet. Unlimited reps, no daily-quest progress (the daily mock counts separately). ≈ ${totalMin} min.`
+      : `3 topics, picked deterministically for today. You'll review each topic + do its activity, then sit a 6-question medium-hard exam pulling from the same three areas. ≈ ${totalMin} min.`;
     container.innerHTML = `
       <div>
         <a href="#dashboard" class="text-xs muted hover:text-accent-400">← Back to dashboard</a>
-        <h1 class="font-display text-3xl font-semibold mt-2">Mock interview${isPractice ? ' · practice' : ''}</h1>
-        <p class="muted text-sm mt-1 max-w-xl">${isPractice
-          ? `Practice run — 3 topics from areas you haven't completed yet. Unlimited reps, no daily-quest progress (the daily mock counts separately). ≈ ${totalMin} min.`
-          : `3 topics, picked deterministically for today. You'll review each topic + do its activity, then sit a 6-question medium-hard exam pulling from the same three areas. ≈ ${totalMin} min.`}</p>
+        <h1 class="font-display text-3xl font-semibold mt-2">Mock interview${titleSuffix}</h1>
+        <p class="muted text-sm mt-1 max-w-xl">${subtitle}</p>
       </div>
+      ${isIntro ? `
+      <div class="card thin" style="border-left:3px solid var(--accent); background:rgba(14,163,113,0.04)">
+        <div class="text-[11px] uppercase tracking-wider mb-2" style="color:var(--accent); letter-spacing:0.08em; font-weight:600">🎙 Rehearsal protocol</div>
+        <ol class="list-muted text-[13px] leading-relaxed" style="padding-left:18px">
+          <li><b>Read the body once.</b> Cover the body. Don't keep it open while you rehearse.</li>
+          <li><b>Speak your answer out loud.</b> Time it on your phone. Don't read from notes.</li>
+          <li><b>Record a take.</b> Voice memo, screen recording, anything. Play it back. Where did you ramble? Where did you hedge? Where did you fail to land a number?</li>
+          <li><b>Run it live.</b> Open ChatGPT voice mode (or a friend / mirror) and prompt: <i>"You are a senior recruiter doing a 30-minute screen for [target role]. Ask me: [the lesson's prompt]."</i> Answer cold.</li>
+          <li><b>Then</b> do the recall + MCQ in the app — those are recognition checks, not the real rep.</li>
+        </ol>
+      </div>` : ''}
       <div class="grid sm:grid-cols-3 gap-4">
         ${topics.map((t, i) => {
           const cat = CATEGORIES.find(c => c.id === t.cat);
