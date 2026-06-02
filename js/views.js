@@ -5358,6 +5358,12 @@ function renderCompanies(state, hub) {
   let curVFilter = 'all';
   let curLFilter = 'all';
   let curQuery   = '';
+  // Roles pagination — 250 rows initial, +250 per "Load more" click. Hoisted
+  // out of paintRoles so the Load-more handler can mutate it; reset to 250
+  // whenever filter/search changes so users don't pay the full-render cost
+  // after switching to a small subset.
+  const ROLES_PAGE  = 250;
+  let   rolesShown  = ROLES_PAGE;
 
   // Pre-score every company and every role so sort is fast on repaints.
   const scoredCos = COMPANIES.map(c => ({ ...c, _fit: companyFitScore(c) }))
@@ -5518,10 +5524,13 @@ function renderCompanies(state, hub) {
       rolelist.innerHTML = '<div class="muted text-sm py-6 text-center">No roles match your filters.</div>';
       return;
     }
-    // Cap render to 250 rows for performance; show how many are hidden.
-    const cap = 250;
+    // Render up to `rolesShown` rows, with a Load-more button revealing the
+    // next ROLES_PAGE batch. The cap is per-paint, not per-filter, so reset
+    // happens externally whenever the filter set changes.
+    const cap = Math.min(rolesShown, filtered.length);
+    const remaining = Math.max(0, filtered.length - cap);
     const live = (window.APP && window.APP.getState) ? window.APP.getState() : state;
-    const head = `<div class="text-[11px] muted">${filtered.length} role${filtered.length===1?'':'s'} matched, sorted by fit${filtered.length>cap?` (showing top ${cap})`:''}</div>`;
+    const head = `<div class="text-[11px] muted">${filtered.length} role${filtered.length===1?'':'s'} matched, sorted by fit${remaining>0?` · showing top ${cap}`:''}</div>`;
     const rows = filtered.slice(0, cap).map(r => {
       const c = r._company;
       const roleKey = makeRoleKey(c, r);
@@ -5559,7 +5568,17 @@ function renderCompanies(state, hub) {
              style="color:var(--accent); text-decoration:none; padding:4px 6px;">↗</a>
         </div>`;
     }).join('');
-    rolelist.innerHTML = head + '<div class="space-y-1.5 mt-2">' + rows + '</div>';
+    const loadMore = remaining > 0
+      ? `<div class="text-center mt-4"><button class="btn btn-ghost text-[12.5px]" data-roles-load-more>Load ${Math.min(ROLES_PAGE, remaining)} more <span class="muted ml-1">(${remaining} remaining)</span></button></div>`
+      : '';
+    rolelist.innerHTML = head + '<div class="space-y-1.5 mt-2">' + rows + '</div>' + loadMore;
+    const btn = rolelist.querySelector('[data-roles-load-more]');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        rolesShown += ROLES_PAGE;
+        paintRoles();
+      });
+    }
   }
 
   function paint() {
@@ -5620,6 +5639,7 @@ function renderCompanies(state, hub) {
         tab.classList.add('active');
         curLFilter = tab.dataset.lfilter;
       }
+      rolesShown = ROLES_PAGE;            // reset pagination on filter change
       paint();
     });
   });
@@ -5632,6 +5652,7 @@ function renderCompanies(state, hub) {
   let _searchDebounce = 0;
   search.addEventListener('input', e => {
     curQuery = e.target.value;
+    rolesShown = ROLES_PAGE;              // reset pagination on search change
     clearTimeout(_searchDebounce);
     _searchDebounce = setTimeout(paint, 150);
   });
