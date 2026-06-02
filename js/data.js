@@ -12511,6 +12511,109 @@ const COMPANIES = [
       { title:"IT Engineer", url:"https://makers.lemonade.com/recipe/it-engineer-new-york-united-states", level:"mid" },
       { title:"Lemonade Careers Hub", url:"https://makers.lemonade.com/", level:"mid" }
     ] },
+  /* ===== 2026-05-31 sweep #2 — Tier 1–5 verified, 9 survivors of 32 ===== */
+  { id:"nyt", name:"New York Times", vertical:"media",
+    sub:"NYC eng — AI Platforms, ML, GenAI tooling for the newsroom",
+    stage:"Public", raised:"Public (NYSE: NYT)", lead:"Public",
+    badges:["Public","NYC-HQ","AI Engineering"],
+    totalRoles:7,
+    notes:"Hybrid NYC, 2+ days in office. AI Platforms team is building internal LLM platform for the newsroom (article search, GenAI summarization, recsys). Stack: Node/TS, React, Python, Kubernetes. Standard 4-round loop: coding, system design, product sense, behavioral. Strong bar; pays well below FAANG but stable + mission-driven.",
+    jobs:[
+      { title:"Software Engineer - AI Platforms and Products (Frontend)", url:"https://job-boards.greenhouse.io/thenewyorktimes/jobs/4680447005", level:"mid" },
+      { title:"Software Engineer, Data Platforms", url:"https://job-boards.greenhouse.io/thenewyorktimes/jobs/4675221005", level:"mid" },
+      { title:"Backend Software Engineer - Golang", url:"https://job-boards.greenhouse.io/thenewyorktimes/jobs/4663724005", level:"mid" },
+      { title:"Senior Software Engineer, AI Platforms and Products", url:"https://job-boards.greenhouse.io/thenewyorktimes/jobs/4675428005", level:"senior" },
+      { title:"Software Engineer, Machine Learning Platform", url:"https://job-boards.greenhouse.io/thenewyorktimes/jobs/4653129005", level:"mid" },
+      { title:"Software Engineer, News Multimodal", url:"https://job-boards.greenhouse.io/thenewyorktimes/jobs/4693057005", level:"mid" },
+      { title:"Senior Software Engineer, Messaging Platforms (Frontend)", url:"https://job-boards.greenhouse.io/thenewyorktimes/jobs/4680858005", level:"senior" }
+    ] },
+  { id:"spring-health", name:"Spring Health", vertical:"health",
+    sub:"NYC mental health AI / benefits platform",
+    stage:"Series E", raised:"$466M+", lead:"Generation Investment Mgmt",
+    badges:["Generation IM","Kinnevik","Tiger Global"],
+    totalRoles:1,
+    notes:"NYC hybrid available. AI Servicing Platform team is interesting; Rails/React stack. Median NYC SWE comp ~$160K + equity. Behavioral-heavy interview; mission-fit screen is real.",
+    jobs:[
+      { title:"Senior Software Engineer I, Member Growth, Care Guide Experience", url:"https://job-boards.greenhouse.io/springhealth66/jobs/4673749005", level:"senior" }
+    ] },
+  { id:"k-health", name:"K Health", vertical:"health",
+    sub:"NYC AI primary care, partners with Cedars-Sinai, Mayo, Elevance",
+    stage:"Series E", raised:"~$400M", lead:"Valor Equity Partners",
+    badges:["Valor","Mangrove","Claure Group"],
+    totalRoles:4,
+    notes:"NYC HQ, hybrid 4 days/week. NO immigration sponsorship — explicit. Stack: Kubernetes, Terraform, GitLab CI. Mobile + backend heavy. ~30 total open roles. Interview is practical: real code-review style + clinical-domain product judgment.",
+    jobs:[
+      { title:"Senior Data Engineer", url:"https://job-boards.greenhouse.io/khealthcareers/jobs/5985626004", level:"senior" },
+      { title:"Senior DevOps Engineer", url:"https://job-boards.greenhouse.io/khealthcareers/jobs/5993839004", level:"senior" },
+      { title:"Senior Software Engineer - Full Stack", url:"https://job-boards.greenhouse.io/khealthcareers/jobs/6010688004", level:"senior" }
+    ] },
+  { id:"cityblock", name:"Cityblock Health", vertical:"health",
+    sub:"Brooklyn-HQ tech-driven provider for Medicaid populations; Alphabet/Sidewalk-spinout",
+    stage:"Series D", raised:"$890M+", lead:"SoftBank Vision Fund",
+    badges:["Alphabet","SoftBank","General Catalyst"],
+    totalRoles:1,
+    notes:"Brooklyn HQ. Stack: React, GraphQL, TS, Node, Postgres, GCP. Mission-oriented; clinical-facing internal app for community health teams. Workday job board — verify in browser since SPA hides postings from search.",
+    jobs:[
+      { title:"AI Software Engineer", url:"https://cityblockhealth.wd1.myworkdayjobs.com/en-US/CityblockExternalCareerSite/job/AI-Software-Engineer_R-1459", level:"mid" }
+    ] },
+  { id:"de-shaw", name:"D. E. Shaw Group", vertical:"fintech",
+    sub:"NYC quant hedge fund; multi-strategy, $60B+ AUM",
+    stage:"Private", raised:"Private (founded 1988)", lead:"Private",
+    badges:["NYC-HQ","$60B+ AUM","Quant"],
+    totalRoles:5,
+    notes:"NYC base. Bar is high — multiple rounds of brainteasers + algo + system design. Comp $200K-$275K base + variable. Apply via recruitment-nyc@world.deshaw.com or web form. Applied AI team is new and aggressive.",
+    jobs:[
+      { title:"Applied AI Engineer", url:"https://www.deshaw.com/careers/applied-ai-engineer-5375", level:"senior" },
+      { title:"Software Developer", url:"https://www.deshaw.com/careers/software-developer-new-york-2646", level:"mid" },
+      { title:"Software Developer: Developer Experience", url:"https://www.deshaw.com/careers/software-developer-developer-experience-5866", level:"mid" },
+      { title:"AI Product Engineer - Private Equity Platform (Cove)", url:"https://www.deshaw.com/careers/ai-product-engineer-private-equity-platform-5637", level:"mid" },
+      { title:"Senior Product Manager - Applied AI", url:"https://www.deshaw.com/careers/senior-product-manager-applied-ai-5877", level:"senior" }
+    ] },
+  { id:"worldquant", name:"WorldQuant", vertical:"fintech",
+    sub:"NYC quant; alpha-mining platform + Brain crowdsource",
+    stage:"Private", raised:"Private (founded 2007)", lead:"Private",
+    badges:["NYC-HQ","Quant","Global"],
+    totalRoles:3,
+    notes:"C++ heavy in trading systems; AI Developer role for agentic systems. NYC base $125-250K + bonus. Comparable interview shape to HRT/Citadel — algo + system design + finance fundamentals.",
+    jobs:[
+      { title:"C++ Quantitative Developer, Algorithmic Execution", url:"https://job-boards.greenhouse.io/worldquant/jobs/4559626006", level:"senior" },
+      { title:"AI Software Developer", url:"https://job-boards.greenhouse.io/worldquant/jobs/4673986006", level:"senior" },
+      { title:"Portfolio Manager, Agentic Systems", url:"https://job-boards.greenhouse.io/worldquant/jobs/4411819006", level:"senior" }
+    ] },
+  { id:"goldman-sachs", name:"Goldman Sachs (Marquee / Engineering)", vertical:"fintech",
+    sub:"Engineering across Asset & Wealth Mgmt + Global Banking & Markets",
+    stage:"Public", raised:"Public (NYSE: GS)", lead:"Public",
+    badges:["Public","Marquee","NYC-HQ"],
+    totalRoles:2,
+    notes:"VP-level NYC role: $130-250K base; behaviorals-heavy. Java/distributed systems. Marquee is the public-facing SaaS arm; Asset & Wealth Mgmt and Global Banking & Markets are the internal-product orgs.",
+    jobs:[
+      { title:"Asset & Wealth Management - Software Engineer - Vice President - New York", url:"https://higher.gs.com/roles/159540", level:"senior" },
+      { title:"Software Engineer, Global Banking & Markets, Front Office Technology", url:"https://higher.gs.com/roles/161630", level:"mid" }
+    ] },
+  { id:"galaxy-digital", name:"Galaxy Digital", vertical:"fintech",
+    sub:"NYC crypto + prime brokerage + AI infra (GalaxyOne)",
+    stage:"Public", raised:"Public (NASDAQ: GLXY)", lead:"Public",
+    badges:["Public","NYC-HQ","Crypto"],
+    totalRoles:7,
+    notes:"NYC onsite-heavy. Go/Postgres/Kafka; event-driven crypto custody systems. Lead+VP comp competitive vs hedge funds. Interviews: systems design + crypto fundamentals + behavioral. Mike Novogratz's shop.",
+    jobs:[
+      { title:"Senior Software Engineer, Custody & Staking", url:"https://job-boards.greenhouse.io/galaxydigitalservices/jobs/5825595004", level:"senior" },
+      { title:"Senior Software Engineer, GalaxyOne Institutional", url:"https://job-boards.greenhouse.io/galaxydigitalservices/jobs/5834860004", level:"senior" },
+      { title:"VP, Senior Backend Developer - GalaxyOne", url:"https://job-boards.greenhouse.io/galaxydigitalservices/jobs/5763386004", level:"senior" },
+      { title:"Lead Data Engineer", url:"https://job-boards.greenhouse.io/galaxydigitalservices/jobs/5843597004", level:"senior" },
+      { title:"VP, Quantitative Developer", url:"https://job-boards.greenhouse.io/galaxydigitalservices/jobs/5830323004", level:"senior" },
+      { title:"Lead Backend Developer - Mortgage", url:"https://job-boards.greenhouse.io/galaxydigitalservices/jobs/5985794004", level:"senior" }
+    ] },
+  { id:"doordash", name:"DoorDash", vertical:"marketplace",
+    sub:"NYC eng + ML at scale; multi-product marketplace",
+    stage:"Public", raised:"Public (NASDAQ: DASH)", lead:"Public",
+    badges:["Public","ML at Scale","NYC office"],
+    totalRoles:2,
+    notes:"Backend roles open across NYC + LA/SF/Sunnyvale/Seattle/Ann Arbor. Standard FAANG-like loop: coding (2), system design, behavioral. Heavy Go/Kotlin/Python. Marketplace eng is a strong fit if you're targeting matching/dispatch problems.",
+    jobs:[
+      { title:"Software Engineer, Backend (All Teams)", url:"https://job-boards.greenhouse.io/doordashusa/jobs/5630445", level:"mid" },
+      { title:"Staff Software Engineer, Backend", url:"https://job-boards.greenhouse.io/doordashusa/jobs/5630302", level:"senior" }
+    ] },
 ];
 
 
