@@ -12614,6 +12614,125 @@ const COMPANIES = [
       { title:"Software Engineer, Backend (All Teams)", url:"https://job-boards.greenhouse.io/doordashusa/jobs/5630445", level:"mid" },
       { title:"Staff Software Engineer, Backend", url:"https://job-boards.greenhouse.io/doordashusa/jobs/5630302", level:"senior" }
     ] },
+  /* ===== 2026-05-31 sweep #3 — Tier 0/A/B/C/D, 11 survivors of 28 ===== */
+  { id:"hume-ai", name:"Hume AI", vertical:"ai",
+    sub:"Voice/emotion AI; speech-language models trained with RLHE",
+    stage:"Series B", raised:"$50M", lead:"EQT Ventures",
+    badges:["EQT Ventures","Union Square Ventures","Comcast Ventures"],
+    totalRoles:4,
+    notes:"NYC-HQ Series B; FE/Platform/AI Research hiring. Salary bands disclosed: $130–350K. The AI Researcher posting notes a 6-month cooldown on re-application — only apply once.",
+    jobs:[
+      { title:"Senior Platform Engineer", url:"https://job-boards.greenhouse.io/humeai/jobs/5064248008", level:"senior" },
+      { title:"Front-End Engineer", url:"https://job-boards.greenhouse.io/humeai/jobs/4948192008", level:"mid" },
+      { title:"AI Researcher", url:"https://job-boards.greenhouse.io/humeai/jobs/4775962008", level:"senior" },
+      { title:"Senior/Staff AI Research Engineer", url:"https://job-boards.greenhouse.io/humeai/jobs/4003488008", level:"senior" }
+    ] },
+  { id:"udio", name:"Udio", vertical:"ai",
+    sub:"Generative AI music; founded by ex-DeepMind",
+    stage:"Series A", raised:"$10M+", lead:"Andreessen Horowitz",
+    badges:["a16z","will.i.am","Common"],
+    totalRoles:3,
+    notes:"NYC AI music. Quant Research role is PhD-or-5yr; $250–350K; uses TPU compute. Backend roles $180–220K. RIAA music-IP lawsuit is a likely interview topic — be ready to discuss training-data legal strategy.",
+    jobs:[
+      { title:"Member of Technical Staff - Quantitative Research", url:"https://job-boards.greenhouse.io/udio/jobs/5081608008", level:"senior" },
+      { title:"Senior Backend Engineer, Data Modeling and Ingestion Platform", url:"https://job-boards.greenhouse.io/udio/jobs/4988140008", level:"senior" },
+      { title:"Senior Backend Engineer, Product and Infra", url:"https://job-boards.greenhouse.io/udio/jobs/4987729008", level:"senior" }
+    ] },
+  { id:"fireblocks", name:"Fireblocks", vertical:"fintech",
+    sub:"Institutional crypto custody / digital asset infra; Dynamic embedded-wallet platform",
+    stage:"Series E", raised:"$1B+", lead:"D1 Capital",
+    badges:["D1 Capital","Sequoia","Stripes","General Atlantic"],
+    totalRoles:2,
+    notes:"NYC HQ. Director of Engineering ($220–300K) and Full-Stack Blockchain Engineer ($177–230K) NYC-anchored. Crypto domain knowledge expected — MPC, key management, blockchain wallet basics. Strong security bar.",
+    jobs:[
+      { title:"Full Stack Blockchain Engineer", url:"https://www.fireblocks.com/careers/position?gh_jid=4601513006", level:"senior" },
+      { title:"Director of Engineering, Dynamic Platform", url:"https://www.fireblocks.com/careers/position?gh_jid=4662147006", level:"senior" }
+    ] },
+  { id:"reflex-robotics", name:"Reflex Robotics", vertical:"ai",
+    sub:"NYC humanoid mobile-manipulation robots for warehouses",
+    stage:"Seed/Series A", raised:"$10M+", lead:"Lux Capital",
+    badges:["Lux Capital","1517 Fund"],
+    totalRoles:3,
+    notes:"NYC humanoids — wide salary bands ($140–300K) signal leveling-by-interview. Principal AI roles emphasize hardware-in-the-loop RL and world models (Sora/Veo style). High-ownership, high-equity messaging on every listing.",
+    jobs:[
+      { title:"Principal AI Research Engineer - World Models", url:"https://jobs.ashbyhq.com/reflexrobotics/50f1ecc1-5499-4932-9e9c-567aad4cbc0d", level:"senior" },
+      { title:"Principal AI Research Engineer - RL", url:"https://jobs.ashbyhq.com/reflexrobotics/2bfba2bb-1398-48ea-ac87-4b24474431bc", level:"senior" },
+      { title:"Controls Engineer", url:"https://jobs.ashbyhq.com/reflexrobotics/1b9f4970-f21b-4e08-b12a-99f192c054f3", level:"senior" }
+    ] },
+  { id:"braintrust", name:"Braintrust", vertical:"ai",
+    sub:"AI eval & observability; LLM logging + scoring + experiments",
+    stage:"Series A", raised:"$36M", lead:"Andreessen Horowitz",
+    badges:["a16z","Greylock","Founders Fund"],
+    totalRoles:3,
+    notes:"SF primary + NYC + Seattle as secondary locations (NYC eligibility confirmed via Ashby API; the public page only shows SF). Heavy TS/React + Python; eval/prompt engineering experience expected. Direct competitor to LangSmith and Arize.",
+    jobs:[
+      { title:"Software Engineer, Backend", url:"https://jobs.ashbyhq.com/braintrust/9728653e-49b9-4f5c-b6cd-7dbc6a6d5fcc", level:"senior" },
+      { title:"Software Engineer, Product", url:"https://jobs.ashbyhq.com/braintrust/7d0a5b62-a554-48f0-b2f7-8cbac0e98ae6", level:"senior" },
+      { title:"Software Engineer, Systems", url:"https://jobs.ashbyhq.com/braintrust/8b9cfa26-627f-442c-a358-783b0e4ef930", level:"senior" }
+    ] },
+  { id:"replit", name:"Replit", vertical:"devtools",
+    sub:"Agentic software-creation platform; coding via natural language",
+    stage:"Series B", raised:"$104M", lead:"Andreessen Horowitz",
+    badges:["a16z","Coatue","Khosla"],
+    totalRoles:1,
+    notes:"HQ Foster City (in-person, on-purpose). Only NYC-eligible role is the Field Engineer (GTM, customer-facing pre/post-sales — 30%+ travel, 5–7+ yrs B2B). Most engineering is Foster City hybrid only.",
+    jobs:[
+      { title:"Field Engineer", url:"https://jobs.ashbyhq.com/replit/2c1463ab-05a4-482a-a605-013403a41e80", level:"senior" }
+    ] },
+  { id:"cartesia", name:"Cartesia", vertical:"ai",
+    sub:"Voice foundation models / state-space-model research lab",
+    stage:"Series A", raised:"$27M", lead:"Lightspeed",
+    badges:["Lightspeed","Index Ventures","Conviction"],
+    totalRoles:2,
+    notes:"SF on-site only — no NYC presence. Research-heavy bar; Mamba/SSM lineage from Stanford. Inference Engineer focuses on low-latency model serving; Applied Researcher on audio understanding.",
+    jobs:[
+      { title:"Inference Engineer", url:"https://jobs.ashbyhq.com/cartesia/bd9d6688-5486-470f-a273-20874a44f107", level:"senior" },
+      { title:"Applied Researcher, Audio Understanding", url:"https://jobs.ashbyhq.com/cartesia/d26f0158-f7d1-440b-9c1a-f9b7a884437c", level:"senior" }
+    ] },
+  { id:"black-forest-labs", name:"Black Forest Labs", vertical:"ai",
+    sub:"FLUX image-generation foundation models; ex-Stability core team",
+    stage:"Series B", raised:"$200M+", lead:"Andreessen Horowitz",
+    badges:["a16z","General Catalyst","MätchVC"],
+    totalRoles:3,
+    notes:"Freiburg HQ + SF office; no NYC. FDE-ML role is SF-based ($180–300K). Hybrid 2 days/wk required. Image-gen IP/legal landscape is worth knowing for interviews.",
+    jobs:[
+      { title:"Forward Deployed Machine Learning Engineer", url:"https://job-boards.greenhouse.io/blackforestlabs/jobs/4935984008", level:"senior" },
+      { title:"Member of Technical Staff - Large Scale Data Infrastructure", url:"https://job-boards.greenhouse.io/blackforestlabs/jobs/5019171008", level:"senior" },
+      { title:"Member of Technical Staff - Infrastructure Engineer", url:"https://job-boards.greenhouse.io/blackforestlabs/jobs/4925659008", level:"senior" }
+    ] },
+  { id:"sesame-ai", name:"Sesame AI", vertical:"ai",
+    sub:"Voice/companion AI + glasses hardware; ex-Oculus founders",
+    stage:"Series A", raised:"$57M", lead:"Andreessen Horowitz",
+    badges:["a16z","Spark Capital","Matrix Partners"],
+    totalRoles:3,
+    notes:"SF + Bellevue + NYC across roles. Hardware + voice agent + ML serving combo is interview-distinctive. Heavy real-time streaming audio + low-latency networking focus.",
+    jobs:[
+      { title:"SWE - Backend Engineer", url:"https://jobs.ashbyhq.com/sesame/04780842-fd58-41d9-87a1-f65e818eebab", level:"senior" },
+      { title:"ML Model Serving Engineer", url:"https://jobs.ashbyhq.com/sesame/35793528-2b5c-47b3-9422-eaced2b69f63", level:"senior" },
+      { title:"SWE - Developer Infrastructure Engineer", url:"https://jobs.ashbyhq.com/sesame/6a312c19-d42c-4ec2-bcdd-9383c77e83d8", level:"senior" }
+    ] },
+  { id:"hedra", name:"Hedra", vertical:"ai",
+    sub:"AI character/video generation; Character-1 model",
+    stage:"Series A", raised:"$32M", lead:"Andreessen Horowitz",
+    badges:["a16z","Index Ventures","Abstract Ventures"],
+    totalRoles:3,
+    notes:"Per Ashby, current openings are all San Francisco (despite the NYC origin story). Research roles want NeurIPS/ICML/ICLR pubs; engineering is Python/FastAPI/k8s + Next.js. Action-conditioned world models are the research direction.",
+    jobs:[
+      { title:"Senior Full-Stack Engineer", url:"https://jobs.ashbyhq.com/hedra/6ae432f2-c65f-4dd6-9163-e99e52f4537a", level:"senior" },
+      { title:"Senior Backend Engineer", url:"https://jobs.ashbyhq.com/hedra/da0ed497-8952-4dea-8057-91c32de437f5", level:"senior" },
+      { title:"Staff Growth Engineer", url:"https://jobs.ashbyhq.com/hedra/a3ab741d-04ff-4238-8191-4e44d74ccfa4", level:"senior" }
+    ] },
+  { id:"arize", name:"Arize AI", vertical:"ai",
+    sub:"ML/LLM observability + Phoenix open-source eval",
+    stage:"Series B", raised:"$70M", lead:"TCV",
+    badges:["TCV","Battery Ventures","Foundation Capital"],
+    totalRoles:3,
+    notes:"Engineering roles US-Remote (no NYC office requirement). Direct competitor to Braintrust/LangSmith. Senior AI Product Engineer salary $125–225K. Phoenix OSS is a known on-ramp.",
+    jobs:[
+      { title:"Senior AI Product Engineer, Backend", url:"https://job-boards.greenhouse.io/arizeai/jobs/5396396004", level:"senior" },
+      { title:"Senior AI Product Engineer, Fullstack", url:"https://job-boards.greenhouse.io/arizeai/jobs/5396420004", level:"senior" },
+      { title:"AI Product Manager", url:"https://job-boards.greenhouse.io/arizeai/jobs/5818115004", level:"senior" }
+    ] },
 ];
 
 
