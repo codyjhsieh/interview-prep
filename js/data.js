@@ -10609,7 +10609,7 @@ Note: <i>even saying "100+ writers" is real</i>. That's a public-facing, falsifi
  *  - totalRoles == jobs.length (full set; the card slices to 3 for preview).
  *  - jobs are sorted: founding > senior > mid.
  */
-const COMPANIES_VERIFIED_AT = '2026-05-15';
+const COMPANIES_VERIFIED_AT = '2026-05-31';
 const COMPANIES = [
   { id:"openai", name:"OpenAI", vertical:"ai",
     sub:"GPT / ChatGPT / API",
@@ -12355,6 +12355,161 @@ const COMPANIES = [
     notes:"Hyperforce + Data Cloud + Einstein. NYC office for sales eng + applied AI.",
     jobs:[
       { title:"SWE AI Architect \u2014 Marketing", url:"https://salesforce.wd12.myworkdayjobs.com/en-US/External_Career_Site/job/New-York---New-York/Architect-Marketing-Agent-Engineer_JR339380", level:"mid" }
+    ] },
+  /* ===== 2026-05-31 sweep \u2014 14 additions, NYC-skewed (verified live; 10 candidates dropped as 404/landing-only) ===== */
+  { id:"linear", name:"Linear", vertical:"saas",
+    sub:"product development platform",
+    stage:"Series C", raised:"$130M+", lead:"Accel",
+    badges:["Accel","Sequoia","Index"],
+    totalRoles:3,
+    notes:"Remote-first US/EU. Bar is software craftsmanship \u2014 they screen for taste and writing as heavily as code. Process emphasizes async work-trial style take-homes plus a paid contract project. Read 'How we hire at Linear' before interviewing.",
+    jobs:[
+      { title:"Senior / Staff Fullstack Engineer", url:"https://linear.app/careers/d3bc1ced-3ce4-4086-a050-555055dbb1ff", level:"senior" },
+      { title:"Senior / Staff Product Engineer", url:"https://linear.app/careers/069c4628-88d7-4e4d-b393-c996fc7f3076", level:"senior" },
+      { title:"Senior / Staff Product Engineer, AI", url:"https://linear.app/careers/b4a7764e-c680-4bdf-9956-dc78f2ca94d5", level:"senior" }
+    ] },
+  { id:"hex", name:"Hex", vertical:"saas",
+    sub:"agentic data workspace",
+    stage:"Series C", raised:"$100M+", lead:"Sequoia",
+    badges:["Sequoia","a16z","Amplify"],
+    totalRoles:12,
+    notes:"NYC office is a real engineering hub \u2014 multiple NYC-only Compute and Agent Context roles. Loop: paid take-home + onsite mixing systems design and product sense. They will probe every decision in the take-home, so document your reasoning.",
+    jobs:[
+      { title:"AI Engineering Lead", url:"https://hex.tech/careers/ai-engineering-lead/", level:"senior" },
+      { title:"Compute Engineering Lead (NYC)", url:"https://hex.tech/careers/compute-engineering-lead/", level:"senior" },
+      { title:"Software Engineer, AI Agent", url:"https://hex.tech/careers/software-engineer-ai-agent/", level:"mid" },
+      { title:"Customer Engineer (NYC)", url:"https://hex.tech/careers/customer-engineer/", level:"mid" }
+    ] },
+  { id:"hebbia", name:"Hebbia", vertical:"ai",
+    sub:"AI platform for finance and law",
+    stage:"Series B", raised:"$130M", lead:"Andreessen Horowitz",
+    badges:["a16z","Index","Peter Thiel"],
+    totalRoles:10,
+    notes:"NYC-HQ. Known for very hard live coding and a heavy product-judgment final loop. Candidates report multi-hour pair programming on retrieval/ranking. FDE role specifically prizes finance-domain fluency \u2014 being able to talk to a hedge-fund PM is table stakes.",
+    jobs:[
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/hebbia-ai/b35852eb-97ac-491a-b375-91fd13d0b7b3", level:"senior" },
+      { title:"Backend Engineer, Agents", url:"https://jobs.ashbyhq.com/hebbia-ai/1c18a253-3c4d-4e5a-952d-cd35ba690ea7", level:"senior" },
+      { title:"Backend Engineer, Agent Collaboration Platform", url:"https://jobs.ashbyhq.com/hebbia-ai/d4efb36c-c59b-4468-b572-88264d555167", level:"senior" },
+      { title:"Applied Research Engineer, Agents", url:"https://jobs.ashbyhq.com/hebbia-ai/33b7e44e-a37e-4cc8-9a17-7443236650e4", level:"senior" },
+      { title:"Integrations Engineer", url:"https://jobs.ashbyhq.com/hebbia-ai/6cf5b93f-c465-497f-811a-008050c143e7", level:"mid" }
+    ] },
+  { id:"bilt", name:"Bilt Rewards", vertical:"fintech",
+    sub:"rent rewards + housing-payments platform",
+    stage:"Series C", raised:"$200M+", lead:"General Catalyst",
+    badges:["General Catalyst","Eldridge","Ken Chenault"],
+    totalRoles:5,
+    notes:"NYC-HQ, in-person 4-5 days/wk (non-negotiable). Loop is product-eng heavy: API design + Java/Kotlin systems round + leadership conversation. FDE role is partner-integrations focused \u2014 expect questions about debugging external partner APIs under time pressure.",
+    jobs:[
+      { title:"Forward Deployed Engineer", url:"https://jobs.gem.com/bilt/am9icG9zdDoGHterSesZ5Myi9uQO0kZP", level:"senior" },
+      { title:"Back End Engineer (All Levels)", url:"https://jobs.gem.com/bilt/am9icG9zdDrhNAIZzLM9OvpaPkquH_AK", level:"mid" },
+      { title:"Senior Full Stack Engineer", url:"https://jobs.gem.com/bilt/am9icG9zdDqAmYsvaOkqzvNZjqLEQ7Y9", level:"senior" },
+      { title:"Front End Engineer (React Native)", url:"https://jobs.gem.com/bilt/am9icG9zdDrn9qPiXKJDtPXS91m9sQdF", level:"mid" },
+      { title:"Senior Android Engineer", url:"https://jobs.gem.com/bilt/am9icG9zdDqui9Hi-opn5fv-OEkPegJt", level:"senior" }
+    ] },
+  { id:"snorkel-ai", name:"Snorkel AI", vertical:"ai",
+    sub:"data development for foundation models",
+    stage:"Series C", raised:"$135M", lead:"Addition",
+    badges:["Addition","Greylock","Lightspeed"],
+    totalRoles:6,
+    notes:"NYC office is the FDE + AI Solutions hub. Final round usually includes a customer-roleplay where you live-scope an LLM eval/data project. They explicitly screen for ability to translate vague enterprise asks into measurable AI workflows.",
+    jobs:[
+      { title:"Forward Deployed Engineer - Data as a Service", url:"https://job-boards.greenhouse.io/snorkelai/jobs/5689470004", level:"senior" },
+      { title:"Applied AI Engineer - AI Solutions", url:"https://job-boards.greenhouse.io/snorkelai/jobs/5709067004", level:"senior" },
+      { title:"Head of Forward Deployed Engineering", url:"https://job-boards.greenhouse.io/snorkelai/jobs/5828338004", level:"senior" },
+      { title:"Manager, Forward Deployed Engineering", url:"https://job-boards.greenhouse.io/snorkelai/jobs/5830807004", level:"senior" }
+    ] },
+  { id:"zocdoc", name:"Zocdoc", vertical:"health",
+    sub:"healthcare appointment marketplace",
+    stage:"Late stage", raised:"$375M+", lead:"Founders Fund",
+    badges:["Founders Fund","Khosla","BCG"],
+    totalRoles:5,
+    notes:"NYC-HQ hybrid. Staff-level bar is high \u2014 2 systems-design rounds (one marketplace-focused), one deep-dive on past work. They prize candidates who can talk about reliability incidents in depth. Generative AI/LLM work is now part of the Clinical Fit team.",
+    jobs:[
+      { title:"Staff Software Engineer, Marketplace", url:"https://www.zocdoc.com/job/staff-software-engineer-marketplace-growth/8505628", level:"senior" },
+      { title:"Staff Software Engineer (Clinical Fit)", url:"https://www.zocdoc.com/job/staff-software-engineer-clinical-fit/9230435", level:"senior" },
+      { title:"Staff Software Engineer, Search", url:"https://www.zocdoc.com/job/staff-software-engineer-search/9418437", level:"senior" },
+      { title:"Staff Enterprise and Cloud Engineer", url:"https://www.zocdoc.com/job/staff-enterprise-and-cloud-engineer/9551777", level:"senior" }
+    ] },
+  { id:"watershed", name:"Watershed", vertical:"saas",
+    sub:"enterprise carbon accounting + climate reporting",
+    stage:"Series C", raised:"$170M+", lead:"Sequoia",
+    badges:["Sequoia","Kleiner Perkins","Greylock"],
+    totalRoles:2,
+    notes:"NYC office is smaller than SF but real Staff-level hires happening there. Bar is extremely high; ex-Stripe-heavy interview style \u2014 they emphasize crisp written communication and will give you a Stripe-style 'engineering writing' eval. Domain ramp on CSRD/SEC climate rules is steep.",
+    jobs:[
+      { title:"Staff Machine Learning Engineer (NYC)", url:"https://watershed.com/careers/225b7390-staff-machine-learning-engineer", level:"senior" },
+      { title:"Staff Software Engineer, Front End (NYC)", url:"https://watershed.com/careers/472b2ea9-staff-software-engineer-front-end", level:"senior" }
+    ] },
+  { id:"mercor", name:"Mercor", vertical:"ai",
+    sub:"AI-powered recruiting + human-data marketplace",
+    stage:"Series B", raised:"$100M+", lead:"Benchmark",
+    badges:["Benchmark","General Catalyst","Founders Fund"],
+    totalRoles:4,
+    notes:"NYC onsite (also SF); high-velocity culture. Interviews skew product-pragmatist \u2014 pair programming with the founders is common. They explicitly screen against 'senior engineers who can't ship in 48 hours.' Comp is aggressive.",
+    jobs:[
+      { title:"Software Engineer, Agents", url:"https://www.mercor.com/careers/4f4fc8c3-4056-47bb-9e00-1db6e5dd958f/", level:"mid" },
+      { title:"Software Engineer, Platform", url:"https://www.mercor.com/careers/cb67851b-0269-4cf5-996c-34c3a88a19c8/", level:"mid" },
+      { title:"Software Engineer, Applied AI", url:"https://www.mercor.com/careers/e106399e-d85e-4af2-9bc8-6a0e144f318f/", level:"mid" }
+    ] },
+  { id:"runway", name:"Runway", vertical:"ai",
+    sub:"generative video and image foundation models",
+    stage:"Series D", raised:"$540M+", lead:"General Atlantic",
+    badges:["General Atlantic","Nvidia","Google"],
+    totalRoles:10,
+    notes:"NYC-HQ. Engineering loop is heavy on systems + GPU/perf \u2014 expect questions about distributed training, memory layout, and inference latency. Robotics Research Engineer role is NYC-onsite only; product/API roles are remote-friendly.",
+    jobs:[
+      { title:"Robotics Research Engineer (New York)", url:"https://jobs.ashbyhq.com/runway-ml/0f1c42db-8bbf-4e69-a17c-b6f45244605d", level:"senior" },
+      { title:"Backend Engineer, API", url:"https://jobs.ashbyhq.com/runway-ml/8489a08a-f0cf-4418-968c-c7c803d538bc", level:"senior" },
+      { title:"Engineering Manager, API", url:"https://jobs.ashbyhq.com/runway-ml/b5d136bb-4143-400b-914a-0ae7377ad8ed", level:"senior" },
+      { title:"Mobile Engineer", url:"https://jobs.ashbyhq.com/runway-ml/109eaded-dde4-459d-b3a6-5f26f3a57f63", level:"senior" },
+      { title:"Research Engineer (GPU Performance)", url:"https://jobs.ashbyhq.com/runway-ml/277fb5d6-da39-439e-bf3c-3201b9750b31", level:"senior" }
+    ] },
+  { id:"pinecone", name:"Pinecone", vertical:"infra",
+    sub:"vector database for AI",
+    stage:"Series B", raised:"$138M", lead:"Andreessen Horowitz",
+    badges:["a16z","Menlo","Wing"],
+    totalRoles:2,
+    notes:"NYC office is small but the Database team is here. Database-team round goes deep on storage internals: LSM-trees, vector index data structures (HNSW/IVF), query planners. Their public engineering blog telegraphs the bar \u2014 read it.",
+    jobs:[
+      { title:"Senior/Staff Software Engineer, Database Team (NYC)", url:"https://www.pinecone.io/careers/4ef4269b-94c4-4c7c-93ee-15a882caa767/", level:"senior" },
+      { title:"Senior/Staff Software Engineer, Search & Retrieval Infrastructure", url:"https://www.pinecone.io/careers/7ef089cb-a721-4ad8-a6d0-c390e64991d2/", level:"senior" }
+    ] },
+  { id:"clay-labs", name:"Clay", vertical:"saas",
+    sub:"GTM data + AI workflow platform",
+    stage:"Series C", raised:"$100M+", lead:"Sequoia",
+    badges:["Sequoia","CapitalG","First Round"],
+    totalRoles:8,
+    notes:"NYC-HQ; $5B valuation as of 2026 tender. Famous 'Special Forces' Enterprise Growth Engineer role \u2014 they run a paid simulation: build a real Clay table to unblock a fake enterprise deal. Bar is shipper-pragmatist over pure systems depth.",
+    jobs:[
+      { title:"Software Engineer, Backend", url:"https://jobs.ashbyhq.com/claylabs/248aa0c7-034f-47d3-a57e-ce16736eeab6", level:"mid" }
+    ] },
+  { id:"affirm", name:"Affirm", vertical:"fintech",
+    sub:"buy-now-pay-later consumer lending",
+    stage:"Public", raised:"Public (NASDAQ: AFRM)", lead:"Public",
+    badges:["Founders Fund","Khosla","Public"],
+    totalRoles:8,
+    notes:"NYC is one of two hubs (other is SF), hybrid 3 days/wk. Early-Career program is the easiest entry. Backend loop emphasizes Python services + payment-state-machine design. Apprenticeship is a rare 6-mo paid path without a CS degree.",
+    jobs:[
+      { title:"Senior Software Engineer, Backend (Infrastructure)", url:"https://job-boards.greenhouse.io/affirm/jobs/7708921003", level:"senior" }
+    ] },
+  { id:"two-sigma", name:"Two Sigma", vertical:"fintech",
+    sub:"quant trading + financial sciences",
+    stage:"Public", raised:"Private (founded 2001)", lead:"Private",
+    badges:["Private","SoftBank stake"],
+    totalRoles:25,
+    notes:"NYC-HQ. SWE loop is rigorous: 2 algo rounds (LeetCode-Hard, often DP/graph), 1 systems, 1 'modeling' (Python data manipulation). Trading-Engineering team gets a low-latency C++ deep-dive instead. They give time, but expect highly polished code.",
+    jobs:[
+      { title:"Software Engineer, Trading Engineering", url:"https://careers.twosigma.com/careers/JobDetail/New-York-New-York-United-States-Software-Engineer-Trading-Engineering/13462", level:"senior" }
+    ] },
+  { id:"lemonade", name:"Lemonade", vertical:"fintech",
+    sub:"AI-native consumer insurance",
+    stage:"Public", raised:"Public (NYSE: LMND)", lead:"Public",
+    badges:["Softbank","Sequoia","Public"],
+    totalRoles:4,
+    notes:"NYC-HQ. Interview is 4 rounds: live coding + insurance-domain product design + values fit. New IT/AI engineering roles focus on building internal AI agents in Slack \u2014 they want LLM-tooling + low-code/agentic workflow experience.",
+    jobs:[
+      { title:"IT Engineer", url:"https://makers.lemonade.com/recipe/it-engineer-new-york-united-states", level:"mid" },
+      { title:"Lemonade Careers Hub", url:"https://makers.lemonade.com/", level:"mid" }
     ] },
 ];
 
