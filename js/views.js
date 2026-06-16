@@ -5122,6 +5122,32 @@ function renderLesson(state, lessonId, sourceEl) {
 
 /* ====================== COMPANIES ====================== */
 
+/* Job recency helpers. Each job carries `added` (YYYY-MM-DD we first recorded
+ * it) and optionally `posted` (the ATS publish date). For "Newest" sorting we
+ * use the most recent of the two; ISO date strings compare correctly lexically. */
+function jobRecency(j) {
+  const a = j.added || '', p = j.posted || '';
+  return p > a ? p : a;
+}
+function companyRecency(c) {
+  let m = '';
+  (c.jobs || []).forEach(j => { const r = jobRecency(j); if (r > m) m = r; });
+  return m;
+}
+/* "Mon D" for a YYYY-MM-DD string ('' if absent/unparseable). */
+const _MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtDate(s) {
+  if (!s || s.length < 10) return '';
+  const y = +s.slice(0,4), mo = +s.slice(5,7), d = +s.slice(8,10);
+  if (!mo || mo > 12) return '';
+  return `${_MON[mo-1]} ${d}`;
+}
+/* A job is "new" when it was added on the latest verification pass. */
+function isNewJob(j) {
+  const v = window.DATA && window.DATA.COMPANIES_VERIFIED_AT;
+  return !!(v && j.added === v);
+}
+
 /* Probability-of-offer heuristic.
  *
  * The signal flags below drive a relative ranking — they are NOT
@@ -5339,6 +5365,13 @@ function renderCompanies(state, hub) {
         <span class="filter-divider" data-level-only aria-hidden="true"></span>
         ${levelTabs}
       </div>
+      <div class="flex items-center gap-2 mt-2">
+        <span class="text-[11px] muted">Sort</span>
+        <div class="tabs" id="co-sort">
+          <div class="tab active" data-sort="fit">Top fit</div>
+          <div class="tab" data-sort="new">Newest</div>
+        </div>
+      </div>
     </div>
 
     <div id="co-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -5358,6 +5391,8 @@ function renderCompanies(state, hub) {
   let curVFilter = 'all';
   let curLFilter = 'all';
   let curQuery   = '';
+  let curSort    = 'fit';            // 'fit' (offer-probability) | 'new' (recency)
+  let _lastCoSort = null;            // detect sort change to force a grid reorder
   // Roles pagination — 250 rows initial, +250 per "Load more" click. Hoisted
   // out of paintRoles so the Load-more handler can mutate it; reset to 250
   // whenever filter/search changes so users don't pay the full-render cost
@@ -5366,13 +5401,21 @@ function renderCompanies(state, hub) {
   let   rolesShown  = ROLES_PAGE;
 
   // Pre-score every company and every role so sort is fast on repaints.
-  const scoredCos = COMPANIES.map(c => ({ ...c, _fit: companyFitScore(c) }))
+  const scoredCos = COMPANIES.map(c => ({ ...c, _fit: companyFitScore(c), _rec: companyRecency(c) }))
     .sort((a, b) => b._fit - a._fit);
   const scoredRoles = [];
   COMPANIES.forEach(c => (c.jobs || []).forEach(j => {
-    scoredRoles.push({ ...j, _company: c, _fit: roleFitScore(c, j) });
+    scoredRoles.push({ ...j, _company: c, _fit: roleFitScore(c, j), _rec: jobRecency(j) });
   }));
   scoredRoles.sort((a, b) => b._fit - a._fit);
+
+  // Recency-sorted copies (newest first; ties broken by fit). Built once.
+  const recCos = [...scoredCos].sort((a, b) =>
+    (b._rec || '').localeCompare(a._rec || '') || b._fit - a._fit);
+  const recRoles = [...scoredRoles].sort((a, b) =>
+    (b._rec || '').localeCompare(a._rec || '') || b._fit - a._fit);
+  // Active ordering depends on curSort; updated in paint().
+  let coOrder = scoredCos;
 
   // Build one company card. Pulled out of paintCompanies so the chunked
   // renderer below can call it incrementally without duplicating logic.
@@ -5388,7 +5431,13 @@ function renderCompanies(state, hub) {
       : esc(c.name[0]);
     const badges = (c.badges || []).slice(0, 3)
       .map(b => `<span class="chip chip-funding">${esc(b)}</span>`).join('');
-    const previewJobs = (c.jobs || []).slice(0, 3);
+    const newCount = (c.jobs || []).filter(isNewJob).length;
+    const newChip = newCount > 0
+      ? `<span class="pill pill-ai" style="font-size:9px;padding:1px 6px">${newCount} new</span>` : '';
+    // Preview newest-first so fresh roles surface on the card.
+    const previewJobs = [...(c.jobs || [])]
+      .sort((a, b) => (jobRecency(b) || '').localeCompare(jobRecency(a) || ''))
+      .slice(0, 3);
     const total = (c.jobs || []).length;
     const jobsHTML = previewJobs.map(j => {
       const lvl = j.level || 'mid';
@@ -5415,7 +5464,7 @@ function renderCompanies(state, hub) {
         <div class="co-logo">${logo}</div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 justify-between flex-wrap">
-            <div class="font-display font-semibold text-lg truncate">${esc(c.name)}</div>
+            <div class="font-display font-semibold text-lg truncate">${esc(c.name)} ${newChip}</div>
             ${fitBadgeHTML(c._fit)}
           </div>
           <div class="text-xs muted mt-0.5 truncate">${esc(c.sub)}</div>
@@ -5461,7 +5510,7 @@ function renderCompanies(state, hub) {
   function paintCompanies() {
     const q = curQuery.trim().toLowerCase();
     const matches = new Set();
-    for (const c of scoredCos) {
+    for (const c of coOrder) {
       if (curVFilter !== 'all' && c.vertical !== curVFilter) continue;
       if (q && !_coHay(c).includes(q)) continue;
       matches.add(c.id);
@@ -5469,7 +5518,7 @@ function renderCompanies(state, hub) {
 
     // First mount: chunked render of just the matching set.
     if (grid.childElementCount === 0) {
-      const visible = scoredCos.filter(c => matches.has(c.id));
+      const visible = coOrder.filter(c => matches.has(c.id));
       const INITIAL = 18, CHUNK = 8;
       const frag1 = document.createDocumentFragment();
       for (let i = 0; i < Math.min(INITIAL, visible.length); i++) {
@@ -5492,28 +5541,27 @@ function renderCompanies(state, hub) {
 
     // Re-render path: toggle display on cached nodes. Add any missing
     // cards (e.g. first time a vertical-filter shows a previously-unseen
-    // company) in chunks at the end.
-    const toAdd = [];
-    for (const c of scoredCos) {
-      const entry = _coCardCache.get(c.id);
+    // company) in chunks at the end. Re-append visible cards in coOrder so a
+    // sort-toggle reorders the grid (appendChild moves existing nodes — cheap).
+    const f = document.createDocumentFragment();
+    for (const c of coOrder) {
+      let entry = _coCardCache.get(c.id);
       if (matches.has(c.id)) {
-        if (entry) entry.el.style.display = '';
-        else toAdd.push(c);
+        const node = entry ? entry.el : _getOrBuildCard(c);
+        node.style.display = '';
+        f.appendChild(node);                 // moves the node into new order
       } else if (entry) {
         entry.el.style.display = 'none';
       }
     }
-    if (toAdd.length) {
-      const f = document.createDocumentFragment();
-      for (const c of toAdd) f.appendChild(_getOrBuildCard(c));
-      grid.appendChild(f);
-    }
+    grid.appendChild(f);
   }
 
   function paintRoles() {
     rolelist.innerHTML = '';
     const q = curQuery.trim().toLowerCase();
-    const filtered = scoredRoles.filter(r => {
+    const base = curSort === 'new' ? recRoles : scoredRoles;
+    const filtered = base.filter(r => {
       if (curVFilter !== 'all' && r._company.vertical !== curVFilter) return false;
       if (curLFilter !== 'all' && r.level !== curLFilter) return false;
       if (!q) return true;
@@ -5530,7 +5578,7 @@ function renderCompanies(state, hub) {
     const cap = Math.min(rolesShown, filtered.length);
     const remaining = Math.max(0, filtered.length - cap);
     const live = (window.APP && window.APP.getState) ? window.APP.getState() : state;
-    const head = `<div class="text-[11px] muted">${filtered.length} role${filtered.length===1?'':'s'} matched, sorted by fit${remaining>0?` · showing top ${cap}`:''}</div>`;
+    const head = `<div class="text-[11px] muted">${filtered.length} role${filtered.length===1?'':'s'} matched, sorted by ${curSort === 'new' ? 'newest' : 'fit'}${remaining>0?` · showing top ${cap}`:''}</div>`;
     const rows = filtered.slice(0, cap).map(r => {
       const c = r._company;
       const roleKey = makeRoleKey(c, r);
@@ -5542,6 +5590,8 @@ function renderCompanies(state, hub) {
       const lvl = r.level || 'mid';
       const lvlClass = lvl === 'founding' ? 'pill-ai' : (lvl === 'senior' ? 'pill-both' : 'pill-dev');
       const lvlLabel = lvl === 'founding' ? 'Founding' : (lvl === 'senior' ? 'Senior' : 'Mid');
+      const dateStr = fmtDate(r.posted || r.added);
+      const newTag = isNewJob(r) ? '<span class="pill pill-ai" style="font-size:9px;padding:1px 5px">New</span>' : '';
       return `
         <div class="role-row" data-role-row data-role-key="${esc(roleKey)}" data-role-url="${esc(r.url)}"
              data-co-id="${esc(c.id)}" data-co-name="${esc(c.name)}" data-role-title="${esc(r.title)}">
@@ -5550,7 +5600,7 @@ function renderCompanies(state, hub) {
                 aria-label="Mark as applied"></span>
           ${logoMini}
           <div class="role-row-text">
-            <div class="role-row-title truncate">${esc(r.title)}</div>
+            <div class="role-row-title truncate">${esc(r.title)} ${newTag}</div>
             <div class="role-row-co truncate">
               <span class="font-medium">${esc(c.name)}</span>
               <span class="dim mx-1">·</span>
@@ -5559,6 +5609,7 @@ function renderCompanies(state, hub) {
               <span class="muted">${esc(c.stage || '')}</span>
               <span class="dim mx-1">·</span>
               <span style="color:var(--accent)" class="font-mono">${esc(c.raised || '')}</span>
+              ${dateStr ? `<span class="dim mx-1">·</span><span class="muted">${esc(dateStr)}</span>` : ''}
             </div>
           </div>
           <span class="pill ${lvlClass}" style="font-size:10px">${lvlLabel}</span>
@@ -5583,9 +5634,14 @@ function renderCompanies(state, hub) {
 
   function paint() {
     syncLevelVis();
+    coOrder = curSort === 'new' ? recCos : scoredCos;
     if (curMode === 'companies') {
       grid.classList.remove('hidden');
       rolelist.classList.add('hidden');
+      // On a sort change, clear the grid so paintCompanies re-mounts in the new
+      // order (cards come from cache, so this is just a cheap re-append).
+      if (_lastCoSort !== null && _lastCoSort !== curSort) grid.innerHTML = '';
+      _lastCoSort = curSort;
       paintCompanies();
     } else {
       grid.classList.add('hidden');
@@ -5643,6 +5699,17 @@ function renderCompanies(state, hub) {
       paint();
     });
   });
+  // Sort toggle — Top fit (offer-probability) vs Newest (recency).
+  container.querySelectorAll('#co-sort .tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      if (tab.dataset.sort === curSort) return;
+      container.querySelectorAll('#co-sort .tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      curSort = tab.dataset.sort;
+      rolesShown = ROLES_PAGE;            // reset pagination on sort change
+      paint();
+    });
+  });
   const search = container.querySelector('#co-search');
   // Debounce search input so each keystroke doesn't trigger an immediate
   // repaint. 150ms is below the perceptual "instant" threshold (~200ms)
@@ -5679,12 +5746,20 @@ function renderCompany(state, hub, id) {
 
   const badges = (c.badges || []).map(b => `<span class="chip chip-funding">${esc(b)}</span>`).join('');
   const companyFit = companyFitScore(c);
-  const jobsHTML = (c.jobs || []).map(j => {
+  // Sort the company's postings newest-first (recency = most recent of posted/added).
+  const sortedJobs = [...(c.jobs || [])].sort((a, b) =>
+    (jobRecency(b) || '').localeCompare(jobRecency(a) || ''));
+  const jobsHTML = sortedJobs.map(j => {
     const lvl = j.level || 'mid';
     const lvlLabel = lvl === 'founding' ? 'Founding' : (lvl === 'senior' ? 'Senior' : 'Mid');
     const lvlClass = lvl === 'founding' ? 'pill-ai' : (lvl === 'senior' ? 'pill-both' : 'pill-dev');
     const roleKey = makeRoleKey(c, j);
     const checked = GAMI.isRoleApplied(state, roleKey);
+    const dateStr = fmtDate(j.posted || j.added);
+    const newTag = isNewJob(j) ? ' <span class="pill pill-ai" style="font-size:9px;padding:1px 5px">New</span>' : '';
+    const dateLine = dateStr
+      ? `${j.posted ? 'Posted' : 'Added'} ${esc(dateStr)} · opens in new tab`
+      : 'Direct posting · opens in new tab';
     return `
       <div class="job-row flex items-center gap-3 p-3 rounded-xl border border-[color:var(--hairline)] transition"
            data-role-row data-role-key="${esc(roleKey)}" data-role-url="${esc(j.url)}"
@@ -5693,8 +5768,8 @@ function renderCompany(state, hub, id) {
               role="checkbox" aria-checked="${checked ? 'true' : 'false'}"
               aria-label="Mark as applied"></span>
         <div class="flex-1 min-w-0">
-          <div class="text-sm font-medium truncate">${esc(j.title)}</div>
-          <div class="text-[11px] muted mt-0.5">Direct posting · opens in new tab</div>
+          <div class="text-sm font-medium truncate">${esc(j.title)}${newTag}</div>
+          <div class="text-[11px] muted mt-0.5">${dateLine}</div>
         </div>
         <span class="pill ${lvlClass}">${lvlLabel}</span>
         ${fitBadgeHTML(roleFitScore(c, j))}

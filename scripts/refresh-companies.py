@@ -279,11 +279,28 @@ CANDIDATES = [
   ("etsy","Etsy","workday","etsy/wd5/Etsy_Careers","marketplace","Marketplace for handmade + vintage (NASDAQ: ETSY)","Public","$307M pre-IPO","NASDAQ",["NASDAQ","S&P MidCap"],"Brooklyn HQ. Recommendations, search, payments, ML — strong Python culture."),
   ("nbcuniversal","Comcast (NBCUniversal)","workday","comcast/wd5/Comcast_Careers","media","Media + telecom (NASDAQ: CMCSA)","Public","$1.1B pre-IPO","NASDAQ",["NASDAQ","S&P 500"],"NBCU + Peacock streaming. NYC: ad tech + media engineering."),
   ("salesforce","Salesforce","workday","salesforce/wd12/External_Career_Site","saas","CRM + AI cloud (NYSE: CRM)","Public","$2B pre-IPO","NYSE",["NYSE","Dow 30"],"Hyperforce + Data Cloud + Einstein. NYC office for sales eng + applied AI."),
+
+  # ── 2026-06-16 — new NYC candidates (probed live; only those with live NYC SWE) ──
+  ("via","Via","greenhouse","via","saas","Transit tech + mobility platform","Series G","$988M","83North",["83North","Exor","Pitango"],"NYC mobility. Transit routing + optimization; logistics + ML systems."),
+  ("aura-frames","Aura Frames","greenhouse","aura","consumer","Connected digital photo frames","Series C","$60M+","Trustbridge",["Trustbridge","Forerunner"],"NYC consumer hardware. Device platform + infra + product eng for connected frames."),
+  ("rho","Rho","ashby","rho","fintech","Business banking + spend mgmt","Series B","$200M","Dragoneer",["Dragoneer","DFJ Growth"],"NYC fintech. Corporate cards + treasury; payments systems."),
+  ("hex","Hex","greenhouse","hextechnologies","saas","Collaborative analytics + AI notebooks","Series B","$96M","Andreessen Horowitz",["a16z","Sequoia","Amplify"],"Data workspace + AI agents; query engines + collab. NYC eng roles."),
+  ("brigit","Brigit","ashby","brigit","fintech","Consumer financial health app","Series A","$53M","Lightspeed",["Lightspeed","DCM","NYCA"],"NYC fintech. Cash advances + budgeting; banking integrations + ML underwriting."),
+  ("zocdoc","Zocdoc","greenhouse","zocdoc","health","Doctor booking marketplace","Series D","$375M","Francisco Partners",["Francisco Partners","Baillie Gifford"],"NYC healthtech. Provider search + scheduling marketplace; high-traffic systems."),
+  ("clear","CLEAR","greenhouse","clear","security","Identity verification (NYSE: YOU)","Public","$700M+","NYSE",["NYSE","T. Rowe Price"],"NYC identity platform. Biometric verification at airports + healthcare; backend + data eng."),
+  ("drw","DRW","greenhouse","drweng","fintech","Principal trading firm","Private","Self-funded","—",["Privately held"],"NYC/Chicago quant trading. Low-latency systems, market data, analytics — C++/Python heavy."),
+  ("imc","IMC Trading","greenhouse","imc","fintech","Global market maker","Private","Self-funded","—",["Privately held"],"NYC market-making. Ultra-low-latency C++/FPGA, ML for trading; deep systems work."),
+  ("flow-traders","Flow Traders","greenhouse","flowtraders","fintech","ETF + crypto market maker","Public","Self-funded","Euronext",["Euronext"],"NYC trading. ETP market-making; trading systems + low-latency infra."),
+  ("old-mission","Old Mission","greenhouse","oldmissioncapital","fintech","Proprietary trading firm","Private","Self-funded","—",["Privately held"],"NYC/Chicago prop trading. C++/Python trading systems + market data infra."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
 # map fall back to the first letter of their name in the card.
 DOMAINS = {
+  "via":"ridewithvia.com","aura-frames":"auraframes.com","rho":"rho.co",
+  "hex":"hex.tech","brigit":"hellobrigit.com","zocdoc":"zocdoc.com",
+  "clear":"clearme.com","drw":"drw.com","imc":"imc.com",
+  "flow-traders":"flowtraders.com","old-mission":"oldmissioncapital.com",
   "openai":"openai.com","anthropic":"anthropic.com","scaleai":"scale.com",
   "figma":"figma.com","notion":"notion.so","hebbia":"hebbia.com",
   "decagon":"decagon.ai","credal":"credal.ai","mirage":"mirage.app",
@@ -402,9 +419,22 @@ def level(title):
   if "senior" in low or "sr." in low or "sr " in low: return "senior"
   return "mid"
 
+def _date10(v):
+  """Normalize an ATS posting date to YYYY-MM-DD ('' if unparseable).
+  Accepts ISO strings (Ashby/Greenhouse/Workable) and epoch-ms ints (Lever)."""
+  if not v: return ""
+  if isinstance(v, (int, float)):
+    try:
+      return datetime.datetime.utcfromtimestamp(v / 1000).date().isoformat()
+    except Exception:
+      return ""
+  s = str(v)
+  return s[:10] if len(s) >= 10 and s[4] == "-" and s[7] == "-" else ""
+
 def filter_jobs(ats, raw, slug=""):
   out = []
   for j in raw:
+    posted = ""
     if ats == "ashby":
       if j.get("isListed", True) is False: continue
       title = (j.get("title") or "").strip()
@@ -412,11 +442,13 @@ def filter_jobs(ats, raw, slug=""):
       secs = [s.get("location","") for s in (j.get("secondaryLocations") or [])]
       is_nyc = bool(NYC.search(primary)) or any(NYC.search(s) for s in secs)
       url = j.get("jobUrl") or j.get("applyUrl")
+      posted = _date10(j.get("publishedDate") or j.get("publishedAt") or j.get("updatedAt"))
     elif ats == "greenhouse":
       title = (j.get("title") or "").strip()
       loc = (j.get("location") or {}).get("name","") or ""
       is_nyc = bool(NYC.search(loc))
       url = j.get("absolute_url")
+      posted = _date10(j.get("updated_at") or j.get("first_published") or j.get("created_at"))
     elif ats == "lever":
       title = (j.get("text") or "").strip()
       cat = j.get("categories") or {}
@@ -425,6 +457,7 @@ def filter_jobs(ats, raw, slug=""):
       blob = loc + " " + " ".join(all_locs if isinstance(all_locs, list) else [])
       is_nyc = bool(NYC.search(blob))
       url = j.get("hostedUrl") or j.get("applyUrl")
+      posted = _date10(j.get("createdAt"))
     elif ats == "workable":
       # Workable: state=published only, location is a nested object with
       # city/region/country plus a `locations` array for multi-location roles.
@@ -436,6 +469,7 @@ def filter_jobs(ats, raw, slug=""):
       blob = city + " " + " ".join(((l.get("city") or "") + " " + (l.get("region") or "")) for l in others if isinstance(l, dict))
       is_nyc = bool(NYC.search(blob))
       url = f"https://apply.workable.com/{slug}/j/{j.get('shortcode','')}"
+      posted = _date10(j.get("published_on") or j.get("created_at"))
     elif ats == "workday":
       # Workday: locationsText is a free-form string (e.g. "NY - New York"
       # or "MI - Detroit"). externalPath is relative — prefix with the
@@ -448,12 +482,13 @@ def filter_jobs(ats, raw, slug=""):
         url = f"https://{tenant}.{wdn}.myworkdayjobs.com/en-US/{site}{j.get('externalPath','')}"
       except ValueError:
         url = ""
+      posted = _date10(j.get("startDate"))
     else:
       continue
     if not is_nyc: continue
     if not title or TITLE_EXCLUDE.search(title): continue
     if not TITLE_INCLUDE.search(title): continue
-    out.append({"title": title, "url": url, "level": level(title)})
+    out.append({"title": title, "url": url, "level": level(title), "posted": posted})
   # founding > senior > mid
   out.sort(key=lambda j: (
     0 if "founding" in j["title"].lower() else 1,
@@ -535,13 +570,19 @@ def splice(src, marker_start_substr, block, end_marker="\n];\n"):
 def main():
   ap = argparse.ArgumentParser()
   ap.add_argument("-v","--verbose", action="store_true", help="Print no-match diagnostics")
+  ap.add_argument("--only", default="", help="Comma-separated candidate ids to probe (default: all)")
+  ap.add_argument("--emit-json", default="", help="Write fetched rows to this JSON path and DO NOT touch data.js "
+                                                  "(feed it to scripts/merge-additive.js for an additive merge)")
   args = ap.parse_args()
 
+  only = {x.strip() for x in args.only.split(",") if x.strip()}
   today = datetime.date.today().isoformat()
   rows = []
   seen = set()
   no_match = []
   for cid, name, ats, slug, vertical, sub, stage, raised, lead, badges, notes in CANDIDATES:
+    if only and cid not in only:
+      continue
     if cid in seen:
       if args.verbose: print(f"[dup] {cid}", file=sys.stderr)
       continue
@@ -562,6 +603,19 @@ def main():
   print(f"\n{len(rows)} companies survived (of {len(CANDIDATES)} candidates)", file=sys.stderr)
   if no_match:
     print(f"{len(no_match)} dropped:", *no_match, sep="\n  ", file=sys.stderr)
+
+  # Additive path: emit fetched rows as JSON for merge-additive.js (which unions
+  # them into data.js without removing anything). Skips the destructive rewrite.
+  if args.emit_json:
+    import json as _json
+    payload = {"verified": today, "rows": rows}
+    with open(args.emit_json, "w") as f:
+      _json.dump(payload, f, indent=2)
+    print(f"\nWrote {sum(len(r['jobs']) for r in rows)} live URLs across {len(rows)} companies "
+          f"-> {args.emit_json} (verified {today}).\n"
+          f"Merge additively with:\n  node scripts/merge-additive.js js/data.js {args.emit_json}",
+          file=sys.stderr)
+    return
 
   # Rewrite js/data.js in place
   src = DATA_JS.read_text()
