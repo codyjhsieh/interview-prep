@@ -99,6 +99,43 @@ for (const rc of src.companies) {
   }
 }
 
+// ── Liveness-aware dedup of stale reposts ─────────────────────────────────
+// A company can recreate a req under a NEW url (new ATS job id), leaving the old
+// posting as a same-title dead link — so the same role shows up twice. For every
+// company present in the source we know its CURRENT live url set; within a
+// same-(normalized)title group we drop entries whose url is no longer live, BUT
+// only when a live sibling exists. This collapses stale-repost pairs without
+// touching genuine multi-openings (e.g. Stripe's three live "Software Engineer"
+// reqs all stay) and without removing anything the user could actually click.
+const dedup = flags['no-dedup'] === undefined;
+const norm = (t) => (t || '').toLowerCase().replace(/\s+/g, ' ').trim();
+const removed = [];
+if (dedup) {
+  const liveBy = new Map(); // company id -> Set(live urls) from the source fetch
+  for (const sc of src.companies) liveBy.set(sc.id, new Set((sc.jobs || []).map((j) => j.url)));
+  for (const c of orig) {
+    const live = liveBy.get(c.id);
+    if (!live) continue;                       // company not refetched -> can't judge
+    const groups = new Map();
+    for (const j of c.jobs || []) {
+      const k = norm(j.title);
+      (groups.get(k) || groups.set(k, []).get(k)).push(j);
+    }
+    const keep = [];
+    for (const j of c.jobs || []) {
+      const g = groups.get(norm(j.title));
+      const anyLive = g.some((x) => live.has(x.url));
+      if (g.length > 1 && anyLive && !live.has(j.url)) {
+        removed.push(`- ${c.name}: dropped stale "${j.title}" (${j.url})`);
+        continue;                              // dead duplicate of a live sibling
+      }
+      keep.push(j);
+    }
+    c.jobs = keep;
+    c.totalRoles = keep.length;   // authoritative: we know this company's live count
+  }
+}
+
 // Stamp `added` on every job across the whole dataset.
 let stampedNew = 0;
 for (const c of orig) {
@@ -148,7 +185,8 @@ fs.writeFileSync(targetPath, out);
 
 const totalJobs = orig.reduce((n, c) => n + (c.jobs || []).length, 0);
 console.log(`Companies: ${orig.length} (added ${newCompanies})`);
-console.log(`Jobs:      ${totalJobs} (added ${newJobs})`);
+console.log(`Jobs:      ${totalJobs} (added ${newJobs}, deduped ${removed.length} stale repost${removed.length === 1 ? '' : 's'})`);
 console.log(`Verified:  ${today}${baselineDate ? `   (backfilled added=${baselineDate} for baseline jobs, added=${today} for ${stampedNew} newer)` : ''}`);
 console.log('---');
 for (const a of added) console.log(a);
+for (const r of removed) console.log(r);
