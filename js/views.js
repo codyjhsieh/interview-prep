@@ -5332,9 +5332,13 @@ const _coCardCacheModule = new Map();
 function renderCompanies(state, hub) {
   const container = el('div','fade-in space-y-4');
   const verifiedAt = window.DATA && window.DATA.COMPANIES_VERIFIED_AT;
-  const totalJobs = COMPANIES.reduce((s, c) => s + (c.jobs ? c.jobs.length : 0), 0);
+  // Only surface companies with at least one live posting — dead-link pruning can
+  // leave a company with zero current roles; its record stays in data.js (so a
+  // future refresh can repopulate it) but it shouldn't show an empty card.
+  const LIVE = COMPANIES.filter(c => (c.jobs || []).length > 0);
+  const totalJobs = LIVE.reduce((s, c) => s + (c.jobs ? c.jobs.length : 0), 0);
   // Build dynamic vertical filters from the data so we don't hard-code.
-  const verticals = Array.from(new Set(COMPANIES.map(c => c.vertical)));
+  const verticals = Array.from(new Set(LIVE.map(c => c.vertical)));
   const verticalTabs = ['all', ...verticals]
     .map(v => `<div class="tab${v==='all' ? ' active' : ''}" data-vfilter="${esc(v)}">${v === 'all' ? 'All' : esc(verticalLabel[v] || v)}</div>`)
     .join('');
@@ -5347,13 +5351,13 @@ function renderCompanies(state, hub) {
   container.innerHTML = `
     <div>
       <h1 class="font-display text-2xl sm:text-3xl font-semibold">Companies</h1>
-      <p class="muted text-sm mt-1">${COMPANIES.length} startups, ${totalJobs} live NYC engineering postings. Verified ${esc(verifiedAt || 'recently')}. Ranked by fit for your background — sorted highest first.</p>
+      <p class="muted text-sm mt-1">${LIVE.length} startups, ${totalJobs} live NYC engineering postings. Verified ${esc(verifiedAt || 'recently')}. Ranked by fit for your background — sorted highest first.</p>
     </div>
 
     <div class="flex justify-center">
       <div class="tabs tabs-primary" id="co-mode">
         <span class="tab-thumb" aria-hidden="true"></span>
-        <button type="button" class="tab active" data-mode="companies">Companies <span class="ml-1 muted text-[10px] font-mono">${COMPANIES.length}</span></button>
+        <button type="button" class="tab active" data-mode="companies">Companies <span class="ml-1 muted text-[10px] font-mono">${LIVE.length}</span></button>
         <button type="button" class="tab" data-mode="roles">Individual roles <span class="ml-1 muted text-[10px] font-mono">${totalJobs}</span></button>
       </div>
     </div>
@@ -5401,10 +5405,10 @@ function renderCompanies(state, hub) {
   let   rolesShown  = ROLES_PAGE;
 
   // Pre-score every company and every role so sort is fast on repaints.
-  const scoredCos = COMPANIES.map(c => ({ ...c, _fit: companyFitScore(c), _rec: companyRecency(c) }))
+  const scoredCos = LIVE.map(c => ({ ...c, _fit: companyFitScore(c), _rec: companyRecency(c) }))
     .sort((a, b) => b._fit - a._fit);
   const scoredRoles = [];
-  COMPANIES.forEach(c => (c.jobs || []).forEach(j => {
+  LIVE.forEach(c => (c.jobs || []).forEach(j => {
     scoredRoles.push({ ...j, _company: c, _fit: roleFitScore(c, j), _rec: jobRecency(j) });
   }));
   scoredRoles.sort((a, b) => b._fit - a._fit);
