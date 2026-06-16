@@ -11379,13 +11379,10 @@ const COMPANIES = [
     sub:"In-network mental health",
     stage:"Series D", raised:"$325M", lead:"Spark",
     badges:["Spark","a16z","GV"],
-    totalRoles:4,
+    totalRoles:0,
     notes:"Therapist network + billing. Healthcare insurance plumbing.",
     jobs:[
-      { title:"Senior Backend Software Engineer", url:"https://job-boards.greenhouse.io/headway/jobs/5317114004", level:"senior", added:"2026-05-31" },
-      { title:"Senior Data Engineer", url:"https://job-boards.greenhouse.io/headway/jobs/5489512004", level:"senior", added:"2026-05-31" },
-      { title:"Senior Fullstack Software Engineer", url:"https://job-boards.greenhouse.io/headway/jobs/5308863004", level:"senior", added:"2026-05-31" },
-      { title:"Senior Software Engineer (Trust Foundations)", url:"https://job-boards.greenhouse.io/headway/jobs/5598859004", level:"senior", added:"2026-05-31" }
+
     ] },
   { id:"oscar", name:"Oscar Health", vertical:"health",
     sub:"Tech-driven health insurance (NYSE)",
@@ -12261,10 +12258,9 @@ const COMPANIES = [
     sub:"ML model hub + libraries",
     stage:"Series D", raised:"$400M", lead:"Salesforce",
     badges:["Salesforce","Google","Nvidia","Sequoia"],
-    totalRoles:2,
+    totalRoles:1,
     notes:"Open-source ML platform; $4.5B valuation. Inference, hosting, eval; OSS-heavy culture.",
     jobs:[
-      { title:"Open-Source Machine Learning Engineer - International Remote", url:"https://apply.workable.com/huggingface/j/56232F23CB", level:"mid", added:"2026-05-31" },
       { title:"Open-Source Machine Learning Engineer - US Remote", url:"https://apply.workable.com/huggingface/j/19A136F8E2", level:"mid", added:"2026-06-16" }
     ] },
   { id:"coreweave", name:"CoreWeave", vertical:"infra",
@@ -12369,10 +12365,9 @@ const COMPANIES = [
     sub:"Marketplace for handmade + vintage (NASDAQ: ETSY)",
     stage:"Public", raised:"$307M pre-IPO", lead:"NASDAQ",
     badges:["NASDAQ","S&P MidCap"],
-    totalRoles:6,
+    totalRoles:5,
     notes:"Brooklyn HQ. Recommendations, search, payments, ML \u2014 strong Python culture.",
     jobs:[
-      { title:"Senior Software Engineer II, ML Enablement", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Senior-Software-Engineer-II--ML-Enablement_JR5288", level:"senior", added:"2026-05-31" },
       { title:"Machine Learning Engineer II, Inventory", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Machine-Learning-Engineer_JR5383-1", level:"mid", added:"2026-05-31" },
       { title:"Senior Software Engineer I, Decision Systems", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Senior-Software-Engineer-I--Decision-Systems_JR5683-1", level:"senior", added:"2026-06-16" },
       { title:"Senior Software Engineer", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Senior-Software-Engineer_JR5661-1", level:"senior", added:"2026-06-16" },
@@ -12383,20 +12378,19 @@ const COMPANIES = [
     sub:"Media + telecom (NASDAQ: CMCSA)",
     stage:"Public", raised:"$1.1B pre-IPO", lead:"NASDAQ",
     badges:["NASDAQ","S&P 500"],
-    totalRoles:2,
+    totalRoles:0,
     notes:"NBCU + Peacock streaming. NYC: ad tech + media engineering.",
     jobs:[
-      { title:"Sr. Software Engineer-5588", url:"https://comcast.wd5.myworkdayjobs.com/en-US/Comcast_Careers/job/NY---New-York-1407-Broadway-Floor-12/Sr-Software-Engineer-5588_R437137", level:"senior", added:"2026-05-31" },
-      { title:"Software Engineer 1", url:"https://comcast.wd5.myworkdayjobs.com/en-US/Comcast_Careers/job/NY---New-York-1407-Broadway-Floor-12/Software-Engineer-1_R439407", level:"mid", added:"2026-06-16" }
+
     ] },
   { id:"salesforce", name:"Salesforce", vertical:"saas",
     sub:"CRM + AI cloud (NYSE: CRM)",
     stage:"Public", raised:"$2B pre-IPO", lead:"NYSE",
     badges:["NYSE","Dow 30"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"Hyperforce + Data Cloud + Einstein. NYC office for sales eng + applied AI.",
     jobs:[
-      { title:"SWE AI Architect \u2014 Marketing", url:"https://salesforce.wd12.myworkdayjobs.com/en-US/External_Career_Site/job/New-York---New-York/Architect-Marketing-Agent-Engineer_JR339380", level:"mid", added:"2026-05-31" }
+
     ] },
   { id:"linear", name:"Linear", vertical:"saas",
     sub:"product development platform",
@@ -12467,10 +12461,9 @@ const COMPANIES = [
     sub:"healthcare appointment marketplace",
     stage:"Late stage", raised:"$375M+", lead:"Founders Fund",
     badges:["Founders Fund","Khosla","BCG"],
-    totalRoles:5,
+    totalRoles:4,
     notes:"NYC-HQ hybrid. Staff-level bar is high \u2014 2 systems-design rounds (one marketplace-focused), one deep-dive on past work. They prize candidates who can talk about reliability incidents in depth. Generative AI/LLM work is now part of the Clinical Fit team.",
     jobs:[
-      { title:"Staff Software Engineer, Marketplace", url:"https://www.zocdoc.com/job/staff-software-engineer-marketplace-growth/8505628", level:"senior", added:"2026-05-31" },
       { title:"Staff Software Engineer (Clinical Fit)", url:"https://www.zocdoc.com/job/staff-software-engineer-clinical-fit/9230435", level:"senior", added:"2026-05-31" },
       { title:"Staff Software Engineer, Search", url:"https://www.zocdoc.com/job/staff-software-engineer-search/9418437", level:"senior", added:"2026-05-31" },
       { title:"Staff Enterprise and Cloud Engineer", url:"https://www.zocdoc.com/job/staff-enterprise-and-cloud-engineer/9551777", level:"senior", added:"2026-05-31" },
@@ -12594,10 +12587,10 @@ const COMPANIES = [
     sub:"Brooklyn-HQ tech-driven provider for Medicaid populations; Alphabet/Sidewalk-spinout",
     stage:"Series D", raised:"$890M+", lead:"SoftBank Vision Fund",
     badges:["Alphabet","SoftBank","General Catalyst"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"Brooklyn HQ. Stack: React, GraphQL, TS, Node, Postgres, GCP. Mission-oriented; clinical-facing internal app for community health teams. Workday job board \u2014 verify in browser since SPA hides postings from search.",
     jobs:[
-      { title:"AI Software Engineer", url:"https://cityblockhealth.wd1.myworkdayjobs.com/en-US/CityblockExternalCareerSite/job/AI-Software-Engineer_R-1459", level:"mid", added:"2026-05-31" }
+
     ] },
   { id:"de-shaw", name:"D. E. Shaw Group", vertical:"fintech",
     sub:"NYC quant hedge fund; multi-strategy, $60B+ AUM",

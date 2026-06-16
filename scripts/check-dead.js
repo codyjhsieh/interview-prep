@@ -30,6 +30,15 @@ const py = fs.readFileSync('scripts/refresh-companies.py', 'utf8');
 const slugMap = {};
 for (const m of py.matchAll(/\("([^"]+)","[^"]*","([^"]+)","([^"]+)"/g)) slugMap[m[1]] = [m[2], m[3]];
 
+// Overrides for hand-curated companies (absent from CANDIDATES) whose careers
+// page is a custom domain that hides a known ATS board behind it.
+const OVERRIDE = {
+  linear: ['ashby', 'linear'],
+  mercor: ['ashby', 'mercor'],
+  hex: ['greenhouse', 'hextechnologies'],
+};
+Object.assign(slugMap, OVERRIDE);
+
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 function inferAtsSlug(jobs) {
   for (const j of jobs) {
@@ -43,14 +52,34 @@ function inferAtsSlug(jobs) {
   }
   return null;
 }
+// Title liveness matching. Hand-curated links and board titles drift in
+// punctuation ("Engineer, Clinical Fit" vs "Engineer (Clinical Fit)") and in
+// location suffixes ("(NYC)"). So: lowercase, punctuation -> space, drop a small
+// set of location stopwords, then match by WORD-SUBSET (a posting is live if its
+// significant words are all present in some board title). This handles both the
+// "(NYC)" extra and the "(Clinical Fit)" meaningful-team cases without the
+// over-deletion a blanket paren-strip caused.
+const LOC_STOP = new Set(['nyc', 'remote', 'hybrid', 'onsite', 'ny']);
+const titleWords = (t) => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+  .split(' ').filter((w) => w && !LOC_STOP.has(w));
+function titleLive(jobTitle, boardTitleSets) {
+  const jw = titleWords(jobTitle);
+  if (jw.length < 2) return false;                       // too generic to match safely
+  return boardTitleSets.some((bs) => jw.every((w) => bs.has(w)));
+}
 // token that identifies a posting within its company's board
 function urlToken(ats, url) {
   let m;
   if ((m = url.match(UUID))) return m[0].toLowerCase();
   if ((m = url.match(/[?&]gh_jid=(\d+)/))) return m[1];
   if ((m = url.match(/\/jobs\/(\d+)/))) return m[1];
-  if ((m = url.match(/_(\d+)(?:[/?]|$)/))) return m[1];          // workday
-  if ((m = url.match(/\/j\/([A-F0-9]+)/i))) return m[1];          // workable
+  if ((m = url.match(/\/j\/([A-F0-9]+)/i))) return m[1];           // workable
+  // Workday: id is the trailing segment after the LAST underscore — may be
+  // numeric (10149739), prefixed (JR5288, R263961), or suffixed (R-1459, 10151328-2).
+  if (/myworkdayjobs\.com/.test(url) && (m = url.match(/_([A-Za-z0-9-]+)(?:[?#].*)?$/))) return m[1];
+  // NB: deliberately NO generic "trailing number" token — a company-hosted URL's
+  // trailing id is often NOT the ATS id, which would cause false "dead" calls.
+  // Those fall through to title-matching against the live board instead.
   return null;
 }
 
@@ -59,49 +88,71 @@ function curl(url, opts = {}) {
   if (opts.post) { args.push('-X', 'POST', '-H', 'Content-Type: application/json', '-d', opts.post); }
   if (opts.referer) args.push('-H', `Referer: ${opts.referer}`);
   args.push(url);
-  try { return JSON.parse(execFileSync('curl', args, { maxBuffer: 64 * 1024 * 1024 }).toString()); }
-  catch { return null; }
+  // Retry a few times: Ashby/Greenhouse rate-limit under concurrency and return
+  // non-JSON; a transient null must not be mistaken for an empty board.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try { return JSON.parse(execFileSync('curl', args, { maxBuffer: 64 * 1024 * 1024 }).toString()); }
+    catch { try { execFileSync('sleep', [String(0.4 * (attempt + 1))]); } catch {} }
+  }
+  return null;
 }
 
-// Returns { ok:bool, tokens:Set } of all live postings on a board.
+// Returns { ok, complete, tokens:Set, titleSets:[Set<word>] } of all live
+// postings on a board. complete=false means we may not have the full board
+// (oversized Workday) -> callers must NOT call an unmatched posting dead.
 function boardTokens(ats, slug) {
-  const toks = new Set();
+  const toks = new Set(), titleSets = [];
+  const addT = (t) => titleSets.push(new Set(titleWords(t)));
+  const R = (ok, complete = true) => ({ ok, complete, tokens: toks, titleSets });
   if (ats === 'greenhouse') {
     for (const host of ['boards-api.greenhouse.io', 'boards-api.eu.greenhouse.io']) {
       const d = curl(`https://${host}/v1/boards/${slug}/jobs`);
-      if (d && d.jobs) { d.jobs.forEach(j => toks.add(String(j.id))); return { ok: true, tokens: toks }; }
+      if (d && d.jobs) { d.jobs.forEach(j => { toks.add(String(j.id)); addT(j.title); }); return R(true); }
     }
-    return { ok: false, tokens: toks };
+    return R(false);
   }
   if (ats === 'ashby') {
     const d = curl(`https://api.ashbyhq.com/posting-api/job-board/${slug}?includeCompensation=false`);
-    if (!d || !d.jobs) return { ok: false, tokens: toks };
-    d.jobs.forEach(j => toks.add(String(j.id).toLowerCase()));
-    return { ok: true, tokens: toks };
+    if (!d || !d.jobs) return R(false);
+    d.jobs.forEach(j => { toks.add(String(j.id).toLowerCase()); addT(j.title); });
+    return R(true);
   }
   if (ats === 'lever') {
     const d = curl(`https://api.lever.co/v0/postings/${slug}?mode=json`);
-    if (!Array.isArray(d)) return { ok: false, tokens: toks };
-    d.forEach(j => toks.add(String(j.id).toLowerCase()));
-    return { ok: true, tokens: toks };
+    if (!Array.isArray(d)) return R(false);
+    d.forEach(j => { toks.add(String(j.id).toLowerCase()); addT(j.text); });
+    return R(true);
+  }
+  if (ats === 'workable') {
+    const d = curl(`https://apply.workable.com/api/v3/accounts/${slug}/jobs`,
+      { post: '{"query":"","department":[],"location":[]}', referer: `https://apply.workable.com/${slug}/` });
+    if (!d || !d.results) return R(false);
+    d.results.forEach(j => { toks.add(String(j.shortcode)); addT(j.title); });
+    return R(true);
   }
   if (ats === 'workday') {
     const [tenant, wdn, site] = slug.split('/');
-    if (!site) return { ok: false, tokens: toks };
+    if (!site) return R(false);
     const base = `https://${tenant}.${wdn}.myworkdayjobs.com/wday/cxs/${tenant}/${site}/jobs`;
     const ref = `https://${tenant}.${wdn}.myworkdayjobs.com/en-US/${site}`;
-    let offset = 0, any = false;
-    while (offset <= 500) {
+    let offset = 0, any = false, total = 0, complete = false;
+    const CAP = 4000;
+    while (offset <= CAP) {
       const d = curl(base, { post: JSON.stringify({ appliedFacets: {}, limit: 20, offset, searchText: '' }), referer: ref });
       if (!d || !d.jobPostings) break;
-      any = true;
-      d.jobPostings.forEach(j => { const mm = (j.externalPath || '').match(/_(\d+)$/); if (mm) toks.add(mm[1]); });
-      const total = d.total || 0; offset += 20;
-      if (offset >= total || !d.jobPostings.length) break;
+      any = true; total = d.total || 0;
+      d.jobPostings.forEach(j => {
+        const mm = (j.externalPath || '').match(/_([A-Za-z0-9-]+)$/);
+        if (mm) toks.add(mm[1]);
+        addT(j.title);
+      });
+      offset += 20;
+      if (offset >= total) { complete = true; break; }
+      if (!d.jobPostings.length) { complete = true; break; }
     }
-    return { ok: any, tokens: toks };
+    return R(any, complete);
   }
-  return { ok: false, tokens: toks };
+  return R(false);
 }
 
 (async () => {
@@ -111,8 +162,8 @@ function boardTokens(ats, slug) {
     return { c, ats: as && as[0], slug: as && as[1] };
   });
 
-  // Fetch boards with limited concurrency.
-  const LIMIT = 8;
+  // Fetch boards with limited concurrency (low, to avoid ATS rate-limits).
+  const LIMIT = 5;
   let i = 0;
   const boards = {};
   async function worker() {
@@ -133,10 +184,15 @@ function boardTokens(ats, slug) {
       total++;
       if (!b.ok) { unverifiable.push({ co: c.id, url: j.url, why: b.noslug ? 'no-slug' : 'fetch-failed' }); continue; }
       const tok = urlToken(ats, j.url);
-      if (tok && b.tokens.has(tok)) { liveCount++; continue; }
-      // token couldn't be parsed -> can't judge; treat as unverifiable, not dead
-      if (!tok) { unverifiable.push({ co: c.id, url: j.url, why: 'no-token' }); continue; }
-      dead.push({ co: c.id, name: c.name, title: j.title, url: j.url });
+      // Token-authoritative when the URL carries a real ATS id: that exact
+      // posting is what the link points to, so its absence = a dead link even
+      // if a same-title role still exists. Title-match only when there's no id.
+      const matched = tok ? b.tokens.has(tok) : titleLive(j.title, b.titleSets);
+      if (matched) { liveCount++; continue; }
+      // Not found. Only call it dead if we have the FULL board; otherwise we
+      // can't be sure it's gone (e.g. a truncated oversized Workday board).
+      if (b.complete) dead.push({ co: c.id, name: c.name, title: j.title, url: j.url });
+      else unverifiable.push({ co: c.id, url: j.url, why: 'board-truncated' });
     }
   }
 
