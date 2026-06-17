@@ -5442,8 +5442,8 @@ function renderCompanies(state, hub) {
       <div class="flex items-center gap-2 mt-2">
         <span class="text-[11px] muted">Sort</span>
         <div class="tabs" id="co-sort">
-          <div class="tab active" data-sort="fit">Top fit</div>
-          <div class="tab" data-sort="new">Newest</div>
+          <div class="tab active" data-co-sort="fit">Top fit</div>
+          <div class="tab" data-co-sort="new">Newest</div>
         </div>
       </div>
     </div>
@@ -5774,12 +5774,15 @@ function renderCompanies(state, hub) {
     });
   });
   // Sort toggle — Top fit (offer-probability) vs Newest (recency).
+  // Uses data-co-sort (not data-sort) to avoid a mobile-CSS collision
+  // with quiz answer-button styling that targets [data-sort] with
+  // min-height: 52px !important + font-size: 15.5px !important.
   container.querySelectorAll('#co-sort .tab').forEach(tab => {
     tab.addEventListener('click', () => {
-      if (tab.dataset.sort === curSort) return;
+      if (tab.dataset.coSort === curSort) return;
       container.querySelectorAll('#co-sort .tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      curSort = tab.dataset.sort;
+      curSort = tab.dataset.coSort;
       rolesShown = ROLES_PAGE;            // reset pagination on sort change
       paint();
     });

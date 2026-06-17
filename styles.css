@@ -1651,14 +1651,35 @@ code, pre, .font-mono {
 /* Compact sort segmented control — the default .tab padding is calibrated
  * for filter chips (e.g., "Vertical / Stage / Level"). The Sort control
  * only has two short labels ("Top fit", "Newest") so the default pill
- * was visibly oversized for the text. Tighten just this one. */
+ * was visibly oversized for the text. Tighten just this one.
+ *
+ * Note: `line-height: 1.15` is the key — without it, the inherited 1.5
+ * line-height makes the text box taller than the active-pill drop-shadow
+ * can accommodate, and the white pill visually escapes the gray track. */
 #co-sort {
   padding: 3px;
+  gap: 2px;
   margin-bottom: 0;
 }
+/* Tab uses data-co-sort (not data-sort) so it doesn't collide with the
+ * quiz answer-button rule below at line ~2345 that forces 52px min-height
+ * + 15.5px font + 1.35 line-height on any [data-sort] element. */
 #co-sort .tab {
-  padding: 0.25rem 0.7rem;
+  padding: 0.28rem 0.75rem;
   font-size: 11.5px;
+  line-height: 1.2;
+  font-weight: 500;
+}
+/* Default .tab.active drop-shadow is calibrated for the full-size filter
+ * chips. On a compact pill that shadow visibly overflows the track.
+ * Scale the shadow down to match the smaller pill. */
+#co-sort .tab.active {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(15,23,42,0.06),
+    inset 1px 0 0 rgba(255,255,255,0.55),
+    inset -1px 0 0 rgba(255,255,255,0.30),
+    0 1px 2px rgba(15,23,42,0.04);
 }
 
 /* Primary tab strip — chrome material for the top-level segmented
