@@ -1648,6 +1648,19 @@ code, pre, .font-mono {
 .tabs::-webkit-scrollbar { display: none; }
 .tabs .tab { white-space: nowrap; flex-shrink: 0; }
 
+/* Compact sort segmented control — the default .tab padding is calibrated
+ * for filter chips (e.g., "Vertical / Stage / Level"). The Sort control
+ * only has two short labels ("Top fit", "Newest") so the default pill
+ * was visibly oversized for the text. Tighten just this one. */
+#co-sort {
+  padding: 3px;
+  margin-bottom: 0;
+}
+#co-sort .tab {
+  padding: 0.25rem 0.7rem;
+  font-size: 11.5px;
+}
+
 /* Primary tab strip — chrome material for the top-level segmented
  * control. Hosts an absolutely-positioned `.tab-thumb` that slides
  * between segments with spring easing (the JS sets --thumb-x / --thumb-w
