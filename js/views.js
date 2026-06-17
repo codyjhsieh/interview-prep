@@ -5227,6 +5227,46 @@ function _coolness(c) {
   return 3;
 }
 
+/* Candidate-side calibration multiplier on REPLY.
+ * The candidate's career path: Amazon 3y → 13mo gap → BrainPOP 6mo →
+ * 10mo gap → 20mo founder. This combination triggers different responses
+ * at different companies:
+ *   - Late-stage / public: TA-led gap screen at recruiter step
+ *   - Quant / HFT / banks: algorithmic resume screen, gap is fatal
+ *   - Frontier labs: volume gate + pedigree filter compounds
+ *   - Seed / Series A builder shops: founder narrative is a POSITIVE
+ * Stays separate from _replyProb so the company-side reply rate (stage
+ * volume) doesn't get conflated with candidate-side fit. */
+const QUANT_GATED = new Set([
+  'de-shaw','two-sigma','jane-street','point72','worldquant',
+  'jump-trading','virtu','drw','imc','flow-traders','old-mission',
+  'goldman-sachs','blackrock',
+]);
+
+function _candidateMult(c) {
+  let m = 1.0;
+  const stage = (c.stage || '').toLowerCase();
+
+  // Process-heavy gate at recruiter step
+  if (/series [fghij]\b|public|late|take/.test(stage)) m *= 0.55;
+  else if (/series e\b/.test(stage)) m *= 0.7;
+  else if (/series d\b/.test(stage)) m *= 0.85;
+
+  // Frontier labs stack: volume + pedigree filter
+  if (FRONTIER.has(c.id)) m *= 0.6;
+
+  // Quant/HFT/banks: algorithmic screen, gap is structurally fatal
+  if (QUANT_GATED.has(c.id)) m *= 0.3;
+
+  // Seed/Series A: founder/builder narrative actively helps here
+  if (/seed/.test(stage) || /series a\b/.test(stage)) {
+    if ((c.jobs || []).some(j => j.level === 'founding')) m *= 1.3;
+    else m *= 1.15;
+  }
+
+  return Math.max(0.2, Math.min(1.4, m));
+}
+
 function _replyProb(c) {
   // Smaller, earlier, fewer-roles → higher reply.
   let p = 0.10;
@@ -5246,6 +5286,8 @@ function _replyProb(c) {
   const roles = (c.jobs || []).length;
   if (roles > 15)      p *= 0.7;
   else if (roles > 10) p *= 0.85;
+  // Apply candidate-side calibration
+  p *= _candidateMult(c);
   return Math.max(0.02, Math.min(0.45, p));
 }
 
