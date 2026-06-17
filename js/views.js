@@ -5148,119 +5148,147 @@ function isNewJob(j) {
   return !!(v && j.added === v);
 }
 
-/* Probability-of-offer heuristic.
+/* P(cool job) — multiplicative ranking.
  *
- * The signal flags below drive a relative ranking — they are NOT
- * outcome predictions, they're a relative ordering so applications
- * focus on companies whose hiring filters are friendliest to the
- * candidate profile they describe. Tune by editing the booleans
- * and the weights inside companyFitScore / roleFitScore.
- */
-const USER_PROFILE = {
-  hasAiExperience: true,
-  hasLongGap: true,
-  hadFire: true,
+ * fit = COOLNESS × P(REPLY) × P(BAR-PASS)
+ *
+ * COOLNESS is hand-scored from a three-agent sweep on 2026-06-17 along
+ * the "LES-cool" axis — would the candidate be proud to say where they
+ * work at a downtown-NYC dinner. Higher = more indie/creative/cultural
+ * weight; lower = enterprise SaaS / quant / big-tech / compliance.
+ *
+ * P(REPLY) is formula-based from stage + raise + role count + frontier
+ * flag. Smaller, less-hyped, fewer-roles → higher reply rate.
+ *
+ * P(BAR-PASS) is the candidate-fit signal — AI/FDE/Applied-AI titles
+ * pass; quant/HFT/PhD-research fails. Founding +, mid IC −, senior+ +.
+ *
+ * Tune COOLNESS by editing the lookup. Reply + Pass live in the
+ * functions below and key off the data the COMPANIES entries already
+ * carry, so newly-added cos get sane defaults until manually tuned. */
+const COOLNESS = {
+  // Tier 10 — peak LES-cool
+  partiful:10, dorsia:10, suno:10, flora:10, udio:10,
+  // Tier 9
+  substack:9, plot:9, qloo:9, slate:9, patreon:9, hang:9, beacons:9,
+  'aura-frames':9, output:9, runway:9, hedra:9,
+  // Tier 8
+  ideogram:8, 'hume-ai':8, lovable:8, warp:8, cursor:8, etsy:8, nyt:8, reddit:8,
+  // Tier 7
+  seatgeek:7, 'opus-training':7, glossgenius:7, bombas:7, resortpass:7,
+  spotify:7, huggingface:7, perplexity:7, notion:7, linear:7, figma:7,
+  elevenlabs:7, 'mighty-networks':7, crosby:7,
+  // Tier 6
+  vercel:6, replit:6, airtable:6, glide:6, blockworks:6, kalshi:6,
+  polymarket:6, whatnot:6, ro:6, hopper:6, lyft:6, bilt:6, mirage:6,
+  'sesame-ai':6, 'black-forest-labs':6,
+  // Tier 5 — neutral
+  navan:5, metropolis:5, via:5, cityblock:5, propel:5, loopai:5, blee:5,
+  sequence:5, headway:5, 'maven-clinic':5, 'spring-health':5, talkspace:5,
+  'k-health':5, camber:5, abridge:5, squarespace:5, mercury:5, stripe:5,
+  robinhood:5, block:5, 'reflex-robotics':5, cartesia:5, 'clay-labs':5,
+  // Tier 4
+  commure:4, oscar:4, zocdoc:4, lemonade:4, rho:4, brigit:4, stash:4,
+  chime:4, betterment:4, airgoods:4, hebbia:4, openai:4, anthropic:4,
+  mistral:4, cognition:4, modal:4, 'normal-computing':4, stainless:4,
+  hex:4, watershed:4, ramp:4, disney:4, mercor:4,
+  // Tier 3
+  sofi:3, wealthfront:3, affirm:3, doordash:3, alphasense:3, 'snorkel-ai':3,
+  cohere:3, harvey:3, writer:3, decagon:3, sierra:3, unify:3, kustomer:3,
+  attentive:3, iterable:3, braze:3, knock:3, plaid:3, alchemy:3,
+  'galaxy-digital':3, brex:3, tavily:3, langchain:3, baseten:3, deepgram:3,
+  assemblyai:3, poolside:3, fireworks:3, pinecone:3, braintrust:3, arize:3,
+  logrocket:3, 'general-context':3, sola:3, gusto:3,
+  // Tier 2
+  yext:2, 'the-trade-desk':2, doubleverify:2, asana:2, mongodb:2, datadog:2,
+  'cockroach-labs':2, neon:2, 'monte-carlo':2, carta:2, 'modern-treasury':2,
+  alloy:2, middesk:2, pinwheel:2, sandbar:2, fireblocks:2, gemini:2,
+  'jane-street':2, 'two-sigma':2, justworks:2, distyl:2, glean:2, rilla:2,
+  credal:2, clear:2, scaleai:2, coreweave:2, 'sigma-computing':2,
+  nbcuniversal:2,
+  // Tier 1 — anti-LES
+  drata:1, secureframe:1, ridgeline:1, salesforce:1, forge:1, blackrock:1,
+  'goldman-sachs':1, 'de-shaw':1, worldquant:1, point72:1, 'jump-trading':1,
+  virtu:1,
 };
 
-function companyFitScore(c) {
-  // Brutally-honest baseline: a candidate with a 2-year recent gap +
-  // a short fired stint is structurally screened out at most companies
-  // before a human reads the resume. The scoring below is intentionally
-  // harsh — most companies should land in 20–55. A score in the 70s
-  // means "this is a place where the bar is forgiving of the gap and
-  // your AI-engineering profile is actually a strong match."
-  let s = 35;
+const FRONTIER = new Set([
+  'openai','anthropic','cohere','mistral','perplexity','huggingface',
+  'cursor','cognition','glean','sierra','scaleai','harvey','runway',
+  'black-forest-labs',
+]);
 
-  // Vertical: AI background plays best in AI / devtools / infra.
-  if (c.vertical === 'ai') s += 14;
-  else if (c.vertical === 'devtools' || c.vertical === 'infra') s += 7;
-  else if (c.vertical === 'fintech') s += 2;
-  else if (c.vertical === 'health' || c.vertical === 'saas') s += 0;
-  else s -= 2;
+function _coolness(c) {
+  if (c.id in COOLNESS) return COOLNESS[c.id];
+  // Fallback for newly-added cos until hand-scored.
+  if (c.vertical === 'ai') return 4;
+  if (c.vertical === 'devtools' || c.vertical === 'infra') return 4;
+  if (c.vertical === 'media' || c.vertical === 'consumer') return 5;
+  return 3;
+}
 
-  // Stage: earlier is more forgiving of a 2y gap + a short fired stint.
-  // Late-stage process companies will gap-screen at the recruiter step.
+function _replyProb(c) {
+  // Smaller, earlier, fewer-roles → higher reply.
+  let p = 0.10;
   const stage = (c.stage || '').toLowerCase();
-  if (/seed/.test(stage)) s += 22;
-  else if (/series a\b/.test(stage)) s += 18;
-  else if (/series b\b/.test(stage)) s += 11;
-  else if (/series c\b/.test(stage)) s += 3;
-  else if (/series d\b/.test(stage)) s -= 5;
-  else if (/series e\b/.test(stage)) s -= 7;
-  // Series F+ (F, G, H, …) treated as late-stage; same penalty bucket as
-  // late / take-private. Without the explicit alternation we were missing
-  // Series G companies like Hopper, Navan, Carta.
-  else if (/series [fghij]\b|late|take-private/.test(stage)) s -= 10;
-  else if (/public/.test(stage)) s -= 12;
+  if (/seed/.test(stage))                       p = 0.30;
+  else if (/series a\b/.test(stage))            p = 0.25;
+  else if (/series b\b/.test(stage))            p = 0.18;
+  else if (/series c\b/.test(stage))            p = 0.12;
+  else if (/series d\b/.test(stage))            p = 0.08;
+  else if (/series e\b/.test(stage))            p = 0.06;
+  else if (/series [fghij]\b|public|late|take/.test(stage)) p = 0.05;
+  // Frontier labs eat thousands of apps per role.
+  if (FRONTIER.has(c.id)) p *= 0.4;
+  // Founding-role openings get triaged fast.
+  if ((c.jobs || []).some(j => j.level === 'founding')) p *= 1.4;
+  // Lots of postings on the board = dilution per app.
+  const roles = (c.jobs || []).length;
+  if (roles > 15)      p *= 0.7;
+  else if (roles > 10) p *= 0.85;
+  return Math.max(0.02, Math.min(0.45, p));
+}
 
-  // Size of raise — bigger == more bureaucracy + pedigree filtering.
-  const r = c.raised || '';
-  const num = parseFloat(r.replace(/[^\d.]/g, '')) || 0;
-  if (r.includes('B') && num >= 5) s -= 10;
-  else if (r.includes('B') && num >= 1) s -= 7;
-  else if (r.includes('B')) s -= 4;
-  else if (num >= 500) s -= 3;
-  else if (num >= 200) s -= 1;
-  else if (num <= 30) s += 6;
+function _passProb(c, j) {
+  // Candidate fit: AI/FDE/Applied AI passes; quant/HFT/PhD-research fails.
+  const t = ((j && j.title) || '').toLowerCase();
+  let p = 0.30;
+  if (/forward[\s-]deployed|\bfde\b/.test(t))           p += 0.20;
+  if (/applied ai|ai engineer/.test(t))                 p += 0.15;
+  if (/ml engineer|machine[\s-]learning/.test(t))       p += 0.10;
+  if (/full[\s-]stack|backend/.test(t))                 p += 0.05;
+  if (/c\+\+|low.?latency|hft|quant developer/.test(t)) p -= 0.20;
+  if (/researcher|phd/.test(t))                         p -= 0.10;
+  if (j && j.level === 'senior')   p += 0.05;
+  if (j && j.level === 'founding') p += 0.08;
+  if (j && j.level === 'mid')      p -= 0.05;
+  return Math.max(0.05, Math.min(0.70, p));
+}
 
-  // Elite-bar penalty: where the 2y gap + a fire is essentially a
-  // resume-screen reject. These bars don't bend for non-linear paths.
-  const elite = new Set([
-    'openai','anthropic','stripe','figma','notion','cognition',
-    'cursor','perplexity','cohere','glean','sierra','jane-street',
-    'scaleai','ramp','airtable',
-  ]);
-  if (elite.has(c.id)) s -= 16;
-
-  // Mid-tier penalty: process-heavy but not frontier elite. Expanded
-  // after the fifth refresh to cover the new late-stage SaaS / hospitality
-  // / consumer-fintech entries whose recruiting funnels lean pedigree.
-  const heavy = new Set([
-    'plaid','brex','mercury','datadog','mongodb','vercel','attentive',
-    'gusto','carta','hopper','patreon','seatgeek','navan','block',
-    'metropolis','spotify','reddit','lyft','peloton','chime','robinhood',
-    'sofi','asana','iterable','braze','squarespace','talkspace','oscar',
-  ]);
-  if (heavy.has(c.id)) s -= 8;
-
-  // Founding-role bonus — builder-first hiring forgives gaps.
-  if ((c.jobs || []).some(j => j.level === 'founding')) s += 12;
-
-  // User-preference layer — bias the ranking toward sectors the
-  // candidate actively wants and away from ones they avoid. These
-  // are stacked on top of the offer-probability signal above.
-  const blob = ((c.sub || '') + ' ' + (c.notes || '')).toLowerCase();
-  if (/\b(crypto|web3|blockchain|nft|defi|on-?chain|cryptocurrency|tokeniz|stablecoin)\b/.test(blob)) {
-    s -= 15;                                              // hard penalty
-  }
-  if (c.vertical === 'media' ||
-      /\b(creative|design|video|image|music|audio|film|content creator|filmmaker|generative.*(video|image|audio|music)|3d|animation|publishing)\b/.test(blob)) {
-    s += 10;                                              // creative tools / generative-media bias
-  }
-  if (c.vertical === 'hospitality' ||
-      /\b(travel|hotel|restaurant|dining|hospitality|airline|trip|reservation)\b/.test(blob)) {
-    s += 10;                                              // travel / hospitality / restaurants
-  }
-
-  return Math.max(15, Math.min(85, Math.round(s)));
+function companyFitScore(c) {
+  // Company-level uses the role-agnostic pass prob (assumes a mid AI role
+  // shape). Per-role refinement happens in roleFitScore.
+  const cool = _coolness(c) / 10;
+  const reply = _replyProb(c);
+  const pass = _passProb(c, null);
+  // Theoretical max: 1.0 × 0.45 × 0.70 = 0.315. Scale by 280 → ~88 ceiling.
+  return Math.max(1, Math.min(88, Math.round(cool * reply * pass * 280)));
 }
 
 function roleFitScore(c, j) {
-  let s = companyFitScore(c);
-  if (j.level === 'founding') s += 8;
-  const t = (j.title || '').toLowerCase();
-  if (/ai engineer|ml engineer|machine[\s-]learning|applied ai/.test(t)) s += 7;
-  if (/forward[\s-]deployed|\bfde\b/.test(t)) s += 5;
-  if (j.level === 'senior') s += 1;
-  return Math.max(3, Math.min(88, Math.round(s)));
+  const cool = _coolness(c) / 10;
+  const reply = _replyProb(c);
+  const pass = _passProb(c, j);
+  return Math.max(1, Math.min(95, Math.round(cool * reply * pass * 280)));
 }
 
 function fitTier(score) {
-  // Brutally honest tier bands. Most companies should fall in long-shot
-  // or tough-bar for a long-gap, post-fire candidate.
-  if (score >= 65) return { label: 'Strong fit',   cls: 'fit-strong' };
-  if (score >= 48) return { label: 'Worth trying', cls: 'fit-worth'  };
-  if (score >= 30) return { label: 'Long shot',    cls: 'fit-long'   };
+  // Recalibrated for P(cool job) — max realistic is ~90 (Flora/Plot).
+  // Most cool+achievable roles will land 15–35. Single-digits aren't a
+  // bug; they're "you don't want this and won't get a reply anyway."
+  if (score >= 40) return { label: 'Goldilocks',   cls: 'fit-strong' };
+  if (score >= 20) return { label: 'Worth trying', cls: 'fit-worth'  };
+  if (score >= 8)  return { label: 'Long shot',    cls: 'fit-long'   };
   return                   { label: 'Tough bar',    cls: 'fit-tough'  };
 }
 
