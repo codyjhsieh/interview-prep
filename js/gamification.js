@@ -1007,7 +1007,7 @@ function _newPet(name = 'Bit') {
     stage: 'baby',
     ageDays: 0,
     vitality: 80,                  // snapshot (live = vitality − decay since lastFedAt)
-    lastFedAt: Date.now(),         // ms timestamp — drives live decay (100 pts / 24h)
+    lastFedAt: Date.now(),         // ms timestamp — drives live decay (30 pts / 24h; ~3.3d to zero)
     form: 0,
     lastFedDate: null,
     lastTickDate: todayKey(),
@@ -1165,21 +1165,29 @@ function _petBody(p) {
  */
 /* Live vitality — pure time-since-fed decay.
  *
- *   live = max(0, snapshot − 100 × (now − lastFedAt) / 24h)
+ *   live = max(0, snapshot − 30 × (now − lastFedAt) / 24h)
  *
  * Snapshot (p.vitality) only changes on real EVENTS: a feed bumps
  * the snapshot up; nothing decays the snapshot — the displayed
- * value just slides down as time passes. To restore vitality the
- * user spends XP-earned-today on food piles (each pile = +20).
+ * value just slides down as time passes.
  *
- * If they go 24 hours without feeding, vitality hits 0. Stays at
- * 0 until the next feed.
+ * Rate calibration (2026-06-20): decay is 30 pts / 24h, not 100.
+ * The candidate isn't realistically applying every single day, and
+ * the prior 100/24h rate was killing Bit on every skip day. With
+ * 30/24h:
+ *   - 1 skip day → vitality 70 (Bit still looks healthy)
+ *   - 2 skip days → vitality 40 (Bit looks sick)
+ *   - 3 skip days → vitality 10 (Bit dying)
+ *   - ~3.3 days no feed → vitality 0 (dead)
+ * So one skipped application day is a free pass; two starts to hurt
+ * visibly; three earns the death modal. Matches stated cadence.
  */
+const VITALITY_DECAY_PER_DAY = 30;
 function _liveVitality(p /* legacy 2nd/3rd args ignored */) {
   if (!p || p.vitality == null) return 0;
   const last = p.lastFedAt || Date.now();
   const elapsed = Math.max(0, Date.now() - last);
-  const decay = 100 * (elapsed / 86400000);
+  const decay = VITALITY_DECAY_PER_DAY * (elapsed / 86400000);
   return Math.max(0, Math.round((p.vitality || 0) - decay));
 }
 
