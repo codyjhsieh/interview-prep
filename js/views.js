@@ -3585,11 +3585,11 @@ function renderPetCard(state, p) {
     <details class="mt-3">
       <summary class="text-[11px] muted cursor-pointer hover:opacity-80">How feeding works ▾</summary>
       <ul class="list-muted mt-2 text-[11.5px]" style="font-size:11.5px">
-        <li>Vitality decays at <b>30 pts / 24h</b> since the last feed — one skipped day is fine; two starts to hurt; three kills.</li>
+        <li>Vitality decays at <b>50 pts / 24h</b> since the last feed — one skip day is the max; a second skip day kills Bit.</li>
         <li>Every 5 XP earned today = 1 food pile. Each drop consumes one pile: <b>+5 vitality</b> (cap 100).</li>
         <li>Unspent piles <b>roll over</b> — leftover food from yesterday is still droppable today.</li>
         <li><b>Hit ${Math.round(p.goal*1.5)} XP today</b> → body shifts toward <b>Jacked</b>; less than ${p.goal} → toward <b>Chubby</b>.</li>
-        <li><b>~3.3 days with no feed</b> → vitality 0 → ${esc(p.name)} dies. One skip day is forgiving.</li>
+        <li><b>~40h with no feed</b> → vitality 0 → ${esc(p.name)} dies. One skip day is the buffer; two kills.</li>
         <li>Death resets all pet stats; a new baby hatches tomorrow. Skull counter sticks.</li>
       </ul>
     </details>

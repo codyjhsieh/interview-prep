@@ -1007,7 +1007,7 @@ function _newPet(name = 'Bit') {
     stage: 'baby',
     ageDays: 0,
     vitality: 80,                  // snapshot (live = vitality − decay since lastFedAt)
-    lastFedAt: Date.now(),         // ms timestamp — drives live decay (30 pts / 24h; ~3.3d to zero)
+    lastFedAt: Date.now(),         // ms timestamp — drives live decay (50 pts / 24h; ~40h to zero)
     form: 0,
     lastFedDate: null,
     lastTickDate: todayKey(),
@@ -1165,24 +1165,26 @@ function _petBody(p) {
  */
 /* Live vitality — pure time-since-fed decay.
  *
- *   live = max(0, snapshot − 30 × (now − lastFedAt) / 24h)
+ *   live = max(0, snapshot − 50 × (now − lastFedAt) / 24h)
  *
  * Snapshot (p.vitality) only changes on real EVENTS: a feed bumps
  * the snapshot up; nothing decays the snapshot — the displayed
  * value just slides down as time passes.
  *
- * Rate calibration (2026-06-20): decay is 30 pts / 24h, not 100.
- * The candidate isn't realistically applying every single day, and
- * the prior 100/24h rate was killing Bit on every skip day. With
- * 30/24h:
- *   - 1 skip day → vitality 70 (Bit still looks healthy)
- *   - 2 skip days → vitality 40 (Bit looks sick)
- *   - 3 skip days → vitality 10 (Bit dying)
- *   - ~3.3 days no feed → vitality 0 (dead)
- * So one skipped application day is a free pass; two starts to hurt
- * visibly; three earns the death modal. Matches stated cadence.
+ * Rate calibration (2026-06-20, v2): decay is 50 pts / 24h.
+ *   - The original 100/24h killed Bit on every skip day (too punishing).
+ *   - 30/24h allowed 2 free skip days (too permissive).
+ *   - 50/24h: ONE skip day is the max. Bit dies mid-second skip day.
+ *
+ * Curve from a typical 80-vitality feed:
+ *   - +24h skip: 30 vitality (alive but visibly sick — yellow zone)
+ *   - +40h:      ~0   vitality (death modal triggers)
+ *   - +48h:      0    vitality (definitely dead)
+ *
+ * So skipping a SINGLE day costs you the buffer; skipping a second
+ * day costs you Bit. Forcing function matches stated intent.
  */
-const VITALITY_DECAY_PER_DAY = 30;
+const VITALITY_DECAY_PER_DAY = 50;
 function _liveVitality(p /* legacy 2nd/3rd args ignored */) {
   if (!p || p.vitality == null) return 0;
   const last = p.lastFedAt || Date.now();
