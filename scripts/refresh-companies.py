@@ -292,6 +292,47 @@ CANDIDATES = [
   ("imc","IMC Trading","greenhouse","imc","fintech","Global market maker","Private","Self-funded","—",["Privately held"],"NYC market-making. Ultra-low-latency C++/FPGA, ML for trading; deep systems work."),
   ("flow-traders","Flow Traders","greenhouse","flowtraders","fintech","ETF + crypto market maker","Public","Self-funded","Euronext",["Euronext"],"NYC trading. ETP market-making; trading systems + low-latency infra."),
   ("old-mission","Old Mission","greenhouse","oldmissioncapital","fintech","Proprietary trading firm","Private","Self-funded","—",["Privately held"],"NYC/Chicago prop trading. C++/Python trading systems + market data infra."),
+
+  # ── 2026-06-22 — 30 new NYC-leaning startups (probed live; non-matches drop silently) ──
+  # Fintech (NYC-strong)
+  ("lemonade","Lemonade","ashby","lemonade","fintech","AI-driven insurance (NYSE: LMND)","Public","$480M pre-IPO","SoftBank",["NYSE","SoftBank","Sequoia"],"NYC insurtech. Public co; ML underwriting + customer claims AI."),
+  ("capchase","Capchase","ashby","capchase","fintech","Revenue-based financing for SaaS","Series B","$280M","QED",["QED","SciFi","Bling"],"NYC RBF for SaaS founders. Underwriting models + capital-markets plumbing."),
+  ("knotapi","Knot","ashby","knot","fintech","Card-on-file switching API","Series B","$25M","Lightspeed",["Lightspeed","Nyca"],"NYC fintech infra — programmatic card management across merchants. APIs + integrations."),
+  ("orum","Orum","ashby","orum","fintech","Real-time bank payments API","Series B","$56M","Accel",["Accel","Bain Capital Ventures"],"NYC payments infra — RTP, FedNow, ACH. Money movement + reliability."),
+  ("daloopa","Daloopa","ashby","daloopa","ai","AI-extracted financial data","Series B","$23M","Credit Suisse AM",["Credit Suisse","Nyca","Hack VC"],"NYC AI for buy-side financial modeling. Document parsing + ranking."),
+
+  # Health (NYC-strong)
+  ("cedar","Cedar","ashby","cedar","health","Healthcare patient billing platform","Series D","$425M","Andreessen Horowitz",["a16z","Tiger","Thrive"],"NYC healthcare payments. Patient-facing UX + payer integrations."),
+  ("spring-health","Spring Health","ashby","springhealth","health","Mental health benefits platform","Series E","$472M","Kinnevik",["Kinnevik","General Catalyst","RRE"],"NYC mental health network for employers. Provider matching + outcomes data."),
+  ("kindbody","Kindbody","greenhouse","kindbody","health","Fertility + women's health network","Series D","$305M","Perceptive Advisors",["Perceptive","RRE","Claritas"],"NYC fertility care. Clinical + tech platform across owned clinics."),
+  ("talkiatry","Talkiatry","ashby","talkiatry","health","In-network psychiatric care","Series C","$130M","Andreessen Horowitz",["a16z","Perceptive"],"NYC psychiatry. Insurance + telehealth + EHR integrations."),
+  ("octave","Octave","greenhouse","octave","health","Hybrid mental health care","Series B","$80M","Norwest",["Norwest","Greycroft"],"NYC mental health network. In-person + telehealth."),
+  ("particle-health","Particle Health","greenhouse","particlehealth","health","Healthcare data API","Series B","$28M","Menlo",["Menlo","Story","Collaborative"],"NYC healthcare interop API. Records exchange + payer-provider data."),
+
+  # AI / devtools / data (NYC + remote-NYC eng)
+  ("vellum","Vellum","ashby","vellum","ai","LLM development + eval platform","Series A","$25M","Rebel",["Rebel","YC W23"],"LLM observability + prompt mgmt + evals. NYC + remote eng."),
+  ("braintrust","Braintrust","ashby","braintrust","ai","LLM eval + observability platform","Series A","$36M","Andreessen Horowitz",["a16z","Greylock"],"LLM evals + experimentation infra. Strong applied-AI eng culture."),
+  ("anyword","Anyword","greenhouse","anyword","ai","AI copywriting for marketing","Series B","$30M","Innovation Endeavors",["Innovation Endeavors","Lead Edge"],"NYC AI copy generation for marketing teams."),
+  ("verbit","Verbit","greenhouse","verbit","ai","AI transcription + captioning","Series E","$550M","Sapphire",["Sapphire","Vertex","Stripes"],"NYC ASR + captioning at scale. Hybrid AI + human review."),
+  ("materialize","Materialize","ashby","materialize","devtools","Streaming SQL database","Series C","$135M","Kleiner",["Kleiner","Redpoint","Lightspeed"],"NYC streaming SQL DB. Real-time analytics, dataflow internals."),
+  ("bigid","BigID","greenhouse","bigid","security","Data security + privacy compliance","Series E","$317M","Riverwood",["Riverwood","Bessemer","Tiger"],"NYC data discovery + privacy compliance for enterprise."),
+  ("linear","Linear","ashby","linear","saas","Project mgmt for SWE teams","Series B","$87M","Sequoia",["Sequoia","Index","Accel"],"Issue tracker for software teams. Real-time CRDT collab + product depth."),
+  ("dbt-labs","dbt Labs","greenhouse","dbtlabs","devtools","Data transformation framework","Series D","$415M","Altimeter",["Altimeter","Sequoia","a16z"],"Data transformation OSS + dbt Cloud. Strong data + DX eng."),
+  ("honeycomb","Honeycomb","greenhouse","honeycomb","devtools","Observability for production","Series D","$95M","Insight",["Insight","Storm","Scale Venture"],"Distributed tracing + obs. Columnar query engine internals."),
+  ("launchdarkly","LaunchDarkly","greenhouse","launchdarkly","devtools","Feature flag management","Late stage","$330M","Bessemer",["Bessemer","a16z","Vertex"],"Feature mgmt at scale. Real-time config delivery + SDKs."),
+  ("sentry","Sentry","ashby","sentry","devtools","Error monitoring + perf","Series E","$217M","Accel",["Accel","NEA","BOND"],"Error tracking + perf monitoring at scale. SF + NYC + remote eng."),
+  ("sourcegraph","Sourcegraph","greenhouse","sourcegraph","devtools","Code search + Cody AI","Series D","$232M","Andreessen Horowitz",["a16z","Sequoia","Redpoint"],"Code search + AI code assistant. Compiler + indexer + LLM infra."),
+  ("snyk","Snyk","greenhouse","snyk","security","Developer-first app sec","Series G","$1.3B","Tiger",["Tiger","Boldstart","Coatue"],"App-sec + supply chain. NYC + Boston + remote eng."),
+  ("hightouch","Hightouch","ashby","hightouch","devtools","Reverse-ETL + composable CDP","Series C","$93M","Sapphire",["Sapphire","ICONIQ","Y Combinator"],"Reverse-ETL — sync warehouse data to SaaS. Strong analytics-eng DX."),
+  ("census","Census","greenhouse","census","devtools","Data activation / reverse ETL","Series B","$80M","Sequoia",["Sequoia","Insight","a16z"],"Reverse-ETL platform — warehouse → ops tools."),
+
+  # Media / consumer / SaaS (NYC HQ)
+  ("vimeo","Vimeo","greenhouse","vimeo","media","Video platform (NASDAQ: VMEO)","Public","$2.6B revenue","NASDAQ",["NASDAQ"],"NYC video platform — creator hosting + enterprise video. Public co."),
+  ("voxmedia","Vox Media","greenhouse","voxmedia","media","Digital media network","Late stage","$590M+","NBCUniversal",["NBCU","Comcast","General Atlantic"],"NYC media (Vox, The Verge, NY Mag, Eater). CMS + ad tech."),
+  ("foursquare","Foursquare","ashby","foursquare","saas","Location intelligence platform","Late stage","$390M","Andreessen Horowitz",["a16z","Spark"],"NYC location data + dev platform. Geospatial + APIs."),
+  ("wonder","Wonder","greenhouse","wonder","consumer","Premium food delivery + meal kits","Series C","$1.4B","NEA",["NEA","Bain Capital Ventures","GV"],"NYC food delivery + ghost-kitchen platform. Marc Lore's co."),
+  ("nayya","Nayya","greenhouse","nayya","fintech","Employee benefits decisioning","Series C","$100M","ICONIQ",["ICONIQ","Felicis"],"NYC benefits AI for employers. Decision-support + claims integration."),
+  ("glia","Glia","ashby","glia","saas","Digital customer service platform","Series E","$155M","Insight",["Insight","Wildcat"],"NYC digital + voice customer service. Co-browsing + AI agents."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -349,6 +390,20 @@ DOMAINS = {
   "qloo":"qloo.com","sandbar":"sandbar.ai","sequence":"sequence.app",
   "slate":"slate.com","sola":"sola.ai","suno":"suno.com","warp":"warp.dev",
   "output":"output.com",
+  # 2026-06-22 additions
+  "lemonade":"lemonade.com","capchase":"capchase.com","knotapi":"knotapi.com",
+  "orum":"orum.io","daloopa":"daloopa.com","cedar":"cedar.com",
+  "spring-health":"springhealth.com","kindbody":"kindbody.com",
+  "talkiatry":"talkiatry.com","octave":"findoctave.com",
+  "particle-health":"particlehealth.com","vellum":"vellum.ai",
+  "braintrust":"braintrust.dev","anyword":"anyword.com","verbit":"verbit.ai",
+  "materialize":"materialize.com","bigid":"bigid.com","linear":"linear.app",
+  "dbt-labs":"getdbt.com","honeycomb":"honeycomb.io",
+  "launchdarkly":"launchdarkly.com","sentry":"sentry.io",
+  "sourcegraph":"sourcegraph.com","snyk":"snyk.io","hightouch":"hightouch.com",
+  "census":"getcensus.com","vimeo":"vimeo.com","voxmedia":"voxmedia.com",
+  "foursquare":"foursquare.com","wonder":"wonder.com","nayya":"nayya.com",
+  "glia":"glia.com",
 }
 
 
