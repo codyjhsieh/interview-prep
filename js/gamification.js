@@ -529,50 +529,44 @@ function appMorningMultiplier() {
  *   - RAMP=21 days: matches the habit-formation literature midpoint
  *     (21-66 days range). Slow enough that the early streak compounds.
  * Source of truth so the dashboard apps card + chart agree. */
-const APP_RAMP_DAYS  = 14;
 const APP_TARGET_START = 2;
 const APP_TARGET_ELITE = 20;
-function dailyAppTarget(state) {
-  // Anchor priority: explicit state.appsRampAnchor (set when user
-  // chooses "start today") → first-history date → today. The override
-  // lets a returning user (whose history starts weeks ago) reset the
-  // apps ramp without affecting flashcard/lesson ramps.
-  const anchor = state.appsRampAnchor
-    || (state.history && state.history[0] && state.history[0].date)
-    || todayKey();
-  const days   = Math.max(0, Math.floor((new Date(todayKey()) - new Date(anchor)) / 86400000));
-  const t      = Math.min(1, days / APP_RAMP_DAYS);
-  const ease   = 3 * t * t - 2 * t * t * t;
-  return Math.round(APP_TARGET_START + (APP_TARGET_ELITE - APP_TARGET_START) * ease);
-}
 
-/* Two-tier app targets — "realistic" meets the user where they are
- * (recent average + 1), "stretch" is the calendar-day ramp (where the
- * user *should* be at this point in the 10-day ramp).
+/* Two-tier app targets — BOTH behavior-adaptive.
  *
- * Shipping both makes the gap visible: a user behind the ramp sees
- * "realistic 5 · stretch 12" rather than just "12" (demoralizing) or
- * just "5" (hides reality). For a candidate with a long employment
- * gap, that gap-as-information is the right design.
+ *   realistic = recent avg + 1 (small push above sustained pace).
+ *   stretch   = max(realistic + 1, ceil(realistic × 1.4)), capped at
+ *               APP_TARGET_ELITE. Always above realistic, always
+ *               reachable from where you actually are.
  *
- * `realistic` falls back to `stretch` when there isn't enough recent
- * history (<3 days with app data) — without a baseline, the calendar
- * ramp IS the realistic target. */
+ * Previously `stretch` was a fixed calendar-day ramp that climbed to
+ * APP_TARGET_ELITE=20 by day 14 regardless of behavior — for a
+ * candidate averaging ~1/day that just rendered "stretch 20" as a
+ * demoralizing far-away number whose chart line sat near 5%. Tying
+ * stretch to recent pace keeps the gap meaningful (~40%+ above
+ * realistic) without making it absurd.
+ *
+ * Cold start (<3 days of history): realistic = stretch = APP_TARGET_START+1.
+ * Without a baseline, a 3-app day is the right first target. */
 function dailyAppTargets(state) {
-  const stretch = dailyAppTarget(state);
   const hist = (state.history || []);
-  // Use the last 7 calendar days with any app activity. Days with 0
-  // apps DO count toward the average — they're real signal about
-  // sustained pace, and excluding them would let "5 apps once a week"
-  // produce a realistic target of 5.
+  // Last 7 calendar days. Days with 0 apps DO count toward the average
+  // — they're real signal about sustained pace, and excluding them
+  // would let "5 apps once a week" produce a realistic target of 5.
   const last7 = hist.slice(-7);
-  if (last7.length < 3) return { realistic: stretch, stretch };
+  if (last7.length < 3) {
+    const t = APP_TARGET_START + 1;
+    return { realistic: t, stretch: t };
+  }
   const sum = last7.reduce((acc, h) => acc + ((h.events && h.events.app) || 0), 0);
   const avg = sum / last7.length;
-  // +1 buffer so today's realistic is always a small stretch above the
-  // recent average — never a coast.
   const realistic = Math.max(APP_TARGET_START, Math.min(APP_TARGET_ELITE, Math.round(avg + 1)));
+  const stretch   = Math.min(APP_TARGET_ELITE, Math.max(realistic + 1, Math.ceil(realistic * 1.4)));
   return { realistic, stretch };
+}
+
+function dailyAppTarget(state) {
+  return dailyAppTargets(state).stretch;
 }
 
 function logJobApp(state) {

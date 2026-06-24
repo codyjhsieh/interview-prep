@@ -3687,8 +3687,8 @@ function renderJobAppsCard(state) {
         <div class="text-xs muted uppercase tracking-wider">Job applications today</div>
         <div class="text-3xl font-bold mt-1 numeric">${count} <span class="text-sm muted font-normal">/ ${realistic}</span></div>
         ${stretch > realistic
-          ? `<div class="text-[11.5px] muted mt-0.5" title="Stretch goal is today's position on the 10-day ramp. Realistic = recent average + 1.">stretch <span class="numeric" style="color:var(--accent)">${stretch}</span> · ${count >= stretch ? 'crushed it' : count >= realistic ? `${stretch - count} above realistic` : 'meet realistic first'}</div>`
-          : `<div class="text-[11.5px] muted mt-0.5">aligned with ramp · stretch ${stretch}</div>`}
+          ? `<div class="text-[11.5px] muted mt-0.5" title="Both targets adapt to recent pace. Realistic = recent avg + 1. Stretch sits ~40% above realistic.">stretch <span class="numeric" style="color:var(--accent)">${stretch}</span> · ${count >= stretch ? 'crushed it' : count >= realistic ? `${stretch - count} above realistic` : 'meet realistic first'}</div>`
+          : `<div class="text-[11.5px] muted mt-0.5">realistic = stretch · ${stretch}</div>`}
       </div>
       <!-- Single stepper control: one visual pill with a divider, − on
            the left, + on the right. Two click targets, one button. -->
@@ -4022,6 +4022,13 @@ function renderDashboard(state, hub) {
     (k === 'app' && state.appsRampAnchor) ? state.appsRampAnchor : _historyAnchor;
   const _smoothstep = (t) => 3 * t * t - 2 * t * t * t;
   const _rampedTarget = (k) => {
+    // Apps use the behavior-adaptive dynamic stretch (recent avg-based),
+    // so the chart's 100% line collapses to a reachable number for
+    // candidates who aren't yet at elite pace. Flashcards/lessons keep
+    // the calendar-day ramp.
+    if (k === 'app' && window.GAMI && window.GAMI.dailyAppTarget) {
+      return window.GAMI.dailyAppTarget(state);
+    }
     const anchor = _anchorForMetric(k);
     const days = Math.max(0, Math.floor((new Date(_todayStr) - new Date(anchor)) / 86400000));
     const t = Math.min(1, days / RAMP_DAYS[k]);
@@ -4057,6 +4064,14 @@ function renderDashboard(state, hub) {
    * Used to draw the goal curve so the user can see the bar climbing
    * over the window, not just sitting flat at today's value. */
   const _rampedTargetOn = (dateKey, metric) => {
+    // Apps: normalize every day against TODAY's dynamic stretch so the
+    // chart's per-day app values are visually comparable. Past days
+    // don't get their own historical-stretch (we'd need that day's
+    // trailing-7 avg) — keeping the same denominator across the window
+    // is the simpler, more readable choice and matches the legend pill.
+    if (metric === 'app' && window.GAMI && window.GAMI.dailyAppTarget) {
+      return window.GAMI.dailyAppTarget(state);
+    }
     const anchor = _anchorForMetric(metric);
     const days = Math.max(0, Math.floor(
       (new Date(dateKey) - new Date(anchor)) / 86400000
@@ -5389,6 +5404,17 @@ function bindApplyToggles(container) {
       cb.setAttribute('data-checked', '1');
       cb.setAttribute('aria-checked', 'true');
     }
+    // Reorder within the row's sibling list so the active queue stays
+    // on top: just-applied rows slide to the bottom (in front of any
+    // load-more button), just-unapplied rows slide back to the top.
+    // Skips reorder if the row isn't in a multi-row sibling list (e.g.
+    // dashboard mini-list with one row), so we don't break unrelated UI.
+    const parent = row.parentElement;
+    if (parent && parent.children.length > 1) {
+      const isApplied = cb.getAttribute('data-checked') === '1';
+      if (isApplied) parent.appendChild(row);
+      else parent.insertBefore(row, parent.firstElementChild);
+    }
     GAMI.saveImmediate(st);     // wrapped → triggers sync push
     if (window.APP && window.APP.afterStateChange) window.APP.afterStateChange();
   });
@@ -5642,6 +5668,20 @@ function renderCompanies(state, hub) {
       const hay = (r.title + ' ' + r._company.name + ' ' + r._company.sub + ' ' + (r._company.badges||[]).join(' ')).toLowerCase();
       return hay.includes(q);
     });
+    // Push already-applied rows to the bottom (preserving the
+    // primary sort within each group) so the active queue stays at the
+    // top — much easier to scan and click unapplied items, and the
+    // "done" pile is still visible for unchecking.
+    {
+      const liveSt = (window.APP && window.APP.getState) ? window.APP.getState() : state;
+      const open = [], done = [];
+      for (const r of filtered) {
+        (GAMI.isRoleApplied(liveSt, makeRoleKey(r._company, r)) ? done : open).push(r);
+      }
+      filtered.length = 0;
+      for (const r of open) filtered.push(r);
+      for (const r of done) filtered.push(r);
+    }
     if (filtered.length === 0) {
       rolelist.innerHTML = '<div class="muted text-sm py-6 text-center">No roles match your filters.</div>';
       return;
@@ -5823,9 +5863,15 @@ function renderCompany(state, hub, id) {
 
   const badges = (c.badges || []).map(b => `<span class="chip chip-funding">${esc(b)}</span>`).join('');
   const companyFit = companyFitScore(c);
-  // Sort the company's postings newest-first (recency = most recent of posted/added).
-  const sortedJobs = [...(c.jobs || [])].sort((a, b) =>
-    (jobRecency(b) || '').localeCompare(jobRecency(a) || ''));
+  // Sort the company's postings newest-first (recency = most recent of
+  // posted/added), then push already-applied rows to the bottom so the
+  // open queue is on top.
+  const sortedJobs = [...(c.jobs || [])].sort((a, b) => {
+    const ad = GAMI.isRoleApplied(state, makeRoleKey(c, a)) ? 1 : 0;
+    const bd = GAMI.isRoleApplied(state, makeRoleKey(c, b)) ? 1 : 0;
+    if (ad !== bd) return ad - bd;
+    return (jobRecency(b) || '').localeCompare(jobRecency(a) || '');
+  });
   const jobsHTML = sortedJobs.map(j => {
     const lvl = j.level || 'mid';
     const lvlLabel = lvl === 'founding' ? 'Founding' : (lvl === 'senior' ? 'Senior' : 'Mid');
