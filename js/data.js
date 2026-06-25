@@ -13448,11 +13448,11 @@ const COMPANY_DOMAINS = {
   patreon:'patreon.com', hopper:'hopper.com', hang:'hang.xyz',
   block:'block.xyz', 'mighty-networks':'mightynetworks.com', seatgeek:'seatgeek.com',
   beacons:'beacons.ai', navan:'navan.com', airgoods:'airgoods.com',
-  blee:'blee.com', camber:'camber.com', crosby:'crosby.ai',
+  blee:'blee.com', camber:'camber.io', crosby:'crosby.ai',
   flora:'florafauna.ai', 'general-context':'generalcontext.com', glossgenius:'glossgenius.com',
   loopai:'loop.com', metropolis:'metropolis.io', 'opus-training':'opus.so',
   partiful:'partiful.com', plot:'plotai.com', qloo:'qloo.com',
-  sandbar:'sandbar.ai', sequence:'sequence.app', slate:'slate.com',
+  sandbar:'sandbar.io', sequence:'sequence.app', slate:'slate.com',
   sola:'sola.ai', suno:'suno.com', warp:'warp.dev',
   output:'output.com',
   // ── 2026-06-25 — backfill logos for companies missing from this map ──
