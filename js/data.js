@@ -13455,6 +13455,32 @@ const COMPANY_DOMAINS = {
   sandbar:'sandbar.ai', sequence:'sequence.app', slate:'slate.com',
   sola:'sola.ai', suno:'suno.com', warp:'warp.dev',
   output:'output.com',
+  // ── 2026-06-25 — backfill logos for companies missing from this map ──
+  // Pulled from refresh-companies.py's DOMAINS dict where available, else
+  // hand-curated. Google favicon CDN returns a generic glyph for unknown
+  // domains, so a wrong guess is a graceful no-op.
+  linear:'linear.app', hex:'hex.tech', hebbia:'hebbia.com',
+  zocdoc:'zocdoc.com', watershed:'watershedclimate.com', runway:'runwayml.com',
+  lemonade:'lemonade.com', 'spring-health':'springhealth.com',
+  fireblocks:'fireblocks.com', braintrust:'braintrust.dev',
+  'cockroach-labs':'cockroachlabs.com', via:'ridewithvia.com',
+  'aura-frames':'auraframes.com', rho:'rho.co', brigit:'hellobrigit.com',
+  clear:'clearme.com', drw:'drw.com', imc:'imc.com',
+  'flow-traders':'flowtraders.com', 'old-mission':'oldmissioncapital.com',
+  nayya:'nayya.com',
+  // Hand-curated additions (32)
+  harvey:'harvey.ai', huggingface:'huggingface.co', coreweave:'coreweave.com',
+  alphasense:'alphasense.com', neon:'neon.tech', ro:'ro.co',
+  disney:'disney.com', blackrock:'blackrock.com', etsy:'etsy.com',
+  bilt:'biltrewards.com', 'snorkel-ai':'snorkel.ai', mercor:'mercor.com',
+  pinecone:'pinecone.io', 'clay-labs':'clay.com', affirm:'affirm.com',
+  'two-sigma':'twosigma.com', nyt:'nytimes.com', 'k-health':'khealth.com',
+  'de-shaw':'deshaw.com', worldquant:'worldquant.com',
+  'goldman-sachs':'goldmansachs.com', 'galaxy-digital':'galaxy.com',
+  doordash:'doordash.com', 'hume-ai':'hume.ai', udio:'udio.com',
+  'reflex-robotics':'reflexrobotics.com', replit:'replit.com',
+  cartesia:'cartesia.ai', 'black-forest-labs':'blackforestlabs.ai',
+  'sesame-ai':'sesame.com', hedra:'hedra.com', arize:'arize.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */
