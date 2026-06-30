@@ -293,6 +293,19 @@ CANDIDATES = [
   ("flow-traders","Flow Traders","greenhouse","flowtraders","fintech","ETF + crypto market maker","Public","Self-funded","Euronext",["Euronext"],"NYC trading. ETP market-making; trading systems + low-latency infra."),
   ("old-mission","Old Mission","greenhouse","oldmissioncapital","fintech","Proprietary trading firm","Private","Self-funded","—",["Privately held"],"NYC/Chicago prop trading. C++/Python trading systems + market data infra."),
 
+  # ── 2026-06-30 — hospitality / media / consumer expansion (probed via parallel agents) ──
+  ("sonder","Sonder","workday","sonder/wd1/Join_Sonder","hospitality","Tech-enabled hotels + short-stay (NASDAQ: SOND)","Public","$425M+ pre-IPO","Greenoaks",["NASDAQ","Greenoaks","Founders Fund"],"Tech-enabled hotel + short-stay operator. Inventory mgmt + booking + ops automation."),
+  ("higgsfield","Higgsfield AI","ashby","higgsfieldai","ai","Generative AI video for creators","Series A","$15M+","Menlo",["Menlo","AI Grant"],"Gen video studio. Multimodal models, GPU pipelines, mobile-first UX."),
+  ("kasa","Kasa (incl. Mint House)","greenhouse","kasa","hospitality","Apartment-hotel operator (acq. Mint House 2024)","Series C","$190M+","Ribbit",["Ribbit","Citi Ventures"],"Tech-enabled apartment-hotel operator. Inventory + ops + booking systems."),
+  ("unitedmasters","UnitedMasters","greenhouse","unitedmasterstranslation","media","Music distribution + artist services","Series B","$70M+","Andreessen Horowitz",["a16z","Alphabet"],"NYC independent-artist distribution + label services. Music data, payments, integrations."),
+  ("vsco","VSCO","greenhouse","vsco39","consumer","Mobile photo editing + community","Series C","$90M","Goldcrest",["Goldcrest","Accel"],"Oakland-based mobile photo editor. Image ML, iOS/Android."),
+  ("soundcloud","SoundCloud","greenhouse","soundcloud71","media","Audio streaming + creator platform","Late stage","$655M+","Sirius XM",["Sirius XM","Atlantic"],"Audio + creator platform. Streaming infra, recs, monetization."),
+  ("bdg","Bustle Digital Group","lever","BDG","media","Digital media (Bustle, Mic, Inverse, NYLON)","Late stage","$70M+","GGV",["GGV","BlackRock"],"NYC women's-focused digital media network. CMS + ad tech + commerce."),
+  ("resy","Resy","workable","resy-1","hospitality","Dining reservations (Amex-owned)","Acquired","$32M pre-acq.","American Express",["American Express","First Round"],"NYC dining reservations platform. Real-time booking, table mgmt, marketplace."),
+  ("defector","Defector Media","workable","defector-media","media","Worker-owned sports + culture","Bootstrapped","—","—",["Worker-owned"],"NYC subscription sports/news collective (ex-Deadspin staff). Editorial + CMS + subscriptions."),
+  ("recess","Recess","lever","recess","consumer","Functional drinks (CBD + magnesium)","Series B","$25M+","RiverPark",["RiverPark"],"NYC functional drinks brand. DTC + retail; lean eng for site/operations."),
+  ("liquid-death","Liquid Death","greenhouse","liquiddeath","consumer","Canned water + iced tea CPG","Series D","$267M","Live Nation",["Live Nation","Science Inc"],"LA CPG with cult brand. Lean eng team for e-commerce + brand campaigns."),
+
   # ── 2026-06-22 — 30 new NYC-leaning startups (probed live; non-matches drop silently) ──
   # Fintech (NYC-strong)
   ("lemonade","Lemonade","ashby","lemonade","fintech","AI-driven insurance (NYSE: LMND)","Public","$480M pre-IPO","SoftBank",["NYSE","SoftBank","Sequoia"],"NYC insurtech. Public co; ML underwriting + customer claims AI."),
@@ -404,6 +417,11 @@ DOMAINS = {
   "census":"getcensus.com","vimeo":"vimeo.com","voxmedia":"voxmedia.com",
   "foursquare":"foursquare.com","wonder":"wonder.com","nayya":"nayya.com",
   "glia":"glia.com",
+  # 2026-06-30 additions
+  "sonder":"sonder.com","higgsfield":"higgsfield.ai","kasa":"kasa.com",
+  "unitedmasters":"unitedmasters.com","vsco":"vsco.co","soundcloud":"soundcloud.com",
+  "bdg":"bustle.com","resy":"resy.com","defector":"defector.com",
+  "recess":"takearecess.com","liquid-death":"liquiddeath.com",
 }
 
 
