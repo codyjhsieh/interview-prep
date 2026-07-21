@@ -13827,6 +13827,11 @@ const COMPANY_DOMAINS = {
   palantir:'palantir.com', turing:'turing.com', capco:'capco.com',
   vannevarlabs:'vannevarlabs.com', toptal:'toptal.com', andela:'andela.com',
   pariveda:'parivedasolutions.com', factory:'factory.ai', openevidence:'openevidence.com',
+  // Batch 3: YC AI/dev/infra
+  clarion:'clarionhealth.com', offdeal:'offdeal.com', pointone:'pointone.ai',
+  greenboard:'greenboard.co', spur:'spur.dev', ultra:'ultra.us',
+  'codes-health':'codeshealth.co', ryvn:'ryvn.io', 'tuesday-labs':'tuesdaylabs.com',
+  diligencesquared:'diligencesquared.com', fleetline:'fleetline.ai', ambral:'ambral.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */

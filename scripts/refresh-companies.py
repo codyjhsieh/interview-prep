@@ -511,6 +511,20 @@ CANDIDATES = [
   ("pariveda","Pariveda","ashby","pariveda","saas","Elite management + dev consultancy","Bootstrapped","Profitable","—",["Employee-owned"],"NYC office. Boutique employee-owned."),
   ("factory","Factory","ashby","factory","ai","Agentic-coding FDE shop","Series A","$15M","Sequoia",["Sequoia"],"NYC office. AI dev-consulting hybrid."),
   ("openevidence","OpenEvidence","ashby","openevidence","health","Medical AI FDE-style","Series B","$100M+","Sequoia",["Sequoia","Kleiner"],"NYC + Boston. Elite AI deployment shop."),
+
+  # ── 2026-07-21 — Batch 3: recent YC startups (AI / dev / infra) ──
+  ("clarion","Clarion","ashby","clarion","ai","AI voice + comms for healthcare","Series A","$13M","Maverick",["Maverick","YC","a16z"],"YC W24. NYC HQ. Automates clinic scheduling/billing calls."),
+  ("offdeal","OffDeal","ashby","offdeal","ai","AI-native investment bank","Seed","$4.7M","Radical",["Radical","YC"],"YC W24. NYC. AI-run SMB M&A."),
+  ("pointone","PointOne","ashby","pointone","ai","AI legal timekeeping","Seed","$10M+","Khosla",["Khosla","YC"],"YC W24. NYC. Automated time entry for BigLaw."),
+  ("greenboard","Greenboard","ashby","greenboard","fintech","AI compliance for fintech","Seed","YC","Y Combinator",["YC"],"YC W24. NYC. Back-office automation for regulated financial firms."),
+  ("spur","Spur","ashby","spur","ai","AI E2E test automation","Seed","YC","Y Combinator",["YC"],"YC S24. NYC founding team. LLM-generated tests."),
+  ("ultra","Ultra","ashby","ultra","ai","General-purpose humanoid robots","Seed","$10M+","(undisclosed)","—",["—"],"YC S24. NYC HQ, KY manufacturing. Zero-integration robots."),
+  ("codes-health","Codes Health","ashby","codes-health","health","AI medical record retrieval","Seed","YC","Y Combinator",["YC"],"YC S24. NYC. Cross-EHR chart abstraction."),
+  ("ryvn","Ryvn","ashby","ryvn","infra","Multi-cloud deploy infra + observability","Seed","YC","Y Combinator",["YC"],"YC F24. NYC. Ship workloads across AWS/GCP/Azure."),
+  ("tuesday-labs","Tuesday Labs","ashby","tuesday-labs","ai","Consumer + tidying robots","Seed","YC","Y Combinator",["YC"],"YC W24. NYC. Home-tidying AI robots."),
+  ("diligencesquared","Diligencesquared","ashby","diligencesquared","ai","AI market due-diligence","Seed","YC","Y Combinator",["YC"],"YC F25. NYC. Automates McKinsey-grade market reports for PE."),
+  ("fleetline","Fleetline","ashby","fleetline","ai","AI trucking load planner","Seed","YC","Y Combinator",["YC"],"YC S25. NYC founding roles. LLM+OR-based fleet optimization."),
+  ("ambral","Ambral","ashby","ambral","ai","AI account mgmt / CS agent","Seed","YC","Y Combinator",["YC"],"YC S25. NYC founding engineer role. Enterprise CS copilot."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -646,6 +660,11 @@ DOMAINS = {
   "palantir":"palantir.com","turing":"turing.com","capco":"capco.com",
   "vannevarlabs":"vannevarlabs.com","toptal":"toptal.com","andela":"andela.com",
   "pariveda":"parivedasolutions.com","factory":"factory.ai","openevidence":"openevidence.com",
+  # Batch 3: YC AI/dev/infra
+  "clarion":"clarionhealth.com","offdeal":"offdeal.com","pointone":"pointone.ai",
+  "greenboard":"greenboard.co","spur":"spur.dev","ultra":"ultra.us",
+  "codes-health":"codeshealth.co","ryvn":"ryvn.io","tuesday-labs":"tuesdaylabs.com",
+  "diligencesquared":"diligencesquared.com","fleetline":"fleetline.ai","ambral":"ambral.com",
 }
 
 

@@ -5252,6 +5252,10 @@ const COOLNESS = {
   // Batch 2: elite contract shops
   palantir:5, factory:6, openevidence:6, vannevarlabs:5, andela:3,
   turing:3, toptal:3, pariveda:3, capco:2,
+  // Batch 3: YC AI/dev/infra
+  ultra:6, 'tuesday-labs':6, offdeal:5, clarion:4, spur:4, ryvn:4,
+  pointone:4, ambral:3, 'codes-health':3, greenboard:3,
+  diligencesquared:3, fleetline:3,
 };
 
 const FRONTIER = new Set([
