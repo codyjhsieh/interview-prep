@@ -5225,6 +5225,28 @@ const COOLNESS = {
   drata:1, secureframe:1, ridgeline:1, salesforce:1, forge:1, blackrock:1,
   'goldman-sachs':1, 'de-shaw':1, worldquant:1, point72:1, 'jump-trading':1,
   virtu:1,
+
+  // ── 2026-07-21 additions — tier-assigned to match existing anchors ──
+  // Tier 10 — peak LES-cool
+  ganni:10,
+  // Tier 9
+  rockstargames:9,
+  // Tier 8
+  soundcloud:8, duolingo:8, blackbird:8, bdg:8,
+  // Tier 7
+  'farmers-dog':7, fanduel:7,
+  // Tier 6
+  uniswap:6, attio:6, graphite:6, browserbase:6,
+  // Tier 5
+  handshake:5, midpage:5, semgrep:5,
+  // Tier 4
+  peloton:4, equinox:4, materialize:4, knotapi:4, extend:4,
+  // Tier 3
+  numeric:3, numeral:3, socure:3, ripple:3, imprint:3, databento:3, nayya:3,
+  // Tier 2
+  dailypay:2, mosaic:2, octus:2, 'nyc-gov':2,
+  // Tier 1 — anti-LES
+  drw:1, imc:1, 'flow-traders':1, 'old-mission':1, socotec:1,
 };
 
 const FRONTIER = new Set([
