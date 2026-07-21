@@ -13767,6 +13767,12 @@ const COMPANY_DOMAINS = {
   fanduel:'fanduel.com', rockstargames:'rockstargames.com',
   ganni:'ganni.com', equinox:'equinox.com', 'nyc-gov':'nyc.gov',
   socotec:'socotec.com',
+  // Batch 1: agencies
+  codeandtheory:'codeandtheory.com', dept:'deptagency.com',
+  instrument:'instrument.com', nearform:'nearform.com',
+  hugeinc:'hugeinc.com', metalab:'metalab.com', kettle:'wearekettle.com',
+  akqa:'akqa.com', ideo:'ideo.com', thoughtworks:'thoughtworks.com',
+  vsapartners:'vsapartners.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */

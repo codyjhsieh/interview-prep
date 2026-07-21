@@ -5245,6 +5245,10 @@ const COOLNESS = {
   dailypay:2, mosaic:2, octus:2, 'nyc-gov':2,
   // Tier 1 — anti-LES
   drw:1, imc:1, 'flow-traders':1, 'old-mission':1, socotec:1,
+
+  // Batch 1 (2026-07-21): agencies
+  ideo:8, hugeinc:6, metalab:6, instrument:6, akqa:5, codeandtheory:5,
+  kettle:5, dept:4, nearform:4, thoughtworks:4, vsapartners:4,
 };
 
 const FRONTIER = new Set([

@@ -487,6 +487,19 @@ CANDIDATES = [
   ("abbvie","AbbVie / Allergan","smartrecruiters","AbbVie","health","Biopharma (NYSE: ABBV)","Public","(NYSE: ABBV)","NYSE",["NYSE","S&P 500"],"Allergan Manhattan office. Engineer Technology II roles."),
   ("dominos","Domino's Pizza","smartrecruiters","Dominos","consumer","QSR (NYSE: DPZ)","Public","(NYSE: DPZ)","NYSE",["NYSE","S&P 500"],"NYC franchise ops + Ann Arbor eng HQ."),
   ("gap","Gap Inc","smartrecruiters","GapInc2","consumer","Apparel retail (NYSE: GPS)","Public","(NYSE: GPS)","NYSE",["NYSE","S&P 500"],"Old Navy NYC design office."),
+
+  # ── 2026-07-21 — Batch 1: elite NYC coding/product agencies ──
+  ("codeandtheory","Code and Theory","greenhouse","codeandtheory","saas","Elite NYC product + engineering agency","Acquired","(WPP subsidiary, 2024)","WPP",["WPP"],"NYC (SoHo) HQ. 800+ ppl. Clients: WSJ, NYT, CNN, Coca-Cola. 36 NYC eng roles today."),
+  ("dept","DEPT","greenhouse","dept","saas","Global digital product agency","Late stage","Carlyle-backed","Carlyle",["Carlyle"],"NYC Manhattan office. 4000+ ppl. Clients: Google, eBay, Vice, Patagonia."),
+  ("instrument","Instrument","lever","instrument","saas","Portland/NYC design + engineering studio","Acquired","(DEPT subsidiary)","DEPT",["DEPT"],"NYC studio. ~400 ppl. Clients: Google, Spotify, Nike, Meta."),
+  ("nearform","Nearform","greenhouse","nearform","saas","Elite React/Node consultancy (acq. Formidable 2023)","Private","undisclosed","—",["—"],"US remote incl NYC. ~500 ppl. Clients: Netflix, HBO, Verizon, Twilio."),
+  ("hugeinc","Huge","greenhouse","hugeinc","saas","Flagship Brooklyn agency","PE","AEA Investors","AEA Investors",["AEA"],"Brooklyn DUMBO HQ. ~1000 ppl. Clients: Google, HBO, Nike, McDonald's."),
+  ("metalab","MetaLab","greenhouse","metalab","saas","Elite remote product design agency","Bootstrapped","Profitable","—",["—"],"Remote-first with NYC hires. Slack UI + Coinbase + Uber designers."),
+  ("kettle","Kettle","greenhouse","kettle","saas","NYC-founded creative + product agency","Bootstrapped","Profitable","—",["—"],"NYC roots, now remote-first. Clients: NatGeo, Google, MoMA."),
+  ("akqa","AKQA","greenhouse","akqa","saas","WPP design + tech agency","Acquired","(WPP subsidiary)","WPP",["WPP"],"NYC Manhattan office. ~2500 ppl. Clients: Nike, Google, Audi."),
+  ("ideo","IDEO","greenhouse","ideo","saas","Legendary design consultancy","Private","undisclosed","—",["—"],"NYC office active. ~500 ppl. Historic clients: Apple mouse, Ford, Airbnb."),
+  ("thoughtworks","Thoughtworks","greenhouse","thoughtworks","saas","Global engineering consultancy","Public","(NASDAQ: TWKS)","NASDAQ",["NASDAQ"],"NYC Manhattan office. 10K+ ppl. XP + agile pedigree."),
+  ("vsapartners","VSA Partners","greenhouse","vsapartners","saas","Chicago-based design + brand agency","Private","undisclosed","—",["—"],"NYC office. ~250 ppl. Clients: Google, Nike, IBM."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -612,6 +625,12 @@ DOMAINS = {
   "socotec":"socotec.com","visa":"visa.com","sgs":"sgs.com","bosch":"bosch.com",
   "nielseniq":"nielseniq.com","abbvie":"abbvie.com","dominos":"dominos.com",
   "gap":"gap.com",
+  # Batch 1: agencies
+  "codeandtheory":"codeandtheory.com","dept":"deptagency.com",
+  "instrument":"instrument.com","nearform":"nearform.com",
+  "hugeinc":"hugeinc.com","metalab":"metalab.com","kettle":"wearekettle.com",
+  "akqa":"akqa.com","ideo":"ideo.com","thoughtworks":"thoughtworks.com",
+  "vsapartners":"vsapartners.com",
 }
 
 
