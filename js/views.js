@@ -5357,6 +5357,20 @@ function _passProb(c, j) {
   return Math.max(0.05, Math.min(0.70, p));
 }
 
+// Candidate taste penalties — multiplicative on raw fit score before
+// percentile normalization. Applied here (not in _coolness or _passProb)
+// so they compose cleanly and are easy to audit.
+const CRYPTO_IDS = new Set([
+  'alchemy','blockworks','chainalysis','elliptic','fireblocks','galaxy-digital',
+  'gemini','ledger','notabene','ondofinance','paxos','polymarket','ripple',
+  'trm-labs','uniswap',
+]);
+const FRONTEND_TITLE = /\bfront[\s-]?end\b|\bfrontend\b|\bui\s+engineer\b|\bfe\s+engineer\b/i;
+function _cryptoPenalty(c) { return CRYPTO_IDS.has(c.id) ? 0.4 : 1.0; }
+function _frontendPenalty(j) {
+  return (j && FRONTEND_TITLE.test(j.title || '')) ? 0.5 : 1.0;
+}
+
 // Percentile-normalization: the displayed fit score is a company/role's
 // PERCENTILE across the full live-role pool, mapped onto 0.5-10.0. This
 // prevents the tier-3-heavy raw distribution from crushing everything into
@@ -5365,7 +5379,8 @@ function _passProb(c, j) {
 // LIVE is static per page load so no invalidation needed.
 let _fitPool = null;
 function _rawFit(c, j) {
-  return (_coolness(c) / 10) * _replyProb(c) * _passProb(c, j);
+  return (_coolness(c) / 10) * _replyProb(c) * _passProb(c, j)
+    * _cryptoPenalty(c) * _frontendPenalty(j);
 }
 function _computeFitPool() {
   // Use the global COMPANIES (from window.DATA) — LIVE is a local inside
