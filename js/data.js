@@ -13170,6 +13170,85 @@ const COMPANIES = [
     notes:"NYC HQ. Elite talent network with staff engineers.",
     jobs:[
       { title:"Forward Deployed AI Engineer", url:"https://job-boards.greenhouse.io/turing/jobs/5609732004", level:"mid", added:"2026-07-21", posted:"2026-07-20" }
+    ] },
+  { id:"clarion", name:"Clarion", vertical:"ai",
+    sub:"AI voice + comms for healthcare",
+    stage:"Series A", raised:"$13M", lead:"Maverick",
+    badges:["Maverick","YC","a16z"],
+    totalRoles:4,
+    notes:"YC W24. NYC HQ. Automates clinic scheduling/billing calls.",
+    jobs:[
+      { title:"Senior Backend Engineer", url:"https://jobs.ashbyhq.com/clarion/20936d8f-8b90-41ca-9da1-6cf4992a4563", level:"senior", added:"2026-07-21", posted:"2026-02-16" },
+      { title:"Senior Software Engineer (Fullstack)", url:"https://jobs.ashbyhq.com/clarion/c41dc917-4f88-4d64-8831-37ca58339e31", level:"senior", added:"2026-07-21", posted:"2026-02-22" },
+      { title:"Software Engineer (Fullstack)", url:"https://jobs.ashbyhq.com/clarion/ea6f2fc5-7808-42c4-946f-83b4b10f2085", level:"mid", added:"2026-07-21", posted:"2026-01-26" },
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/clarion/e9f595cd-0dc7-4d12-b612-87f018f4042b", level:"mid", added:"2026-07-21", posted:"2026-02-22" }
+    ] },
+  { id:"offdeal", name:"OffDeal", vertical:"ai",
+    sub:"AI-native investment bank",
+    stage:"Seed", raised:"$4.7M", lead:"Radical",
+    badges:["Radical","YC"],
+    totalRoles:1,
+    notes:"YC W24. NYC. AI-run SMB M&A.",
+    jobs:[
+      { title:"Full Stack Engineer", url:"https://jobs.ashbyhq.com/offdeal/3f29a3f6-b336-459b-aee0-6975f7e2af24", level:"mid", added:"2026-07-21", posted:"2024-09-12" }
+    ] },
+  { id:"pointone", name:"PointOne", vertical:"ai",
+    sub:"AI legal timekeeping",
+    stage:"Seed", raised:"$10M+", lead:"Khosla",
+    badges:["Khosla","YC"],
+    totalRoles:5,
+    notes:"YC W24. NYC. Automated time entry for BigLaw.",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/pointone/d9fce9c8-016f-4b9f-b930-08f52a9c9104", level:"senior", added:"2026-07-21", posted:"2025-10-23" },
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/pointone/bb42f37c-8a7c-434d-aae8-089820a7171d", level:"mid", added:"2026-07-21", posted:"2025-10-23" },
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/pointone/834a8648-5581-4d69-80cb-41382928d220", level:"mid", added:"2026-07-21", posted:"2025-10-23" },
+      { title:"New Grad Software Engineer", url:"https://jobs.ashbyhq.com/pointone/1e312db8-6d18-4d07-af99-ed3ba165e7d9", level:"mid", added:"2026-07-21", posted:"2025-10-23" },
+      { title:"Security & Infrastructure Engineer", url:"https://jobs.ashbyhq.com/pointone/e57df388-58d1-41b5-b388-6b4ad41a6c57", level:"mid", added:"2026-07-21", posted:"2026-03-02" }
+    ] },
+  { id:"spur", name:"Spur", vertical:"ai",
+    sub:"AI E2E test automation",
+    stage:"Seed", raised:"YC", lead:"Y Combinator",
+    badges:["YC"],
+    totalRoles:1,
+    notes:"YC S24. NYC founding team. LLM-generated tests.",
+    jobs:[
+      { title:"Applied AI Product Engineer", url:"https://jobs.ashbyhq.com/spur/3e021029-67f0-4574-a1b2-8517fa531529", level:"mid", added:"2026-07-21", posted:"2026-06-07" }
+    ] },
+  { id:"codes-health", name:"Codes Health", vertical:"health",
+    sub:"AI medical record retrieval",
+    stage:"Seed", raised:"YC", lead:"Y Combinator",
+    badges:["YC"],
+    totalRoles:1,
+    notes:"YC S24. NYC. Cross-EHR chart abstraction.",
+    jobs:[
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/codes-health/c7e866ec-6abe-4fcb-a472-47b1b4a7ee18", level:"mid", added:"2026-07-21", posted:"2026-06-10" }
+    ] },
+  { id:"ryvn", name:"Ryvn", vertical:"infra",
+    sub:"Multi-cloud deploy infra + observability",
+    stage:"Seed", raised:"YC", lead:"Y Combinator",
+    badges:["YC"],
+    totalRoles:1,
+    notes:"YC F24. NYC. Ship workloads across AWS/GCP/Azure.",
+    jobs:[
+      { title:"Founding Software Engineer", url:"https://jobs.ashbyhq.com/ryvn/fc9bac77-7913-4182-bbe6-c7889ec7ca76", level:"founding", added:"2026-07-21", posted:"2025-11-07" }
+    ] },
+  { id:"fleetline", name:"Fleetline", vertical:"ai",
+    sub:"AI trucking load planner",
+    stage:"Seed", raised:"YC", lead:"Y Combinator",
+    badges:["YC"],
+    totalRoles:1,
+    notes:"YC S25. NYC founding roles. LLM+OR-based fleet optimization.",
+    jobs:[
+      { title:"Founding Engineer", url:"https://jobs.ashbyhq.com/fleetline/214a08ae-62e9-4288-ba97-b27d74f73325", level:"founding", added:"2026-07-21", posted:"2026-01-09" }
+    ] },
+  { id:"ambral", name:"Ambral", vertical:"ai",
+    sub:"AI account mgmt / CS agent",
+    stage:"Seed", raised:"YC", lead:"Y Combinator",
+    badges:["YC"],
+    totalRoles:1,
+    notes:"YC S25. NYC founding engineer role. Enterprise CS copilot.",
+    jobs:[
+      { title:"Senior Founding Engineer", url:"https://jobs.ashbyhq.com/ambral/56a4da97-22ae-4b5a-ab3b-6f9ddbb2a9ef", level:"founding", added:"2026-07-21", posted:"2026-05-06" }
     ] }
 ];
 

@@ -518,7 +518,7 @@ CANDIDATES = [
   ("pointone","PointOne","ashby","pointone","ai","AI legal timekeeping","Seed","$10M+","Khosla",["Khosla","YC"],"YC W24. NYC. Automated time entry for BigLaw."),
   ("greenboard","Greenboard","ashby","greenboard","fintech","AI compliance for fintech","Seed","YC","Y Combinator",["YC"],"YC W24. NYC. Back-office automation for regulated financial firms."),
   ("spur","Spur","ashby","spur","ai","AI E2E test automation","Seed","YC","Y Combinator",["YC"],"YC S24. NYC founding team. LLM-generated tests."),
-  ("ultra","Ultra","ashby","ultra","ai","General-purpose humanoid robots","Seed","$10M+","(undisclosed)","—",["—"],"YC S24. NYC HQ, KY manufacturing. Zero-integration robots."),
+  ("ultra","Ultra","ashby","ultra","ai","General-purpose humanoid robots","Seed","$10M+","(undisclosed)",["—"],"YC S24. NYC HQ, KY manufacturing. Zero-integration robots."),
   ("codes-health","Codes Health","ashby","codes-health","health","AI medical record retrieval","Seed","YC","Y Combinator",["YC"],"YC S24. NYC. Cross-EHR chart abstraction."),
   ("ryvn","Ryvn","ashby","ryvn","infra","Multi-cloud deploy infra + observability","Seed","YC","Y Combinator",["YC"],"YC F24. NYC. Ship workloads across AWS/GCP/Azure."),
   ("tuesday-labs","Tuesday Labs","ashby","tuesday-labs","ai","Consumer + tidying robots","Seed","YC","Y Combinator",["YC"],"YC W24. NYC. Home-tidying AI robots."),
