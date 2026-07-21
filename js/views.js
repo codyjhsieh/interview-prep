@@ -5342,30 +5342,55 @@ function _passProb(c, j) {
   return Math.max(0.05, Math.min(0.70, p));
 }
 
+// Percentile-normalization: the displayed fit score is a company/role's
+// PERCENTILE across the full live-role pool, mapped onto 0.5-10.0. This
+// prevents the tier-3-heavy raw distribution from crushing everything into
+// low single digits — the top decile always sits near 10, the median near
+// 5. Sort order is preserved (monotonic). Recomputed lazily on first call;
+// LIVE is static per page load so no invalidation needed.
+let _fitPool = null;
+function _rawFit(c, j) {
+  return (_coolness(c) / 10) * _replyProb(c) * _passProb(c, j);
+}
+function _computeFitPool() {
+  const scores = [];
+  for (const c of LIVE) {
+    for (const j of (c.jobs || [])) scores.push(_rawFit(c, j));
+  }
+  scores.sort((a, b) => a - b);
+  _fitPool = scores;
+}
+function _normalize(raw) {
+  if (!_fitPool) _computeFitPool();
+  const n = _fitPool.length;
+  if (!n) return 5;
+  // Binary search for lower-bound percentile (fraction strictly less than raw).
+  let lo = 0, hi = n;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (_fitPool[mid] < raw) lo = mid + 1; else hi = mid;
+  }
+  const pct = lo / n;
+  return Math.max(0.5, Math.min(10, 0.5 + pct * 9.5));
+}
+
 function companyFitScore(c) {
   // Company-level uses the role-agnostic pass prob (assumes a mid AI role
   // shape). Per-role refinement happens in roleFitScore.
-  const cool = _coolness(c) / 10;
-  const reply = _replyProb(c);
-  const pass = _passProb(c, null);
-  // Theoretical max: 1.0 × 0.45 × 0.70 = 0.315. Scale by 28 → ~8.8 ceiling on a 10-pt scale.
-  return Math.max(0.1, Math.min(8.8, cool * reply * pass * 28));
+  return _normalize(_rawFit(c, null));
 }
 
 function roleFitScore(c, j) {
-  const cool = _coolness(c) / 10;
-  const reply = _replyProb(c);
-  const pass = _passProb(c, j);
-  return Math.max(0.1, Math.min(9.5, cool * reply * pass * 28));
+  return _normalize(_rawFit(c, j));
 }
 
 function fitTier(score) {
-  // On a 1-10 scale: max realistic ~9 (Flora/Plot × founding × FDE title).
-  // Most cool+achievable roles land 1.5–3.5. Sub-1 is "you don't want this
-  // and won't get a reply anyway."
-  if (score >= 4)   return { label: 'Goldilocks',   cls: 'fit-strong' };
-  if (score >= 2)   return { label: 'Worth trying', cls: 'fit-worth'  };
-  if (score >= 0.8) return { label: 'Long shot',    cls: 'fit-long'   };
+  // Uniform-percentile scale — every tier has a real population share.
+  // Goldilocks: top ~20%. Worth trying: next 30%. Long shot: next 30%.
+  // Tough bar: bottom 20%.
+  if (score >= 8)   return { label: 'Goldilocks',   cls: 'fit-strong' };
+  if (score >= 5)   return { label: 'Worth trying', cls: 'fit-worth'  };
+  if (score >= 2)   return { label: 'Long shot',    cls: 'fit-long'   };
   return                   { label: 'Tough bar',    cls: 'fit-tough'  };
 }
 

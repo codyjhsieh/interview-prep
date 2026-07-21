@@ -13753,6 +13753,20 @@ const COMPANY_DOMAINS = {
   'reflex-robotics':'reflexrobotics.com', replit:'replit.com',
   cartesia:'cartesia.ai', 'black-forest-labs':'blackforestlabs.ai',
   'sesame-ai':'sesame.com', hedra:'hedra.com', arize:'arize.com',
+  // 2026-07-21 additions — icons for new expansion candidates
+  peloton:'onepeloton.com', nbcuniversal:'nbcuniversal.com',
+  bdg:'bustle.com', 'farmers-dog':'thefarmersdog.com',
+  soundcloud:'soundcloud.com', knotapi:'knotapi.com',
+  materialize:'materialize.com', blackbird:'blackbird.xyz',
+  graphite:'graphite.dev', browserbase:'browserbase.com',
+  midpage:'midpage.ai', semgrep:'semgrep.dev', attio:'attio.com',
+  socure:'socure.com', uniswap:'uniswap.org', dailypay:'dailypay.com',
+  numeral:'numeralhq.com', imprint:'imprint.co',
+  databento:'databento.com', ripple:'ripple.com', octus:'octus.com',
+  handshake:'joinhandshake.com', duolingo:'duolingo.com',
+  fanduel:'fanduel.com', rockstargames:'rockstargames.com',
+  ganni:'ganni.com', equinox:'equinox.com', 'nyc-gov':'nyc.gov',
+  socotec:'socotec.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */
