@@ -55,11 +55,24 @@ TITLE_INCLUDE = re.compile(
   r"ai[\s-]engineer|applied[\s-]ai[\s-]engineer|ml[\s-]engineer|"
   r"machine[\s-]learning[\s-]engineer|infrastructure[\s-]engineer|"
   r"platform[\s-]engineer|data[\s-]engineer|systems[\s-]engineer|"
+  # DevOps / SRE / Cloud / Security / Reliability — infra-adjacent IC roles.
+  r"devops[\s-]engineer|site[\s-]reliability[\s-]engineer|sre(?:\s|$)|"
+  r"cloud[\s-]engineer|security[\s-]engineer|reliability[\s-]engineer|"
+  # AI/ML variants — slash-separated (AI/ML), GenAI, LLM, Agent, Research,
+  # MLOps. "Research Engineer" is the elite-AI-lab pattern (Anthropic,
+  # OpenAI, DeepMind); TITLE_EXCLUDE's "researcher" doesn't catch it.
+  r"ai[/]ml[\s-]engineer|ml[/]ai[\s-]engineer|"
+  r"genai[\s-]engineer|llm[\s-]engineer|agent[\s-]engineer|"
+  r"agentic[\s-]engineer|mlops[\s-]engineer|research[\s-]engineer|"
   # Agency title variants — reverse-order (Engineer, Front-end) and
   # parenthetical (Engineer (Front-end)) forms common at Code and Theory /
   # DEPT / Instrument / etc.
-  r"engineer,\s*(?:front|back|full[\s-]?stack|frontend|backend|fullstack)|"
-  r"engineer\s*\((?:front|back|full[\s-]?stack|frontend|backend|fullstack)|"
+  r"engineer,\s*(?:front|back|full[\s-]?stack|frontend|backend|fullstack|"
+  r"devops|sre|site\s+reliability|cloud|security|reliability|"
+  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|research)|"
+  r"engineer\s*\((?:front|back|full[\s-]?stack|frontend|backend|fullstack|"
+  r"devops|sre|site\s+reliability|cloud|security|reliability|"
+  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|research)|"
   # "Developer" role names — DEPT uses these for mobile + software roles
   # ("Android Developer", "iOS Developer", "Software Developer").
   r"software[\s-]developer|"
