@@ -47,6 +47,9 @@ function inferAtsSlug(jobs) {
     if ((m = u.match(/ashbyhq\.com\/([^/]+)\//))) return ['ashby', m[1]];
     if ((m = u.match(/(?:job-boards|boards)\.(?:eu\.)?greenhouse\.io\/([^/]+)\//))) return ['greenhouse', m[1]];
     if ((m = u.match(/lever\.co\/([^/]+)\//))) return ['lever', m[1]];
+    if ((m = u.match(/apply\.workable\.com\/([^/]+)\//))) return ['workable', m[1]];
+    if ((m = u.match(/([a-z0-9-]+)\.teamtailor\.com\//))) return ['teamtailor', m[1]];
+    if ((m = u.match(/jobs\.smartrecruiters\.com\/([^/]+)\//))) return ['smartrecruiters', m[1]];
     if ((m = u.match(/([a-z0-9-]+)\.(wd\d+)\.myworkdayjobs\.com\/[^/]*\/([^/]+)/i)))
       return ['workday', `${m[1]}/${m[2]}/${m[3]}`];
   }
@@ -74,6 +77,10 @@ function urlToken(ats, url) {
   if ((m = url.match(/[?&]gh_jid=(\d+)/))) return m[1];
   if ((m = url.match(/\/jobs\/(\d+)/))) return m[1];
   if ((m = url.match(/\/j\/([A-F0-9]+)/i))) return m[1];           // workable
+  // Teamtailor: /jobs/{numeric-id}-{slug-title} — the numeric id is the token.
+  if (/teamtailor\.com/.test(url) && (m = url.match(/\/jobs\/(\d+)/))) return m[1];
+  // SmartRecruiters: /{Company}/{numeric-id}[-slug] — take the trailing id.
+  if (/smartrecruiters\.com/.test(url) && (m = url.match(/\/(\d{6,})(?:[-?#].*)?$/))) return m[1];
   // Workday: id is the trailing segment after the LAST underscore — may be
   // numeric (10149739), prefixed (JR5288, R263961), or suffixed (R-1459, 10151328-2).
   if (/myworkdayjobs\.com/.test(url) && (m = url.match(/_([A-Za-z0-9-]+)(?:[?#].*)?$/))) return m[1];
@@ -129,6 +136,33 @@ function boardTokens(ats, slug) {
     if (!d || !d.results) return R(false);
     d.results.forEach(j => { toks.add(String(j.shortcode)); addT(j.title); });
     return R(true);
+  }
+  if (ats === 'teamtailor') {
+    const host = slug.includes('.') ? slug : `${slug}.teamtailor.com`;
+    const d = curl(`https://${host}/jobs.json`);
+    if (!d || !d.items) return R(false);
+    d.items.forEach(j => {
+      // token = numeric id from url (matches urlToken extraction), fall back to uuid
+      const m = String(j.url || '').match(/\/jobs\/(\d+)/);
+      if (m) toks.add(m[1]);
+      toks.add(String(j.id).toLowerCase());
+      addT(j.title);
+    });
+    return R(true);
+  }
+  if (ats === 'smartrecruiters') {
+    // Paginate — API caps limit at 100.
+    let offset = 0, any = false, complete = false;
+    while (offset <= 5000) {
+      const d = curl(`https://api.smartrecruiters.com/v1/companies/${slug}/postings?limit=100&offset=${offset}`);
+      if (!d || !d.content) break;
+      any = true;
+      d.content.forEach(j => { toks.add(String(j.id)); addT(j.name); });
+      const total = d.totalFound || 0;
+      offset += 100;
+      if (offset >= total || !d.content.length) { complete = true; break; }
+    }
+    return R(any, complete);
   }
   if (ats === 'workday') {
     const [tenant, wdn, site] = slug.split('/');

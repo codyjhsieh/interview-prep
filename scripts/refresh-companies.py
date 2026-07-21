@@ -6,7 +6,8 @@ rewrite the COMPANIES block in js/data.js in place.
 What it does
 ------------
 For every candidate company in CANDIDATES below, hits the company's
-public ATS JSON (Ashby / Greenhouse) via curl, filters jobs by:
+public ATS JSON (Ashby / Greenhouse / Lever / Workable / Workday /
+Teamtailor / SmartRecruiters) via curl, filters jobs by:
 
   • Location contains "New York" / NYC / Brooklyn / Manhattan
   • Title matches an SDE / SWE / Forward Deployed / Founding /
@@ -494,6 +495,27 @@ def fetch(ats, slug):
     body = '{"query":"","department":[],"location":[]}'
     d = curl_json(url, method="POST", body=body)
     return d.get("results", []) if d else []
+  if ats == "teamtailor":
+    # Teamtailor exposes a JSONFeed at {subdomain}.teamtailor.com/jobs.json.
+    # If the slug contains a dot, treat it as a full host (custom domain like
+    # careers.marginedge.com); otherwise prepend .teamtailor.com.
+    host = slug if "." in slug else f"{slug}.teamtailor.com"
+    d = curl_json(f"https://{host}/jobs.json")
+    return d.get("items", []) if d else []
+  if ats == "smartrecruiters":
+    # SmartRecruiters public postings API — pages of 100 (API cap).
+    all_postings = []
+    offset = 0
+    while True:
+      d = curl_json(f"https://api.smartrecruiters.com/v1/companies/{slug}/postings?limit=100&offset={offset}")
+      if not d or "content" not in d: break
+      page = d.get("content", []) or []
+      all_postings.extend(page)
+      total = d.get("totalFound") or 0
+      offset += 100
+      if offset >= total or not page: break
+      if offset > 5000: break  # safety
+    return all_postings
   if ats == "workday":
     # Slug encodes the 3-tuple: "tenant/wdN/site"
     # e.g. "cityblockhealth/wd1/CityblockExternalCareerSite"
@@ -578,6 +600,29 @@ def filter_jobs(ats, raw, slug=""):
       is_nyc = bool(NYC.search(blob))
       url = f"https://apply.workable.com/{slug}/j/{j.get('shortcode','')}"
       posted = _date10(j.get("published_on") or j.get("created_at"))
+    elif ats == "teamtailor":
+      # Teamtailor JSONFeed item. Title + url are top-level; location is in
+      # _jobposting.jobLocation[].address.{addressLocality,addressRegion}.
+      title = (j.get("title") or "").strip()
+      url = j.get("url") or ""
+      jp = j.get("_jobposting") or {}
+      locs = jp.get("jobLocation") or []
+      if isinstance(locs, dict): locs = [locs]
+      parts = []
+      for L in locs:
+        a = (L or {}).get("address") or {}
+        parts.append(f"{a.get('addressLocality','')} {a.get('addressRegion','')}")
+      is_nyc = bool(NYC.search(" ".join(parts)))
+      posted = _date10(j.get("date_published"))
+    elif ats == "smartrecruiters":
+      # SmartRecruiters posting. Title = name; location = {city, region,
+      # fullLocation, remote, hybrid}; URL constructed from company + id.
+      title = (j.get("name") or "").strip()
+      loc = j.get("location") or {}
+      blob = f"{loc.get('city','')} {loc.get('region','')} {loc.get('fullLocation','')}"
+      is_nyc = bool(NYC.search(blob))
+      url = f"https://jobs.smartrecruiters.com/{slug}/{j.get('id','')}"
+      posted = _date10(j.get("releasedDate"))
     elif ats == "workday":
       # Workday: locationsText is a free-form string (e.g. "NY - New York"
       # or "MI - Detroit"). externalPath is relative — prefix with the
