@@ -5353,8 +5353,11 @@ function _rawFit(c, j) {
   return (_coolness(c) / 10) * _replyProb(c) * _passProb(c, j);
 }
 function _computeFitPool() {
+  // Use the global COMPANIES (from window.DATA) — LIVE is a local inside
+  // renderCompanies and isn't in scope here. Same "has ≥1 job" filter to
+  // stay consistent with what actually renders.
   const scores = [];
-  for (const c of LIVE) {
+  for (const c of COMPANIES) {
     for (const j of (c.jobs || [])) scores.push(_rawFit(c, j));
   }
   scores.sort((a, b) => a - b);
