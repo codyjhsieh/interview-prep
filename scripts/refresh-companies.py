@@ -500,6 +500,17 @@ CANDIDATES = [
   ("ideo","IDEO","greenhouse","ideo","saas","Legendary design consultancy","Private","undisclosed","—",["—"],"NYC office active. ~500 ppl. Historic clients: Apple mouse, Ford, Airbnb."),
   ("thoughtworks","Thoughtworks","greenhouse","thoughtworks","saas","Global engineering consultancy","Public","(NASDAQ: TWKS)","NASDAQ",["NASDAQ"],"NYC Manhattan office. 10K+ ppl. XP + agile pedigree."),
   ("vsapartners","VSA Partners","greenhouse","vsapartners","saas","Chicago-based design + brand agency","Private","undisclosed","—",["—"],"NYC office. ~250 ppl. Clients: Google, Nike, IBM."),
+
+  # ── 2026-07-21 — Batch 2: elite contract / FDE consultancies ──
+  ("palantir","Palantir","lever","palantir","saas","Elite FDE consultancy (NYSE: PLTR)","Public","(NYSE: PLTR)","NYSE",["NYSE"],"NYC major eng hub. Original FDE model. 33 NYC eng roles today."),
+  ("turing","Turing","greenhouse","turing","ai","AI dev marketplace + staff","Late stage","$140M+","WestBridge",["WestBridge","Foundation"],"NYC HQ. Elite talent network with staff engineers."),
+  ("capco","Capco","greenhouse","capco","saas","Financial-services dev consultancy","Acquired","(Wipro subsidiary)","Wipro",["Wipro"],"NYC office. Elite banking tech consultancy."),
+  ("vannevarlabs","Vannevar Labs","greenhouse","vannevarlabs","saas","Defense FDE consultancy","Series C","$100M+","General Catalyst",["General Catalyst","Founders Fund"],"NYC office. Palantir alumni; defense FDE."),
+  ("toptal","Toptal","lever","toptal","saas","Elite dev marketplace + staff","Bootstrapped","Profitable","—",["—"],"NYC office. Vetted senior-eng network."),
+  ("andela","Andela","ashby","andela","saas","Staff-engineer dev network","Late stage","$381M","SoftBank",["SoftBank","GV","Spark"],"NYC-connected. Staff-eng model."),
+  ("pariveda","Pariveda","ashby","pariveda","saas","Elite management + dev consultancy","Bootstrapped","Profitable","—",["Employee-owned"],"NYC office. Boutique employee-owned."),
+  ("factory","Factory","ashby","factory","ai","Agentic-coding FDE shop","Series A","$15M","Sequoia",["Sequoia"],"NYC office. AI dev-consulting hybrid."),
+  ("openevidence","OpenEvidence","ashby","openevidence","health","Medical AI FDE-style","Series B","$100M+","Sequoia",["Sequoia","Kleiner"],"NYC + Boston. Elite AI deployment shop."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -631,6 +642,10 @@ DOMAINS = {
   "hugeinc":"hugeinc.com","metalab":"metalab.com","kettle":"wearekettle.com",
   "akqa":"akqa.com","ideo":"ideo.com","thoughtworks":"thoughtworks.com",
   "vsapartners":"vsapartners.com",
+  # Batch 2: elite contract shops
+  "palantir":"palantir.com","turing":"turing.com","capco":"capco.com",
+  "vannevarlabs":"vannevarlabs.com","toptal":"toptal.com","andela":"andela.com",
+  "pariveda":"parivedasolutions.com","factory":"factory.ai","openevidence":"openevidence.com",
 }
 
 

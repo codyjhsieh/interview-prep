@@ -5249,6 +5249,9 @@ const COOLNESS = {
   // Batch 1 (2026-07-21): agencies
   ideo:8, hugeinc:6, metalab:6, instrument:6, akqa:5, codeandtheory:5,
   kettle:5, dept:4, nearform:4, thoughtworks:4, vsapartners:4,
+  // Batch 2: elite contract shops
+  palantir:5, factory:6, openevidence:6, vannevarlabs:5, andela:3,
+  turing:3, toptal:3, pariveda:3, capco:2,
 };
 
 const FRONTIER = new Set([

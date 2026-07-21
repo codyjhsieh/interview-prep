@@ -13120,6 +13120,56 @@ const COMPANIES = [
       { title:"Senior Data Engineer (Azure & Databricks)", url:"https://jobs.smartrecruiters.com/Socotec/744000130842876", level:"senior", added:"2026-07-21", posted:"2026-06-08" },
       { title:"Applied AI Engineer", url:"https://jobs.smartrecruiters.com/Socotec/744000130845740", level:"mid", added:"2026-07-21", posted:"2026-06-08" },
       { title:"Software Engineer", url:"https://jobs.smartrecruiters.com/Socotec/744000127899832", level:"mid", added:"2026-07-21", posted:"2026-05-22" }
+    ] },
+  { id:"palantir", name:"Palantir", vertical:"saas",
+    sub:"Elite FDE consultancy (NYSE: PLTR)",
+    stage:"Public", raised:"(NYSE: PLTR)", lead:"NYSE",
+    badges:["NYSE"],
+    totalRoles:33,
+    notes:"NYC major eng hub. Original FDE model. 33 NYC eng roles today.",
+    jobs:[
+      { title:"Senior Backend Software Engineer - Application Development", url:"https://jobs.lever.co/palantir/7177acab-5c64-4005-9b28-93f33b3e172a", level:"senior", added:"2026-07-21", posted:"2026-04-06" },
+      { title:"Senior Backend Software Engineer - Infrastructure", url:"https://jobs.lever.co/palantir/b5ad6660-8145-4be5-97e2-3799f2912f5b", level:"senior", added:"2026-07-21", posted:"2026-04-06" },
+      { title:"Senior Front End Software Engineer - Application Development", url:"https://jobs.lever.co/palantir/d2a87a1d-63f4-4dcd-b0d0-f6be91fed4d3", level:"senior", added:"2026-07-21", posted:"2024-08-06" },
+      { title:"Senior Software Engineer - Observability", url:"https://jobs.lever.co/palantir/8a95dba1-b814-4243-be14-eba1df340ceb", level:"senior", added:"2026-07-21", posted:"2022-10-17" },
+      { title:"Senior Software Engineer, Network Infrastructure", url:"https://jobs.lever.co/palantir/55005ee7-4e06-4520-b569-f6e8f26745cb", level:"senior", added:"2026-07-21", posted:"2024-02-27" },
+      { title:"Senior Software Engineer, Substrate", url:"https://jobs.lever.co/palantir/68d690cf-fc8a-4755-9b69-abe13f93d262", level:"senior", added:"2026-07-21", posted:"2024-02-27" },
+      { title:"Backend Software Engineer - Application Development", url:"https://jobs.lever.co/palantir/ab7e3425-81d5-4705-a7b5-cd60c8a45cdb", level:"mid", added:"2026-07-21", posted:"2024-03-11" },
+      { title:"Backend Software Engineer - Defense", url:"https://jobs.lever.co/palantir/d33e0c31-ac7e-4f57-ba74-36f2df6ae2f5", level:"mid", added:"2026-07-21", posted:"2025-02-24" },
+      { title:"Backend Software Engineer - Infrastructure", url:"https://jobs.lever.co/palantir/6fe5515f-f677-4d98-8ac2-1775a425f5e7", level:"mid", added:"2026-07-21", posted:"2025-08-06" },
+      { title:"Backend Software Engineer - Infrastructure, Foundations", url:"https://jobs.lever.co/palantir/fb2d3222-dbd8-4e03-8d39-47b820e9509c", level:"mid", added:"2026-07-21", posted:"2024-02-20" },
+      { title:"Forward Deployed AI Engineer", url:"https://jobs.lever.co/palantir/636fc05c-d348-4a06-be51-597cb9e07488", level:"mid", added:"2026-07-21", posted:"2024-03-22" },
+      { title:"Forward Deployed Enablement Engineer - Customer Success", url:"https://jobs.lever.co/palantir/4cba9c95-d16f-440d-83e7-2352480f689f", level:"mid", added:"2026-07-21", posted:"2024-11-13" },
+      { title:"Forward Deployed Infrastructure Engineer - US Government", url:"https://jobs.lever.co/palantir/b57f08e9-546c-4b9b-8d21-db0ebbc11363", level:"mid", added:"2026-07-21", posted:"2023-09-14" },
+      { title:"Forward Deployed Reliability Engineer", url:"https://jobs.lever.co/palantir/689e6869-01bc-40f1-b580-adb33a020065", level:"mid", added:"2026-07-21", posted:"2026-02-10" },
+      { title:"Forward Deployed Software Engineer", url:"https://jobs.lever.co/palantir/dab396d4-2f14-4796-aac0-0d82883dccf0", level:"mid", added:"2026-07-21", posted:"2014-01-23" },
+      { title:"Forward Deployed Software Engineer - US Government", url:"https://jobs.lever.co/palantir/e82b696e-a085-4bbf-8bcb-6d2c4f8cf2f7", level:"mid", added:"2026-07-21", posted:"2020-06-02" },
+      { title:"Forward Deployed Software Engineer - US Government - Federal Health and Civilian", url:"https://jobs.lever.co/palantir/be4ab5cb-9caa-4c2a-97b9-c73805fca4fc", level:"mid", added:"2026-07-21", posted:"2026-05-07" },
+      { title:"Forward Deployed Software Engineer - Warp Speed", url:"https://jobs.lever.co/palantir/13f99633-43b5-4459-8e84-25073f257c18", level:"mid", added:"2026-07-21", posted:"2025-02-07" },
+      { title:"Forward Deployed Software Engineer, New Grad - Commercial", url:"https://jobs.lever.co/palantir/2e6b0ac8-83e9-4be5-a3aa-cf319f751728", level:"mid", added:"2026-07-21", posted:"2025-06-13" },
+      { title:"Forward Deployed Software Engineer, New Grad - US Government", url:"https://jobs.lever.co/palantir/d1ac83d0-e923-42a5-8e6d-58dd0cab25ca", level:"mid", added:"2026-07-21", posted:"2022-06-30" },
+      { title:"Full Stack Software Engineer - Application Development", url:"https://jobs.lever.co/palantir/2da4be12-bc7a-4950-87db-e9d68d955ff7", level:"mid", added:"2026-07-21", posted:"2024-02-17" },
+      { title:"Software Engineer - Apollo Platform", url:"https://jobs.lever.co/palantir/8f308f3e-43d2-49c9-accd-cc7af0f1565c", level:"mid", added:"2026-07-21", posted:"2022-08-10" },
+      { title:"Software Engineer - Apollo Systems", url:"https://jobs.lever.co/palantir/832e4652-5088-4e5b-aeac-1e82ec3ebad4", level:"mid", added:"2026-07-21", posted:"2025-11-10" },
+      { title:"Software Engineer - Core Interfaces", url:"https://jobs.lever.co/palantir/3b4ae28e-c4f2-4654-83b4-64366bfe72fa", level:"mid", added:"2026-07-21", posted:"2026-06-11" },
+      { title:"Software Engineer - Defense Applications", url:"https://jobs.lever.co/palantir/c288bb43-3c63-4557-bd96-600ef0d1b7a6", level:"mid", added:"2026-07-21", posted:"2026-06-11" },
+      { title:"Software Engineer - Developer Productivity", url:"https://jobs.lever.co/palantir/3c84af24-b7aa-483e-b2c3-e1d83494fe15", level:"mid", added:"2026-07-21", posted:"2022-11-08" },
+      { title:"Software Engineer - Environment Platform", url:"https://jobs.lever.co/palantir/d5d83a8f-cb96-41cc-9612-c7224fbb2fbc", level:"mid", added:"2026-07-21", posted:"2024-09-05" },
+      { title:"Software Engineer - Frontend Developer Productivity", url:"https://jobs.lever.co/palantir/71ed917e-850a-484b-9454-fa66bdf24540", level:"mid", added:"2026-07-21", posted:"2024-02-23" },
+      { title:"Software Engineer - Hosted Model Infrastructure", url:"https://jobs.lever.co/palantir/4df4cca5-e361-498b-806d-05f21638c93a", level:"mid", added:"2026-07-21", posted:"2026-06-03" },
+      { title:"Software Engineer, New Grad", url:"https://jobs.lever.co/palantir/94984771-0704-446c-88c6-91ce748f6d92", level:"mid", added:"2026-07-21", posted:"2021-07-01" },
+      { title:"Software Engineer, New Grad - Defense", url:"https://jobs.lever.co/palantir/0a838e66-1ab0-4fc4-b4d3-4671c0352278", level:"mid", added:"2026-07-21", posted:"2025-06-19" },
+      { title:"Software Engineer, New Grad - Infrastructure", url:"https://jobs.lever.co/palantir/4abf26b4-795c-420a-bf22-1ab98db268b4", level:"mid", added:"2026-07-21", posted:"2025-06-26" },
+      { title:"Software Engineer, New Grad - Production Infrastructure", url:"https://jobs.lever.co/palantir/e1a6c138-98bf-45e2-97f7-2c70371cc38a", level:"mid", added:"2026-07-21", posted:"2025-06-26" }
+    ] },
+  { id:"turing", name:"Turing", vertical:"ai",
+    sub:"AI dev marketplace + staff",
+    stage:"Late stage", raised:"$140M+", lead:"WestBridge",
+    badges:["WestBridge","Foundation"],
+    totalRoles:1,
+    notes:"NYC HQ. Elite talent network with staff engineers.",
+    jobs:[
+      { title:"Forward Deployed AI Engineer", url:"https://job-boards.greenhouse.io/turing/jobs/5609732004", level:"mid", added:"2026-07-21", posted:"2026-07-20" }
     ] }
 ];
 
@@ -13773,6 +13823,10 @@ const COMPANY_DOMAINS = {
   hugeinc:'hugeinc.com', metalab:'metalab.com', kettle:'wearekettle.com',
   akqa:'akqa.com', ideo:'ideo.com', thoughtworks:'thoughtworks.com',
   vsapartners:'vsapartners.com',
+  // Batch 2: elite contract shops
+  palantir:'palantir.com', turing:'turing.com', capco:'capco.com',
+  vannevarlabs:'vannevarlabs.com', toptal:'toptal.com', andela:'andela.com',
+  pariveda:'parivedasolutions.com', factory:'factory.ai', openevidence:'openevidence.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */
