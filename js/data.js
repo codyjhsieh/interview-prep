@@ -13340,6 +13340,15 @@ const COMPANIES = [
     jobs:[
       { title:"Founding Engineer", url:"https://jobs.ashbyhq.com/solva/c2218bb1-e112-4f04-b9dc-6f121cfc59f0", level:"founding", added:"2026-07-21", posted:"2025-09-11" },
       { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/solva/a74e2c5c-f1da-4e1d-9a85-54056443f899", level:"mid", added:"2026-07-21", posted:"2026-07-10" }
+    ] },
+  { id:"codeandtheory", name:"Code and Theory", vertical:"saas",
+    sub:"Elite NYC product + engineering agency",
+    stage:"Acquired", raised:"(WPP subsidiary, 2024)", lead:"WPP",
+    badges:["WPP"],
+    totalRoles:1,
+    notes:"NYC (SoHo) HQ. 800+ ppl. Clients: WSJ, NYT, CNN, Coca-Cola. 36 NYC eng roles today.",
+    jobs:[
+      { title:"Engineer, Front-end (US)", url:"https://www.codeandtheory.com/careers/8558982002?gh_jid=8558982002", level:"mid", added:"2026-07-21", posted:"2026-07-08" }
     ] }
 ];
 

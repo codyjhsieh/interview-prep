@@ -54,7 +54,16 @@ TITLE_INCLUDE = re.compile(
   r"full[\s-]stack[\s-]engineer|product[\s-]engineer|"
   r"ai[\s-]engineer|applied[\s-]ai[\s-]engineer|ml[\s-]engineer|"
   r"machine[\s-]learning[\s-]engineer|infrastructure[\s-]engineer|"
-  r"platform[\s-]engineer|data[\s-]engineer|systems[\s-]engineer"
+  r"platform[\s-]engineer|data[\s-]engineer|systems[\s-]engineer|"
+  # Agency title variants — reverse-order (Engineer, Front-end) and
+  # parenthetical (Engineer (Front-end)) forms common at Code and Theory /
+  # DEPT / Instrument / etc.
+  r"engineer,\s*(?:front|back|full[\s-]?stack|frontend|backend|fullstack)|"
+  r"engineer\s*\((?:front|back|full[\s-]?stack|frontend|backend|fullstack)|"
+  # "Developer" role names — DEPT uses these for mobile + software roles
+  # ("Android Developer", "iOS Developer", "Software Developer").
+  r"software[\s-]developer|"
+  r"(?:android|ios|mobile|web|full[\s-]?stack|frontend|backend)[\s-]developer"
   r")\b", re.IGNORECASE)
 # Dual-tagged seniority ("Senior/Staff Backend Engineer") = still senior IC.
 # When the title contains "senior" we mask out staff/principal tokens BEFORE
