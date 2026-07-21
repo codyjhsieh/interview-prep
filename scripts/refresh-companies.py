@@ -55,6 +55,12 @@ TITLE_INCLUDE = re.compile(
   r"machine[\s-]learning[\s-]engineer|infrastructure[\s-]engineer|"
   r"platform[\s-]engineer|data[\s-]engineer|systems[\s-]engineer"
   r")\b", re.IGNORECASE)
+# Dual-tagged seniority ("Senior/Staff Backend Engineer") = still senior IC.
+# When the title contains "senior" we mask out staff/principal tokens BEFORE
+# running TITLE_EXCLUDE so those titles survive; the rest of the exclusions
+# (manager, sales/solutions/customer eng, etc.) still apply.
+SENIORITY_MARK = re.compile(r'\bsenior\b|\bsr[.\s]', re.I)
+STAFF_PRINCIPAL = re.compile(r'\b(staff|principal)\b', re.I)
 TITLE_EXCLUDE = re.compile(
   r"\b("
   r"staff[\s,]|principal|^lead\s|\slead\s|\slead$|head\s|chief|director|"
@@ -346,6 +352,27 @@ CANDIDATES = [
   ("wonder","Wonder","greenhouse","wonder","consumer","Premium food delivery + meal kits","Series C","$1.4B","NEA",["NEA","Bain Capital Ventures","GV"],"NYC food delivery + ghost-kitchen platform. Marc Lore's co."),
   ("nayya","Nayya","greenhouse","nayya","fintech","Employee benefits decisioning","Series C","$100M","ICONIQ",["ICONIQ","Felicis"],"NYC benefits AI for employers. Decision-support + claims integration."),
   ("glia","Glia","ashby","glia","saas","Digital customer service platform","Series E","$155M","Insight",["Insight","Wildcat"],"NYC digital + voice customer service. Co-browsing + AI agents."),
+
+  # ── 2026-07-21 — food & beverage / hospitality expansion (probed via parallel agents) ──
+  ("slice","Slice","greenhouse","slice","hospitality","Software + marketplace for indie pizzerias","Series G","$250M+","Union Square Ventures",["USV","GGV","KKR"],"NYC-HQ platform powering 20K+ independent pizzerias — ordering, marketing, payments."),
+  ("owner-com","Owner.com","ashby","owner","hospitality","All-in-one indie restaurant marketing + ordering","Series B","$60M+","Redpoint",["Redpoint","SaaStr Fund"],"Adam Guild's all-in-one indie restaurant marketing + ordering platform. Hot on X."),
+  ("blackbird","Blackbird Labs","ashby","blackbird-labs-inc","hospitality","Restaurant loyalty + payments (Ben Leventhal)","Series B","$50M+","Andreessen Horowitz",["a16z","Union Square Ventures"],"Resy founder Ben Leventhal's next act — loyalty + payments network for restaurants (NYC dining darling)."),
+  ("sauce","Sauce","lever","Sauce","hospitality","Commission-free restaurant ordering + delivery","Series A","$30M","Bessemer",["Bessemer"],"NYC-native anti-DoorDash — direct online ordering + delivery for restaurants."),
+  ("restaurant365","Restaurant365","lever","restaurant365","hospitality","Restaurant accounting + ops","Late stage","$400M+","KKR",["KKR","ICONIQ","Serent"],"Category-leading restaurant back-office platform ($1B+ val) — accounting, inventory, scheduling."),
+  ("chowbus","Chowbus","greenhouse","chowbus","hospitality","POS + delivery for Asian restaurants","Series B","$120M+","Left Lane",["Left Lane","Altos"],"POS + delivery for Asian restaurants (huge in NYC's Flushing + Manhattan Chinatown)."),
+  ("choco","Choco","ashby","choco","hospitality","B2B ordering between restaurants + suppliers","Series B+","$328M","Bessemer",["Bessemer","Insight","Coatue"],"Berlin HQ w/ NYC office. Unicorn WhatsApp-style ordering app between restaurants and suppliers."),
+  ("crunchtime","Crunchtime (Zenput)","greenhouse","zenput","hospitality","Enterprise restaurant ops (multi-unit chains)","Late stage","$100M+","Battery",["Battery","Vista"],"Category leader for multi-unit restaurant operations (acquired Zenput, uses that ATS)."),
+  ("popmenu","Popmenu","workable","popmenu","hospitality","Restaurant AI menu + marketing SaaS","Series C","$88M","Tiger",["Tiger","Bedrock"],"Restaurant marketing + AI menu SaaS — Atlanta HQ, real NYC eng presence."),
+  ("slangai","Slang.ai","lever","slangai","ai","Voice AI for restaurant phone lines","Series B","$36M","USVP",["USVP","Homebrew"],"NYC-HQ voice AI answering restaurant calls — 2K+ restaurants, 20M+ calls handled."),
+  ("blank-street","Blank Street Coffee","greenhouse","blankstreet","hospitality","Tech-forward micro-cafe chain","Series C","$100M+","General Catalyst",["General Catalyst","Tiger","Left Lane"],"NYC-native tech-forward coffee chain — mobile app, loyalty, hundreds of stores."),
+  ("olipop","OLIPOP","greenhouse","olipop","cpg","Prebiotic soda category leader","Series C","$137M+","JP Morgan",["JP Morgan","Monogram","Melo7"],"Category-defining prebiotic soda ($1.85B val). Oakland HQ, NYC-strong ops + brand."),
+  ("magic-spoon","Magic Spoon","workable","magicspoon","cpg","Low-carb high-protein DTC cereal","Series B","$85M+","Constellation",["Constellation","Lightspeed","Coatue"],"Cult NYC DTC cereal brand, now in national retail. Founders Gabi Lewis + Greg Sewitz."),
+  ("ag1","AG1 (Athletic Greens)","greenhouse","ag1","consumer","Foundational-nutrition powder subscription","Late stage","$115M","Alpha Wave Global",["Alpha Wave"],"Category-defining green-powder subscription (~$1.2B val). Big NYC office; supply-chain + product eng."),
+  ("hungryroot","Hungryroot","greenhouse","hungryroot","consumer","AI-personalized grocery + meal delivery","Late stage","$70M+","L Catterton",["L Catterton","Lightspeed"],"NYC-HQ profitable meal-kit + grocery hybrid personalized by AI recs."),
+  ("misfits-market","Misfits Market","greenhouse","misfitsmarket","marketplace","Ugly-produce grocery + Imperfect Foods","Late stage","$525M+","SoftBank",["SoftBank","D1","Valor"],"NJ/NYC online grocery — merged with Imperfect Foods; large eng org, logistics-heavy."),
+  ("tovala","Tovala","lever","tovala","consumer","Smart-oven + meal delivery","Series C","$100M+","Left Lane",["Left Lane","OurCrowd"],"Connected smart-oven + subscription meal service. Hardware + software + food-ops."),
+  ("farmers-dog","The Farmer's Dog","greenhouse","thefarmersdog","consumer","Fresh human-grade dog food subscription","Series D","$150M+","L Catterton",["L Catterton","Shasta"],"NYC-HQ fresh pet-food juggernaut (~$2B val). Huge eng org — logistics, cold-chain, subscriptions."),
+  ("foodsmart","Foodsmart","lever","foodsmart","health","Food-as-medicine platform","Series C","$63M+","Cigna Ventures",["Cigna Ventures","Bessemer"],"Food-as-medicine platform for health plans/employers. NYC office; nutrition + telehealth ops."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -422,6 +449,14 @@ DOMAINS = {
   "unitedmasters":"unitedmasters.com","vsco":"vsco.co","soundcloud":"soundcloud.com",
   "bdg":"bustle.com","resy":"resy.com","defector":"defector.com",
   "recess":"takearecess.com","liquid-death":"liquiddeath.com",
+  # 2026-07-21 additions
+  "slice":"slicelife.com","owner-com":"owner.com","blackbird":"blackbird.xyz",
+  "sauce":"getsauce.com","restaurant365":"restaurant365.com",
+  "chowbus":"chowbus.com","choco":"choco.com","crunchtime":"crunchtime.com",
+  "popmenu":"popmenu.com","slangai":"slang.ai","blank-street":"blankstreet.com",
+  "olipop":"drinkolipop.com","magic-spoon":"magicspoon.com","ag1":"drinkag1.com",
+  "hungryroot":"hungryroot.com","misfits-market":"misfitsmarket.com",
+  "tovala":"tovala.com","farmers-dog":"thefarmersdog.com","foodsmart":"foodsmart.com",
 }
 
 
@@ -559,7 +594,9 @@ def filter_jobs(ats, raw, slug=""):
     else:
       continue
     if not is_nyc: continue
-    if not title or TITLE_EXCLUDE.search(title): continue
+    if not title: continue
+    title_for_check = STAFF_PRINCIPAL.sub("", title) if SENIORITY_MARK.search(title) else title
+    if TITLE_EXCLUDE.search(title_for_check): continue
     if not TITLE_INCLUDE.search(title): continue
     out.append({"title": title, "url": url, "level": level(title), "posted": posted})
   # founding > senior > mid
