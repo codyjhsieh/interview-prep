@@ -5227,22 +5227,20 @@ const COOLNESS = {
   virtu:1,
 
   // ── 2026-07-21 additions — tier-assigned to match existing anchors ──
-  // Tier 10 — peak LES-cool
-  ganni:10,
-  // Tier 9
-  rockstargames:9,
+  // Tier 9 (Ganni: cult but not peak-LES like Partiful/Dorsia; Rockstar: GTA)
+  ganni:9, rockstargames:9,
   // Tier 8
-  soundcloud:8, duolingo:8, blackbird:8, bdg:8,
-  // Tier 7
-  'farmers-dog':7, fanduel:7,
-  // Tier 6
-  uniswap:6, attio:6, graphite:6, browserbase:6,
+  duolingo:8, blackbird:8, bdg:8,
+  // Tier 7 (Farmer's Dog like Bombas; SoundCloud declining brand; SeatGeek anchors tier)
+  'farmers-dog':7, soundcloud:7,
+  // Tier 6 (FanDuel less LES-cool than SeatGeek)
+  uniswap:6, attio:6, graphite:6, browserbase:6, fanduel:6,
   // Tier 5
   handshake:5, midpage:5, semgrep:5,
-  // Tier 4
-  peloton:4, equinox:4, materialize:4, knotapi:4, extend:4,
+  // Tier 4 (Ripple + Databento bumped up: real infra cachet)
+  peloton:4, equinox:4, materialize:4, knotapi:4, extend:4, ripple:4, databento:4,
   // Tier 3
-  numeric:3, numeral:3, socure:3, ripple:3, imprint:3, databento:3, nayya:3,
+  numeric:3, numeral:3, socure:3, imprint:3, nayya:3,
   // Tier 2
   dailypay:2, mosaic:2, octus:2, 'nyc-gov':2,
   // Tier 1 — anti-LES
@@ -5350,33 +5348,33 @@ function companyFitScore(c) {
   const cool = _coolness(c) / 10;
   const reply = _replyProb(c);
   const pass = _passProb(c, null);
-  // Theoretical max: 1.0 × 0.45 × 0.70 = 0.315. Scale by 280 → ~88 ceiling.
-  return Math.max(1, Math.min(88, Math.round(cool * reply * pass * 280)));
+  // Theoretical max: 1.0 × 0.45 × 0.70 = 0.315. Scale by 28 → ~8.8 ceiling on a 10-pt scale.
+  return Math.max(0.1, Math.min(8.8, cool * reply * pass * 28));
 }
 
 function roleFitScore(c, j) {
   const cool = _coolness(c) / 10;
   const reply = _replyProb(c);
   const pass = _passProb(c, j);
-  return Math.max(1, Math.min(95, Math.round(cool * reply * pass * 280)));
+  return Math.max(0.1, Math.min(9.5, cool * reply * pass * 28));
 }
 
 function fitTier(score) {
-  // Recalibrated for P(cool job) — max realistic is ~90 (Flora/Plot).
-  // Most cool+achievable roles will land 15–35. Single-digits aren't a
-  // bug; they're "you don't want this and won't get a reply anyway."
-  if (score >= 40) return { label: 'Goldilocks',   cls: 'fit-strong' };
-  if (score >= 20) return { label: 'Worth trying', cls: 'fit-worth'  };
-  if (score >= 8)  return { label: 'Long shot',    cls: 'fit-long'   };
+  // On a 1-10 scale: max realistic ~9 (Flora/Plot × founding × FDE title).
+  // Most cool+achievable roles land 1.5–3.5. Sub-1 is "you don't want this
+  // and won't get a reply anyway."
+  if (score >= 4)   return { label: 'Goldilocks',   cls: 'fit-strong' };
+  if (score >= 2)   return { label: 'Worth trying', cls: 'fit-worth'  };
+  if (score >= 0.8) return { label: 'Long shot',    cls: 'fit-long'   };
   return                   { label: 'Tough bar',    cls: 'fit-tough'  };
 }
 
 function fitBadgeHTML(score) {
   const tier = fitTier(score);
-  // Tier label is exposed via title (tooltip) but not rendered inline —
-  // the badge color already conveys tier, the number conveys precision.
-  return `<span class="fit-badge ${tier.cls}" title="${esc(tier.label)} · ${score}/100">
-    <span class="fit-num">${score}</span>
+  // Display with one decimal (e.g. 6.8, 3.2). Tooltip carries the tier label.
+  const shown = score >= 10 ? '10' : score.toFixed(1);
+  return `<span class="fit-badge ${tier.cls}" title="${esc(tier.label)} · ${shown}/10">
+    <span class="fit-num">${shown}</span>
   </span>`;
 }
 
