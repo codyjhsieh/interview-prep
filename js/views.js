@@ -5256,6 +5256,10 @@ const COOLNESS = {
   ultra:6, 'tuesday-labs':6, offdeal:5, clarion:4, spur:4, ryvn:4,
   pointone:4, ambral:3, 'codes-health':3, greenboard:3,
   diligencesquared:3, fleetline:3,
+  // Batch 4: YC consumer/fintech/health
+  piramidalinc:6, tennr:5, 'fortuna-health':5, junction:5, garage:5,
+  loula:4, 'prosper-ai':4, finny:4, careswift:4, atg:4,
+  avallon:3, solva:3, 'claim-health':3,
 };
 
 const FRONTIER = new Set([

@@ -525,6 +525,21 @@ CANDIDATES = [
   ("diligencesquared","Diligencesquared","ashby","diligencesquared","ai","AI market due-diligence","Seed","YC","Y Combinator",["YC"],"YC F25. NYC. Automates McKinsey-grade market reports for PE."),
   ("fleetline","Fleetline","ashby","fleetline","ai","AI trucking load planner","Seed","YC","Y Combinator",["YC"],"YC S25. NYC founding roles. LLM+OR-based fleet optimization."),
   ("ambral","Ambral","ashby","ambral","ai","AI account mgmt / CS agent","Seed","YC","Y Combinator",["YC"],"YC S25. NYC founding engineer role. Enterprise CS copilot."),
+
+  # ── 2026-07-21 — Batch 4: recent YC startups (consumer / fintech / health) ──
+  ("tennr","Tennr","ashby","tennr","health","AI reads faxes/PDFs for specialty-clinic patient intake","Series B","$37M","Andreessen Horowitz",["a16z","ICONIQ"],"YC W23. NYC."),
+  ("loula","Loula","ashby","loula","health","Insurance billing rails for doulas + postpartum providers","Seed","YC","Y Combinator",["YC"],"YC W23. NYC. Mission-driven."),
+  ("fortuna-health","Fortuna Health","ashby","fortuna-health","health","Consumer Medicaid enrollment + renewals","Series A","$18M","Andreessen Horowitz",["a16z"],"YC S23. NYC."),
+  ("prosper-ai","Prosper","ashby","prosper-ai","health","AI voice agents for patient calls at health systems","Seed","YC","Y Combinator",["YC"],"YC S23. NYC."),
+  ("junction","Junction Bioscience","ashby","junction","health","AI hypothesis engine for molecular discovery","Seed","YC","Y Combinator",["YC"],"YC W24. NYC + wet lab."),
+  ("piramidalinc","Piramidal","greenhouse","piramidalinc","health","Foundation model for the brain (EEG)","Seed","$6M","(undisclosed)",["—"],"YC W24. NYC. Deployed at NYU Langone."),
+  ("garage","Garage","ashby","garage","marketplace","Marketplace for industrial assets","Seed","YC + Founders Fund","Founders Fund",["Founders Fund","YC"],"YC W24. NYC. Trucks, machinery, equipment."),
+  ("finny","FINNY AI","ashby","finny","fintech","AI organic-growth engine for RIAs","Seed","$12M","Maverick",["Maverick","YC"],"YC S24. NYC."),
+  ("claim-health","Claim Health","ashby","claim-health","health","AI RCM for post-acute care","Seed","YC","Y Combinator",["YC"],"YC S25. NYC."),
+  ("avallon","Avallon AI","ashby","avallon","fintech","AI agents for insurance claims ops","Seed","YC","Y Combinator",["YC"],"YC S25. NYC."),
+  ("careswift","CareSwift","ashby","careswift","health","AI scribe for ambulance/EMS run reports","Seed","YC","Y Combinator",["YC"],"YC S25. NYC."),
+  ("solva","Solva","ashby","solva","fintech","AI automating insurance claims + blocking overpayments","Seed","YC","Y Combinator",["YC"],"YC S25. NYC."),
+  ("atg","Autonomous Technologies Group","ashby","atg","fintech","Superintelligent financial advisor research lab","Seed","YC","Y Combinator",["YC"],"YC F25. NYC."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -665,6 +680,11 @@ DOMAINS = {
   "greenboard":"greenboard.co","spur":"spur.dev","ultra":"ultra.us",
   "codes-health":"codeshealth.co","ryvn":"ryvn.io","tuesday-labs":"tuesdaylabs.com",
   "diligencesquared":"diligencesquared.com","fleetline":"fleetline.ai","ambral":"ambral.com",
+  # Batch 4: YC consumer/fintech/health
+  "tennr":"tennr.com","loula":"loula.co","fortuna-health":"fortunahealth.com",
+  "prosper-ai":"prosper.ai","junction":"junction.bio","piramidalinc":"piramidal.ai",
+  "garage":"garage.com","finny":"finny.ai","claim-health":"claim.health",
+  "avallon":"avallon.ai","careswift":"careswift.com","solva":"solva.ai","atg":"atg.systems",
 }
 
 

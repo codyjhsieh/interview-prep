@@ -13249,6 +13249,97 @@ const COMPANIES = [
     notes:"YC S25. NYC founding engineer role. Enterprise CS copilot.",
     jobs:[
       { title:"Senior Founding Engineer", url:"https://jobs.ashbyhq.com/ambral/56a4da97-22ae-4b5a-ab3b-6f9ddbb2a9ef", level:"founding", added:"2026-07-21", posted:"2026-05-06" }
+    ] },
+  { id:"tennr", name:"Tennr", vertical:"health",
+    sub:"AI reads faxes/PDFs for specialty-clinic patient intake",
+    stage:"Series B", raised:"$37M", lead:"Andreessen Horowitz",
+    badges:["a16z","ICONIQ"],
+    totalRoles:6,
+    notes:"YC W23. NYC.",
+    jobs:[
+      { title:"Senior Product Engineer", url:"https://jobs.ashbyhq.com/tennr/d46af7f0-9d7f-405c-b3e0-dd0f885f03aa", level:"senior", added:"2026-07-21", posted:"2026-03-13" },
+      { title:"Senior Backend Software Engineer", url:"https://jobs.ashbyhq.com/tennr/3989dc49-5e46-466a-ab74-837ad7e7f0e1", level:"senior", added:"2026-07-21", posted:"2026-03-02" },
+      { title:"Senior ML Infrastructure Engineer", url:"https://jobs.ashbyhq.com/tennr/4057c11d-f9aa-42e4-8b52-ad98a3f94d2f", level:"senior", added:"2026-07-21", posted:"2026-07-08" },
+      { title:"Backend Software Engineer", url:"https://jobs.ashbyhq.com/tennr/9aae43bf-3303-468e-aae0-038b7fb395f3", level:"mid", added:"2026-07-21", posted:"2026-01-23" },
+      { title:"Product Engineer", url:"https://jobs.ashbyhq.com/tennr/35e4db16-9ca2-4532-acf3-176a2ce983b0", level:"mid", added:"2026-07-21", posted:"2026-03-13" },
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/tennr/a439c5b8-1686-4b90-b2bc-cffd761e002d", level:"mid", added:"2026-07-21", posted:"2026-06-24" }
+    ] },
+  { id:"loula", name:"Loula", vertical:"health",
+    sub:"Insurance billing rails for doulas + postpartum providers",
+    stage:"Seed", raised:"YC", lead:"Y Combinator",
+    badges:["YC"],
+    totalRoles:1,
+    notes:"YC W23. NYC. Mission-driven.",
+    jobs:[
+      { title:"Founding Software Engineer (Backend/Infra)", url:"https://jobs.ashbyhq.com/loula/fdf244bb-148d-4320-9cb4-15c24365c884", level:"founding", added:"2026-07-21", posted:"2026-04-01" }
+    ] },
+  { id:"fortuna-health", name:"Fortuna Health", vertical:"health",
+    sub:"Consumer Medicaid enrollment + renewals",
+    stage:"Series A", raised:"$18M", lead:"Andreessen Horowitz",
+    badges:["a16z"],
+    totalRoles:1,
+    notes:"YC S23. NYC.",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/fortuna-health/6b4ac299-8f62-490b-b97a-4905f989126b", level:"senior", added:"2026-07-21", posted:"2025-12-20" }
+    ] },
+  { id:"piramidalinc", name:"Piramidal", vertical:"health",
+    sub:"Foundation model for the brain (EEG)",
+    stage:"Seed", raised:"$6M", lead:"(undisclosed)",
+    badges:["—"],
+    totalRoles:1,
+    notes:"YC W24. NYC. Deployed at NYU Langone.",
+    jobs:[
+      { title:"Software Engineer - Frontend", url:"https://job-boards.greenhouse.io/piramidalinc/jobs/4212482009", level:"mid", added:"2026-07-21", posted:"2026-04-13" }
+    ] },
+  { id:"garage", name:"Garage", vertical:"marketplace",
+    sub:"Marketplace for industrial assets",
+    stage:"Seed", raised:"YC + Founders Fund", lead:"Founders Fund",
+    badges:["Founders Fund","YC"],
+    totalRoles:2,
+    notes:"YC W24. NYC. Trucks, machinery, equipment.",
+    jobs:[
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/garage/f4018670-2c66-4da9-acac-2aa0af432abb", level:"mid", added:"2026-07-21", posted:"2026-07-08" },
+      { title:"Software Engineer, Growth", url:"https://jobs.ashbyhq.com/garage/dba79415-f4eb-48fd-acf8-9c2086d58a54", level:"mid", added:"2026-07-21", posted:"2026-07-08" }
+    ] },
+  { id:"finny", name:"FINNY AI", vertical:"fintech",
+    sub:"AI organic-growth engine for RIAs",
+    stage:"Seed", raised:"$12M", lead:"Maverick",
+    badges:["Maverick","YC"],
+    totalRoles:2,
+    notes:"YC S24. NYC.",
+    jobs:[
+      { title:"Senior Product Engineer", url:"https://jobs.ashbyhq.com/finny/338f8e1b-57f4-4170-80f1-dab76947a197", level:"senior", added:"2026-07-21", posted:"2026-03-19" },
+      { title:"Senior Machine Learning Engineer", url:"https://jobs.ashbyhq.com/finny/fb414324-df83-4683-9690-1ca7d2de74e3", level:"senior", added:"2026-07-21", posted:"2026-03-24" }
+    ] },
+  { id:"claim-health", name:"Claim Health", vertical:"health",
+    sub:"AI RCM for post-acute care",
+    stage:"Seed", raised:"YC", lead:"Y Combinator",
+    badges:["YC"],
+    totalRoles:2,
+    notes:"YC S25. NYC.",
+    jobs:[
+      { title:"Full Stack Engineer", url:"https://jobs.ashbyhq.com/claim-health/f2b284c9-f2af-478b-8f16-961ab8dc1e73", level:"mid", added:"2026-07-21", posted:"2025-12-31" },
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/claim-health/c9512763-dcae-40ed-a929-37d16d915ed0", level:"mid", added:"2026-07-21", posted:"2026-05-15" }
+    ] },
+  { id:"avallon", name:"Avallon AI", vertical:"fintech",
+    sub:"AI agents for insurance claims ops",
+    stage:"Seed", raised:"YC", lead:"Y Combinator",
+    badges:["YC"],
+    totalRoles:2,
+    notes:"YC S25. NYC.",
+    jobs:[
+      { title:"Founding Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/avallon/2d402538-2d78-476e-9695-7829b3db0d2c", level:"founding", added:"2026-07-21", posted:"2026-03-06" },
+      { title:"Founding Software Engineer", url:"https://jobs.ashbyhq.com/avallon/8e97bb07-6120-4bc0-8376-f9e0d6998ef8", level:"founding", added:"2026-07-21", posted:"2026-04-14" }
+    ] },
+  { id:"solva", name:"Solva", vertical:"fintech",
+    sub:"AI automating insurance claims + blocking overpayments",
+    stage:"Seed", raised:"YC", lead:"Y Combinator",
+    badges:["YC"],
+    totalRoles:2,
+    notes:"YC S25. NYC.",
+    jobs:[
+      { title:"Founding Engineer", url:"https://jobs.ashbyhq.com/solva/c2218bb1-e112-4f04-b9dc-6f121cfc59f0", level:"founding", added:"2026-07-21", posted:"2025-09-11" },
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/solva/a74e2c5c-f1da-4e1d-9a85-54056443f899", level:"mid", added:"2026-07-21", posted:"2026-07-10" }
     ] }
 ];
 
@@ -13911,6 +14002,11 @@ const COMPANY_DOMAINS = {
   greenboard:'greenboard.co', spur:'spur.dev', ultra:'ultra.us',
   'codes-health':'codeshealth.co', ryvn:'ryvn.io', 'tuesday-labs':'tuesdaylabs.com',
   diligencesquared:'diligencesquared.com', fleetline:'fleetline.ai', ambral:'ambral.com',
+  // Batch 4: YC consumer/fintech/health
+  tennr:'tennr.com', loula:'loula.co', 'fortuna-health':'fortunahealth.com',
+  'prosper-ai':'prosper.ai', junction:'junction.bio', piramidalinc:'piramidal.ai',
+  garage:'garage.com', finny:'finny.ai', 'claim-health':'claim.health',
+  avallon:'avallon.ai', careswift:'careswift.com', solva:'solva.ai', atg:'atg.systems',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */
