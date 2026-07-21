@@ -12896,6 +12896,230 @@ const COMPANIES = [
     jobs:[
       { title:"Senior/Staff Backend Engineer", url:"https://jobs.ashbyhq.com/blackbird-labs-inc/25a21dd6-d9d4-4b0a-b6b4-2c13efebd481", level:"senior", added:"2026-07-21", posted:"2025-05-07" },
       { title:"Senior/Staff Fullstack Engineer", url:"https://jobs.ashbyhq.com/blackbird-labs-inc/7714b6bf-5633-43bc-8818-a9af6c5dfe10", level:"senior", added:"2026-07-21", posted:"2026-02-12" }
+    ] },
+  { id:"graphite", name:"Graphite", vertical:"ai",
+    sub:"AI code review + stacked PRs",
+    stage:"Series B", raised:"$52M", lead:"Accel",
+    badges:["Accel","Founders Fund"],
+    totalRoles:3,
+    notes:"NYC + SF. Ex-Airbnb team. Diamond AI reviewer.",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/graphite/c1c39a52-543c-4c50-aee3-43d24214d7cd", level:"senior", added:"2026-07-21", posted:"2026-04-18" },
+      { title:"Senior Frontend Engineer", url:"https://jobs.ashbyhq.com/graphite/bf46d65a-c0a7-4d4c-88d9-7de5b991307b", level:"senior", added:"2026-07-21", posted:"2026-04-18" },
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/graphite/2f799d75-dbdf-4caa-83a2-bf7edb2dde85", level:"mid", added:"2026-07-21", posted:"2026-04-18" }
+    ] },
+  { id:"browserbase", name:"Browserbase", vertical:"ai",
+    sub:"Headless browser infra for AI agents",
+    stage:"Series A", raised:"$27M", lead:"Kleiner",
+    badges:["Kleiner","CRV"],
+    totalRoles:2,
+    notes:"NYC + SF. Stagehand SDK, key primitive for agentic web.",
+    jobs:[
+      { title:"Software Engineer (Dashboard) - San Francisco", url:"https://jobs.ashbyhq.com/browserbase/be6c011e-9bb1-4be0-93c2-ed615ef070d8", level:"mid", added:"2026-07-21", posted:"2026-07-02" },
+      { title:"Software Engineer (Dashboard) - New York", url:"https://jobs.ashbyhq.com/browserbase/689df609-4658-4769-bc2c-5962516237bb", level:"mid", added:"2026-07-21", posted:"2026-07-13" }
+    ] },
+  { id:"midpage", name:"Midpage", vertical:"ai",
+    sub:"AI legal research assistant",
+    stage:"Seed", raised:"$6M", lead:"BoxGroup",
+    badges:["BoxGroup"],
+    totalRoles:1,
+    notes:"NYC HQ. Lawyer-founded, buzzed legal AI.",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/midpage/bbfa2f36-fcb8-4779-9ca6-54f0a0181091", level:"senior", added:"2026-07-21", posted:"2026-05-26" }
+    ] },
+  { id:"semgrep", name:"Semgrep", vertical:"security",
+    sub:"AI + static analysis code security",
+    stage:"Series D", raised:"$100M", lead:"Redpoint",
+    badges:["Redpoint","Sequoia"],
+    totalRoles:4,
+    notes:"NYC office (also SF/Boston/Denver). AppSec leader, AI-assisted vuln triage.",
+    jobs:[
+      { title:"Senior Backend Software Engineer", url:"https://jobs.ashbyhq.com/semgrep/92b21a3a-fba8-4d71-9f4d-217850689f5f", level:"senior", added:"2026-07-21", posted:"2026-02-02" },
+      { title:"Senior Full Stack Software Engineer", url:"https://jobs.ashbyhq.com/semgrep/21496f9a-feaf-4c11-a83c-3b46c621b778", level:"senior", added:"2026-07-21", posted:"2026-02-02" },
+      { title:"Senior AI Software Engineer", url:"https://jobs.ashbyhq.com/semgrep/589d46cc-0f2a-4660-a516-9e4e378a9b8e", level:"senior", added:"2026-07-21", posted:"2026-02-02" },
+      { title:"Senior Software Engineer, Growth", url:"https://jobs.ashbyhq.com/semgrep/9700188b-be5d-4de1-abea-4f8397f596c8", level:"senior", added:"2026-07-21", posted:"2026-05-08" }
+    ] },
+  { id:"attio", name:"Attio", vertical:"saas",
+    sub:"AI-native CRM",
+    stage:"Series B", raised:"$33M", lead:"Redpoint",
+    badges:["Redpoint","Balderton"],
+    totalRoles:1,
+    notes:"NYC office (also London). Modern relationship-graph CRM.",
+    jobs:[
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/attio/cef00929-63ab-4927-8a3c-1ea1d4224606", level:"mid", added:"2026-07-21", posted:"2026-05-29" }
+    ] },
+  { id:"socure", name:"Socure", vertical:"fintech",
+    sub:"Identity verification / KYC",
+    stage:"Series E", raised:"$744M", lead:"Accel",
+    badges:["Accel","T. Rowe Price","Commerce Ventures"],
+    totalRoles:5,
+    notes:"NYC HQ, $4.5B val. ML fraud detection, security-adjacent.",
+    jobs:[
+      { title:"Senior Backend Engineer", url:"https://jobs.ashbyhq.com/socure/0fa30965-200d-435b-ad30-7f778b9f8ec7", level:"senior", added:"2026-07-21", posted:"2026-01-19" },
+      { title:"Senior Software Engineer - Backend (DocV)", url:"https://jobs.ashbyhq.com/socure/5fe679df-bf03-42e0-bcb0-7d4056b76f2c", level:"senior", added:"2026-07-21", posted:"2026-01-28" },
+      { title:"Senior Software Engineer - SRE", url:"https://jobs.ashbyhq.com/socure/881c4497-b1ec-4d5a-9d5a-8a2dae33d6eb", level:"senior", added:"2026-07-21", posted:"2026-06-03" },
+      { title:"Senior AI Engineer", url:"https://jobs.ashbyhq.com/socure/eda88068-dad3-44c0-8bd8-393971602aea", level:"senior", added:"2026-07-21", posted:"2026-05-27" },
+      { title:"Software Engineer - II", url:"https://jobs.ashbyhq.com/socure/d40ea2d5-8b9d-4168-aeee-e63387d25ba9", level:"mid", added:"2026-07-21", posted:"2025-12-04" }
+    ] },
+  { id:"uniswap", name:"Uniswap Labs", vertical:"fintech",
+    sub:"DeFi + crypto exchange infra",
+    stage:"Series B", raised:"$165M", lead:"Polychain",
+    badges:["Polychain","a16z"],
+    totalRoles:3,
+    notes:"NYC HQ. Largest DEX protocol.",
+    jobs:[
+      { title:"Senior Backend Engineer", url:"https://jobs.ashbyhq.com/uniswap/cfd492ff-dd07-432a-84b8-8aef0e8984ec", level:"senior", added:"2026-07-21", posted:"2026-03-18" },
+      { title:"Senior Backend Engineer, Platform", url:"https://jobs.ashbyhq.com/uniswap/f475ea4a-b8be-442a-b8e2-9a6003d1a51a", level:"senior", added:"2026-07-21", posted:"2026-03-18" },
+      { title:"Senior Frontend Infrastructure Engineer", url:"https://jobs.ashbyhq.com/uniswap/c9fe612e-7c29-47a4-b2a3-2a9d1185f5ef", level:"senior", added:"2026-07-21", posted:"2026-03-18" }
+    ] },
+  { id:"dailypay", name:"DailyPay", vertical:"fintech",
+    sub:"Earned wage access",
+    stage:"Late stage", raised:"$500M+", lead:"Carrick",
+    badges:["Carrick","Rockefeller"],
+    totalRoles:1,
+    notes:"NYC HQ. Payroll infra at scale.",
+    jobs:[
+      { title:"Senior Machine Learning Engineer", url:"https://jobs.ashbyhq.com/dailypay/fd5f567b-85f1-42be-8738-0bc2f70ec5b5", level:"senior", added:"2026-07-21", posted:"2026-07-06" }
+    ] },
+  { id:"numeral", name:"Numeral", vertical:"fintech",
+    sub:"Sales tax compliance automation",
+    stage:"Series A", raised:"$28M", lead:"Benchmark",
+    badges:["Benchmark"],
+    totalRoles:2,
+    notes:"NYC hybrid. Tax RegTech, engineer-first.",
+    jobs:[
+      { title:"Software Engineer (Product)", url:"https://jobs.ashbyhq.com/numeral/3d9dd65d-4d7e-4d3d-b1ee-390074e27266", level:"mid", added:"2026-07-21", posted:"2025-07-16" },
+      { title:"Software Engineer (AI)", url:"https://jobs.ashbyhq.com/numeral/26400013-a45f-4504-a0f9-f288069ee32c", level:"mid", added:"2026-07-21", posted:"2026-01-27" }
+    ] },
+  { id:"imprint", name:"Imprint", vertical:"fintech",
+    sub:"Co-branded credit cards",
+    stage:"Series C", raised:"$95M", lead:"Kleiner Perkins",
+    badges:["Kleiner","Thrive"],
+    totalRoles:1,
+    notes:"NYC HQ. Modern card issuing + rewards.",
+    jobs:[
+      { title:"Software Engineer, Backend (Mid/Senior)", url:"https://jobs.ashbyhq.com/imprint/0e6955fb-133f-4d72-a53d-f926e99b531e", level:"senior", added:"2026-07-21", posted:"2026-06-18" }
+    ] },
+  { id:"databento", name:"Databento", vertical:"fintech",
+    sub:"Market data infra for quants",
+    stage:"Series A", raised:"$34M", lead:"Point72 Ventures",
+    badges:["Point72","USV"],
+    totalRoles:3,
+    notes:"NYC office. Low-latency financial data APIs.",
+    jobs:[
+      { title:"Software Engineer (C++/C#)", url:"https://job-boards.greenhouse.io/databento/jobs/8074350", level:"mid", added:"2026-07-21", posted:"2026-07-20" },
+      { title:"Software Engineer (C++/Java)", url:"https://job-boards.greenhouse.io/databento/jobs/8074345", level:"mid", added:"2026-07-21", posted:"2026-07-20" },
+      { title:"Systems Engineer", url:"https://job-boards.greenhouse.io/databento/jobs/7439184", level:"mid", added:"2026-07-21", posted:"2026-07-09" }
+    ] },
+  { id:"ripple", name:"Ripple", vertical:"fintech",
+    sub:"Crypto payments + cross-border",
+    stage:"Late stage", raised:"$15B val", lead:"Andreessen Horowitz",
+    badges:["a16z","Founders Fund"],
+    totalRoles:1,
+    notes:"NYC office. RippleNet + XRP infra.",
+    jobs:[
+      { title:"Senior Software Engineer, Liquidity Management", url:"https://ripple.com/careers/all-jobs/job/7944457?gh_jid=7944457", level:"senior", added:"2026-07-21", posted:"2026-07-20" }
+    ] },
+  { id:"octus", name:"Octus", vertical:"fintech",
+    sub:"Legal + credit intelligence SaaS",
+    stage:"Late stage", raised:"$200M+", lead:"Warburg Pincus",
+    badges:["Warburg Pincus"],
+    totalRoles:1,
+    notes:"NYC HQ. LLM workflows on legal docs (fka Reorg).",
+    jobs:[
+      { title:"Senior AI Engineer", url:"https://job-boards.greenhouse.io/octus/jobs/5155045007", level:"senior", added:"2026-07-21", posted:"2026-07-17" }
+    ] },
+  { id:"handshake", name:"Handshake", vertical:"saas",
+    sub:"Early-career hiring marketplace",
+    stage:"Series F", raised:"$434M", lead:"Kleiner Perkins",
+    badges:["Kleiner","Coatue","Valor"],
+    totalRoles:6,
+    notes:"NYC office. Marketplace at scale.",
+    jobs:[
+      { title:"Senior Software Engineer - Pay & Safety", url:"https://jobs.ashbyhq.com/handshake/60057740-e884-4025-9d02-e332f8feb867", level:"senior", added:"2026-07-21", posted:"2026-05-05" },
+      { title:"Senior Forward Deployed Engineer, Handshake AI Enterprise", url:"https://jobs.ashbyhq.com/handshake/bd860a01-b630-4530-9e65-6d762e47e818", level:"senior", added:"2026-07-21", posted:"2026-05-04" },
+      { title:"Senior Software Engineer, Handshake AI Enterprise", url:"https://jobs.ashbyhq.com/handshake/32f0d53c-5808-4b12-84ac-60e2bb9dd7ae", level:"senior", added:"2026-07-21", posted:"2026-05-04" },
+      { title:"Senior Platform Engineer, Handshake AI Enterprise", url:"https://jobs.ashbyhq.com/handshake/51e41714-89e7-46a9-a242-6ca5ef2242b5", level:"senior", added:"2026-07-21", posted:"2026-05-04" },
+      { title:"Senior Applied AI Engineer, Handshake AI Enterprise", url:"https://jobs.ashbyhq.com/handshake/b777e140-6ccd-44e6-9709-5a43c4b1ca7a", level:"senior", added:"2026-07-21", posted:"2026-05-19" },
+      { title:"Senior Frontend Engineer, Handshake AI Enterprise", url:"https://jobs.ashbyhq.com/handshake/f0267113-e730-48fa-8ae4-6f2246fc1af3", level:"senior", added:"2026-07-21", posted:"2026-06-30" }
+    ] },
+  { id:"duolingo", name:"Duolingo", vertical:"consumer",
+    sub:"Edtech language learning",
+    stage:"Public", raised:"(NASDAQ: DUOL)", lead:"NASDAQ",
+    badges:["NASDAQ"],
+    totalRoles:1,
+    notes:"NYC eng office. Massive consumer ML/gamification org.",
+    jobs:[
+      { title:"Software Engineer II, Android", url:"https://careers.duolingo.com/jobs/8628670002?gh_jid=8628670002", level:"mid", added:"2026-07-21", posted:"2026-07-10" }
+    ] },
+  { id:"fanduel", name:"FanDuel", vertical:"consumer",
+    sub:"Sports betting / gaming",
+    stage:"Public", raised:"(Flutter subsidiary)", lead:"Flutter",
+    badges:["Flutter","LSE"],
+    totalRoles:4,
+    notes:"NYC HQ. Leading US sportsbook, real-time betting infra.",
+    jobs:[
+      { title:"Senior Data Engineer", url:"https://www.fanduel.careers/open-positions?gh_jid=7798237", level:"senior", added:"2026-07-21", posted:"2026-07-20" },
+      { title:"Senior Machine Learning Engineer", url:"https://www.fanduel.careers/open-positions?gh_jid=7524024", level:"senior", added:"2026-07-21", posted:"2026-07-20" },
+      { title:"Senior Machine Learning Engineer", url:"https://www.fanduel.careers/open-positions?gh_jid=7524004", level:"senior", added:"2026-07-21", posted:"2026-07-20" },
+      { title:"Data Engineer", url:"https://www.fanduel.careers/open-positions?gh_jid=7798466", level:"mid", added:"2026-07-21", posted:"2026-07-20" }
+    ] },
+  { id:"rockstargames", name:"Rockstar Games", vertical:"consumer",
+    sub:"AAA game studio",
+    stage:"Public", raised:"(Take-Two subsidiary)", lead:"Take-Two",
+    badges:["Take-Two","NASDAQ"],
+    totalRoles:5,
+    notes:"NYC HQ. GTA/RDR studio, massive eng org.",
+    jobs:[
+      { title:"Senior Application Security Platform Engineer", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7782765003", level:"senior", added:"2026-07-21", posted:"2026-07-09" },
+      { title:"Senior Machine Learning Engineer", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7752446003", level:"senior", added:"2026-07-21", posted:"2026-07-09" },
+      { title:"Senior Software Engineer, Data Engineering", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7575962003", level:"senior", added:"2026-07-21", posted:"2026-07-09" },
+      { title:"Cloud Platform Engineer", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7800927003", level:"mid", added:"2026-07-21", posted:"2026-07-20" },
+      { title:"Full Stack Engineer (C#/React)", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7711703003", level:"mid", added:"2026-07-21", posted:"2026-07-09" }
+    ] },
+  { id:"ganni", name:"Ganni", vertical:"consumer",
+    sub:"Danish contemporary fashion",
+    stage:"Acquired", raised:"L Catterton majority", lead:"L Catterton",
+    badges:["L Catterton"],
+    totalRoles:1,
+    notes:"Ganni SoHo NYC HQ for Americas. 500-person co, dedicated NYC e-comm team.",
+    jobs:[
+      { title:"Software Engineer", url:"https://ganni.teamtailor.com/jobs/5123809-software-engineer", level:"mid", added:"2026-07-21", posted:"2024-10-24" }
+    ] },
+  { id:"equinox", name:"Equinox Group", vertical:"consumer",
+    sub:"Luxury fitness / hospitality",
+    stage:"PE-backed", raised:"$1B+", lead:"L Catterton",
+    badges:["L Catterton","Related Cos"],
+    totalRoles:1,
+    notes:"HQ Hudson Yards NYC. Sr Data Engineer + site-testing eng roles.",
+    jobs:[
+      { title:"Sr. Data Engineer (HYBRID)", url:"https://jobs.smartrecruiters.com/Equinox/744000138711935", level:"senior", added:"2026-07-21", posted:"2026-07-20" }
+    ] },
+  { id:"nyc-gov", name:"City of New York", vertical:"saas",
+    sub:"Public sector (dept of tech)",
+    stage:"Public sector", raised:"$110B budget", lead:"\u2014",
+    badges:["Public sector"],
+    totalRoles:7,
+    notes:"NYC gov. Sr SWE GeoSupport, .NET, City Environmental Quality Review roles.",
+    jobs:[
+      { title:"Senior Product Engineer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014073256", level:"senior", added:"2026-07-21", posted:"2026-07-14" },
+      { title:"Senior Software Engineer - City Environmental Quality Review", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990013738356", level:"senior", added:"2026-07-21", posted:"2026-06-23" },
+      { title:"Senior Software Engineer (GeoSupport)", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990013738346", level:"senior", added:"2026-07-21", posted:"2026-06-23" },
+      { title:"Senior Software Engineer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990013657876", level:"senior", added:"2026-07-21", posted:"2026-06-17" },
+      { title:"Data Engineer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990013806086", level:"mid", added:"2026-07-21", posted:"2026-06-26" },
+      { title:"Data Engineer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990013487451", level:"mid", added:"2026-07-21", posted:"2026-06-05" },
+      { title:"Data Engineer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990013314086", level:"mid", added:"2026-07-21", posted:"2026-05-27" }
+    ] },
+  { id:"socotec", name:"Socotec", vertical:"saas",
+    sub:"TIC + AI platform",
+    stage:"PE-backed", raised:"~$2B rev", lead:"Cobepa",
+    badges:["Cobepa"],
+    totalRoles:3,
+    notes:"151 W 42nd St Manhattan. SWE applied AI + data infra roles.",
+    jobs:[
+      { title:"Senior Data Engineer (Azure & Databricks)", url:"https://jobs.smartrecruiters.com/Socotec/744000130842876", level:"senior", added:"2026-07-21", posted:"2026-06-08" },
+      { title:"Applied AI Engineer", url:"https://jobs.smartrecruiters.com/Socotec/744000130845740", level:"mid", added:"2026-07-21", posted:"2026-06-08" },
+      { title:"Software Engineer", url:"https://jobs.smartrecruiters.com/Socotec/744000127899832", level:"mid", added:"2026-07-21", posted:"2026-05-22" }
     ] }
 ];
 
