@@ -5557,7 +5557,8 @@ function renderCompanies(state, hub) {
         ${verticalTabs}
         <span class="filter-divider" data-level-only aria-hidden="true"></span>
         ${levelTabs}
-        <span class="filter-divider" data-cats-only aria-hidden="true"></span>
+      </div>
+      <div class="tabs" id="co-cat-filters">
         ${categoryTabs}
       </div>
       <div class="flex items-center gap-2 mt-2">
@@ -5577,10 +5578,13 @@ function renderCompanies(state, hub) {
   const grid       = container.querySelector('#co-grid');
   const rolelist   = container.querySelector('#co-rolelist');
   const filterBar  = container.querySelector('#co-filters');
-  // Hide the level-filter chips + divider in Companies mode by class
-  // on the merged filter bar.
+  const catBar     = container.querySelector('#co-cat-filters');
+  // Hide the level-filter chips + divider and the category row in
+  // Companies mode. Level chips share the same pill as verticals; the
+  // category row is its own container just below.
   function syncLevelVis() {
     filterBar.classList.toggle('hide-levels', curMode === 'companies');
+    if (catBar) catBar.style.display = curMode === 'companies' ? 'none' : '';
   }
   let curMode    = 'companies';
   let curVFilter = 'all';
@@ -5935,7 +5939,9 @@ function renderCompanies(state, hub) {
   });
   // Merged filter bar — vertical chips + level chips share one pill.
   // Click handler differentiates by data-vfilter vs data-lfilter.
-  container.querySelectorAll('#co-filters .tab').forEach(tab => {
+  // Click handler covers both the merged verticals+levels pill AND the
+  // separate category-row pill below it.
+  container.querySelectorAll('#co-filters .tab, #co-cat-filters .tab').forEach(tab => {
     tab.addEventListener('click', () => {
       if (tab.dataset.vfilter) {
         container.querySelectorAll('#co-filters .tab[data-vfilter]').forEach(t => t.classList.remove('active'));
@@ -5946,7 +5952,7 @@ function renderCompanies(state, hub) {
         tab.classList.add('active');
         curLFilter = tab.dataset.lfilter;
       } else if (tab.dataset.catfilter) {
-        container.querySelectorAll('#co-filters .tab[data-catfilter]').forEach(t => t.classList.remove('active'));
+        container.querySelectorAll('#co-cat-filters .tab[data-catfilter]').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         curCatFilter = tab.dataset.catfilter;
       }

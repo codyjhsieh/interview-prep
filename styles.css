@@ -1785,15 +1785,21 @@ code, pre, .font-mono {
   flex-shrink: 0;
 }
 
-/* Hide the level + category groups (chips + dividers) when in Companies
- * mode. Divider spans marked with [data-level-only] / [data-cats-only];
- * chips are [data-lfilter] / [data-catfilter]. All get display:none on
- * .hide-levels (the class stays the same for backwards-compat). */
+/* Hide the level group (chips + divider) when in Companies mode.
+ * Divider marked with [data-level-only], chips with [data-lfilter];
+ * both get display:none on .hide-levels. The role-category row lives
+ * in its own #co-cat-filters container and is hidden via inline style
+ * from views.js (syncLevelVis). */
 #co-filters.hide-levels [data-level-only],
-#co-filters.hide-levels [data-cats-only],
-#co-filters.hide-levels [data-lfilter],
-#co-filters.hide-levels [data-catfilter] {
+#co-filters.hide-levels [data-lfilter] {
   display: none;
+}
+
+/* Role-category row — its own pill sitting just below the vertical +
+ * level filter bar. Adds a small top gap so it reads as a separate
+ * grouping without needing a horizontal rule. */
+#co-cat-filters {
+  margin-top: 6px;
 }
 .tab {
   padding: 0.45rem 0.95rem;
