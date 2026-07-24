@@ -46,6 +46,19 @@ DATA_JS   = REPO_ROOT / "js" / "data.js"
 
 # ── Regex filters ────────────────────────────────────────────────────────
 NYC = re.compile(r'\b(new[\s-]?york|nyc|brooklyn|manhattan)\b', re.I)
+# Defensive: some multi-location listings tag NYC in their location field but
+# put the actual anchor city in the TITLE ("Security Engineer, San Francisco"
+# / "Senior Research Engineer (Based in Hong Kong)"). Drop those — the title
+# is authoritative when it explicitly names a different city.
+NON_NYC_TITLE_CITY = re.compile(
+  r'\b('
+  r'san francisco|palo alto|mountain view|los angeles|chicago|austin|'
+  r'boston|cambridge, ma|seattle|denver|miami|atlanta|dallas|houston|'
+  r'portland|toronto|montreal|vancouver|london|dublin|berlin|paris|'
+  r'amsterdam|stockholm|copenhagen|bangalore|bengaluru|hyderabad|mumbai|'
+  r'delhi|singapore|tokyo|hong kong|sydney|melbourne'
+  r')\b', re.I
+)
 TITLE_INCLUDE = re.compile(
   r"\b("
   r"forward[\s-]deployed|fde|founding[\s-]engineer|"
@@ -909,6 +922,10 @@ def filter_jobs(ats, raw, slug=""):
       continue
     if not is_nyc: continue
     if not title: continue
+    # Title-authoritative city override: if the title explicitly names a
+    # non-NYC city, drop even if the ATS location field said "New York"
+    # (common in multi-location listings where NYC was just one of several).
+    if NON_NYC_TITLE_CITY.search(title) and not NYC.search(title): continue
     title_for_check = STAFF_PRINCIPAL.sub("", title) if SENIORITY_MARK.search(title) else title
     if TITLE_EXCLUDE.search(title_for_check): continue
     if not TITLE_INCLUDE.search(title): continue

@@ -11558,7 +11558,6 @@ const COMPANIES = [
       { title:"Software Engineer, Web Infrastructure", url:"https://jobs.ashbyhq.com/notion/6895adad-5031-4dce-9e8e-b9361d3a2850", level:"mid", added:"2026-06-16", posted:"2026-05-28" },
       { title:"Software Engineer, Developer Experience (Go Lead)", url:"https://jobs.ashbyhq.com/notion/876c69a9-be0a-4a71-bf4a-04cbc9c6328e", level:"mid", added:"2026-06-30", posted:"2026-06-23" },
       { title:"Software Engineer, AI Platform", url:"https://jobs.ashbyhq.com/notion/a9d4a192-d31c-48d2-8156-e2a75d98eec1", level:"mid", added:"2026-07-21", posted:"2026-07-14" },
-      { title:"Security Engineer, Detection and Response, San Francisco", url:"https://jobs.ashbyhq.com/notion/c0fcf37b-e00f-4aae-a2e0-b008f9939a7e", level:"mid", added:"2026-07-21", posted:"2026-06-10" },
       { title:"Security Engineer, Corporate Security", url:"https://jobs.ashbyhq.com/notion/477768e1-37af-49bc-a4de-6564e0a4ec54", level:"mid", added:"2026-07-21", posted:"2026-06-08" },
       { title:"Solutions Engineer - Enterprise - AMER", url:"https://jobs.ashbyhq.com/notion/b0c0afb3-f075-47c7-9a8e-428032b3bb20", level:"mid", added:"2026-07-23", posted:"2025-10-27" },
       { title:"Solutions Engineer, Commercial", url:"https://jobs.ashbyhq.com/notion/fede5201-c97f-4492-bfa6-66da7afbb068", level:"mid", added:"2026-07-23", posted:"2026-02-25" }
@@ -12974,8 +12973,7 @@ const COMPANIES = [
     notes:"NYC trading. ETP market-making; trading systems + low-latency infra.",
     jobs:[
       { title:"Senior Software Engineer, C++", url:"https://job-boards.greenhouse.io/flowtraders/jobs/8027268", level:"senior", added:"2026-07-21", posted:"2026-07-20" },
-      { title:"Senior Software Engineer, C++ (Market Data)", url:"https://job-boards.greenhouse.io/flowtraders/jobs/8027267", level:"senior", added:"2026-07-21", posted:"2026-07-20" },
-      { title:"Senior Research Engineer (Based in Hong Kong)", url:"https://job-boards.greenhouse.io/flowtraders/jobs/8018139", level:"senior", added:"2026-07-21", posted:"2026-07-20" }
+      { title:"Senior Software Engineer, C++ (Market Data)", url:"https://job-boards.greenhouse.io/flowtraders/jobs/8027267", level:"senior", added:"2026-07-21", posted:"2026-07-20" }
     ] },
   { id:"old-mission", name:"Old Mission", vertical:"fintech",
     sub:"Proprietary trading firm",
@@ -13092,8 +13090,7 @@ const COMPANIES = [
     badges:["Kleiner","CRV"],
     totalRoles:2,
     notes:"NYC + SF. Stagehand SDK, key primitive for agentic web.",
-    jobs:[
-      { title:"Software Engineer (Dashboard) - San Francisco", url:"https://jobs.ashbyhq.com/browserbase/be6c011e-9bb1-4be0-93c2-ed615ef070d8", level:"mid", added:"2026-07-21", posted:"2026-07-02" },
+    jobs:[,
       { title:"Software Engineer (Dashboard) - New York", url:"https://jobs.ashbyhq.com/browserbase/689df609-4658-4769-bc2c-5962516237bb", level:"mid", added:"2026-07-21", posted:"2026-07-13" }
     ] },
   { id:"midpage", name:"Midpage", vertical:"ai",
