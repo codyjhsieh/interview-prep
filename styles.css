@@ -1785,11 +1785,14 @@ code, pre, .font-mono {
   flex-shrink: 0;
 }
 
-/* Hide the level group (chips + divider) when in Companies mode. We
- * mark the divider with [data-level-only]; level chips are
- * [data-lfilter]; both get display:none on .hide-levels. */
+/* Hide the level + category groups (chips + dividers) when in Companies
+ * mode. Divider spans marked with [data-level-only] / [data-cats-only];
+ * chips are [data-lfilter] / [data-catfilter]. All get display:none on
+ * .hide-levels (the class stays the same for backwards-compat). */
 #co-filters.hide-levels [data-level-only],
-#co-filters.hide-levels [data-lfilter] {
+#co-filters.hide-levels [data-cats-only],
+#co-filters.hide-levels [data-lfilter],
+#co-filters.hide-levels [data-catfilter] {
   display: none;
 }
 .tab {

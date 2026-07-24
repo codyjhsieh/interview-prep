@@ -5524,6 +5524,18 @@ function renderCompanies(state, hub) {
     <div class="tab" data-lfilter="founding">Founding</div>
     <div class="tab" data-lfilter="senior">Senior</div>
     <div class="tab" data-lfilter="mid">Mid</div>`;
+  // Role-type category chips — roles-mode only (hidden in companies mode
+  // via .hide-levels alongside level chips). Ordered by usefulness.
+  const CAT_LABELS = [
+    ['all', 'All types'], ['ai-ml', 'AI/ML'], ['backend', 'Backend'],
+    ['fullstack', 'Full-stack'], ['frontend', 'Frontend'],
+    ['infra', 'Infra/SRE'], ['data', 'Data'], ['security', 'Security'],
+    ['mobile', 'Mobile'], ['fde-sales', 'FDE/SE'],
+    ['product', 'Product'], ['generic-swe', 'SWE (unspec)'], ['other', 'Other'],
+  ];
+  const categoryTabs = CAT_LABELS
+    .map(([v, l]) => `<div class="tab${v==='all' ? ' active' : ''}" data-catfilter="${esc(v)}">${esc(l)}</div>`)
+    .join('');
 
   container.innerHTML = `
     <div>
@@ -5545,6 +5557,8 @@ function renderCompanies(state, hub) {
         ${verticalTabs}
         <span class="filter-divider" data-level-only aria-hidden="true"></span>
         ${levelTabs}
+        <span class="filter-divider" data-cats-only aria-hidden="true"></span>
+        ${categoryTabs}
       </div>
       <div class="flex items-center gap-2 mt-2">
         <span class="text-[11px] muted">Sort</span>
@@ -5571,6 +5585,7 @@ function renderCompanies(state, hub) {
   let curMode    = 'companies';
   let curVFilter = 'all';
   let curLFilter = 'all';
+  let curCatFilter = 'all';
   let curQuery   = '';
   let curSort    = 'fit';            // 'fit' (offer-probability) | 'new' (recency)
   let _lastCoSort = null;            // detect sort change to force a grid reorder
@@ -5738,6 +5753,46 @@ function renderCompanies(state, hub) {
     grid.appendChild(f);
   }
 
+  // Categorize a role by title into a coarse "type" bucket. Ordered
+  // most-specific first so e.g. "AI Infrastructure Engineer" lands in
+  // ai-ml, not infra. Each check accepts both direct ("Backend Engineer")
+  // and reverse-order ("Software Engineer, Backend") forms since ~1/3 of
+  // ATS titles use the reverse convention.
+  function roleCategory(title) {
+    const t = (title || '').toLowerCase();
+    // FDE / Solutions / Sales
+    if (/\b(forward[\s-]deployed|\bfde\b|solutions?\s+engineer|sales\s+engineer|presales\s+engineer)\b/.test(t)) return 'fde-sales';
+    // AI/ML — direct + reverse ("Software Engineer, Agents" / ", AI")
+    if (/\b(ai[/]?ml|machine[\s-]learning|genai|\bllm\b|agentic?|agents?\b|research\s+engineer|mlops|applied\s+ai|\bai\s+engineer|\bml\s+engineer)\b/.test(t)) return 'ai-ml';
+    if (/,\s*(ai|ml|agents?|agentic|research|genai|llm|mlops)\b/.test(t)) return 'ai-ml';
+    // Mobile
+    if (/\b(ios|android|mobile)\b/.test(t)) return 'mobile';
+    // Security
+    if (/\bsecurity\b/.test(t)) return 'security';
+    // Data — direct + reverse ("Software Engineer, Data")
+    if (/\bdata\s+(engineer|platform)\b/.test(t)) return 'data';
+    if (/,\s*data\b/.test(t)) return 'data';
+    // Infra / SRE / Platform / Cloud / DevOps — direct + reverse
+    if (/\b(devops|\bsre\b|site\s+reliability|infrastructure|platform\s+engineer|cloud\s+engineer|reliability\s+engineer|production\s+engineer)\b/.test(t)) return 'infra';
+    if (/,\s*(platform|infrastructure|infra|cloud|devops|production\s+engineering|developer\s+platform|developer\s+productivity|developer\s+experience)\b/.test(t)) return 'infra';
+    // Frontend
+    if (/\b(frontend|front[\s-]end|ui\s+engineer|fe\s+engineer)\b/.test(t)) return 'frontend';
+    if (/,\s*(frontend|front[\s-]end|ui)\b/.test(t)) return 'frontend';
+    // Full-stack
+    if (/\bfull[\s-]?stack\b/.test(t)) return 'fullstack';
+    if (/,\s*full[\s-]?stack\b/.test(t)) return 'fullstack';
+    // Backend
+    if (/\bbackend\b|\bback[\s-]end\b/.test(t)) return 'backend';
+    if (/,\s*(backend|back[\s-]end)\b/.test(t)) return 'backend';
+    // Product-team eng
+    if (/\bproduct\s+engineer\b/.test(t)) return 'product';
+    if (/,\s*(product|growth|product\s+foundations)\b/.test(t)) return 'product';
+    // Unspecified "Software Engineer" / "SDE" / "SWE" — its own bucket so
+    // users can distinguish "generic" from "unclassifiable weird title"
+    if (/\b(software\s+engineer|swe|sde|software\s+developer|founding\s+engineer|systems\s+engineer|quantitative\s+(software\s+)?(engineer|developer))\b/.test(t)) return 'generic-swe';
+    return 'other';
+  }
+
   function paintRoles() {
     rolelist.innerHTML = '';
     const q = curQuery.trim().toLowerCase();
@@ -5745,6 +5800,7 @@ function renderCompanies(state, hub) {
     const filtered = base.filter(r => {
       if (curVFilter !== 'all' && r._company.vertical !== curVFilter) return false;
       if (curLFilter !== 'all' && r.level !== curLFilter) return false;
+      if (curCatFilter !== 'all' && roleCategory(r.title) !== curCatFilter) return false;
       if (!q) return true;
       const hay = (r.title + ' ' + r._company.name + ' ' + r._company.sub + ' ' + (r._company.badges||[]).join(' ')).toLowerCase();
       return hay.includes(q);
@@ -5889,6 +5945,10 @@ function renderCompanies(state, hub) {
         container.querySelectorAll('#co-filters .tab[data-lfilter]').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         curLFilter = tab.dataset.lfilter;
+      } else if (tab.dataset.catfilter) {
+        container.querySelectorAll('#co-filters .tab[data-catfilter]').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        curCatFilter = tab.dataset.catfilter;
       }
       rolesShown = ROLES_PAGE;            // reset pagination on filter change
       paint();
