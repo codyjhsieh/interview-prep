@@ -64,15 +64,20 @@ TITLE_INCLUDE = re.compile(
   r"ai[/]ml[\s-]engineer|ml[/]ai[\s-]engineer|"
   r"genai[\s-]engineer|llm[\s-]engineer|agent[\s-]engineer|"
   r"agentic[\s-]engineer|mlops[\s-]engineer|research[\s-]engineer|"
+  # Solutions / Sales / Presales Engineer — customer-facing eng roles.
+  # Removed from TITLE_EXCLUDE and explicitly allowed here.
+  r"solutions?[\s-]engineer|sales[\s-]engineer|presales[\s-]engineer|"
   # Agency title variants — reverse-order (Engineer, Front-end) and
   # parenthetical (Engineer (Front-end)) forms common at Code and Theory /
   # DEPT / Instrument / etc.
   r"engineer,\s*(?:front|back|full[\s-]?stack|frontend|backend|fullstack|"
   r"devops|sre|site\s+reliability|cloud|security|reliability|"
-  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|research)|"
+  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|research|"
+  r"solutions?|sales|presales)|"
   r"engineer\s*\((?:front|back|full[\s-]?stack|frontend|backend|fullstack|"
   r"devops|sre|site\s+reliability|cloud|security|reliability|"
-  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|research)|"
+  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|research|"
+  r"solutions?|sales|presales)|"
   # "Developer" role names — DEPT uses these for mobile + software roles
   # ("Android Developer", "iOS Developer", "Software Developer").
   r"software[\s-]developer|"
@@ -89,7 +94,9 @@ TITLE_EXCLUDE = re.compile(
   r"staff[\s,]|principal|^lead\s|\slead\s|\slead$|head\s|chief|director|"
   r"manager|engineering\s+manager|technical\s+program|vp\s|vice\s+president|"
   r"intern|internship|research\s+scientist|researcher|"
-  r"solutions?\s+engineer|sales\s+engineer|customer\s+engineer|field\s+engineer|"
+  # Kept excluded: customer / field engineer. Solutions + Sales Engineer
+  # were previously here but are now explicitly allowed (see TITLE_INCLUDE).
+  r"customer\s+engineer|field\s+engineer|"
   r"support\s+engineer|implementation\s+engineer|partner\s+engineer|"
   r"developer\s+advocate|developer\s+relations|devrel|recruiter|recruiting|"
   r"account\s+executive|account\s+manager|operations\s+manager"
