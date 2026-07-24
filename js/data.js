@@ -14317,6 +14317,10 @@ const COMPANY_DOMAINS = {
   'prosper-ai':'prosper.ai', junction:'junction.bio', piramidalinc:'piramidal.ai',
   garage:'garage.com', finny:'finny.ai', 'claim-health':'claim.health',
   avallon:'avallon.ai', careswift:'careswift.com', solva:'solva.ai', atg:'atg.systems',
+  // 2026-07-23 art/creative/celeb batch
+  sonymusic:'sonymusic.com', a24:'a24films.com', aimeleondore:'aimeleondore.com',
+  splice:'splice.com', goop:'goop.com', livenation:'livenationentertainment.com',
+  honestco:'honest.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */

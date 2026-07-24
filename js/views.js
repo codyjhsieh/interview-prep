@@ -5260,6 +5260,9 @@ const COOLNESS = {
   piramidalinc:6, tennr:5, 'fortuna-health':5, junction:5, garage:5,
   loula:4, 'prosper-ai':4, finny:4, careswift:4, atg:4,
   avallon:3, solva:3, 'claim-health':3,
+  // 2026-07-23 art/creative/celeb batch
+  a24:9, aimeleondore:8, splice:6, sonymusic:6, goop:5,
+  livenation:4, honestco:3,
 };
 
 const FRONTIER = new Set([

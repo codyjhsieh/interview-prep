@@ -569,6 +569,15 @@ CANDIDATES = [
   ("careswift","CareSwift","ashby","careswift","health","AI scribe for ambulance/EMS run reports","Seed","YC","Y Combinator",["YC"],"YC S25. NYC."),
   ("solva","Solva","ashby","solva","fintech","AI automating insurance claims + blocking overpayments","Seed","YC","Y Combinator",["YC"],"YC S25. NYC."),
   ("atg","Autonomous Technologies Group","ashby","atg","fintech","Superintelligent financial advisor research lab","Seed","YC","Y Combinator",["YC"],"YC F25. NYC."),
+
+  # ── 2026-07-23 — Art / creative / music / celeb-brand batch ──
+  ("sonymusic","Sony Music Entertainment","greenhouse","sonymusicentertainment","media","Global record label (Sony subsidiary)","Public","(Sony subsidiary)","Sony",["Sony"],"NYC HQ. Includes The Orchard, Alamo, Columbia. 3 NYC eng today (Data Privacy, Emerging Tech, Sr PM D2C)."),
+  ("a24","A24","greenhouse","a24","media","Indie film + TV studio","Late stage","$225M","Stripes",["Stripes"],"NYC + LA. Cultural weight — Everything Everywhere, Uncut Gems, Moonlight. Small ops today, no NYC eng yet."),
+  ("aimeleondore","Aime Leon Dore","greenhouse","aimeleondore","consumer","NYC cult streetwear + menswear","Bootstrapped","Profitable","—",["—"],"NYC HQ (SoHo). Teddy Santis' menswear cult brand; Porsche + New Balance collabs. 16 open roles today (retail/design)."),
+  ("splice","Splice","greenhouse","splice","media","Music-production sample marketplace + tools","Series D","$102M+","Union Square Ventures",["USV","DFJ Growth"],"NYC HQ. Producer + creator tools; sample library at scale."),
+  ("goop","Goop","greenhouse","goop","consumer","Wellness + lifestyle content commerce","Series C","$100M+","Democracy Partners",["Democracy","NEA","Lightspeed"],"LA HQ, NYC retail. Gwyneth Paltrow's brand."),
+  ("livenation","Live Nation Entertainment","smartrecruiters","LiveNationEntertainment","media","Live-events + ticketing conglomerate (NYSE: LYV)","Public","(NYSE: LYV)","NYSE",["NYSE"],"NYC office. Ticketmaster + concert-promoter parent."),
+  ("honestco","The Honest Company","greenhouse","thehonestcompany","consumer","Wellness + baby DTC (NASDAQ: HNST)","Public","(NASDAQ: HNST)","NASDAQ",["NASDAQ"],"LA HQ. Jessica Alba's co. Board empty today; kept as future-surfacing candidate."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -714,6 +723,10 @@ DOMAINS = {
   "prosper-ai":"prosper.ai","junction":"junction.bio","piramidalinc":"piramidal.ai",
   "garage":"garage.com","finny":"finny.ai","claim-health":"claim.health",
   "avallon":"avallon.ai","careswift":"careswift.com","solva":"solva.ai","atg":"atg.systems",
+  # 2026-07-23 art/creative/celeb batch
+  "sonymusic":"sonymusic.com","a24":"a24films.com","aimeleondore":"aimeleondore.com",
+  "splice":"splice.com","goop":"goop.com","livenation":"livenationentertainment.com",
+  "honestco":"honest.com",
 }
 
 
