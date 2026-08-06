@@ -14145,6 +14145,17 @@ const COMPANY_DOMAINS = {
   fanduel:'fanduel.com', rockstargames:'rockstargames.com',
   ganni:'ganni.com', equinox:'equinox.com', 'nyc-gov':'nyc.gov',
   socotec:'socotec.com',
+  // 2026-08-06 — backfill for 21 missing companies (YC batch + longtails)
+  amplitude:'amplitude.com', 'bastion-fi':'bastion.com',
+  brellium:'brellium.com', 'cape-privacy':'cape.co',
+  concourse:'concourse.ai', crusoe:'crusoe.ai',
+  eliseai:'eliseai.com', elliptic:'elliptic.co',
+  halliday:'halliday.xyz', 'inductive-bio':'inductive.bio',
+  mintlify:'mintlify.com', modernfi:'modernfi.com',
+  'moment-fintech':'moment.com', motherduck:'motherduck.com',
+  notabene:'notabene.id', symphony:'symphony.com',
+  taboola:'taboola.com', 'titan-invest':'titan.com',
+  valon:'valon.com', vapi:'vapi.ai', vestwell:'vestwell.com',
   // Batch 1: agencies
   codeandtheory:'codeandtheory.com', dept:'deptagency.com',
   instrument:'instrument.com', nearform:'nearform.com',
