@@ -5531,7 +5531,8 @@ function renderCompanies(state, hub) {
     ['ai-ml', 'AI/ML'],
     ['backend', 'Backend'],
     ['infra', 'Infra'],
-    ['fde-sales', 'FDE/SE'],
+    ['fde', 'FDE'],
+    ['sales', 'Sales'],
     ['frontend', 'Frontend'],
   ];
   const categoryTabs = CAT_LABELS
@@ -5765,7 +5766,8 @@ function renderCompanies(state, hub) {
   // companies.
   function roleCategory(title) {
     const t = (title || '').toLowerCase();
-    if (/\b(forward[\s-]deployed|\bfde\b|solutions?\s+engineer|sales\s+engineer|presales\s+engineer)\b/.test(t)) return 'fde-sales';
+    if (/\b(solutions?\s+engineer|sales\s+engineer|presales\s+engineer)\b/.test(t)) return 'sales';
+    if (/\b(forward[\s-]deployed|\bfde\b)\b/.test(t)) return 'fde';
     if (/\b(ai[/]?ml|machine[\s-]learning|genai|\bllm\b|agentic?|agents?\b|research\s+engineer|mlops|applied\s+ai|\bai\s+engineer|\bml\s+engineer)\b/.test(t)
       || /,\s*(ai|ml|agents?|agentic|research|genai|llm|mlops)\b/.test(t)) return 'ai-ml';
     if (/\b(frontend|front[\s-]end|ui\s+engineer|fe\s+engineer|ios|android|mobile)\b/.test(t)
