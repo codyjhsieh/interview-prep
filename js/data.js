@@ -10169,13 +10169,13 @@ Note: <i>even saying "100+ writers" is real</i>. That's a public-facing, falsifi
  *  - totalRoles == jobs.length (full set; the card slices to 3 for preview).
  *  - jobs are sorted: founding > senior > mid.
  */
-const COMPANIES_VERIFIED_AT = '2026-08-06';
+const COMPANIES_VERIFIED_AT = '2026-08-18';
 const COMPANIES = [
   { id:"openai", name:"OpenAI", vertical:"ai",
     sub:"GPT / ChatGPT / API",
     stage:"Late stage", raised:"$57B+", lead:"Microsoft",
     badges:["Microsoft","Thrive","Khosla"],
-    totalRoles:24,
+    totalRoles:28,
     notes:"FDE-style 'solutions' work + applied research. Bar is extreme; emphasizes shipping + safety judgment.",
     jobs:[
       { title:"Software Engineer, Developer Productivity", url:"https://jobs.ashbyhq.com/openai/2cba0d45-7a4f-4f38-ac73-3f8633bf0349", level:"mid", added:"2026-05-31", posted:"2025-03-27" },
@@ -10201,13 +10201,17 @@ const COMPANIES = [
       { title:"Security Engineer, Insider Threat Detection & Response", url:"https://jobs.ashbyhq.com/openai/f84dbb5c-6008-40f1-b388-1434d159d4a4", level:"mid", added:"2026-07-21", posted:"2025-11-19" },
       { title:"Solutions Engineer, Pre-Sales", url:"https://jobs.ashbyhq.com/openai/e665817a-bf86-4208-8cf3-c1754c28b401", level:"mid", added:"2026-07-23", posted:"2026-01-22" },
       { title:"Offensive Security Agent Engineer", url:"https://jobs.ashbyhq.com/openai/dd7443fe-a7b8-4794-8dd5-cb7d14c00c64", level:"mid", added:"2026-07-23", posted:"2026-07-22" },
-      { title:"Forward Deployed Engineer (FDE), Healthcare - NYC", url:"https://jobs.ashbyhq.com/openai/2a931dd1-5002-47d1-a367-ec1a19ef7e9e", level:"mid", added:"2026-08-06", posted:"2026-08-06" }
+      { title:"Forward Deployed Engineer (FDE), Healthcare - NYC", url:"https://jobs.ashbyhq.com/openai/2a931dd1-5002-47d1-a367-ec1a19ef7e9e", level:"mid", added:"2026-08-06", posted:"2026-08-06" },
+      { title:"Applied AI Engineer, Startups", url:"https://jobs.ashbyhq.com/openai/71e7252f-abb1-4b74-8e69-318413042357", level:"mid", added:"2026-08-18", posted:"2026-06-01" },
+      { title:"Applied AI Engineer, Digital Natives", url:"https://jobs.ashbyhq.com/openai/3254f6a7-6353-4a77-beec-f37b832c99ae", level:"mid", added:"2026-08-18", posted:"2026-07-08" },
+      { title:"Applied AI Engineer, Enterprise", url:"https://jobs.ashbyhq.com/openai/01091aed-427d-4e10-8cdb-fb500cf55bb9", level:"mid", added:"2026-08-18", posted:"2026-07-08" },
+      { title:"Applied AI Engineer, Global Affairs", url:"https://jobs.ashbyhq.com/openai/8859d8fa-48d8-4e1a-a53f-39e7a58e4522", level:"mid", added:"2026-08-18", posted:"2026-07-21" }
     ] },
   { id:"anthropic", name:"Anthropic", vertical:"ai",
     sub:"Claude \u2014 AI safety lab",
     stage:"Series F", raised:"$18B+", lead:"Amazon",
     badges:["Amazon","Google","Spark"],
-    totalRoles:66,
+    totalRoles:75,
     notes:"Heavy values screen; expect ethical-dilemma and downside-risk questions. Applied-AI eng roles are FDE-flavored.",
     jobs:[
       { title:"Senior Software Engineer, Full-stack", url:"https://job-boards.greenhouse.io/anthropic/jobs/5174743008", level:"senior", added:"2026-05-31", posted:"2026-06-04" },
@@ -10224,7 +10228,6 @@ const COMPANIES = [
       { title:"Staff+ Software Engineer, Developer Productivity", url:"https://job-boards.greenhouse.io/anthropic/jobs/5110511008", level:"mid", added:"2026-05-31", posted:"2026-05-06" },
       { title:"Staff+ Software Engineer, Full-stack", url:"https://job-boards.greenhouse.io/anthropic/jobs/5174747008", level:"mid", added:"2026-05-31", posted:"2026-06-04" },
       { title:"Staff+ Software Engineer, Platform", url:"https://job-boards.greenhouse.io/anthropic/jobs/5157847008", level:"mid", added:"2026-05-31", posted:"2026-06-15" },
-      { title:"Staff+ Software Engineer, Privacy", url:"https://job-boards.greenhouse.io/anthropic/jobs/5159146008", level:"mid", added:"2026-05-31", posted:"2026-06-20" },
       { title:"Staff+ Software Engineer, Public Sector", url:"https://job-boards.greenhouse.io/anthropic/jobs/5205704008", level:"mid", added:"2026-05-31", posted:"2026-06-05" },
       { title:"Staff + Sr. Software Engineer, AI Reliability", url:"https://job-boards.greenhouse.io/anthropic/jobs/5113224008", level:"senior", added:"2026-05-31" },
       { title:"UI Software Engineer, Claude.ai Consumer Product", url:"https://job-boards.greenhouse.io/anthropic/jobs/5026097008", level:"mid", added:"2026-05-31" },
@@ -10275,13 +10278,23 @@ const COMPANIES = [
       { title:"Staff+ Software Engineer, Enterprise AI Products", url:"https://job-boards.greenhouse.io/anthropic/jobs/5368034008", level:"mid", added:"2026-07-23", posted:"2026-07-22" },
       { title:"Full Stack Engineer, Education Labs", url:"https://job-boards.greenhouse.io/anthropic/jobs/5097186008", level:"mid", added:"2026-08-06", posted:"2026-08-03" },
       { title:"Research Engineer, RL Engineering", url:"https://job-boards.greenhouse.io/anthropic/jobs/4952051008", level:"mid", added:"2026-08-06", posted:"2026-08-04" },
-      { title:"Software Engineer, ML Networking", url:"https://job-boards.greenhouse.io/anthropic/jobs/4926242008", level:"mid", added:"2026-08-06", posted:"2026-08-04" }
+      { title:"Software Engineer, ML Networking", url:"https://job-boards.greenhouse.io/anthropic/jobs/4926242008", level:"mid", added:"2026-08-06", posted:"2026-08-04" },
+      { title:"Applied AI Engineer, Enterprise Tech", url:"https://job-boards.greenhouse.io/anthropic/jobs/5057647008", level:"mid", added:"2026-08-06", posted:"2026-08-06" },
+      { title:"Forward Deployed Engineer", url:"https://job-boards.greenhouse.io/anthropic/jobs/5302966008", level:"mid", added:"2026-08-18", posted:"2026-08-12" },
+      { title:"Software Engineer, Desktop", url:"https://job-boards.greenhouse.io/anthropic/jobs/5367585008", level:"mid", added:"2026-08-18", posted:"2026-08-11" },
+      { title:"Software Engineer, Research Data Platform", url:"https://job-boards.greenhouse.io/anthropic/jobs/5191226008", level:"mid", added:"2026-08-18", posted:"2026-08-17" },
+      { title:"Staff+ Site Reliability Engineer, Safeguards ML Infra", url:"https://job-boards.greenhouse.io/anthropic/jobs/5230394008", level:"mid", added:"2026-08-18", posted:"2026-08-10" },
+      { title:"Staff+ Software Engineer, Data Infrastructure", url:"https://job-boards.greenhouse.io/anthropic/jobs/5114768008", level:"mid", added:"2026-08-18", posted:"2026-08-18" },
+      { title:"Staff+ Software Engineer, Infrastructure (Distributed Systems)", url:"https://job-boards.greenhouse.io/anthropic/jobs/4970314008", level:"mid", added:"2026-08-18", posted:"2026-08-07" },
+      { title:"Staff+ Software Engineer, Platform Ecosystem", url:"https://job-boards.greenhouse.io/anthropic/jobs/5392335008", level:"mid", added:"2026-08-18", posted:"2026-08-15" },
+      { title:"Staff+ Software Engineer, Privacy", url:"https://job-boards.greenhouse.io/anthropic/jobs/5383114008", level:"mid", added:"2026-08-18", posted:"2026-08-18" },
+      { title:"Staff+ Software Engineer, Safeguards Data", url:"https://job-boards.greenhouse.io/anthropic/jobs/5379140008", level:"mid", added:"2026-08-18", posted:"2026-08-14" }
     ] },
   { id:"scaleai", name:"Scale AI", vertical:"ai",
     sub:"AI data + evals + RLHF",
     stage:"Series F", raised:"$1.6B", lead:"Accel",
     badges:["Accel","Index","Founders Fund"],
-    totalRoles:36,
+    totalRoles:37,
     notes:"Data pipelines for AI labs + DoD. FDE work for enterprise deploys; long async eval workflows.",
     jobs:[
       { title:"Senior AI Infrastructure Engineer, Model Serving Platform", url:"https://job-boards.greenhouse.io/scaleai/jobs/4520320005", level:"senior", added:"2026-05-31", posted:"2026-05-26" },
@@ -10319,7 +10332,8 @@ const COMPANIES = [
       { title:"Frontier Agents Engineer (Forward Deployed Engineering)", url:"https://job-boards.greenhouse.io/scaleai/jobs/4694861005", level:"mid", added:"2026-08-06", posted:"2026-08-04" },
       { title:"Infrastructure Security Engineer, Public Sector", url:"https://job-boards.greenhouse.io/scaleai/jobs/4718258005", level:"mid", added:"2026-08-06", posted:"2026-08-04" },
       { title:"Security Engineer, Public Sector", url:"https://job-boards.greenhouse.io/scaleai/jobs/4718314005", level:"mid", added:"2026-08-06", posted:"2026-08-04" },
-      { title:"Software Engineer, Gen AI", url:"https://job-boards.greenhouse.io/scaleai/jobs/4591300005", level:"mid", added:"2026-08-06", posted:"2026-08-04" }
+      { title:"Software Engineer, Gen AI", url:"https://job-boards.greenhouse.io/scaleai/jobs/4591300005", level:"mid", added:"2026-08-06", posted:"2026-08-04" },
+      { title:"Forward Deployed Product Designer", url:"https://job-boards.greenhouse.io/scaleai/jobs/4724276005", level:"mid", added:"2026-08-18", posted:"2026-08-14" }
     ] },
   { id:"decagon", name:"Decagon", vertical:"ai",
     sub:"AI customer-support agents",
@@ -10364,9 +10378,9 @@ const COMPANIES = [
       { title:"Software Engineer, ML Systems", url:"https://jobs.ashbyhq.com/mirage/77f90cfc-e2a1-40d0-9e57-34a4d4d451b2", level:"mid", added:"2026-07-21", posted:"2026-07-13" },
       { title:"ML Engineer, Agentic Systems", url:"https://jobs.ashbyhq.com/mirage/453b6a5b-c1ec-4f1e-8508-c1627caa5907", level:"mid", added:"2026-07-21", posted:"2026-07-13" },
       { title:"ML Engineer, Generative Video", url:"https://jobs.ashbyhq.com/mirage/b441af00-ee73-4cde-94b1-d870ff2b191d", level:"mid", added:"2026-07-21", posted:"2026-07-20" },
-      { title:"Research Engineer, Generative Video", url:"https://jobs.ashbyhq.com/mirage/ffbda52e-3b05-44a8-ac89-6e87e8e3f757", level:"mid", added:"2026-08-06", posted:"2026-08-02" },
       { title:"Software Engineer, Backend", url:"https://jobs.ashbyhq.com/mirage/d5b5193e-90e8-4d10-8e01-e8fdd7dad6e1", level:"mid", added:"2026-08-06", posted:"2026-08-02" },
-      { title:"Research Engineer, Agentic Systems", url:"https://jobs.ashbyhq.com/mirage/26d1cd9c-42f8-40a1-a130-063d499145cb", level:"mid", added:"2026-08-06", posted:"2026-08-02" }
+      { title:"Research Engineer, Generative Video", url:"https://jobs.ashbyhq.com/mirage/48f6319b-9db8-45ae-b328-1f59547cde95", level:"mid", added:"2026-08-18", posted:"2026-08-17" },
+      { title:"Research Engineer, Agentic Systems", url:"https://jobs.ashbyhq.com/mirage/05c94660-f8a4-4415-b497-694dd18828ab", level:"mid", added:"2026-08-18", posted:"2026-08-17" }
     ] },
   { id:"tavily", name:"Tavily", vertical:"ai",
     sub:"Search API for AI agents (acq. by Nebius Feb 2026)",
@@ -10422,7 +10436,7 @@ const COMPANIES = [
     sub:"AI agents for consumer brands",
     stage:"Series A", raised:"$110M", lead:"Sequoia",
     badges:["Sequoia","Benchmark"],
-    totalRoles:13,
+    totalRoles:16,
     notes:"Bret Taylor's agent co. Customer-deploy heavy.",
     jobs:[
       { title:"Software Engineer, Agent", url:"https://jobs.ashbyhq.com/sierra/e9f5fdb6-91ee-4c55-9230-41ec8865650e", level:"mid", added:"2026-05-31", posted:"2025-04-18" },
@@ -10437,7 +10451,10 @@ const COMPANIES = [
       { title:"Software Engineer - Healthcare Integrations", url:"https://jobs.ashbyhq.com/sierra/97ca0c70-f371-4167-9908-2adca3464b8d", level:"mid", added:"2026-08-06", posted:"2026-08-04" },
       { title:"Enterprise Sales Engineer, Retail", url:"https://jobs.ashbyhq.com/sierra/17bd055c-c281-4c01-bf61-671710b25cc0", level:"mid", added:"2026-08-06", posted:"2026-08-05" },
       { title:"Enterprise Sales Engineer, Healthcare", url:"https://jobs.ashbyhq.com/sierra/ab7ce8a1-d088-4808-93e2-a4162c315821", level:"mid", added:"2026-08-06", posted:"2026-08-05" },
-      { title:"Enterprise Sales Engineer, Financial Services", url:"https://jobs.ashbyhq.com/sierra/41fa146b-73a4-41d0-a546-bcf504945772", level:"mid", added:"2026-08-06", posted:"2026-08-05" }
+      { title:"Enterprise Sales Engineer, Financial Services", url:"https://jobs.ashbyhq.com/sierra/41fa146b-73a4-41d0-a546-bcf504945772", level:"mid", added:"2026-08-06", posted:"2026-08-05" },
+      { title:"Enterprise Sales Engineer (Spanish speaking)", url:"https://jobs.ashbyhq.com/sierra/adaa6543-00df-4e5f-8e40-e4327ccb764c", level:"mid", added:"2026-08-18", posted:"2026-08-11" },
+      { title:"Enterprise Sales Engineer (Brazilian Portuguese speaking)", url:"https://jobs.ashbyhq.com/sierra/102b597d-876d-458f-bf11-58924df4b73d", level:"mid", added:"2026-08-18", posted:"2026-08-11" },
+      { title:"Software Engineer, Agent - Tech, Media & Telecom", url:"https://jobs.ashbyhq.com/sierra/4472e6c2-fe4e-4540-a37c-68b9367fe02a", level:"mid", added:"2026-08-18", posted:"2026-08-13" }
     ] },
   { id:"cognition", name:"Cognition", vertical:"ai",
     sub:"Devin \u2014 autonomous SWE agent",
@@ -10494,7 +10511,7 @@ const COMPANIES = [
     sub:"AI answer engine",
     stage:"Series C", raised:"$165M", lead:"IVP",
     badges:["IVP","NEA","NVIDIA"],
-    totalRoles:22,
+    totalRoles:24,
     notes:"Conversational answer engine with citations. Retrieval + ranking + UX.",
     jobs:[
       { title:"Member of Technical Staff (Software Engineer, Monetization)", url:"https://jobs.ashbyhq.com/perplexity/043d6a58-87a1-4e3c-bf47-4dc351b94cf4", level:"mid", added:"2026-05-31", posted:"2026-04-23" },
@@ -10518,13 +10535,15 @@ const COMPANIES = [
       { title:"Member of Technical Staff (Offensive Security Engineer)", url:"https://jobs.ashbyhq.com/perplexity/69fd6a56-0050-44f7-9ed2-2c3a7320908d", level:"mid", added:"2026-07-21", posted:"2026-04-02" },
       { title:"Member of Technical Staff (Software Engineer, Enterprise Adoption)", url:"https://jobs.ashbyhq.com/perplexity/3c16733a-07d1-42d9-ac54-ff9065f702cf", level:"mid", added:"2026-07-23", posted:"2026-07-24" },
       { title:"Member of Technical Staff (Software Engineer, GPU Cluster Infrastructure)", url:"https://jobs.ashbyhq.com/perplexity/886f4ab3-e691-45ed-b2db-069edf6f5413", level:"mid", added:"2026-08-06", posted:"2026-08-05" },
-      { title:"Member of Technical Staff (Software Engineer, Backend API)", url:"https://jobs.ashbyhq.com/perplexity/9ca67ae3-8507-40b9-9d7f-d81b249c1041", level:"mid", added:"2026-08-06", posted:"2026-08-06" }
+      { title:"Member of Technical Staff (Software Engineer, Backend API)", url:"https://jobs.ashbyhq.com/perplexity/9ca67ae3-8507-40b9-9d7f-d81b249c1041", level:"mid", added:"2026-08-06", posted:"2026-08-06" },
+      { title:"Member of Technical Staff (Software Engineer, Data Flywheel)", url:"https://jobs.ashbyhq.com/perplexity/7755eb0a-0f51-4286-b75e-591e44c741bc", level:"mid", added:"2026-08-18", posted:"2026-04-13" },
+      { title:"Member of Technical Staff (Software Engineer, Design System)", url:"https://jobs.ashbyhq.com/perplexity/78675022-c4a7-41d2-9259-7c59be4de93c", level:"mid", added:"2026-08-18", posted:"2026-08-11" }
     ] },
   { id:"cohere", name:"Cohere", vertical:"ai",
     sub:"Enterprise LLM platform",
     stage:"Series C", raised:"$945M", lead:"Inovia",
     badges:["Inovia","Index","Tiger","NVIDIA"],
-    totalRoles:12,
+    totalRoles:15,
     notes:"Enterprise LLM toolchain. Strong RAG + finetuning depth.",
     jobs:[
       { title:"Senior ML Systems Engineer, Frameworks & Tooling", url:"https://jobs.ashbyhq.com/cohere/c99e61c9-ed92-426d-9711-188dfc0f729f", level:"senior", added:"2026-05-31", posted:"2025-12-01" },
@@ -10538,7 +10557,10 @@ const COMPANIES = [
       { title:"Senior Security Engineer", url:"https://jobs.ashbyhq.com/cohere/cb981ecd-a161-482c-8d8e-5f19bb6e7fdd", level:"senior", added:"2026-07-21", posted:"2025-10-29" },
       { title:"Senior Research Engineer - Safety Tooling and Data", url:"https://jobs.ashbyhq.com/cohere/2d4d224f-94d4-40ce-88d5-5d340bc0da4e", level:"senior", added:"2026-07-21", posted:"2026-06-26" },
       { title:"Member of Technical Staff, Integration/RL Team (Research Engineer)", url:"https://jobs.ashbyhq.com/cohere/e9ef9420-88e5-403b-82e8-1c36fa010d4d", level:"mid", added:"2026-07-21", posted:"2025-08-19" },
-      { title:"Site Reliability Engineer, Inference Infrastructure", url:"https://jobs.ashbyhq.com/cohere/8b6696e1-f1c4-4010-bde9-3cec1340a2a6", level:"mid", added:"2026-07-21", posted:"2026-01-12" }
+      { title:"Site Reliability Engineer, Inference Infrastructure", url:"https://jobs.ashbyhq.com/cohere/8b6696e1-f1c4-4010-bde9-3cec1340a2a6", level:"mid", added:"2026-07-21", posted:"2026-01-12" },
+      { title:"Senior Full-Stack Engineer, North Tools & Retrieval", url:"https://jobs.ashbyhq.com/cohere/6ebac60b-0758-4bb8-8299-44328d4926cb", level:"senior", added:"2026-08-18", posted:"2026-08-11" },
+      { title:"Data Engineer, Data Foundations", url:"https://jobs.ashbyhq.com/cohere/9baccd88-c051-474f-bfe8-6867fca54cee", level:"mid", added:"2026-08-18", posted:"2026-08-14" },
+      { title:"Software Engineer, Integrations", url:"https://jobs.ashbyhq.com/cohere/96c74af4-b3d7-4960-a666-212ce4debac8", level:"mid", added:"2026-08-18", posted:"2026-08-11" }
     ] },
   { id:"cursor", name:"Cursor", vertical:"ai",
     sub:"AI-first code editor",
@@ -10572,7 +10594,7 @@ const COMPANIES = [
     sub:"LLM app dev framework",
     stage:"Series A", raised:"$25M", lead:"Sequoia",
     badges:["Sequoia","Benchmark"],
-    totalRoles:8,
+    totalRoles:12,
     notes:"LangSmith + framework. Agent tooling, observability, evals.",
     jobs:[
       { title:"Senior Fullstack Engineer,  AI Observability & Evals Platform", url:"https://jobs.ashbyhq.com/langchain/a03b3e54-495d-4960-aee7-0194a3cef57d", level:"senior", added:"2026-05-31", posted:"2025-02-19" },
@@ -10582,13 +10604,17 @@ const COMPANIES = [
       { title:"FullStack Engineer,  AI Observability & Evals Platform (LangSmith)", url:"https://jobs.ashbyhq.com/langchain/ddf92275-1cc3-49c0-9f25-e8ded43b07f6", level:"mid", added:"2026-05-31", posted:"2025-08-15" },
       { title:"Fullstack Software Engineer, Applied AI", url:"https://jobs.ashbyhq.com/langchain/c75915ba-a32b-4e17-873d-19b47564170d", level:"mid", added:"2026-05-31", posted:"2025-09-12" },
       { title:"Senior Fullstack Engineer, Growth & Monetization", url:"https://jobs.ashbyhq.com/langchain/f07bfbad-6daf-4b11-b5bb-2c3bbc47c53c", level:"senior", added:"2026-06-16", posted:"2026-06-10" },
-      { title:"Senior Backend Engineer, LangSmith Deployments", url:"https://jobs.ashbyhq.com/langchain/cb61f821-d8c4-4ec5-940d-3fd83be63a5f", level:"senior", added:"2026-07-21", posted:"2026-02-25" }
+      { title:"Senior Backend Engineer, LangSmith Deployments", url:"https://jobs.ashbyhq.com/langchain/cb61f821-d8c4-4ec5-940d-3fd83be63a5f", level:"senior", added:"2026-07-21", posted:"2026-02-25" },
+      { title:"Senior Frontend Engineer, AI Observability & Evals Platform", url:"https://jobs.ashbyhq.com/langchain/afb91b9b-46d5-4c9d-aa84-a4f1a3f74263", level:"senior", added:"2026-08-18", posted:"2026-08-13" },
+      { title:"Frontend Engineer, AI Observability & Evals Platform", url:"https://jobs.ashbyhq.com/langchain/f7de4819-e7aa-4dfb-9acd-8b81ad8caf2c", level:"mid", added:"2026-08-18", posted:"2026-08-12" },
+      { title:"Security Engineer - Detection & Response", url:"https://jobs.ashbyhq.com/langchain/7b1e5ff7-4531-4d4a-8379-52a21b6d386d", level:"mid", added:"2026-08-18", posted:"2026-08-17" },
+      { title:"Research Engineer, LangSmith Engine", url:"https://jobs.ashbyhq.com/langchain/bdc96ffd-2a95-4d63-bf8f-193574961e00", level:"mid", added:"2026-08-18", posted:"2026-08-14" }
     ] },
   { id:"baseten", name:"Baseten", vertical:"ai",
     sub:"ML model deployment",
     stage:"Series C", raised:"$135M", lead:"IVP",
     badges:["IVP","Spark","Greylock"],
-    totalRoles:25,
+    totalRoles:29,
     notes:"Model deployment infra. Inference engineering, autoscaling GPU.",
     jobs:[
       { title:"Software Engineer - Core Product", url:"https://jobs.ashbyhq.com/baseten/fc6e5f2e-eb2d-4a6c-8a51-8422e8662bde", level:"mid", added:"2026-05-31", posted:"2024-07-09" },
@@ -10615,7 +10641,11 @@ const COMPANIES = [
       { title:"Site Reliability Engineer", url:"https://jobs.ashbyhq.com/baseten/ff008b8e-b38d-4941-b24f-9a48c970e7fb", level:"mid", added:"2026-07-21", posted:"2026-05-11" },
       { title:"Security Engineer", url:"https://jobs.ashbyhq.com/baseten/b85e4b1d-6531-46b5-bc8a-238f3761a50e", level:"mid", added:"2026-07-21", posted:"2026-04-01" },
       { title:"AI Solutions Engineer", url:"https://jobs.ashbyhq.com/baseten/508b792d-57a0-467e-9a89-76fe72e84433", level:"mid", added:"2026-07-23", posted:"2026-04-21" },
-      { title:"Forward Deployed Engineer (Training)", url:"https://jobs.ashbyhq.com/baseten/454b6a44-1cad-4afe-aceb-2630c0918dac", level:"mid", added:"2026-07-23", posted:"2026-07-22" }
+      { title:"Forward Deployed Engineer (Training)", url:"https://jobs.ashbyhq.com/baseten/454b6a44-1cad-4afe-aceb-2630c0918dac", level:"mid", added:"2026-07-23", posted:"2026-07-22" },
+      { title:"Software Engineer - Observability", url:"https://jobs.ashbyhq.com/baseten/3e925ab1-2089-4a79-989e-50479b546eda", level:"mid", added:"2026-08-18", posted:"2026-08-10" },
+      { title:"Software Engineer - Continuous Delivery", url:"https://jobs.ashbyhq.com/baseten/fb886b59-fdc3-4315-a9b3-c49808bcd2ce", level:"mid", added:"2026-08-18", posted:"2026-08-11" },
+      { title:"Software Engineer - Testing Frameworks", url:"https://jobs.ashbyhq.com/baseten/78028a72-2431-4373-aaec-d6e2c9a1cc7d", level:"mid", added:"2026-08-18", posted:"2026-08-11" },
+      { title:"Software Engineer - AI Developer Productivity", url:"https://jobs.ashbyhq.com/baseten/e71e97a8-6367-4050-b6a9-42ce62ec78f1", level:"mid", added:"2026-08-18", posted:"2026-08-11" }
     ] },
   { id:"deepgram", name:"Deepgram", vertical:"ai",
     sub:"Speech AI / STT",
@@ -10657,19 +10687,20 @@ const COMPANIES = [
     sub:"AI for medical scribing",
     stage:"Series D", raised:"$462M", lead:"Lightspeed",
     badges:["Lightspeed","CVS","Khosla"],
-    totalRoles:4,
+    totalRoles:5,
     notes:"Real-time medical transcription. Audio + clinical NLP + EHR.",
     jobs:[
       { title:"Senior Platform Engineer", url:"https://jobs.ashbyhq.com/abridge/d980a314-1c5f-422e-99f9-d36bda21f49d", level:"senior", added:"2026-05-31", posted:"2025-05-21" },
       { title:"Software Engineer - Early Career", url:"https://jobs.ashbyhq.com/abridge/7d6ae2be-cd53-466c-8151-2dae2e87aace", level:"mid", added:"2026-07-21", posted:"2026-07-13" },
       { title:"Senior/Staff Infrastructure Security Engineer", url:"https://jobs.ashbyhq.com/abridge/b55901ff-e42e-44bc-b2ec-c2c40410b6e7", level:"senior", added:"2026-07-21", posted:"2026-07-09" },
-      { title:"Software Engineer, GenAI", url:"https://jobs.ashbyhq.com/abridge/897709b2-e03d-4574-8611-5cfd669adde9", level:"mid", added:"2026-08-06", posted:"2026-07-29" }
+      { title:"Software Engineer, GenAI", url:"https://jobs.ashbyhq.com/abridge/897709b2-e03d-4574-8611-5cfd669adde9", level:"mid", added:"2026-08-06", posted:"2026-07-29" },
+      { title:"Senior/Staff Software Engineer, Front End", url:"https://jobs.ashbyhq.com/abridge/983ea248-e6c9-43bc-a27d-914091173337", level:"senior", added:"2026-08-18", posted:"2026-08-17" }
     ] },
   { id:"stripe", name:"Stripe", vertical:"fintech",
     sub:"Payments + financial infra",
     stage:"Late stage", raised:"$8.7B", lead:"Sequoia",
     badges:["Sequoia","a16z","General Catalyst"],
-    totalRoles:12,
+    totalRoles:14,
     notes:"Payments at planet scale. Distributed systems, idempotency, money.",
     jobs:[
       { title:"Backend Engineer, AI Security", url:"https://stripe.com/jobs/search?gh_jid=7826765", level:"mid", added:"2026-05-31", posted:"2026-06-05" },
@@ -10683,7 +10714,9 @@ const COMPANIES = [
       { title:"Client Platform Security Engineer", url:"https://stripe.com/jobs/search?gh_jid=7982720", level:"mid", added:"2026-07-21", posted:"2026-07-17" },
       { title:"Security Engineer, Bridge", url:"https://stripe.com/jobs/search?gh_jid=7776179", level:"mid", added:"2026-07-21", posted:"2026-06-26" },
       { title:"Forward Deployed Engineer, Professional Services", url:"https://stripe.com/jobs/search?gh_jid=8075570", level:"mid", added:"2026-08-06", posted:"2026-08-06" },
-      { title:"Security Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=8073092", level:"mid", added:"2026-08-06", posted:"2026-08-06" }
+      { title:"Security Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=8073092", level:"mid", added:"2026-08-06", posted:"2026-08-06" },
+      { title:"Backend Engineer, Link (US)", url:"https://stripe.com/jobs/search?gh_jid=8131144", level:"mid", added:"2026-08-18", posted:"2026-08-14" },
+      { title:"Software Engineer, Backend Engineer- Credit Coverage", url:"https://stripe.com/jobs/search?gh_jid=8130578", level:"mid", added:"2026-08-18", posted:"2026-08-14" }
     ] },
   { id:"ramp", name:"Ramp", vertical:"fintech",
     sub:"Corporate cards + finance ops",
@@ -10775,26 +10808,29 @@ const COMPANIES = [
     sub:"Identity decisioning for fintech",
     stage:"Series C", raised:"$207M", lead:"Lightspeed",
     badges:["Lightspeed","Avenir"],
-    totalRoles:5,
+    totalRoles:6,
     notes:"KYC/AML infra. Identity graph, compliance UX.",
     jobs:[
       { title:"Senior Software Engineer, Decisioning", url:"https://www.alloy.com/about/jobs/detail?gh_jid=8538706002&gh_jid=8538706002", level:"senior", added:"2026-05-31", posted:"2026-06-16" },
       { title:"Senior Software Engineer, Platform", url:"https://www.alloy.com/about/jobs/detail?gh_jid=8538688002&gh_jid=8538688002", level:"senior", added:"2026-05-31", posted:"2026-06-18" },
       { title:"Applied AI Engineer, Ops", url:"https://www.alloy.com/about/jobs/detail?gh_jid=8552760002&gh_jid=8552760002", level:"mid", added:"2026-06-16", posted:"2026-06-16" },
       { title:"Founding Forward Deployed Engineer", url:"https://www.alloy.com/about/jobs/detail?gh_jid=8610085002&gh_jid=8610085002", level:"founding", added:"2026-06-30", posted:"2026-06-26" },
-      { title:"Senior Software Engineer II, Frontend Platform", url:"https://www.alloy.com/about/jobs/detail?gh_jid=8636096002&gh_jid=8636096002", level:"senior", added:"2026-07-21", posted:"2026-07-16" }
+      { title:"Senior Software Engineer II, Frontend Platform", url:"https://www.alloy.com/about/jobs/detail?gh_jid=8636096002&gh_jid=8636096002", level:"senior", added:"2026-07-21", posted:"2026-07-16" },
+      { title:"Senior Software Engineer, Product", url:"https://www.alloy.com/about/jobs/detail?gh_jid=8687389002&gh_jid=8687389002", level:"senior", added:"2026-08-18", posted:"2026-08-07" }
     ] },
   { id:"gusto", name:"Gusto", vertical:"fintech",
     sub:"Payroll / HR for SMBs",
     stage:"Series E", raised:"$716M", lead:"Generation",
     badges:["Generation","Kleiner","YC"],
-    totalRoles:4,
+    totalRoles:6,
     notes:"Payroll engine + benefits. Compliance, money movement, multi-state tax.",
     jobs:[
       { title:"Sr Software Engineer, Database Infrastructure", url:"https://job-boards.greenhouse.io/gusto/jobs/7413644", level:"senior", added:"2026-07-21", posted:"2026-07-08" },
       { title:"Senior Staff Software Engineer, Money Group", url:"https://job-boards.greenhouse.io/gusto/jobs/7654934", level:"senior", added:"2026-07-21", posted:"2026-06-25" },
       { title:"Sr. Staff AI/ML Engineer", url:"https://job-boards.greenhouse.io/gusto/jobs/7307124", level:"senior", added:"2026-07-21", posted:"2026-07-01" },
-      { title:"Senior Staff Software Engineer, iOS Platform", url:"https://job-boards.greenhouse.io/gusto/jobs/8083826", level:"senior", added:"2026-08-06", posted:"2026-07-28" }
+      { title:"Senior Staff Software Engineer, iOS Platform", url:"https://job-boards.greenhouse.io/gusto/jobs/8083826", level:"senior", added:"2026-08-06", posted:"2026-07-28" },
+      { title:"Senior Data Engineer", url:"https://job-boards.greenhouse.io/gusto/jobs/8099751", level:"senior", added:"2026-08-18", posted:"2026-08-14" },
+      { title:"Software Engineer, ML Platform", url:"https://job-boards.greenhouse.io/gusto/jobs/8073232", level:"mid", added:"2026-08-18", posted:"2026-08-14" }
     ] },
   { id:"robinhood", name:"Robinhood", vertical:"fintech",
     sub:"Retail brokerage (NASDAQ)",
@@ -10862,11 +10898,12 @@ const COMPANIES = [
     sub:"Fintech for low-income Americans",
     stage:"Series B", raised:"$50M", lead:"Andreessen Horowitz",
     badges:["a16z","Kleiner","Serena Williams"],
-    totalRoles:2,
+    totalRoles:3,
     notes:"SNAP-balance app + benefits financial services. Mission-driven.",
     jobs:[
       { title:"Senior Full Stack Engineer, Healthcare", url:"https://jobs.ashbyhq.com/propel/e6a61c7b-87bb-448c-81c7-2db5a2bb1d9f", level:"senior", added:"2026-05-31", posted:"2026-04-01" },
-      { title:"Senior Platform Engineer", url:"https://jobs.ashbyhq.com/propel/11265618-fbca-405c-b52f-a9b85ffe6aed", level:"senior", added:"2026-05-31", posted:"2026-04-01" }
+      { title:"Senior Platform Engineer", url:"https://jobs.ashbyhq.com/propel/11265618-fbca-405c-b52f-a9b85ffe6aed", level:"senior", added:"2026-05-31", posted:"2026-04-01" },
+      { title:"Senior Full Stack Engineer", url:"https://jobs.ashbyhq.com/propel/d0e96770-a073-4d53-88b6-586d74db35e8", level:"senior", added:"2026-08-18", posted:"2026-08-11" }
     ] },
   { id:"gemini", name:"Gemini", vertical:"fintech",
     sub:"Crypto exchange + prediction markets (NASDAQ: GEMI)",
@@ -10899,7 +10936,7 @@ const COMPANIES = [
     sub:"Cloud monitoring (NASDAQ)",
     stage:"Public", raised:"$148M pre-IPO", lead:"Index",
     badges:["NASDAQ","Index","OpenView"],
-    totalRoles:17,
+    totalRoles:18,
     notes:"Public co. Time-series infra, alerting, observability depth.",
     jobs:[
       { title:"Senior Software Engineer - Distributed Systems", url:"https://careers.datadoghq.com/detail/3851927/?gh_jid=3851927", level:"senior", added:"2026-05-31", posted:"2026-06-16" },
@@ -10918,20 +10955,20 @@ const COMPANIES = [
       { title:"Security Sales Engineer", url:"https://careers.datadoghq.com/detail/7554877/?gh_jid=7554877", level:"mid", added:"2026-07-23", posted:"2026-07-21" },
       { title:"Senior Software Engineer - Bazel Tools", url:"https://careers.datadoghq.com/detail/8095166/?gh_jid=8095166", level:"senior", added:"2026-08-06", posted:"2026-07-29" },
       { title:"Partner Technology Solutions Engineer", url:"https://careers.datadoghq.com/detail/7961297/?gh_jid=7961297", level:"mid", added:"2026-08-06", posted:"2026-07-28" },
-      { title:"Systems Engineer 2, Technical Solutions (US-East)", url:"https://careers.datadoghq.com/detail/8092973/?gh_jid=8092973", level:"mid", added:"2026-08-06", posted:"2026-07-31" }
+      { title:"Systems Engineer 2, Technical Solutions (US-East)", url:"https://careers.datadoghq.com/detail/8092973/?gh_jid=8092973", level:"mid", added:"2026-08-06", posted:"2026-07-31" },
+      { title:"Mid-Market Sales Engineer (NYC)", url:"https://careers.datadoghq.com/detail/8114029/?gh_jid=8114029", level:"mid", added:"2026-08-18", posted:"2026-08-12" }
     ] },
   { id:"mongodb", name:"MongoDB", vertical:"devtools",
     sub:"Document database (NASDAQ)",
     stage:"Public", raised:"$311M pre-IPO", lead:"Sequoia",
     badges:["NASDAQ","Sequoia","Union Square"],
-    totalRoles:17,
+    totalRoles:18,
     notes:"Public co. Database internals, distributed systems.",
     jobs:[
       { title:"Senior Software Engineer, Atlas Clusters Platform", url:"https://www.mongodb.com/careers/job/?gh_jid=7890652", level:"senior", added:"2026-05-31", posted:"2026-06-18" },
       { title:"Senior Software Engineer, Server Security", url:"https://www.mongodb.com/careers/job/?gh_jid=7815677", level:"senior", added:"2026-05-31", posted:"2026-06-18" },
       { title:"Senior Software Engineer, Public Backup", url:"https://www.mongodb.com/careers/job/?gh_jid=7975692", level:"senior", added:"2026-06-16", posted:"2026-06-18" },
       { title:"Senior Software Engineer, Storage Layer Services", url:"https://www.mongodb.com/careers/job/?gh_jid=7947560", level:"senior", added:"2026-06-22", posted:"2026-06-18" },
-      { title:"Software Engineer 3", url:"https://www.mongodb.com/careers/job/?gh_jid=8015792", level:"mid", added:"2026-06-30", posted:"2026-06-23" },
       { title:"Software Engineer 3, Query Integration", url:"https://www.mongodb.com/careers/job/?gh_jid=8010102", level:"mid", added:"2026-06-30", posted:"2026-06-24" },
       { title:"Software Engineer 3, Documentation Platform", url:"https://www.mongodb.com/careers/job/?gh_jid=8054991", level:"mid", added:"2026-07-21", posted:"2026-07-16" },
       { title:"Security Software Engineer, Infrastructure Security (Staff or Senior)", url:"https://www.mongodb.com/careers/job/?gh_jid=7727896", level:"senior", added:"2026-07-21", posted:"2026-07-16" },
@@ -10943,7 +10980,9 @@ const COMPANIES = [
       { title:"Site Reliability Engineer 3", url:"https://www.mongodb.com/careers/job/?gh_jid=7821316", level:"mid", added:"2026-07-21", posted:"2026-07-21" },
       { title:"Software Engineer 3", url:"https://www.mongodb.com/careers/job/?gh_jid=8069776", level:"mid", added:"2026-07-21", posted:"2026-07-21" },
       { title:"Product Security Engineer, Server", url:"https://www.mongodb.com/careers/job/?gh_jid=8098695", level:"mid", added:"2026-08-06", posted:"2026-08-06" },
-      { title:"Software Engineer 3", url:"https://www.mongodb.com/careers/job/?gh_jid=8083761", level:"mid", added:"2026-08-06", posted:"2026-08-06" }
+      { title:"Software Engineer 3", url:"https://www.mongodb.com/careers/job/?gh_jid=8083761", level:"mid", added:"2026-08-06", posted:"2026-08-06" },
+      { title:"Senior Software Engineer", url:"https://www.mongodb.com/careers/job/?gh_jid=8065483", level:"senior", added:"2026-08-18", posted:"2026-08-17" },
+      { title:"Software Engineer 3", url:"https://www.mongodb.com/careers/job/?gh_jid=8107198", level:"mid", added:"2026-08-18", posted:"2026-08-17" }
     ] },
   { id:"vercel", name:"Vercel", vertical:"devtools",
     sub:"Frontend cloud / Next.js",
@@ -10973,7 +11012,7 @@ const COMPANIES = [
     sub:"No-code database",
     stage:"Late stage", raised:"$1.4B", lead:"Thrive",
     badges:["Thrive","Coatue","Caffeinated"],
-    totalRoles:8,
+    totalRoles:9,
     notes:"No-code data platform. App framework + AI features.",
     jobs:[
       { title:"Software Engineer, Compute (8+ YOE)", url:"https://job-boards.greenhouse.io/airtable/jobs/8442397002", level:"mid", added:"2026-05-31", posted:"2026-05-13" },
@@ -10983,7 +11022,8 @@ const COMPANIES = [
       { title:"Software Engineer, Product Backend (8+ YOE)", url:"https://job-boards.greenhouse.io/airtable/jobs/8397618002", level:"mid", added:"2026-06-16", posted:"2026-06-12" },
       { title:"Software Engineer, Product Frontend (8+ YOE)", url:"https://job-boards.greenhouse.io/airtable/jobs/8397228002", level:"mid", added:"2026-06-16", posted:"2026-06-16" },
       { title:"Forward Deployed Engineer", url:"https://job-boards.greenhouse.io/airtable/jobs/8617009002", level:"mid", added:"2026-07-21", posted:"2026-07-13" },
-      { title:"Product Security Engineer", url:"https://job-boards.greenhouse.io/airtable/jobs/8533547002", level:"mid", added:"2026-08-06", posted:"2026-07-27" }
+      { title:"Product Security Engineer", url:"https://job-boards.greenhouse.io/airtable/jobs/8533547002", level:"mid", added:"2026-08-06", posted:"2026-07-27" },
+      { title:"Software Engineer, Product Backend (4-8 YOE)", url:"https://job-boards.greenhouse.io/airtable/jobs/8397515002", level:"mid", added:"2026-08-18", posted:"2026-08-13" }
     ] },
   { id:"sigma-computing", name:"Sigma", vertical:"devtools",
     sub:"Cloud BI",
@@ -11062,11 +11102,12 @@ const COMPANIES = [
     sub:"Day-pass hotel marketplace",
     stage:"Series B", raised:"$56M", lead:"Charlesbank",
     badges:["Charlesbank","Declaration"],
-    totalRoles:2,
+    totalRoles:3,
     notes:"Inventory + pricing for hotel amenities.",
     jobs:[
       { title:"Senior Software Engineer, Frontend", url:"https://job-boards.greenhouse.io/resortpass/jobs/5037441007", level:"senior", added:"2026-05-31", posted:"2026-06-11" },
-      { title:"Software Engineer - Full Stack", url:"https://job-boards.greenhouse.io/resortpass/jobs/5059472007", level:"mid", added:"2026-05-31", posted:"2026-06-11" }
+      { title:"Software Engineer - Full Stack", url:"https://job-boards.greenhouse.io/resortpass/jobs/5059472007", level:"mid", added:"2026-05-31", posted:"2026-06-11" },
+      { title:"Senior Software Engineer, Backend \u2014 Booking Platform & APIs", url:"https://job-boards.greenhouse.io/resortpass/jobs/5209861007", level:"senior", added:"2026-08-18", posted:"2026-08-11" }
     ] },
   { id:"talkspace", name:"Talkspace", vertical:"health",
     sub:"Online therapy (NASDAQ)",
@@ -11131,7 +11172,7 @@ const COMPANIES = [
     sub:"Collaborative design",
     stage:"Pre-IPO", raised:"$333M", lead:"Index",
     badges:["Index","Sequoia","Greylock"],
-    totalRoles:17,
+    totalRoles:18,
     notes:"Multiplayer collaboration at scale. CRDT, real-time infra, design tooling depth.",
     jobs:[
       { title:"Data Engineer", url:"https://boards.greenhouse.io/figma/jobs/5220003004?gh_jid=5220003004", level:"mid", added:"2026-05-31", posted:"2026-04-15" },
@@ -11150,13 +11191,14 @@ const COMPANIES = [
       { title:"Software Engineer, iOS", url:"https://boards.greenhouse.io/figma/jobs/6100023004?gh_jid=6100023004", level:"mid", added:"2026-06-30", posted:"2026-06-25" },
       { title:"Software Engineer, Traffic", url:"https://boards.greenhouse.io/figma/jobs/6102379004?gh_jid=6102379004", level:"mid", added:"2026-06-30", posted:"2026-06-26" },
       { title:"Forward Deployed Engineer", url:"https://boards.greenhouse.io/figma/jobs/6110219004?gh_jid=6110219004", level:"mid", added:"2026-07-21", posted:"2026-07-17" },
-      { title:"Security Engineer", url:"https://boards.greenhouse.io/figma/jobs/5829751004?gh_jid=5829751004", level:"mid", added:"2026-07-21", posted:"2026-07-17" }
+      { title:"Security Engineer", url:"https://boards.greenhouse.io/figma/jobs/5829751004?gh_jid=5829751004", level:"mid", added:"2026-07-21", posted:"2026-07-17" },
+      { title:"Software Engineer - Application Platform", url:"https://boards.greenhouse.io/figma/jobs/6142506004?gh_jid=6142506004", level:"mid", added:"2026-08-18", posted:"2026-08-17" }
     ] },
   { id:"notion", name:"Notion", vertical:"saas",
     sub:"Connected workspace + AI",
     stage:"Series C", raised:"$343M", lead:"Index",
     badges:["Sequoia","Index","Coatue"],
-    totalRoles:11,
+    totalRoles:13,
     notes:"Block-based docs + LLM features. Schema design, perf, AI eval.",
     jobs:[
       { title:"Forward Deployed Engineer, GTM", url:"https://jobs.ashbyhq.com/notion/10437426-14c8-4c45-8075-67959ce80393", level:"mid", added:"2026-05-31", posted:"2025-08-07" },
@@ -11169,13 +11211,15 @@ const COMPANIES = [
       { title:"Software Engineer, AI Platform", url:"https://jobs.ashbyhq.com/notion/a9d4a192-d31c-48d2-8156-e2a75d98eec1", level:"mid", added:"2026-07-21", posted:"2026-07-14" },
       { title:"Security Engineer, Corporate Security", url:"https://jobs.ashbyhq.com/notion/477768e1-37af-49bc-a4de-6564e0a4ec54", level:"mid", added:"2026-07-21", posted:"2026-06-08" },
       { title:"Solutions Engineer - Enterprise - AMER", url:"https://jobs.ashbyhq.com/notion/b0c0afb3-f075-47c7-9a8e-428032b3bb20", level:"mid", added:"2026-07-23", posted:"2025-10-27" },
-      { title:"Solutions Engineer, Commercial", url:"https://jobs.ashbyhq.com/notion/fede5201-c97f-4492-bfa6-66da7afbb068", level:"mid", added:"2026-07-23", posted:"2026-02-25" }
+      { title:"Solutions Engineer, Commercial", url:"https://jobs.ashbyhq.com/notion/fede5201-c97f-4492-bfa6-66da7afbb068", level:"mid", added:"2026-07-23", posted:"2026-02-25" },
+      { title:"Software Engineer, Infrastructure Security", url:"https://jobs.ashbyhq.com/notion/e3d8dc06-da05-4e9d-a143-2e9c51fa3d51", level:"mid", added:"2026-08-18", posted:"2026-08-07" },
+      { title:"Software Engineer, Collections Infra", url:"https://jobs.ashbyhq.com/notion/ca74504a-9b91-4ce3-b0df-97919b46e749", level:"mid", added:"2026-08-18", posted:"2026-08-10" }
     ] },
   { id:"justworks", name:"Justworks", vertical:"saas",
     sub:"HR / payroll / benefits",
     stage:"Late stage", raised:"$143M", lead:"Bain Capital",
     badges:["Bain","Index"],
-    totalRoles:10,
+    totalRoles:11,
     notes:"PEO platform. Multi-tenant, integrations with payroll + carriers.",
     jobs:[
       { title:"Software Engineer", url:"https://boards.greenhouse.io/justworks/jobs/6917404?gh_jid=6917404", level:"mid", added:"2026-05-31", posted:"2026-06-18" },
@@ -11187,7 +11231,8 @@ const COMPANIES = [
       { title:"Software Engineer, Frontend", url:"https://boards.greenhouse.io/justworks/jobs/8069292?gh_jid=8069292", level:"mid", added:"2026-07-21", posted:"2026-07-20" },
       { title:"Senior Security Engineer (AI Security)", url:"https://boards.greenhouse.io/justworks/jobs/7356444?gh_jid=7356444", level:"senior", added:"2026-07-21", posted:"2026-05-12" },
       { title:"Senior Security Engineer (Detection & Response)", url:"https://boards.greenhouse.io/justworks/jobs/7868291?gh_jid=7868291", level:"senior", added:"2026-07-21", posted:"2026-06-04" },
-      { title:"Senior Software Engineer, Partnerships", url:"https://boards.greenhouse.io/justworks/jobs/7914186?gh_jid=7914186", level:"senior", added:"2026-08-06", posted:"2026-07-29" }
+      { title:"Senior Software Engineer, Partnerships", url:"https://boards.greenhouse.io/justworks/jobs/7914186?gh_jid=7914186", level:"senior", added:"2026-08-06", posted:"2026-07-29" },
+      { title:"Senior Software Engineer, International Payroll", url:"https://boards.greenhouse.io/justworks/jobs/7914440?gh_jid=7914440", level:"senior", added:"2026-08-18", posted:"2026-08-17" }
     ] },
   { id:"kalshi", name:"Kalshi", vertical:"fintech",
     sub:"Regulated event-contracts exchange",
@@ -11435,7 +11480,7 @@ const COMPANIES = [
     sub:"Audio streaming (NYSE)",
     stage:"Public", raised:"$540M pre-IPO", lead:"TCV",
     badges:["NYSE","TCV","DST"],
-    totalRoles:12,
+    totalRoles:13,
     notes:"Public co. Audio infra + recs + ads + creator tools.",
     jobs:[
       { title:"Senior Machine Learning Engineer - Policy & Safety", url:"https://jobs.lever.co/spotify/9eca14d3-8e0b-46de-8161-704e07f3d9d0", level:"senior", added:"2026-05-31", posted:"2026-05-04" },
@@ -11449,7 +11494,8 @@ const COMPANIES = [
       { title:"Senior Backend Engineer - Advertising", url:"https://jobs.lever.co/spotify/5b977d60-af96-435a-acf6-28c83be57888", level:"senior", added:"2026-07-21", posted:"2026-07-06" },
       { title:"Full Stack Engineer - Advertising", url:"https://jobs.lever.co/spotify/7a6a7b30-828f-4a72-bc9f-09bafe2934b8", level:"mid", added:"2026-07-21", posted:"2026-05-06" },
       { title:"Backend Engineer - Advertising", url:"https://jobs.lever.co/spotify/1689082c-9265-431f-9e55-ef7666e41283", level:"mid", added:"2026-07-21", posted:"2026-04-08" },
-      { title:"Senior Machine Learning Engineer, Surfaces Moments", url:"https://jobs.lever.co/spotify/ab407f05-063e-4bf7-a7fc-be03b4097f14", level:"senior", added:"2026-07-23", posted:"2026-06-18" }
+      { title:"Senior Machine Learning Engineer, Surfaces Moments", url:"https://jobs.lever.co/spotify/ab407f05-063e-4bf7-a7fc-be03b4097f14", level:"senior", added:"2026-07-23", posted:"2026-06-18" },
+      { title:"Senior Software Engineer - Enterprise AI", url:"https://jobs.lever.co/spotify/c73be71c-1a63-4906-9925-95f2115d1f1d", level:"senior", added:"2026-08-18", posted:"2026-08-13" }
     ] },
   { id:"point72", name:"Point72", vertical:"fintech",
     sub:"Quant + multi-strat hedge fund",
@@ -11460,7 +11506,6 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Data Engineer, Proprietary Research", url:"https://boards.greenhouse.io/point72/jobs/7769261002?gh_jid=7769261002", level:"senior", added:"2026-05-31", posted:"2026-06-12" },
       { title:"Data Engineer", url:"https://boards.greenhouse.io/point72/jobs/7829230002?gh_jid=7829230002", level:"mid", added:"2026-05-31", posted:"2026-06-12" },
-      { title:"Data Engineer, Knowledge Graph", url:"https://boards.greenhouse.io/point72/jobs/8448917002?gh_jid=8448917002", level:"mid", added:"2026-05-31", posted:"2026-06-12" },
       { title:"Data Engineer, Proprietary Research", url:"https://boards.greenhouse.io/point72/jobs/7667745002?gh_jid=7667745002", level:"mid", added:"2026-05-31", posted:"2026-06-12" },
       { title:"Machine Learning Engineer", url:"https://boards.greenhouse.io/point72/jobs/8170176002?gh_jid=8170176002", level:"mid", added:"2026-05-31", posted:"2026-06-12" },
       { title:"NLP / AI Engineer", url:"https://boards.greenhouse.io/point72/jobs/7661997002?gh_jid=7661997002", level:"mid", added:"2026-05-31", posted:"2026-06-12" },
@@ -11476,7 +11521,8 @@ const COMPANIES = [
       { title:"Quantitative Software Developer", url:"https://boards.greenhouse.io/point72/jobs/8036928002?gh_jid=8036928002", level:"mid", added:"2026-07-21", posted:"2026-07-13" },
       { title:"Quantitative Software Developer", url:"https://boards.greenhouse.io/point72/jobs/7825863002?gh_jid=7825863002", level:"mid", added:"2026-07-21", posted:"2026-07-14" },
       { title:"Research Engineer, Knowledge Graph Intelligence", url:"https://boards.greenhouse.io/point72/jobs/8531773002?gh_jid=8531773002", level:"mid", added:"2026-07-21", posted:"2026-07-13" },
-      { title:"Machine Learning Engineer, GenAI Technology", url:"https://boards.greenhouse.io/point72/jobs/8651402002?gh_jid=8651402002", level:"mid", added:"2026-08-06", posted:"2026-08-03" }
+      { title:"Machine Learning Engineer, GenAI Technology", url:"https://boards.greenhouse.io/point72/jobs/8651402002?gh_jid=8651402002", level:"mid", added:"2026-08-06", posted:"2026-08-03" },
+      { title:"Data Engineer, Knowledge Graph", url:"https://boards.greenhouse.io/point72/jobs/8701705002?gh_jid=8701705002", level:"mid", added:"2026-08-18", posted:"2026-08-12" }
     ] },
   { id:"jump-trading", name:"Jump Trading", vertical:"fintech",
     sub:"Proprietary trading firm",
@@ -11495,7 +11541,7 @@ const COMPANIES = [
     sub:"Market maker (NASDAQ)",
     stage:"Public", raised:"$402M pre-IPO", lead:"Silver Lake",
     badges:["NASDAQ","Silver Lake"],
-    totalRoles:8,
+    totalRoles:9,
     notes:"Public market maker. HFT, market-data, low-latency systems.",
     jobs:[
       { title:"Machine Learning Engineer", url:"https://job-boards.greenhouse.io/virtu/jobs/8457186002", level:"mid", added:"2026-05-31", posted:"2026-05-12" },
@@ -11505,7 +11551,8 @@ const COMPANIES = [
       { title:"Software Engineer - Web Application, Front-end (Javascript/React)", url:"https://job-boards.greenhouse.io/virtu/jobs/4534064002", level:"mid", added:"2026-05-31", posted:"2026-05-12" },
       { title:"Systems Engineer", url:"https://job-boards.greenhouse.io/virtu/jobs/6153489002", level:"mid", added:"2026-05-31", posted:"2026-05-12" },
       { title:"Site Reliability Engineer", url:"https://job-boards.greenhouse.io/virtu/jobs/5499653002", level:"mid", added:"2026-07-23", posted:"2026-07-23" },
-      { title:"Information Security Engineer", url:"https://job-boards.greenhouse.io/virtu/jobs/4339444002", level:"mid", added:"2026-08-06", posted:"2026-07-27" }
+      { title:"Information Security Engineer", url:"https://job-boards.greenhouse.io/virtu/jobs/4339444002", level:"mid", added:"2026-08-06", posted:"2026-07-27" },
+      { title:"Software Engineer - Frontend Trading Application (C#/.NET)", url:"https://job-boards.greenhouse.io/virtu/jobs/4261145002", level:"mid", added:"2026-08-18", posted:"2026-08-17" }
     ] },
   { id:"secureframe", name:"Secureframe", vertical:"saas",
     sub:"Compliance automation",
@@ -11551,7 +11598,7 @@ const COMPANIES = [
     sub:"Customer engagement (NASDAQ)",
     stage:"Public", raised:"$175M pre-IPO", lead:"ICONIQ",
     badges:["NASDAQ","ICONIQ","Battery"],
-    totalRoles:8,
+    totalRoles:9,
     notes:"Public co. Cross-channel CRM messaging at scale.",
     jobs:[
       { title:"Senior Software Engineer I, Full-stack", url:"https://boards.greenhouse.io/braze/jobs/7365359?gh_jid=7365359", level:"senior", added:"2026-05-31", posted:"2026-05-22" },
@@ -11561,7 +11608,8 @@ const COMPANIES = [
       { title:"Senior Security Engineer, Enterprise Security", url:"https://boards.greenhouse.io/braze/jobs/8071700?gh_jid=8071700", level:"senior", added:"2026-07-23", posted:"2026-07-21" },
       { title:"Solutions Engineer, Security & Privacy", url:"https://boards.greenhouse.io/braze/jobs/7977098?gh_jid=7977098", level:"mid", added:"2026-07-23", posted:"2026-07-16" },
       { title:"Senior Security Engineer II", url:"https://boards.greenhouse.io/braze/jobs/8080170?gh_jid=8080170", level:"senior", added:"2026-08-06", posted:"2026-07-24" },
-      { title:"Senior Software Engineer I, Content Cards", url:"https://boards.greenhouse.io/braze/jobs/8105865?gh_jid=8105865", level:"senior", added:"2026-08-06", posted:"2026-08-05" }
+      { title:"Senior Software Engineer I, Content Cards", url:"https://boards.greenhouse.io/braze/jobs/8105865?gh_jid=8105865", level:"senior", added:"2026-08-06", posted:"2026-08-05" },
+      { title:"Platform Software Engineer II", url:"https://boards.greenhouse.io/braze/jobs/8112110?gh_jid=8112110", level:"mid", added:"2026-08-18", posted:"2026-08-13" }
     ] },
   { id:"knock", name:"Knock", vertical:"devtools",
     sub:"Notifications-as-a-service",
@@ -11607,11 +11655,12 @@ const COMPANIES = [
     sub:"CRM platform for support",
     stage:"Series F", raised:"$174M", lead:"Tiger",
     badges:["Tiger","Coatue"],
-    totalRoles:2,
+    totalRoles:3,
     notes:"Modern support CRM. Unified customer record + automation + AI.",
     jobs:[
       { title:"Software Engineer, Full Stack (Senior, Staff+)", url:"https://jobs.ashbyhq.com/kustomer/7f9617a9-e401-4517-8766-802dcc4a66e0", level:"senior", added:"2026-05-31", posted:"2026-06-09" },
-      { title:"Software Engineer, Infrastructure", url:"https://jobs.ashbyhq.com/kustomer/ff55a88e-f510-4d9a-93fe-add4a50879ac", level:"mid", added:"2026-07-21", posted:"2026-07-08" }
+      { title:"Software Engineer, Infrastructure", url:"https://jobs.ashbyhq.com/kustomer/ff55a88e-f510-4d9a-93fe-add4a50879ac", level:"mid", added:"2026-07-21", posted:"2026-07-08" },
+      { title:"Software Engineer, Infrastructure (Optimization)", url:"https://jobs.ashbyhq.com/kustomer/50bf7508-e199-4136-a11f-705f06b834c4", level:"mid", added:"2026-08-18", posted:"2026-08-06" }
     ] },
   { id:"doubleverify", name:"DoubleVerify", vertical:"saas",
     sub:"Ad measurement (NYSE)",
@@ -11630,11 +11679,13 @@ const COMPANIES = [
     sub:"Robo-advisor + cash mgmt (NASDAQ: WLTH)",
     stage:"Public", raised:"$205M", lead:"Greylock",
     badges:["Greylock","Index"],
-    totalRoles:2,
+    totalRoles:4,
     notes:"Public co since Dec 2025. Robo-advisor + banking at $88B+ AUM. Algorithms + compliance + UX.",
     jobs:[
       { title:"Backend Engineer", url:"https://jobs.lever.co/wealthfront/f5a0963a-ca1a-4140-b9e6-dbf6072093fe", level:"mid", added:"2026-05-31", posted:"2023-09-11" },
-      { title:"Senior Systems Engineer, Network", url:"https://jobs.lever.co/wealthfront/93383267-2d57-45d0-bb6a-7d9c5d8b6f3c", level:"senior", added:"2026-06-30", posted:"2026-06-24" }
+      { title:"Senior Systems Engineer, Network", url:"https://jobs.lever.co/wealthfront/93383267-2d57-45d0-bb6a-7d9c5d8b6f3c", level:"senior", added:"2026-06-30", posted:"2026-06-24" },
+      { title:"Software Engineer – DevOps Platform", url:"https://jobs.lever.co/wealthfront/91c149ed-18fa-4e72-a3a6-386840aae86e", level:"mid", added:"2026-08-18", posted:"2025-10-03" },
+      { title:"Software Engineer, Frontend", url:"https://jobs.lever.co/wealthfront/a4a9fd4e-d33a-4767-995f-7a2286bc9762", level:"mid", added:"2026-08-18", posted:"2026-05-12" }
     ] },
   { id:"bombas", name:"Bombas", vertical:"consumer",
     sub:"Mission-driven apparel DTC",
@@ -11679,7 +11730,7 @@ const COMPANIES = [
     sub:"Membership platform for creators",
     stage:"Series F", raised:"$413M", lead:"Tiger",
     badges:["Tiger","Index","Wellington"],
-    totalRoles:6,
+    totalRoles:7,
     notes:"Creator monetization at scale. Subscriptions infra, payments, media tooling.",
     jobs:[
       { title:"Senior Software Engineer, Storage", url:"https://jobs.ashbyhq.com/patreon/f93e7e71-f1be-451b-beec-eef15d42d06f", level:"senior", added:"2026-05-31" },
@@ -11687,7 +11738,8 @@ const COMPANIES = [
       { title:"Senior Software Engineer, Product Foundations", url:"https://jobs.ashbyhq.com/patreon/e8f0fe39-1a3f-4672-8857-0258800dc24f", level:"senior", added:"2026-05-31", posted:"2026-04-02" },
       { title:"Fullstack Engineer, Creation", url:"https://jobs.ashbyhq.com/patreon/45a7e43c-098a-4b16-a8d2-ef2aca466533", level:"mid", added:"2026-05-31", posted:"2026-05-07" },
       { title:"Fullstack Engineer, Creator Home", url:"https://jobs.ashbyhq.com/patreon/bc4a590b-ba06-4058-83ac-1c7f458277f8", level:"mid", added:"2026-06-16", posted:"2026-05-18" },
-      { title:"Senior Staff Software Engineer, Backend Platform", url:"https://jobs.ashbyhq.com/patreon/c277b009-0c9c-4ae7-a72b-56aaad0d985c", level:"senior", added:"2026-07-21", posted:"2026-05-15" }
+      { title:"Senior Staff Software Engineer, Backend Platform", url:"https://jobs.ashbyhq.com/patreon/c277b009-0c9c-4ae7-a72b-56aaad0d985c", level:"senior", added:"2026-07-21", posted:"2026-05-15" },
+      { title:"Senior Machine Learning Engineer, Infrastructure", url:"https://jobs.ashbyhq.com/patreon/722d3541-d93a-4533-958b-74ce1060fb19", level:"senior", added:"2026-08-18", posted:"2026-08-17" }
     ] },
   { id:"hopper", name:"Hopper", vertical:"hospitality",
     sub:"B2B travel tech + fintech (HTS)",
@@ -11738,7 +11790,7 @@ const COMPANIES = [
     sub:"Live-events ticketing",
     stage:"Series E", raised:"$338M", lead:"Wellington",
     badges:["Wellington","Accel","Causeway"],
-    totalRoles:6,
+    totalRoles:7,
     notes:"Tickets marketplace + primary-issuer platform. Marketplace ranking, payments, integrations.",
     jobs:[
       { title:"Senior Machine Learning Engineer", url:"https://seatgeek.com/jobs/7246461?gh_jid=7246461", level:"senior", added:"2026-05-31", posted:"2026-06-11" },
@@ -11746,7 +11798,8 @@ const COMPANIES = [
       { title:"Senior Software Engineer, Fullstack", url:"https://seatgeek.com/jobs/7909258?gh_jid=7909258", level:"senior", added:"2026-05-31", posted:"2026-06-11" },
       { title:"Senior Software Engineer, Security", url:"https://seatgeek.com/jobs/8016238?gh_jid=8016238", level:"senior", added:"2026-06-22", posted:"2026-06-18" },
       { title:"Senior Software Engineer, Finance Engineering", url:"https://seatgeek.com/jobs/8071838?gh_jid=8071838", level:"senior", added:"2026-07-21", posted:"2026-07-17" },
-      { title:"Senior Software Engineer, Platform", url:"https://seatgeek.com/jobs/8068276?gh_jid=8068276", level:"senior", added:"2026-07-21", posted:"2026-07-15" }
+      { title:"Senior Software Engineer, Platform", url:"https://seatgeek.com/jobs/8068276?gh_jid=8068276", level:"senior", added:"2026-07-21", posted:"2026-07-15" },
+      { title:"Senior Software Engineer, Business Technology", url:"https://seatgeek.com/jobs/8128889?gh_jid=8128889", level:"senior", added:"2026-08-18", posted:"2026-08-13" }
     ] },
   { id:"beacons", name:"Beacons", vertical:"saas",
     sub:"Link-in-bio + creator monetization",
@@ -11902,7 +11955,7 @@ const COMPANIES = [
     sub:"AI for compliance / fincrime",
     stage:"Series A", raised:"$22M", lead:"Felicis",
     badges:["Felicis","Bain Capital Ventures"],
-    totalRoles:6,
+    totalRoles:7,
     notes:"Anti-fincrime AI. ML + investigation tooling + bank integrations.",
     jobs:[
       { title:"Senior ML/AI Engineer", url:"https://jobs.ashbyhq.com/sandbar/ce41a03c-beed-4614-985e-f84347982965", level:"senior", added:"2026-05-31", posted:"2026-04-04" },
@@ -11910,7 +11963,8 @@ const COMPANIES = [
       { title:"Senior Software Engineer, Infrastructure", url:"https://jobs.ashbyhq.com/sandbar/f4374e2a-012a-43d8-8fc6-86aeffa61c01", level:"senior", added:"2026-05-31", posted:"2026-02-08" },
       { title:"ML Engineer, Lead", url:"https://jobs.ashbyhq.com/sandbar/c80cf04b-b597-4bc9-ae06-d920a7c88a27", level:"mid", added:"2026-05-31", posted:"2026-02-08" },
       { title:"ML Engineer, Audio", url:"https://jobs.ashbyhq.com/sandbar/84ec6c36-e5d6-4013-8228-17142023a475", level:"mid", added:"2026-05-31", posted:"2026-02-08" },
-      { title:"Product Engineer", url:"https://jobs.ashbyhq.com/sandbar/316bc5bf-a60c-4022-9efb-39b35c2ffe4f", level:"mid", added:"2026-05-31", posted:"2026-02-27" }
+      { title:"Product Engineer", url:"https://jobs.ashbyhq.com/sandbar/316bc5bf-a60c-4022-9efb-39b35c2ffe4f", level:"mid", added:"2026-05-31", posted:"2026-02-27" },
+      { title:"Machine Learning Engineer", url:"https://jobs.ashbyhq.com/sandbar/fda60cac-8e4a-4edc-aee9-392d02af081b", level:"mid", added:"2026-08-18", posted:"2026-08-11" }
     ] },
   { id:"sequence", name:"Sequence", vertical:"fintech",
     sub:"Personal-finance autopilot",
@@ -12008,7 +12062,7 @@ const COMPANIES = [
     sub:"Specialized GPU cloud (NASDAQ: CRWV)",
     stage:"Public", raised:"$1.5B IPO ($14B+ pre-IPO)", lead:"NASDAQ",
     badges:["NASDAQ","Coatue","NVIDIA","Blackstone"],
-    totalRoles:44,
+    totalRoles:45,
     notes:"GPU cloud powering AI labs; IPO'd Mar 2025. Bare-metal infra + scheduling.",
     jobs:[
       { title:"Senior Platform Engineer II, Compute Services", url:"https://coreweave.com/careers/job?4607559006&board=coreweave&gh_jid=4607559006", level:"senior", added:"2026-05-31", posted:"2026-06-17" },
@@ -12054,7 +12108,8 @@ const COMPANIES = [
       { title:"Senior Systems Engineer, Legal Systems", url:"https://coreweave.com/careers/job?4701740006&board=coreweave&gh_jid=4701740006", level:"senior", added:"2026-08-06", posted:"2026-08-04" },
       { title:"Senior Systems Engineer,  Test Frameworks & Validation Platform", url:"https://coreweave.com/careers/job?4700154006&board=coreweave&gh_jid=4700154006", level:"senior", added:"2026-08-06", posted:"2026-07-29" },
       { title:"Senior Systems Engineer, Virtualization", url:"https://coreweave.com/careers/job?4700471006&board=coreweave&gh_jid=4700471006", level:"senior", added:"2026-08-06", posted:"2026-07-29" },
-      { title:"Data Center Security Engineer - Resiliency", url:"https://coreweave.com/careers/job?4701742006&board=coreweave&gh_jid=4701742006", level:"mid", added:"2026-08-06", posted:"2026-08-06" }
+      { title:"Data Center Security Engineer - Resiliency", url:"https://coreweave.com/careers/job?4701742006&board=coreweave&gh_jid=4701742006", level:"mid", added:"2026-08-06", posted:"2026-08-06" },
+      { title:"Senior Network Security Engineer, Operational Technology", url:"https://coreweave.com/careers/job?4701022006&board=coreweave&gh_jid=4701022006", level:"senior", added:"2026-08-18", posted:"2026-08-13" }
     ] },
   { id:"alphasense", name:"AlphaSense", vertical:"ai",
     sub:"AI market intelligence",
@@ -12097,11 +12152,10 @@ const COMPANIES = [
     sub:"Streaming + studios + parks (NYSE: DIS)",
     stage:"Public", raised:"$1B+ pre-IPO", lead:"NYSE",
     badges:["NYSE","S&P 500"],
-    totalRoles:10,
+    totalRoles:9,
     notes:"NYC tech: ABC News, Hulu, ESPN+, Disney+. Streaming infra + content systems.",
     jobs:[
       { title:"Senior Software Engineer - Java", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Senior-Software-Engineer---Java_10149378", level:"senior", added:"2026-05-31" },
-      { title:"Senior Software Engineer", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Senior-Software-Engineer_10149739", level:"senior", added:"2026-05-31" },
       { title:"Senior Software Engineer", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Senior-Software-Engineer_10149859", level:"senior", added:"2026-05-31" },
       { title:"Software Engineer - DevOps Mobile", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Software-Engineer---DevOps-Mobile_10143241", level:"mid", added:"2026-05-31" },
       { title:"Software Engineer II - Ad Platform, Integrating Engineering", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Software-Engineer-II---Ad-Platform--Integrating-Engineering_10151597", level:"mid", added:"2026-06-16" },
@@ -12228,10 +12282,11 @@ const COMPANIES = [
     sub:"enterprise carbon accounting + climate reporting",
     stage:"Series C", raised:"$170M+", lead:"Sequoia",
     badges:["Sequoia","Kleiner Perkins","Greylock"],
-    totalRoles:1,
+    totalRoles:2,
     notes:"NYC office is smaller than SF but real Staff-level hires happening there. Bar is extremely high; ex-Stripe-heavy interview style \u2014 they emphasize crisp written communication and will give you a Stripe-style 'engineering writing' eval. Domain ramp on CSRD/SEC climate rules is steep.",
     jobs:[
-      { title:"Staff Software Engineer, Front End (NYC)", url:"https://watershed.com/careers/472b2ea9-staff-software-engineer-front-end", level:"senior", added:"2026-05-31" }
+      { title:"Staff Software Engineer, Front End (NYC)", url:"https://watershed.com/careers/472b2ea9-staff-software-engineer-front-end", level:"senior", added:"2026-05-31" },
+      { title:"Senior software engineer, full-stack", url:"https://jobs.ashbyhq.com/watershed/c24a97b1-e9c2-4863-bbb5-f28446174d46", level:"senior", added:"2026-08-18", posted:"2026-08-12" }
     ] },
   { id:"mercor", name:"Mercor", vertical:"ai",
     sub:"AI-powered recruiting + human-data marketplace",
@@ -12525,11 +12580,12 @@ const COMPANIES = [
     sub:"Transit tech + mobility platform",
     stage:"Series G", raised:"$988M", lead:"83North",
     badges:["83North","Exor","Pitango"],
-    totalRoles:2,
+    totalRoles:3,
     notes:"NYC mobility. Transit routing + optimization; logistics + ML systems.",
     jobs:[
       { title:"Senior AI Engineer, AI Labs", url:"https://job-boards.greenhouse.io/via/jobs/8507860002", level:"senior", added:"2026-06-16", posted:"2026-06-15" },
-      { title:"Senior Mobile Cross Platform Engineer", url:"https://job-boards.greenhouse.io/via/jobs/8585308002", level:"senior", added:"2026-06-16", posted:"2026-06-11" }
+      { title:"Senior Mobile Cross Platform Engineer", url:"https://job-boards.greenhouse.io/via/jobs/8585308002", level:"senior", added:"2026-06-16", posted:"2026-06-11" },
+      { title:"Forward Deployed Engineer, AI Labs", url:"https://job-boards.greenhouse.io/via/jobs/8726311002", level:"mid", added:"2026-08-18", posted:"2026-08-18" }
     ] },
   { id:"aura-frames", name:"Aura Frames", vertical:"consumer",
     sub:"Connected digital photo frames",
@@ -12618,11 +12674,13 @@ const COMPANIES = [
     sub:"ETF + crypto market maker",
     stage:"Public", raised:"Self-funded", lead:"Euronext",
     badges:["Euronext"],
-    totalRoles:2,
+    totalRoles:4,
     notes:"NYC trading. ETP market-making; trading systems + low-latency infra.",
     jobs:[
       { title:"Senior Software Engineer, C++", url:"https://job-boards.greenhouse.io/flowtraders/jobs/8027268", level:"senior", added:"2026-07-21", posted:"2026-07-20" },
-      { title:"Senior Software Engineer, C++ (Market Data)", url:"https://job-boards.greenhouse.io/flowtraders/jobs/8027267", level:"senior", added:"2026-07-21", posted:"2026-07-20" }
+      { title:"Senior Software Engineer, C++ (Market Data)", url:"https://job-boards.greenhouse.io/flowtraders/jobs/8027267", level:"senior", added:"2026-07-21", posted:"2026-07-20" },
+      { title:"Software Engineer (Trading Automation)", url:"https://job-boards.greenhouse.io/flowtraders/jobs/8120460", level:"mid", added:"2026-08-18", posted:"2026-08-12" },
+      { title:"Talent Pool: Trading Systems Engineer", url:"https://job-boards.greenhouse.io/flowtraders/jobs/8026227", level:"mid", added:"2026-08-18", posted:"2026-08-06" }
     ] },
   { id:"old-mission", name:"Old Mission", vertical:"fintech",
     sub:"Proprietary trading firm",
@@ -12659,11 +12717,14 @@ const COMPANIES = [
     sub:"Media + telecom (NASDAQ: CMCSA)",
     stage:"Public", raised:"$1.1B pre-IPO", lead:"NASDAQ",
     badges:["NASDAQ","S&P 500"],
-    totalRoles:2,
+    totalRoles:5,
     notes:"NBCU + Peacock streaming. NYC: ad tech + media engineering.",
     jobs:[
       { title:"C++ Software Engineer 3 - New York Hybrid - FreeWheel", url:"https://comcast.wd5.myworkdayjobs.com/en-US/Comcast_Careers/job/NY---New-York-1407-Broadway-Floor-12/Software-Engineer-3_R440985", level:"mid", added:"2026-07-21" },
-      { title:"Sr. Software Engineer - FreeWheel", url:"https://comcast.wd5.myworkdayjobs.com/en-US/Comcast_Careers/job/NY---New-York-1407-Broadway-Floor-12/Sr-Software-Engineer---FreeWheel_R441897", level:"senior", added:"2026-08-06" }
+      { title:"Sr. Software Engineer - FreeWheel", url:"https://comcast.wd5.myworkdayjobs.com/en-US/Comcast_Careers/job/NY---New-York-1407-Broadway-Floor-12/Sr-Software-Engineer---FreeWheel_R441897", level:"senior", added:"2026-08-06" },
+      { title:"Senior Backend Engineer (Python or PHP) - New York - ONSITE 4X Week", url:"https://comcast.wd5.myworkdayjobs.com/en-US/Comcast_Careers/job/NY---New-York-1407-Broadway-Floor-12/Senior-Backend-Engineer--Python-or-PHP----New-York---ONSITE-4X-Week_R442301", level:"senior", added:"2026-08-18" },
+      { title:"Forward Deployed Engineer", url:"https://comcast.wd5.myworkdayjobs.com/en-US/Comcast_Careers/job/NY---New-York-1407-Broadway-Floor-12/Forward-Deployed-Engineer_R442090", level:"mid", added:"2026-08-18" },
+      { title:"Junior C++ Software Engineer - New York Hybrid - FreeWheel", url:"https://comcast.wd5.myworkdayjobs.com/en-US/Comcast_Careers/job/NY---New-York-1407-Broadway-Floor-12/Junior-C---Software-Engineer---New-York-Hybrid---FreeWheel_R442391", level:"mid", added:"2026-08-18" }
     ] },
   { id:"bdg", name:"Bustle Digital Group", vertical:"media",
     sub:"Digital media (Bustle, Mic, Inverse, NYLON)",
@@ -12679,12 +12740,13 @@ const COMPANIES = [
     sub:"Fresh human-grade dog food subscription",
     stage:"Series D", raised:"$150M+", lead:"L Catterton",
     badges:["L Catterton","Shasta"],
-    totalRoles:3,
+    totalRoles:4,
     notes:"NYC-HQ fresh pet-food juggernaut (~$2B val). Huge eng org \u2014 logistics, cold-chain, subscriptions.",
     jobs:[
       { title:"Senior Software Engineer 1", url:"https://job-boards.greenhouse.io/thefarmersdog/jobs/8602423002", level:"senior", added:"2026-07-21", posted:"2026-06-30" },
       { title:"Senior Software Engineer 2", url:"https://job-boards.greenhouse.io/thefarmersdog/jobs/8470228002", level:"senior", added:"2026-07-21", posted:"2026-06-30" },
-      { title:"Senior Software Engineer 2 - Care Tools", url:"https://job-boards.greenhouse.io/thefarmersdog/jobs/8470229002", level:"senior", added:"2026-07-21", posted:"2026-06-30" }
+      { title:"Senior Software Engineer 2 - Care Tools", url:"https://job-boards.greenhouse.io/thefarmersdog/jobs/8470229002", level:"senior", added:"2026-07-21", posted:"2026-06-30" },
+      { title:"Software Engineer 3", url:"https://job-boards.greenhouse.io/thefarmersdog/jobs/8716669002", level:"mid", added:"2026-08-18", posted:"2026-08-14" }
     ] },
   { id:"soundcloud", name:"SoundCloud", vertical:"media",
     sub:"Audio streaming + creator platform",
@@ -12793,21 +12855,24 @@ const COMPANIES = [
     sub:"DeFi + crypto exchange infra",
     stage:"Series B", raised:"$165M", lead:"Polychain",
     badges:["Polychain","a16z"],
-    totalRoles:3,
+    totalRoles:5,
     notes:"NYC HQ. Largest DEX protocol.",
     jobs:[
       { title:"Senior Backend Engineer", url:"https://jobs.ashbyhq.com/uniswap/cfd492ff-dd07-432a-84b8-8aef0e8984ec", level:"senior", added:"2026-07-21", posted:"2026-03-18" },
       { title:"Senior Backend Engineer, Platform", url:"https://jobs.ashbyhq.com/uniswap/f475ea4a-b8be-442a-b8e2-9a6003d1a51a", level:"senior", added:"2026-07-21", posted:"2026-03-18" },
-      { title:"Senior Frontend Infrastructure Engineer", url:"https://jobs.ashbyhq.com/uniswap/c9fe612e-7c29-47a4-b2a3-2a9d1185f5ef", level:"senior", added:"2026-07-21", posted:"2026-03-18" }
+      { title:"Senior Frontend Infrastructure Engineer", url:"https://jobs.ashbyhq.com/uniswap/c9fe612e-7c29-47a4-b2a3-2a9d1185f5ef", level:"senior", added:"2026-07-21", posted:"2026-03-18" },
+      { title:"Software Engineer - Early Career", url:"https://jobs.ashbyhq.com/uniswap/fb4d4137-f003-4669-beb7-2a5caca88012", level:"mid", added:"2026-08-18", posted:"2026-08-12" },
+      { title:"Software Engineer- General Interest", url:"https://jobs.ashbyhq.com/uniswap/bb981823-b923-4f53-95ba-19d732c1caf3", level:"mid", added:"2026-08-18", posted:"2026-08-12" }
     ] },
   { id:"dailypay", name:"DailyPay", vertical:"fintech",
     sub:"Earned wage access",
     stage:"Late stage", raised:"$500M+", lead:"Carrick",
     badges:["Carrick","Rockefeller"],
-    totalRoles:1,
+    totalRoles:2,
     notes:"NYC HQ. Payroll infra at scale.",
     jobs:[
-      { title:"Senior Machine Learning Engineer", url:"https://jobs.ashbyhq.com/dailypay/fd5f567b-85f1-42be-8738-0bc2f70ec5b5", level:"senior", added:"2026-07-21", posted:"2026-07-06" }
+      { title:"Senior Machine Learning Engineer", url:"https://jobs.ashbyhq.com/dailypay/fd5f567b-85f1-42be-8738-0bc2f70ec5b5", level:"senior", added:"2026-07-21", posted:"2026-07-06" },
+      { title:"Data Engineer II", url:"https://jobs.ashbyhq.com/dailypay/a3b94dcb-b60e-4752-8d76-7335d758fc6b", level:"mid", added:"2026-08-18", posted:"2026-08-17" }
     ] },
   { id:"numeral", name:"Numeral", vertical:"fintech",
     sub:"Sales tax compliance automation",
@@ -12844,13 +12909,14 @@ const COMPANIES = [
     sub:"Crypto payments + cross-border",
     stage:"Late stage", raised:"$15B val", lead:"Andreessen Horowitz",
     badges:["a16z","Founders Fund"],
-    totalRoles:4,
+    totalRoles:5,
     notes:"NYC office. RippleNet + XRP infra.",
     jobs:[
       { title:"Senior Software Engineer, Liquidity Management", url:"https://ripple.com/careers/all-jobs/job/7944457?gh_jid=7944457", level:"senior", added:"2026-07-21", posted:"2026-07-20" },
       { title:"Senior Site Reliability Engineer, Observability", url:"https://ripple.com/careers/all-jobs/job/8052513?gh_jid=8052513", level:"senior", added:"2026-07-21", posted:"2026-07-08" },
       { title:"Senior Staff DevOps Engineer", url:"https://ripple.com/careers/all-jobs/job/8002028?gh_jid=8002028", level:"senior", added:"2026-07-21", posted:"2026-07-01" },
-      { title:"Site Reliability Engineer, Observability", url:"https://ripple.com/careers/all-jobs/job/7947800?gh_jid=7947800", level:"mid", added:"2026-07-21", posted:"2026-07-20" }
+      { title:"Site Reliability Engineer, Observability", url:"https://ripple.com/careers/all-jobs/job/7947800?gh_jid=7947800", level:"mid", added:"2026-07-21", posted:"2026-07-20" },
+      { title:"Senior Staff Security Engineer, Ripple Treasury", url:"https://ripple.com/careers/all-jobs/job/7997246?gh_jid=7997246", level:"senior", added:"2026-08-18", posted:"2026-08-08" }
     ] },
   { id:"octus", name:"Octus", vertical:"fintech",
     sub:"Legal + credit intelligence SaaS",
@@ -12908,7 +12974,7 @@ const COMPANIES = [
     sub:"AAA game studio",
     stage:"Public", raised:"(Take-Two subsidiary)", lead:"Take-Two",
     badges:["Take-Two","NASDAQ"],
-    totalRoles:6,
+    totalRoles:7,
     notes:"NYC HQ. GTA/RDR studio, massive eng org.",
     jobs:[
       { title:"Senior Application Security Platform Engineer", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7782765003", level:"senior", added:"2026-07-21", posted:"2026-07-09" },
@@ -12916,7 +12982,8 @@ const COMPANIES = [
       { title:"Senior Software Engineer, Data Engineering", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7575962003", level:"senior", added:"2026-07-21", posted:"2026-07-09" },
       { title:"Cloud Platform Engineer", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7800927003", level:"mid", added:"2026-07-21", posted:"2026-07-20" },
       { title:"Full Stack Engineer (C#/React)", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7711703003", level:"mid", added:"2026-07-21", posted:"2026-07-09" },
-      { title:"Software Engineer (C#/.NET)", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7711702003", level:"mid", added:"2026-08-06", posted:"2026-07-24" }
+      { title:"Software Engineer (C#/.NET)", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7711702003", level:"mid", added:"2026-08-06", posted:"2026-07-24" },
+      { title:"Senior Linux Systems Engineer", url:"https://job-boards.greenhouse.io/rockstargames/jobs/7634972003", level:"senior", added:"2026-08-18", posted:"2026-08-13" }
     ] },
   { id:"ganni", name:"Ganni", vertical:"consumer",
     sub:"Danish contemporary fashion",
@@ -12940,7 +13007,7 @@ const COMPANIES = [
     sub:"Public sector (dept of tech)",
     stage:"Public sector", raised:"$110B budget", lead:"\u2014",
     badges:["Public sector"],
-    totalRoles:16,
+    totalRoles:17,
     notes:"NYC gov. Sr SWE GeoSupport, .NET, City Environmental Quality Review roles.",
     jobs:[
       { title:"Senior Software Engineer - City Environmental Quality Review", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990013738356", level:"senior", added:"2026-07-21", posted:"2026-06-23" },
@@ -12954,11 +13021,12 @@ const COMPANIES = [
       { title:"Senior DevOps Engineer, Infrastructure", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014445886", level:"senior", added:"2026-08-06", posted:"2026-08-05" },
       { title:"Senior DevOps Engineer, Infrastructure", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014421836", level:"senior", added:"2026-08-06", posted:"2026-08-04" },
       { title:"Senior DevOps Engineer, Infrastructure", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014399006", level:"senior", added:"2026-08-06", posted:"2026-08-01" },
-      { title:"Senior Product Engineer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014380176", level:"senior", added:"2026-08-06", posted:"2026-07-31" },
       { title:"Senior Software Developer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014311721", level:"senior", added:"2026-08-06", posted:"2026-07-28" },
       { title:"Pubic Safety Systems Engineer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014398846", level:"mid", added:"2026-08-06", posted:"2026-08-01" },
       { title:"Web Developer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014358496", level:"mid", added:"2026-08-06", posted:"2026-07-30" },
-      { title:"Appian Software Developer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014282961", level:"mid", added:"2026-08-06", posted:"2026-07-25" }
+      { title:"Appian Software Developer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014282961", level:"mid", added:"2026-08-06", posted:"2026-07-25" },
+      { title:"Senior Product Engineer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014641526", level:"senior", added:"2026-08-18", posted:"2026-08-18" },
+      { title:"Public Safety Systems Engineer", url:"https://jobs.smartrecruiters.com/CityOfNewYork/3743990014555696", level:"mid", added:"2026-08-18", posted:"2026-08-12" }
     ] },
   { id:"socotec", name:"Socotec", vertical:"saas",
     sub:"TIC + AI platform",
@@ -12977,7 +13045,7 @@ const COMPANIES = [
     sub:"Elite FDE consultancy (NYSE: PLTR)",
     stage:"Public", raised:"(NYSE: PLTR)", lead:"NYSE",
     badges:["NYSE"],
-    totalRoles:43,
+    totalRoles:44,
     notes:"NYC major eng hub. Original FDE model. 33 NYC eng roles today.",
     jobs:[
       { title:"Senior Backend Software Engineer - Application Development", url:"https://jobs.lever.co/palantir/7177acab-5c64-4005-9b28-93f33b3e172a", level:"senior", added:"2026-07-21", posted:"2026-04-06" },
@@ -13022,7 +13090,8 @@ const COMPANIES = [
       { title:"Product Reliability Engineer - Defense", url:"https://jobs.lever.co/palantir/250f623c-9afb-4c91-b0c0-25d4e83005ec", level:"mid", added:"2026-07-21", posted:"2026-01-27" },
       { title:"Senior Software Engineer - Autonomous Systems", url:"https://jobs.lever.co/palantir/bba1ecbc-e56d-48b0-b33a-aefcbffbd655", level:"senior", added:"2026-07-23", posted:"2026-02-03" },
       { title:"Forward Deployed Infrastructure Engineer, New Grad - US Government", url:"https://jobs.lever.co/palantir/91117724-9389-48dc-912f-98e48d4d45d8", level:"mid", added:"2026-08-06", posted:"2025-10-29" },
-      { title:"Platform Engineer - Identity Infrastructure", url:"https://jobs.lever.co/palantir/cf08f44c-bf75-45ed-9fab-f4836e51013e", level:"mid", added:"2026-08-06", posted:"2026-07-28" }
+      { title:"Platform Engineer - Identity Infrastructure", url:"https://jobs.lever.co/palantir/cf08f44c-bf75-45ed-9fab-f4836e51013e", level:"mid", added:"2026-08-06", posted:"2026-07-28" },
+      { title:"Offensive Security Engineer", url:"https://jobs.lever.co/palantir/5b1eac37-708b-4eb2-94f0-d2abe7945989", level:"mid", added:"2026-08-18", posted:"2025-07-28" }
     ] },
   { id:"turing", name:"Turing", vertical:"ai",
     sub:"AI dev marketplace + staff",
@@ -13328,10 +13397,11 @@ const COMPANIES = [
     sub:"Blockchain analytics + AML",
     stage:"Series C", raised:"$60M", lead:"Evolution",
     badges:["Evolution","SoftBank"],
-    totalRoles:1,
+    totalRoles:2,
     notes:"NYC office. Crypto compliance.",
     jobs:[
-      { title:"Senior Software Engineer - Data", url:"https://jobs.ashbyhq.com/elliptic/449ea855-3b3f-45cc-aa0d-90c084ec59eb", level:"senior", added:"2026-08-06", posted:"2026-07-30" }
+      { title:"Senior Software Engineer - Data", url:"https://jobs.ashbyhq.com/elliptic/449ea855-3b3f-45cc-aa0d-90c084ec59eb", level:"senior", added:"2026-08-06", posted:"2026-07-30" },
+      { title:"Senior DevOps Engineer", url:"https://jobs.ashbyhq.com/elliptic/0b5cbd30-2b4a-4bee-a1ea-207571708b00", level:"senior", added:"2026-08-18", posted:"2026-08-07" }
     ] },
   { id:"crusoe", name:"Crusoe", vertical:"climate",
     sub:"Flare-gas + clean-energy AI datacenters",
@@ -13358,18 +13428,18 @@ const COMPANIES = [
     totalRoles:6,
     notes:"YC W23. NYC HQ.",
     jobs:[
-      { title:"Senior Backend / Infrastructure Engineer", url:"https://jobs.ashbyhq.com/brellium/e9487561-a09e-41fc-9f49-5d7703e281ea", level:"senior", added:"2026-08-06", posted:"2026-03-17" },
-      { title:"Senior Product Engineer", url:"https://jobs.ashbyhq.com/brellium/e739bd3e-2878-49db-9607-60e82d73821e", level:"senior", added:"2026-08-06", posted:"2026-03-17" },
-      { title:"Senior AI Engineer", url:"https://jobs.ashbyhq.com/brellium/55938675-f5fc-41ea-a7ed-005afb6a2bfe", level:"senior", added:"2026-08-06", posted:"2026-03-17" },
       { title:"Software Engineer", url:"https://jobs.ashbyhq.com/brellium/8209ac68-d966-4d5f-a925-3b277f8583c3", level:"mid", added:"2026-08-06", posted:"2025-10-16" },
       { title:"Software Engineer - AI", url:"https://jobs.ashbyhq.com/brellium/c1c54c79-d3cf-41d7-a3d2-a230ec9b6c9e", level:"mid", added:"2026-08-06", posted:"2026-03-02" },
-      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/brellium/ec618c95-e55b-433f-84b7-c7a2c9cfa4c5", level:"mid", added:"2026-08-06", posted:"2026-03-10" }
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/brellium/ec618c95-e55b-433f-84b7-c7a2c9cfa4c5", level:"mid", added:"2026-08-06", posted:"2026-03-10" },
+      { title:"Senior Backend / Infrastructure Engineer", url:"https://jobs.ashbyhq.com/brellium/002bfd3b-8ddc-4ce7-b6f8-ee2ccca0ea4b", level:"senior", added:"2026-08-18", posted:"2026-08-11" },
+      { title:"Senior AI Engineer", url:"https://jobs.ashbyhq.com/brellium/6c1a8785-6913-45c4-921e-f28c50f37e8f", level:"senior", added:"2026-08-18", posted:"2026-08-11" },
+      { title:"Senior Product Engineer", url:"https://jobs.ashbyhq.com/brellium/cc5792fa-068c-4463-915a-e8206c024980", level:"senior", added:"2026-08-18", posted:"2026-08-11" }
     ] },
   { id:"eliseai", name:"EliseAI", vertical:"ai",
     sub:"AI conversational agents for real estate",
     stage:"Series D", raised:"$140M", lead:"Sapphire",
     badges:["Sapphire","Divco","Point72"],
-    totalRoles:10,
+    totalRoles:12,
     notes:"YC W19. NYC HQ.",
     jobs:[
       { title:"Founding Senior Software Engineer (Full Stack) | Healthcare", url:"https://jobs.ashbyhq.com/eliseai/d9178355-392e-4197-811f-32a1f9c2887e", level:"founding", added:"2026-08-06", posted:"2025-07-29" },
@@ -13381,7 +13451,9 @@ const COMPANIES = [
       { title:"Senior Security Engineer", url:"https://jobs.ashbyhq.com/eliseai/af77f19a-8ce5-451b-bae5-f78750679df3", level:"senior", added:"2026-08-06", posted:"2026-01-30" },
       { title:"Solutions Engineer (Product Expert) | Housing", url:"https://jobs.ashbyhq.com/eliseai/866d9768-9a9e-4e7d-aa2a-da977c5b5dde", level:"mid", added:"2026-08-06", posted:"2026-08-05" },
       { title:"Software Engineer (Full Stack and Mobile)", url:"https://jobs.ashbyhq.com/eliseai/a3f5a582-7613-498e-8705-2dcaeae2511e", level:"mid", added:"2026-08-06", posted:"2025-08-28" },
-      { title:"Solutions Engineer, Implementation & Delivery | Housing", url:"https://jobs.ashbyhq.com/eliseai/d400f45b-bc78-41c2-96ab-9c6c9eaecf06", level:"mid", added:"2026-08-06", posted:"2026-08-05" }
+      { title:"Solutions Engineer, Implementation & Delivery | Housing", url:"https://jobs.ashbyhq.com/eliseai/d400f45b-bc78-41c2-96ab-9c6c9eaecf06", level:"mid", added:"2026-08-06", posted:"2026-08-05" },
+      { title:"Associate Solutions Engineer | Housing", url:"https://jobs.ashbyhq.com/eliseai/5b6f3775-3e79-4269-a255-47ee3057265d", level:"mid", added:"2026-08-18", posted:"2026-08-06" },
+      { title:"Associate Solutions Engineer | Healthcare", url:"https://jobs.ashbyhq.com/eliseai/68e1e7e0-0089-4cd5-9603-24bae85891a9", level:"mid", added:"2026-08-18", posted:"2026-08-13" }
     ] },
   { id:"concourse", name:"Concourse", vertical:"fintech",
     sub:"AI finance analyst for corporate finance",
@@ -13401,7 +13473,7 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/valon/6052f210-29f1-4ef4-93cc-48029969eaf7", level:"senior", added:"2026-08-06", posted:"2025-10-03" },
       { title:"Sales Engineer", url:"https://jobs.ashbyhq.com/valon/7803a34d-471f-4935-bcea-f54b34a3ce95", level:"mid", added:"2026-08-06", posted:"2026-06-11" },
-      { title:"Software Engineer II", url:"https://jobs.ashbyhq.com/valon/ad193612-38c9-4877-b16f-cbcaf5415ef3", level:"mid", added:"2026-08-06", posted:"2026-07-23" }
+      { title:"Software Engineer II", url:"https://jobs.ashbyhq.com/valon/2de94485-130f-4f93-abe7-c21d70401b0b", level:"mid", added:"2026-08-18", posted:"2026-08-11" }
     ] },
   { id:"cape-privacy", name:"Cape", vertical:"infra",
     sub:"Privacy-first mobile carrier",
@@ -13484,11 +13556,12 @@ const COMPANIES = [
     sub:"Alternative investments platform",
     stage:"Seed", raised:"$5M", lead:"Cota",
     badges:["Cota","YC"],
-    totalRoles:2,
+    totalRoles:3,
     notes:"NYC HQ.",
     jobs:[
       { title:"Full Stack Engineer", url:"https://jobs.ashbyhq.com/odyssey/5158a3e1-ddde-4253-a895-a82a9ab2e2d4", level:"mid", added:"2026-08-06", posted:"2026-04-27" },
-      { title:"Sr. Security Engineer", url:"https://jobs.ashbyhq.com/odyssey/68b8890a-2bad-4d09-96c6-292dd63b9c03", level:"senior", added:"2026-08-06", posted:"2026-08-06" }
+      { title:"Sr. Security Engineer", url:"https://jobs.ashbyhq.com/odyssey/68b8890a-2bad-4d09-96c6-292dd63b9c03", level:"senior", added:"2026-08-06", posted:"2026-08-06" },
+      { title:"Founding Security Engineer", url:"https://jobs.ashbyhq.com/odyssey/a6a64fea-ed7c-42e4-9c15-2c7e6da2a244", level:"founding", added:"2026-08-18", posted:"2026-08-11" }
     ] },
   { id:"motherduck", name:"MotherDuck", vertical:"devtools",
     sub:"Managed DuckDB in the cloud",
@@ -13498,6 +13571,33 @@ const COMPANIES = [
     notes:"NYC office.",
     jobs:[
       { title:"Software Engineer - Database", url:"https://jobs.ashbyhq.com/motherduck/111fd8f5-a8ad-4aa4-937f-79da7c2184db", level:"mid", added:"2026-08-06", posted:"2026-08-03" }
+    ] },
+  { id:"pagaya", name:"Pagaya", vertical:"fintech",
+    sub:"AI lending platform (NASDAQ)",
+    stage:"Public", raised:"$500M+ pre-IPO", lead:"Israel Growth Partners",
+    badges:["NASDAQ","Aflac","Viola"],
+    totalRoles:1,
+    notes:"NYC AI-lending. ML credit + capital-markets plumbing.",
+    jobs:[
+      { title:"Applied AI Engineer, Office of the CEO", url:"https://job-boards.greenhouse.io/pagaya/jobs/7855240003", level:"mid", added:"2026-08-18", posted:"2026-08-11" }
+    ] },
+  { id:"linkedin", name:"LinkedIn", vertical:"saas",
+    sub:"Professional social / SaaS",
+    stage:"Public", raised:"(Microsoft: MSFT)", lead:"Microsoft",
+    badges:["Microsoft","NASDAQ"],
+    totalRoles:1,
+    notes:"Empire State Building NYC office. Sr enterprise systems eng roles.",
+    jobs:[
+      { title:"Senior AI Engineer (NYC)", url:"https://jobs.smartrecruiters.com/LinkedIn3/744000142012329", level:"senior", added:"2026-08-18", posted:"2026-08-06" }
+    ] },
+  { id:"nielseniq", name:"NielsenIQ", vertical:"saas",
+    sub:"Data + analytics (NIQ)",
+    stage:"Public", raised:"(NIQ post-Advent spinout)", lead:"NYSE",
+    badges:["NYSE"],
+    totalRoles:1,
+    notes:"NYC HQ 85 Broad St. Sr Director Engineering roles.",
+    jobs:[
+      { title:"Forward Deployed AI Engineer (USA Based)", url:"https://jobs.smartrecruiters.com/NielsenIQ/744000143780479", level:"mid", added:"2026-08-18", posted:"2026-08-17" }
     ] }
 ];
 
@@ -14180,6 +14280,8 @@ const COMPANY_DOMAINS = {
   sonymusic:'sonymusic.com', a24:'a24films.com', aimeleondore:'aimeleondore.com',
   splice:'splice.com', goop:'goop.com', livenation:'livenationentertainment.com',
   honestco:'honest.com',
+  // 2026-08-18 backfill (auto)
+  pagaya:'pagaya.com', linkedin:'linkedin.com', nielseniq:'nielseniq.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */
