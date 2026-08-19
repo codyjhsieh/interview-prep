@@ -2065,12 +2065,34 @@ code, pre, .font-mono {
   font-size: 12px; font-weight: 600; color: var(--muted);
 }
 .role-row-text  { flex: 1 1 0; min-width: 0; }
+/* Trailing chips (level pill, fit badge, open-link arrow) travel as one
+   group so they wrap together instead of one at a time. gap matches the
+   row's own 12px so desktop spacing is unchanged. */
+.role-row-meta  { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .role-row-title { font-size: 14.5px; font-weight: 500; line-height: 1.35; }
 .role-row-co    { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
 @media (max-width: 640px) {
   .role-row { gap: 12px; padding: 13px 14px; }
   .role-row-title { font-size: 14px; }
   .role-row .fit-badge .fit-tier { display: none; } /* tight layout */
+
+  /* Phone layout: the checkbox, logo, pill, fit badge and arrow are all
+     fixed-width, which left the text column ~98px of a 367px row — about two
+     words of a job description, with titles clipped mid-word. Let the meta
+     group wrap to its own line (right-aligned) so the text column gets the
+     full width, and give the title + desc two lines instead of one. */
+  .role-row { flex-wrap: wrap; row-gap: 7px; }
+  .role-row-text { flex: 1 1 60%; }
+  .role-row-meta { margin-left: auto; gap: 8px; }
+  .role-row .role-row-title.truncate,
+  .role-row .role-row-desc.truncate {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
 }
 
 /* Role preview pills shown on each company card (up to 3 per card). */
