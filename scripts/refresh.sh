@@ -42,6 +42,10 @@ logos() {
   node scripts/check-logos.mjs
 }
 
+rankings() {
+  node scripts/check-rankings.mjs
+}
+
 prune() {
   echo "→ prune (drop postings no longer on live ATS boards)"
   node scripts/check-dead.js --prune
@@ -60,11 +64,11 @@ ship() {
   sed -i '' "s|?v=$cur|?v=$new|g" index.html
   echo "  cache-buster: $cur → $new"
 
-  if git diff --quiet js/data.js index.html; then
+  if git diff --quiet js/data.js js/views.js index.html; then
     echo "  nothing to commit"
     return 0
   fi
-  git add js/data.js index.html
+  git add js/data.js js/views.js index.html
   git commit -m "Data refresh $TODAY + cache-bust to $new
 
 Auto-generated via scripts/refresh.sh.
@@ -78,6 +82,7 @@ case "${1:-all}" in
   merge)        merge ;;
   fetch-merge)  fetch; merge ;;
   logos)        logos ;;
+  rankings)     rankings ;;
   prune)        prune ;;
   ship)         ship ;;
   all)
@@ -97,5 +102,5 @@ case "${1:-all}" in
     merge
     ship
     ;;
-  *) echo "usage: $0 {fetch|merge|fetch-merge|logos|prune|ship|all}"; exit 1 ;;
+  *) echo "usage: $0 {fetch|merge|fetch-merge|logos|rankings|prune|ship|all}"; exit 1 ;;
 esac

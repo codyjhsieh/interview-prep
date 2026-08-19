@@ -5263,6 +5263,26 @@ const COOLNESS = {
   // 2026-07-23 art/creative/celeb batch
   a24:9, aimeleondore:8, splice:6, sonymusic:6, goop:5,
   livenation:4, honestco:3,
+
+  // ── 2026-08-19 auto-scored (inline pass, LES-cool axis) ──
+  // AI / dev tools — hot but enterprise-flavored
+  mintlify:7, vapi:6, 'cape-privacy':5, crusoe:5, motherduck:6,
+  eliseai:5, concourse:4, 'inductive-bio':5, xai:6, 'character-ai':8,
+  // Fintech
+  notabene:4, vestwell:3, symphony:3, valon:4, 'moment-fintech':5,
+  'titan-invest':5, modernfi:4, 'bastion-fi':4, halliday:4, 'odyssey-fi':4,
+  brellium:4, melio:4, pagaya:3,
+  // Crypto (penalty applied elsewhere at 0.4x)
+  bitgo:3, moonpay:4,
+  // Enterprise SaaS / infra
+  snowflake:3, databricks:4, confluent:3, okta:2, taboola:2, amplitude:3,
+  elliptic:3, pendo:3, liveramp:2, linkedin:3, nielseniq:2,
+  // Marketplaces / health
+  stubhub:4, grubhub:3, progyny:4,
+  // Big banks (anti-LES)
+  'bank-of-america':1, barclays:1,
+  // Quant HFT (anti-LES; also added to QUANT_GATED)
+  'tower-research':1, 'belvedere-trading':1, 'pdt-partners':1, 'man-group':1,
 };
 
 const FRONTIER = new Set([
@@ -5294,6 +5314,8 @@ const QUANT_GATED = new Set([
   'de-shaw','two-sigma','jane-street','point72','worldquant',
   'jump-trading','virtu','drw','imc','flow-traders','old-mission',
   'goldman-sachs','blackrock',
+  // 2026-08-19 auto — hft-vertical additions from recent CANDIDATES expansions
+  'tower-research','belvedere-trading','pdt-partners','man-group',
 ]);
 
 function _candidateMult(c) {
