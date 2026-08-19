@@ -46,6 +46,10 @@ rankings() {
   node scripts/check-rankings.mjs
 }
 
+audit() {
+  node scripts/score-dist.mjs "$@"
+}
+
 prune() {
   echo "→ prune (drop postings no longer on live ATS boards)"
   node scripts/check-dead.js --prune
@@ -83,6 +87,7 @@ case "${1:-all}" in
   fetch-merge)  fetch; merge ;;
   logos)        logos ;;
   rankings)     rankings ;;
+  audit)        shift; audit "$@" ;;
   prune)        prune ;;
   ship)         ship ;;
   all)
@@ -102,5 +107,5 @@ case "${1:-all}" in
     merge
     ship
     ;;
-  *) echo "usage: $0 {fetch|merge|fetch-merge|logos|rankings|prune|ship|all}"; exit 1 ;;
+  *) echo "usage: $0 {fetch|merge|fetch-merge|logos|rankings|audit|prune|ship|all}"; exit 1 ;;
 esac
