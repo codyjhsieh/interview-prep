@@ -65,13 +65,25 @@ switch to Individual roles, and compare `clientWidth`/`scrollWidth` (and
 
 ## Backfilling the existing corpus
 
-The 274 taglines and 969 descs already in `js/data.js` predate these budgets
-(tagline median 57 chars / 8 words, desc median 98 chars / 12 words). Even
-with the two-line role row, only 3% of descs fit the ~76-char phone budget
-and 0% of taglines fit 32 chars — the rest still end in an ellipsis.
-`apply-descriptions.mjs` is additive by design, so a normal run will not
-touch them: the new budgets apply only to newly-discovered companies and
-jobs.
+Done once, on 2026-08-19: all 274 taglines and 969 descs were re-cut to these
+budgets (taglines median 57 -> 26 chars, descs median 98 -> 55 chars; 100% of
+both now fit). Everything since then is written to budget at generation time,
+so a routine refresh needs no backfill.
+
+If a future layout change moves the budgets again, repeat the pass:
+
+```bash
+scripts/refresh.sh descriptions > .tmp/desc-in.json   # current values
+# rewrite them to the new budget, then:
+node scripts/apply-descriptions.mjs .tmp/desc-out.json --force
+```
+
+`--force` is the only way to overwrite existing copy — the default is
+additive, and a routine refresh must stay that way so good copy is never
+replaced with worse. Compress the existing summary rather than regenerating
+from `descRaw`: SmartRecruiters and Workday never returned bodies, so ~150
+jobs have no source text to regenerate from.
+
 
 Rewriting the existing set is a deliberate, separate pass — it needs an
 overwrite path in `apply-descriptions.mjs` (there is no `--force` today) and
