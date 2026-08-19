@@ -68,28 +68,28 @@ TITLE_INCLUDE = re.compile(
   r"ai[\s-]engineer|applied[\s-]ai[\s-]engineer|ml[\s-]engineer|"
   r"machine[\s-]learning[\s-]engineer|infrastructure[\s-]engineer|"
   r"platform[\s-]engineer|data[\s-]engineer|systems[\s-]engineer|"
-  # DevOps / SRE / Cloud / Security / Reliability — infra-adjacent IC roles.
+  # DevOps / SRE / Cloud / Reliability — infra-adjacent IC roles.
+  # (Security engineers explicitly excluded — see TITLE_EXCLUDE.)
   r"devops[\s-]engineer|site[\s-]reliability[\s-]engineer|sre(?:\s|$)|"
-  r"cloud[\s-]engineer|security[\s-]engineer|reliability[\s-]engineer|"
-  # AI/ML variants — slash-separated (AI/ML), GenAI, LLM, Agent, Research,
-  # MLOps. "Research Engineer" is the elite-AI-lab pattern (Anthropic,
-  # OpenAI, DeepMind); TITLE_EXCLUDE's "researcher" doesn't catch it.
+  r"cloud[\s-]engineer|reliability[\s-]engineer|"
+  # AI/ML variants — slash-separated (AI/ML), GenAI, LLM, Agent, MLOps.
+  # (Research engineers explicitly excluded — see TITLE_EXCLUDE.)
   r"ai[/]ml[\s-]engineer|ml[/]ai[\s-]engineer|"
   r"genai[\s-]engineer|llm[\s-]engineer|agent[\s-]engineer|"
-  r"agentic[\s-]engineer|mlops[\s-]engineer|research[\s-]engineer|"
+  r"agentic[\s-]engineer|mlops[\s-]engineer|"
   # Solutions / Sales / Presales Engineer — customer-facing eng roles.
   # Removed from TITLE_EXCLUDE and explicitly allowed here.
   r"solutions?[\s-]engineer|sales[\s-]engineer|presales[\s-]engineer|"
   # Agency title variants — reverse-order (Engineer, Front-end) and
   # parenthetical (Engineer (Front-end)) forms common at Code and Theory /
-  # DEPT / Instrument / etc.
+  # DEPT / Instrument / etc. Security + Research explicitly omitted.
   r"engineer,\s*(?:front|back|full[\s-]?stack|frontend|backend|fullstack|"
-  r"devops|sre|site\s+reliability|cloud|security|reliability|"
-  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|research|"
+  r"devops|sre|site\s+reliability|cloud|reliability|"
+  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|"
   r"solutions?|sales|presales)|"
   r"engineer\s*\((?:front|back|full[\s-]?stack|frontend|backend|fullstack|"
-  r"devops|sre|site\s+reliability|cloud|security|reliability|"
-  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|research|"
+  r"devops|sre|site\s+reliability|cloud|reliability|"
+  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|"
   r"solutions?|sales|presales)|"
   # "Developer" role names — DEPT uses these for mobile + software roles
   # ("Android Developer", "iOS Developer", "Software Developer").
@@ -106,7 +106,9 @@ TITLE_EXCLUDE = re.compile(
   r"\b("
   r"staff[\s,]|principal|^lead\s|\slead\s|\slead$|head\s|chief|director|"
   r"manager|engineering\s+manager|technical\s+program|vp\s|vice\s+president|"
-  r"intern|internship|research\s+scientist|researcher|"
+  r"intern|internship|research\s+scientist|researcher|research\s+engineer|"
+  r"security\s+engineer|application\s+security|appsec|product\s+security|"
+  r"detection\s+engineer|"
   # Kept excluded: customer / field engineer. Solutions + Sales Engineer
   # were previously here but are now explicitly allowed (see TITLE_INCLUDE).
   r"customer\s+engineer|field\s+engineer|"
@@ -638,6 +640,131 @@ CANDIDATES = [
   ("adaptive-security","Adaptive Security","greenhouse","adaptivesecurity","saas","AI-driven security awareness","Series A","$43M","a16z",["a16z","OpenAI Startup Fund"],"NYC HQ. a16z portfolio."),
   ("blackbird-labs","Blackbird","greenhouse","blackbirdlabs","consumer","Web3 restaurant loyalty","Series A","$24M","a16z",["a16z","USV"],"NYC HQ."),
   ("camber-schools","Camber","greenhouse","camber","health","RCM for behavioral health","Series A","$30M","a16z",["a16z","Craft"],"NYC HQ."),
+
+  # ── 2026-08-18 — 94-company expansion (obviously-missing NYC eng employers) ──
+  # Discovered via parallel ATS-probing agents. Custom career sites and unknowns
+  # excluded. Slugs verified via WebFetch where possible.
+
+  # Big banks (Workday tenants)
+  ("citi","Citi","workday","citi/wd5/2","fintech","Global bank (NYSE: C)","Public","N/A","NYSE",["NYSE","Dow 30"],"NYC HQ. Markets + institutional tech + retail digital."),
+  ("bank-of-america","Bank of America","workday","ghr/wd1/lateral-us","fintech","Retail + institutional bank (NYSE: BAC)","Public","N/A","NYSE",["NYSE","Dow 30"],"NYC office. Markets + retail digital."),
+  ("barclays","Barclays","workday","barclays/wd3/External_Career_Site_Barclays","fintech","UK investment bank (LSE: BARC)","Public","N/A","LSE",["LSE","FTSE 100"],"NYC office. Markets + risk + platforms."),
+  ("td-bank","TD Bank","workday","td/wd3/TD_Bank_Careers","fintech","North American retail bank","Public","N/A","TSX",["TSX","NYSE"],"NYC office. Retail + digital."),
+  ("guardian-life","Guardian Life","workday","guardianlife/wd5/Guardian-Life-Careers","fintech","Life insurance + benefits","Private mutual","N/A","N/A",[],"NYC HQ. Insurance tech."),
+  ("prudential-financial","Prudential Financial","workday","pru/wd5/Careers","fintech","Insurance + asset mgmt (NYSE: PRU)","Public","N/A","NYSE",["NYSE","S&P 500"],"NJ HQ + NYC office. Insurance tech + investment platforms."),
+
+  # Fintech
+  ("marqeta","Marqeta","greenhouse","marqeta","fintech","Card issuing platform (NASDAQ: MQ)","Public","$525M pre-IPO","NASDAQ",["NASDAQ"],"Card issuing API."),
+  ("bill-com","Bill.com","greenhouse","billcom","fintech","SMB accounts payable (NYSE: BILL)","Public","$347M pre-IPO","NYSE",["NYSE"],"AP/AR automation for SMB."),
+  ("payoneer","Payoneer","greenhouse","payoneer","fintech","Cross-border payments (NASDAQ: PAYO)","Public","N/A","NASDAQ",["NASDAQ"],"NYC HQ. Global payments infra."),
+  ("better-mortgage","Better.com","ashby","better-mortgage","fintech","Digital mortgage (NASDAQ: BETR)","Public","N/A","NASDAQ",["NASDAQ","SoftBank"],"NYC HQ. Mortgage automation."),
+  ("adyen","Adyen","greenhouse","adyen","fintech","Global payments platform (AMS: ADYEN)","Public","N/A","AEX",["AEX"],"NYC office. Payments infra."),
+  ("column","Column","ashby","column","fintech","Nationally chartered banking-as-a-service","Series B","$50M","Framework",["Framework","Coatue"],"Nationally chartered bank + APIs."),
+
+  # HFT / Quant / Prop trading
+  ("hrt","Hudson River Trading","greenhouse","hrttalentcommunity","hft","Quantitative HFT","Private","N/A","N/A",[],"NYC HQ. Low-latency quant."),
+  ("optiver","Optiver","greenhouse","optiver","hft","Global market-maker","Private","N/A","N/A",[],"NYC office. Market-making + options."),
+  ("xtx-markets","XTX Markets","greenhouse","xtxmarketstechnologies","hft","Quantitative electronic market-maker","Private","N/A","N/A",[],"NYC office. Quantitative trading + ML."),
+  ("tower-research","Tower Research Capital","greenhouse","towerresearchcapital","hft","Diversified quantitative trading","Private","N/A","N/A",[],"NYC HQ."),
+  ("balyasny","Balyasny","greenhouse","balyasny","hft","Multi-strategy hedge fund","Private","N/A","N/A",[],"NYC office. Multi-manager platform."),
+  ("aqr","AQR Capital","greenhouse","aqr","hft","Systematic asset manager","Private","N/A","N/A",[],"CT HQ, NYC office. Factor research."),
+  ("belvedere-trading","Belvedere Trading","lever","belvederetrading","hft","Options market maker","Private","N/A","N/A",[],"NYC office. Options market making."),
+  ("radix-trading","Radix Trading","greenhouse","radixtrading","hft","Quantitative trading","Private","N/A","N/A",[],"Chicago/NYC."),
+  ("pdt-partners","PDT Partners","greenhouse","pdtpartners","hft","Quantitative hedge fund","Private","N/A","N/A",[],"NYC HQ. Ex-Morgan Stanley PDT."),
+  ("marshall-wace","Marshall Wace","greenhouse","marshallwace","hft","Long/short hedge fund","Private","N/A","N/A",[],"NYC office."),
+  ("man-group","Man Group","greenhouse","mangroup","hft","Systematic + discretionary hedge fund","Public","N/A","LSE",["LSE"],"NYC office. AHL + GLG + Numeric."),
+  ("peak6","Peak6","greenhouse","peak6","hft","Options + fintech","Private","N/A","N/A",[],"Chicago HQ, NYC office."),
+  ("wolverine-trading","Wolverine Trading","greenhouse","wolverinetrading","hft","Options market maker","Private","N/A","N/A",[],"NYC office."),
+
+  # AI / ML
+  ("xai","xAI","greenhouse","xai","ai","Elon's AI lab / Grok","Series C","$12B+","Sequoia",["Sequoia","a16z","Valor"],"Frontier training. AI lab."),
+  ("character-ai","Character AI","ashby","character","ai","Conversational AI characters","Series A","$150M","a16z",["a16z","Google","Nat Friedman"],"AI characters at scale."),
+  ("together-ai","Together AI","greenhouse","togetherai","ai","AI infra / inference","Series B","$228M","Salesforce",["Salesforce","Kleiner"],"Open-source AI cloud."),
+  ("cerebras","Cerebras","ashby","cerebras","ai","AI chips / wafer-scale compute","Series G","$720M","Alpha Wave",["Alpha Wave","Benchmark"],"Wafer-scale chips."),
+  ("sambanova","SambaNova","greenhouse","sambanovasystems","ai","AI dataflow chips + systems","Series D","$1.1B","SoftBank",["SoftBank","Intel Capital"],"Reconfigurable dataflow AI."),
+  ("cresta","Cresta","greenhouse","cresta","ai","AI for contact centers","Series C","$156M","Sequoia",["Sequoia","Greylock","a16z"],"Real-time AI coaching."),
+  ("otter-ai","Otter.ai","greenhouse","otter","ai","AI meeting notes","Series C","$63M","Slow Ventures",["Slow","Fidelity"],"Meeting transcription + summaries."),
+  ("speak","Speak","ashby","speak","ai","AI language learning","Series C","$78M","OpenAI Startup Fund",["OpenAI","Khosla","Founders Fund"],"Conversational AI language tutor."),
+
+  # Crypto
+  ("coinbase","Coinbase","greenhouse","coinbase","crypto","Crypto exchange (NASDAQ: COIN)","Public","$547M pre-IPO","NASDAQ",["NASDAQ","a16z"],"NYC office. Exchange + wallet + custody."),
+  ("consensys","Consensys","greenhouse","consensys","crypto","Ethereum infra (MetaMask, Infura)","Series D","$725M","ParaFi",["ParaFi","Microsoft","JPMorgan"],"NYC HQ. Ethereum tooling + wallets."),
+  ("bitgo","BitGo","greenhouse","bitgo","crypto","Institutional crypto custody","Series C","$100M","Ribbit",["Ribbit","Goldman Sachs"],"Institutional custody."),
+  ("blockchain-com","Blockchain.com","greenhouse","blockchain","crypto","Crypto exchange + wallet","Series D","$300M","Baillie Gifford",["Baillie Gifford","GV"],"Retail + institutional."),
+  ("kraken","Kraken","ashby","kraken.com","crypto","Crypto exchange","Late stage","$118M","N/A",[],"NYC office."),
+  ("grayscale","Grayscale","greenhouse","grayscale","crypto","Crypto asset manager (DCG)","Private","N/A","N/A",[],"NYC HQ. GBTC + Grayscale funds."),
+  ("foundry-digital","Foundry Digital","greenhouse","foundry","crypto","Bitcoin mining (DCG)","Private","N/A","N/A",[],"DCG subsidiary."),
+  ("dcg","Digital Currency Group","greenhouse","digitalcurrencygroup","crypto","Crypto holding company","Private","N/A","N/A",[],"NYC HQ. DCG umbrella."),
+  ("anchorage-digital","Anchorage Digital","lever","anchorage","crypto","Federally chartered crypto bank","Series D","$487M","Andreessen Horowitz",["a16z","Kleiner","GIC"],"OCC-chartered crypto bank."),
+  ("moonpay","MoonPay","lever","moonpay","crypto","Crypto on/off ramp","Series A","$642M","Tiger",["Tiger","Coatue","Sequoia"],"Crypto payments."),
+  ("reservoir","Reservoir","ashby","reservoir","crypto","NFT infrastructure","Seed+","$14M","Paradigm",["Paradigm"],"NYC HQ. NFT protocol + tools."),
+
+  # SaaS / infra / dev tools
+  ("cloudflare","Cloudflare","greenhouse","cloudflare","infra","Edge + zero-trust (NYSE: NET)","Public","$332M pre-IPO","NYSE",["NYSE","S&P 500"],"NYC office. CDN + Workers + Zero Trust."),
+  ("twilio","Twilio","greenhouse","twilio","saas","Communications APIs (NYSE: TWLO)","Public","$233M pre-IPO","NYSE",["NYSE"],"NYC office. Voice + SMS + Segment."),
+  ("snowflake","Snowflake","ashby","snowflake","saas","Cloud data warehouse (NYSE: SNOW)","Public","$1.4B pre-IPO","NYSE",["NYSE","S&P 500"],"NYC office."),
+  ("databricks","Databricks","greenhouse","databricks","saas","Data + AI lakehouse","Late stage","$14B+","T. Rowe Price",["T. Rowe","a16z","Coatue"],"NYC office. Lakehouse + MosaicML."),
+  ("confluent","Confluent","ashby","confluent","infra","Kafka streaming (NASDAQ: CFLT)","Public","$455M pre-IPO","NASDAQ",["NASDAQ"],"Kafka SaaS."),
+  ("elastic","Elastic","greenhouse","elastic","saas","Search + observability (NYSE: ESTC)","Public","$252M pre-IPO","NYSE",["NYSE"],"Elasticsearch + Kibana."),
+  ("deel","Deel","ashby","deel","saas","Global payroll + HR","Late stage","$679M","Andreessen Horowitz",["a16z","YC"],"Global payroll + contractors."),
+  ("miro","Miro","ashby","miro","saas","Collaborative whiteboard","Series C","$476M","ICONIQ",["ICONIQ","Accel"],"NYC office. Real-time collab."),
+  ("new-relic","New Relic","greenhouse","newrelic","saas","APM + observability","Private","N/A","Francisco Partners",["Francisco Partners","TPG"],"NYC office. APM."),
+  ("okta","Okta","greenhouse","okta","saas","Identity + access mgmt (NASDAQ: OKTA)","Public","$229M pre-IPO","NASDAQ",["NASDAQ"],"SSO/IAM."),
+  ("1password","1Password","ashby","1password","saas","Password mgmt / vaults","Late stage","$920M","ICONIQ",["ICONIQ","Accel"],"Enterprise vaults."),
+  ("crowdstrike","CrowdStrike","workday","crowdstrike/wd5/crowdstrikecareers","saas","Endpoint security (NASDAQ: CRWD)","Public","$481M pre-IPO","NASDAQ",["NASDAQ","S&P 500"],"NYC office. Endpoint + XDR."),
+  ("clickup","ClickUp","ashby","clickup","saas","Project mgmt / productivity","Series C","$538M","Craft Ventures",["Craft","Georgian"],"All-in-one work."),
+  ("hubspot","HubSpot","greenhouse","hubspot","saas","Marketing + CRM (NYSE: HUBS)","Public","$100M pre-IPO","NYSE",["NYSE"],"CRM + inbound."),
+  ("zendesk","Zendesk","workday","zendesk/wd1/zendesk","saas","Customer support platform","Private","N/A","Permira",["Permira","Hellman & Friedman"],"NYC office. Support suite."),
+  ("freshworks","Freshworks","smartrecruiters","Freshworks","saas","CRM + support (NASDAQ: FRSH)","Public","N/A","NASDAQ",["NASDAQ"],"Zendesk competitor."),
+  ("workday-inc","Workday","workday","workday/wd5/Workday","saas","HR + finance (NASDAQ: WDAY)","Public","N/A","NASDAQ",["NASDAQ","S&P 500"],"NYC office. HCM + Financials."),
+  ("grammarly","Grammarly","greenhouse","grammarly","saas","AI writing assistant","Late stage","$400M","Baillie Gifford",["Baillie Gifford","General Catalyst"],"NYC office. Writing AI."),
+  ("adobe","Adobe","workday","adobe/wd5/external_experienced","saas","Creative + Experience Cloud (NASDAQ: ADBE)","Public","N/A","NASDAQ",["NASDAQ","Dow 30"],"NYC office."),
+
+  # Consumer / social
+  ("pinterest","Pinterest","greenhouse","pinterest","consumer","Visual discovery (NYSE: PINS)","Public","$1.5B pre-IPO","NYSE",["NYSE"],"NYC office. Discovery + shopping."),
+
+  # Media / publishing
+  ("reuters","Reuters","workday","thomsonreuters/wd5/External_Career_Site","media","News + finance data (NYSE: TRI)","Public","N/A","NYSE",["NYSE"],"NYC office. News + Refinitiv/LSEG data."),
+  ("buzzfeed","BuzzFeed","greenhouse","buzzfeed","media","Digital media (NASDAQ: BZFD)","Public","N/A","NASDAQ",["NASDAQ"],"NYC HQ."),
+  ("vox-media","Vox Media","greenhouse","voxmedia","media","Digital publisher (Verge, Vox, SB Nation)","Private","N/A","N/A",[],"NYC HQ. Chorus CMS."),
+  ("hearst","Hearst","greenhouse","hearst","media","Diversified media conglomerate","Private","N/A","N/A",[],"NYC HQ."),
+  ("the-athletic","The Athletic","lever","theathletic","media","Sports journalism (NYT subsidiary)","Subsidiary","$139M pre-acq","NYT",["NYT"],"NYC/SF."),
+
+  # DTC / Consumer NYC
+  ("away","Away","ashby","away","consumer","DTC luggage","Series D","$181M","Wellington",["Wellington","Global Founders"],"NYC HQ."),
+  ("rent-the-runway","Rent the Runway","greenhouse","renttherunway","consumer","Fashion rental (NASDAQ: RENT)","Public","$541M pre-IPO","NASDAQ",["NASDAQ"],"NYC HQ."),
+  ("glossier","Glossier","greenhouse","glossier","consumer","DTC beauty","Series E","$266M","Wellington",["Wellington","Sequoia"],"NYC HQ."),
+  ("harrys","Harry's","greenhouse","harrys","consumer","DTC grooming","Series E","$873M","Alliance Consumer",["Alliance","Tiger"],"NYC HQ."),
+  ("bark","Bark","greenhouse","bark","consumer","BarkBox + dog products (NYSE: BARK)","Public","$67M pre-IPO","NYSE",["NYSE"],"NYC HQ."),
+  ("hellofresh","HelloFresh","greenhouse","hellofresh","consumer","Meal kits (ETR: HFG)","Public","N/A","ETR",["ETR"],"NYC office."),
+
+  # Marketplaces / delivery
+  ("airbnb","Airbnb","greenhouse","airbnb","marketplace","Short-term rentals (NASDAQ: ABNB)","Public","$6B+ pre-IPO","NASDAQ",["NASDAQ"],"NYC office."),
+  ("instacart","Instacart","greenhouse","instacart","marketplace","Grocery delivery (NASDAQ: CART)","Public","$2.7B pre-IPO","NASDAQ",["NASDAQ"],"NYC office. Grocery + adtech."),
+  ("stubhub","StubHub","greenhouse","stubhubinc","marketplace","Ticket resale","Private","N/A","Madrone",["Madrone"],"NYC office."),
+  ("stockx","StockX","greenhouse","stockx","marketplace","Sneaker + collectibles marketplace","Series E","$690M","Tiger",["Tiger","GV","DST"],"Detroit HQ, NYC office."),
+  ("gopuff","Gopuff","lever","gopuff","marketplace","Instant convenience delivery","Late stage","$3.4B","SoftBank",["SoftBank","D1"],"NYC office."),
+  ("vroom","Vroom","workday","vroom/wd5/Vroom","marketplace","Used-car marketplace","Public (delisted)","N/A","N/A",[],"NYC HQ."),
+  ("grubhub","Grubhub","workday","wonder/wd1/Grubhub_Careers","marketplace","Food delivery (Wonder Group subsidiary)","Subsidiary","$3.1B pre-acq","Wonder",["Wonder"],"NYC HQ."),
+
+  # Real estate / prop tech
+  ("zillow","Zillow","workday","zillow/wd5/Zillow_Group_External","proptech","Real estate marketplace (NASDAQ: Z)","Public","N/A","NASDAQ",["NASDAQ"],"NYC office (StreetEasy)."),
+  ("wework","WeWork","workday","wework/wd1/WeWork","proptech","Flexible workspaces","Public reorg","N/A","N/A",[],"NYC HQ. Coworking + tech."),
+  ("latch","Latch","ashby","latch","proptech","Smart building access (NASDAQ: LTCH)","Public","N/A","NASDAQ",["NASDAQ"],"NYC HQ."),
+
+  # Health tech
+  ("progyny","Progyny","workday","progyny/wd5/progyny","health","Fertility benefits (NASDAQ: PGNY)","Public","$130M pre-IPO","NASDAQ",["NASDAQ"],"NYC HQ."),
+  ("hinge-health","Hinge Health","ashby","hinge-health","health","Digital MSK care","Late stage","$823M","Tiger",["Tiger","Coatue","Bessemer"],"SF/NYC. Digital PT."),
+  ("included-health","Included Health","lever","includedhealth","health","Care navigation","Series H","$650M","GV",["GV","BlackRock"],"SF HQ, NYC office."),
+
+  # Adtech
+  ("criteo","Criteo","workday","criteo/wd3/Criteo_Career_Site","adtech","Ad tech (NASDAQ: CRTO)","Public","N/A","NASDAQ",["NASDAQ"],"NYC office. Commerce media."),
+  ("liveramp","LiveRamp","workday","liveramp/wd5/LiveRampCareers","adtech","Data connectivity (NYSE: RAMP)","Public","N/A","NYSE",["NYSE"],"NYC office. Identity graph."),
+
+  # Gaming / consumer social
+  ("take-two","Take-Two Interactive","greenhouse","taketwo","gaming","Rockstar + 2K parent (NASDAQ: TTWO)","Public","N/A","NASDAQ",["NASDAQ","S&P 500"],"NYC HQ."),
+  ("discord","Discord","greenhouse","discord","consumer","Voice + text communities","Late stage","$1B+","Tiger",["Tiger","Sequoia"],"NYC office."),
+  ("roblox","Roblox","greenhouse","roblox","gaming","UGC gaming platform (NYSE: RBLX)","Public","$500M+ pre-IPO","NYSE",["NYSE"],"NYC office."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
