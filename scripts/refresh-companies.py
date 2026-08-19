@@ -765,6 +765,118 @@ CANDIDATES = [
   ("take-two","Take-Two Interactive","greenhouse","taketwo","gaming","Rockstar + 2K parent (NASDAQ: TTWO)","Public","N/A","NASDAQ",["NASDAQ","S&P 500"],"NYC HQ."),
   ("discord","Discord","greenhouse","discord","consumer","Voice + text communities","Late stage","$1B+","Tiger",["Tiger","Sequoia"],"NYC office."),
   ("roblox","Roblox","greenhouse","roblox","gaming","UGC gaming platform (NYSE: RBLX)","Public","$500M+ pre-IPO","NYSE",["NYSE"],"NYC office."),
+
+  # ── 2026-08-19 — non-crypto expansion (aerospace, PE, saas, health, ed) ──
+
+  # Aerospace / Defense / GovTech
+  ("spacex","SpaceX","greenhouse","spacex","aerospace","Rockets + Starlink","Private","$10B+","N/A",[],"Rocket + satcom giant."),
+  ("blue-origin","Blue Origin","lever","blueorigin","aerospace","Rockets + space infra (Bezos)","Private","N/A","N/A",[],"Bezos rocket co."),
+  ("rocket-lab","Rocket Lab","greenhouse","rocketlab","aerospace","Small-launch rockets (NASDAQ: RKLB)","Public","N/A","NASDAQ",["NASDAQ"],"Small-sat launch."),
+  ("relativity-space","Relativity Space","greenhouse","relativity","aerospace","3D-printed rockets","Private","$1.3B","Fidelity",["Fidelity","BlackRock"],"3D-printed launch vehicles."),
+  ("axiom-space","Axiom Space","workday","axiomspace/wd5/External_Career_Site","aerospace","Commercial space stations","Series C","$500M+","N/A",[],"Commercial ISS successor."),
+  ("astranis","Astranis","greenhouse","astranis","aerospace","Geostationary comms satellites","Series D","$550M","Andreessen Horowitz",["a16z","Venrock"],"GEO smallsats for connectivity."),
+  ("momentus","Momentus","greenhouse","momentus","aerospace","In-space transportation (NASDAQ: MNTS)","Public","N/A","NASDAQ",["NASDAQ"],"In-space last-mile."),
+  ("anduril","Anduril","greenhouse","andurilindustries","defense","Autonomous defense systems","Late stage","$3.8B","Founders Fund",["Founders Fund","Andreessen"],"Palmer Luckey defense co."),
+  ("shield-ai","Shield AI","lever","shieldai","defense","AI autonomy for defense","Series F","$1.5B","US Innovative Tech",["US Innovative","Andreessen"],"Hivemind autonomy."),
+  ("skydio","Skydio","ashby","Skydio","defense","Autonomous drones","Series E","$740M","Linse Capital",["Linse","IVP","a16z"],"US drone maker."),
+  ("kratos-defense","Kratos Defense","smartrecruiters","Kratos","defense","Unmanned defense systems (NASDAQ: KTOS)","Public","N/A","NASDAQ",["NASDAQ"],"Drones + defense systems."),
+  ("two-six","Two Six Technologies","greenhouse","twosixtechnologies","defense","Defense R&D + cyber","Private","N/A","N/A",[],"Defense cyber R&D."),
+  ("leidos","Leidos","workday","leidos/wd5/External","defense","Defense IT + services (NYSE: LDOS)","Public","N/A","NYSE",["NYSE","S&P 500"],"Federal IT + defense."),
+
+  # Automotive / mobility
+  ("lucid-motors","Lucid Motors","greenhouse","lucidmotors","automotive","EV luxury sedan (NASDAQ: LCID)","Public","N/A","NASDAQ",["NASDAQ"],"EV maker."),
+  ("zoox","Zoox","lever","zoox","automotive","Autonomous ride-hail (Amazon subsidiary)","Subsidiary","$1B+ pre-acq","Amazon",["Amazon"],"Purpose-built AV."),
+
+  # Robotics
+  ("locus-robotics","Locus Robotics","greenhouse","locusrobotics","robotics","Warehouse robots","Series F","$305M","G2 Venture Partners",["G2","BOND","Tiger"],"Warehouse fulfillment robots."),
+  ("path-robotics","Path Robotics","greenhouse","pathrobotics","robotics","AI-driven welding robots","Series D","$260M","Tiger",["Tiger","Silver Lake"],"Autonomous welding."),
+  ("formic","Formic","greenhouse","formic","robotics","Robotics-as-a-service","Series A","$50M","Blackhorn",["Blackhorn","Lux"],"RaaS for factories."),
+  ("bright-machines","Bright Machines","lever","brightmachines","robotics","Software-defined manufacturing","Series C","$500M+","BlackRock",["BlackRock","Eclipse"],"Software-defined factories."),
+  ("diligent-robotics","Diligent Robotics","greenhouse","diligentrobotics","robotics","Hospital service robots (Moxi)","Series C","$83M","Canaan Partners",["Canaan","True"],"Hospital assistant robots."),
+  ("hadrian","Hadrian","teamtailor","hadrian","robotics","Autonomous precision manufacturing","Series B","$117M","Lux Capital",["Lux","a16z","Founders Fund"],"Autonomous CNC factory."),
+
+  # Nasdaq (Exchanges)
+  ("nasdaq","Nasdaq","greenhouse","nasdaq","fintech","Stock exchange + market tech (NASDAQ: NDAQ)","Public","N/A","NASDAQ",["NASDAQ"],"NYC HQ. Exchange + market surveillance."),
+
+  # VC / PE (careers pages for portfolio ops + platform eng)
+  ("bridgewater","Bridgewater Associates","greenhouse","bridgewater","hft","Discretionary + systematic macro hedge fund","Private","N/A","N/A",[],"CT HQ. Largest hedge fund."),
+  ("coatue","Coatue","greenhouse","coatue","hft","Tech-focused hedge fund + growth PE","Private","N/A","N/A",[],"NYC HQ."),
+  ("tiger-global","Tiger Global","greenhouse","tigerglobal","hft","Global growth PE + hedge fund","Private","N/A","N/A",[],"NYC HQ."),
+  ("sequoia-capital","Sequoia Capital","greenhouse","sequoiacapital","hft","Venture capital","Private","N/A","N/A",[],"Menlo Park HQ, NYC office."),
+  ("a16z","Andreessen Horowitz","greenhouse","a16z","hft","Venture capital","Private","N/A","N/A",[],"a16z. NYC office."),
+  ("general-atlantic","General Atlantic","greenhouse","generalatlantic","hft","Growth equity","Private","N/A","N/A",[],"NYC HQ."),
+
+  # Fintech
+  ("melio","Melio","greenhouse","melio","fintech","SMB B2B payments","Series D","$500M+","Coatue",["Coatue","General Catalyst","Accel"],"NYC office. B2B payments."),
+
+  # DevTools / Infra / Data
+  ("gitlab","GitLab","greenhouse","gitlab","devtools","DevSecOps platform (NASDAQ: GTLB)","Public","$412M pre-IPO","NASDAQ",["NASDAQ"],"All-remote. GitLab + CI/CD."),
+  ("atlassian","Atlassian","workday","atlassian/wd3/External","saas","Jira + Confluence + Trello (NASDAQ: TEAM)","Public","N/A","NASDAQ",["NASDAQ"],"NYC office. Jira + Confluence + Bitbucket."),
+  ("netlify","Netlify","greenhouse","netlify","devtools","Jamstack platform","Series D","$212M","BOND",["BOND","Andreessen","Kleiner"],"Jamstack + edge functions."),
+  ("render","Render","ashby","render","devtools","Cloud application platform","Series B","$74M","General Catalyst",["General Catalyst","Bessemer"],"Heroku alternative."),
+  ("chef-progress","Chef (Progress)","workday","progress/wd5/ProgressCareers","devtools","Infra automation (Progress subsidiary)","Subsidiary","N/A","Progress",["NASDAQ"],"Chef + Progress DevOps."),
+  ("buildkite","Buildkite","greenhouse","buildkite","devtools","CI/CD","Series B","$41M","OpenView",["OpenView","General Catalyst"],"Hybrid CI/CD."),
+  ("prefect","Prefect","ashby","prefect","devtools","Data workflow orchestration","Series B","$50M+","Tiger",["Tiger","Positive Sum"],"Python workflow orchestrator."),
+  ("dagster","Dagster","greenhouse","dagster","devtools","Data orchestration","Series B","$41M","Coatue",["Coatue","Sequoia"],"Dagster orchestrator."),
+  ("grafana-labs","Grafana Labs","greenhouse","grafanalabs","devtools","Observability + monitoring","Series D","$540M","GIC",["GIC","Sequoia","Coatue"],"NYC office. Grafana + Loki + Tempo."),
+  ("sumo-logic","Sumo Logic","greenhouse","sumologic","saas","Cloud logs + security analytics","Private","N/A","Francisco Partners",["Francisco Partners"],"Log analytics."),
+  ("statsig","Statsig","ashby","statsig","devtools","Feature flags + experimentation","Series B","$43M","Sequoia",["Sequoia","Madrona"],"Experimentation platform."),
+  ("mixpanel","Mixpanel","greenhouse","mixpanel","saas","Product analytics","Late stage","$200M+","Sequoia",["Sequoia","Andreessen"],"Product analytics."),
+  ("pendo","Pendo","greenhouse","pendo","saas","Product experience platform","Late stage","$473M","Battery",["Battery","Meritech","Sapphire"],"Product analytics + in-app guides."),
+
+  # Cyber
+  ("verkada","Verkada","greenhouse","verkada","saas","Physical security cameras + access","Series D","$443M","Sequoia",["Sequoia","Meritech"],"Cloud-managed security cameras."),
+  ("ping-identity","Ping Identity","greenhouse","pingidentity","saas","Identity + access mgmt","Private","N/A","Thoma Bravo",["Thoma Bravo"],"Enterprise SSO/IAM."),
+  ("beyondtrust","BeyondTrust","greenhouse","beyondtrust","saas","Privileged access mgmt","Private","N/A","Clearlake",["Clearlake"],"PAM security."),
+  ("chainguard","Chainguard","greenhouse","chainguard","saas","Zero-CVE container images","Series C","$254M","Redpoint",["Redpoint","Kleiner","Amplify"],"Container image supply chain security."),
+
+  # Consumer / restaurants
+  ("toast","Toast","greenhouse","toast","saas","Restaurant POS + payments (NYSE: TOST)","Public","$902M pre-IPO","NYSE",["NYSE"],"Restaurant tech."),
+
+  # Consumer / retail
+  ("wayfair","Wayfair","greenhouse","wayfair","marketplace","Home goods marketplace (NYSE: W)","Public","$358M pre-IPO","NYSE",["NYSE"],"Home retail. Boston HQ, NYC office."),
+  ("nordstrom","Nordstrom","workday","nordstrom/wd501/nordstromcareers","consumer","Department store (NYSE: JWN)","Public","N/A","NYSE",["NYSE"],"NYC office. Nordstrom.com tech."),
+
+  # Media / news
+  ("semafor","Semafor","greenhouse","semafor","media","Global news startup","Series A","$25M","Justin Smith",["Emerson","Alphabet","3B"],"NYC HQ. News."),
+  ("conde-nast","Condé Nast","smartrecruiters","CondeNast","media","Magazines + digital (Vogue, Wired, GQ, VF)","Private","N/A","N/A",[],"NYC HQ. Vogue + Wired + GQ + Vanity Fair + The New Yorker."),
+  ("genius","Genius","workable","genius","media","Music annotation + lyrics","Private","N/A","N/A",[],"NYC HQ. Music intelligence."),
+
+  # Ed tech
+  ("coursera","Coursera","greenhouse","coursera","ed","MOOC platform (NYSE: COUR)","Public","N/A","NYSE",["NYSE"],"NYC office. Online learning."),
+  ("2u","edX / 2U","greenhouse","2u","ed","Online degrees + edX","Public","N/A","NASDAQ",["NASDAQ"],"edX parent."),
+  ("udemy","Udemy","greenhouse","udemy","ed","Online course marketplace (NASDAQ: UDMY)","Public","N/A","NASDAQ",["NASDAQ"],"Online course marketplace."),
+  ("masterclass","MasterClass","greenhouse","masterclass","ed","Celebrity-taught video learning","Series F","$536M","Fidelity",["Fidelity","IVP"],"Celebrity masterclasses."),
+  ("skillshare","Skillshare","workable","skillshare","ed","Creative learning subscriptions","Series C","$107M","Union Square",["Union Square","Amasia"],"NYC HQ."),
+  ("codecademy","Codecademy","greenhouse","codecademy","ed","Learn-to-code platform (Skillsoft subsidiary)","Subsidiary","$525M pre-acq","Skillsoft",["Skillsoft"],"NYC HQ."),
+  ("chegg","Chegg","greenhouse","chegg","ed","Student learning platform (NYSE: CHGG)","Public","N/A","NYSE",["NYSE"],"Homework help + tutoring."),
+  ("course-hero","Course Hero","greenhouse","learneo","ed","Study materials platform","Series C","$380M","Wellington",["Wellington","Bessemer","GSV"],"Study docs marketplace."),
+  ("amplify","Amplify Education","greenhouse","amplify","ed","K-12 curriculum platform","Private","N/A","News Corp",["News Corp","Emerson Collective"],"K-12 EdTech."),
+  ("newsela","Newsela","greenhouse","newsela","ed","K-12 reading + articles platform","Late stage","$247M","Franklin Templeton",["Franklin Templeton"],"NYC HQ."),
+
+  # Health / biotech
+  ("verily","Verily","greenhouse","verily","health","Alphabet life-sciences subsidiary","Subsidiary","N/A","Alphabet",["Alphabet"],"Life sciences (Google Health)."),
+  ("flatiron-health","Flatiron Health","greenhouse","flatironhealth","health","Oncology real-world data (Roche)","Subsidiary","$523M pre-acq","Roche",["Roche"],"NYC HQ. Oncology EHR + data."),
+  ("tempus-labs","Tempus Labs","greenhouse","tempuslabs","health","Precision medicine + AI (NASDAQ: TEM)","Public","N/A","NASDAQ",["NASDAQ"],"Molecular + clinical data."),
+  ("recursion","Recursion Pharmaceuticals","greenhouse","recursionpharmaceuticals","health","AI-driven drug discovery (NASDAQ: RXRX)","Public","N/A","NASDAQ",["NASDAQ"],"Image-based drug discovery."),
+  ("ginkgo-bioworks","Ginkgo Bioworks","greenhouse","ginkgobioworks","health","Cell programming platform (NYSE: DNA)","Public","N/A","NYSE",["NYSE"],"Cell programming."),
+
+  # Logistics / supply chain
+  ("project44","Project44","greenhouse","project44","saas","Real-time supply-chain visibility","Series F","$792M","Thoma Bravo",["Thoma Bravo","TPG","Insight"],"NYC office. Supply chain visibility."),
+  ("shipbob","ShipBob","greenhouse","shipbob","saas","Fulfillment for e-commerce","Series E","$332M","Bain Capital Ventures",["Bain","Menlo","SoftBank"],"E-commerce fulfillment."),
+
+  # Marketplaces / travel
+  ("yelp","Yelp","greenhouse","yelp","marketplace","Local business reviews (NYSE: YELP)","Public","N/A","NYSE",["NYSE"],"NYC office. Local search + reviews."),
+  ("tripadvisor","Tripadvisor","greenhouse","tripadvisor","marketplace","Travel reviews + booking (NASDAQ: TRIP)","Public","N/A","NASDAQ",["NASDAQ"],"Travel reviews."),
+  ("expedia","Expedia","workday","expedia/wd108/expediagroup","marketplace","Travel booking (NASDAQ: EXPE)","Public","N/A","NASDAQ",["NASDAQ"],"Travel giant."),
+  ("vacasa","Vacasa","greenhouse","vacasa","marketplace","Vacation rental mgmt","Public","N/A","NASDAQ",["NASDAQ"],"Vacation rental operator."),
+
+  # Adtech / marketing
+  ("klaviyo","Klaviyo","greenhouse","klaviyo","adtech","Marketing automation (NYSE: KVYO)","Public","$454M pre-IPO","NYSE",["NYSE"],"NYC office. Email + SMS marketing."),
+
+  # AI / ML
+  ("ai21-labs","AI21 Labs","greenhouse","ai21labs","ai","Foundation model lab (Jurassic)","Series C","$326M","NVIDIA",["NVIDIA","Google","Salesforce"],"Israel-based foundation model lab. NYC eng."),
+  ("inflection-ai","Inflection AI","greenhouse","inflectionai","ai","Personal AI (Pi) — engineering team now at MS","Private","$1.3B","Microsoft",["Microsoft","NVIDIA","Reid Hoffman"],"Personal AI. Team acqui-hired by Microsoft; brand still hiring."),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this

@@ -13,8 +13,9 @@ Expect ~5 min wall time, mostly network. The bash script owns the safety.
 ## Steps
 
 1. **Invoke `/refresh-fetch-merge`.** Halts the pipeline if it exits non-zero (sparse fetch means an ATS outage; don't merge a partial view).
-2. **Invoke `/refresh-logos`.** Soft — if agents can't resolve a domain, ship anyway (letter tile is a graceful fallback).
-3. **Invoke `/refresh-ship`.** Bump `?v=`, commit, push.
+2. **Invoke `/refresh-prune`.** Re-fetches each company's full board and removes postings whose IDs no longer exist. Only touches companies whose fetch succeeded — everything else is untouched.
+3. **Invoke `/refresh-logos`.** Soft — if agents can't resolve a domain, ship anyway (letter tile is a graceful fallback).
+4. **Invoke `/refresh-ship`.** Bump `?v=`, commit, push.
 
 ## Guardrails
 

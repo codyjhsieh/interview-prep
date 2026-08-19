@@ -42,6 +42,11 @@ logos() {
   node scripts/check-logos.mjs
 }
 
+prune() {
+  echo "→ prune (drop postings no longer on live ATS boards)"
+  node scripts/check-dead.js --prune
+}
+
 ship() {
   echo "→ ship"
   local cur date_part num_part new
@@ -73,7 +78,8 @@ case "${1:-all}" in
   merge)        merge ;;
   fetch-merge)  fetch; merge ;;
   logos)        logos ;;
+  prune)        prune ;;
   ship)         ship ;;
-  all)          fetch; merge; ship ;;
-  *) echo "usage: $0 {fetch|merge|fetch-merge|logos|ship|all}"; exit 1 ;;
+  all)          fetch; merge; prune; ship ;;
+  *) echo "usage: $0 {fetch|merge|fetch-merge|logos|prune|ship|all}"; exit 1 ;;
 esac
