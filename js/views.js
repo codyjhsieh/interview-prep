@@ -5689,6 +5689,7 @@ function renderCompanies(state, hub) {
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 justify-between flex-wrap">
             <div class="font-display font-semibold text-lg truncate">${esc(c.name)} ${newChip}</div>
+            ${c.tagline ? `<div class="text-xs muted truncate" style="font-style:italic">${esc(c.tagline)}</div>` : ''}
             ${fitBadgeHTML(c._fit)}
           </div>
           <div class="text-xs muted mt-0.5 truncate">${esc(c.sub)}</div>
@@ -5858,8 +5859,9 @@ function renderCompanies(state, hub) {
           ${logoMini}
           <div class="role-row-text">
             <div class="role-row-title truncate">${esc(r.title)} ${newTag}</div>
+            ${r.desc ? `<div class="role-row-desc truncate muted text-xs mt-0.5" style="font-style:italic">${esc(r.desc)}</div>` : ''}
             <div class="role-row-co truncate">
-              <span class="font-medium">${esc(c.name)}</span>
+              <span class="font-medium">${esc(c.name)}</span>${c.tagline ? ` <span class="muted text-xs">— ${esc(c.tagline)}</span>` : ''}
               <span class="dim mx-1">·</span>
               <span class="muted">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
               <span class="dim mx-1">·</span>

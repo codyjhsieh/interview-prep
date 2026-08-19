@@ -1050,7 +1050,7 @@ def fetch(ats, slug):
     d = curl_json(f"https://api.ashbyhq.com/posting-api/job-board/{slug}?includeCompensation=false")
     return d.get("jobs", []) if d else []
   if ats == "greenhouse":
-    d = curl_json(f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs")
+    d = curl_json(f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true")
     return d.get("jobs", []) if d else []
   if ats == "lever":
     d = curl_json(f"https://api.lever.co/v0/postings/{slug}?mode=json")
@@ -1129,10 +1129,27 @@ def _date10(v):
   s = str(v)
   return s[:10] if len(s) >= 10 and s[4] == "-" and s[7] == "-" else ""
 
+_HTML_TAG = re.compile(r'<[^>]+>')
+_HTML_ENT = {'&nbsp;':' ','&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&#39;':"'","&rsquo;":"'","&lsquo;":"'","&mdash;":"—","&ndash;":"–"}
+_WS = re.compile(r'\s+')
+def _strip_html(s, cap=800):
+  """Decode entities, strip HTML tags, collapse whitespace, truncate.
+  Greenhouse sends content entity-encoded (&lt;div&gt;...), so decoding
+  MUST happen first — otherwise strip finds no tags to remove."""
+  if not s: return ""
+  s = str(s)
+  for k,v in _HTML_ENT.items(): s = s.replace(k, v)
+  s = _HTML_TAG.sub(' ', s)
+  # A second entity pass catches nested encodings.
+  for k,v in _HTML_ENT.items(): s = s.replace(k, v)
+  s = _WS.sub(' ', s).strip()
+  return s[:cap]
+
 def filter_jobs(ats, raw, slug=""):
   out = []
   for j in raw:
     posted = ""
+    descRaw = ""
     if ats == "ashby":
       if j.get("isListed", True) is False: continue
       title = (j.get("title") or "").strip()
@@ -1141,12 +1158,14 @@ def filter_jobs(ats, raw, slug=""):
       is_nyc = bool(NYC.search(primary)) or any(NYC.search(s) for s in secs)
       url = j.get("jobUrl") or j.get("applyUrl")
       posted = _date10(j.get("publishedDate") or j.get("publishedAt") or j.get("updatedAt"))
+      descRaw = _strip_html(j.get("descriptionHtml") or j.get("description") or "")
     elif ats == "greenhouse":
       title = (j.get("title") or "").strip()
       loc = (j.get("location") or {}).get("name","") or ""
       is_nyc = bool(NYC.search(loc))
       url = j.get("absolute_url")
       posted = _date10(j.get("updated_at") or j.get("first_published") or j.get("created_at"))
+      descRaw = _strip_html(j.get("content") or "")
     elif ats == "lever":
       title = (j.get("text") or "").strip()
       cat = j.get("categories") or {}
@@ -1156,6 +1175,7 @@ def filter_jobs(ats, raw, slug=""):
       is_nyc = bool(NYC.search(blob))
       url = j.get("hostedUrl") or j.get("applyUrl")
       posted = _date10(j.get("createdAt"))
+      descRaw = _strip_html(j.get("descriptionPlain") or j.get("description") or "")
     elif ats == "workable":
       # Workable: state=published only, location is a nested object with
       # city/region/country plus a `locations` array for multi-location roles.
@@ -1168,6 +1188,7 @@ def filter_jobs(ats, raw, slug=""):
       is_nyc = bool(NYC.search(blob))
       url = f"https://apply.workable.com/{slug}/j/{j.get('shortcode','')}"
       posted = _date10(j.get("published_on") or j.get("created_at"))
+      descRaw = _strip_html(j.get("description") or "")
     elif ats == "teamtailor":
       # Teamtailor JSONFeed item. Title + url are top-level; location is in
       # _jobposting.jobLocation[].address.{addressLocality,addressRegion}.
@@ -1182,6 +1203,7 @@ def filter_jobs(ats, raw, slug=""):
         parts.append(f"{a.get('addressLocality','')} {a.get('addressRegion','')}")
       is_nyc = bool(NYC.search(" ".join(parts)))
       posted = _date10(j.get("date_published"))
+      descRaw = _strip_html(j.get("content_html") or j.get("summary") or (jp.get("description") if isinstance(jp, dict) else "") or "")
     elif ats == "smartrecruiters":
       # SmartRecruiters posting. Title = name; location = {city, region,
       # fullLocation, remote, hybrid}; URL constructed from company + id.
@@ -1191,6 +1213,8 @@ def filter_jobs(ats, raw, slug=""):
       is_nyc = bool(NYC.search(blob))
       url = f"https://jobs.smartrecruiters.com/{slug}/{j.get('id','')}"
       posted = _date10(j.get("releasedDate"))
+      # SR list endpoint typically lacks description body; fall back to name-only.
+      descRaw = ""
     elif ats == "workday":
       # Workday: locationsText is a free-form string (e.g. "NY - New York"
       # or "MI - Detroit"). externalPath is relative — prefix with the
@@ -1204,6 +1228,9 @@ def filter_jobs(ats, raw, slug=""):
       except ValueError:
         url = ""
       posted = _date10(j.get("startDate"))
+      # Workday search endpoint returns no description — skip. Per-job fetch
+      # would be another ~1100 requests; not worth it.
+      descRaw = ""
     else:
       continue
     if not is_nyc: continue
@@ -1215,7 +1242,9 @@ def filter_jobs(ats, raw, slug=""):
     title_for_check = STAFF_PRINCIPAL.sub("", title) if SENIORITY_MARK.search(title) else title
     if TITLE_EXCLUDE.search(title_for_check): continue
     if not TITLE_INCLUDE.search(title): continue
-    out.append({"title": title, "url": url, "level": level(title), "posted": posted})
+    job = {"title": title, "url": url, "level": level(title), "posted": posted}
+    if descRaw: job["descRaw"] = descRaw
+    out.append(job)
   # founding > senior > mid
   out.sort(key=lambda j: (
     0 if "founding" in j["title"].lower() else 1,

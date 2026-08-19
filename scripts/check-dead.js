@@ -259,12 +259,15 @@ function boardTokens(ats, slug) {
       if (j.level) s += `, level:"${esc(j.level)}"`;
       if (j.added) s += `, added:"${esc(j.added)}"`;
       if (j.posted) s += `, posted:"${esc(j.posted)}"`;
+      if (j.desc) s += `, desc:"${esc(j.desc)}"`;
+      if (j.descRaw) s += `, descRaw:"${esc(j.descRaw)}"`;
       return s + ' }';
     };
     const emitCompany = (c) => {
       const L = [];
       L.push(`  { id:${JSON.stringify(c.id)}, name:"${esc(c.name)}", vertical:${JSON.stringify(c.vertical)},`);
       if (c.sub !== undefined) L.push(`    sub:"${esc(c.sub)}",`);
+      if (c.tagline !== undefined) L.push(`    tagline:"${esc(c.tagline)}",`);
       const meta = [];
       if (c.stage !== undefined) meta.push(`stage:"${esc(c.stage)}"`);
       if (c.raised !== undefined) meta.push(`raised:"${esc(c.raised)}"`);

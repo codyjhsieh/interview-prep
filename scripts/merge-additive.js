@@ -87,10 +87,11 @@ for (const rc of src.companies) {
   }
   const have = new Map((ec.jobs || []).map((j) => [j.url, j]));
   const fresh = (rc.jobs || []).filter((j) => !have.has(j.url));
-  // carry posted onto already-present jobs if the source now has it
+  // carry posted + descRaw onto already-present jobs if the source now has them
   for (const j of rc.jobs || []) {
     const e = have.get(j.url);
     if (e && j.posted && !e.posted) e.posted = j.posted;
+    if (e && j.descRaw && !e.descRaw) e.descRaw = j.descRaw;
   }
   if (fresh.length) {
     ec.jobs = (ec.jobs || []).concat(fresh);
@@ -154,12 +155,15 @@ function emitJob(j) {
   if (j.level) s += `, level:"${esc(j.level)}"`;
   if (j.added) s += `, added:"${esc(j.added)}"`;
   if (j.posted) s += `, posted:"${esc(j.posted)}"`;
+  if (j.desc) s += `, desc:"${esc(j.desc)}"`;
+  if (j.descRaw) s += `, descRaw:"${esc(j.descRaw)}"`;
   return s + ' }';
 }
 function emitCompany(c) {
   const L = [];
   L.push(`  { id:${JSON.stringify(c.id)}, name:"${esc(c.name)}", vertical:${JSON.stringify(c.vertical)},`);
   if (c.sub !== undefined) L.push(`    sub:"${esc(c.sub)}",`);
+  if (c.tagline !== undefined) L.push(`    tagline:"${esc(c.tagline)}",`);
   const meta = [];
   if (c.stage !== undefined) meta.push(`stage:"${esc(c.stage)}"`);
   if (c.raised !== undefined) meta.push(`raised:"${esc(c.raised)}"`);
