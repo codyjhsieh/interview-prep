@@ -1,25 +1,27 @@
 ---
 name: refresh-fetch-merge
-description: Fetch fresh ATS boards for every candidate company and additively merge NYC engineering roles into js/data.js. Emits JSON, refuses to write if the fetch is suspiciously sparse.
+description: Fetch fresh ATS boards in parallel (10 workers) and additively merge NYC engineering roles into js/data.js. Refuses to write on suspiciously sparse fetches.
 ---
 
 # refresh-fetch-merge
 
-One command. Deterministic. Bash owns the safety.
+Deterministic. Bash owns safety; the skill just invokes it.
 
 ```bash
-scripts/refresh.sh fetch-merge
+scripts/refresh.sh fetch-merge         # fetch + merge alone
+scripts/refresh.sh all                 # fetch + prune in parallel, then merge, ship
+REFRESH_WORKERS=20 scripts/refresh.sh fetch    # push fetch concurrency higher
 ```
 
-Expect ~5 min wall time. If you're above 2× that, an ATS is hanging — check `.tmp/refresh.json` for partial progress.
+Expect ~1-2 min wall for fetch alone (was 7 min before parallelization).
 
 ## What it does
 
-- Writes `.tmp/refresh.json` from `refresh-companies.py --emit-json`.
-- Aborts if row count < `MIN_ROWS` (default 40, override via env). Guards against mass ATS outage.
-- Snapshots `js/data.js` → `.tmp/baseline.js` so pre-existing job URLs get accurate backfilled `added` dates.
-- Runs `merge-additive.js`. Additive-only; existing companies and jobs are never removed.
+- Writes `.tmp/refresh.json` from `refresh-companies.py --emit-json`. Fetch is now a `ThreadPoolExecutor(max_workers=REFRESH_WORKERS)` — order preserved via `sorted(rows_by_idx)`.
+- Aborts if row count < `MIN_ROWS` (default 40).
+- Snapshots `js/data.js` → `.tmp/baseline.js` for accurate `added` backfill.
+- Runs `merge-additive.js`. Additive-only; existing companies/jobs never removed.
 
 ## Success signal
 
-One-line summary from `merge-additive.js`: `Companies: N (added X) / Jobs: M (added Y, deduped Z stale) / Verified: DATE`. Zero adds is still success.
+One-line summary: `Companies: N (added X) / Jobs: M (added Y, deduped Z stale) / Verified: DATE`. Zero adds is still success.

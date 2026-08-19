@@ -1304,28 +1304,50 @@ def main():
 
   only = {x.strip() for x in args.only.split(",") if x.strip()}
   today = datetime.date.today().isoformat()
-  rows = []
   seen = set()
-  no_match = []
-  for cid, name, ats, slug, vertical, sub, stage, raised, lead, badges, notes in CANDIDATES:
-    if only and cid not in only:
-      continue
+  todo = []
+  for tup in CANDIDATES:
+    cid = tup[0]
+    if only and cid not in only: continue
     if cid in seen:
       if args.verbose: print(f"[dup] {cid}", file=sys.stderr)
       continue
     seen.add(cid)
+    todo.append(tup)
+
+  # Parallelize the fetch — ATS calls are I/O-bound (curl subprocess), threads
+  # are fine. Concurrency=10 keeps per-provider load light while cutting
+  # wall time from ~7min → ~1-2min on ~600 candidates. Order is preserved by
+  # sorting results back by original index.
+  from concurrent.futures import ThreadPoolExecutor, as_completed
+  MAX_WORKERS = int(os.environ.get("REFRESH_WORKERS", "10"))
+  rows_by_idx = {}
+  no_match = []
+
+  def probe(idx, tup):
+    cid, name, ats, slug, vertical, sub, stage, raised, lead, badges, notes = tup
     raw = fetch(ats, slug)
     matches = filter_jobs(ats, raw, slug)
     if not matches:
-      no_match.append(f"{name} ({ats}:{slug})")
-      if args.verbose: print(f"[no-match] {name} ({ats}:{slug})", file=sys.stderr)
-      continue
-    rows.append({
+      return (idx, None, f"{name} ({ats}:{slug})")
+    return (idx, {
       "id": cid, "name": name, "vertical": vertical, "sub": sub,
       "stage": stage, "raised": raised, "lead": lead, "badges": badges,
       "totalRoles": len(matches), "notes": notes, "jobs": matches,
-    })
-    print(f"[ok] {name:26s} {len(matches):3d} role(s)", file=sys.stderr)
+    }, None)
+
+  with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
+    futures = [ex.submit(probe, i, t) for i, t in enumerate(todo)]
+    for fut in as_completed(futures):
+      idx, row, miss = fut.result()
+      if row is not None:
+        rows_by_idx[idx] = row
+        print(f"[ok] {row['name']:26s} {row['totalRoles']:3d} role(s)", file=sys.stderr)
+      else:
+        no_match.append(miss)
+        if args.verbose: print(f"[no-match] {miss}", file=sys.stderr)
+
+  rows = [rows_by_idx[i] for i in sorted(rows_by_idx)]
 
   print(f"\n{len(rows)} companies survived (of {len(CANDIDATES)} candidates)", file=sys.stderr)
   if no_match:

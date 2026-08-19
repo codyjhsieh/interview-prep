@@ -197,7 +197,7 @@ function boardTokens(ats, slug) {
   });
 
   // Fetch boards with limited concurrency (low, to avoid ATS rate-limits).
-  const LIMIT = 5;
+  const LIMIT = parseInt(process.env.DEAD_WORKERS || '10', 10);
   let i = 0;
   const boards = {};
   async function worker() {

@@ -80,6 +80,22 @@ case "${1:-all}" in
   logos)        logos ;;
   prune)        prune ;;
   ship)         ship ;;
-  all)          fetch; merge; prune; ship ;;
+  all)
+    # Parallel topology — fetch writes .tmp/refresh.json (never touches
+    # data.js); prune mutates data.js in place. They don't share state,
+    # so they can run concurrently. Merge waits for both, then runs on
+    # the post-prune data.js (additive union with the fetched rows).
+    (fetch) &  FETCH_PID=$!
+    (prune) &  PRUNE_PID=$!
+    wait $FETCH_PID
+    FETCH_RC=$?
+    wait $PRUNE_PID
+    PRUNE_RC=$?
+    if [ $FETCH_RC -ne 0 ] || [ $PRUNE_RC -ne 0 ]; then
+      echo "aborting: fetch=$FETCH_RC prune=$PRUNE_RC" >&2; exit 1
+    fi
+    merge
+    ship
+    ;;
   *) echo "usage: $0 {fetch|merge|fetch-merge|logos|prune|ship|all}"; exit 1 ;;
 esac

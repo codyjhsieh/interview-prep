@@ -1,32 +1,37 @@
 ---
 name: refresh-jobs
-description: End-to-end refresh of NYC engineering jobs — fetch fresh ATS boards, additive-merge into js/data.js, resolve any missing company logos, bump the cache-buster, commit, push. Fully autonomous.
+description: End-to-end refresh of NYC engineering jobs — parallel fetch + prune, additive merge, logo backfill, cache-buster bump, commit, push. Fully autonomous.
 ---
 
 # refresh-jobs
 
-Runs the full pipeline. Each stage lives in its own skill so it can also be
-run standalone. Every mutation is additive — nothing gets removed.
-
-Expect ~5 min wall time, mostly network. The bash script owns the safety.
+One command. Delegates each stage to a smaller skill. Every mutation is
+additive to the companies set; jobs can be pruned only if the ATS confirms
+their posting IDs are gone.
 
 ## Steps
 
-1. **Invoke `/refresh-fetch-merge`.** Halts the pipeline if it exits non-zero (sparse fetch means an ATS outage; don't merge a partial view).
-2. **Invoke `/refresh-prune`.** Re-fetches each company's full board and removes postings whose IDs no longer exist. Only touches companies whose fetch succeeded — everything else is untouched.
-3. **Invoke `/refresh-logos`.** Soft — if agents can't resolve a domain, ship anyway (letter tile is a graceful fallback).
-4. **Invoke `/refresh-ship`.** Bump `?v=`, commit, push.
+1. **Invoke `/refresh-fetch-merge`.** Under the hood, `scripts/refresh.sh all` runs `fetch` and `prune` **in parallel** — fetch writes `.tmp/refresh.json`, prune mutates `js/data.js`; they touch disjoint state. Then merge unions the fresh rows into the pruned `data.js`. Halts if either child exits non-zero.
+2. **Invoke `/refresh-logos`.** Soft — inline resolve if ≤5 recognizable brands, parallel agents otherwise.
+3. **Invoke `/refresh-ship`.** Bump `?v=`, commit, push.
+
+## Timing (measured on ~600 candidates)
+
+| Stage | Serial (pre-2026-08-19) | Parallel (now) |
+|---|---|---|
+| fetch | 7 min | ~1-2 min (10-worker `ThreadPoolExecutor`) |
+| prune | 5 min | ~2 min (LIMIT=10 workers, was 5) |
+| fetch+prune wall | 12 min serial | max(fetch, prune) ≈ 2 min parallel |
+| merge | <1 s | <1 s |
+| logos check | <1 s | <1 s |
+| ship | 1-3 s | 1-3 s |
+| **total** | ~12 min | **~3-5 min** |
+
+Concurrency knobs: `REFRESH_WORKERS` (fetch), `DEAD_WORKERS` (prune), `MIN_ROWS` (sparse-fetch abort threshold, default 40).
 
 ## Guardrails
 
-- Never call `refresh-companies.py` without `--emit-json`. The unflagged path rewrites `js/data.js` in place — that's the bug that once wiped 425 lines.
-- Never remove companies or jobs. `merge-additive.js` enforces this; don't work around it.
-- Stop-on-error: stages 1 and 3 are hard; stage 2 is soft.
-- When the diff is empty, `/refresh-ship` no-ops — don't force a commit.
-
-## Verification
-
-After the run, expect:
-- `git log -1` shows a `Data refresh YYYY-MM-DD + cache-bust to YYYY-MM-DD-N` commit.
-- `grep -oE '?v=[^\"]+' index.html | sort -u` returns exactly one buster.
-- `scripts/refresh.sh logos` returns `[]` or a short list of known-unresolvable ids.
+- Never call `refresh-companies.py` without `--emit-json`. The unflagged path rewrites `js/data.js` in place — the bug that once wiped 425 lines.
+- Never remove companies; only prune-confirmed dead jobs.
+- Stage 1 hard-halts on non-zero exit from either fetch or prune.
+- On empty diff, `/refresh-ship` no-ops — silence is the correct signal for "nothing changed."
