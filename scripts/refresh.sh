@@ -2,9 +2,20 @@
 # refresh.sh — deterministic stages of the jobs refresh pipeline.
 #
 #   scripts/refresh.sh fetch-merge   # discover + additive-merge into js/data.js
+#   scripts/refresh.sh prune         # drop postings gone from live ATS boards
 #   scripts/refresh.sh logos         # print JSON list of ids missing a domain
+#   scripts/refresh.sh rankings      # print JSON of missing COOLNESS/QUANT_GATED
+#   scripts/refresh.sh descriptions  # print jobs/companies needing a one-liner
+#   scripts/refresh.sh audit         # fit-score histogram (add --json for machine)
 #   scripts/refresh.sh ship          # bump ?v= cache-buster, commit, push
-#   scripts/refresh.sh all           # fetch-merge + ship (skips agent logo step)
+#   scripts/refresh.sh all           # (fetch || prune) -> merge -> ship
+#
+# Concurrency knobs: REFRESH_WORKERS (fetch, default 10), DEAD_WORKERS (prune,
+# default 10), MIN_ROWS (sparse-fetch abort threshold, default 40).
+#
+# Portable across GNU (Linux) and BSD (macOS) userland -- no `sed -i ''`,
+# no `date -v`. `ship` pushes to the current branch's upstream, so it is safe
+# on a feature branch as well as on main.
 #
 # Never destructive: fetch always uses --emit-json; merge is additive-only.
 # Aborts if the fetch returns fewer than MIN_ROWS rows (protects against a
@@ -61,6 +72,13 @@ prune() {
 
 ship() {
   echo "→ ship"
+  # Check for real changes BEFORE bumping: the bump itself dirties index.html,
+  # so checking afterwards made the no-op path unreachable and produced a
+  # cache-buster-only commit on every run.
+  if git diff --quiet js/data.js js/views.js index.html; then
+    echo "  nothing to commit"
+    return 0
+  fi
   local cur date_part num_part new
   cur=$(grep -oE '\?v=[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]+' index.html | head -1 | sed 's/.*=//')
   date_part="${cur%-*}"; num_part="${cur##*-}"
@@ -69,20 +87,21 @@ ship() {
   else
     new="$TODAY-1"
   fi
-  sed -i '' "s|?v=$cur|?v=$new|g" index.html
+  # Portable in-place edit: GNU sed's -i takes no argument, BSD's requires
+  # one, so `sed -i ''` fails on Linux. Write-then-move works on both.
+  sed "s|?v=$cur|?v=$new|g" index.html > "$TMPDIR/index.html.new"
+  mv "$TMPDIR/index.html.new" index.html
   echo "  cache-buster: $cur → $new"
 
-  if git diff --quiet js/data.js js/views.js index.html; then
-    echo "  nothing to commit"
-    return 0
-  fi
   git add js/data.js js/views.js index.html
   git commit -m "Data refresh $TODAY + cache-bust to $new
 
 Auto-generated via scripts/refresh.sh.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
-  git push
+  local branch
+  branch=$(git rev-parse --abbrev-ref HEAD)
+  git push -u origin "$branch"
 }
 
 case "${1:-all}" in
@@ -102,10 +121,9 @@ case "${1:-all}" in
     # the post-prune data.js (additive union with the fetched rows).
     (fetch) &  FETCH_PID=$!
     (prune) &  PRUNE_PID=$!
-    wait $FETCH_PID
-    FETCH_RC=$?
-    wait $PRUNE_PID
-    PRUNE_RC=$?
+    FETCH_RC=0; PRUNE_RC=0
+    wait $FETCH_PID || FETCH_RC=$?
+    wait $PRUNE_PID || PRUNE_RC=$?
     if [ $FETCH_RC -ne 0 ] || [ $PRUNE_RC -ne 0 ]; then
       echo "aborting: fetch=$FETCH_RC prune=$PRUNE_RC" >&2; exit 1
     fi

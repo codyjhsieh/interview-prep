@@ -35,6 +35,20 @@ their posting IDs are gone.
 
 Concurrency knobs: `REFRESH_WORKERS` (fetch), `DEAD_WORKERS` (prune), `MIN_ROWS` (sparse-fetch abort threshold, default 40).
 
+## Environment notes (Linux / Claude Code on the web)
+
+The pipeline runs unmodified on Linux as well as macOS — `refresh.sh` uses no
+BSD-only flags, and `ship` pushes to the current branch's upstream rather than
+a hardcoded `main`, so in a remote session it lands on the session branch.
+
+- All seven ATS backends (Ashby, Greenhouse, Lever, Workable, Teamtailor,
+  SmartRecruiters, Workday) are reachable through the agent proxy.
+- A handful of custom career domains get CONNECT-tunnel 502s behind the proxy.
+  Those companies drop out of a fetch and are never pruned — `check-dead.js`
+  leaves boards it could not fetch alone. Expected, not a failure.
+- `.tmp/` is gitignored; both `refresh.json` and the `baseline.js` snapshot
+  live there.
+
 ## Guardrails
 
 - Never call `refresh-companies.py` without `--emit-json`. The unflagged path rewrites `js/data.js` in place — the bug that once wiped 425 lines.
