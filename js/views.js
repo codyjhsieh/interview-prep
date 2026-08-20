@@ -5555,7 +5555,6 @@ function renderCompanies(state, hub) {
     ['infra', 'Infra'],
     ['fde', 'FDE'],
     ['sales', 'Sales'],
-    ['frontend', 'Frontend'],
   ];
   const categoryTabs = CAT_LABELS
     .map(([v, l]) => `<div class="tab${v==='all' ? ' active' : ''}" data-catfilter="${esc(v)}">${esc(l)}</div>`)

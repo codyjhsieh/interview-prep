@@ -63,7 +63,7 @@ TITLE_INCLUDE = re.compile(
   r"\b("
   r"forward[\s-]deployed|fde|founding[\s-]engineer|"
   r"software[\s-]engineer|swe(?:\s|$)|sde(?:\s|$)|"
-  r"backend[\s-]engineer|frontend[\s-]engineer|fullstack[\s-]engineer|"
+  r"backend[\s-]engineer|fullstack[\s-]engineer|"
   r"full[\s-]stack[\s-]engineer|product[\s-]engineer|"
   r"ai[\s-]engineer|applied[\s-]ai[\s-]engineer|ml[\s-]engineer|"
   r"machine[\s-]learning[\s-]engineer|infrastructure[\s-]engineer|"
@@ -80,21 +80,21 @@ TITLE_INCLUDE = re.compile(
   # Solutions / Sales / Presales Engineer — customer-facing eng roles.
   # Removed from TITLE_EXCLUDE and explicitly allowed here.
   r"solutions?[\s-]engineer|sales[\s-]engineer|presales[\s-]engineer|"
-  # Agency title variants — reverse-order (Engineer, Front-end) and
-  # parenthetical (Engineer (Front-end)) forms common at Code and Theory /
-  # DEPT / Instrument / etc. Security + Research explicitly omitted.
-  r"engineer,\s*(?:front|back|full[\s-]?stack|frontend|backend|fullstack|"
+  # Agency title variants — reverse-order (Engineer, Back-end) and
+  # parenthetical (Engineer (Back-end)) forms common at Code and Theory /
+  # DEPT / Instrument / etc. Security, Research, and Front-end omitted.
+  r"engineer,\s*(?:back|full[\s-]?stack|backend|fullstack|"
   r"devops|sre|site\s+reliability|cloud|reliability|"
   r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|"
   r"solutions?|sales|presales)|"
-  r"engineer\s*\((?:front|back|full[\s-]?stack|frontend|backend|fullstack|"
+  r"engineer\s*\((?:back|full[\s-]?stack|backend|fullstack|"
   r"devops|sre|site\s+reliability|cloud|reliability|"
   r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|"
   r"solutions?|sales|presales)|"
-  # "Developer" role names — DEPT uses these for mobile + software roles
-  # ("Android Developer", "iOS Developer", "Software Developer").
+  # "Developer" role names. Mobile and web developer variants are omitted
+  # — see TITLE_EXCLUDE.
   r"software[\s-]developer|"
-  r"(?:android|ios|mobile|web|full[\s-]?stack|frontend|backend)[\s-]developer"
+  r"(?:full[\s-]?stack|backend)[\s-]developer"
   r")\b", re.IGNORECASE)
 # Dual-tagged seniority ("Senior/Staff Backend Engineer") = still senior IC.
 # When the title contains "senior" we mask out staff/principal tokens BEFORE
@@ -107,8 +107,14 @@ TITLE_EXCLUDE = re.compile(
   r"staff[\s,]|principal|^lead\s|\slead\s|\slead$|head\s|chief|director|"
   r"manager|engineering\s+manager|technical\s+program|vp\s|vice\s+president|"
   r"intern|internship|research\s+scientist|researcher|research\s+engineer|"
+  r"quantitative\s+research|"
   r"security\s+engineer|application\s+security|appsec|product\s+security|"
   r"detection\s+engineer|"
+  # Mobile — client-platform roles, not the SDE/FDE track this board is for.
+  r"mobile|android|ios|react\s+native|"
+  # Front-end — including "full-stack (front-end leaning)", which is a
+  # front-end role wearing a full-stack title.
+  r"front[\s-]?end|frontend|web\s+developer|ui\s+engineer|"
   # Kept excluded: customer / field engineer. Solutions + Sales Engineer
   # were previously here but are now explicitly allowed (see TITLE_INCLUDE).
   r"customer\s+engineer|field\s+engineer|"
