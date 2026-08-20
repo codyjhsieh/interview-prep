@@ -30,11 +30,16 @@ def slugify(name):
     return s or "company"
 
 
-def existing_ids(src):
+def existing(src):
+    """Returns (ids, boards). A board is an (ats, slug) pair: two entries
+    pointing at the same board would list every job on it twice, under two
+    company names, so those are skipped even when the id is free."""
     tree = ast.parse(src)
     for n in tree.body:
         if isinstance(n, ast.Assign) and getattr(n.targets[0], "id", "") == "CANDIDATES":
-            return {e.elts[0].value for e in n.value.elts}
+            ids = {e.elts[0].value for e in n.value.elts}
+            boards = {(e.elts[2].value, e.elts[3].value) for e in n.value.elts}
+            return ids, boards
     raise SystemExit("CANDIDATES not found")
 
 
@@ -48,14 +53,16 @@ def main():
 
     found = json.loads(Path(args.found).read_text())
     src = TARGET.read_text()
-    have = existing_ids(src)
+    have, boards = existing(src)
 
     rows, skipped = [], []
     for f in found:
         cid = slugify(f["name"])
         if cid in have:
-            skipped.append(cid); continue
-        have.add(cid)
+            skipped.append(f"{cid} (id)"); continue
+        if (f["ats"], f["slug"]) in boards:
+            skipped.append(f"{cid} (board {f['ats']}:{f['slug']})"); continue
+        have.add(cid); boards.add((f["ats"], f["slug"]))
         meta = f.get("meta") or []
         vertical = meta[0] if meta and meta[0] in VERTICALS else "saas"
         sub = meta[1] if len(meta) > 1 else ""
@@ -76,7 +83,9 @@ def main():
     header = f"  # ── {args.header} ──" if args.header else "  # ── batch ──"
 
     print(f"{len(rows)} new tuples ({sum(1 for r in rows if r[6])} with live NYC roles today), "
-          f"{len(skipped)} duplicate ids skipped", file=sys.stderr)
+          f"{len(skipped)} duplicates skipped", file=sys.stderr)
+    for s_ in skipped:
+        print(f"   dup: {s_}", file=sys.stderr)
     if args.dry:
         print(header); print(block[:2000]); return
 
