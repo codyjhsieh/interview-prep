@@ -5283,6 +5283,14 @@ const COOLNESS = {
   'bank-of-america':1, barclays:1,
   // Quant HFT (anti-LES; also added to QUANT_GATED)
   'tower-research':1, 'belvedere-trading':1, 'pdt-partners':1, 'man-group':1,
+  // ── 2026-08-20 auto-scored ──
+  astronomer:5, evolutioniq:5, 'garner-health':4, assembled:6, axon:3, 'grow-therapy':5,
+  blacksmith:7, kalepa:5, 'method-financial':5, 'namespace-labs':6, regard:5, 'charlie-health':4,
+  dealpath:4, 'eagle-eye-networks':3, 'eight-sleep':8, fivetran:5, 'gecko-robotics':7, 'verana-health':4,
+  workato:4, algolia:6, altana:6, artisan:6, astra:5, collibra:3,
+  'copilot-money':8, cube:6, 'david-energy':6, 'falcon-x':5, harness:4, 'icon-savings':5,
+  livekit:8, mark43:5, merge:6, nabla:6, 'oak-street-health':3, oso:6,
+  pelago:5, samsara:4, 'savvy-wealth':5, videoamp:4,
 };
 
 const FRONTIER = new Set([
