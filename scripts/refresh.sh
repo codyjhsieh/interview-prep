@@ -6,6 +6,7 @@
 #   scripts/refresh.sh logos         # print JSON list of ids missing a domain
 #   scripts/refresh.sh rankings      # print JSON of missing COOLNESS/QUANT_GATED
 #   scripts/refresh.sh descriptions  # print jobs/companies needing a one-liner
+#   scripts/refresh.sh funding       # propose funding for companies with none
 #   scripts/refresh.sh audit         # fit-score histogram (add --json for machine)
 #   scripts/refresh.sh ship          # bump ?v= cache-buster, commit, push
 #   scripts/refresh.sh all           # (fetch || prune) -> merge -> ship
@@ -65,6 +66,16 @@ descriptions() {
   node scripts/check-descriptions.mjs "$@"
 }
 
+# Funding for companies that have none. Reads .tmp/refresh.json (descRaw only
+# exists there), so it must follow a fetch in the same run. Proposes; writing
+# is a separate, reviewable step:
+#   scripts/refresh.sh funding --edgar        # propose into .tmp/funding.json
+#   node scripts/apply-funding.mjs .tmp/funding.json
+funding() {
+  echo "→ funding (propose for companies with no funding data)"
+  python3 scripts/fetch-funding.py --out "$TMPDIR/funding.json" "$@"
+}
+
 prune() {
   echo "→ prune (drop postings no longer on live ATS boards)"
   node scripts/check-dead.js --prune
@@ -112,6 +123,7 @@ case "${1:-all}" in
   rankings)     rankings ;;
   audit)        shift; audit "$@" ;;
   descriptions) shift; descriptions "$@" ;;
+  funding)      shift; funding "$@" ;;
   prune)        prune ;;
   ship)         ship ;;
   all)
@@ -130,5 +142,5 @@ case "${1:-all}" in
     merge
     ship
     ;;
-  *) echo "usage: $0 {fetch|merge|fetch-merge|logos|rankings|descriptions|audit|prune|ship|all}"; exit 1 ;;
+  *) echo "usage: $0 {fetch|merge|fetch-merge|logos|rankings|descriptions|funding|audit|prune|ship|all}"; exit 1 ;;
 esac

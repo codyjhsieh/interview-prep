@@ -13512,10 +13512,11 @@ const COMPANIES = [
   { id:"evolutioniq", name:"EvolutionIQ", vertical:"ai",
     sub:"Claims guidance AI",
     tagline:"Guides claims with AI",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$60M", lead:"",
     badges:[],
     totalRoles:6,
     notes:"",
+    fundingSrc:"sec",
     jobs:[
       { title:"Senior Analytics Engineer (AI Insurance SaaS)", url:"https://job-boards.greenhouse.io/evolutioniq/jobs/6122675004", level:"senior", added:"2026-08-20", posted:"2026-07-22", desc:"Model claims data for insurance analytics." },
       { title:"Senior Machine Learning (ML) Engineer (AI Insurtech)", url:"https://job-boards.greenhouse.io/evolutioniq/jobs/6135244004", level:"senior", added:"2026-08-20", posted:"2026-08-05", desc:"Build ML that guides insurance claims teams." },
@@ -13580,10 +13581,11 @@ const COMPANIES = [
   { id:"blacksmith", name:"Blacksmith", vertical:"devtools",
     sub:"Fast CI runners",
     tagline:"CI runners that fly",
-    stage:"", raised:"", lead:"",
+    stage:"Series B", raised:"$58.5M", lead:"Google Ventures",
     badges:[],
     totalRoles:3,
     notes:"",
+    fundingSrc:"posting",
     jobs:[
       { title:"Senior Product Engineer", url:"https://jobs.ashbyhq.com/blacksmith/604cabdf-a54d-4dba-8dee-904e88ed5f16", level:"senior", added:"2026-08-20", posted:"2025-04-30", desc:"Ship product for the fast-CI platform." },
       { title:"Senior Systems Engineer", url:"https://jobs.ashbyhq.com/blacksmith/7f13567d-a9ab-4231-b439-99b84584257f", level:"senior", added:"2026-08-20", posted:"2025-04-30", desc:"Build the systems that make CI runners fast." },
@@ -13706,10 +13708,11 @@ const COMPANIES = [
   { id:"verana-health", name:"Verana Health", vertical:"health",
     sub:"Clinical data insights",
     tagline:"Turns clinical data into insight",
-    stage:"", raised:"", lead:"",
+    stage:"Series E", raised:"$150M", lead:"Johnson & Johnson Innovation",
     badges:[],
     totalRoles:2,
     notes:"",
+    fundingSrc:"posting",
     jobs:[
       { title:"Senior Software Engineer", url:"https://job-boards.greenhouse.io/veranahealth/jobs/8700261002", level:"senior", added:"2026-08-20", posted:"2026-08-19", desc:"Build systems behind clinical data insights." },
       { title:"Senior/Staff/Principal Backend Engineer, Platform & Data Ingestion", url:"https://job-boards.greenhouse.io/veranahealth/jobs/8635045002", level:"senior", added:"2026-08-20", posted:"2026-08-10", desc:"Build ingestion behind clinical data platforms." }
@@ -13738,20 +13741,22 @@ const COMPANIES = [
   { id:"altana", name:"Altana", vertical:"ai",
     sub:"Supply chain intelligence",
     tagline:"Maps the global supply chain",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$344M", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
+    fundingSrc:"sec",
     jobs:[
       { title:"Sales Engineer, Federal", url:"https://job-boards.greenhouse.io/altanaai/jobs/7753292003", level:"mid", added:"2026-08-20", posted:"2026-07-17", desc:"Demo supply chain intelligence to federal buyers." }
     ] },
   { id:"artisan", name:"Artisan", vertical:"ai",
     sub:"AI sales representatives",
     tagline:"AI reps that sell",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$35M", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
+    fundingSrc:"posting",
     jobs:[
       { title:"Forward Deployed GTM Architect", url:"https://jobs.ashbyhq.com/artisan/77f1e47e-61d0-4245-bc99-02bb189ce392", level:"mid", added:"2026-08-20", posted:"2026-08-07", desc:"Deploy AI sales agents with GTM customers." }
     ] },
@@ -13778,10 +13783,11 @@ const COMPANIES = [
   { id:"copilot-money", name:"Copilot Money", vertical:"fintech",
     sub:"Personal finance app",
     tagline:"Personal finance, beautifully",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$11M", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
+    fundingSrc:"sec",
     jobs:[
       { title:"Senior Fullstack Engineer", url:"https://jobs.ashbyhq.com/copilot-money/3debb1d6-7d68-4a4f-b546-f97cf51b0307", level:"senior", added:"2026-08-20", posted:"2026-05-22", desc:"Ship full-stack features for a finance app." }
     ] },
@@ -13798,10 +13804,11 @@ const COMPANIES = [
   { id:"david-energy", name:"David Energy", vertical:"infra",
     sub:"Retail energy supplier",
     tagline:"Energy supply, software-first",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$38M", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
+    fundingSrc:"sec",
     jobs:[
       { title:"Senior Software Engineer, Energy Systems", url:"https://jobs.ashbyhq.com/davidenergy/b3550840-6344-46b3-9ebe-be9413907a9f", level:"senior", added:"2026-08-20", posted:"2026-05-20", desc:"Build systems behind retail energy supply." }
     ] },
@@ -13838,20 +13845,22 @@ const COMPANIES = [
   { id:"livekit", name:"LiveKit", vertical:"devtools",
     sub:"Real-time audio and video",
     tagline:"Real-time voice and video",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$56M", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
+    fundingSrc:"sec",
     jobs:[
       { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/livekit/b889ef16-4d5d-4b71-b0a9-682026a0a1ee", level:"mid", added:"2026-08-20", posted:"2026-03-17", desc:"Deploy real-time voice and video with customers." }
     ] },
   { id:"mark43", name:"Mark43", vertical:"defense",
     sub:"Public safety software",
     tagline:"Software for first responders",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$118M", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
+    fundingSrc:"sec",
     jobs:[
       { title:"DevOps Engineer, DevEx", url:"https://mark43.com/list-job/7753456?gh_jid=7753456", level:"mid", added:"2026-08-20", posted:"2026-05-12", desc:"Build DevEx tooling for public safety software." }
     ] },

@@ -276,6 +276,7 @@ function boardTokens(ats, slug) {
       if (c.badges !== undefined) L.push(`    badges:${JSON.stringify(c.badges)},`);
       if (c.totalRoles !== undefined) L.push(`    totalRoles:${c.totalRoles},`);
       if (c.notes !== undefined) L.push(`    notes:"${esc(c.notes)}",`);
+      if (c.fundingSrc !== undefined) L.push(`    fundingSrc:"${esc(c.fundingSrc)}",`);
       L.push('    jobs:[');
       L.push((c.jobs || []).map(emitJob).join(',\n'));
       L.push('    ] }');

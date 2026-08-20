@@ -12,12 +12,15 @@ their posting IDs are gone.
 ## Steps
 
 1. **Invoke `/refresh-fetch-merge`.** Under the hood, `scripts/refresh.sh all` runs `fetch` and `prune` **in parallel** — fetch writes `.tmp/refresh.json`, prune mutates `js/data.js`; they touch disjoint state. Then merge unions the fresh rows into the pruned `data.js`. Halts if either child exits non-zero.
-2. **Invoke `/refresh-logos`, `/refresh-rankings`, and `/refresh-descriptions` in parallel.** They edit largely disjoint state:
+2. **Invoke `/refresh-logos`, `/refresh-rankings`, `/refresh-descriptions`, and `/refresh-funding` in parallel.** They edit largely disjoint state:
    - `/refresh-logos` → `COMPANY_DOMAINS` in `js/data.js`
    - `/refresh-rankings` → `COOLNESS` + `QUANT_GATED` in `js/views.js`
    - `/refresh-descriptions` → `desc` on jobs + `tagline` on companies in `js/data.js`
+   - `/refresh-funding` → `raised` / `stage` / `lead` on companies in `js/data.js`.
+     Must run in the same session as the fetch: it reads `descRaw` from
+     `.tmp/refresh.json`, which the fetch stage writes and nothing persists.
    All soft — graceful fallback if agents fail (letter tile, vertical-default coolness, descRaw fallback for missing desc).
-   Note: `/refresh-logos` and `/refresh-descriptions` both touch `js/data.js`. Run them sequentially (logos → descriptions) or serialize the write step; the agent dispatch itself can still parallelize.
+   Note: `/refresh-logos`, `/refresh-descriptions`, and `/refresh-funding` all touch `js/data.js`. Run their write steps sequentially (logos → descriptions → funding); the research/dispatch part can still parallelize.
 3. **Invoke `/refresh-ship`.** Bump `?v=`, stage `js/data.js` + `js/views.js` + `index.html`, commit, push.
 
 ## Timing (measured on ~600 candidates)
