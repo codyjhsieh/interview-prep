@@ -10169,7 +10169,7 @@ Note: <i>even saying "100+ writers" is real</i>. That's a public-facing, falsifi
  *  - totalRoles == jobs.length (full set; the card slices to 3 for preview).
  *  - jobs are sorted: founding > senior > mid.
  */
-const COMPANIES_VERIFIED_AT = '2026-08-19';
+const COMPANIES_VERIFIED_AT = '2026-08-20';
 const COMPANIES = [
   { id:"openai", name:"OpenAI", vertical:"ai",
     sub:"GPT / ChatGPT / API",
@@ -10207,7 +10207,7 @@ const COMPANIES = [
     tagline:"Builds safe frontier models",
     stage:"Series F", raised:"$18B+", lead:"Amazon",
     badges:["Amazon","Google","Spark"],
-    totalRoles:51,
+    totalRoles:52,
     notes:"Heavy values screen; expect ethical-dilemma and downside-risk questions. Applied-AI eng roles are FDE-flavored.",
     jobs:[
       { title:"Senior Software Engineer, Full-stack", url:"https://job-boards.greenhouse.io/anthropic/jobs/5174743008", level:"senior", added:"2026-05-31", posted:"2026-06-04", desc:"Ship full-stack work across Claude.ai, API, and Claude Code." },
@@ -10260,7 +10260,8 @@ const COMPANIES = [
       { title:"Staff+ Software Engineer, Platform Ecosystem", url:"https://job-boards.greenhouse.io/anthropic/jobs/5392335008", level:"mid", added:"2026-08-18", posted:"2026-08-15", desc:"Build zero-to-one platform work for businesses on Claude." },
       { title:"Staff+ Software Engineer, Privacy", url:"https://job-boards.greenhouse.io/anthropic/jobs/5383114008", level:"mid", added:"2026-08-18", posted:"2026-08-18", desc:"Establish privacy engineering protecting sensitive user data." },
       { title:"Staff+ Software Engineer, Safeguards Data", url:"https://job-boards.greenhouse.io/anthropic/jobs/5379140008", level:"mid", added:"2026-08-18", posted:"2026-08-14", desc:"Build safety data pipelines across AWS, GCP, and Azure." },
-      { title:"Staff+ Software Engineer, Product Sandboxing", url:"https://job-boards.greenhouse.io/anthropic/jobs/5394943008", level:"mid", added:"2026-08-19", posted:"2026-08-18", desc:"Build sandboxes for Claude's code, browser, and computer use." }
+      { title:"Staff+ Software Engineer, Product Sandboxing", url:"https://job-boards.greenhouse.io/anthropic/jobs/5394943008", level:"mid", added:"2026-08-19", posted:"2026-08-18", desc:"Build sandboxes for Claude's code, browser, and computer use." },
+      { title:"Pre-Sales Program Lead, Forward Deployed Engineering", url:"https://job-boards.greenhouse.io/anthropic/jobs/5391012008", level:"mid", added:"2026-08-20", posted:"2026-08-19", descRaw:"About Anthropic Anthropic’s mission is to create reliable, interpretable, and steerable AI systems. We want AI to be safe and beneficial for our users and for society as a whole. Our team is a quickly growing group of committed researchers, engineers, policy experts, and business leaders working together to build beneficial AI systems. About the role We're looking for our first Pre-Sales Program Lead to build the programs that take this team from opportunity to a signed contract. Your job will be to build the pipeline qualification and management mechanisms that keep quality opportunities flowing, the prioritization heuristics that decide where a capacity-constrained team places its bets across commercial, research, and mission-oriented deals, the pursuit-to-signature process (including th" }
     ] },
   { id:"scaleai", name:"Scale AI", vertical:"ai",
     sub:"AI data + evals + RLHF",
@@ -10542,7 +10543,7 @@ const COMPANIES = [
     tagline:"Framework for LLM apps",
     stage:"Series A", raised:"$25M", lead:"Sequoia",
     badges:["Sequoia","Benchmark"],
-    totalRoles:9,
+    totalRoles:8,
     notes:"LangSmith + framework. Agent tooling, observability, evals.",
     jobs:[
       { title:"Senior Fullstack Engineer,  AI Observability & Evals Platform", url:"https://jobs.ashbyhq.com/langchain/a03b3e54-495d-4960-aee7-0194a3cef57d", level:"senior", added:"2026-05-31", posted:"2025-02-19", desc:"Build observability and eval tools for LLM agents." },
@@ -10552,15 +10553,14 @@ const COMPANIES = [
       { title:"FullStack Engineer,  AI Observability & Evals Platform (LangSmith)", url:"https://jobs.ashbyhq.com/langchain/ddf92275-1cc3-49c0-9f25-e8ded43b07f6", level:"mid", added:"2026-05-31", posted:"2025-08-15", desc:"Build LangSmith observability for production AI agents." },
       { title:"Fullstack Software Engineer, Applied AI", url:"https://jobs.ashbyhq.com/langchain/c75915ba-a32b-4e17-873d-19b47564170d", level:"mid", added:"2026-05-31", posted:"2025-09-12", desc:"Build agent apps on LangSmith, LangGraph, and internal tools." },
       { title:"Senior Fullstack Engineer, Growth & Monetization", url:"https://jobs.ashbyhq.com/langchain/f07bfbad-6daf-4b11-b5bb-2c3bbc47c53c", level:"senior", added:"2026-06-16", posted:"2026-06-10", desc:"Ship growth and monetization across agent platform products." },
-      { title:"Senior Backend Engineer, LangSmith Deployments", url:"https://jobs.ashbyhq.com/langchain/cb61f821-d8c4-4ec5-940d-3fd83be63a5f", level:"senior", added:"2026-07-21", posted:"2026-02-25", desc:"Build deployment infra for running agents in production." },
-      { title:"Platform Software Engineer, Ingestion", url:"https://jobs.ashbyhq.com/langchain/bdcced92-2dca-49b0-bc33-4ec0cf5a8e00", level:"mid", added:"2026-08-19", posted:"2026-08-18", desc:"Build the ingestion platform behind LangSmith workflows." }
+      { title:"Senior Backend Engineer, LangSmith Deployments", url:"https://jobs.ashbyhq.com/langchain/cb61f821-d8c4-4ec5-940d-3fd83be63a5f", level:"senior", added:"2026-07-21", posted:"2026-02-25", desc:"Build deployment infra for running agents in production." }
     ] },
   { id:"baseten", name:"Baseten", vertical:"ai",
     sub:"ML model deployment",
     tagline:"Deploys ML models fast",
     stage:"Series C", raised:"$135M", lead:"IVP",
     badges:["IVP","Spark","Greylock"],
-    totalRoles:23,
+    totalRoles:24,
     notes:"Model deployment infra. Inference engineering, autoscaling GPU.",
     jobs:[
       { title:"Software Engineer - Core Product", url:"https://jobs.ashbyhq.com/baseten/fc6e5f2e-eb2d-4a6c-8a51-8422e8662bde", level:"mid", added:"2026-05-31", posted:"2024-07-09", desc:"Shape CLI, SDKs, and observability for AI inference." },
@@ -10585,7 +10585,8 @@ const COMPANIES = [
       { title:"Software Engineer - Observability", url:"https://jobs.ashbyhq.com/baseten/3e925ab1-2089-4a79-989e-50479b546eda", level:"mid", added:"2026-08-18", posted:"2026-08-10", desc:"Build observability for inference at massive scale." },
       { title:"Software Engineer - Continuous Delivery", url:"https://jobs.ashbyhq.com/baseten/fb886b59-fdc3-4315-a9b3-c49808bcd2ce", level:"mid", added:"2026-08-18", posted:"2026-08-11", desc:"Build continuous delivery for AI product teams." },
       { title:"Software Engineer - Testing Frameworks", url:"https://jobs.ashbyhq.com/baseten/78028a72-2431-4373-aaec-d6e2c9a1cc7d", level:"mid", added:"2026-08-18", posted:"2026-08-11", desc:"Own test frameworks every inference engineer ships through." },
-      { title:"Software Engineer - AI Developer Productivity", url:"https://jobs.ashbyhq.com/baseten/e71e97a8-6367-4050-b6a9-42ce62ec78f1", level:"mid", added:"2026-08-18", posted:"2026-08-11", desc:"Build an AI-first platform for agent configs and MCP servers." }
+      { title:"Software Engineer - AI Developer Productivity", url:"https://jobs.ashbyhq.com/baseten/e71e97a8-6367-4050-b6a9-42ce62ec78f1", level:"mid", added:"2026-08-18", posted:"2026-08-11", desc:"Build an AI-first platform for agent configs and MCP servers." },
+      { title:"Forward Deployed Engineer (Training)", url:"https://jobs.ashbyhq.com/baseten/11ab2593-6648-4943-ab4a-284fe7e89720", level:"mid", added:"2026-08-20", posted:"2026-08-19", descRaw:"ABOUT BASETEN Baseten powers mission-critical inference for the world's most dynamic AI companies, like Cursor, Notion, OpenEvidence, Abridge, Clay, Gamma and Writer. By uniting applied AI research, flexible infrastructure, and seamless developer tooling, we enable companies operating at the frontier of AI to bring cutting-edge models into production. We're growing quickly and recently raised our $1.5B Series F , led by Altimeter Capital, Conviction Partners, and Spark Capital. Join us and help build the platform engineers turn to to ship AI products. THE ROLE Forward Deployed Engineers work directly with the largest and fastest-growing AI companies in the world, owning their technical outcomes on Baseten and taking on the hardest problems in serving and improving models at scale. The work" }
     ] },
   { id:"deepgram", name:"Deepgram", vertical:"ai",
     sub:"Speech AI / STT",
@@ -10886,14 +10887,13 @@ const COMPANIES = [
     tagline:"Ships frontends to the edge",
     stage:"Series E", raised:"$563M", lead:"Accel",
     badges:["Accel","GV","Bedrock"],
-    totalRoles:14,
+    totalRoles:13,
     notes:"Edge platform + Next.js. CDN, build, runtime.",
     jobs:[
       { title:"Forward-Deployed Engineer", url:"https://job-boards.greenhouse.io/vercel/jobs/5752684004", level:"mid", added:"2026-05-31", posted:"2026-06-01", desc:"Embed with customers building on Next.js, v0, and AI SDK." },
       { title:"Software Engineer, AI Gateway", url:"https://job-boards.greenhouse.io/vercel/jobs/5798406004", level:"mid", added:"2026-05-31", posted:"2026-06-01", desc:"Build the AI Gateway routing traffic across model providers." },
       { title:"Software Engineer, AI SDK", url:"https://job-boards.greenhouse.io/vercel/jobs/5474915004", level:"mid", added:"2026-05-31", posted:"2026-06-01", desc:"Build the AI SDK behind agents, chat, and generative apps." },
       { title:"Software Engineer, CDN", url:"https://job-boards.greenhouse.io/vercel/jobs/5179639004", level:"mid", added:"2026-05-31", posted:"2026-06-01", desc:"Build CDN infrastructure behind Next.js and the AI SDK." },
-      { title:"Software Engineer, Dashboard", url:"https://job-boards.greenhouse.io/vercel/jobs/5808568004", level:"mid", added:"2026-05-31", posted:"2026-06-01" },
       { title:"Software Engineer, Deployment Infrastructure", url:"https://job-boards.greenhouse.io/vercel/jobs/5633880004", level:"mid", added:"2026-05-31", posted:"2026-06-01", desc:"Build deploy infrastructure for the agentic web platform." },
       { title:"Software Engineer, Workflows", url:"https://job-boards.greenhouse.io/vercel/jobs/5798416004", level:"mid", added:"2026-05-31", posted:"2026-06-01", desc:"Build durable workflow infrastructure for agentic apps." },
       { title:"Software Engineer, eve", url:"https://job-boards.greenhouse.io/vercel/jobs/6098390004", level:"mid", added:"2026-06-22", posted:"2026-06-21", desc:"Build eve, letting agents deploy on the platform." },
@@ -11180,10 +11180,10 @@ const COMPANIES = [
     tagline:"Answers about your brand",
     stage:"Public", raised:"$255M pre-IPO", lead:"Insight",
     badges:["NYSE","Insight","Marker"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"Public co. Knowledge-graph platform + AI answers.",
     jobs:[
-      { title:"Systems Engineer", url:"https://job-boards.greenhouse.io/yext/jobs/7777830", level:"mid", added:"2026-05-31", posted:"2026-05-19" }
+
     ] },
   { id:"the-trade-desk", name:"The Trade Desk", vertical:"saas",
     sub:"DSP for digital advertising (NASDAQ)",
@@ -11205,10 +11205,10 @@ const COMPANIES = [
     tagline:"Rides on demand",
     stage:"Public", raised:"$5B pre-IPO", lead:"Andreessen Horowitz",
     badges:["NASDAQ","a16z","Founders Fund"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"Public co. Mobility platform \u2014 matching, payments, mapping.",
     jobs:[
-      { title:"Senior Software Engineer, Growth Platforms", url:"https://app.careerpuck.com/job-board/lyft/job/8586469002?gh_jid=8586469002", level:"senior", added:"2026-06-16", posted:"2026-06-18", desc:"Build growth platforms for Lyft drivers and riders." }
+
     ] },
   { id:"reddit", name:"Reddit", vertical:"media",
     sub:"Social discussion platform (NYSE)",
@@ -11312,14 +11312,13 @@ const COMPANIES = [
     tagline:"Streams the world's audio",
     stage:"Public", raised:"$540M pre-IPO", lead:"TCV",
     badges:["NYSE","TCV","DST"],
-    totalRoles:7,
+    totalRoles:6,
     notes:"Public co. Audio infra + recs + ads + creator tools.",
     jobs:[
       { title:"Senior Machine Learning Engineer - Policy & Safety", url:"https://jobs.lever.co/spotify/9eca14d3-8e0b-46de-8161-704e07f3d9d0", level:"senior", added:"2026-05-31", posted:"2026-05-04", desc:"Build ML keeping millions of users and creators safe." },
       { title:"Senior Machine Learning Engineer, Personalization, Magenta", url:"https://jobs.lever.co/spotify/3cf07bc7-2b9f-4531-af88-a09cfdf7b3ab", level:"senior", added:"2026-05-31", posted:"2026-05-07", desc:"Build conversational products for music discovery." },
       { title:"Senior Machine Learning Engineer, Personalization, Music Understanding", url:"https://jobs.lever.co/spotify/d7c43743-2240-45b6-bc31-33e50cbaba4a", level:"senior", added:"2026-05-31", posted:"2026-04-29", desc:"Build ML behind personalized music sessions and playlists." },
       { title:"Senior Machine Learning Engineer - Enrichment & Content Intelligence", url:"https://jobs.lever.co/spotify/159e823e-5a29-4222-94bb-40e97f63cc93", level:"senior", added:"2026-06-16", posted:"2026-05-28", desc:"Build metadata ML across mobile, speakers, cars, and TVs." },
-      { title:"Senior Machine Learning Engineer - Ads R&D", url:"https://jobs.lever.co/spotify/6236f25f-f9cc-47c2-af7b-4ace57332eeb", level:"senior", added:"2026-06-30", posted:"2025-08-26" },
       { title:"Senior Machine Learning Engineer, Surfaces Moments", url:"https://jobs.lever.co/spotify/ab407f05-063e-4bf7-a7fc-be03b4097f14", level:"senior", added:"2026-07-23", posted:"2026-06-18", desc:"Build recommendations behind Home Shortcuts personalization." },
       { title:"Senior Software Engineer - Enterprise AI", url:"https://jobs.lever.co/spotify/c73be71c-1a63-4906-9925-95f2115d1f1d", level:"senior", added:"2026-08-18", posted:"2026-08-13", desc:"Build the internal AI platform with governance and identity." }
     ] },
@@ -12049,7 +12048,7 @@ const COMPANIES = [
       { title:"Infrastructure Engineer", url:"https://jobs.ashbyhq.com/mercor/296c4031-5e98-4772-95f5-a9eb5bd7746d", level:"mid", added:"2026-08-06", posted:"2025-09-18", desc:"Build infrastructure paying experts $4M daily to train AI." },
       { title:"Software Engineer, Agents", url:"https://jobs.ashbyhq.com/mercor/4f4fc8c3-4056-47bb-9e00-1db6e5dd958f", level:"mid", added:"2026-08-06", posted:"2025-09-18", desc:"Turn expert workflows into deployable enterprise agents." },
       { title:"Software Engineer, Frontier Data Products", url:"https://jobs.ashbyhq.com/mercor/ae344099-3fde-4027-bfde-f953db8b4728", level:"mid", added:"2026-08-06", posted:"2026-04-10", desc:"Connect domain experts to frontier training pipelines." },
-      { title:"Software Engineer, Platform", url:"https://jobs.ashbyhq.com/mercor/cb67851b-0269-4cf5-996c-34c3a88a19c8", level:"mid", added:"2026-08-06", posted:"2026-04-23" },
+      { title:"Software Engineer, Platform", url:"https://jobs.ashbyhq.com/mercor/cb67851b-0269-4cf5-996c-34c3a88a19c8", level:"mid", added:"2026-08-06", posted:"2026-04-23", descRaw:"About Mercor Mercor's mission is to organize human intelligence to power the AI economy. We're a leading AI data company, building the layer between human expertise and frontier models. Millions of domain experts on the platform are paid over $4 million per day to train frontier AI models. Mercor's APEX benchmark family measures AI's real-world impact on professional work. Mercor Enterprise brings this same infrastructure to Fortune 500 companies: helping companies capture how their best people actually work, translating that expertise directly back into agents. Mercor is creating a new category of work where expertise powers AI advancement. Achieving this requires an ambitious, fast-paced and deeply committed team. You’ll work alongside researchers, operators, and AI companies at the fore" },
       { title:"Machine Learning Engineer, Frontier Data Products", url:"https://jobs.ashbyhq.com/mercor/73a9f1c6-3c62-4c49-b65d-e5f6a3549d95", level:"mid", added:"2026-08-06", posted:"2026-05-29", desc:"Build ML capturing expertise to train frontier models." },
       { title:"Fullstack Engineer, RL Environments", url:"https://jobs.ashbyhq.com/mercor/fa580f7f-8752-428c-bb6b-439fa72c76e7", level:"mid", added:"2026-08-06", posted:"2026-06-23", desc:"Build RL environments linking experts to model training." }
     ] },
@@ -12984,12 +12983,13 @@ const COMPANIES = [
     tagline:"Builds brands and products",
     stage:"Acquired", raised:"(WPP subsidiary, 2024)", lead:"WPP",
     badges:["WPP"],
-    totalRoles:3,
+    totalRoles:4,
     notes:"NYC (SoHo) HQ. 800+ ppl. Clients: WSJ, NYT, CNN, Coca-Cola. 36 NYC eng roles today.",
     jobs:[
       { title:"Senior Engineer, Cloud Infrastructure (US)", url:"https://www.codeandtheory.com/careers/8541896002?gh_jid=8541896002", level:"senior", added:"2026-07-21", posted:"2026-07-08", desc:"Own client cloud deployments for marketing integrations." },
       { title:"Senior Engineer, DevOps (US)", url:"https://www.codeandtheory.com/careers/8594730002?gh_jid=8594730002", level:"senior", added:"2026-07-21", posted:"2026-07-08", desc:"Own cloud, CI/CD, and security for an agentic marketing OS." },
-      { title:"Senior Engineer, Security & Compliance (US)", url:"https://www.codeandtheory.com/careers/8618478002?gh_jid=8618478002", level:"senior", added:"2026-07-21", posted:"2026-07-08" }
+      { title:"Senior Engineer, Security & Compliance (US)", url:"https://www.codeandtheory.com/careers/8618478002?gh_jid=8618478002", level:"senior", added:"2026-07-21", posted:"2026-07-08" },
+      { title:"Senior Engineer, Full-stack (US)", url:"https://www.codeandtheory.com/careers/8558982002?gh_jid=8558982002", level:"senior", added:"2026-08-20", posted:"2026-08-19", descRaw:"Code and Theory is seeking a Front-End Engineer to help build AI-native digital platforms and user experiences powering enterprise marketing workflows. Working closely with Engineering, Product, and Design teams, you’ll develop modern, performant, and scalable frontend applications that balance thoughtful user experience with technical excellence across web and AI-enabled systems. The Machine is the agentic operating system for marketing, built by Code and Theory. It plugs into the tools marketing teams use and turns disconnected workflows into a single intelligent system, connecting brand strategy, creative production, and media performance. The Machine helps power agencies across Stagwell's network and world-leading brands. WHAT YOU'LL DO Build and ship frontend applications and user exp" }
     ] },
   { id:"stash", name:"Stash", vertical:"fintech",
     sub:"Beginner investing app (Grab acquisition pending Q3 2026)",
@@ -13301,11 +13301,10 @@ const COMPANIES = [
     tagline:"Global bank since 1690",
     stage:"Public", raised:"N/A", lead:"LSE",
     badges:["LSE","FTSE 100"],
-    totalRoles:2,
+    totalRoles:1,
     notes:"NYC office. Markets + risk + platforms.",
     jobs:[
-      { title:"Senior Site Reliability Engineer - AVP - Credit Trade Floor", url:"https://barclays.wd3.myworkdayjobs.com/en-US/External_Career_Site_Barclays/job/New-York-745-7th-Avenue/Senior-Site-Reliability-Engineer---AVP---Credit-Trade-Floor_JR-0000117505", level:"senior", added:"2026-08-18" },
-      { title:"Liquid Financing Data/AI Engineer – VP", url:"https://barclays.wd3.myworkdayjobs.com/en-US/External_Career_Site_Barclays/job/New-York-745-7th-Avenue/Liquid-Financing-Data-AI-Engineer---VP_JR-0000128970-1", level:"mid", added:"2026-08-19" }
+      { title:"Senior Site Reliability Engineer - AVP - Credit Trade Floor", url:"https://barclays.wd3.myworkdayjobs.com/en-US/External_Career_Site_Barclays/job/New-York-745-7th-Avenue/Senior-Site-Reliability-Engineer---AVP---Credit-Trade-Floor_JR-0000117505", level:"senior", added:"2026-08-18" }
     ] },
   { id:"tower-research", name:"Tower Research Capital", vertical:"hft",
     sub:"Diversified quantitative trading",
@@ -13481,6 +13480,419 @@ const COMPANIES = [
     notes:"Product analytics + in-app guides.",
     jobs:[
       { title:"Sr. Software Engineer (AI)", url:"https://job-boards.greenhouse.io/pendo/jobs/8533495002", level:"senior", added:"2026-08-19", posted:"2026-08-19", desc:"Ship RAG pipelines and LLM features for product analytics." }
+    ] },
+  { id:"substack", name:"Substack", vertical:"media",
+    sub:"Independent publishing",
+    stage:"Series B", raised:"$96M", lead:"Andreessen Horowitz",
+    badges:["a16z","YC"],
+    totalRoles:1,
+    notes:"Newsletter platform + Notes. Publishing infra, subscriptions.",
+    jobs:[
+      { title:"Full Stack Software Engineer - Growth", url:"https://jobs.ashbyhq.com/substack/110ac422-58fb-461f-b249-9072eff43f3a", level:"mid", added:"2026-08-20", posted:"2026-08-19", descRaw:"Substack is building a new economic engine for culture, giving the brightest, most interesting, and most creative people on the internet the power of their own publishing platform. The terms of our culture should not be set by gate-keeping legacy media or chaos-fueling social media, but by the people who make and participate in that culture. Substack's model, based on direct subscriptions, has fueled an explosion of independent publishing. It empowers creators with economic autonomy, creative ownership, and a direct connection to their most engaged audiences. As a member of Substack’s Activation team, you will be responsible for building and testing features that bring new readers and creators to Substack and help them succeed and stick around. The team's goal is to help consumers find thi" }
+    ] },
+  { id:"astronomer", name:"Astronomer", vertical:"devtools",
+    sub:"Airflow platform",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:9,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer, Platform", url:"https://jobs.ashbyhq.com/astronomer/1a7e12f6-efb9-4a72-9137-a3c409689abb", level:"senior", added:"2026-08-20", posted:"2026-06-18", descRaw:"Astronomer empowers data teams to bring mission-critical software, analytics, and AI to life and is the company behind Astro, the industry-leading unified DataOps platform powered by Apache Airflow®. Astro accelerates building reliable data products that unlock insights, unleash AI value, and powers data-driven applications. Trusted by more than 800 of the world's leading enterprises, Astronomer lets businesses do more with their data. To learn more, visit www.astronomer.io . About this role: At Astronomer, we’re redefining how companies run Apache Airflow at scale. Our R&D organization is home to some of the most innovative minds in cloud infrastructure and open-source software. We’re looking for a Senior Software Engineer to join our Platform Engineering team. You get to go in at the gro" },
+      { title:"Senior Software Engineer, Airflow Infrastructure - NYC", url:"https://jobs.ashbyhq.com/astronomer/0166149d-ce80-4a1b-8371-5c989b28c1e7", level:"senior", added:"2026-08-20", posted:"2026-07-30", descRaw:"Astronomer empowers data teams to bring mission-critical software, analytics, and AI to life and is the company behind Astro, the industry-leading unified DataOps platform powered by Apache Airflow®. Astro accelerates building reliable data products that unlock insights, unleash AI value, and powers data-driven applications. Trusted by more than 800 of the world's leading enterprises, Astronomer lets businesses do more with their data. To learn more, visit www.astronomer.io . About this role: At Astronomer, we’re redefining how companies run Apache Airflow at scale. Our R&D organization is home to some of the most innovative minds in cloud infrastructure and open-source software. We’re looking for a Senior Software Engineer to join our Airflow Infra team, part of Astro, our flagship cloud " },
+      { title:"Senior Software Engineer - Build - NYC", url:"https://jobs.ashbyhq.com/astronomer/38a12983-72c9-4a62-b3b3-ae792afe72fc", level:"senior", added:"2026-08-20", posted:"2026-08-05", descRaw:"Astronomer empowers data teams to bring mission-critical software, analytics, and AI to life and is the company behind Astro, the industry-leading unified DataOps platform powered by Apache Airflow®. Astro accelerates building reliable data products that unlock insights, unleash AI value, and powers data-driven applications. Trusted by more than 800 of the world's leading enterprises, Astronomer lets businesses do more with their data. To learn more, visit www.astronomer.io . About this role Apache Airflow is one of the most popular open-source data platform tools. It powers the data platforms at nearly every large company and fast-growing startups: Airbnb, Uber, OpenAI, Anthropic, Nike, Capital One, Disney all use Airflow extensively. At Astronomer, we’re the largest contributors to the p" },
+      { title:"Senior Software Engineer, Infrastructure & Systems", url:"https://jobs.ashbyhq.com/astronomer/4179edb8-7ff6-4d0c-ba04-7a0d1e34e252", level:"senior", added:"2026-08-20", posted:"2026-08-13", descRaw:"Astronomer empowers data teams to bring mission-critical software, analytics, and AI to life and is the company behind Astro, the industry-leading unified DataOps platform powered by Apache Airflow®. Astro accelerates building reliable data products that unlock insights, unleash AI value, and powers data-driven applications. Trusted by more than 800 of the world's leading enterprises, Astronomer lets businesses do more with their data. To learn more, visit www.astronomer.io . About This Role Senior and Staff Software Engineers on our Infrastructure team own the architecture of the systems that stand up, configure, and manage the infrastructure the underlying Airflows run on. This includes the security of those systems and the reliability and observability capabilities that keep Astro runni" },
+      { title:"Senior Software Engineer, Core Platform", url:"https://jobs.ashbyhq.com/astronomer/89a60cf7-cdde-45b4-b09c-c0e527217cb0", level:"senior", added:"2026-08-20", posted:"2026-08-14", descRaw:"Astronomer empowers data teams to bring mission-critical software, analytics, and AI to life and is the company behind Astro, the industry-leading unified DataOps platform powered by Apache Airflow®. Astro accelerates building reliable data products that unlock insights, unleash AI value, and powers data-driven applications. Trusted by more than 800 of the world's leading enterprises, Astronomer lets businesses do more with their data. To learn more, visit www.astronomer.io . About this role At Astronomer, we’re on a mission to make Apache Airflow the go-to standard for data orchestration, and our R&D team is at the heart of it. We’re looking for a Software Engineer to our Core Platform team, where you’ll work on core systems that power Astro’s Public API, authentication, billing, alerting" },
+      { title:"Sales Engineer", url:"https://jobs.ashbyhq.com/astronomer/3e3be48c-ccf0-4a39-9eb2-03a896787999", level:"mid", added:"2026-08-20", posted:"2025-07-30", descRaw:"Astronomer empowers data teams to bring mission-critical software, analytics, and AI to life and is the company behind Astro, the industry-leading unified DataOps platform powered by Apache Airflow®. Astro accelerates building reliable data products that unlock insights, unleash AI value, and powers data-driven applications. Trusted by more than 800 of the world's leading enterprises, Astronomer lets businesses do more with their data. To learn more, visit www.astronomer.io . About this role: Astronomer is on a mission to make DataOps a first-class discipline in every modern data organization. As the driving force behind Apache Airflow, we're powering mission-critical pipelines at scale for companies like Condé Nast, Rappi, Sonos, and more. We're expanding our Sales Engineering team to hel" },
+      { title:"Customer Reliability Engineer - Infrastructure", url:"https://jobs.ashbyhq.com/astronomer/0ec38426-ed92-4a59-bb91-7aa65ea3e3b2", level:"mid", added:"2026-08-20", posted:"2026-06-24", descRaw:"Astronomer empowers data teams to bring mission-critical software, analytics, and AI to life and is the company behind Astro, the industry-leading unified DataOps platform powered by Apache Airflow®. Astro accelerates building reliable data products that unlock insights, unleash AI value, and powers data-driven applications. Trusted by more than 800 of the world's leading enterprises, Astronomer lets businesses do more with their data. To learn more, visit www.astronomer.io . About this role The Astronomer Customer Reliability Engineering (CRE) team is responsible for the success of our customers' usage of our managed Airflow service. The CREs are responsible for operating, monitoring, and maintaining the platform to ensure availability, predictability, and reliable operations. As an infra" },
+      { title:"Software Engineer - Applications", url:"https://jobs.ashbyhq.com/astronomer/1d29fe9a-7351-4b82-9017-de16dc86382f", level:"mid", added:"2026-08-20", posted:"2026-07-21", descRaw:"Astronomer empowers data teams to bring mission-critical software, analytics, and AI to life and is the company behind Astro, the industry-leading unified DataOps platform powered by Apache Airflow®. Astro accelerates building reliable data products that unlock insights, unleash AI value, and powers data-driven applications. Trusted by more than 800 of the world's leading enterprises, Astronomer lets businesses do more with their data. To learn more, visit www.astronomer.io . About This Role Software Engineers on our Applications teams help build the product experience that customers use every day on Astro \u2014 from the web console and CLI to the APIs, workflows, and features that make Airflow easier to use, monitor, and manage. The team owns the problems that make Astro a great product: usab" },
+      { title:"Customer Reliability Engineer - Airflow", url:"https://jobs.ashbyhq.com/astronomer/93fcb206-a045-4f03-9979-84b987ca84fa", level:"mid", added:"2026-08-20", posted:"2026-08-14", descRaw:"Astronomer empowers data teams to bring mission-critical software, analytics, and AI to life and is the company behind Astro, the industry-leading unified DataOps platform powered by Apache Airflow®. Astro accelerates building reliable data products that unlock insights, unleash AI value, and powers data-driven applications. Trusted by more than 800 of the world's leading enterprises, Astronomer lets businesses do more with their data. To learn more, visit www.astronomer.io . About this role: As an Airflow Reliability Engineer on the Customer Reliability Engineering (CRE) team at Astronomer, you will have the opportunity to become an Apache Airflow expert, learning directly from leaders of the Airflow project. You’ll provide Apache Airflow expertise directly to customers to help them make " }
+    ] },
+  { id:"evolutioniq", name:"EvolutionIQ", vertical:"ai",
+    sub:"Claims guidance AI",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:6,
+    notes:"",
+    jobs:[
+      { title:"Senior Analytics Engineer (AI Insurance SaaS)", url:"https://job-boards.greenhouse.io/evolutioniq/jobs/6122675004", level:"senior", added:"2026-08-20", posted:"2026-07-22", descRaw:"About Us: EvolutionIQ’s mission is to improve the lives of injured and disabled workers and enable them to return to the workforce, saving billions of dollars in avoidable costs and lost productivity to the US and global economies and make insurance more affordable for everyone. We are currently experiencing massive growth and to accomplish our goals, we are hiring world-class talent who want to help build and scale internally, and transform the insurance space. Our team is our #1 priority, and we have been named one of Inc.’s Best Workplaces 3 years in a row! The Adventure: We're the leading AI Guidance Platform in the insurance industry today, working with some of the largest insurance carriers in the US and expanding globally. We are seeking a highly skilled and motivated Senior Analyti" },
+      { title:"Senior Machine Learning (ML) Engineer (AI Insurtech)", url:"https://job-boards.greenhouse.io/evolutioniq/jobs/6135244004", level:"senior", added:"2026-08-20", posted:"2026-08-05", descRaw:"About Us: EvolutionIQ’s mission is to deliver state of the art technology that helps insurance claims teams make claims handling more accurate, fair, and efficient, so that more people impacted by injury or illness can continue their lives with dignity and stability. We are currently experiencing massive growth and to accomplish our goals, we are hiring world-class talent who want to help build and scale internally, and transform the insurance space. Our team is our #1 priority, and we have been named one of Inc.’s Best Workplaces 3 years in a row and Built In’s Best Places to work in 2025 and 2026! About You : A Senior Machine Learning Engineer who thrives on first principles problems that no one has ever worked on before. You love innovation and making an immediate impact, and are consta" },
+      { title:"Senior Software Engineer (AI Data Engineering)", url:"https://job-boards.greenhouse.io/evolutioniq/jobs/6090796004", level:"senior", added:"2026-08-20", posted:"2026-06-16", descRaw:"About Us: EvolutionIQ’s mission is to deliver state of the art technology that helps insurance claims teams make claims handling more accurate, fair, and efficient, so that more people impacted by injury or illness can continue their lives with dignity and stability. We are currently experiencing massive growth and to accomplish our goals, we are hiring world-class talent who want to help build and scale internally, and transform the insurance space. Our team is our #1 priority, and we have been named one of Inc.’s Best Workplaces 3 years in a row and Built In’s Best Places to work in 2025 and 2026! About You: An ambitious Software Engineer using agentic workflows as a massive lever for engineering velocity. While you use modern AI tools to accelerate code generation, your core strengths l" },
+      { title:"Senior Software Engineer (Insurance Tech)", url:"https://job-boards.greenhouse.io/evolutioniq/jobs/6122678004", level:"senior", added:"2026-08-20", posted:"2026-08-12", descRaw:"About Us: When someone is out of work with a serious injury or illness, the last thing they need is a claims process that's slow, confusing, or unfair. That's what EvolutionIQ is here to fix. EvolutionIQ builds AI that helps insurance claims teams handle claims more accurately, fairly, and efficiently, so more people impacted by injury or illness can get back to their lives with dignity and stability. As part of CCC Intelligent Solutions (NASDAQ: CCC), we pair AI-native product development with something almost no one else in this market has: 40 years of proprietary data and deep relationships with the largest, most complex carriers in the world. It's a rare combination, and it's what lets us build products others can't. Our people come first, and we think it shows. We've been named one of" },
+      { title:"Senior Software Engineer (Python / AI Insurance SaaS)", url:"https://job-boards.greenhouse.io/evolutioniq/jobs/6138019004", level:"senior", added:"2026-08-20", posted:"2026-08-06", descRaw:"About Us: EvolutionIQ’s mission is to deliver state of the art technology that helps insurance claims teams make claims handling more accurate, fair, and efficient, so that more people impacted by injury or illness can continue their lives with dignity and stability. We are currently experiencing massive growth and to accomplish our goals, we are hiring world-class talent who want to help build and scale internally, and transform the insurance space. Our team is our #1 priority, and we have been named one of Inc.’s Best Workplaces 3 years in a row and Built In’s Best Places to work in 2025 and 2026! About You: An ambitious Software Engineer who will be in the driver’s seat as we design and deliver the entire customer-facing application layer for our growing line of AI solutions. You thrive" },
+      { title:"Staff or Sr. Staff Software Engineer (AI Insurance Tech)", url:"https://job-boards.greenhouse.io/evolutioniq/jobs/6122701004", level:"senior", added:"2026-08-20", posted:"2026-08-12", descRaw:"About Us: EvolutionIQ builds AI that helps insurance claims teams handle claims more accurately, fairly, and efficiently, so more people impacted by injury or illness can get back to their lives with dignity and stability. As part of CCC Intelligent Solutions (NASDAQ: CCC), we pair AI-native product development with something almost no one else in this market has: 40 years of proprietary data and deep relationships with the largest, most complex carriers in the world. It's a rare combination, and it's what lets us build casualty products others can't. Our people come first, and we think it shows. We've been named one of Inc.'s Best Workplaces three years running, plus Built In's Best Places to Work in 2025 and 2026. The Mission: EvolutionIQ is seeking to scale our infrastructure, systems, " }
+    ] },
+  { id:"garner-health", name:"Garner Health", vertical:"health",
+    sub:"Provider quality data",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:5,
+    notes:"",
+    jobs:[
+      { title:"Senior Data Engineer", url:"https://job-boards.greenhouse.io/garnerhealth/jobs/5844350004", level:"senior", added:"2026-08-20", posted:"2026-08-17", descRaw:"What you’ll be part of Garner is on a mission to transform the U.S. healthcare system \u2014 and we’re the only proven player doing exactly that. We partner with employers to redesign how healthcare works: applying 550+ proprietary clinical metrics across 80+ specialties to a dataset of 320M+ patients to identify the best-performing doctors, then using compelling incentives to steer members to the care that helps them get healthier, faster. The result is a rare “win win” \u2014 better care and lower costs for both members and employers. In just five years, our work has helped over 2.5 million people access higher-quality care and saved $1B in healthcare costs. We recently raised our Series E and have doubled five years running. If you've ever wanted your work to solve a problem that touches every pe" },
+      { title:"Senior IT Systems Engineer", url:"https://job-boards.greenhouse.io/garnerhealth/jobs/5982721004", level:"senior", added:"2026-08-20", posted:"2026-08-17", descRaw:"What you’ll be part of Garner is on a mission to transform the U.S. healthcare system \u2014 and we’re the only proven player doing exactly that. We partner with employers to redesign how healthcare works: applying 550+ proprietary clinical metrics across 80+ specialties to a dataset of 320M+ patients to identify the best-performing doctors, then using compelling incentives to steer members to the care that helps them get healthier, faster. The result is a rare “win win” \u2014 better care and lower costs for both members and employers. In just five years, our work has helped over 2.5 million people access higher-quality care and saved $1B in healthcare costs. We recently raised our Series E and have doubled five years running. If you've ever wanted your work to solve a problem that touches every pe" },
+      { title:"Senior Software Engineer", url:"https://job-boards.greenhouse.io/garnerhealth/jobs/5816853004", level:"senior", added:"2026-08-20", posted:"2026-08-17", descRaw:"What you’ll be part of Garner is on a mission to transform the U.S. healthcare system \u2014 and we’re the only proven player doing exactly that. We partner with employers to redesign how healthcare works: applying 550+ proprietary clinical metrics across 80+ specialties to a dataset of 320M+ patients to identify the best-performing doctors, then using compelling incentives to steer members to the care that helps them get healthier, faster. The result is a rare “win win” \u2014 better care and lower costs for both members and employers. In just five years, our work has helped over 2.5 million people access higher-quality care and saved $1B in healthcare costs. We recently raised our Series E and have doubled five years running. If you've ever wanted your work to solve a problem that touches every pe" },
+      { title:"Data Engineer III", url:"https://job-boards.greenhouse.io/garnerhealth/jobs/5844340004", level:"mid", added:"2026-08-20", posted:"2026-08-17", descRaw:"What you’ll be part of Garner is on a mission to transform the U.S. healthcare system \u2014 and we’re the only proven player doing exactly that. We partner with employers to redesign how healthcare works: applying 550+ proprietary clinical metrics across 80+ specialties to a dataset of 320M+ patients to identify the best-performing doctors, then using compelling incentives to steer members to the care that helps them get healthier, faster. The result is a rare “win win” \u2014 better care and lower costs for both members and employers. In just five years, our work has helped over 2.5 million people access higher-quality care and saved $1B in healthcare costs. We recently raised our Series E and have doubled five years running. If you've ever wanted your work to solve a problem that touches every pe" },
+      { title:"Software Engineer III", url:"https://job-boards.greenhouse.io/garnerhealth/jobs/5816889004", level:"mid", added:"2026-08-20", posted:"2026-08-17", descRaw:"What you’ll be part of Garner is on a mission to transform the U.S. healthcare system \u2014 and we’re the only proven player doing exactly that. We partner with employers to redesign how healthcare works: applying 550+ proprietary clinical metrics across 80+ specialties to a dataset of 320M+ patients to identify the best-performing doctors, then using compelling incentives to steer members to the care that helps them get healthier, faster. The result is a rare “win win” \u2014 better care and lower costs for both members and employers. In just five years, our work has helped over 2.5 million people access higher-quality care and saved $1B in healthcare costs. We recently raised our Series E and have doubled five years running. If you've ever wanted your work to solve a problem that touches every pe" }
+    ] },
+  { id:"assembled", name:"Assembled", vertical:"saas",
+    sub:"Support team operations",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:4,
+    notes:"",
+    jobs:[
+      { title:"Software Engineer - Platform", url:"https://jobs.ashbyhq.com/assembledhq/a3900c2e-bf0f-4ba0-9844-5726e72b74d9", level:"mid", added:"2026-08-20", posted:"2026-05-05", descRaw:"About Assembled Great customer support requires human agents and AI in perfect balance, and Assembled is the only unified platform that orchestrates both at scale. Companies like Canva, Etsy, and Robinhood use Assembled to coordinate their entire support operation \u2014 in-house agents, BPOs, and AI \u2014 in a single operating system. With AI Agents that resolve cases end-to-end, AI Copilot for agent assistance, and AI-powered workforce management that optimizes both human and AI capacity, Assembled helps teams deliver faster, better service while making smarter decisions about how to staff and automate. Backed by $71M from NEA, Emergence Capital, and Stripe, we're building the platform that makes AI and human collaboration actually work. The Role We’re looking for an experienced software engineer" },
+      { title:"Software Engineer - Forecasting & Scheduling", url:"https://jobs.ashbyhq.com/assembledhq/c66054bb-694f-4077-8012-f71dd0a61a0c", level:"mid", added:"2026-08-20", posted:"2026-05-08", descRaw:"About Assembled Great customer support requires human agents and AI in perfect balance, and Assembled is the only unified platform that orchestrates both at scale. Companies like Canva, Etsy, and Robinhood use Assembled to coordinate their entire support operation \u2014 in-house agents, BPOs, and AI \u2014 in a single operating system. With AI Agents that resolve cases end-to-end, AI Copilot for agent assistance, and AI-powered workforce management that optimizes both human and AI capacity, Assembled helps teams deliver faster, better service while making smarter decisions about how to staff and automate. Backed by $71M from NEA, Emergence Capital, and Stripe, we're building the platform that makes AI and human collaboration actually work. The problem Every support team on earth is trying to answer" },
+      { title:"Sales Engineer", url:"https://jobs.ashbyhq.com/assembledhq/90514e41-3c81-490c-960e-c14fa7c5a3e2", level:"mid", added:"2026-08-20", posted:"2026-06-05", descRaw:"About Assembled Great customer support requires human agents and AI in perfect balance, and Assembled is the only unified platform that orchestrates both at scale. Companies like Canva, Etsy, and Robinhood use Assembled to coordinate their entire support operation \u2014 in-house agents, BPOs, and AI \u2014 in a single operating system. With AI Agents that resolve cases end-to-end, AI Copilot for agent assistance, and AI-powered workforce management that optimizes both human and AI capacity, Assembled helps teams deliver faster, better service while making smarter decisions about how to staff and automate. Backed by $71M from NEA, Emergence Capital, and Stripe, we're building the platform that makes AI and human collaboration actually work. The Role We're seeking a Sales Engineer to help us capture " },
+      { title:"Software Engineer, Design Systems", url:"https://jobs.ashbyhq.com/assembledhq/b6bdb9ea-a144-4687-bc3b-310b369f7bde", level:"mid", added:"2026-08-20", posted:"2026-07-01", descRaw:"About Assembled Great customer support requires human agents and AI in perfect balance, and Assembled is the only unified platform that orchestrates both at scale. Companies like Canva, Etsy, and Robinhood use Assembled to coordinate their entire support operation \u2014 in-house agents, BPOs, and AI \u2014 in a single operating system. With AI Agents that resolve cases end-to-end, AI Copilot for agent assistance, and AI-powered workforce management that optimizes both human and AI capacity, Assembled helps teams deliver faster, better service while making smarter decisions about how to staff and automate. Backed by $71M from NEA, Emergence Capital, and Stripe, we're building the platform that makes AI and human collaboration actually work. The role At Assembled, we're rebuilding how design and engi" }
+    ] },
+  { id:"axon", name:"Axon", vertical:"defense",
+    sub:"Public safety technology",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:4,
+    notes:"",
+    jobs:[
+      { title:"Senior Platform Software Engineer, Axon 911", url:"https://job-boards.greenhouse.io/axon/jobs/7504120003", level:"senior", added:"2026-08-20", posted:"2026-07-23", descRaw:"Join Axon and be a Force for Good. At Axon, we’re on a mission to Protect Life. We’re explorers, pursuing society’s most critical safety and justice issues with our ecosystem of devices and cloud software. Like our products, we work better together. We connect with candor and care, seeking out diverse perspectives from our customers, communities and each other. Life at Axon is fast-paced, challenging and meaningful. Here, you’ll take ownership and drive real change. Constantly grow as you work hard for a mission that matters at a company where you matter. About Axon 911 Axon 911 brings together Prepared and Carbyne under Axon. Together, we are creating the only platform that combines modern 911 infrastructure with an AI intelligence layer\u2014helping public safety agencies move faster, make be" },
+      { title:"Senior Site Reliability Engineer, Axon 911", url:"https://job-boards.greenhouse.io/axon/jobs/7791890003", level:"senior", added:"2026-08-20", posted:"2026-07-22", descRaw:"Join Axon and be a Force for Good. At Axon, we’re on a mission to Protect Life. We’re explorers, pursuing society’s most critical safety and justice issues with our ecosystem of devices and cloud software. Like our products, we work better together. We connect with candor and care, seeking out diverse perspectives from our customers, communities and each other. Life at Axon is fast-paced, challenging and meaningful. Here, you’ll take ownership and drive real change. Constantly grow as you work hard for a mission that matters at a company where you matter. About Axon 911 Axon 911 brings together Prepared and Carbyne under Axon. Together, we are creating the only platform that combines modern 911 infrastructure with an AI intelligence layer\u2014helping public safety agencies move faster, make be" },
+      { title:"Senior Software Engineer, Axon 911", url:"https://job-boards.greenhouse.io/axon/jobs/7499970003", level:"senior", added:"2026-08-20", posted:"2026-08-06", descRaw:"Join Axon and be a Force for Good. At Axon, we’re on a mission to Protect Life. We’re explorers, pursuing society’s most critical safety and justice issues with our ecosystem of devices and cloud software. Like our products, we work better together. We connect with candor and care, seeking out diverse perspectives from our customers, communities and each other. Life at Axon is fast-paced, challenging and meaningful. Here, you’ll take ownership and drive real change. Constantly grow as you work hard for a mission that matters at a company where you matter. About Axon 911 Axon 911 brings together Prepared and Carbyne under Axon. Together, we are creating the only platform that combines modern 911 infrastructure with an AI intelligence layer\u2014helping public safety agencies move faster, make be" },
+      { title:"Senior UC Software Engineer, Axon 911", url:"https://job-boards.greenhouse.io/axon/jobs/7790089003", level:"senior", added:"2026-08-20", posted:"2026-07-28", descRaw:"Join Axon and be a Force for Good. At Axon, we’re on a mission to Protect Life. We’re explorers, pursuing society’s most critical safety and justice issues with our ecosystem of devices and cloud software. Like our products, we work better together. We connect with candor and care, seeking out diverse perspectives from our customers, communities and each other. Life at Axon is fast-paced, challenging and meaningful. Here, you’ll take ownership and drive real change. Constantly grow as you work hard for a mission that matters at a company where you matter. About Axon 911 Axon 911 brings together Prepared and Carbyne under Axon. Together, we are creating the only platform that combines modern 911 infrastructure with an AI intelligence layer\u2014helping public safety agencies move faster, make be" }
+    ] },
+  { id:"grow-therapy", name:"Grow Therapy", vertical:"health",
+    sub:"Therapist network platform",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:4,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer, Backend", url:"https://jobs.ashbyhq.com/grow-therapy/16179a07-5099-4034-941c-7b2f28d91e83", level:"senior", added:"2026-08-20", posted:"2026-03-30", descRaw:"Grow Therapy is on a mission to serve as the trusted partner for therapists growing their practice, and patients accessing high-quality care. Powered by technology, we are a three-sided marketplace that empowers providers, augments insurance payors, and serves patients. Following the mass increase in depression and anxiety, the need for accessibility is more important than ever. To make our vision for mental healthcare a reality, we’re building a team of entrepreneurs and mission-driven go-getters. Since launching in February 2021, we’ve empowered more than ten thousand therapists and hundreds of thousands of clients across the country and insurance landscape. We’ve raised more than $328Mm in funding, including our Series D, at a $3B valuation from Sequoia Capital, Transformation Capital, " },
+      { title:"Senior Software Engineer - Full Stack", url:"https://jobs.ashbyhq.com/grow-therapy/d4732124-9e19-47dd-8fdd-c37cffbeaadc", level:"senior", added:"2026-08-20", posted:"2026-03-30", descRaw:"Grow Therapy is on a mission to serve as the trusted partner for therapists growing their practice, and patients accessing high-quality care. Powered by technology, we are a three-sided marketplace that empowers providers, augments insurance payors, and serves patients. Following the mass increase in depression and anxiety, the need for accessibility is more important than ever. To make our vision for mental healthcare a reality, we’re building a team of entrepreneurs and mission-driven go-getters. Since launching in February 2021, we’ve empowered more than ten thousand therapists and hundreds of thousands of clients across the country and insurance landscape. We’ve raised more than $328Mm in funding, including our Series D, at a $3B valuation from Sequoia Capital, Transformation Capital, " },
+      { title:"Senior Platform Reliability Engineer", url:"https://jobs.ashbyhq.com/grow-therapy/dbb244c2-08aa-44f9-b695-4c97d73a7b4a", level:"senior", added:"2026-08-20", posted:"2026-06-16", descRaw:"Grow Therapy is on a mission to serve as the trusted partner for therapists growing their practice, and patients accessing high-quality care. Powered by technology, we are a three-sided marketplace that empowers providers, augments insurance payors, and serves patients. Following the mass increase in depression and anxiety, the need for accessibility is more important than ever. To make our vision for mental healthcare a reality, we’re building a team of entrepreneurs and mission-driven go-getters. Since launching in February 2021, we’ve empowered more than ten thousand therapists and hundreds of thousands of clients across the country and insurance landscape. We’ve raised more than $328Mm in funding, including our Series D, at a $3B valuation from Sequoia Capital, Transformation Capital, " },
+      { title:"Senior/Staff Engineer, Cloud & Infrastructure Security", url:"https://jobs.ashbyhq.com/grow-therapy/40326d35-cf61-4b93-bc39-2679c07b4332", level:"senior", added:"2026-08-20", posted:"2026-08-19", descRaw:"Grow Therapy is on a mission to serve as the trusted partner for therapists growing their practice, and patients accessing high-quality care. Powered by technology, we are a three-sided marketplace that empowers providers, augments insurance payors, and serves patients. Following the mass increase in depression and anxiety, the need for accessibility is more important than ever. To make our vision for mental healthcare a reality, we’re building a team of entrepreneurs and mission-driven go-getters. Since launching in February 2021, we’ve empowered more than ten thousand therapists and hundreds of thousands of clients across the country and insurance landscape. We’ve raised more than $328Mm in funding, including our Series D, at a $3B valuation from Sequoia Capital, Transformation Capital, " }
+    ] },
+  { id:"blacksmith", name:"Blacksmith", vertical:"devtools",
+    sub:"Fast CI runners",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:3,
+    notes:"",
+    jobs:[
+      { title:"Senior Product Engineer", url:"https://jobs.ashbyhq.com/blacksmith/604cabdf-a54d-4dba-8dee-904e88ed5f16", level:"senior", added:"2026-08-20", posted:"2025-04-30", descRaw:"About Blacksmith We started by building infrastructure to run CI workloads really fast. Our first product helps companies run GitHub Actions substantially faster and cheaper by owning and operating our own global fleet of bare-metal machines rather than renting generic cloud VMs. Today, we orchestrate tens of millions of Firecracker VMs each month, running CI for 3,000+ companies and hit ~$10M in ARR in less than 2 years. We’ve already more than 5X’d revenue since the start of 2026. We operate thousands of bare-metal machines across multiple regions, regularly schedule 100k+ vCPUs concurrently, and run a petabyte-scale Ceph cluster that we manage ourselves. We’ve raised $58.5M from Seed to Series B, led by Google Ventures (GV) & Peak XV Capital, and we’re intentionally building a small, bu" },
+      { title:"Senior Systems Engineer", url:"https://jobs.ashbyhq.com/blacksmith/7f13567d-a9ab-4231-b439-99b84584257f", level:"senior", added:"2026-08-20", posted:"2025-04-30", descRaw:"About Blacksmith We started by building infrastructure to run CI workloads really fast. Our first product helps companies run GitHub Actions substantially faster and cheaper by owning and operating our own global fleet of bare-metal machines rather than renting generic cloud VMs. Today, we orchestrate tens of millions of Firecracker VMs each month, running CI for 3,000+ companies and hit ~$10M in ARR in less than 2 years. We’ve already more than 5X'd revenue since the start of 2026. We operate thousands of bare-metal machines across multiple regions, regularly schedule 100k+ vCPUs concurrently, and run a petabyte-scale Ceph cluster that we manage ourselves. We’ve raised $58.5M from Seed to Series B, led by Google Ventures (GV) & Peak XV Capital, and we’re intentionally building a small, bu" },
+      { title:"Solutions Engineer", url:"https://jobs.ashbyhq.com/blacksmith/915282a3-c12a-4ae8-9483-3f4b02a2e8ff", level:"mid", added:"2026-08-20", posted:"2025-12-19", descRaw:"About Blacksmith We started by building infrastructure to run CI workloads really fast. Our first product helps companies run GitHub Actions substantially faster and cheaper by owning and operating our own global fleet of bare-metal machines rather than renting generic cloud VMs. Today, we orchestrate tens of millions of Firecracker VMs each month, running CI for 3,000+ companies and hit ~$10M in ARR in less than 2 years. We’ve more than tripled revenue since the start of 2026. We operate thousands of bare-metal machines across multiple regions, regularly schedule 100k+ vCPUs concurrently, and run a petabyte-scale Ceph cluster that we manage ourselves. We’ve raised $13.5M across Seed and Series A, led by Google Ventures (GV), and we’re intentionally building a small, but exceptional team. " }
+    ] },
+  { id:"kalepa", name:"Kalepa", vertical:"ai",
+    sub:"Commercial underwriting AI",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:3,
+    notes:"",
+    jobs:[
+      { title:"Senior Backend Engineer - Client integrations (New York)", url:"https://job-boards.greenhouse.io/kalepa/jobs/5737349004", level:"senior", added:"2026-08-20", posted:"2026-06-07", descRaw:"About Kalepa: Insurance is a $7T global industry built on professional labor: underwriting, claims, pricing, operations, and distribution. Kalepa is building AI that can perform that work. We create professional-grade AI systems for insurers: software that can read, reason, decide, and act inside real workflows and operate over long-time horizons. Kalepa begins by augmenting professionals with the tools to succeed at their jobs. That earns us the right to learn from real decisions, capture decision traces, and automate what can be automated successfully over time. Our products are already in production with leading insurers, driving measurable outcomes and expanding across functions. The opportunity is far broader than any single workflow: to build the AI operating system for decision-maki" },
+      { title:"Senior Backend Engineer - Client integrations (USA)", url:"https://job-boards.greenhouse.io/kalepa/jobs/5737344004", level:"senior", added:"2026-08-20", posted:"2026-06-07", descRaw:"About Kalepa: Insurance is a $7T global industry built on professional labor: underwriting, claims, pricing, operations, and distribution. Kalepa is building AI that can perform that work. We create professional-grade AI systems for insurers: software that can read, reason, decide, and act inside real workflows and operate over long-time horizons. Kalepa begins by augmenting professionals with the tools to succeed at their jobs. That earns us the right to learn from real decisions, capture decision traces, and automate what can be automated successfully over time. Our products are already in production with leading insurers, driving measurable outcomes and expanding across functions. The opportunity is far broader than any single workflow: to build the AI operating system for decision-maki" },
+      { title:"Senior Platform Engineer - Infrastructure (USA)", url:"https://job-boards.greenhouse.io/kalepa/jobs/5742656004", level:"senior", added:"2026-08-20", posted:"2026-06-11", descRaw:"About Kalepa: Insurance is a $7T global industry built on professional labor: underwriting, claims, pricing, operations, and distribution. Kalepa is building AI that can perform that work. We create professional-grade AI systems for insurers: software that can read, reason, decide, and act inside real workflows and operate over long-time horizons. Kalepa begins by augmenting professionals with the tools to succeed at their jobs. That earns us the right to learn from real decisions, capture decision traces, and automate what can be automated successfully over time. Our products are already in production with leading insurers, driving measurable outcomes and expanding across functions. The opportunity is far broader than any single workflow: to build the AI operating system for decision-maki" }
+    ] },
+  { id:"method-financial", name:"Method Financial", vertical:"fintech",
+    sub:"Debt data and payments",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:3,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/method/22f6e56e-e983-4eaf-b00a-4598ba99e590", level:"senior", added:"2026-08-20", posted:"2026-06-29", descRaw:"Meet Method Method has built the most modern way to connect to consumer financial accounts. Combining real-time liability connectivity with instant payment execution, Method’s API is designed to make it easy for people to connect their financial accounts to the apps and services they want to use. We have helped 45+ million users connect 350+ million liability accounts credential-less and processed over $2.5B in payments, helping users save millions in interest. One in every three credit cards in the United States is in the Method ecosystem and leading financial institutions like SoFi, Bilt, Cleo, Sezzle, Figure & Aven rely on our APIs to build magical experiences for millions of consumers. We’re a team of 50+ people spread across offices in Austin, SF, New York City, and Washington D.C! We" },
+      { title:"Solutions Engineer", url:"https://jobs.ashbyhq.com/method/ae69beed-33d7-462b-ab83-5680c647741e", level:"mid", added:"2026-08-20", posted:"2026-05-07", descRaw:"Meet Method Method has built the most modern way to connect to consumer financial accounts. Combining real-time liability connectivity with instant payment execution, Method’s API is designed to make it easy for people to connect their financial accounts to the apps and services they want to use. We have helped 45+ million users connect 350+ million liability accounts credential-less and processed over $2.5B in payments, helping users save millions in interest. One in every three credit cards in the United States is in the Method ecosystem and leading financial institutions like SoFi, Bilt, Cleo, Sezzle, Figure & Aven rely on our APIs to build magical experiences for millions of consumers. We’re a team of 50+ people spread across offices in Austin, SF, New York City, and Washington D.C! We" },
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/method/33e8b312-a0a6-479d-81cf-24fd048f8303", level:"mid", added:"2026-08-20", posted:"2026-04-06", descRaw:"Meet Method Method has built the most modern way to connect to consumer financial accounts. Combining real-time liability connectivity with instant payment execution, Method’s API is designed to make it easy for people to connect their financial accounts to the apps and services they want to use. We have helped 45+ million users connect 350+ million liability accounts credential-less and processed over $2.5B in payments, helping users save millions in interest. One in every three credit cards in the United States is in the Method ecosystem and leading financial institutions like SoFi, Bilt, Cleo, Sezzle, Figure & Aven rely on our APIs to build magical experiences for millions of consumers. We’re a team of 50+ people spread across offices in Austin, SF, New York City, and Washington D.C! We" }
+    ] },
+  { id:"namespace-labs", name:"Namespace Labs", vertical:"devtools",
+    sub:"Build and test infrastructure",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:3,
+    notes:"",
+    jobs:[
+      { title:"Product Engineer", url:"https://jobs.ashbyhq.com/namespace/ff8cc22e-9c67-47cc-a858-04b38f29bf81", level:"mid", added:"2026-08-20", posted:"2026-04-07", descRaw:"Join our mission We're proud to work with many incredible companies, accelerating their ability to build their products. We've spent years watching talented engineering teams lose momentum to the same frustrating bottleneck: waiting. Waiting for CI to finish. Waiting for builds to complete. Waiting for tests to run. After experiencing this pain firsthand at companies of every size, we set out to build the developer infrastructure platform we'd always wanted to use. Something that would seamlessly integrate with our workflows and the tools teams already love\u2014but make everything dramatically faster and more cost-effective. Today, we're already accelerating hundreds of companies around the world, helping them ship features instead of waiting for infrastructure. We've built something that feel" },
+      { title:"Infrastructure Software Engineer", url:"https://jobs.ashbyhq.com/namespace/168f6c0b-a28c-4b04-9432-228a297aeedc", level:"mid", added:"2026-08-20", posted:"2026-05-04", descRaw:"Join our mission We're proud to work with many incredible companies, accelerating their ability to build their products. We've spent years watching talented engineering teams lose momentum to the same frustrating bottleneck: waiting. Waiting for CI to finish. Waiting for builds to complete. Waiting for tests to run. After experiencing this pain firsthand at companies of every size, we set out to build the developer infrastructure platform we'd always wanted to use. Something that would seamlessly integrate with our workflows and the tools teams already love\u2014but make everything dramatically faster and more cost-effective. Today, we're already accelerating hundreds of companies around the world, helping them ship features instead of waiting for infrastructure. We've built something that feel" },
+      { title:"Customer-Facing Software Engineer", url:"https://jobs.ashbyhq.com/namespace/baf4e483-2481-4848-b238-556133dfcd3b", level:"mid", added:"2026-08-20", posted:"2026-06-24", descRaw:"Join our mission We're proud to work with many incredible companies, accelerating their ability to build their products. We've spent years watching talented engineering teams lose momentum to the same frustrating bottleneck: waiting. Waiting for CI to finish. Waiting for builds to complete. Waiting for tests to run. After experiencing this pain firsthand at companies of every size, we set out to build the developer infrastructure platform we'd always wanted to use. Something that would seamlessly integrate with our workflows and the tools teams already love\u2014but make everything dramatically faster and more cost-effective. Today, we're already accelerating hundreds of companies around the world, helping them ship features instead of waiting for infrastructure. We've built something that feel" }
+    ] },
+  { id:"regard", name:"Regard", vertical:"health",
+    sub:"Clinical AI diagnosis",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:3,
+    notes:"",
+    jobs:[
+      { title:"Senior Data Engineer", url:"https://jobs.ashbyhq.com/regard/45fddbb6-c2cb-418f-98b3-8547595c2c56", level:"senior", added:"2026-08-20", posted:"2026-07-16", descRaw:"As a Senior Data Engineer at Regard, you will own the design, development, and production deployment of the data services that power the Regard platform. From ingesting and standardizing clinical data across health systems to making it reliably available for downstream product and analytics workflows, you'll build and evolve the infrastructure that enables the platform. This includes analyzing and tuning Spark workloads and partitioning strategies to control costs, adapting to upstream breaking changes, and enforcing rigorous data quality standards so our analytics are as dependable as our application code. We prioritize transparent, code-driven systems over black-box services, and you'll help architect the data platform that supports that philosophy. About Regard Our mission is to bring w" },
+      { title:"Full Stack Software Engineer", url:"https://jobs.ashbyhq.com/regard/8614f0d0-5f03-4cb2-834d-69cf962f0c2d", level:"mid", added:"2026-08-20", posted:"2026-06-18", descRaw:"As a Full Stack Software Engineer at Regard, you’ll be involved in all stages of the product development and deployment lifecycle: idea generation, planning, design, prototyping, execution, deployment, and iteration of new and existing features. You’ll collaborate closely with engineering, design, and product teams to bring new features and products to life. Your primary objective will be to develop high-quality software solutions that meet user needs and align with the organization’s business goals. This includes analyzing requirements, designing robust architectures, writing efficient code, and conducting thorough testing. You’ll be responsible for contributing to high-priority projects and continuous improvement initiatives. By delivering innovative and reliable software, you’ll help dr" },
+      { title:"Data Engineer", url:"https://jobs.ashbyhq.com/regard/78278d99-6f03-491a-8681-86ea25d3062f", level:"mid", added:"2026-08-20", posted:"2026-06-18", descRaw:"As a Data Engineer at Regard, you will help build and maintain the data pipelines and infrastructure that turn raw data into the metrics and insights that drive our product decisions and research. We run an engineering-first stack that prioritizes transparent, code-driven systems over black-box services, and you will contribute to the continued growth and reliability of our data platform. Working closely with Engineering and Product teams, you'll develop and improve data pipelines, support analytics initiatives, and help ensure the quality and availability of critical datasets. You'll have the opportunity to work across the full data stack while growing your expertise in distributed data processing, data modeling, and platform operations. About Regard Our mission is to bring world-class he" }
+    ] },
+  { id:"charlie-health", name:"Charlie Health", vertical:"health",
+    sub:"Intensive mental health",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior Machine Learning Platform Engineer", url:"https://www.charliehealth.com/careers?gh_jid=5886810004", level:"senior", added:"2026-08-20", posted:"2026-08-18", descRaw:"Why Charlie Health? Millions of people across the country are navigating mental health conditions, substance use disorders, and eating disorders, but too often, they’re met with barriers to care. From limited local options and long wait times to treatment that lacks personalization, behavioral healthcare can leave people feeling unseen and unsupported. Charlie Health exists to change that. Our mission is to connect the world to life-saving behavioral health treatment. We deliver personalized, virtual care rooted in connection\u2014between clients and clinicians, care teams, loved ones, and the communities that support them. By focusing on people with complex needs, we’re expanding access to meaningful care and driving better outcomes from the comfort of home. As a rapidly growing organization, " },
+      { title:"Senior Software Engineer, Full Stack (Provider)", url:"https://www.charliehealth.com/careers?gh_jid=5831865004", level:"senior", added:"2026-08-20", posted:"2026-08-18", descRaw:"Why Charlie Health? Millions of people across the country are navigating mental health conditions, substance use disorders, and eating disorders, but too often, they’re met with barriers to care. From limited local options and long wait times to treatment that lacks personalization, behavioral healthcare can leave people feeling unseen and unsupported. Charlie Health exists to change that. Our mission is to connect the world to life-saving behavioral health treatment. We deliver personalized, virtual care rooted in connection\u2014between clients and clinicians, care teams, loved ones, and the communities that support them. By focusing on people with complex needs, we’re expanding access to meaningful care and driving better outcomes from the comfort of home. As a rapidly growing organization, " }
+    ] },
+  { id:"dealpath", name:"Dealpath", vertical:"proptech",
+    sub:"Real estate deal management",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior DevOps Engineer", url:"https://www.dealpath.com/job-post/?gh_jid=8112197", level:"senior", added:"2026-08-20", posted:"2026-08-06", descRaw:"As a Senior DevOps Engineer, you will be a critical member of our infrastructure team based in New York, providing earlier-hours coverage and support for our cloud-based platform as we scale into a multi-shard environment. You will work closely with software engineers to deploy code at scale, drive SRE practices, and lead infrastructure reliability, observability, and security initiatives. This is a high-visibility, highly independent role that requires strong ownership. You will be instrumental in expanding our logging, monitoring, and observability tooling, and will also play a key part in setting up our Google Cloud Platform (GCP) infrastructure as we expand our AI capabilities. This role requires 3 days in-office (Tuesday, Wednesday, Thursday). What you’ll Do Provide infrastructure sup" },
+      { title:"Senior Full Stack Engineer", url:"https://www.dealpath.com/job-post/?gh_jid=8064783", level:"senior", added:"2026-08-20", posted:"2026-07-24", descRaw:"Senior Software Engineer Dealpath is the AI-powered operating system for institutional real estate investing \u2014 purpose-built to help the world's leading firms capture more opportunities, make faster decisions, and execute with precision. As a Senior Software Engineer here, you'll ship features that go directly into the workflows of firms managing trillions in real assets, using AI coding tools as a core part of how you build every day. We're looking for engineers who take ownership end-to-end, think about the problems they're solving for customers, and want to help shape the way the built world transacts. You’re excited about this opportunity because you’ll Ship customer-facing features \u2014 build and deploy product features that go directly into the workflows of the world's leading real esta" }
+    ] },
+  { id:"eagle-eye-networks", name:"Eagle Eye Networks", vertical:"infra",
+    sub:"Cloud video surveillance",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Platform Engineer", url:"https://jobs.ashbyhq.com/eagle/00b0bfbe-b174-4c5b-8d29-3aba4a1ddeef", level:"mid", added:"2026-08-20", posted:"2026-07-28", descRaw:"About Eagle We’re on a mission to radically transform the way we design and construct our built environment. Backed by Lightspeed Venture Partners, Eagle transforms civil, structural, and MEP engineering firms with applied AI. We’re an AI laboratory dedicated to providing engineers with the tools they need to solve the world’s hardest infrastructure, energy, and climate problems. By arming designers with frontier technology, our ambition is to build the most valuable, talent-dense engineering firm in the United States. The opportunity Our core thesis: 85% of what engineers do today is theoretically automatable, yet less than 5% has actually been touched by AI. That gap is the largest of any profession. Our plan is to close it by building purpose-built tools for their staff, and compounding" },
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/eagle/ddd07f46-a42a-4709-8e19-091d5145a9e7", level:"mid", added:"2026-08-20", posted:"2026-06-01", descRaw:"About Eagle We’re on a mission to radically transform the way we design and construct our built environment. Backed by Lightspeed Venture Partners, Eagle transforms civil, structural, and MEP engineering firms with applied AI. We’re an AI laboratory dedicated to providing engineers with the tools they need to solve the world’s hardest infrastructure, energy, and climate problems. By arming designers with frontier technology, our ambition is to build the most valuable, talent-dense engineering firm in the United States. The opportunity Our core thesis: 85% of what engineers do today is theoretically automatable, yet less than 5% has actually been touched by AI. That gap is the largest of any profession. Our plan is to close it by building purpose-built tools for their staff, and compounding" }
+    ] },
+  { id:"eight-sleep", name:"Eight Sleep", vertical:"consumer",
+    sub:"Sleep fitness technology",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Data Engineer", url:"https://jobs.ashbyhq.com/eightsleep/e23f8002-ffc8-49b6-b44e-2f14f27b6159", level:"mid", added:"2026-08-20", posted:"2026-03-11", descRaw:"Join the Sleep Fitness Movement At Eight Sleep, we’re on a mission to fuel human potential through optimal sleep. As the world’s first sleep fitness company, we’re redefining what it means to be well-rested and building the most advanced hardware, software, and AI technology to make it possible. Our products power peak mental, physical, and emotional performance by transforming every night of sleep into a personalized, data-driven recovery experience. We are trusted by high performers, professional athletes, and health-conscious consumers in over 30 countries worldwide. Recognized as one of Fast Company's Most Innovative Companies in 2019, 2022, and 2023, and twice named to TIME's “Best Inventions of the Year.” We operate like a high-performance team: fast, focused, and motivated by impact" },
+      { title:"Full Stack Engineer - Customer Experience", url:"https://jobs.ashbyhq.com/eightsleep/05a32566-9806-44e4-81d4-e61434554f30", level:"mid", added:"2026-08-20", posted:"2026-01-29", descRaw:"Join the Sleep Fitness Movement At Eight Sleep, we’re on a mission to fuel human potential through optimal sleep. As the world’s first sleep fitness company, we’re redefining what it means to be well-rested and building the most advanced hardware, software, and AI technology to make it possible. Our products power peak mental, physical, and emotional performance by transforming every night of sleep into a personalized, data-driven recovery experience. We are trusted by high performers, professional athletes, and health-conscious consumers in over 30 countries worldwide. Recognized as one of Fast Company's Most Innovative Companies in 2019, 2022, and 2023, and twice named to TIME's “Best Inventions of the Year.” We operate like a high-performance team: fast, focused, and motivated by impact" }
+    ] },
+  { id:"fivetran", name:"Fivetran", vertical:"devtools",
+    sub:"Automated data movement",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior R&D Software Engineer, Fivetran AI", url:"https://www.fivetran.com/careers/job?gh_jid=7810468003", level:"senior", added:"2026-08-20", posted:"2026-08-19", descRaw:"From Fivetran’s founding until now, our mission has remained the same: to make access to data as simple and reliable as electricity. With Fivetran, customer data arrives in their warehouses, canonical and ready to query, with no engineering or maintenance required. We’re proud that more organizations continue to leverage our technology every day to become truly data-driven. About Us Fivetran and dbt Labs are bringing together two industry-leading companies with a shared mission: helping organizations unlock the full value of their data. Together, we’re delivering the data infrastructure layer that helps organizations move, transform, and trust their data \u2014 from the moment data moves, through every transformation, to the context teams and AI systems rely on. Fivetran helps organizations aut" },
+      { title:"Senior Staff R&D Software Engineer, Fivetran AI", url:"https://www.fivetran.com/careers/job?gh_jid=7810451003", level:"senior", added:"2026-08-20", posted:"2026-08-19", descRaw:"From Fivetran’s founding until now, our mission has remained the same: to make access to data as simple and reliable as electricity. With Fivetran, customer data arrives in their warehouses, canonical and ready to query, with no engineering or maintenance required. We’re proud that more organizations continue to leverage our technology every day to become truly data-driven. About Us Fivetran and dbt Labs are bringing together two industry-leading companies with a shared mission: helping organizations unlock the full value of their data. Together, we’re delivering the data infrastructure layer that helps organizations move, transform, and trust their data \u2014 from the moment data moves, through every transformation, to the context teams and AI systems rely on. Fivetran helps organizations aut" }
+    ] },
+  { id:"gecko-robotics", name:"Gecko Robotics", vertical:"robotics",
+    sub:"Industrial inspection robots",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/gecko-robotics/1ae83c3f-565a-48c9-85f7-55ab1c75593d", level:"mid", added:"2026-08-20", posted:"2026-01-29", descRaw:"What We Do Gecko Robotics is helping the world’s most important organizations ensure the availability, reliability, and sustainability of critical infrastructure. Gecko's complete and connected solutions combine wall-climbing robots, industry-leading sensors, and an AI-powered data platform to provide customers with a unique window into the current and future health of their physical assets. This enables real-time decision making to increase the efficiency and safety of operations, promote mission readiness, and protect the environment and civilization from the effects of infrastructure failure. Role at a Glance Our Forward Deployed Engineers are not support engineers, they’re builders. Forward Deployed Engineers build our business within the context of a single customer at a time. They se" },
+      { title:"Software Engineer | Data Platform", url:"https://jobs.ashbyhq.com/gecko-robotics/9fcb98dc-cfb5-4ccb-8930-7e3c2b5ab368", level:"mid", added:"2026-08-20", posted:"2026-05-27", descRaw:"What We Do Gecko Robotics is helping the world’s most important organizations ensure the availability, reliability, and sustainability of critical infrastructure. Gecko's complete and connected solutions combine wall-climbing robots, industry-leading sensors, and an AI-powered data platform to provide customers with a unique window into the current and future health of their physical assets. This enables real-time decision making to increase the efficiency and safety of operations, promote mission readiness, and protect the environment and civilization from the effects of infrastructure failure. Role at a Glance Gecko is building the unified knowledge system industrial facilities have always lacked: a continuously evolving facility context graph that connects every dimension of asset intel" }
+    ] },
+  { id:"verana-health", name:"Verana Health", vertical:"health",
+    sub:"Clinical data insights",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://job-boards.greenhouse.io/veranahealth/jobs/8700261002", level:"senior", added:"2026-08-20", posted:"2026-08-19", descRaw:"Verana Health, a digital health company that delivers quality drug lifecycle and medical practice insights from an exclusive real-world data network, recently secured a $150 million Series E led by Johnson & Johnson Innovation – JJDC, Inc. (JJDC) and Novo Growth, the growth-stage investment arm of Novo Holdings. Existing Verana Health investors GV (formerly Google Ventures), Casdin Capital, and Brook Byers also joined the round, as well as notable new investors, including the Merck Global Health Innovation Fund, THVC, and Breyer Capital. We are driven to create quality real-world data in ophthalmology, neurology, urology, and oncology to accelerate quality insights across the drug lifecycle and within medical practices. Additionally, we are driven to advance the quality of care and quality" },
+      { title:"Senior/Staff/Principal Backend Engineer, Platform & Data Ingestion", url:"https://job-boards.greenhouse.io/veranahealth/jobs/8635045002", level:"senior", added:"2026-08-20", posted:"2026-08-10", descRaw:"Verana Health, a digital health company that delivers quality drug lifecycle and medical practice insights from an exclusive real-world data network, recently secured a $150 million Series E led by Johnson & Johnson Innovation – JJDC, Inc. (JJDC) and Novo Growth, the growth-stage investment arm of Novo Holdings. Existing Verana Health investors GV (formerly Google Ventures), Casdin Capital, and Brook Byers also joined the round, as well as notable new investors, including the Merck Global Health Innovation Fund, THVC, and Breyer Capital. We are driven to create quality real-world data in ophthalmology, neurology, urology, and oncology to accelerate quality insights across the drug lifecycle and within medical practices. Additionally, we are driven to advance the quality of care and quality" }
+    ] },
+  { id:"workato", name:"Workato", vertical:"saas",
+    sub:"Enterprise automation",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior Infrastructure Engineer (Core Infra, US)", url:"https://www.workato.com/careers?gh_jid=8202703002#open-roles", level:"senior", added:"2026-08-20", posted:"2026-08-06", descRaw:"About Workato Workato delivers enterprise infrastructure for the agentic era, redefining iPaaS and helping enterprises unify data, applications, processes, and AI into a single, governed platform. A leader in Enterprise MCP and trusted by 50% of the Fortune 500, Workato’s cloud-native architecture connects every application, data source, and process to power real-time orchestration at scale. With enterprise-grade security and continuous innovation at its core, Workato provides the trusted foundation for organizations to automate with confidence and operationalize AI across the business. To learn more, visit www.workato.com Why join us? Ultimately, Workato believes in fostering a flexible, trust-oriented culture that empowers everyone to take full ownership of their roles . We are driven by" },
+      { title:"Forward Deployed Engineer", url:"https://www.workato.com/careers?gh_jid=8437707002#open-roles", level:"mid", added:"2026-08-20", posted:"2026-08-06", descRaw:"About Workato Workato delivers enterprise infrastructure for the agentic era, redefining iPaaS and helping enterprises unify data, applications, processes, and AI into a single, governed platform. A leader in Enterprise MCP and trusted by 50% of the Fortune 500, Workato’s cloud-native architecture connects every application, data source, and process to power real-time orchestration at scale. With enterprise-grade security and continuous innovation at its core, Workato provides the trusted foundation for organizations to automate with confidence and operationalize AI across the business. To learn more, visit www.workato.com Why join us? Ultimately, Workato believes in fostering a flexible, trust-oriented culture that empowers everyone to take full ownership of their roles . We are driven by" }
+    ] },
+  { id:"algolia", name:"Algolia", vertical:"devtools",
+    sub:"Search API platform",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Fullstack Software Engineer, Growth", url:"https://job-boards.greenhouse.io/algolia/jobs/5988748004", level:"senior", added:"2026-08-20", posted:"2026-07-30", descRaw:"At Algolia, we’re proud to be a pioneer and market leader in AI Search, empowering 18,000+ businesses to deliver blazing-fast, predictive search and browse experiences at internet scale. Every week, we power over 30 billion search requests \u2014 four times more than Microsoft Bing, Yahoo, Baidu, Yandex, and DuckDuckGo combined. In 2021, we raised $150 million in Series D funding, quadrupling our valuation to $2.25 billion. This strong foundation enables us to keep investing in our market-leading platform and serving incredible customers like Under Armour, PetSmart, Stripe, Gymshark, and Walgreens. At Algolia, we are passionate about helping developers & product teams connect their users with what matters most in milliseconds! To ensure our users make the most out of Algolia’s powerful features" }
+    ] },
+  { id:"altana", name:"Altana", vertical:"ai",
+    sub:"Supply chain intelligence",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Sales Engineer, Federal", url:"https://job-boards.greenhouse.io/altanaai/jobs/7753292003", level:"mid", added:"2026-08-20", posted:"2026-07-17", descRaw:"Altana is the network for trusted trade. Our AI-powered product network empowers governments and businesses to build a more resilient and secure global economy while keeping trade flowing. The Opportunity at Altana As we continue to scale our government business we are seeking a dynamic Sales Engineer to join our team. As a Sales Engineer at Altana Technologies, you'll be at the forefront of our sales initiatives, playing a crucial role in translating technical jargon into practical value for our clients and partners. This role requires a perfect blend of technical acumen and interpersonal skills, as you will be tasked with presenting our innovative solutions to diverse audiences, ranging from technical contributors to executives. You'll be working closely with various teams, including Sal" }
+    ] },
+  { id:"artisan", name:"Artisan", vertical:"ai",
+    sub:"AI sales representatives",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Forward Deployed GTM Architect", url:"https://jobs.ashbyhq.com/artisan/77f1e47e-61d0-4245-bc99-02bb189ce392", level:"mid", added:"2026-08-20", posted:"2026-08-07", descRaw:"About Artisan We're building the last GTM tool companies will ever need, with AI employees (Artisans) embedded within it. Our first Artisan, Ava, is an AI BDR hired by hundreds of companies. Our next is an AI AE called Aria. Artisan has a database of every professional and local business, dozens of intent signals, website visitor de-anonymization, a dialer, inbound web chat, and so much more. We're a YC W24 company, have raised $35M+ from investors including Y Combinator, and are at $9M+ ARR. Role overview Deploying an AI employee into a 500-person sales org is an operating model change. Territories, books, and quotas already exist. RevOps has a system of record they've spent years defending. Every region has different compliance rules, every division has a different ICP, and half a dozen " }
+    ] },
+  { id:"astra", name:"Astra", vertical:"fintech",
+    sub:"Payment automation APIs",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Backend Engineer", url:"https://jobs.ashbyhq.com/astra/b32566e2-7f27-4d8d-a839-3d7154a6689f", level:"senior", added:"2026-08-20", posted:"2026-06-03", descRaw:"About Astra Astra is a high-impact engineering team building mission-critical financial infrastructure. Our fintech platform powers payment processing, fraud detection, and financial compliance for businesses handling 100M+ in weekly transaction volume. We maintain 99.9%+ uptime, process complex cross-border payments, and coordinate with multiple third-party financial services while meeting strict regulatory requirements. The Role We're looking for a Senior Backend Engineer to architect and build complex financial systems that process millions of dollars daily. You'll be one of our core engineers designing cross-domain solutions that coordinate payments, fraud detection, compliance, and user management across our distributed microservices architecture. This role requires deep systems think" }
+    ] },
+  { id:"collibra", name:"Collibra", vertical:"devtools",
+    sub:"Data intelligence platform",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior AI Engineer, Unstructured AI", url:"https://www.collibra.com/us/en/company/careers/job-listing/?gh_jid=8136480", level:"senior", added:"2026-08-20", posted:"2026-08-17", descRaw:"Joining Collibra’s Unstructured AI Team Work at the forefront of context engineering - shaping how AI systems retrieve, structure, and leverage context to deliver accurate, high-quality results at scale. Own end-to-end technical delivery of Unstructured AI systems - from feature prototype to stable production across enterprise environments. Build and scale full-stack systems that ingest, process, and enrich large volumes of unstructured content from distributed enterprise silos (PDFs, contracts, reports, and other document types). Collaborate with the Best: Work closely with xYC Founders to understand complex business challenges and deliver Deasy to solve them. Be part of a dynamic team where ideas flow freely and creativity thrives. Learn and Lead: Stay ahead of the curve by engaging with" }
+    ] },
+  { id:"copilot-money", name:"Copilot Money", vertical:"fintech",
+    sub:"Personal finance app",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Fullstack Engineer", url:"https://jobs.ashbyhq.com/copilot-money/3debb1d6-7d68-4a4f-b546-f97cf51b0307", level:"senior", added:"2026-08-20", posted:"2026-05-22", descRaw:"Who we are Copilot Money is on a mission to help people stress less about money. We’re building a new kind of financial platform that empowers people to take control of their finances, make informed decisions, and achieve their goals. We're a high-energy, fast-paced startup looking for determined, hands-on folks to join our team and make a real impact on people's financial lives. The Role As a Senior Fullstack Engineer at Copilot Money, you'll be a key contributor on a small, high-ownership engineering team building one of the most trusted personal finance apps in the market. You'll work across the full stack on features that matter - bringing strong technical judgment, a bias for shipping, and a genuine enthusiasm for using AI tools as part of how you build. This is a hybrid position base" }
+    ] },
+  { id:"cube", name:"Cube", vertical:"devtools",
+    sub:"Semantic layer for analytics",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Solutions Engineer", url:"https://jobs.ashbyhq.com/cube/9a2e55cb-5802-4809-b3eb-87c1385ee4c1", level:"mid", added:"2026-08-20", posted:"2026-06-24", descRaw:"CUBE are a global RegTech business defining and implementing the gold standard of regulatory intelligence for the financial services industry. We deliver our services through intuitive SaaS solutions, powered by AI, to simplify the complex and everchanging world of compliance for our clients. Why us? 🌍 CUBE is a globally recognized brand at the forefront of Regulatory Technology. Our industry-leading SaaS solutions are trusted by the world’s top financial institutions globally. 🚀 In 2024, we achieved over 50% growth, both organically and through two strategic acquisitions. We’re a fast-paced, high-performing team that thrives on pushing boundaries\u2014continuously evolving our products, services, and operations. At CUBE, we don’t just keep up we stay ahead. 🌱 We believe our future is built by " }
+    ] },
+  { id:"david-energy", name:"David Energy", vertical:"infra",
+    sub:"Retail energy supplier",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer, Energy Systems", url:"https://jobs.ashbyhq.com/davidenergy/b3550840-6344-46b3-9ebe-be9413907a9f", level:"senior", added:"2026-08-20", posted:"2026-05-20", descRaw:"About David Energy David Energy is creating a new kind of power company. We offer cheaper and cleaner energy than traditional Retail Electricity Providers (REPs) can, and we do so economically because we can tap into renewable supply (e.g. solar) and controllable capacity (e.g. batteries) anywhere it exists, including \"behind\" customers’ electricity meters. We’re a series A company aiming to run the grid on clean energy 24/7/365. We’re rapidly scaling our \"Beat the Utility\" product which guarantees small commercial customers that their total electric spend will be less than their incumbent utility. We can make this guarantee because our technology and risk management unlock value that is not available to the utility. We're currently operating in NYC (NYISO Zone J) and scaling toward hundre" }
+    ] },
+  { id:"falcon-x", name:"Falcon X", vertical:"fintech",
+    sub:"Institutional crypto brokerage",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Infrastructure Engineer - Trading Systems", url:"https://job-boards.greenhouse.io/falconx/jobs/4719441005", level:"senior", added:"2026-08-20", posted:"2026-08-06", descRaw:"Who are we? FalconX is a pioneering team of operators, investors, and builders committed to revolutionizing institutional access to the crypto markets. Operating at the intersection of traditional finance and cutting-edge technology, FalconX addresses the industry's foremost challenges: Navigating the digital asset market can be complex and fragmented, with limited products and services that support trading strategies, structures, and liquidity found in conventional financial markets. As a comprehensive solution for all digital asset strategies from start to scale, FalconX operates as the connective tissue empowering clients with seamless navigation through the ever- evolving cryptocurrency landscape. Responsibilities Low-Latency Architecture: Design, provision, and maintain ultra-low late" }
+    ] },
+  { id:"harness", name:"Harness", vertical:"devtools",
+    sub:"Software delivery platform",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Enterprise Sales Engineer - New York", url:"https://www.harness.io/company/jobs/apply?gh_jid=5044593007&gh_jid=5044593007", level:"senior", added:"2026-08-20", posted:"2026-06-10", descRaw:"Harness is the AI Software Delivery Platform company, led by technologist and entrepreneur Jyoti Bansal (founder of AppDynamics, acquired by Cisco for $3.7B). Harness has raised approximately $570M in funding and is valued at $5.5B, backed by leading investors including Goldman Sachs, Menlo Ventures, IVP, Unusual Ventures, Citi Ventures, and more. As AI accelerates code creation, the real bottleneck has shifted to everything after the code – testing, deployments, application security, reliability, compliance, and cost optimization. Harness brings AI and automation to this “outer loop,” helping teams ship software faster while maintaining security and governance throughout the entire software delivery lifecycle. Powered by Harness AI and the Software Delivery Knowledge Graph, the Harness Pl" }
+    ] },
+  { id:"icon-savings", name:"Icon Savings", vertical:"fintech",
+    sub:"Portable retirement plans",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Founding Engineer", url:"https://jobs.ashbyhq.com/icon/8de569c7-814f-4ffe-9c21-a92d7b806be2", level:"founding", added:"2026-08-20", posted:"2024-08-29", descRaw:"https://icon.com/careers" }
+    ] },
+  { id:"livekit", name:"LiveKit", vertical:"devtools",
+    sub:"Real-time audio and video",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/livekit/b889ef16-4d5d-4b71-b0a9-682026a0a1ee", level:"mid", added:"2026-08-20", posted:"2026-03-17", descRaw:"About LiveKit LiveKit is building the infrastructure layer for the agentic era of computing. Our platform gives developers everything they need to build, test, deploy, scale, and observe AI agents in production. Founded in 2021, LiveKit powers voice and agentic AI applications for OpenAI, Salesforce, Spotify, Meta, and tens of thousands of other developers, collectively facilitating billions of calls each year. About This Role LiveKit is seeking a Forward Deployed Engineer (FDE) to work directly with customers building real-time communication and voice AI applications on the LiveKit platform. This role sits at the intersection of engineering, architecture, and customer implementation. Forward Deployed Engineers partner closely with customers to design systems, prototype solutions, and solv" }
+    ] },
+  { id:"mark43", name:"Mark43", vertical:"defense",
+    sub:"Public safety software",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"DevOps Engineer, DevEx", url:"https://mark43.com/list-job/7753456?gh_jid=7753456", level:"mid", added:"2026-08-20", posted:"2026-05-12", descRaw:"Applicants must be authorized to work for any employer in the country in which the role is being hired. We are unable to sponsor or take over sponsorship of an employment visa at this time. Mark43’s mission is to empower communities and their governments with new technologies that improve the safety and quality of life for all. We build powerful, scalable, and elegant software that sets a new standard for the tools upon which our first responders rely. Our users are diverse, and we are therefore committed to embracing diversity of thought and experience within our team. The Mark43 law enforcement platform delivers mission-critical services to agencies across the country. When our systems are unavailable, real-world safety is impacted. As a Platform Engineer, you will take ownership of crit" }
+    ] },
+  { id:"merge", name:"Merge", vertical:"devtools",
+    sub:"Unified API for integrations",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/merge/7b98a416-65ba-4a92-9941-9d24366b6139", level:"mid", added:"2026-08-20", posted:"2025-07-18", descRaw:"Merge is the leading provider of agentic tools and customer-facing integrations for frontier LLMs, Fortune 500 organizations, and B2B SaaS companies. Our platform offers three core products: Merge Unified, which enables businesses to add hundreds of integrations to their products with a single API, Merge Agent Handler, which empowers AI agents with secure access to thousands of third-party tools, and Merge Gateway, the control plane for running AI in production. Merge's enterprise-grade platform handles the entire integration lifecycle, from authentication and security to monitoring and maintenance. Thousands of companies trust Merge to accelerate product development, unblock sales, reduce customer churn, and save engineering resources\u2014allowing them to focus on their core product. Who are " }
+    ] },
+  { id:"nabla", name:"Nabla", vertical:"health",
+    sub:"Ambient clinical AI",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"SRE / Backend Engineer", url:"https://jobs.ashbyhq.com/nabla/67f41562-cabb-4c75-8841-7ea113065ed8", level:"mid", added:"2026-08-20", posted:"2026-06-18", descRaw:"About Nabla We are a team of entrepreneurs, clinicians and engineers committed to bringing back joy to the practice of medicine. Together with a community of clinician innovators, we’ve harnessed the best of machine learning science to develop Nabla: the leading AI assistant that’s restoring the human connection at the heart of healthcare. By streamlining clinical documentation, Nabla is helping clinicians focus on what matters most - patient care. Today, over 100,000+ clinicians across 130+ healthcare organizations trust Nabla to support how they deliver care every day. We’re at the start of an ambitious journey: Ambient listening, dictation, coding, and command capabilities are all converging into a proactive assistant that intuitively streamlines clinical and financial workflows. Backed" }
+    ] },
+  { id:"oak-street-health", name:"Oak Street Health", vertical:"health",
+    sub:"Value-based primary care",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Enterprise Solutions Engineer - East", url:"https://jobs.ashbyhq.com/oak/da71c5be-ff1c-42fb-8b0a-86e88c2b8640", level:"mid", added:"2026-08-20", posted:"2026-07-15", descRaw:"We're reimagining enterprise Identity and Access Management from the ground up. Founded by serial entrepreneurs Shai Morag and Tal Marom and backed by a $60M seed round from Greylock, Accel, and CRV, we're building the next generation of identity security. Identity is the gateway to everything- who's let in, who's kept out, and it's now the number one attack vector in the enterprise. The tools built to govern it were designed for a slower world of human users and static environments. That world is gone. Identities are exploding across human, machine, and AI agents faster than legacy systems can track, and security teams are left patching together five disconnected tools that still can't answer \"who has access to what, right now.\" We think the answer isn't another point solution- it's a new" }
+    ] },
+  { id:"oso", name:"Oso", vertical:"devtools",
+    sub:"Authorization as a service",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/oso/1778e946-7138-4ab7-8ad2-8d664d11dd8f", level:"mid", added:"2026-08-20", posted:"2023-01-16", descRaw:"Old problem, new $25B+ market Companies like AWS, Stripe, and Twilio have shown that if a technology isn't core to your value proposition, you should offload it. Still, every engineering team builds and rebuilds one piece: authorization , how you control who has access to what in your app. We intend to change that. We see a world where developers never roll their own authorization again, and instead say, \"Just use Oso\" – the same way you might say, \"Oh, you should just use Postgres for that.\" In doing so, we're creating the $25B+ authorization market. Why Oso? We have the lead – in traction, capital, and team. Traction : Oso is used by thousands of companies from startups to the Fortune 500, like Wayfair, ProductBoard, Vanta, Brex, Verizon, ZoomInfo, and Duolingo. Capital : We're backed by" }
+    ] },
+  { id:"pelago", name:"Pelago", vertical:"health",
+    sub:"Substance use management",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"AI Product Engineer", url:"https://job-boards.greenhouse.io/pelago/jobs/5164093007", level:"mid", added:"2026-08-20", posted:"2026-07-07", descRaw:"Pelago is the leading specialty substance use care provider, built on the belief that effective treatment means matching care intensity to what each member actually needs rather than defaulting to the most expensive intervention. Our programs guide members through every stage of the substance use spectrum, from unhealthy habits to active use disorders, delivering personalized treatment for tobacco, alcohol, opioid, cannabis, and stimulant use based on individual health, habits, genetics, and goals. With Sona, our voice-first AI Mental Health Specialist, Pelago now applies that same clinically-driven model to mental health, pairing deep clinical expertise with technology to expand access without compromising care quality. We believe technology should make clinical care more precise and more" }
+    ] },
+  { id:"samsara", name:"Samsara", vertical:"saas",
+    sub:"Connected operations cloud",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Specialist Sales Engineer", url:"https://www.samsara.com/company/careers/roles/7341443?gh_jid=7341443", level:"mid", added:"2026-08-20", posted:"2026-08-14", descRaw:"Who we are Samsara (NYSE: IOT) is the pioneer of the Connected Operations™ Cloud, which is a platform that enables organizations that depend on physical operations to harness Internet of Things (IoT) data to develop actionable insights and improve their operations. At Samsara, we are helping improve the safety, efficiency and sustainability of the physical operations that power our global economy. Representing more than 40% of global GDP, these industries are the infrastructure of our planet, including agriculture, construction, field services, transportation, and manufacturing \u2014 and we are excited to help digitally transform their operations at scale. Working at Samsara means you’ll help define the future of physical operations and be on a team that’s shaping an exciting array of product " }
+    ] },
+  { id:"savvy-wealth", name:"Savvy Wealth", vertical:"fintech",
+    sub:"Advisor technology platform",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Platform Engineer - Technical Staff", url:"https://jobs.ashbyhq.com/savvy/e4a54631-390c-4909-952f-2cf453772ce3", level:"senior", added:"2026-08-20", posted:"2026-08-17", descRaw:"About Savvy Wealth: Wealth management is a $545 billion industry that still runs on manual work. 75% of advisors offer no digital communication beyond email, and most still build financial plans by hand in Excel. Savvy is reinventing what it looks like to be a financial advisor. Founder Ritik Malhotra saw the fragmentation firsthand after seeking out his own advisor, and started Savvy to give independent advisors a modern, AI-native home. Savvy is a registered investment advisor (RIA), and we partner with experienced financial advisors who want to grow without running the back office themselves. Advisors bring their book and join Savvy, running under their own brand (or ours), and Savvy earns a percentage of the assets they manage. In return, they get a true business-in-a-box: a proprietar" }
+    ] },
+  { id:"videoamp", name:"VideoAmp", vertical:"adtech",
+    sub:"Cross-platform measurement",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Solutions Engineer", url:"http://videoamp.com/job?gh_jid=8649483002", level:"senior", added:"2026-08-20", posted:"2026-08-11", descRaw:"Senior Solutions Engineer 📍 New York, NY or Los Angeles, CA | Hybrid / or Remote US | $140,000 to $160,000 + Equity + Benefits About VideoAmp VideoAmp is the tech-first measurement company transforming how advertising is valued, bought, and sold. Powered by currency-grade big data and a best-in-class technology stack, our platform gives advertisers, agencies, and digital partners the ability to plan, optimize, and measure media investments across every screen, from linear TV and OTT to CTV and digital video. VideoAmp is accelerating investment in agentic AI and intelligent optimization technologies, helping clients drive measurable, real-world outcomes in an increasingly complex media landscape. With 880% year-over-year measurement growth, 98% coverage of the TV ecosystem, and partnerships" }
     ] }
 ];
 
