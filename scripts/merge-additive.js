@@ -87,11 +87,14 @@ for (const rc of src.companies) {
   }
   const have = new Map((ec.jobs || []).map((j) => [j.url, j]));
   const fresh = (rc.jobs || []).filter((j) => !have.has(j.url));
-  // carry posted + descRaw onto already-present jobs if the source now has them
+  // carry posted + descRaw onto already-present jobs if the source now has them.
+  // descRaw is summarization input only, so a job that already has a desc does
+  // not get it back -- otherwise every refresh would re-inflate data.js with
+  // raw ATS bodies the UI never reads.
   for (const j of rc.jobs || []) {
     const e = have.get(j.url);
     if (e && j.posted && !e.posted) e.posted = j.posted;
-    if (e && j.descRaw && !e.descRaw) e.descRaw = j.descRaw;
+    if (e && j.descRaw && !e.descRaw && !e.desc) e.descRaw = j.descRaw;
   }
   if (fresh.length) {
     ec.jobs = (ec.jobs || []).concat(fresh);

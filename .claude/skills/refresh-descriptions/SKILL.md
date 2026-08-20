@@ -62,6 +62,12 @@ switch to Individual roles, and compare `clientWidth`/`scrollWidth` (and
 - **Batch size ~30** — sweet spot: agents can hold context, output stays under ~2k tokens.
 - **Fan-out 10-30 concurrent** — same shape as `/refresh-add-candidates`. If you're paying for parallelism, this is where it earns.
 - **Skip jobs without `descRaw`** — Workday and SmartRecruiters list endpoints don't return description bodies. `descRaw` presence is the gate.
+- **`descRaw` is staging, not payload.** It is the raw ATS body fed to the
+  summarizer, and `apply-descriptions.mjs` deletes it from every job that
+  has a `desc`. Left in place it was 0.77 MB of the 2.6 MB `data.js` that
+  every visitor downloads and parses for text the UI never renders.
+  `merge-additive.js` will not re-attach it to a job that already has a
+  `desc`, so the payload cannot silently regrow on the next refresh.
 
 ## Backfilling the existing corpus
 
@@ -98,5 +104,7 @@ returned. Do it only when asked; do not fold it into a routine refresh.
   `apply-descriptions.mjs` still backstops at 140 chars, but a 140-char
   string is ~4x what a phone renders — treat the backstop as a bug net, not
   a budget. Long-form belongs in the ATS.
-- **Silent-approximate is safe.** Missing `desc` falls back to `descRaw[:80]` or the job title alone; missing `tagline` falls back to `sub`.
+- **Silent-approximate is safe.** A job with no `desc` renders as its title
+  alone; a company with no `tagline` falls back to `sub`. (`descRaw` is *not*
+  a render fallback -- nothing in `js/` reads it.)
 - **`js/data.js` is staged by `/refresh-ship`** so these writes travel with the rest of the data.

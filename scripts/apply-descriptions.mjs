@@ -15,6 +15,12 @@
  *     refresh — it will happily replace good copy with worse copy.
  *   - Strips any trailing newlines / quotes from desc; caps to 140 chars, and
  *     reports anything over the render budgets (32 tagline / 70 desc).
+ *   - Drops `descRaw` from any job that has a `desc`. descRaw is the raw ATS
+ *     body -- input to the summarization step, never read by the UI -- and at
+ *     ~800 bytes per job it was 0.77 MB of the 2.6 MB data.js shipped to every
+ *     visitor. Jobs still awaiting a desc keep theirs (check-descriptions.mjs
+ *     uses `descRaw && !desc` to find them). Running this with an empty
+ *     payload ({}) performs the prune alone.
  *   - Re-serializes data.js in the same hand-written style used by
  *     merge-additive.js and check-dead.js (so all three stay in sync).
  *   - Reports how many jobs / companies were updated. */
@@ -70,6 +76,16 @@ for (const c of companies) {
   }
 }
 
+// descRaw has done its job once a desc exists: it is summarization input, not
+// render data (no reference to it anywhere in js/). Dropping it here keeps the
+// payload from regrowing on every refresh.
+let rawDropped = 0, rawBytes = 0;
+for (const c of companies) {
+  for (const j of (c.jobs || [])) {
+    if (j.desc && j.descRaw) { rawBytes += j.descRaw.length; delete j.descRaw; rawDropped++; }
+  }
+}
+
 // Re-serialize in the same hand-written style as merge-additive.js.
 const esc = (s) => JSON.stringify(s).slice(1, -1).replace(/—/g, '\\u2014');
 const emitJob = (j) => {
@@ -107,6 +123,9 @@ fs.writeFileSync(DATA, src.slice(0, a) + block + src.slice(e));
 
 console.log(`Applied ${jobsUpdated} job desc(s) and ${companiesUpdated} company tagline(s).`);
 if (force) console.log(`  --force replaced ${jobsReplaced} existing desc(s), ${companiesReplaced} existing tagline(s).`);
+if (rawDropped) {
+  console.log(`  dropped descRaw from ${rawDropped} job(s) that already have a desc (${(rawBytes / 1024).toFixed(0)} KB).`);
+}
 if (tagOver || descOver) {
   console.log(`  over budget: ${tagOver} tagline(s) > ${TAGLINE_BUDGET} chars, ${descOver} desc(s) > ${DESC_BUDGET} chars.`);
 }

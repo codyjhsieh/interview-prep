@@ -2069,6 +2069,15 @@ code, pre, .font-mono {
    group so they wrap together instead of one at a time. gap matches the
    row's own 12px so desktop spacing is unchanged. */
 .role-row-meta  { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+/* The roles list paints 250 rows and the companies grid 274 cards, all in one
+   pass -- laying out every one of them cost ~1.5s on a throttled phone and
+   made scrolling drop frames. content-visibility lets the browser skip layout
+   and paint for rows that are off screen; contain-intrinsic-size keeps the
+   scrollbar honest, and `auto` means each element remembers its real height
+   once it has been rendered. Ignored by browsers that do not support it
+   (Safari < 18), which simply get today's behaviour. */
+.role-row       { content-visibility: auto; contain-intrinsic-size: auto 96px; }
+#co-grid > .card { content-visibility: auto; contain-intrinsic-size: auto 260px; }
 .role-row-title { font-size: 14.5px; font-weight: 500; line-height: 1.35; }
 .role-row-co    { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
 @media (max-width: 640px) {
@@ -2081,7 +2090,7 @@ code, pre, .font-mono {
      words of a job description, with titles clipped mid-word. Let the meta
      group wrap to its own line (right-aligned) so the text column gets the
      full width, and give the title + desc two lines instead of one. */
-  .role-row { flex-wrap: wrap; row-gap: 7px; }
+  .role-row { flex-wrap: wrap; row-gap: 7px; contain-intrinsic-size: auto 160px; }
   .role-row-text { flex: 1 1 60%; }
   .role-row-meta { margin-left: auto; gap: 8px; }
   .role-row .role-row-title.truncate,
