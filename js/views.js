@@ -5694,9 +5694,9 @@ function renderCompanies(state, hub) {
           <div class="text-xs muted mt-0.5 truncate">${esc(c.sub)}</div>
           <div class="text-[11px] mt-1.5 flex items-center gap-1.5 flex-wrap">
             <span class="pill ${verticalPill[c.vertical] || 'pill-dev'}" style="font-size:10px;padding:1px 6px">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
-            <span class="font-mono tabular-nums" style="color:var(--accent)">${esc(c.raised || '')}</span>
-            <span class="dim">·</span>
-            <span class="muted">${esc(c.stage || '')}</span>
+            ${c.raised ? `<span class="font-mono tabular-nums" style="color:var(--accent)">${esc(c.raised)}</span>` : ''}
+            ${c.raised && c.stage ? '<span class="dim">·</span>' : ''}
+            ${c.stage ? `<span class="muted">${esc(c.stage)}</span>` : ''}
           </div>
         </div>
       </div>
@@ -5863,10 +5863,8 @@ function renderCompanies(state, hub) {
               <span class="font-medium">${esc(c.name)}</span>${c.tagline ? ` <span class="muted text-xs">— ${esc(c.tagline)}</span>` : ''}
               <span class="dim mx-1">·</span>
               <span class="muted">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
-              <span class="dim mx-1">·</span>
-              <span class="muted">${esc(c.stage || '')}</span>
-              <span class="dim mx-1">·</span>
-              <span style="color:var(--accent)" class="font-mono">${esc(c.raised || '')}</span>
+              ${c.stage ? `<span class="dim mx-1">·</span><span class="muted">${esc(c.stage)}</span>` : ''}
+              ${c.raised ? `<span class="dim mx-1">·</span><span style="color:var(--accent)" class="font-mono">${esc(c.raised)}</span>` : ''}
               ${dateStr ? `<span class="dim mx-1">·</span><span class="muted">${esc(dateStr)}</span>` : ''}
             </div>
           </div>
