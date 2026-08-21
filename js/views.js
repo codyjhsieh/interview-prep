@@ -5291,6 +5291,13 @@ const COOLNESS = {
   'copilot-money':8, cube:6, 'david-energy':6, 'falcon-x':5, harness:4, 'icon-savings':5,
   livekit:8, mark43:5, merge:6, nabla:6, 'oak-street-health':3, oso:6,
   pelago:5, samsara:4, 'savvy-wealth':5, videoamp:4,
+  // ── 2026-08-21 auto-scored ──
+  voxmedia:6, citi:1, crowdstrike:3, freshworks:3, 'hex-technologies':6, 'redpanda-data':6,
+  revel:7, rain:5, tabs:5, traba:5, angellist:6, exiger:3,
+  'norm-ai':6, 'catapult-sports':5, drivewealth:4, 'genius-sports':5, omnea:4, posh:8,
+  smarsh:2, windmill:6, ashby:6, cais:4, comun:6, floqast:3,
+  'glean-ai':5, 'global-relay':2, 'impact-analytics':4, ironclad:5, 'modern-life':4, novig:7,
+  quizlet:6,
 };
 
 const FRONTIER = new Set([
