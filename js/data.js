@@ -10395,7 +10395,7 @@ const COMPANIES = [
     tagline:"AI agents for consumer brands",
     stage:"Series A", raised:"$110M", lead:"Sequoia",
     badges:["Sequoia","Benchmark"],
-    totalRoles:16,
+    totalRoles:17,
     notes:"Bret Taylor's agent co. Customer-deploy heavy.",
     jobs:[
       { title:"Software Engineer, Agent", url:"https://jobs.ashbyhq.com/sierra/e9f5fdb6-91ee-4c55-9230-41ec8865650e", level:"mid", added:"2026-05-31", posted:"2025-04-18", desc:"Build AI agents for partners like Uber, Rivian, and SoftBank." },
@@ -10413,7 +10413,8 @@ const COMPANIES = [
       { title:"Enterprise Sales Engineer, Financial Services", url:"https://jobs.ashbyhq.com/sierra/41fa146b-73a4-41d0-a546-bcf504945772", level:"mid", added:"2026-08-06", posted:"2026-08-05", desc:"Demo and deploy conversational AI for financial services." },
       { title:"Enterprise Sales Engineer (Spanish speaking)", url:"https://jobs.ashbyhq.com/sierra/adaa6543-00df-4e5f-8e40-e4327ccb764c", level:"mid", added:"2026-08-18", posted:"2026-08-11", desc:"Deploy conversational AI for Spanish-speaking enterprises." },
       { title:"Enterprise Sales Engineer (Brazilian Portuguese speaking)", url:"https://jobs.ashbyhq.com/sierra/102b597d-876d-458f-bf11-58924df4b73d", level:"mid", added:"2026-08-18", posted:"2026-08-11", desc:"Drive technical sales across Portuguese-speaking customers." },
-      { title:"Software Engineer, Agent - Tech, Media & Telecom", url:"https://jobs.ashbyhq.com/sierra/4472e6c2-fe4e-4540-a37c-68b9367fe02a", level:"mid", added:"2026-08-18", posted:"2026-08-13", desc:"Build conversational AI for tech, media, and telecom." }
+      { title:"Software Engineer, Agent - Tech, Media & Telecom", url:"https://jobs.ashbyhq.com/sierra/4472e6c2-fe4e-4540-a37c-68b9367fe02a", level:"mid", added:"2026-08-18", posted:"2026-08-13", desc:"Build conversational AI for tech, media, and telecom." },
+      { title:"Enterprise Sales Engineer, Consumer Business Insights", url:"https://jobs.ashbyhq.com/sierra/bde6daf0-ee01-4470-b1b2-77fc8d232f06", level:"mid", added:"2026-08-21", posted:"2026-08-21", descRaw:"About us At Sierra, we’re building a platform to enable every company in the world to build better, more human customer experiences with AI. We partner with industry leaders such as SoftBank, Uber, Rivian, CLEAR, and Sutter Health. We are primarily an in-person company based in San Francisco, with growing offices across North America, Europe, and Asia. We are guided by a set of values that are at the core of our actions and define our culture: Trust, Customer Obsession, Craftsmanship, Intensity, and Family. These values are the foundation of our work, and we are committed to upholding them in everything we do. Our co-founders are Bret Taylor and Clay Bavor . Bret currently serves as Board Chair of OpenAI. Previously, he was co-CEO of Salesforce (which had acquired the company he founded, Q" }
     ] },
   { id:"cognition", name:"Cognition", vertical:"ai",
     sub:"Devin \u2014 autonomous SWE agent",
@@ -10697,7 +10698,7 @@ const COMPANIES = [
     tagline:"Banking built for startups",
     stage:"Series C", raised:"$152M", lead:"CRV",
     badges:["CRV","a16z","Coatue"],
-    totalRoles:7,
+    totalRoles:8,
     notes:"Banking UX + ops. Compliance, money movement.",
     jobs:[
       { title:"Senior Software Engineer - AI Engineering", url:"https://job-boards.greenhouse.io/mercury/jobs/5850044004", level:"senior", added:"2026-05-31", posted:"2026-06-12", desc:"Turn scattered AI experiments into shared infrastructure." },
@@ -10706,7 +10707,8 @@ const COMPANIES = [
       { title:"Senior Full-Stack Engineer", url:"https://job-boards.greenhouse.io/mercury/jobs/6101151004", level:"senior", added:"2026-07-21", posted:"2026-07-10", desc:"Ship banking features across web and API surfaces." },
       { title:"Senior Software Engineer - Banking Integration Platform", url:"https://job-boards.greenhouse.io/mercury/jobs/6118243004", level:"senior", added:"2026-07-21", posted:"2026-07-17", desc:"Integrate systems for the move to a national bank charter." },
       { title:"Software Engineer - Product", url:"https://job-boards.greenhouse.io/mercury/jobs/6101145004", level:"mid", added:"2026-07-21", posted:"2026-07-10", desc:"Ship features improving startup banking on core product." },
-      { title:"Senior Software Engineer - Fraud", url:"https://job-boards.greenhouse.io/mercury/jobs/5847987004", level:"senior", added:"2026-08-19", posted:"2026-08-18", desc:"Build fraud detection screening new business applications." }
+      { title:"Senior Software Engineer - Fraud", url:"https://job-boards.greenhouse.io/mercury/jobs/5847987004", level:"senior", added:"2026-08-19", posted:"2026-08-18", desc:"Build fraud detection screening new business applications." },
+      { title:"Software Engineer - Infrastructure", url:"https://job-boards.greenhouse.io/mercury/jobs/6150432004", level:"mid", added:"2026-08-21", posted:"2026-08-21", descRaw:"The backbone of any technology org is its infrastructure, come join the team giving that skeleton superhuman abilities. The Infrastructure team at Mercury is an enablement lever for the rest of the business, building scaleable, secure and maintainable foundations for the rest of the org to build on top of. Infrastructure is currently building out more platform features to make it easier for agents and humans to deploy code. This means security by default, observable by default and easy to use and operate. We do all this while not compromising on speed, and ship to prod all day, every day, which is a testament to the strong foundations this team has built. We are looking for an engineer to join our team to help build out the “platform” even further! We maintain everything from networking to" }
     ] },
   { id:"plaid", name:"Plaid", vertical:"fintech",
     sub:"Banking API + financial data",
@@ -14298,6 +14300,49 @@ const COMPANIES = [
     notes:"",
     jobs:[
       { title:"Sr Backend Engineer", url:"https://jobs.ashbyhq.com/quizlet-inc/6b802b88-42b1-4857-9d61-5c96c63022f0", level:"senior", added:"2026-08-21", posted:"2026-07-17", desc:"Build backends behind study tools at scale." }
+    ] },
+  { id:"schonfeld", name:"Schonfeld", vertical:"hft",
+    sub:"Multi-strategy trading",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:8,
+    notes:"",
+    jobs:[
+      { title:"Senior Quantitative Data Engineer", url:"https://job-boards.greenhouse.io/schonfeld/jobs/7544203", level:"senior", added:"2026-08-21", posted:"2026-07-28", descRaw:"The Role As the driving force behind Schonfeld’s next-generation data platforms, you will architect, operate, and continually refine underlying platform that empowers research, systematic trading, AI and risk analytics. On top of this robust foundation, you’ll build and run high-throughput pipelines spanning ultra-low-latency market-data streams to cost-efficient end-of-day workflows. Partner closely with quants, data scientists, and fellow engineers to achieve sub-minute SLAs, shape firm-wide architecture, and mentor peers. We believe diverse backgrounds and voices spark better ideas and more resilient systems, so you’ll join an inclusive culture where every perspective counts. What you’ll do Architect and operate the platform – 24x7 reliability, IaC-driven deployments, tight cost control" },
+      { title:"Senior Software Engineer", url:"https://job-boards.greenhouse.io/schonfeld/jobs/7843962", level:"senior", added:"2026-08-21", posted:"2026-07-28", descRaw:"The Role We’re looking for a Senior Software Engineer to join our AI Technology team and play a critical role in building and shaping the firm’s internal Agentic AI platform. This is a high-impact, hands-on engineering position where you’ll contribute not just as an AI software engineer, but also as an AI strategist – helping to evolve our agentic AI platform powering the firm. You’ll work in a dynamic, fast-paced environment where product requirements evolve, and business stakeholders are deeply engaged. What you’ll do You’ll be a key contributor to our agentic AI platform and associated tooling. At the same time, you’ll work closely with product teams and business stakeholders, helping shape feature definitions, and designing and building high-impact AI-powered solutions directly into ou" },
+      { title:"Senior Software Engineer", url:"https://job-boards.greenhouse.io/schonfeld/jobs/7538303", level:"senior", added:"2026-08-21", posted:"2026-07-28", descRaw:"The Role The Global Operations Technology team at Schonfeld is tasked with creating a platform that serves as the golden data source for post trade operational data – transaction capture, near real-time positions, start-of-day position, end-of-day position, trades, executions and P&L. The team is responsible for Drop copy and FIX integrations for post trade across our multi-manager multi-strategy platform. Building and managing positions across a wide array of asset classes including listed and OTC products. Building and maintaining all systems related to the fund’s intraday and end of day trade reporting facilities across all investments to our Prime Brokers, Fund Primary and Shadow books of record systems. What you’ll do Senior Software Engineers at Schonfeld take on a wide range of resp" },
+      { title:"Senior Software Engineer, UI/UX", url:"https://job-boards.greenhouse.io/schonfeld/jobs/7653520", level:"senior", added:"2026-08-21", posted:"2026-07-28", descRaw:"The Role We’re looking for a Senior UI Engineer to join our team and play a critical role in building and shaping the firm’s internal UI platform. This is a high-impact, hands-on engineering position where you’ll contribute not just as a front-end specialist, but also as a platform thinker – helping to evolve our UI infrastructure that powers 100+ business applications across the firm. You’ll work in a dynamic, fast-paced environment where product requirements evolve, and business stakeholders are deeply engaged. Your engineering skills, UX sensibility, and product mindset will all be utilized as you craft industry-leading UI platform and ecosystems. What you’ll do You’ll be a key contributor to our UI platform and a technical partner to product owners building on top of it. You’ll help ev" },
+      { title:"AI Data Engineer", url:"https://job-boards.greenhouse.io/schonfeld/jobs/7589451", level:"mid", added:"2026-08-21", posted:"2026-07-28", descRaw:"About the Role Schonfeld Strategic Advisors is seeking an experienced AI Data Engineer to join our Data Engineering team. In this role, you will be responsible for designing, building, and maintaining robust data pipelines that power SchonAI, our firm's internal AI platform. You will work at the intersection of data engineering and AI, ensuring that high-quality, timely, and relevant data flows seamlessly to our AI systems to support investment professionals across the firm. Key Responsibilities Data Pipeline Development Design and build scalable, reliable data pipelines to ingest, transform, and deliver structured and unstructured data to SchonAI using Prefect. Develop ETL/ELT processes for diverse data sources including market data, research documents, internal databases, and third-party" },
+      { title:"Full Stack Engineer", url:"https://job-boards.greenhouse.io/schonfeld/jobs/7843972", level:"mid", added:"2026-08-21", posted:"2026-07-28", descRaw:"The Role We’re looking for a Full Stack Engineer to join our AI Technology team and play a critical role in building and shaping the firm’s internal Generative AI platform. This is a high-impact, hands-on engineering position where you’ll contribute not just as a full stack specialist, but also as an AI strategist – helping to evolve our agentic AI platform powering the firm. You’ll work in a dynamic, fast-paced environment where product requirements evolve, and business stakeholders are deeply engaged. Your engineering skills, UX sensibility, and product mindset will all be utilized as you craft industry-leading UI platform and ecosystems. What you’ll do You’ll be a key contributor to the UI and backend of our agentic AI platform and associated tooling. You’ll help evolve our technical st" },
+      { title:"Software Engineer - Business Analytics", url:"https://job-boards.greenhouse.io/schonfeld/jobs/7958235", level:"mid", added:"2026-08-21", posted:"2026-07-28", descRaw:"The Role We are seeking a highly qualified embedded Software Engineer to join our Business Analytics team. The Business Analytics team at Schonfeld focuses on analytics, reporting and automation. As a Software Engineer you will work on building key infrastructure to help compute performance related fees for our PMs and other related projects. What you’ll do Take full ownership of an existing Python codebase, quickly become the subject-matter expert and plan the next-generation architecture. Develop a deep understanding of the firm's complex business structures and translate that knowledge into clean, reliable code. Build tools and automation that enable Accounting teams to execute updates efficiently with minimal manual intervention. Design and implement a scalable reporting infrastructure" },
+      { title:"Software Engineer - Fundamental Equities", url:"https://job-boards.greenhouse.io/schonfeld/jobs/7957507", level:"mid", added:"2026-08-21", posted:"2026-07-28", descRaw:"The Role We are looking for a Software Engineer to join the Fundamental Equity COO team, embedded directly within the business rather than in a central technology function. You will work alongside quant researchers and COO management to build backend services, data pipelines, and internal APIs that improve productivity, deepen AI adoption, and make better use of the data the business already has access to. AI integration is a core part of this role, not an afterthought. We are actively building out how LLMs, agentic workflows, and AI-powered tooling fit into the investment process, and this hire is expected to drive a meaningful part of that. You should come in with both hands-on experience and genuine conviction about where these technologies are heading. The role sits close to the invest" }
+    ] },
+  { id:"equinox-fitness", name:"Equinox Fitness", vertical:"consumer",
+    sub:"Luxury fitness clubs",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Sr. Data Engineer (HYBRID)", url:"https://jobs.smartrecruiters.com/equinox/744000138711935", level:"senior", added:"2026-08-21", posted:"2026-07-20" }
+    ] },
+  { id:"pubmatic", name:"PubMatic", vertical:"adtech",
+    sub:"Programmatic advertising",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Forward Deployed Engineer", url:"https://pubmatic.com/job/?gh_jid=5177499008", level:"mid", added:"2026-08-21", posted:"2026-08-11", descRaw:"About the Role: As a Forward Deployed Engineer (FDE) at PubMatic, you will sit at the intersection of software engineering and applied AI, embedded directly within GTM and operational teams to ship production-grade AI workflows. You will be delivering working agents, integrations, and automation that measurably improve productivity and decision-making inside real business processes. Operating in a small pod model, you will own the full technical lifecycle: discovery, integration design, build, and production rollout. Initial focus areas include GTM functions where AI can automate analysis, generate insights, and streamline day-to-day operations. This is a hybrid role based in New York, with proximity to PubMatic’s GTM teams. On-site collaboration is expected for this role. Travel to Redwoo" }
+    ] },
+  { id:"squarepoint-capital", name:"Squarepoint Capital", vertical:"hft",
+    sub:"Quantitative investment",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Junior SRE", url:"https://www.squarepoint-capital.com/open-opportunities?id=6380892&gh_jid=6380892", level:"mid", added:"2026-08-21", posted:"2026-08-06", descRaw:"Position Overview: This is a Full‑time Junior Software Engineering position for candidates early in their career who are interested in infrastructure, systems, and machine learning platforms at scale. As a Junior Engineer, you will contribute to production ML/HPC infrastructure, working alongside experienced engineers and quantitative researchers. You will gradually take ownership of components and features, learn how large‑scale systems are designed and operated in practice, and contribute production‑quality code that directly supports research and trading workloads. This role is designed to offer strong mentorship while encouraging increasing autonomy and technical ownership over time. As part of the team, you will work on some of the following: Design, implement, and maintain data pipel" }
     ] }
 ];
 
