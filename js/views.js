@@ -5298,6 +5298,8 @@ const COOLNESS = {
   smarsh:2, windmill:6, ashby:6, cais:4, comun:6, floqast:3,
   'glean-ai':5, 'global-relay':2, 'impact-analytics':4, ironclad:5, 'modern-life':4, novig:7,
   quizlet:6,
+  // ── 2026-08-21 auto-scored #2 ──
+  schonfeld:2, 'equinox-fitness':4, pubmatic:3, 'squarepoint-capital':2,
 };
 
 const FRONTIER = new Set([
@@ -5331,6 +5333,8 @@ const QUANT_GATED = new Set([
   'goldman-sachs','blackrock',
   // 2026-08-19 auto — hft-vertical additions from recent CANDIDATES expansions
   'tower-research','belvedere-trading','pdt-partners','man-group',
+  // 2026-08-21 auto — hft-vertical additions
+  'schonfeld','squarepoint-capital',
 ]);
 
 function _candidateMult(c) {
