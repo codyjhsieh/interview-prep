@@ -14047,10 +14047,11 @@ const COMPANIES = [
   { id:"tabs", name:"Tabs", vertical:"ai",
     sub:"Revenue automation platform",
     tagline:"Automates B2B revenue",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$91M", lead:"",
     badges:[],
     totalRoles:5,
     notes:"",
+    fundingSrc:"posting",
     jobs:[
       { title:"Senior Software Engineer, Payments", url:"https://jobs.ashbyhq.com/tabs/780e0391-3d89-4384-9022-ba88efac392d", level:"senior", added:"2026-08-21", posted:"2026-07-14", desc:"Build payments behind B2B revenue automation." },
       { title:"Senior Software Engineer, Platform", url:"https://jobs.ashbyhq.com/tabs/c7234d3b-e983-4912-b17e-6b7d4ffd8225", level:"senior", added:"2026-08-21", posted:"2026-08-19", desc:"Build the platform behind revenue automation." },
@@ -14144,10 +14145,11 @@ const COMPANIES = [
   { id:"omnea", name:"Omnea", vertical:"saas",
     sub:"Procurement operations",
     tagline:"Runs company purchasing",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$75M", lead:"",
     badges:[],
     totalRoles:2,
     notes:"",
+    fundingSrc:"posting",
     jobs:[
       { title:"Technical Solutions Engineer", url:"https://jobs.ashbyhq.com/omnea/5494036d-7702-4193-be60-aef9cbaa3f02", level:"mid", added:"2026-08-21", posted:"2026-07-22", desc:"Deploy procurement workflows with customers." },
       { title:"Enterprise Sales Engineer", url:"https://jobs.ashbyhq.com/omnea/f79dde19-5684-465b-b24b-c62f2bed711c", level:"mid", added:"2026-08-21", posted:"2026-07-23", desc:"Demo procurement orchestration to enterprises." }
@@ -14155,10 +14157,11 @@ const COMPANIES = [
   { id:"posh", name:"Posh", vertical:"consumer",
     sub:"Event discovery platform",
     tagline:"Finds the party tonight",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$70M", lead:"",
     badges:[],
     totalRoles:2,
     notes:"",
+    fundingSrc:"posting",
     jobs:[
       { title:"Senior Software Engineer, Personalization", url:"https://jobs.ashbyhq.com/posh/5c29d5f4-e82c-415a-91c5-4a80fe581ec2", level:"senior", added:"2026-08-21", posted:"2026-03-10", desc:"Build personalization for event discovery." },
       { title:"Senior Software Engineer, Backend", url:"https://jobs.ashbyhq.com/posh/a7d28450-654e-4498-860e-d36c5b507c5c", level:"senior", added:"2026-08-21", posted:"2026-08-18", desc:"Build backends behind event discovery." }
@@ -14248,10 +14251,11 @@ const COMPANIES = [
   { id:"impact-analytics", name:"Impact Analytics", vertical:"ai",
     sub:"Retail forecasting platform",
     tagline:"Forecasts what retail sells",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$61M", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
+    fundingSrc:"sec",
     jobs:[
       { title:"Internal Systems Engineer (Applied AI)", url:"https://job-boards.greenhouse.io/impact/jobs/8532453002", level:"mid", added:"2026-08-21", posted:"2026-05-26", desc:"Apply AI to internal retail forecasting systems." }
     ] },
