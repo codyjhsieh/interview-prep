@@ -6174,7 +6174,15 @@ function renderFlashcards(state, hub) {
   // the resumed card may not even survive the cut.
   let resumeId = null;
   try { resumeId = sessionStorage.getItem('fc.resumeId'); } catch (_) {}
-  const due = GAMI.dueCards(state, FLASHCARDS, 50, resumeId);
+  // Category filter. Persisted for the session so navigating to a lesson and
+  // back keeps the deck you were drilling, the same way fc.resumeId does.
+  let catFilter = 'all';
+  try { catFilter = sessionStorage.getItem('fc.catFilter') || 'all'; } catch (_) {}
+  if (catFilter !== 'all' && !FLASHCARDS.some(c => c.cat === catFilter)) catFilter = 'all';
+  const cardsIn = (cat) => cat === 'all' ? FLASHCARDS : FLASHCARDS.filter(c => c.cat === cat);
+  // dueCards() takes the card pool, so filtering is just a smaller pool —
+  // scheduling, ordering and resume-pinning all keep working unchanged.
+  let due = GAMI.dueCards(state, cardsIn(catFilter), 50, resumeId);
   const fs = state.flashcardFailStats || {};
   const totalFails = Object.values(fs.byCard || {}).reduce((s,n) => s + n, 0);
   const top = (obj, n=3) => Object.entries(obj || {})
@@ -6306,6 +6314,29 @@ function renderFlashcards(state, hub) {
         </div>
       ` : ''}
     </div>`;
+  // Short chip labels — the full category names ("Decomposition & Case
+  // Study") are far too long for a chip row on a phone.
+  const CAT_SHORT = {
+    ai: 'AI/LLM', decomp: 'Decomp', sysd: 'System Design', coding: 'Coding',
+    data: 'SQL/Data', cloud: 'Cloud', client: 'Client Sim', behav: 'Behavioral',
+    domain: 'Domain', meta: 'Meta',
+  };
+  const nowMs = Date.now();
+  const dueCountIn = (cat) => cardsIn(cat).filter(c => {
+    const m = fcMeta[c.id];
+    return !m || m.due <= nowMs;
+  }).length;
+  // Only offer categories that actually have cards, in curriculum order.
+  const catsWithCards = CATEGORIES.filter(c => FLASHCARDS.some(f => f.cat === c.id));
+  const filterTabs = [
+    `<div class="tab${catFilter === 'all' ? ' active' : ''}" data-fcfilter="all">All <span class="ml-1 muted text-[10px] font-mono">${dueCountIn('all')}</span></div>`,
+    ...catsWithCards.map(c => {
+      const n = dueCountIn(c.id);
+      return `<div class="tab${catFilter === c.id ? ' active' : ''}" data-fcfilter="${esc(c.id)}">`
+        + `${esc(CAT_SHORT[c.id] || c.name)} <span class="ml-1 muted text-[10px] font-mono">${n}</span></div>`;
+    }),
+  ].join('');
+
   const container = el('div','fade-in space-y-5');
   container.innerHTML = `
     <div class="flex items-end justify-between flex-wrap gap-3">
@@ -6318,6 +6349,7 @@ function renderFlashcards(state, hub) {
         <div class="text-2xl font-bold" id="fc-due">${due.length}</div>
       </div>
     </div>
+    <div class="tabs" id="fc-cat-filters">${filterTabs}</div>
     <div id="fc-stage"></div>
     ${statsHTML}
   `;
@@ -6328,6 +6360,21 @@ function renderFlashcards(state, hub) {
     // flashcards screen — only the due-now counter ticks down here.
     const dueEl = container.querySelector('#fc-due');
     if (dueEl) dueEl.textContent = Math.max(0, due.length - idx);
+    // Chip counts drift as cards are rated out of the due window; recompute
+    // them from live state rather than leaving stale numbers on screen.
+    const row = container.querySelector('#fc-cat-filters');
+    if (row) {
+      const meta = state.flashcards || {};
+      const now = Date.now();
+      const liveCount = (cat) => cardsIn(cat).filter(c => {
+        const m = meta[c.id];
+        return !m || m.due <= now;
+      }).length;
+      row.querySelectorAll('[data-fcfilter]').forEach(t => {
+        const n = t.querySelector('span');
+        if (n) n.textContent = liveCount(t.dataset.fcfilter);
+      });
+    }
   }
 
   const stage = container.querySelector('#fc-stage');
@@ -6337,6 +6384,35 @@ function renderFlashcards(state, hub) {
     try { sessionStorage.removeItem('fc.resumeId'); } catch (_) {}
   }
   let idx = 0;
+
+  const filterRow = container.querySelector('#fc-cat-filters');
+  // The chip row scrolls horizontally on a phone, so the active chip is often
+  // off-screen — on mount with a persisted filter you could not see which
+  // deck you were in. Keep it centred.
+  const centerChip = (tab, smooth) => {
+    if (!tab || !filterRow) return;
+    const target = tab.offsetLeft - (filterRow.clientWidth - tab.offsetWidth) / 2;
+    filterRow.scrollTo({ left: Math.max(0, target), behavior: smooth ? 'smooth' : 'auto' });
+  };
+  if (filterRow && catFilter !== 'all') {
+    centerChip(filterRow.querySelector(`[data-fcfilter="${catFilter}"]`), false);
+  }
+  if (filterRow) filterRow.addEventListener('click', (e) => {
+    const tab = e.target.closest('[data-fcfilter]');
+    if (!tab) return;
+    const next = tab.dataset.fcfilter;
+    if (next === catFilter) return;
+    catFilter = next;
+    try { sessionStorage.setItem('fc.catFilter', catFilter); } catch (_) {}
+    filterRow.querySelectorAll('[data-fcfilter]').forEach(t =>
+      t.classList.toggle('active', t.dataset.fcfilter === catFilter));
+    centerChip(tab, true);
+    // Rebuild the queue from the narrowed pool and start it from the top.
+    due = GAMI.dueCards(state, cardsIn(catFilter), 50, null);
+    idx = 0;
+    paint();
+    refreshStats();
+  });
   // Keyboard: Space/Enter flips, 1-4 rates
   const onKey = (e) => {
     if (idx >= due.length) return;
@@ -6364,12 +6440,23 @@ function renderFlashcards(state, hub) {
     if (prior && prior._sizeCard) window.removeEventListener('resize', prior._sizeCard);
     stage.innerHTML = '';
     if (idx >= due.length) {
+      const catLabel = catFilter === 'all'
+        ? '' : (CAT_SHORT[catFilter] || catFilter);
+      // Finishing a deck earns the celebration; switching to an already-empty
+      // filter does not — idx > 0 means cards were actually reviewed here.
+      const finished = idx > 0;
       stage.innerHTML = `<div class="card text-center py-12">
-        <div class="text-4xl mb-3">🎉</div>
-        <div class="font-display font-semibold text-xl">All caught up.</div>
-        <div class="text-slate-400 mt-2 text-sm">Come back tomorrow — your schedule is set.</div>
+        <div class="text-4xl mb-3">${finished ? '🎉' : '✓'}</div>
+        <div class="font-display font-semibold text-xl">${finished
+          ? 'All caught up.'
+          : `Nothing due in ${esc(catLabel || 'your deck')}.`}</div>
+        <div class="text-slate-400 mt-2 text-sm">${finished
+          ? 'Come back tomorrow — your schedule is set.'
+          : catFilter === 'all'
+            ? 'Come back tomorrow — your schedule is set.'
+            : 'Pick another category above, or come back tomorrow.'}</div>
       </div>`;
-      ANIM.confettiBurst('m');
+      if (finished) ANIM.confettiBurst('m');
       return;
     }
     const { card } = due[idx];
