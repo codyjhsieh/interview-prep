@@ -6392,6 +6392,47 @@ If length L has a duplicate, then so do all smaller lengths — monotonic proper
        items:['High-level architecture boxes','Deep-dive on a hard subproblem','Capacity estimate (QPS, storage, bandwidth)','Functional + non-functional requirements'],
        correct:[3,2,0,1],
        explain:'Requirements anchor the design. Capacity sizes the problem. Boxes give scaffolding. Deep-dive is where the interviewer evaluates your judgment.'}},
+    {id:'sd-bo', type:'concept', name:'Back-of-envelope — the numbers every senior knows cold', xp:12, time:10,
+     body:`Interviewers grade your estimation by whether you reach for known numbers or stall trying to derive them. Memorize this table. It's the senior-vs-mid filter.
+<br><br>
+<b>Latency numbers (Jeff Dean, normalized):</b>
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0">
+<thead><tr style="border-bottom:1px solid var(--hairline)"><th style="text-align:left;padding:6px">Operation</th><th style="text-align:left;padding:6px">Latency</th></tr></thead>
+<tbody>
+<tr><td style="padding:6px">L1 cache reference</td><td style="padding:6px">~1 ns</td></tr>
+<tr><td style="padding:6px">L2 cache reference</td><td style="padding:6px">~4 ns</td></tr>
+<tr><td style="padding:6px">Main memory reference (RAM)</td><td style="padding:6px">~100 ns</td></tr>
+<tr><td style="padding:6px">Compress 1 KB with Snappy</td><td style="padding:6px">~2 μs</td></tr>
+<tr><td style="padding:6px">Send 1 KB over 1 Gbps network</td><td style="padding:6px">~10 μs</td></tr>
+<tr><td style="padding:6px">SSD random read (4 KB)</td><td style="padding:6px">~100 μs</td></tr>
+<tr><td style="padding:6px">Read 1 MB sequentially from SSD</td><td style="padding:6px">~1 ms</td></tr>
+<tr><td style="padding:6px">Round-trip same datacenter</td><td style="padding:6px">~0.5 ms</td></tr>
+<tr><td style="padding:6px">Round-trip cross-country (US)</td><td style="padding:6px">~40 ms</td></tr>
+<tr><td style="padding:6px">Round-trip CA → Netherlands</td><td style="padding:6px">~150 ms</td></tr>
+<tr><td style="padding:6px">HDD seek</td><td style="padding:6px">~10 ms (avoid)</td></tr>
+</tbody></table>
+<b>Capacity rules of thumb:</b>
+<ul class="list-muted">
+  <li>1 KB ≈ a tweet / short message. 1 MB ≈ a photo. 1 GB ≈ a movie chunk / DB index.</li>
+  <li>1 server ≈ 10–50K QPS for stateless work. 1K–10K QPS for DB-bound. 100–1K QPS for ML inference.</li>
+  <li>1 disk ≈ 500K-1M IOPS (modern enterprise NVMe), 50-100K IOPS (consumer NVMe), 100 IOPS (HDD). Cloud-attached NVMe (gp3/io2/Local NVMe) sits at 16K-100K depending on tier — pricier than raw HW because of network virtualization. Cite the cloud-tier number in interviews; the raw-HW number is the upper bound.</li>
+  <li>1 Redis instance ≈ 100K ops/sec (single-thread).</li>
+  <li>1 day = 86,400 sec. 1 month ≈ 2.6 M sec. 1 year ≈ 31.5 M sec.</li>
+</ul>
+<b>Worked example: Instagram-scale photo upload.</b>
+<br>"500M DAU, average 2 photos/day, photo ≈ 2 MB."
+<ul class="list-muted">
+  <li><b>Writes:</b> 500M × 2 / 86,400 ≈ <b>12 K photos/sec</b>. With 10× headroom: 120 K/sec.</li>
+  <li><b>Storage/day:</b> 1 B photos × 2 MB = <b>2 PB/day</b>. Per year: ~700 PB. Triple for replicas → ~2 EB.</li>
+  <li><b>Bandwidth:</b> 12 K × 2 MB × 8 = <b>192 Gbps</b> ingress alone. 10× for reads (most photos viewed).</li>
+  <li><b>Conclusion:</b> single-region won't fit. Need sharded object storage (S3-style), CDN for reads, async resize pipeline, and you're absolutely not putting photos in Postgres.</li>
+</ul>
+<b>The senior move:</b> after the estimate, say "let me sanity-check this." If your number says one server handles all writes, you forgot a 10×. If your number says you need 100 datacenters, you forgot a 10×. The mental check IS the signal.`,
+     interactive:{ type:'mcq',
+       q:'A new service expects 50 M users, 10 reads/user/day, p99 < 100 ms. You estimate ~6 K reads/sec. With a 10× peak headroom, you need 60 K/sec capacity. If each read costs 5 ms of CPU on a server that handles 10 K req/sec, how many app servers do you need?',
+       options:['1','6','60','600'],
+       correct:1,
+       explain:'60 K req/sec ÷ 10 K req/sec per server = 6 servers. Plus N+1 for availability → 7. Estimation drills like this — fluently translating users → QPS → servers — are the back-of-envelope rubric.'}},
     {id:'sd-2', type:'concept', name:'URL shortener — designed in 10 minutes', xp:12, time:8,
      body:`The canonical first system-design prompt. Walk through it like this:
 <br><br>
@@ -6503,54 +6544,6 @@ Use application-layer rate limiting (Redis-backed GCRA) only for the things the 
          ['Distributed (Redis+Lua)','Atomic across servers; cluster-friendly'],
        ],
        explain:'Sliding-window counter in Redis with a Lua script gets you atomicity, approximate accuracy, and low cost — the production default.'}},
-    {id:'sd-4', type:'concept', name:'News feed — push vs pull vs hybrid', xp:12, time:10,
-     body:`"Design Twitter's feed" or "design a friends-activity feed" — these prompts test how you handle <b>fan-out</b> at very uneven scales (your average user has 200 followers; a celebrity has 100M).
-<br><br>
-<b>Push model (fan-out on write).</b> When user A posts, write a copy of the post ID into the <b>inbox</b> of every follower of A.
-<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">A posts → loop over A's 200 followers → INSERT into 200 inboxes
-Reader's feed = SELECT FROM inbox WHERE user_id = reader ORDER BY ts LIMIT 50</pre>
-<span class="icon-check"></span> Read is O(1) — just scan your inbox. Sub-10 ms feed loads.
-<br><span class="icon-x"></span> Celebrity write amplification: 1 post by an idol → 100M inbox inserts. Storage explosion (the same post stored 100M times).
-<br><br>
-<b>Pull model (fan-out on read).</b> Store posts once by author. At read time, look up "who do I follow," fetch their recent posts, merge.
-<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">A posts → INSERT into posts(author_id, post_id, ts)
-Reader's feed = SELECT FROM posts
-  WHERE author_id IN (followees of reader)
-  ORDER BY ts LIMIT 50</pre>
-<span class="icon-check"></span> Write is O(1). Storage is normal (one copy per post).
-<br><span class="icon-x"></span> Read is expensive — if you follow 5,000 accounts, that's a 5,000-author query. Heavy users pay every page load.
-<br><br>
-<b>Hybrid (the production answer).</b> Set a <b>celebrity threshold</b> (e.g., 1M followers). For authors below the threshold: push (fan-out on write). For authors above: pull (fan-out on read). Each reader's feed = merge(pushed inbox + pulled celebrity timelines).
-<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">feed(reader) =
-  recent_inbox(reader)                                       # push side
-  ∪ posts where author ∈ celebrities_followed(reader)        # pull side
-  → sort by ts → take top 50</pre>
-<b>Capacity math (Twitter-scale):</b>
-<ul class="list-muted">
-  <li>500M users, average 200 followers → 100B follow edges.</li>
-  <li>500M posts/day → 6 K posts/sec. With push at avg 200 followers: 1.2 M inbox writes/sec — fine for a sharded KV store.</li>
-  <li>Celebrities (top 0.1%): 500 K accounts × 10M followers avg → if we push, 5 T inbox writes/day. Untenable. Pull them.</li>
-  <li>Storage: pushed inbox at 500M readers × 500 recent IDs × 16 B = 4 TB hot. Affordable.</li>
-</ul>
-<b>Storage primitives:</b>
-<ul class="list-muted">
-  <li><b>Inbox</b> — Redis sorted set or Cassandra wide row, keyed by <code>user_id</code>, scored by timestamp, capped at ~500 IDs (older drops out).</li>
-  <li><b>Posts</b> — partitioned by <code>author_id</code> for celebrity-pull access pattern.</li>
-  <li><b>Edge store</b> (who follows whom) — graph DB or partitioned table; needed by both fan-out worker and pull-side query.</li>
-</ul>
-<b>Operational gotchas:</b>
-<ul class="list-muted">
-  <li><b>Backfill on follow.</b> When user X follows celebrity Y, you must inject Y's recent posts into X's view immediately. Pull side handles this naturally; push side needs a backfill job.</li>
-  <li><b>Unfollow / mute / block.</b> Inbox entries from a muted account must be hidden at read time, not deleted (the user could unmute later).</li>
-  <li><b>Ranking layer.</b> Modern feeds aren't chronological — ML re-ranks the merged candidate set. Add a ranking service after the merge step.</li>
-  <li><b>Fan-out workers.</b> Push fan-out happens asynchronously (Kafka → workers). The author's POST returns immediately; followers see the post within seconds.</li>
-</ul>
-<b>Senior signal:</b> name push vs pull, name the celebrity threshold as the knob, name backfill-on-follow as the hidden complication, name the ranking layer as the modern post-merge step.`,
-     interactive:{ type:'mcq',
-       q:'A user with 100M followers posts. Pure push fan-out, what happens?',
-       options:["Fast reads for all 100M followers because the inbox is already materialized when they load","Write amplification: 100M inbox inserts for a single post, saturating the write path","Followers miss the post because push fan-out drops writes beyond a per-author quota","Storage is unaffected because inbox entries are pointers to the original post row"],
-       correct:1,
-       explain:'Write amplification is the celebrity problem. Hybrid: push for normal authors, pull for celebrities above a follower threshold. Reader\'s feed = merge(pushed inbox + pulled celebrity timelines), then re-rank.'}},
     {id:'sd-5', type:'concept', name:'Caching pitfalls — the six that come up in interviews', xp:12, time:9,
      body:`Senior engineers don\'t just say "add a cache." They name the failure modes they\'re mitigating. Six pitfalls + their textbook fixes.
 <br><br>
@@ -6574,75 +6567,6 @@ Reader's feed = SELECT FROM posts
          { text:'TTL alone is a complete invalidation strategy.', answer:false, why:'TTL handles staleness but lets clients read stale data for the TTL window. Pair with event-driven invalidation for write-heavy paths.' },
          { text:'Hot keys can be sharded with consistent hashing + replicas.', answer:true, why:'Hot keys are the celebrity problem of caches. Use replicas with read-load balancing or client-side double-keying.' },
        ]}},
-    {id:'sd-7', type:'concept', name:'Chat / messaging at scale', xp:12, time:9,
-     body:`"Design a chat system" tests three things at once: real-time delivery, message ordering, and presence. Walk through them in order.
-<br><br>
-<b>Real-time delivery.</b> Long-polling is dead; use <b>WebSockets</b> (or Server-Sent Events for one-way). Each client opens a persistent connection to a "gateway" server. Gateways are stateless about content but hold the socket; they look up "where is user X connected" via a Redis presence index and route messages there.
-<br><br>
-<b>Message storage.</b> Two access patterns: (a) recent messages for a conversation, (b) full history. Optimize for (a): partition messages table by conversation_id, order by timestamp, index lets you LIMIT 50 efficiently. For (b), archive older messages to cold storage.
-<br><br>
-<b>Ordering guarantee.</b> Within one conversation, you typically want monotonic message order. The classic gotcha: two clients send simultaneously; the gateway timestamps differ by milliseconds; clients render in different orders. Fix: use a per-conversation sequence number generated server-side, or a Lamport-style logical clock. Always order by sequence, not wall-clock.
-<br><br>
-<b>Delivery semantics.</b> What if a user is offline? Buffer messages, deliver when they reconnect. What if they read message 50 and you push 51 while they\'re offline? Deliver 51 + an "unread count." Track per-user "last-read sequence" so you can compute unreads.
-<br><br>
-<b>Presence (online status).</b> Each WebSocket connection writes a heartbeat to Redis with a TTL of 30 seconds. To know if user X is online, GET their presence key. Scales fine to millions of users.
-<br><br>
-<b>Scale gotchas:</b>
-<ul class="list-muted">
-  <li>Group chats: 10k people in a group, one message → 10k pushes. Use fan-out workers; don\'t do it inline on the sender\'s request.</li>
-  <li>WebSocket connections scale by number of users, not by traffic. Plan capacity per-gateway-server (typically 10k-50k connections each).</li>
-  <li>Push notifications (when app is closed) go through APNs / FCM separately — add a worker that triggers on message-for-offline-user.</li>
-</ul>
-<b>Capacity numbers to anchor on:</b> assume 1B DAU sending ~50 messages/day → ~600K msgs/sec average, peak ~3M msgs/sec. Storage: 50B msgs/day × 200 bytes ≈ 10 TB/day; with replication 30 TB/day; archive after 90 days. WebSocket fanout per gateway: ~50K connections × 1 message/sec each = 50K msg/sec/gateway. Need ~20K gateway nodes globally for a WhatsApp-scale deployment.
-<br><br>
-<b>2026 transport options beyond WebSocket:</b>
-<ul class="list-muted">
-<li><b>HTTP/3 + WebTransport</b> — QUIC-based, head-of-line-blocking immune, better than WebSocket on flaky mobile networks. Supported by Chromium and modern servers (Cloudflare, NodeJS via @fails-components/webtransport). The 2026 successor for new builds.</li>
-<li><b>SSE (Server-Sent Events)</b> — one-way server-to-client. Simpler than WebSocket if clients only RECEIVE (notifications, live feeds). Auto-reconnects.</li>
-</ul>
-<b>Multi-device sync — when CRDTs become the right shape:</b> if users edit the same conversation/draft from phone + laptop simultaneously while one is offline, you have a multi-leader concurrent-edit problem. Server-assigned sequence numbers don\'t solve it (you can\'t assign a sequence when offline). The 2026 pattern: CRDT-based local-first storage (Yjs, Automerge) syncs to server when online. Used by Linear, Notion, modern chat apps with offline-first design.
-<br><br>
-<b>E2E encryption (MLS):</b> as of 2026 the modern standard for group-chat E2E is <b>MLS (Messaging Layer Security, RFC 9420)</b>, which Signal, WhatsApp, and Discord have either adopted or are migrating to. The previous Double Ratchet (Signal protocol) doesn\'t scale to large groups; MLS does (O(log N) per add/remove). If the interviewer cares about E2E, MLS is the senior answer in 2026, not "Signal protocol."`,
-     interactive:{ type:'mcq',
-       q:'In a chat system, two users send a message in the same conversation within 5ms of each other. They each see their own message first locally. What\'s the correct way to ensure all OTHER clients see them in the same order?',
-       options:["Use wall-clock timestamps sent from each client, breaking ties by client ID for determinism","Use the server's wall-clock arrival time, since server clocks are more consistent than client clocks","Assign a server-side per-conversation sequence number and order messages by that sequence","Random tiebreak using a shared seed derived from the conversation ID and the message hash"],
-       correct:2,
-       explain:'A per-conversation server-assigned sequence is the canonical ordering primitive. Server wall-clock has the same skew problem at scale; sequence numbers are monotone and deterministic.'}},
-    {id:'sd-8', type:'concept', name:'Consistent hashing — how to shard without re-shuffling', xp:12, time:9,
-     body:`You have 10 cache servers and 10M cached items. You shard by <code>hash(key) % 10</code>. Then you add an 11th server. Now <code>hash(key) % 11</code> maps almost every key to a different server. 91% of your cache becomes useless instantly. This is the problem <b>consistent hashing</b> solves.
-<br><br>
-<b>The mental model:</b> imagine a ring of values 0 to 2³² - 1. Each server is hashed to a position on the ring. Each key is hashed to a position on the ring. A key\'s server is the next server clockwise from its position.
-<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">    ┌─ S1 ──┐
-    │       │
-key A    key B
-    │       │
-    └─ S2 ──┘</pre>
-When you add server S3, only the keys whose "next server clockwise" was S2 but now is S3 need to move. Roughly 1/N of keys remap, instead of N-1/N.
-<br><br>
-<b>Virtual nodes.</b> A single position per server creates load imbalance (one server gets a huge arc). Fix: each physical server is placed at K positions on the ring (typical K=100-200). Now load is evenly distributed.
-<br><br>
-<b>Implementations:</b> Java\'s ConsistentHash, Redis Cluster\'s "hash slots" (a discrete variant — 16384 slots assigned to nodes), Cassandra\'s "token ring."
-<br><br>
-<b>Where it shows up in interviews:</b>
-<ul class="list-muted">
-  <li>"How do you shard a cache?" → consistent hashing.</li>
-  <li>"How do you scale Redis?" → cluster mode = consistent hashing.</li>
-  <li>"What happens when a node fails?" → its arc redistributes among neighbors.</li>
-  <li>"What about hot keys?" → consistent hashing alone doesn\'t fix hot keys — that needs replicas + load balancing.</li>
-</ul>
-<b>Two modern alternatives every senior should name:</b>
-<ul class="list-muted">
-<li><b>Rendezvous hashing (HRW — Highest Random Weight)</b>: for each key, compute hash(key, node) for every node; pick the node with the highest hash. No ring, no virtual nodes, no rebalancing data structure — just O(N) hashes per lookup. Adding/removing a node only affects keys whose new "highest" landed on the changed node. Used in CDN routing (Akamai) and modern shard routers because it\'s simpler than rings with comparable balance.</li>
-<li><b>Jump consistent hash (Lamping/Veach, Google 2014)</b>: a one-line function that maps a key to a bucket in O(log N) time with no state at all — perfect balance, perfect monotonicity (when you add a bucket, only keys that move go to the new bucket). Limitation: only works for "bucket numbered 0..N-1" — you can\'t arbitrarily remove a middle node. Used by ScyllaDB, some shard routers, anywhere the node count is monotonically growing.</li>
-</ul>
-<b>Which to pick:</b> classic ring + vnodes for cache clusters with manual rebalancing; HRW for stateless routing where simplicity wins; jump hash for systems where buckets are append-only (data shards in a growing fleet).
-<br><br>
-<b>The senior signal:</b> draw the ring on the whiteboard, mention virtual nodes, name rendezvous and jump as alternatives, identify which fits the problem. Most candidates know "consistent hashing" — naming the two modern variants is the senior signal.`,
-     interactive:{ type:'mcq',
-       q:'Your distributed cache has 4 nodes using consistent hashing. You add a 5th node. Approximately what fraction of cached keys move to the new node?',
-       options:["About 50% of keys remap, because adding a node roughly halves each existing node's range","About 80% of keys remap, because the new node's virtual nodes fragment existing key ranges","About 20% of keys move, matching the new node's proportional share of the ring (1/5)","About 1% of keys move, since only keys adjacent to the new node's ring position shift"],
-       correct:2,
-       explain:'Each new node takes roughly its proportional share, about 1/N of keys. With virtual nodes, this is evenly distributed across the existing servers. That\'s the whole point of consistent hashing.'}},
     {id:'sd-9', type:'concept', name:'CAP & PACELC — what you can\'t have all of', xp:12, time:9,
      body:`<b>CAP theorem</b> (Brewer, 2000): in the presence of a network partition, a distributed system must choose between Consistency and Availability. You can\'t have both.
 <br><br>
@@ -6680,96 +6604,6 @@ Real systems also have to choose between low latency and strong consistency even
          { text:'Spanner achieves strong consistency globally with low latency, breaking the PACELC tradeoff.',
            answer:false, why:'Spanner pays for strong consistency in latency (TrueTime + commit-wait). It\'s PC/EC. Globally consistent transactions take ~10ms+ commit latency.'},
        ]}},
-    {id:'sd-bo', type:'concept', name:'Back-of-envelope — the numbers every senior knows cold', xp:12, time:10,
-     body:`Interviewers grade your estimation by whether you reach for known numbers or stall trying to derive them. Memorize this table. It's the senior-vs-mid filter.
-<br><br>
-<b>Latency numbers (Jeff Dean, normalized):</b>
-<table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0">
-<thead><tr style="border-bottom:1px solid var(--hairline)"><th style="text-align:left;padding:6px">Operation</th><th style="text-align:left;padding:6px">Latency</th></tr></thead>
-<tbody>
-<tr><td style="padding:6px">L1 cache reference</td><td style="padding:6px">~1 ns</td></tr>
-<tr><td style="padding:6px">L2 cache reference</td><td style="padding:6px">~4 ns</td></tr>
-<tr><td style="padding:6px">Main memory reference (RAM)</td><td style="padding:6px">~100 ns</td></tr>
-<tr><td style="padding:6px">Compress 1 KB with Snappy</td><td style="padding:6px">~2 μs</td></tr>
-<tr><td style="padding:6px">Send 1 KB over 1 Gbps network</td><td style="padding:6px">~10 μs</td></tr>
-<tr><td style="padding:6px">SSD random read (4 KB)</td><td style="padding:6px">~100 μs</td></tr>
-<tr><td style="padding:6px">Read 1 MB sequentially from SSD</td><td style="padding:6px">~1 ms</td></tr>
-<tr><td style="padding:6px">Round-trip same datacenter</td><td style="padding:6px">~0.5 ms</td></tr>
-<tr><td style="padding:6px">Round-trip cross-country (US)</td><td style="padding:6px">~40 ms</td></tr>
-<tr><td style="padding:6px">Round-trip CA → Netherlands</td><td style="padding:6px">~150 ms</td></tr>
-<tr><td style="padding:6px">HDD seek</td><td style="padding:6px">~10 ms (avoid)</td></tr>
-</tbody></table>
-<b>Capacity rules of thumb:</b>
-<ul class="list-muted">
-  <li>1 KB ≈ a tweet / short message. 1 MB ≈ a photo. 1 GB ≈ a movie chunk / DB index.</li>
-  <li>1 server ≈ 10–50K QPS for stateless work. 1K–10K QPS for DB-bound. 100–1K QPS for ML inference.</li>
-  <li>1 disk ≈ 500K-1M IOPS (modern enterprise NVMe), 50-100K IOPS (consumer NVMe), 100 IOPS (HDD). Cloud-attached NVMe (gp3/io2/Local NVMe) sits at 16K-100K depending on tier — pricier than raw HW because of network virtualization. Cite the cloud-tier number in interviews; the raw-HW number is the upper bound.</li>
-  <li>1 Redis instance ≈ 100K ops/sec (single-thread).</li>
-  <li>1 day = 86,400 sec. 1 month ≈ 2.6 M sec. 1 year ≈ 31.5 M sec.</li>
-</ul>
-<b>Worked example: Instagram-scale photo upload.</b>
-<br>"500M DAU, average 2 photos/day, photo ≈ 2 MB."
-<ul class="list-muted">
-  <li><b>Writes:</b> 500M × 2 / 86,400 ≈ <b>12 K photos/sec</b>. With 10× headroom: 120 K/sec.</li>
-  <li><b>Storage/day:</b> 1 B photos × 2 MB = <b>2 PB/day</b>. Per year: ~700 PB. Triple for replicas → ~2 EB.</li>
-  <li><b>Bandwidth:</b> 12 K × 2 MB × 8 = <b>192 Gbps</b> ingress alone. 10× for reads (most photos viewed).</li>
-  <li><b>Conclusion:</b> single-region won't fit. Need sharded object storage (S3-style), CDN for reads, async resize pipeline, and you're absolutely not putting photos in Postgres.</li>
-</ul>
-<b>The senior move:</b> after the estimate, say "let me sanity-check this." If your number says one server handles all writes, you forgot a 10×. If your number says you need 100 datacenters, you forgot a 10×. The mental check IS the signal.`,
-     interactive:{ type:'mcq',
-       q:'A new service expects 50 M users, 10 reads/user/day, p99 < 100 ms. You estimate ~6 K reads/sec. With a 10× peak headroom, you need 60 K/sec capacity. If each read costs 5 ms of CPU on a server that handles 10 K req/sec, how many app servers do you need?',
-       options:['1','6','60','600'],
-       correct:1,
-       explain:'60 K req/sec ÷ 10 K req/sec per server = 6 servers. Plus N+1 for availability → 7. Estimation drills like this — fluently translating users → QPS → servers — are the back-of-envelope rubric.'}},
-    {id:'sd-db', type:'concept', name:'DB internals — B-tree vs LSM, when each wins', xp:12, time:11,
-     body:`Picking a database is mostly picking a storage engine. Two dominant families: <b>B-tree</b> (Postgres, MySQL/InnoDB, SQL Server) and <b>LSM tree</b> (RocksDB, Cassandra, ScyllaDB, HBase, Bigtable). They make opposite tradeoffs.
-<br><br>
-<b>B-tree.</b> A sorted on-disk tree of fixed-size pages. Reads = log(N) page fetches. Writes = locate page → modify in place → fsync. <b>In-place update.</b>
-<br><span class="icon-check"></span> Excellent point reads and range scans. Predictable latency. SQL planners love it.
-<br><span class="icon-x"></span> Random writes are expensive — each write may rewrite a 4 KB page even to flip 8 bytes. <b>Write amplification ≈ 4–10×</b>.
-<br><br>
-<b>LSM (Log-Structured Merge).</b> Writes go to an in-memory <code>memtable</code> + WAL (append-only). When memtable fills, flush to disk as an immutable sorted file (SSTable). Background <b>compaction</b> merges SSTables to keep read paths short.
-<br><span class="icon-check"></span> Insanely fast writes — sequential append. <b>Write amplification ≈ 1× at write time</b>, paid later in compaction.
-<br><span class="icon-x"></span> Reads may have to check multiple SSTables (read amplification). Compaction steals CPU and IO. Worst-case tail latency on read.
-<br><br>
-<b>The asymmetry in one picture:</b>
-<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">B-tree:  WRITE → seek → modify page → fsync (random IO, 4-10× amp)
-         READ  → traverse log(N) pages (fast, predictable)
-
-LSM:     WRITE → append memtable + WAL (sequential, fast)
-                 [later, async: flush + compaction]
-         READ  → check memtable, then N SSTables in order
-                 (slower, bloom filters + level-pinning help)</pre>
-<b>When to pick which:</b>
-<ul class="list-muted">
-  <li><b>Read-heavy OLTP, joins, transactions, complex queries</b> → B-tree (Postgres). Industry default unless you've measured a reason to leave.</li>
-  <li><b>Write-heavy time-series, logs, metrics, IoT, append-mostly</b> → LSM (Cassandra, ClickHouse for OLAP, InfluxDB).</li>
-  <li><b>Mixed but huge volume + horizontally sharded</b> → LSM (DynamoDB, Bigtable). Write amp matters at petabyte scale.</li>
-  <li><b>Embedded KV store with millions of writes/sec on one box</b> → RocksDB. Used inside Kafka Streams, CockroachDB, TiKV.</li>
-</ul>
-<b>What an interviewer is listening for:</b> name write-amp and read-amp by name. Explain WHY LSM compaction exists (without it, reads degrade). Pick the storage engine BEFORE picking the DB. "We need 100 K writes/sec of telemetry — that's LSM territory, so I'd choose Cassandra or ScyllaDB, not Postgres."
-<br><br>
-<div class="callout callout-senior"><div class="callout-label">Mature signal</div>recognize that the choice cascades. LSM → secondary indexes are expensive (write to multiple SSTable sets). Joins are expensive (no co-located rows). You either design around it (denormalize, materialized views) or pick B-tree.</div>
-<br>
-<b>2026 — serverless / disaggregated DBs change the calculus:</b>
-<ul class="list-muted">
-<li><b>Aurora DSQL</b> (AWS, GA 2025) — serverless distributed Postgres with optimistic concurrency. Storage layer is separated from compute; compute auto-scales to zero. The "Postgres + cloud-scale" answer for new builds.</li>
-<li><b>Neon</b> — serverless Postgres with branchable storage. Each git branch can have its own DB branch in seconds. Engineering-team-favorite for the dev-loop ergonomics.</li>
-<li><b>PlanetScale Postgres</b> — Vitess-style sharded Postgres-compatible. Online schema changes without locks.</li>
-<li><b>Databricks Lakebase</b> — Postgres with native Delta Lake integration; transactional + analytical in one engine.</li>
-<li><b>TigerBeetle</b> — purpose-built for double-entry accounting with insane throughput (1M tx/s); a counterexample to "general-purpose DB always wins."</li>
-</ul>
-<b>"Postgres as everything" is the 2026 default — until measurement shows otherwise:</b> Postgres now has solid pgvector (vector search), Listen/Notify (pub-sub), SKIP LOCKED (queue), partial indexes (sparse data), JSONB (semi-structured), and TimescaleDB extension (time-series). Many systems that needed 4 specialized stores in 2020 can be one Postgres in 2026. The senior framing: <i>"I\'d default to Postgres + targeted extensions. I\'d add a specialized store (Cassandra for write-heavy time-series, ClickHouse for OLAP, vector DB for billion-vector retrieval) only when measurement shows Postgres is the bottleneck."</i></div>`,
-     interactive:{ type:'match',
-       prompt:'Match each workload to the storage engine you would default to:',
-       pairs:[
-         ['OLTP user/orders tables with joins + transactions','B-tree (Postgres / MySQL)'],
-         ['Time-series metrics at 1M writes/sec','LSM (Cassandra / ClickHouse)'],
-         ['Embedded KV inside a stream processor','LSM (RocksDB)'],
-         ['Reporting / analytics with rare writes, heavy scans','Columnar OLAP (ClickHouse / BigQuery)'],
-         ['Single-row PK lookups at petabyte scale, AP semantics','LSM KV (DynamoDB / Bigtable)'],
-       ],
-       explain:'B-tree wins where reads are random and transactions matter. LSM wins where writes dominate. Columnar wins where scans dominate. Choose the engine, then the product.'}},
     {id:'sd-raft', type:'concept', name:'Replication & Raft — consensus in one page', xp:12, time:11,
      body:`Once your data lives on more than one box, you need to answer: <b>which copy is the truth?</b> Three topologies, escalating complexity.
 <br><br>
@@ -6822,111 +6656,213 @@ Used in Yjs, Automerge, Riak, Figma (custom CRDTs for multiplayer). The "CRDTs v
          { text:'Raft guarantees a committed log entry will never be lost, as long as a majority survives.',
            answer:true, why:'The election restriction (only candidates with up-to-date logs can win) is exactly the safety property guaranteeing committed entries persist across leader changes.'},
        ]}},
-    {id:'sd-reliable', type:'concept', name:'Reliability patterns — circuit breaker, bulkhead, retry budget', xp:12, time:11,
-     body:`Senior engineers don't just describe what HAPPENS — they describe what happens <b>when it fails</b>. Four patterns interviewers expect you to name when one of your dependencies is slow, broken, or rate-limiting.
+    {id:'sd-db', type:'concept', name:'DB internals — B-tree vs LSM, when each wins', xp:12, time:11,
+     body:`Picking a database is mostly picking a storage engine. Two dominant families: <b>B-tree</b> (Postgres, MySQL/InnoDB, SQL Server) and <b>LSM tree</b> (RocksDB, Cassandra, ScyllaDB, HBase, Bigtable). They make opposite tradeoffs.
 <br><br>
-<b>1. Timeout cascade.</b> Every call has a timeout. The caller's timeout should be SHORTER than its parent's, or the system stalls on already-doomed calls.
-<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">Client (60s) → API (30s) → Service (10s) → DB (3s)
-   ↑ each parent has more time than the child, plus buffer for retry</pre>
-<b>2. Circuit breaker.</b> Wraps a flaky dependency. Tracks recent error rate. Three states:
+<b>B-tree.</b> A sorted on-disk tree of fixed-size pages. Reads = log(N) page fetches. Writes = locate page → modify in place → fsync. <b>In-place update.</b>
+<br><span class="icon-check"></span> Excellent point reads and range scans. Predictable latency. SQL planners love it.
+<br><span class="icon-x"></span> Random writes are expensive — each write may rewrite a 4 KB page even to flip 8 bytes. <b>Write amplification ≈ 4–10×</b>.
+<br><br>
+<b>LSM (Log-Structured Merge).</b> Writes go to an in-memory <code>memtable</code> + WAL (append-only). When memtable fills, flush to disk as an immutable sorted file (SSTable). Background <b>compaction</b> merges SSTables to keep read paths short.
+<br><span class="icon-check"></span> Insanely fast writes — sequential append. <b>Write amplification ≈ 1× at write time</b>, paid later in compaction.
+<br><span class="icon-x"></span> Reads may have to check multiple SSTables (read amplification). Compaction steals CPU and IO. Worst-case tail latency on read.
+<br><br>
+<b>The asymmetry in one picture:</b>
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">B-tree:  WRITE → seek → modify page → fsync (random IO, 4-10× amp)
+         READ  → traverse log(N) pages (fast, predictable)
+
+LSM:     WRITE → append memtable + WAL (sequential, fast)
+                 [later, async: flush + compaction]
+         READ  → check memtable, then N SSTables in order
+                 (slower, bloom filters + level-pinning help)</pre>
+<b>When to pick which:</b>
 <ul class="list-muted">
-  <li><b>Closed</b> — requests pass through normally. Errors counted.</li>
-  <li><b>Open</b> — error rate exceeds threshold → fail fast. No requests reach the dependency. (Saves it from making things worse.)</li>
-  <li><b>Half-open</b> — after a cooldown (e.g., 30 s), allow a few probe requests. If they succeed, close the breaker. If they fail, reopen.</li>
+  <li><b>Read-heavy OLTP, joins, transactions, complex queries</b> → B-tree (Postgres). Industry default unless you've measured a reason to leave.</li>
+  <li><b>Write-heavy time-series, logs, metrics, IoT, append-mostly</b> → LSM (Cassandra, ClickHouse for OLAP, InfluxDB).</li>
+  <li><b>Mixed but huge volume + horizontally sharded</b> → LSM (DynamoDB, Bigtable). Write amp matters at petabyte scale.</li>
+  <li><b>Embedded KV store with millions of writes/sec on one box</b> → RocksDB. Used inside Kafka Streams, CockroachDB, TiKV.</li>
 </ul>
-<pre><code>class CircuitBreaker:
-    def __init__(self, fail_threshold=5, cooldown_s=30):
-        self.fails = 0; self.opened_at = None
-        self.fail_threshold = fail_threshold; self.cooldown_s = cooldown_s
-    def call(self, fn, *args):
-        if self.opened_at and time.time() - self.opened_at < self.cooldown_s:
-            raise CircuitOpenError()                  # fail fast
-        try:
-            r = fn(*args); self.fails = 0; self.opened_at = None
-            return r
-        except Exception:
-            self.fails += 1
-            if self.fails >= self.fail_threshold: self.opened_at = time.time()
-            raise</code></pre>
-<b>3. Bulkhead.</b> Isolate resource pools so one slow dependency doesn't drain ALL your threads/connections. If 50% of your DB pool is stuck on slow billing queries, your auth queries also stall. Fix: separate pools per dependency.
-<br>Analogy: a ship's bulkheads. One compartment floods, the ship floats.
+<b>What an interviewer is listening for:</b> name write-amp and read-amp by name. Explain WHY LSM compaction exists (without it, reads degrade). Pick the storage engine BEFORE picking the DB. "We need 100 K writes/sec of telemetry — that's LSM territory, so I'd choose Cassandra or ScyllaDB, not Postgres."
 <br><br>
-<b>4. Retry budget + exponential backoff with jitter.</b> Retries make things worse if a downstream is overloaded — you 10× its load right when it's struggling. Two rules:
+<div class="callout callout-senior"><div class="callout-label">Mature signal</div>recognize that the choice cascades. LSM → secondary indexes are expensive (write to multiple SSTable sets). Joins are expensive (no co-located rows). You either design around it (denormalize, materialized views) or pick B-tree.</div>
+<br>
+<b>2026 — serverless / disaggregated DBs change the calculus:</b>
 <ul class="list-muted">
-  <li><b>Bound retries</b> per call (3 max) AND per client per minute (e.g., "no more than 10% retry rate"). Stops retry storms.</li>
-  <li><b>Backoff with jitter.</b> Don't retry at exactly t=1s, 2s, 4s — every client does that and creates a synchronized stampede. Use <code>sleep(base × 2^attempt × random(0.5, 1.5))</code>.</li>
+<li><b>Aurora DSQL</b> (AWS, GA 2025) — serverless distributed Postgres with optimistic concurrency. Storage layer is separated from compute; compute auto-scales to zero. The "Postgres + cloud-scale" answer for new builds.</li>
+<li><b>Neon</b> — serverless Postgres with branchable storage. Each git branch can have its own DB branch in seconds. Engineering-team-favorite for the dev-loop ergonomics.</li>
+<li><b>PlanetScale Postgres</b> — Vitess-style sharded Postgres-compatible. Online schema changes without locks.</li>
+<li><b>Databricks Lakebase</b> — Postgres with native Delta Lake integration; transactional + analytical in one engine.</li>
+<li><b>TigerBeetle</b> — purpose-built for double-entry accounting with insane throughput (1M tx/s); a counterexample to "general-purpose DB always wins."</li>
 </ul>
-<b>How they combine.</b> A real call chain typically uses ALL FOUR: timeout (so you don't wait forever) → retry with backoff (handle transient failures) → circuit breaker (stop trying when broken) → bulkhead (don't let this dependency take everyone down).
+<b>"Postgres as everything" is the 2026 default — until measurement shows otherwise:</b> Postgres now has solid pgvector (vector search), Listen/Notify (pub-sub), SKIP LOCKED (queue), partial indexes (sparse data), JSONB (semi-structured), and TimescaleDB extension (time-series). Many systems that needed 4 specialized stores in 2020 can be one Postgres in 2026. The senior framing: <i>"I\'d default to Postgres + targeted extensions. I\'d add a specialized store (Cassandra for write-heavy time-series, ClickHouse for OLAP, vector DB for billion-vector retrieval) only when measurement shows Postgres is the bottleneck."</i></div>`,
+     interactive:{ type:'match',
+       prompt:'Match each workload to the storage engine you would default to:',
+       pairs:[
+         ['OLTP user/orders tables with joins + transactions','B-tree (Postgres / MySQL)'],
+         ['Time-series metrics at 1M writes/sec','LSM (Cassandra / ClickHouse)'],
+         ['Embedded KV inside a stream processor','LSM (RocksDB)'],
+         ['Reporting / analytics with rare writes, heavy scans','Columnar OLAP (ClickHouse / BigQuery)'],
+         ['Single-row PK lookups at petabyte scale, AP semantics','LSM KV (DynamoDB / Bigtable)'],
+       ],
+       explain:'B-tree wins where reads are random and transactions matter. LSM wins where writes dominate. Columnar wins where scans dominate. Choose the engine, then the product.'}},
+    {id:'sd-8', type:'concept', name:'Consistent hashing — how to shard without re-shuffling', xp:12, time:9,
+     body:`You have 10 cache servers and 10M cached items. You shard by <code>hash(key) % 10</code>. Then you add an 11th server. Now <code>hash(key) % 11</code> maps almost every key to a different server. 91% of your cache becomes useless instantly. This is the problem <b>consistent hashing</b> solves.
 <br><br>
-<b>The interview signal.</b> When the interviewer says "what if the DB is slow?", a junior says "we'd add retries." A senior says: "Each call is wrapped in a 3-second timeout. We retry 3× with exponential jitter, with a per-client retry budget of 10%. The connection pool is bulkheaded by query class so slow analytics don't starve OLTP. A circuit breaker opens after 5 errors and probes again after 30 seconds." That's the whole pattern landscape in one breath.
+<b>The mental model:</b> imagine a ring of values 0 to 2³² - 1. Each server is hashed to a position on the ring. Each key is hashed to a position on the ring. A key\'s server is the next server clockwise from its position.
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">    ┌─ S1 ──┐
+    │       │
+key A    key B
+    │       │
+    └─ S2 ──┘</pre>
+When you add server S3, only the keys whose "next server clockwise" was S2 but now is S3 need to move. Roughly 1/N of keys remap, instead of N-1/N.
 <br><br>
-<b>Where these patterns live in 2026 — name the tools, not just the concepts:</b>
+<b>Virtual nodes.</b> A single position per server creates load imbalance (one server gets a huge arc). Fix: each physical server is placed at K positions on the ring (typical K=100-200). Now load is evenly distributed.
+<br><br>
+<b>Implementations:</b> Java\'s ConsistentHash, Redis Cluster\'s "hash slots" (a discrete variant — 16384 slots assigned to nodes), Cassandra\'s "token ring."
+<br><br>
+<b>Where it shows up in interviews:</b>
 <ul class="list-muted">
-<li><b>Service mesh (Istio / Envoy / Linkerd)</b> implements timeouts, retries, circuit breakers as DestinationRule / VirtualService config — no app-level code. The 2026 default for new microservice architectures; the "Hystrix" answer is now historical. Istio also has an "ambient mesh" mode (GA 1.24, 2024) that drops the per-pod sidecar in favor of ztunnel + per-node proxies — lower overhead, easier ops.</li>
-<li><b>Application-level libraries</b>: <code>resilience4j</code> (Java), <code>polly</code> (.NET), <code>tenacity</code> (Python), <code>p-retry</code> (Node). Use these for in-process patterns the mesh can\'t see (DB query retries, in-app circuit breaks).</li>
-<li><b>Observability:</b> <b>OpenTelemetry</b> is the cross-vendor standard for traces + metrics + logs. Mesh and app both emit OTel; you correlate request-traces across the network boundary. The 2026 default observability stack: OTel collector → Tempo/Jaeger (traces) + Mimir/Prometheus (metrics) + Loki (logs), often as the Grafana LGTM stack. Datadog / Honeycomb / New Relic are still common but OTel makes vendor swaps cheap.</li>
+  <li>"How do you shard a cache?" → consistent hashing.</li>
+  <li>"How do you scale Redis?" → cluster mode = consistent hashing.</li>
+  <li>"What happens when a node fails?" → its arc redistributes among neighbors.</li>
+  <li>"What about hot keys?" → consistent hashing alone doesn\'t fix hot keys — that needs replicas + load balancing.</li>
 </ul>
-<b>The senior framing:</b> "I\'d let the service mesh handle timeout/retry/circuit-break for inter-service calls and reserve app-level libraries for in-process needs. All instrumentation via OpenTelemetry so I can swap vendors. Don\'t roll your own circuit breaker in 2026."`,
-     interactive:{ type:'sort',
-       prompt:'Order the reliability patterns from "outermost shield" to "innermost":',
-       items:['Timeout (per call)','Circuit breaker (per dependency)','Retry with backoff (per attempt)','Bulkhead (per resource pool)'],
-       correct:[3,1,0,2],
-       explain:'Bulkhead is outermost — it isolates the resource pool. Circuit breaker decides whether to even try. Timeout bounds the attempt. Retry handles the failed attempt. They nest: pool → breaker → timeout → retry.'}},
-    {id:'sd-kafka', type:'concept', name:'Distributed log — Kafka partitioning, replication, exactly-once', xp:12, time:12,
-     body:`"Use Kafka" is a complete non-answer in a senior interview. What interviewers want: which Kafka knobs you'd turn and why.
-<br><br>
-<b>Partitions.</b> A topic is split into N partitions. Each partition is an append-only log on one broker (with replicas). Throughput scales with partitions; ordering is preserved <b>within a partition only</b>, not across the topic.
-<br><br>
-<b>Partition key.</b> Producers hash a key to pick a partition. <code>hash(user_id) % N</code> sends all events for one user to the same partition → ordered per user. Pick wrong key and you create hot partitions: <code>hash("country") % N</code> sends most traffic to "US."
-<br><br>
-<b>Replication factor (RF).</b> Each partition is replicated to RF brokers. RF=3 is standard. One replica is the <b>leader</b> (handles reads + writes); the rest are <b>followers</b> (replicate). <b>In-Sync Replicas (ISR)</b> = followers caught up within a window.
-<br><br>
-<b>Durability vs latency knobs.</b>
+<b>Two modern alternatives every senior should name:</b>
 <ul class="list-muted">
-  <li><code>acks=0</code>: producer doesn't wait. Fastest, can lose data.</li>
-  <li><code>acks=1</code>: leader acks. Loses data if leader crashes before replicating.</li>
-  <li><code>acks=all</code> + <code>min.insync.replicas=2</code>: producer waits for at least 2 replicas to ACK. Survives 1 broker failure with no data loss. Standard for "we can't lose this."</li>
+<li><b>Rendezvous hashing (HRW — Highest Random Weight)</b>: for each key, compute hash(key, node) for every node; pick the node with the highest hash. No ring, no virtual nodes, no rebalancing data structure — just O(N) hashes per lookup. Adding/removing a node only affects keys whose new "highest" landed on the changed node. Used in CDN routing (Akamai) and modern shard routers because it\'s simpler than rings with comparable balance.</li>
+<li><b>Jump consistent hash (Lamping/Veach, Google 2014)</b>: a one-line function that maps a key to a bucket in O(log N) time with no state at all — perfect balance, perfect monotonicity (when you add a bucket, only keys that move go to the new bucket). Limitation: only works for "bucket numbered 0..N-1" — you can\'t arbitrarily remove a middle node. Used by ScyllaDB, some shard routers, anywhere the node count is monotonically growing.</li>
 </ul>
-<b>Consumers.</b> Consumers join a <b>consumer group</b>. Each partition is assigned to at most one consumer in the group → group-wide parallelism = min(consumers, partitions). Offsets track "last message consumed per partition per group" so on restart you resume from where you left off.
+<b>Which to pick:</b> classic ring + vnodes for cache clusters with manual rebalancing; HRW for stateless routing where simplicity wins; jump hash for systems where buckets are append-only (data shards in a growing fleet).
 <br><br>
-<b>Exactly-once semantics (EOS).</b> The trinity:
-<ol style="margin-left:1.2em">
-  <li><b>Idempotent producer</b> — Kafka deduplicates producer retries within a partition (<code>enable.idempotence=true</code>).</li>
-  <li><b>Transactions</b> — wrap multiple sends + offset commits in one atomic commit (<code>initTransactions()</code>, <code>commitTransaction()</code>).</li>
-  <li><b>Read-process-write consumers</b> — read offsets and output sends are in the SAME transaction, so a crash doesn't double-deliver downstream.</li>
-</ol>
-<b>When NOT to reach for Kafka.</b>
-<ul class="list-muted">
-  <li><b>Low volume, simple work queue</b> → SQS or RabbitMQ. Kafka's complexity earns nothing below ~10 K msgs/sec.</li>
-  <li><b>Request/response RPC</b> → use gRPC. Kafka is for streams, not RPC.</li>
-  <li><b>Strict ordering across millions of independent entities</b> → either pick a partition key that scales or use a different primitive.</li>
-</ul>
-<pre><code>// Idempotent + transactional producer (Java-ish)
-props.put("acks", "all");
-props.put("enable.idempotence", "true");
-props.put("transactional.id", "billing-tx-1");
-producer.initTransactions();
-try {
-    producer.beginTransaction();
-    producer.send(new ProducerRecord<>("charges", chargeId, charge));
-    producer.send(new ProducerRecord<>("audit",   chargeId, audit));
-    producer.commitTransaction();   // both messages atomic
-} catch (Exception e) {
-    producer.abortTransaction();
-}</code></pre>
-<b>Common interview prompt:</b> "Design a clickstream pipeline." Walk through partition key choice, replication factor, consumer group sizing, and exactly-once if downstream is non-idempotent.
-<br><br>
-<b>2026 — what every senior knows about Kafka NOW:</b>
-<ul class="list-muted">
-<li><b>KRaft has been the only mode since Kafka 4.0 (March 2025).</b> ZooKeeper was removed entirely. Metadata is stored in an internal Kafka topic, managed by a Raft quorum of "controller" brokers. If you read older interview prep, ignore the "ZooKeeper or KRaft" framing — it\'s KRaft now.</li>
-<li><b>S3-backed BYOC tier reshaped the market.</b> <b>WarpStream</b> (acq. by Confluent 2024), <b>Redpanda BYOC</b>, and <b>AutoMQ</b> all write the log directly to S3 instead of broker-local disk. Cost drops 5-10× (you pay S3 storage, not 3×-replicated EBS). Latency tradeoff: p50 ~500ms vs ~5ms for traditional Kafka. Pick BYOC when throughput is high but you don\'t need single-digit-ms latency (most analytics and event-streaming workloads).</li>
-<li><b>"Postgres as a queue" is increasingly the right call</b> for &lt; 1K msgs/sec workloads. <code>SELECT ... FOR UPDATE SKIP LOCKED</code> + a status column gives you durable, transactional, exactly-once delivery with zero new infra. Saying "I\'d start with Postgres and graduate to Kafka if needed" is a senior signal — the rookie reflex is "Kafka by default."</li>
-</ul>`,
+<b>The senior signal:</b> draw the ring on the whiteboard, mention virtual nodes, name rendezvous and jump as alternatives, identify which fits the problem. Most candidates know "consistent hashing" — naming the two modern variants is the senior signal.`,
      interactive:{ type:'mcq',
-       q:'You\'re ingesting 50 K events/sec into Kafka and need strict per-user ordering. You have 10 partitions, 1M users. Which partition-key strategy is correct?',
-       options:["No key so Kafka distributes round-robin, giving perfectly even partition load","hash(timestamp) % 10 to spread load evenly across the 10 partitions over time","hash(user_id) % 10 so all events for one user land in the same partition consistently","hash(country) % 10 to group events by region for locality of downstream processing"],
+       q:'Your distributed cache has 4 nodes using consistent hashing. You add a 5th node. Approximately what fraction of cached keys move to the new node?',
+       options:["About 50% of keys remap, because adding a node roughly halves each existing node's range","About 80% of keys remap, because the new node's virtual nodes fragment existing key ranges","About 20% of keys move, matching the new node's proportional share of the ring (1/5)","About 1% of keys move, since only keys adjacent to the new node's ring position shift"],
        correct:2,
-       explain:'Per-user ordering requires all of one user\'s events to land in one partition. hash(user_id) does that and the cardinality (1M users) means load is evenly spread across 10 partitions. country has too low cardinality and creates hot partitions; timestamp doesn\'t preserve user ordering; no key gives no ordering guarantee.'}},
+       explain:'Each new node takes roughly its proportional share, about 1/N of keys. With virtual nodes, this is evenly distributed across the existing servers. That\'s the whole point of consistent hashing.'}},
+    {id:'sd-4', type:'concept', name:'News feed — push vs pull vs hybrid', xp:12, time:10,
+     body:`"Design Twitter's feed" or "design a friends-activity feed" — these prompts test how you handle <b>fan-out</b> at very uneven scales (your average user has 200 followers; a celebrity has 100M).
+<br><br>
+<b>Push model (fan-out on write).</b> When user A posts, write a copy of the post ID into the <b>inbox</b> of every follower of A.
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">A posts → loop over A's 200 followers → INSERT into 200 inboxes
+Reader's feed = SELECT FROM inbox WHERE user_id = reader ORDER BY ts LIMIT 50</pre>
+<span class="icon-check"></span> Read is O(1) — just scan your inbox. Sub-10 ms feed loads.
+<br><span class="icon-x"></span> Celebrity write amplification: 1 post by an idol → 100M inbox inserts. Storage explosion (the same post stored 100M times).
+<br><br>
+<b>Pull model (fan-out on read).</b> Store posts once by author. At read time, look up "who do I follow," fetch their recent posts, merge.
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">A posts → INSERT into posts(author_id, post_id, ts)
+Reader's feed = SELECT FROM posts
+  WHERE author_id IN (followees of reader)
+  ORDER BY ts LIMIT 50</pre>
+<span class="icon-check"></span> Write is O(1). Storage is normal (one copy per post).
+<br><span class="icon-x"></span> Read is expensive — if you follow 5,000 accounts, that's a 5,000-author query. Heavy users pay every page load.
+<br><br>
+<b>Hybrid (the production answer).</b> Set a <b>celebrity threshold</b> (e.g., 1M followers). For authors below the threshold: push (fan-out on write). For authors above: pull (fan-out on read). Each reader's feed = merge(pushed inbox + pulled celebrity timelines).
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">feed(reader) =
+  recent_inbox(reader)                                       # push side
+  ∪ posts where author ∈ celebrities_followed(reader)        # pull side
+  → sort by ts → take top 50</pre>
+<b>Capacity math (Twitter-scale):</b>
+<ul class="list-muted">
+  <li>500M users, average 200 followers → 100B follow edges.</li>
+  <li>500M posts/day → 6 K posts/sec. With push at avg 200 followers: 1.2 M inbox writes/sec — fine for a sharded KV store.</li>
+  <li>Celebrities (top 0.1%): 500 K accounts × 10M followers avg → if we push, 5 T inbox writes/day. Untenable. Pull them.</li>
+  <li>Storage: pushed inbox at 500M readers × 500 recent IDs × 16 B = 4 TB hot. Affordable.</li>
+</ul>
+<b>Storage primitives:</b>
+<ul class="list-muted">
+  <li><b>Inbox</b> — Redis sorted set or Cassandra wide row, keyed by <code>user_id</code>, scored by timestamp, capped at ~500 IDs (older drops out).</li>
+  <li><b>Posts</b> — partitioned by <code>author_id</code> for celebrity-pull access pattern.</li>
+  <li><b>Edge store</b> (who follows whom) — graph DB or partitioned table; needed by both fan-out worker and pull-side query.</li>
+</ul>
+<b>Operational gotchas:</b>
+<ul class="list-muted">
+  <li><b>Backfill on follow.</b> When user X follows celebrity Y, you must inject Y's recent posts into X's view immediately. Pull side handles this naturally; push side needs a backfill job.</li>
+  <li><b>Unfollow / mute / block.</b> Inbox entries from a muted account must be hidden at read time, not deleted (the user could unmute later).</li>
+  <li><b>Ranking layer.</b> Modern feeds aren't chronological — ML re-ranks the merged candidate set. Add a ranking service after the merge step.</li>
+  <li><b>Fan-out workers.</b> Push fan-out happens asynchronously (Kafka → workers). The author's POST returns immediately; followers see the post within seconds.</li>
+</ul>
+<b>Senior signal:</b> name push vs pull, name the celebrity threshold as the knob, name backfill-on-follow as the hidden complication, name the ranking layer as the modern post-merge step.`,
+     interactive:{ type:'mcq',
+       q:'A user with 100M followers posts. Pure push fan-out, what happens?',
+       options:["Fast reads for all 100M followers because the inbox is already materialized when they load","Write amplification: 100M inbox inserts for a single post, saturating the write path","Followers miss the post because push fan-out drops writes beyond a per-author quota","Storage is unaffected because inbox entries are pointers to the original post row"],
+       correct:1,
+       explain:'Write amplification is the celebrity problem. Hybrid: push for normal authors, pull for celebrities above a follower threshold. Reader\'s feed = merge(pushed inbox + pulled celebrity timelines), then re-rank.'}},
+    {id:'sd-7', type:'concept', name:'Chat / messaging at scale', xp:12, time:9,
+     body:`"Design a chat system" tests three things at once: real-time delivery, message ordering, and presence. Walk through them in order.
+<br><br>
+<b>Real-time delivery.</b> Long-polling is dead; use <b>WebSockets</b> (or Server-Sent Events for one-way). Each client opens a persistent connection to a "gateway" server. Gateways are stateless about content but hold the socket; they look up "where is user X connected" via a Redis presence index and route messages there.
+<br><br>
+<b>Message storage.</b> Two access patterns: (a) recent messages for a conversation, (b) full history. Optimize for (a): partition messages table by conversation_id, order by timestamp, index lets you LIMIT 50 efficiently. For (b), archive older messages to cold storage.
+<br><br>
+<b>Ordering guarantee.</b> Within one conversation, you typically want monotonic message order. The classic gotcha: two clients send simultaneously; the gateway timestamps differ by milliseconds; clients render in different orders. Fix: use a per-conversation sequence number generated server-side, or a Lamport-style logical clock. Always order by sequence, not wall-clock.
+<br><br>
+<b>Delivery semantics.</b> What if a user is offline? Buffer messages, deliver when they reconnect. What if they read message 50 and you push 51 while they\'re offline? Deliver 51 + an "unread count." Track per-user "last-read sequence" so you can compute unreads.
+<br><br>
+<b>Presence (online status).</b> Each WebSocket connection writes a heartbeat to Redis with a TTL of 30 seconds. To know if user X is online, GET their presence key. Scales fine to millions of users.
+<br><br>
+<b>Scale gotchas:</b>
+<ul class="list-muted">
+  <li>Group chats: 10k people in a group, one message → 10k pushes. Use fan-out workers; don\'t do it inline on the sender\'s request.</li>
+  <li>WebSocket connections scale by number of users, not by traffic. Plan capacity per-gateway-server (typically 10k-50k connections each).</li>
+  <li>Push notifications (when app is closed) go through APNs / FCM separately — add a worker that triggers on message-for-offline-user.</li>
+</ul>
+<b>Capacity numbers to anchor on:</b> assume 1B DAU sending ~50 messages/day → ~600K msgs/sec average, peak ~3M msgs/sec. Storage: 50B msgs/day × 200 bytes ≈ 10 TB/day; with replication 30 TB/day; archive after 90 days. WebSocket fanout per gateway: ~50K connections × 1 message/sec each = 50K msg/sec/gateway. Need ~20K gateway nodes globally for a WhatsApp-scale deployment.
+<br><br>
+<b>2026 transport options beyond WebSocket:</b>
+<ul class="list-muted">
+<li><b>HTTP/3 + WebTransport</b> — QUIC-based, head-of-line-blocking immune, better than WebSocket on flaky mobile networks. Supported by Chromium and modern servers (Cloudflare, NodeJS via @fails-components/webtransport). The 2026 successor for new builds.</li>
+<li><b>SSE (Server-Sent Events)</b> — one-way server-to-client. Simpler than WebSocket if clients only RECEIVE (notifications, live feeds). Auto-reconnects.</li>
+</ul>
+<b>Multi-device sync — when CRDTs become the right shape:</b> if users edit the same conversation/draft from phone + laptop simultaneously while one is offline, you have a multi-leader concurrent-edit problem. Server-assigned sequence numbers don\'t solve it (you can\'t assign a sequence when offline). The 2026 pattern: CRDT-based local-first storage (Yjs, Automerge) syncs to server when online. Used by Linear, Notion, modern chat apps with offline-first design.
+<br><br>
+<b>E2E encryption (MLS):</b> as of 2026 the modern standard for group-chat E2E is <b>MLS (Messaging Layer Security, RFC 9420)</b>, which Signal, WhatsApp, and Discord have either adopted or are migrating to. The previous Double Ratchet (Signal protocol) doesn\'t scale to large groups; MLS does (O(log N) per add/remove). If the interviewer cares about E2E, MLS is the senior answer in 2026, not "Signal protocol."`,
+     interactive:{ type:'mcq',
+       q:'In a chat system, two users send a message in the same conversation within 5ms of each other. They each see their own message first locally. What\'s the correct way to ensure all OTHER clients see them in the same order?',
+       options:["Use wall-clock timestamps sent from each client, breaking ties by client ID for determinism","Use the server's wall-clock arrival time, since server clocks are more consistent than client clocks","Assign a server-side per-conversation sequence number and order messages by that sequence","Random tiebreak using a shared seed derived from the conversation ID and the message hash"],
+       correct:2,
+       explain:'A per-conversation server-assigned sequence is the canonical ordering primitive. Server wall-clock has the same skew problem at scale; sequence numbers are monotone and deterministic.'}},
+    {id:'sd-6', type:'concept', name:'Notification system — how the pieces fit', xp:12, time:9,
+     body:`"Design a notification system" is asking you to handle: send something to a user via email / SMS / push, at scale (millions/day), reliably, without duplicates, and gracefully when delivery providers fail.
+<br><br>
+<b>The pipeline:</b>
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">App emits "send_notification" event
+ ↓
+[API/Producer]  → publishes to message queue
+ ↓
+[Kafka topic: notifications.outgoing]
+ ↓
+[Fan-out worker]  → reads event, looks up user prefs (channels enabled, quiet hours)
+                  → splits into per-channel sub-events
+ ↓
+[Channel queues: notifications.email, .push, .sms]
+ ↓
+[Channel workers]  → email worker calls SendGrid, push worker calls FCM, sms worker calls Twilio
+ ↓
+[Status store]  → records delivery result (sent / failed / bounced)</pre>
+<b>Why a queue?</b> Decouples the producer (fast) from the channel workers (slow, depend on external providers). If SendGrid is having a bad day, only the email queue backs up — push and SMS keep flowing.
+<br><br>
+<b>Idempotency.</b> If the same event is processed twice (worker retried after a crash), you'd send the same email twice. Fix: every notification has an idempotency key based on <code>(user_id, template_id, time_window)</code>. The channel worker checks "have I sent this in the last 24h?" before calling the provider.
+<br><br>
+<b>Backpressure.</b> When SendGrid throttles to 100 emails/sec but your queue has 100k messages, you need to slow down — not just retry in tight loop. Use a token-bucket per provider: workers wait for a token before sending. The queue absorbs the burst.
+<br><br>
+<b>Dead-letter queue (DLQ).</b> Some messages can't succeed — the user's email bounced, the push token expired. After 3 retries with exponential backoff, route to DLQ. A separate process inspects the DLQ to surface "your push token is stale" UI to the user.
+<br><br>
+<b>User preferences.</b> Quiet hours, channel preferences, email frequency caps. These rules belong in the fan-out worker (one place), not scattered across channel workers.
+<br><br>
+<b>Multi-template testing.</b> If you A/B test notification copy, the idempotency key needs to include the template version. Otherwise the second variant looks like a duplicate and gets dropped.`,
+     interactive:{ type:'sort',
+       prompt:'Order these components of the notification pipeline from where the event ENTERS to where it EXITS:',
+       items:[
+         'Channel queues (email, push, SMS)',
+         'Producer / API publishes to Kafka',
+         'Status store + DLQ for failures',
+         'Fan-out worker — apply user prefs, split per channel',
+         'Channel workers — call SendGrid / FCM / Twilio'
+       ],
+       correct:[1,3,0,4,2],
+       explain:'Producer → fan-out → channel queues → channel workers → status. Each stage has one job; the queues between stages absorb backpressure when a downstream provider gets slow.'}},
+
     {id:'sd-geo', type:'concept', name:'Geo-dispatch — Uber-style matching at scale', xp:12, time:11,
      body:`"Find the nearest driver" sounds easy. With 100K active drivers and 1K requests/sec, the naïve O(N) scan is 100M operations per second. You need a spatial index.
 <br><br>
@@ -7022,75 +6958,128 @@ Each transition is a separate event; each can fail independently. Storage = even
          { text:'If a webhook arrives before your local DB has the charge record, you should reject the webhook.',
            answer:false, why:'Webhooks are unordered relative to your local writes. Accept and store the webhook event, then reconcile when the local record appears. Rejecting causes the provider to retry indefinitely.'},
        ]}},
-    {id:'sd-6', type:'concept', name:'Notification system — how the pieces fit', xp:12, time:9,
-     body:`"Design a notification system" is asking you to handle: send something to a user via email / SMS / push, at scale (millions/day), reliably, without duplicates, and gracefully when delivery providers fail.
+    {id:'sd-llm', type:'concept', name:'LLM inference service — the 2026 design round', xp:13, time:12,
+     body:`The prompt AI companies actually ask now: <i>"design a service that serves our model to customers"</i> or <i>"design a batch inference API on a GPU cluster."</i> It is a normal distributed-systems problem with one unusual resource — a GPU you cannot oversubscribe — and interviewers are checking whether you know why that changes the design.
 <br><br>
-<b>The pipeline:</b>
-<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">App emits "send_notification" event
- ↓
-[API/Producer]  → publishes to message queue
- ↓
-[Kafka topic: notifications.outgoing]
- ↓
-[Fan-out worker]  → reads event, looks up user prefs (channels enabled, quiet hours)
-                  → splits into per-channel sub-events
- ↓
-[Channel queues: notifications.email, .push, .sms]
- ↓
-[Channel workers]  → email worker calls SendGrid, push worker calls FCM, sms worker calls Twilio
- ↓
-[Status store]  → records delivery result (sent / failed / bounced)</pre>
-<b>Why a queue?</b> Decouples the producer (fast) from the channel workers (slow, depend on external providers). If SendGrid is having a bad day, only the email queue backs up — push and SMS keep flowing.
+<b>Start with the two phases, because every decision downstream follows from them.</b>
+<ul class="list-muted">
+  <li><b>Prefill</b> — process the whole prompt, write the key/value tensors into the KV cache. Compute-bound. Cost scales with prompt length.</li>
+  <li><b>Decode</b> — generate one token at a time, re-reading that cache. Memory-bandwidth-bound. Cost scales with output length.</li>
+</ul>
+Two phases with opposite bottlenecks in one request is the whole reason LLM serving looks different from a normal RPC service.
 <br><br>
-<b>Idempotency.</b> If the same event is processed twice (worker retried after a crash), you'd send the same email twice. Fix: every notification has an idempotency key based on <code>(user_id, template_id, time_window)</code>. The channel worker checks "have I sent this in the last 24h?" before calling the provider.
+<b>So there are two SLOs, not one.</b> <b>TTFT</b> (time to first token) is a prefill number; <b>TPOT</b> (time per output token) is a decode number. A chat UI needs tight TTFT and tolerable TPOT. A batch summarization job cares about neither — it wants throughput per dollar. Ask which one the product needs before you draw a box; getting this question in is most of the signal.
 <br><br>
-<b>Backpressure.</b> When SendGrid throttles to 100 emails/sec but your queue has 100k messages, you need to slow down — not just retry in tight loop. Use a token-bucket per provider: workers wait for a token before sending. The queue absorbs the burst.
+<b>Batching is where the throughput comes from.</b> Naive request-per-forward-pass wastes most of the GPU. <b>Continuous batching</b> (iteration-level scheduling) admits new requests into the running batch between decode steps and evicts finished ones, instead of waiting for the slowest request in a static batch. This is the single highest-leverage thing to name.
 <br><br>
-<b>Dead-letter queue (DLQ).</b> Some messages can't succeed — the user's email bounced, the push token expired. After 3 retries with exponential backoff, route to DLQ. A separate process inspects the DLQ to surface "your push token is stale" UI to the user.
+<b>KV cache is your real capacity limit.</b> Not QPS — GPU memory. Cache size ≈ 2 (K and V) × layers × heads × head_dim × context_length × batch × bytes_per_element. On a 70B-class model that runs to megabytes per thousand tokens per request, so a single 80GB card holds far fewer concurrent long-context sessions than people assume. <b>PagedAttention</b>-style block allocation exists because naive contiguous allocation fragments this memory badly. Say "my capacity model is KV-cache bytes, not requests" and you sound like you have run one of these.
 <br><br>
-<b>User preferences.</b> Quiet hours, channel preferences, email frequency caps. These rules belong in the fan-out worker (one place), not scattered across channel workers.
+<b>The scaling ladder, in the order you should propose it:</b>
+<ul class="list-muted">
+  <li><b>One replica, continuous batching</b> — correct starting point.</li>
+  <li><b>Replicas behind a queue</b>, autoscaled on <i>queue depth and cache occupancy</i>, not CPU. Cold start is model load time — minutes, not seconds — so scale-up is slow and you must over-provision or keep warm pools.</li>
+  <li><b>Prefill/decode disaggregation</b> — run the two phases on separate pools so a long prompt does not stall other users' token streams. Worth it under strict TPOT; unnecessary complexity when TTFT is what is tight.</li>
+  <li><b>Tensor / pipeline parallelism</b> only when the model does not fit on one card. Do not lead with this.</li>
+</ul>
+<b>Admission control is the part most candidates skip.</b> When the cache is full you must reject or queue — you cannot let the GPU thrash. Say it explicitly: bounded queue, per-tenant concurrency caps, 429 with <code>Retry-After</code> when full. That is the difference between a design that degrades and one that collapses.
 <br><br>
-<b>Multi-template testing.</b> If you A/B test notification copy, the idempotency key needs to include the template version. Otherwise the second variant looks like a duplicate and gets dropped.`,
-     interactive:{ type:'sort',
-       prompt:'Order these components of the notification pipeline from where the event ENTERS to where it EXITS:',
-       items:[
-         'Channel queues (email, push, SMS)',
-         'Producer / API publishes to Kafka',
-         'Status store + DLQ for failures',
-         'Fan-out worker — apply user prefs, split per channel',
-         'Channel workers — call SendGrid / FCM / Twilio'
+<b>The batch-inference variant.</b> If the prompt is "batch API," the answer shifts: durable job queue, results to object storage, a status endpoint, checkpointing so a preempted spot GPU does not lose the run, and dramatically larger batches because nobody is watching the clock. Latency SLOs disappear and cost-per-token becomes the objective.
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"I would size capacity in KV-cache bytes, not QPS, and autoscale on queue depth — the model load time means I can't scale reactively, so I'd keep a warm pool sized to the p95 burst. I'd only disaggregate prefill from decode if TPOT is the SLO under pressure; otherwise it's complexity without goodput."</div>`,
+     interactive:{type:'mcq',
+       q:'Your chat product has a strict TTFT SLO. Traffic is a mix of short questions and occasional 100k-token document prompts, and users report the token stream stuttering when the long prompts arrive. What is the most direct fix?',
+       options:[
+         'Increase the batch size so more requests are processed per forward pass and throughput rises',
+         'Add GPU replicas until the aggregate FLOPs comfortably exceed peak demand',
+         'Separate prefill from decode onto different pools so a long prompt cannot stall in-flight token generation',
+         'Shorten the KV cache retention window so memory frees faster between requests'
        ],
-       correct:[1,3,0,4,2],
-       explain:'Producer → fan-out → channel queues → channel workers → status. Each stage has one job; the queues between stages absorb backpressure when a downstream provider gets slow.'}},
-
-    {id:'sd-cells', type:'concept', name:'Cell-based architecture — blast radius as a first-class design constraint', xp:13, time:10,
-     body:`Modern AWS reference architectures (and most large-scale SaaS) shard not just data but the <b>entire service stack</b> into independent "cells." A cell is a complete, self-sufficient slice of your service — its own compute, DB, cache, queues, deploy pipeline — serving a deterministic partition of users (e.g., users 0-9999 → cell-1, users 10000-19999 → cell-2). Cells share NOTHING runtime. A bug, deploy error, or DB corruption affects ONE cell\'s users, not all of them.
+       correct:2,
+       explain:'Stuttering mid-stream is the signature of a long prefill occupying the same GPU that is decoding other users’ tokens — prefill is compute-bound and hogs the device. Prefill/decode disaggregation puts the phases on separate pools so a 100k-token prompt no longer blocks decode steps. Bigger batches make it worse (more contention per device). More replicas raise aggregate capacity but do nothing about two phases fighting inside one device. Trimming cache retention frees memory, which is not the bottleneck being described.'}},
+    {id:'sd-book', type:'concept', name:'Ticket booking — holds, oversell, and the hot-row problem', xp:13, time:11,
+     body:`"Design Ticketmaster" (or seat booking, or hotel inventory) is a top-frequency prompt because it forces the one thing most designs dodge: <b>contention on a single row that thousands of people want at the same instant.</b> Caching does not save you here — every one of those users is trying to <i>write</i>.
 <br><br>
-<b>Why this matters in 2026:</b> traditional "shared infra, partitioned data" architectures spread blast radius across all customers when something goes wrong (a bad deploy, a runaway query, a DNS misconfiguration). Cell-based shrinks blast radius to a single cell — typically 1-10% of users. AWS uses this for many internal services (e.g., S3 cells); Stripe, Square, Slack have adopted variants.
+<b>The three-state model.</b> A seat is <code>available → held → sold</code>. The hold is the entire design.
+<ul class="list-muted">
+  <li><b>Hold</b> — a short TTL reservation (5–10 min) taken the moment a user picks a seat, before payment.</li>
+  <li><b>Expiry must be authoritative, not a cron job.</b> Store <code>held_until</code> and treat any row past it as available at read time. A sweeper that reclaims expired holds is a cleanup optimization, never the source of truth — if correctness depends on the sweeper running, you have a bug at 3am.</li>
+</ul>
+<b>Preventing oversell — pick one and defend it:</b>
+<ul class="list-muted">
+  <li><b>Pessimistic:</b> <code>SELECT ... FOR UPDATE</code> on the seat row. Simple, correct, and serializes everyone onto one row. Fine for a 200-seat theatre, fatal for a stadium on-sale.</li>
+  <li><b>Optimistic:</b> conditional update — "set held where state = available and version = N." Loser retries. Better under contention because there is no held lock, but retry storms need backoff.</li>
+  <li><b>Queue the contention away:</b> a per-event partition (a Kafka partition keyed by event_id, or a single-writer service) turns 50k simultaneous grabs into an ordered stream. This is what large on-sales actually do — the waiting room is a product feature <i>and</i> a load-shedding mechanism.</li>
+</ul>
+<b>The waiting room deserves a box on your diagram.</b> For a hot on-sale, admitting everyone to the seat map is what melts the database. Admit a bounded number of users per minute, hold the rest in a queue with a position estimate. Interviewers read this as "has thought about a real launch."
 <br><br>
-<b>The components:</b>
-<ul class="list-muted">
-<li><b>Thin routing layer</b> (cell router) — hash(user_id) → cell N. The ONLY component shared by all users. Designed to be stateless, simple, and easy to roll back independently.</li>
-<li><b>N identical cells</b> — each runs a complete copy of your service. Sized to handle "this slice of users at peak."</li>
-<li><b>Per-cell deploy pipeline</b> — deploys roll out cell-by-cell. Wave 1: 1 cell. Wait an hour. If no regression: wave 2: 10 more. Wait. Wave 3: rest. A bad deploy hits 1% of users, not 100%.</li>
-<li><b>Per-cell observability</b> — every metric, log, and trace tagged with cell_id. "Cell 7 latency just spiked" is the right alert granularity.</li>
-</ul>
-<br>
-<b>The tradeoffs:</b>
-<ul class="list-muted">
-<li><span class="icon-check"></span> Blast radius bounded to one cell. Deploy waves are natural. Capacity scales by adding cells, not by resizing a global pool.</li>
-<li><span class="icon-x"></span> Cross-cell operations are EXPENSIVE — searching across all users, computing global stats, joining data from multiple cells requires fanning out to every cell. Design these as async, eventually-consistent.</li>
-<li><span class="icon-x"></span> Cell sizing matters. Too few cells = blast radius too large. Too many = per-cell overhead (each cell has its own DB connection pool, etc.). Typical: 10-100 cells per region for medium-scale; AWS S3 has thousands per region.</li>
-</ul>
-<br>
-<b>The senior interview move:</b> when an interviewer asks "how do you protect against a bad deploy taking down all customers?", reach for cell-based architecture. <i>"I\'d shard the service into cells of ~10K users each. Deploys roll cell-by-cell with bake time between waves. A bad change reaches at most 1% of users before the rollback alarm fires."</i>
-<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"Blast radius is a design constraint, not a property to discover after an incident. Cell-based architecture makes it explicit."</div>`,
-     interactive:{ type:'mcq',
-       q:'Your service has a single shared Postgres + 50 stateless app servers across 1 region, serving 5M users. A bad migration corrupts a non-critical table. Approximately what % of users are affected?',
-       options:["About 2%, since only users actively hitting that specific feature encounter the corrupted rows","About 100%, since all users share the same DB and any query touching that table hits corruption","About 50%, since half the app servers haven't yet executed the bad migration on their connections","About 0%, since Postgres rolls back the migration transaction automatically on any query error"],
+<b>Money makes it a distributed transaction, so don't pretend it's one.</b> Hold, then charge, then confirm — across your DB and a payment provider that can time out after having already charged. Idempotency key per booking attempt, and a saga: if the charge succeeds but confirmation fails, a compensating action either completes the booking from the payment record or refunds. Say out loud that two-phase commit across a third-party payment API is not available to you.
+<br><br>
+<b>Where the scale actually is.</b> Reads (browsing the seat map) outnumber writes by orders of magnitude and cache fine — with the caveat that a stale map showing sold seats as available is <i>acceptable</i>, because the write path is authoritative and will reject. Say that explicitly; it shows you know which layer owns correctness.
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"I'd make hold expiry read-time authoritative rather than depending on a sweeper, use a conditional update instead of a row lock so a stadium on-sale doesn't serialize on one row, and treat the seat map cache as deliberately stale — the write path rejects, so a stale read is a UX cost, not a correctness one."</div>`,
+     interactive:{type:'mcq',
+       q:'A 50,000-seat on-sale opens at noon. Your design holds seats with SELECT ... FOR UPDATE and reclaims expired holds with a sweeper that runs every minute. What breaks first?',
+       options:[
+         'The seat-map cache goes stale and users see sold seats as available, causing failed checkouts',
+         'Row locks serialize the concurrent grabs, so throughput collapses to roughly one booking at a time per contended row',
+         'The payment provider rate-limits the burst of charges and bookings begin timing out',
+         'The sweeper falls behind and expired holds accumulate, gradually reducing available inventory'
+       ],
        correct:1,
-       explain:'Shared infrastructure → 100% blast radius. The bad migration affects every query that touches the corrupted table for every user, because they all share the same DB. Cell-based architecture limits this to a single cell\'s users (typically 1-10%) — the rest of your fleet keeps serving traffic from their own uncorrupted cells.'}},
-
+       explain:'Pessimistic row locking is the binding constraint the moment demand concentrates: every user contending for the same seat (or the same small set of good seats) queues behind one lock, so effective throughput on hot rows drops to serialized writes and the connection pool fills with waiters. The stale cache is real but benign — the write path rejects. Payment limits and sweeper lag are downstream problems you would hit later, and the sweeper is a cleanup path anyway if expiry is evaluated at read time.'}},
+    {id:'sd-kafka', type:'concept', name:'Distributed log — Kafka partitioning, replication, exactly-once', xp:12, time:12,
+     body:`"Use Kafka" is a complete non-answer in a senior interview. What interviewers want: which Kafka knobs you'd turn and why.
+<br><br>
+<b>Partitions.</b> A topic is split into N partitions. Each partition is an append-only log on one broker (with replicas). Throughput scales with partitions; ordering is preserved <b>within a partition only</b>, not across the topic.
+<br><br>
+<b>Partition key.</b> Producers hash a key to pick a partition. <code>hash(user_id) % N</code> sends all events for one user to the same partition → ordered per user. Pick wrong key and you create hot partitions: <code>hash("country") % N</code> sends most traffic to "US."
+<br><br>
+<b>Replication factor (RF).</b> Each partition is replicated to RF brokers. RF=3 is standard. One replica is the <b>leader</b> (handles reads + writes); the rest are <b>followers</b> (replicate). <b>In-Sync Replicas (ISR)</b> = followers caught up within a window.
+<br><br>
+<b>Durability vs latency knobs.</b>
+<ul class="list-muted">
+  <li><code>acks=0</code>: producer doesn't wait. Fastest, can lose data.</li>
+  <li><code>acks=1</code>: leader acks. Loses data if leader crashes before replicating.</li>
+  <li><code>acks=all</code> + <code>min.insync.replicas=2</code>: producer waits for at least 2 replicas to ACK. Survives 1 broker failure with no data loss. Standard for "we can't lose this."</li>
+</ul>
+<b>Consumers.</b> Consumers join a <b>consumer group</b>. Each partition is assigned to at most one consumer in the group → group-wide parallelism = min(consumers, partitions). Offsets track "last message consumed per partition per group" so on restart you resume from where you left off.
+<br><br>
+<b>Exactly-once semantics (EOS).</b> The trinity:
+<ol style="margin-left:1.2em">
+  <li><b>Idempotent producer</b> — Kafka deduplicates producer retries within a partition (<code>enable.idempotence=true</code>).</li>
+  <li><b>Transactions</b> — wrap multiple sends + offset commits in one atomic commit (<code>initTransactions()</code>, <code>commitTransaction()</code>).</li>
+  <li><b>Read-process-write consumers</b> — read offsets and output sends are in the SAME transaction, so a crash doesn't double-deliver downstream.</li>
+</ol>
+<b>When NOT to reach for Kafka.</b>
+<ul class="list-muted">
+  <li><b>Low volume, simple work queue</b> → SQS or RabbitMQ. Kafka's complexity earns nothing below ~10 K msgs/sec.</li>
+  <li><b>Request/response RPC</b> → use gRPC. Kafka is for streams, not RPC.</li>
+  <li><b>Strict ordering across millions of independent entities</b> → either pick a partition key that scales or use a different primitive.</li>
+</ul>
+<pre><code>// Idempotent + transactional producer (Java-ish)
+props.put("acks", "all");
+props.put("enable.idempotence", "true");
+props.put("transactional.id", "billing-tx-1");
+producer.initTransactions();
+try {
+    producer.beginTransaction();
+    producer.send(new ProducerRecord<>("charges", chargeId, charge));
+    producer.send(new ProducerRecord<>("audit",   chargeId, audit));
+    producer.commitTransaction();   // both messages atomic
+} catch (Exception e) {
+    producer.abortTransaction();
+}</code></pre>
+<b>Common interview prompt:</b> "Design a clickstream pipeline." Walk through partition key choice, replication factor, consumer group sizing, and exactly-once if downstream is non-idempotent.
+<br><br>
+<b>2026 — what every senior knows about Kafka NOW:</b>
+<ul class="list-muted">
+<li><b>KRaft has been the only mode since Kafka 4.0 (March 2025).</b> ZooKeeper was removed entirely. Metadata is stored in an internal Kafka topic, managed by a Raft quorum of "controller" brokers. If you read older interview prep, ignore the "ZooKeeper or KRaft" framing — it\'s KRaft now.</li>
+<li><b>S3-backed BYOC tier reshaped the market.</b> <b>WarpStream</b> (acq. by Confluent 2024), <b>Redpanda BYOC</b>, and <b>AutoMQ</b> all write the log directly to S3 instead of broker-local disk. Cost drops 5-10× (you pay S3 storage, not 3×-replicated EBS). Latency tradeoff: p50 ~500ms vs ~5ms for traditional Kafka. Pick BYOC when throughput is high but you don\'t need single-digit-ms latency (most analytics and event-streaming workloads).</li>
+<li><b>"Postgres as a queue" is increasingly the right call</b> for &lt; 1K msgs/sec workloads. <code>SELECT ... FOR UPDATE SKIP LOCKED</code> + a status column gives you durable, transactional, exactly-once delivery with zero new infra. Saying "I\'d start with Postgres and graduate to Kafka if needed" is a senior signal — the rookie reflex is "Kafka by default."</li>
+</ul>`,
+     interactive:{ type:'mcq',
+       q:'You\'re ingesting 50 K events/sec into Kafka and need strict per-user ordering. You have 10 partitions, 1M users. Which partition-key strategy is correct?',
+       options:["No key so Kafka distributes round-robin, giving perfectly even partition load","hash(timestamp) % 10 to spread load evenly across the 10 partitions over time","hash(user_id) % 10 so all events for one user land in the same partition consistently","hash(country) % 10 to group events by region for locality of downstream processing"],
+       correct:2,
+       explain:'Per-user ordering requires all of one user\'s events to land in one partition. hash(user_id) does that and the cardinality (1M users) means load is evenly spread across 10 partitions. country has too low cardinality and creates hot partitions; timestamp doesn\'t preserve user ordering; no key gives no ordering guarantee.'}},
     {id:'sd-outbox', type:'concept', name:'Outbox pattern + CDC — transactional event publishing', xp:13, time:10,
      body:`The classic dual-write bug: you update your DB and publish a Kafka event in the same function. Either can succeed while the other fails — DB updated but no event, or event sent but DB rollback. Both create state divergence between your service and downstream consumers. The 2026 standard fix: the <b>outbox pattern</b>, often paired with CDC.
 <br><br>
@@ -7126,6 +7115,56 @@ COMMIT;
        correct:1,
        explain:'The trick is that you\'re no longer doing TWO writes (DB + Kafka) — you\'re doing ONE write (DB transaction containing BOTH the domain change and the outbox row). Atomicity is inherited from the DB. The relay is a separate, retryable process; if it fails, the outbox row stays unpublished until next attempt. Consumers tolerate duplicates via idempotency keyed on event ID.'}},
 
+    {id:'sd-reliable', type:'concept', name:'Reliability patterns — circuit breaker, bulkhead, retry budget', xp:12, time:11,
+     body:`Senior engineers don't just describe what HAPPENS — they describe what happens <b>when it fails</b>. Four patterns interviewers expect you to name when one of your dependencies is slow, broken, or rate-limiting.
+<br><br>
+<b>1. Timeout cascade.</b> Every call has a timeout. The caller's timeout should be SHORTER than its parent's, or the system stalls on already-doomed calls.
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">Client (60s) → API (30s) → Service (10s) → DB (3s)
+   ↑ each parent has more time than the child, plus buffer for retry</pre>
+<b>2. Circuit breaker.</b> Wraps a flaky dependency. Tracks recent error rate. Three states:
+<ul class="list-muted">
+  <li><b>Closed</b> — requests pass through normally. Errors counted.</li>
+  <li><b>Open</b> — error rate exceeds threshold → fail fast. No requests reach the dependency. (Saves it from making things worse.)</li>
+  <li><b>Half-open</b> — after a cooldown (e.g., 30 s), allow a few probe requests. If they succeed, close the breaker. If they fail, reopen.</li>
+</ul>
+<pre><code>class CircuitBreaker:
+    def __init__(self, fail_threshold=5, cooldown_s=30):
+        self.fails = 0; self.opened_at = None
+        self.fail_threshold = fail_threshold; self.cooldown_s = cooldown_s
+    def call(self, fn, *args):
+        if self.opened_at and time.time() - self.opened_at < self.cooldown_s:
+            raise CircuitOpenError()                  # fail fast
+        try:
+            r = fn(*args); self.fails = 0; self.opened_at = None
+            return r
+        except Exception:
+            self.fails += 1
+            if self.fails >= self.fail_threshold: self.opened_at = time.time()
+            raise</code></pre>
+<b>3. Bulkhead.</b> Isolate resource pools so one slow dependency doesn't drain ALL your threads/connections. If 50% of your DB pool is stuck on slow billing queries, your auth queries also stall. Fix: separate pools per dependency.
+<br>Analogy: a ship's bulkheads. One compartment floods, the ship floats.
+<br><br>
+<b>4. Retry budget + exponential backoff with jitter.</b> Retries make things worse if a downstream is overloaded — you 10× its load right when it's struggling. Two rules:
+<ul class="list-muted">
+  <li><b>Bound retries</b> per call (3 max) AND per client per minute (e.g., "no more than 10% retry rate"). Stops retry storms.</li>
+  <li><b>Backoff with jitter.</b> Don't retry at exactly t=1s, 2s, 4s — every client does that and creates a synchronized stampede. Use <code>sleep(base × 2^attempt × random(0.5, 1.5))</code>.</li>
+</ul>
+<b>How they combine.</b> A real call chain typically uses ALL FOUR: timeout (so you don't wait forever) → retry with backoff (handle transient failures) → circuit breaker (stop trying when broken) → bulkhead (don't let this dependency take everyone down).
+<br><br>
+<b>The interview signal.</b> When the interviewer says "what if the DB is slow?", a junior says "we'd add retries." A senior says: "Each call is wrapped in a 3-second timeout. We retry 3× with exponential jitter, with a per-client retry budget of 10%. The connection pool is bulkheaded by query class so slow analytics don't starve OLTP. A circuit breaker opens after 5 errors and probes again after 30 seconds." That's the whole pattern landscape in one breath.
+<br><br>
+<b>Where these patterns live in 2026 — name the tools, not just the concepts:</b>
+<ul class="list-muted">
+<li><b>Service mesh (Istio / Envoy / Linkerd)</b> implements timeouts, retries, circuit breakers as DestinationRule / VirtualService config — no app-level code. The 2026 default for new microservice architectures; the "Hystrix" answer is now historical. Istio also has an "ambient mesh" mode (GA 1.24, 2024) that drops the per-pod sidecar in favor of ztunnel + per-node proxies — lower overhead, easier ops.</li>
+<li><b>Application-level libraries</b>: <code>resilience4j</code> (Java), <code>polly</code> (.NET), <code>tenacity</code> (Python), <code>p-retry</code> (Node). Use these for in-process patterns the mesh can\'t see (DB query retries, in-app circuit breaks).</li>
+<li><b>Observability:</b> <b>OpenTelemetry</b> is the cross-vendor standard for traces + metrics + logs. Mesh and app both emit OTel; you correlate request-traces across the network boundary. The 2026 default observability stack: OTel collector → Tempo/Jaeger (traces) + Mimir/Prometheus (metrics) + Loki (logs), often as the Grafana LGTM stack. Datadog / Honeycomb / New Relic are still common but OTel makes vendor swaps cheap.</li>
+</ul>
+<b>The senior framing:</b> "I\'d let the service mesh handle timeout/retry/circuit-break for inter-service calls and reserve app-level libraries for in-process needs. All instrumentation via OpenTelemetry so I can swap vendors. Don\'t roll your own circuit breaker in 2026."`,
+     interactive:{ type:'sort',
+       prompt:'Order the reliability patterns from "outermost shield" to "innermost":',
+       items:['Timeout (per call)','Circuit breaker (per dependency)','Retry with backoff (per attempt)','Bulkhead (per resource pool)'],
+       correct:[3,1,0,2],
+       explain:'Bulkhead is outermost — it isolates the resource pool. Circuit breaker decides whether to even try. Timeout bounds the attempt. Retry handles the failed attempt. They nest: pool → breaker → timeout → retry.'}},
     {id:'sd-tail', type:'concept', name:'Tail-latency engineering — hedged requests + p99 thinking', xp:12, time:9,
      body:`Average latency is a lie. A service with 10ms mean and 2 seconds p99 looks fine in the dashboards but feels broken to 1 in 100 users — including the high-value users making 100+ requests per session. Senior engineers think in <b>tail latency</b>, not averages. The 2026 toolkit:
 <br><br>
@@ -7162,6 +7201,34 @@ Tradeoff: hedging doubles your backend load for the hedged fraction (typically 5
        options:["About 100ms, since fan-out is parallel and doesn't change per-request latency in the common case","About 500ms, roughly additive across the 5 slowest shards when tail latencies stack up","About 5000ms, multiplicative because each shard's tail compounds the others in parallel work","About 100ms base, but waiting for the slowest of 50 pushes effective per-shard percentile to ~p99.98"],
        correct:3,
        explain:'When you fan out to 50 backends and wait for ALL, your overall p99 is the p99 of "max of 50 latencies." That\'s approximately the per-shard p_{(1 - 0.01/50)} ≈ p99.98 per shard, much worse than p99. Tail compounding is why hedged requests + parallel-friendly query patterns matter at fan-out scale. Some systems address this by issuing 51 requests and accepting the first 50 (drop the slow one) — partial-result tolerance.'}},
+
+    {id:'sd-cells', type:'concept', name:'Cell-based architecture — blast radius as a first-class design constraint', xp:13, time:10,
+     body:`Modern AWS reference architectures (and most large-scale SaaS) shard not just data but the <b>entire service stack</b> into independent "cells." A cell is a complete, self-sufficient slice of your service — its own compute, DB, cache, queues, deploy pipeline — serving a deterministic partition of users (e.g., users 0-9999 → cell-1, users 10000-19999 → cell-2). Cells share NOTHING runtime. A bug, deploy error, or DB corruption affects ONE cell\'s users, not all of them.
+<br><br>
+<b>Why this matters in 2026:</b> traditional "shared infra, partitioned data" architectures spread blast radius across all customers when something goes wrong (a bad deploy, a runaway query, a DNS misconfiguration). Cell-based shrinks blast radius to a single cell — typically 1-10% of users. AWS uses this for many internal services (e.g., S3 cells); Stripe, Square, Slack have adopted variants.
+<br><br>
+<b>The components:</b>
+<ul class="list-muted">
+<li><b>Thin routing layer</b> (cell router) — hash(user_id) → cell N. The ONLY component shared by all users. Designed to be stateless, simple, and easy to roll back independently.</li>
+<li><b>N identical cells</b> — each runs a complete copy of your service. Sized to handle "this slice of users at peak."</li>
+<li><b>Per-cell deploy pipeline</b> — deploys roll out cell-by-cell. Wave 1: 1 cell. Wait an hour. If no regression: wave 2: 10 more. Wait. Wave 3: rest. A bad deploy hits 1% of users, not 100%.</li>
+<li><b>Per-cell observability</b> — every metric, log, and trace tagged with cell_id. "Cell 7 latency just spiked" is the right alert granularity.</li>
+</ul>
+<br>
+<b>The tradeoffs:</b>
+<ul class="list-muted">
+<li><span class="icon-check"></span> Blast radius bounded to one cell. Deploy waves are natural. Capacity scales by adding cells, not by resizing a global pool.</li>
+<li><span class="icon-x"></span> Cross-cell operations are EXPENSIVE — searching across all users, computing global stats, joining data from multiple cells requires fanning out to every cell. Design these as async, eventually-consistent.</li>
+<li><span class="icon-x"></span> Cell sizing matters. Too few cells = blast radius too large. Too many = per-cell overhead (each cell has its own DB connection pool, etc.). Typical: 10-100 cells per region for medium-scale; AWS S3 has thousands per region.</li>
+</ul>
+<br>
+<b>The senior interview move:</b> when an interviewer asks "how do you protect against a bad deploy taking down all customers?", reach for cell-based architecture. <i>"I\'d shard the service into cells of ~10K users each. Deploys roll cell-by-cell with bake time between waves. A bad change reaches at most 1% of users before the rollback alarm fires."</i>
+<div class="callout callout-senior"><div class="callout-label">Senior signal</div>"Blast radius is a design constraint, not a property to discover after an incident. Cell-based architecture makes it explicit."</div>`,
+     interactive:{ type:'mcq',
+       q:'Your service has a single shared Postgres + 50 stateless app servers across 1 region, serving 5M users. A bad migration corrupts a non-critical table. Approximately what % of users are affected?',
+       options:["About 2%, since only users actively hitting that specific feature encounter the corrupted rows","About 100%, since all users share the same DB and any query touching that table hits corruption","About 50%, since half the app servers haven't yet executed the bad migration on their connections","About 0%, since Postgres rolls back the migration transaction automatically on any query error"],
+       correct:1,
+       explain:'Shared infrastructure → 100% blast radius. The bad migration affects every query that touches the corrupted table for every user, because they all share the same DB. Cell-based architecture limits this to a single cell\'s users (typically 1-10%) — the rest of your fleet keeps serving traffic from their own uncorrupted cells.'}},
 
     {id:'sd-tracing', type:'concept', name:'Distributed tracing — OpenTelemetry + W3C trace context', xp:12, time:9,
      body:`When a user request flows through 10 microservices, "the API was slow" is useless. You need <b>distributed tracing</b>: a single trace ID that follows the request across services, with spans showing where time was spent. The 2026 standard is <b>OpenTelemetry (OTel)</b>, vendor-neutral.
