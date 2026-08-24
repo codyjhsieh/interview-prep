@@ -109,7 +109,7 @@ ship() {
 
 Auto-generated via scripts/refresh.sh.
 
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>"
   local branch
   branch=$(git rev-parse --abbrev-ref HEAD)
   git push -u origin "$branch"
