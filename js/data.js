@@ -10271,8 +10271,8 @@ const COMPANIES = [
       { title:"Software Engineer, Fleet Management", url:"https://jobs.ashbyhq.com/openai/7809102e-e82a-4678-bf7c-221de8acc0d6", level:"mid", city:"nyc", added:"2026-08-21", posted:"2025-11-19", desc:"Manage the GPU fleet behind model training." },
       { title:"Software Engineer, Fleet Infrastructure", url:"https://jobs.ashbyhq.com/openai/a58add97-1968-4d5c-b504-ab62bea12df3", level:"mid", city:"nyc", added:"2026-08-21", posted:"2025-02-13", desc:"Build infrastructure running the accelerator fleet." },
       { title:"Software Engineer, GPU Infrastructure - HPC", url:"https://jobs.ashbyhq.com/openai/f58cb1eb-9642-4a4d-a14d-d7a57d583a11", level:"mid", city:"nyc", added:"2026-08-21", posted:"2026-02-05", desc:"Build HPC infrastructure for GPU clusters." },
-      { title:"Data Center Physical Security Systems Engineer", url:"https://jobs.ashbyhq.com/openai/f69f75f5-439f-4044-8ae1-8fd810e0402d", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-08-21", descRaw:"About the Role OpenAI is seeking a Data Center Physical Security Systems Engineer to define and deliver the physical security technology architecture that protects the infrastructure powering advanced AI systems. As OpenAI’s global compute footprint continues to expand, this role will partner closely with infrastructure engineering, hardware operations, networking, and regional operations teams to design and deploy scalable security architectures across a diverse portfolio of data center environments. The role is responsible for establishing architecture standards, technical requirements, and system designs that address security, operational, and compliance needs while supporting the rapid growth of OpenAI’s global infrastructure. This is not a purely advisory architecture position. The su" },
-      { title:"Applied AI Engineer, Cyber", url:"https://jobs.ashbyhq.com/openai/b46ffd99-f9f2-440c-ac13-448eb7911ad6", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-06-23", descRaw:"About the team The Applied AI Engineering team is responsible for helping developers and enterprises safely and effectively deploy OpenAI technologies in production. We act as trusted technical advisors and thought partners for customers, working side by side with their teams to identify high-value use cases, design practical architectures, and move from prototype to durable deployment. Cybersecurity is one of the most urgent domains where AI can help. Security teams are under pressure to reason across code, logs, infrastructure, tickets, alerts, and vulnerability data faster than ever. As frontier models become more capable, organizations need deep technical guidance on how to evaluate, validate, and safely deploy AI systems in security-critical workflows. About the role We are looking fo" }
+      { title:"Data Center Physical Security Systems Engineer", url:"https://jobs.ashbyhq.com/openai/f69f75f5-439f-4044-8ae1-8fd810e0402d", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-08-21", desc:"Architect physical security tech for AI compute sites." },
+      { title:"Applied AI Engineer, Cyber", url:"https://jobs.ashbyhq.com/openai/b46ffd99-f9f2-440c-ac13-448eb7911ad6", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-06-23", desc:"Deploy OpenAI models into enterprise security workflows." }
     ] },
   { id:"anthropic", name:"Anthropic", vertical:"ai",
     sub:"Claude \u2014 AI safety lab",
@@ -10408,7 +10408,7 @@ const COMPANIES = [
     jobs:[
       { title:"Software Engineer, Web Product", url:"https://jobs.ashbyhq.com/mirage/961e9a66-7574-4e0a-bff1-95312b7d6cab", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-06", desc:"Build web surfaces for an AI-native video editing platform." },
       { title:"Software Engineer, ML Systems", url:"https://jobs.ashbyhq.com/mirage/77f90cfc-e2a1-40d0-9e57-34a4d4d451b2", level:"mid", city:"nyc", added:"2026-07-21", posted:"2026-07-13", desc:"Build ML systems behind AI video generation and editing." },
-      { title:"Software Engineer, Backend", url:"https://jobs.ashbyhq.com/mirage/d5b5193e-90e8-4d10-8e01-e8fdd7dad6e1", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-08-02", desc:"Build backends orchestrating video production by prompt." }
+      { title:"Software Engineer, Backend", url:"https://jobs.ashbyhq.com/mirage/8d5cc445-ff2b-41ca-8c42-feb690de4bf7", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-08-24", desc:"Build backend for natural-language video editing." }
     ] },
   { id:"tavily", name:"Tavily", vertical:"ai",
     sub:"Search API for AI agents (acq. by Nebius Feb 2026)",
@@ -10516,11 +10516,10 @@ const COMPANIES = [
     tagline:"Synthesizes lifelike voice",
     stage:"Series C", raised:"$281M", lead:"Andreessen Horowitz",
     badges:["a16z","Sequoia","Nat Friedman"],
-    totalRoles:4,
+    totalRoles:3,
     notes:"Voice synthesis API. Audio infra, real-time streaming.",
     jobs:[
       { title:"Full-Stack Engineer (Back-End Leaning)", url:"https://jobs.ashbyhq.com/elevenlabs/c7d59014-b918-4c15-ae33-79f5c9f2cf9f", level:"mid", city:"nyc", added:"2026-05-31", posted:"2025-02-24", desc:"Build backends for voice AI serving millions of users." },
-      { title:"Forward Deployed Engineer - Software Engineer", url:"https://jobs.ashbyhq.com/elevenlabs/6c4c57c1-ec72-42ba-af3a-eb7aebbde2e6", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-01-14", desc:"Deploy voice AI agents into enterprise customer workflows." },
       { title:"Full-Stack Engineer", url:"https://jobs.ashbyhq.com/elevenlabs/6a530871-b6c6-4783-ac6b-69cc3b084192", level:"mid", city:"nyc", added:"2026-05-31", posted:"2024-09-06", desc:"Build full-stack features across voice AI platforms." },
       { title:"Enterprise Solutions Engineer - North America", url:"https://jobs.ashbyhq.com/elevenlabs/275f43d0-b62d-401d-830c-7c1ac0e688aa", level:"mid", city:"nyc", added:"2026-07-23", posted:"2026-05-06", desc:"Guide enterprises deploying voice and chat agents." }
     ] },
@@ -10720,7 +10719,7 @@ const COMPANIES = [
       { title:"Backend Engineer, Link (US)", url:"https://stripe.com/jobs/search?gh_jid=8131144", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-14", desc:"Build backends powering Link wallet payments on the web." },
       { title:"Software Engineer, Backend Engineer- Credit Coverage", url:"https://stripe.com/jobs/search?gh_jid=8130578", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-14", desc:"Own backends for credit coverage payments infrastructure." },
       { title:"Full Stack Engineer, Bridge", url:"https://stripe.com/jobs/search?gh_jid=8142764", level:"mid", city:"nyc", added:"2026-08-21", posted:"2026-08-20", desc:"Build full-stack features for Bridge stablecoins." },
-      { title:"Full Stack Engineer, Link", url:"https://stripe.com/jobs/search?gh_jid=8062305", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-08-21", descRaw:"Who we are About the team Link is a digital wallet designed for effortless and secure online payments and digital transactions. With Link, consumers enjoy convenience and peace of mind\u2014it works on any device or browser, is backed by the highest security mechanisms, offers purchase protections on eligible items, and ensures seamless and quick payments. Across the Link Engineering org, we focus on building delightful payment experiences and allowing our global consumer base to pay with their preferred payment methods. Our team's work spans the entire stack from front-end experiences, to infrastructure that supports low-latency transactions, to intelligent systems that help protect consumers and merchants from bad actors. Team matching for one of the subteams will begin during final stages. P" }
+      { title:"Full Stack Engineer, Link", url:"https://stripe.com/jobs/search?gh_jid=8062305", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-08-21", desc:"Build Link, Stripe's one-click consumer wallet." }
     ] },
   { id:"ramp", name:"Ramp", vertical:"fintech",
     sub:"Corporate cards + finance ops",
@@ -10795,7 +10794,7 @@ const COMPANIES = [
       { title:"Software Engineer, Full Stack", url:"https://jobs.ashbyhq.com/plaid/a9dc0810-546b-4773-9545-2862409e24b4", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-05-04", desc:"Ship features connecting accounts for fintech apps." },
       { title:"Senior Software Engineer - AI Tooling", url:"https://jobs.ashbyhq.com/plaid/3f7a4b9f-50b9-4adf-8475-4a4e6b8f0893", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-07-10", desc:"Build AI tooling for the financial connectivity platform." },
       { title:"Enterprise Sales Engineer - Sales Engineering", url:"https://jobs.ashbyhq.com/plaid/18208822-26ee-4485-a3e7-c9cfb4ad1c66", level:"mid", city:"nyc", added:"2026-07-23", posted:"2026-06-11", desc:"Architect Plaid integrations for banks and Fortune 500s." },
-      { title:"Software Engineer - Security Engineering", url:"https://jobs.ashbyhq.com/plaid/f214bf6c-2008-4eab-8943-03f5d03088c2", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-06-03", descRaw:"We believe that the way people interact with their finances will drastically improve in the next few years. We’re dedicated to empowering this transformation by building the tools and experiences that thousands of developers use to create their own products. Plaid powers the tools millions of people rely on to live a healthier financial life. We work with thousands of companies like Venmo, SoFi, several of the Fortune 500, and many of the largest banks to make it easy for people to connect their financial accounts to the apps and services they want to use. Plaid’s network covers 12,000 financial institutions across the US, Canada, UK and Europe. Founded in 2013, the company is headquartered in San Francisco with offices in New York, Washington D.C., London and Amsterdam. Security Engineeri" }
+      { title:"Software Engineer - Security Engineering", url:"https://jobs.ashbyhq.com/plaid/f214bf6c-2008-4eab-8943-03f5d03088c2", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-06-03", desc:"Secure the APIs behind millions of bank connections." }
     ] },
   { id:"alloy", name:"Alloy", vertical:"fintech",
     sub:"Identity decisioning for fintech",
@@ -10878,7 +10877,7 @@ const COMPANIES = [
     jobs:[
       { title:"Sr. IT Systems Engineer", url:"https://www.betterment.com/careers/current-openings/job?gh_jid=7679122&gh_jid=7679122", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-06-03", desc:"Run identity, SaaS, and endpoint infra for a finance firm." },
       { title:"Sr. Software Engineer, Backend", url:"https://www.betterment.com/careers/current-openings/job?gh_jid=7220419&gh_jid=7220419", level:"senior", city:"nyc", added:"2026-06-16", posted:"2026-06-03", desc:"Build broker-dealer backends running regulatory risk checks." },
-      { title:"Sr. Full Stack Software Engineer - Product Engineering", url:"https://www.betterment.com/careers/current-openings/job?gh_jid=7184616&gh_jid=7184616", level:"senior", city:"nyc", added:"2026-08-24", posted:"2026-08-21", descRaw:"About Betterment: Betterment is a leading, technology-driven financial services company that offers investing, savings and retirement solutions for retail investors and investment advisors as well as financial wellness solutions, including a 401(k) for small and medium-sized businesses. Our team is passionate about our mission, to empower people to build wealth with confidence and ease. We’re headquartered in NYC and offer hybrid NY-based positions (four days/ week in-office, with no required office days during the summer and winter holidays). About the role The Product Engineering teams at Betterment build the applications our customers use when they are logged in to their Betterment accounts. We are looking for Senior Full Stack Engineers to join us in furthering our mission to make peop" }
+      { title:"Sr. Full Stack Software Engineer - Product Engineering", url:"https://www.betterment.com/careers/current-openings/job?gh_jid=7184616&gh_jid=7184616", level:"senior", city:"nyc", added:"2026-08-24", posted:"2026-08-21", desc:"Build the logged-in investing product customers use daily." }
     ] },
   { id:"propel", name:"Propel", vertical:"fintech",
     sub:"Fintech for low-income Americans",
@@ -10921,7 +10920,7 @@ const COMPANIES = [
     tagline:"Watches every cloud metric",
     stage:"Public", raised:"$148M pre-IPO", lead:"Index",
     badges:["NASDAQ","Index","OpenView"],
-    totalRoles:12,
+    totalRoles:11,
     notes:"Public co. Time-series infra, alerting, observability depth.",
     jobs:[
       { title:"Senior Software Engineer - Distributed Systems", url:"https://careers.datadoghq.com/detail/3851927/?gh_jid=3851927", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-06-16", desc:"Build pipelines ingesting billions of events per second." },
@@ -10934,8 +10933,7 @@ const COMPANIES = [
       { title:"Senior Software Engineer - Bazel Tools", url:"https://careers.datadoghq.com/detail/8095166/?gh_jid=8095166", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-07-29", desc:"Own Bazel builds for 1,500 developers on a polyglot monorepo." },
       { title:"Partner Technology Solutions Engineer", url:"https://careers.datadoghq.com/detail/7961297/?gh_jid=7961297", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-07-28", desc:"Guide partners from architecture to marketplace publication." },
       { title:"Systems Engineer 2, Technical Solutions (US-East)", url:"https://careers.datadoghq.com/detail/8092973/?gh_jid=8092973", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-07-31", desc:"Run Zendesk, Jira, and tooling behind solutions workflows." },
-      { title:"Security Sales Engineer", url:"https://careers.datadoghq.com/detail/8141240/?gh_jid=8141240", level:"mid", city:"nyc", added:"2026-08-19", posted:"2026-08-19", desc:"Demo security products and drive enterprise adoption." },
-      { title:"Senior Data Engineer - Revenue Data Platform", url:"https://careers.datadoghq.com/detail/8141967/?gh_jid=8141967", level:"senior", city:"nyc", added:"2026-08-21", posted:"2026-08-20", desc:"Build the revenue data platform pipelines." }
+      { title:"Security Sales Engineer", url:"https://careers.datadoghq.com/detail/8141240/?gh_jid=8141240", level:"mid", city:"nyc", added:"2026-08-19", posted:"2026-08-19", desc:"Demo security products and drive enterprise adoption." }
     ] },
   { id:"mongodb", name:"MongoDB", vertical:"devtools",
     sub:"Document database (NASDAQ)",
@@ -11126,7 +11124,7 @@ const COMPANIES = [
     tagline:"Design together in the browser",
     stage:"Pre-IPO", raised:"$333M", lead:"Index",
     badges:["Index","Sequoia","Greylock"],
-    totalRoles:15,
+    totalRoles:14,
     notes:"Multiplayer collaboration at scale. CRDT, real-time infra, design tooling depth.",
     jobs:[
       { title:"Data Engineer", url:"https://boards.greenhouse.io/figma/jobs/5220003004?gh_jid=5220003004", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-15", desc:"Own data pipelines serving sales, marketing, and finance." },
@@ -11140,7 +11138,6 @@ const COMPANIES = [
       { title:"Software Engineer, Graphics & Media", url:"https://boards.greenhouse.io/figma/jobs/5552522004?gh_jid=5552522004", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-15", desc:"Build the C++ and WebAssembly graphics engine in the browser." },
       { title:"Software Engineer, Growth & Monetization", url:"https://boards.greenhouse.io/figma/jobs/5552560004?gh_jid=5552560004", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-15", desc:"Build growth, billing, and enterprise across the product." },
       { title:"Software Engineer, Machine Learning", url:"https://boards.greenhouse.io/figma/jobs/5551532004?gh_jid=5551532004", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-15", desc:"Build ML search and AI creative features across design." },
-      { title:"Software Engineer, Production Engineering", url:"https://boards.greenhouse.io/figma/jobs/5551649004?gh_jid=5551649004", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-15", desc:"Drive reliability and scalability across production programs." },
       { title:"Support AI Engineer", url:"https://boards.greenhouse.io/figma/jobs/5802956004?gh_jid=5802956004", level:"mid", city:"nyc", added:"2026-06-16", posted:"2026-06-17" },
       { title:"Software Engineer, Traffic", url:"https://boards.greenhouse.io/figma/jobs/6102379004?gh_jid=6102379004", level:"mid", city:"nyc", added:"2026-06-30", posted:"2026-06-26", desc:"Build the traffic infrastructure under every Figma service." },
       { title:"Software Engineer - Application Platform", url:"https://boards.greenhouse.io/figma/jobs/6142506004?gh_jid=6142506004", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-17", desc:"Build the Ruby foundations behind APIs and async jobs." }
@@ -11150,18 +11147,17 @@ const COMPANIES = [
     tagline:"One workspace for everything",
     stage:"Series C", raised:"$343M", lead:"Index",
     badges:["Sequoia","Index","Coatue"],
-    totalRoles:9,
+    totalRoles:8,
     notes:"Block-based docs + LLM features. Schema design, perf, AI eval.",
     jobs:[
       { title:"Forward Deployed Engineer, GTM", url:"https://jobs.ashbyhq.com/notion/10437426-14c8-4c45-8075-67959ce80393", level:"mid", city:"nyc", added:"2026-05-31", posted:"2025-08-07", desc:"Build custom Notion workflows and agent integrations." },
       { title:"Software Engineer, Collections Experience", url:"https://jobs.ashbyhq.com/notion/5d8c1ec6-e9ea-416b-9715-880bf5037abc", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-23", desc:"Improve how people organize and navigate their pages." },
-      { title:"Software Engineer, Trust", url:"https://jobs.ashbyhq.com/notion/66236b7e-2905-4a93-84a5-ed036a1a6581", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-05-07", desc:"Build abuse prevention protecting millions of teams." },
       { title:"Software Engineer, AI Workflows", url:"https://jobs.ashbyhq.com/notion/17330e14-83db-49a4-ae31-411690d97dba", level:"mid", city:"nyc", added:"2026-06-16", posted:"2026-05-26", desc:"Build AI workflows putting agents in the workspace." },
       { title:"Software Engineer, Developer Experience (Go Lead)", url:"https://jobs.ashbyhq.com/notion/876c69a9-be0a-4a71-bf4a-04cbc9c6328e", level:"mid", city:"nyc", added:"2026-06-30", posted:"2026-06-23", desc:"Lead Go developer experience across the workspace codebase." },
       { title:"Software Engineer, AI Platform", url:"https://jobs.ashbyhq.com/notion/a9d4a192-d31c-48d2-8156-e2a75d98eec1", level:"mid", city:"nyc", added:"2026-07-21", posted:"2026-07-14", desc:"Build the AI platform behind agents in the workspace." },
       { title:"Software Engineer, Infrastructure Security", url:"https://jobs.ashbyhq.com/notion/e3d8dc06-da05-4e9d-a143-2e9c51fa3d51", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-07", desc:"Build infrastructure security protecting the workspace." },
       { title:"Software Engineer, Collections Infra", url:"https://jobs.ashbyhq.com/notion/ca74504a-9b91-4ce3-b0df-97919b46e749", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-10", desc:"Build collections behind knowledge, projects, and meetings." },
-      { title:"Software Engineer, Developer Platform", url:"https://jobs.ashbyhq.com/notion/1fc309c8-da20-4ff2-84c7-8b863ece2b0a", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-08-24", descRaw:"Who We Are Notion is the collaborative AI workspace where teams and agents think together . We're building one place where your knowledge, projects, meetings, and AI tools live side by side, so work is faster, clearer, and less fragmented. Millions of individuals, small teams, and large companies run their work on Notion. Notinos (our employees) are customer zero in bringing this future of work to life. We care about craft, building things that last, and the belief that great work is still fundamentally human. Our goal isn’t to ship the next feature. Each and every team of Notinos is working to set the standard for how humans work together in the AI era. From building a business’s system of record to making and managing AI agents to automating away the busy work, we care deeply about givin" }
+      { title:"Software Engineer, Developer Platform", url:"https://jobs.ashbyhq.com/notion/1fc309c8-da20-4ff2-84c7-8b863ece2b0a", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-08-24", desc:"Build the public API and app platform for Notion." }
     ] },
   { id:"justworks", name:"Justworks", vertical:"saas",
     sub:"HR / payroll / benefits",
@@ -11987,11 +11983,10 @@ const COMPANIES = [
     tagline:"Streams, studios, and parks",
     stage:"Public", raised:"$1B+ pre-IPO", lead:"NYSE",
     badges:["NYSE","S&P 500"],
-    totalRoles:6,
+    totalRoles:5,
     notes:"NYC tech: ABC News, Hulu, ESPN+, Disney+. Streaming infra + content systems.",
     jobs:[
       { title:"Senior Software Engineer - Java", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Senior-Software-Engineer---Java_10149378", level:"senior", city:"nyc", added:"2026-05-31" },
-      { title:"Senior Software Engineer", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Senior-Software-Engineer_10149859", level:"senior", city:"nyc", added:"2026-05-31" },
       { title:"Software Engineer - Java", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Software-Engineer-II---Data-Ingestion---Data-Store_10141160-1", level:"mid", city:"nyc", added:"2026-06-16" },
       { title:"Senior Product Software Engineer", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Senior-Product-Software-Engineer_10153072-2", level:"senior", city:"nyc", added:"2026-06-22" },
       { title:"Sr Product Software Engineer", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Sr-Product-Software-Engineer_10153785", level:"senior", city:"nyc", added:"2026-06-22" },
@@ -12069,7 +12064,7 @@ const COMPANIES = [
       { title:"Backend Engineer, Growth and Data", url:"https://jobs.ashbyhq.com/hebbia-ai/1710a563-14df-45c5-a6b1-a62adcdead89", level:"mid", city:"nyc", added:"2026-06-22", posted:"2025-07-09", desc:"Build growth and data backends for an investor AI platform." },
       { title:"Software Engineer, Site Reliability", url:"https://jobs.ashbyhq.com/hebbia-ai/07730121-e344-4b07-a23e-47dcfd6b3678", level:"mid", city:"nyc", added:"2026-06-22", posted:"2026-02-26", desc:"Run reliability for AI used by BlackRock and Carlyle." },
       { title:"Solutions Engineer", url:"https://jobs.ashbyhq.com/hebbia-ai/6ee51b19-cead-4fb5-b83c-6285a36541a7", level:"mid", city:"nyc", added:"2026-07-23", posted:"2025-04-28", desc:"Own technical pre-sales for the investment AI platform." },
-      { title:"Software Engineer, Infrastructure", url:"https://jobs.ashbyhq.com/hebbia-ai/6e802704-ce96-4110-9db3-6e02dc28d615", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-08-24", descRaw:"About Hebbia The AI platform for investors and bankers that generates alpha and drives upside. Founded in 2020 by George Sivulka and backed by Peter Thiel and Andreessen Horowitz, Hebbia powers investment decisions for BlackRock, KKR, Carlyle, Centerview, and 40% of the world's largest asset managers. Our flagship product, Matrix, delivers industry-leading accuracy, speed, and transparency in AI-driven analysis. It is trusted to help manage over $30 trillion in assets globally. We deliver the intelligence that gives finance professionals a definitive edge. Our AI uncovers signals no human could see, surfaces hidden opportunities, and accelerates decisions with unmatched speed and conviction. We do not just streamline workflows. We transform how capital is deployed, how risk is managed, and" }
+      { title:"Software Engineer, Infrastructure", url:"https://jobs.ashbyhq.com/hebbia-ai/6e802704-ce96-4110-9db3-6e02dc28d615", level:"mid", city:"nyc", added:"2026-08-24", posted:"2026-08-24", desc:"Run infra behind AI research tools for asset managers." }
     ] },
   { id:"bilt", name:"Bilt Rewards", vertical:"fintech",
     sub:"rent rewards + housing-payments platform",
@@ -12626,12 +12621,11 @@ const COMPANIES = [
     tagline:"Finds bugs in your code",
     stage:"Series D", raised:"$100M", lead:"Redpoint",
     badges:["Redpoint","Sequoia"],
-    totalRoles:4,
+    totalRoles:3,
     notes:"NYC office (also SF/Boston/Denver). AppSec leader, AI-assisted vuln triage.",
     jobs:[
       { title:"Senior Backend Software Engineer", url:"https://jobs.ashbyhq.com/semgrep/92b21a3a-fba8-4d71-9f4d-217850689f5f", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-02-02", desc:"Build backends for AI code security scanning." },
       { title:"Senior Full Stack Software Engineer", url:"https://jobs.ashbyhq.com/semgrep/21496f9a-feaf-4c11-a83c-3b46c621b778", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-02-02", desc:"Build features detecting vulnerabilities in developer flows." },
-      { title:"Senior AI Software Engineer", url:"https://jobs.ashbyhq.com/semgrep/589d46cc-0f2a-4660-a516-9e4e378a9b8e", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-02-02", desc:"Cut false positives by learning developer context." },
       { title:"Senior Software Engineer, Growth", url:"https://jobs.ashbyhq.com/semgrep/9700188b-be5d-4de1-abea-4f8397f596c8", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-05-08", desc:"Ship growth and onboarding for a code security platform." }
     ] },
   { id:"attio", name:"Attio", vertical:"saas",
@@ -12879,7 +12873,7 @@ const COMPANIES = [
       { title:"Senior Software Engineer - Autonomous Systems", url:"https://jobs.lever.co/palantir/bba1ecbc-e56d-48b0-b33a-aefcbffbd655", level:"senior", city:"nyc", added:"2026-07-23", posted:"2026-02-03", desc:"Build C2 autonomy linking sensors, drones, and LLMs." },
       { title:"Forward Deployed Infrastructure Engineer, New Grad - US Government", url:"https://jobs.lever.co/palantir/91117724-9389-48dc-912f-98e48d4d45d8", level:"mid", city:"nyc", added:"2026-08-06", posted:"2025-10-29", desc:"Run infrastructure for federal platform deployments." },
       { title:"Platform Engineer - Identity Infrastructure", url:"https://jobs.lever.co/palantir/cf08f44c-bf75-45ed-9fab-f4836e51013e", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-07-28", desc:"Build the identity platform behind mission deployments." },
-      { title:"Forward Deployed Software Engineer - US Government", url:"https://jobs.lever.co/palantir/84131e3f-455e-47fc-9c11-898d95f09048", level:"mid", city:"sd", added:"2026-08-24", posted:"2025-07-29", descRaw:"A World-Changing Company Palantir builds the world’s leading software for data-driven decisions and operations. By bringing the right data to the people who need it, our platforms empower our partners to develop lifesaving drugs, forecast supply chain disruptions, locate missing children, and more. The Role Forward Deployed Software Engineers (FDSEs) understand our customers’ greatest pain points and design end-to-end solutions to address them. FDSEs solicit constant feedback on their work from both customers and colleagues, improving our products over time with rapid iteration cycles. FDSEs deploy ground breaking technical solutions to solve our customers’ hardest problems. Projects often start with a nebulous question like “Why are we losing customers?” or “How can we more effectively id" }
+      { title:"Forward Deployed Software Engineer - US Government", url:"https://jobs.lever.co/palantir/84131e3f-455e-47fc-9c11-898d95f09048", level:"mid", city:"sd", added:"2026-08-24", posted:"2025-07-29", desc:"Ship end-to-end solutions onsite with government users." }
     ] },
   { id:"turing", name:"Turing", vertical:"ai",
     sub:"AI dev marketplace + staff",
@@ -12988,10 +12982,10 @@ const COMPANIES = [
     tagline:"Bills insurance for doulas",
     stage:"Seed", raised:"YC", lead:"Y Combinator",
     badges:["YC"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"YC W23. NYC. Mission-driven.",
     jobs:[
-      { title:"Founding Software Engineer (Backend/Infra)", url:"https://jobs.ashbyhq.com/loula/fdf244bb-148d-4320-9cb4-15c24365c884", level:"founding", city:"nyc", added:"2026-07-21", posted:"2026-04-01", desc:"Found the backend of a maternal healthcare platform." }
+
     ] },
   { id:"fortuna-health", name:"Fortuna Health", vertical:"health",
     sub:"Consumer Medicaid enrollment + renewals",
@@ -13128,7 +13122,7 @@ const COMPANIES = [
     notes:"NYC major office. Product analytics + experimentation.",
     jobs:[
       { title:"Senior Sales Engineer - Enterprise", url:"https://job-boards.greenhouse.io/amplitude/jobs/8623085002", level:"senior", city:"nyc", added:"2026-07-23", posted:"2026-07-20", desc:"Run demos and evaluations of an AI analytics platform." },
-      { title:"Senior Sales Engineer - Enterprise (Fluent Spanish Speaking)", url:"https://job-boards.greenhouse.io/amplitude/jobs/8705194002", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-08-19", descRaw:"Amplitude is the leading AI analytics platform, helping over 4,700 customers\u2014including Atlassian, Burger King, NBCUniversal, and Square\u2014build better products and digital experiences. With powerful AI Agents embedded across our platform, teams can analyze, test, and optimize user experiences faster than ever. Ranked #1 across multiple categories in G2’s Winter 2026 Report, Amplitude is the best-in-class solution for product, data, and marketing teams. Learn more at amplitude.com . As an organization, we deliver for our customers by living our values. We operate from a place of humility, take ownership of problems and successes, approach challenges with a growth mindset, and put our customers at the center of everything we do. Amplitude’s Commitment to Diversity Equity & Inclusion (DEI): Amp" }
+      { title:"Senior Sales Engineer - Enterprise (Fluent Spanish Speaking)", url:"https://job-boards.greenhouse.io/amplitude/jobs/8705194002", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-08-19", desc:"Scope and demo analytics deals for Spanish-speaking accounts." }
     ] },
   { id:"factory", name:"Factory", vertical:"ai",
     sub:"Agentic-coding FDE shop",
@@ -13315,13 +13309,13 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/bastion/fc523fc6-78a4-4f02-807f-de5218f593e3", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-06-22", desc:"Ship custody and issuance behind regulated stablecoins." }
     ] },
-  { id:"odyssey-fi", name:"Odyssey", vertical:"fintech",
-    sub:"Alternative investments platform",
-    tagline:"Alternatives made accessible",
-    stage:"Seed", raised:"$5M", lead:"Cota",
-    badges:["Cota","YC"],
+  { id:"odyssey-fi", name:"Odyssey", vertical:"saas",
+    sub:"K-12 education savings accounts",
+    tagline:"Public school money, family-run",
+    stage:"", raised:"", lead:"",
+    badges:[],
     totalRoles:1,
-    notes:"NYC HQ.",
+    notes:"NYC HQ. ESA program software for states.",
     jobs:[
       { title:"Full Stack Engineer", url:"https://jobs.ashbyhq.com/odyssey/5158a3e1-ddde-4253-a895-a82a9ab2e2d4", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-04-27", desc:"Build systems managing state education savings accounts." }
     ] },
@@ -13360,10 +13354,10 @@ const COMPANIES = [
     tagline:"Measures what shoppers buy",
     stage:"Public", raised:"(NIQ post-Advent spinout)", lead:"NYSE",
     badges:["NYSE"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC HQ 85 Broad St. Sr Director Engineering roles.",
     jobs:[
-      { title:"Forward Deployed AI Engineer (USA Based)", url:"https://jobs.smartrecruiters.com/NielsenIQ/744000144775644", level:"mid", city:"nyc", added:"2026-08-21", posted:"2026-08-21" }
+
     ] },
   { id:"bank-of-america", name:"Bank of America", vertical:"fintech",
     sub:"Retail + institutional bank (NYSE: BAC)",
@@ -13486,8 +13480,8 @@ const COMPANIES = [
       { title:"Sr. Solutions Engineer - Digital Native Business, Named Accounts", url:"https://databricks.com/company/careers/open-positions/job?gh_jid=8646516002", level:"senior", city:"nyc", added:"2026-08-18", posted:"2026-08-18", desc:"Guide digital-native customers architecting on the lakehouse." },
       { title:"Sr. Forward Deployed Engineer (FDE) - Public Sector", url:"https://databricks.com/company/careers/open-positions/job?gh_jid=8423296002", level:"senior", city:"nyc", added:"2026-08-19", posted:"2026-08-18", desc:"Deploy Databricks for public sector and defense customers." },
       { title:"Senior Software Engineer - Enterprise Platform, CustomerLake", url:"https://databricks.com/company/careers/open-positions/job?gh_jid=8715639002", level:"senior", city:"nyc", added:"2026-08-21", posted:"2026-08-20", desc:"Build enterprise CustomerLake data platform." },
-      { title:"Sr. Forward Deployed Engineer", url:"https://databricks.com/company/careers/open-positions/job?gh_jid=8739462002", level:"senior", city:"nyc", added:"2026-08-24", posted:"2026-08-21", descRaw:"CSQ427R94 As a Forward Deployed Engineer (FDE) you will work with customers to build and productionize solutions to their data & AI challenges using the Databricks platform. You will own the architecture, lead design decisions, and implement end-to-end systems spanning data engineering, AI, and application development. We work cross-functionally to shape long-term strategic priorities and initiatives alongside engineering, product, and developer relations. FDEs deliver with customer empathy, integrating with client systems, training, and other technical needs to help customers get most value out of their data. This is a hands-on, customer-facing role for builders who thrive at the intersection of technology and business impact. The ideal candidate combines engineering expertise with adapta" },
-      { title:"Sr. Forward Deployed Engineer - Public Sector", url:"https://databricks.com/company/careers/open-positions/job?gh_jid=8632188002", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-08-18", descRaw:"CSQ327R221 About Databricks At Databricks, we are passionate about enabling data teams to solve the world's toughest problems, from making the next mode of transportation a reality to accelerating the development of medical breakthroughs. We do this by building and running the world's best data and AI infrastructure platform so our customers can use deep data insights to improve their business. Founded by engineers, and customer obsessed, we leap at every opportunity to solve technical challenges, from designing next-gen UI/UX for interfacing with data to scaling our services and infrastructure across millions of virtual machines. And we're only getting started. The Role As a Sr. Forward Deployed Engineer (FDE), you will work with federal government customers to build and productionize sol" }
+      { title:"Sr. Forward Deployed Engineer", url:"https://databricks.com/company/careers/open-positions/job?gh_jid=8739462002", level:"senior", city:"nyc", added:"2026-08-24", posted:"2026-08-21", desc:"Architect customer data and AI systems on Databricks." },
+      { title:"Sr. Forward Deployed Engineer - Public Sector", url:"https://databricks.com/company/careers/open-positions/job?gh_jid=8632188002", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-08-18", desc:"Build production data and AI systems for federal customers." }
     ] },
   { id:"confluent", name:"Confluent", vertical:"infra",
     sub:"Kafka streaming (NASDAQ: CFLT)",
@@ -14053,10 +14047,10 @@ const COMPANIES = [
     tagline:"Banking for the world",
     stage:"Public", raised:"N/A", lead:"NYSE",
     badges:["NYSE","Dow 30"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC HQ. Markets + institutional tech + retail digital.",
     jobs:[
-      { title:"Senior Software Engineer (Java/Python)", url:"https://citi.wd5.myworkdayjobs.com/en-US/2/job/New-York-New-York-United-States/Senior-Software-Engineer--Java-Python-_26968452", level:"senior", city:"nyc", added:"2026-08-21" }
+
     ] },
   { id:"crowdstrike", name:"CrowdStrike", vertical:"saas",
     sub:"Endpoint security (NASDAQ: CRWD)",
@@ -14273,10 +14267,11 @@ const COMPANIES = [
   { id:"ashby", name:"Ashby", vertical:"saas",
     sub:"Recruiting operations platform",
     tagline:"Recruiting that runs on data",
-    stage:"", raised:"", lead:"",
+    stage:"", raised:"$83M", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
+    fundingSrc:"sec",
     jobs:[
       { title:"Senior Product Engineer - Americas", url:"https://jobs.ashbyhq.com/ashby/751768c6-8d97-4e91-a57d-6b85ce4b5a37", level:"senior", city:"nyc", added:"2026-08-21", posted:"2026-04-30", desc:"Ship product for the recruiting platform." }
     ] },
@@ -14430,6 +14425,7 @@ const COMPANIES = [
     ] },
   { id:"abbvie", name:"AbbVie / Allergan", vertical:"health",
     sub:"Biopharma (NYSE: ABBV)",
+    tagline:"Medicine at industrial scale.",
     stage:"Public", raised:"(NYSE: ABBV)", lead:"NYSE",
     badges:["NYSE","S&P 500"],
     totalRoles:1,
@@ -14439,106 +14435,115 @@ const COMPANIES = [
     ] },
   { id:"vannevarlabs", name:"Vannevar Labs", vertical:"saas",
     sub:"Defense FDE consultancy",
+    tagline:"AI built to deter adversaries.",
     stage:"Series C", raised:"$100M+", lead:"General Catalyst",
     badges:["General Catalyst","Founders Fund"],
     totalRoles:1,
     notes:"NYC office. Palantir alumni; defense FDE.",
     jobs:[
-      { title:"Senior Software Engineer - ATO", url:"https://job-boards.greenhouse.io/vannevarlabs/jobs/5038982007", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-20", descRaw:"Vannevar is a defense technology company building AI to deter our adversaries. In the 21st century, conflict moves at algorithmic speed and foresight equals firepower. Our agentic AI is purpose-built to compete with China\u2014from cross-Strait conflict to gray zone coercion. Trained on the most mission-relevant datasets in defense, our technology models adversary behavior, simulates campaigns, and recommends the best course of action to decision makers. Our AI systems are some of the most trusted in the industry and actively used on the front lines of the Indo-Pacific to keep the peace and save lives. Exceptional technology starts with exceptional people. Vannevar is a small agile team combining world-class engineers with veteran strategists who bring deep expertise in defense and tradecraft. " }
+      { title:"Senior Software Engineer - ATO", url:"https://job-boards.greenhouse.io/vannevarlabs/jobs/5038982007", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-20", desc:"Build AI systems for defense intelligence missions." }
     ] },
   { id:"sonymusic", name:"Sony Music Entertainment", vertical:"media",
     sub:"Global record label (Sony subsidiary)",
+    tagline:"Where music careers are made.",
     stage:"Public", raised:"(Sony subsidiary)", lead:"Sony",
     badges:["Sony"],
     totalRoles:1,
     notes:"NYC HQ. Includes The Orchard, Alamo, Columbia. 3 NYC eng today (Data Privacy, Emerging Tech, Sr PM D2C).",
     jobs:[
-      { title:"Senior Software Engineer, Data Ops - PDEGO", url:"https://job-boards.greenhouse.io/sonymusicentertainment/jobs/8730207002", level:"senior", city:"nyc", added:"2026-08-24", posted:"2026-08-24", descRaw:"About Sony Music Entertainment At Sony Music Entertainment, we fuel the creative journey. We’ve played a pioneering role in music history, from the first-ever music label to the invention of the flat disc record. We’ve nurtured some of music’s most iconic artists and produced some of the most influential recordings of all time. Today, we work in more than 70 countries, supporting a diverse roster of international superstars, developing and independent artists, and visionary creators. From our position at the intersection of music, entertainment, and technology, we bring imagination and expertise to the newest products and platforms, embrace new business models, employ breakthrough tools, and provide powerful insights that help our artists push creative boundaries and reach new audiences. I" }
+      { title:"Senior Software Engineer, Data Ops - PDEGO", url:"https://job-boards.greenhouse.io/sonymusicentertainment/jobs/8730207002", level:"senior", city:"nyc", added:"2026-08-24", posted:"2026-08-24", desc:"Run data pipelines across label and catalog systems." }
     ] },
   { id:"shield-ai", name:"Shield AI", vertical:"defense",
     sub:"AI autonomy for defense",
+    tagline:"Autonomy that flies itself.",
     stage:"Series F", raised:"$1.5B", lead:"US Innovative Tech",
     badges:["US Innovative","Andreessen"],
     totalRoles:15,
     notes:"Hivemind autonomy.",
     jobs:[
-      { title:"Senior Software Engineer, Autonomous Pilot Integration – Emerging Domains (R5423)", url:"https://jobs.lever.co/shieldai/84623e5a-e496-4431-bc15-9bb92a080bc4", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube." },
-      { title:"Senior Software Engineer, Autonomous Pilot Integration – Expeditionary (R5208)", url:"https://jobs.lever.co/shieldai/3adca53e-1c7c-4036-9077-6320f0a69561", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube." },
-      { title:"Senior Software Engineer, Autonomous Pilot Integration – Weapons (R5427)", url:"https://jobs.lever.co/shieldai/52ea86e4-8495-4847-b26a-69c7e5b4c574", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. The Autonomous Pilot Integration team for launched effects builds autonomy solutions for small, often air- or ground-launched platforms that operate in multi-agent fleets and frequently in disconnected or air-gapped environments. We combine capabilities from the Autonomy Capa" },
-      { title:"Senior Software Engineer, Autonomous Pilot Integration (R5200)", url:"https://jobs.lever.co/shieldai/aec9e538-6071-47c5-9c9b-8aadc0bd3f7e", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-06-08", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. The Autonomous Pilot Integration team builds autonomy solutions for a wide range of CONOPs and mission sets. We combine capabilities from the Autonomy Capabilities team (motion planning, tactics), the Perception team (e.g., track fusion), and the HivemindSDK to develop the au" },
-      { title:"Senior Software Engineer, Autonomy Behaviors (R4588)", url:"https://jobs.lever.co/shieldai/ccddd964-0a35-4650-9690-28d54b690298", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-04-30", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. About The Team The Autonomy Capabilities team at Shield AI has assembled a diverse team of experts in software, robotics, control systems, optimization, and data analysis to create software solutions that greatly evolve the capabilities of our customers. The team is responsib" },
-      { title:"Senior Software Engineer, Autonomy Capabilities - Space", url:"https://jobs.lever.co/shieldai/cc7f8c05-cff0-4222-9319-db05c7d544f3", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-08-05", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. The Autonomy Capabilities Team develops functionality to automate single- and multi-agent teams of platforms in pursuit of mission objectives and acts as a central discipline-aligned focal-point for encouraging consistent usage of technical approaches across business portfoli" },
-      { title:"Senior Software Engineer, Perception (R5420)", url:"https://jobs.lever.co/shieldai/3587ad7b-e57a-4dea-8e14-db52d1808f40", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-28", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. The Hivemind Solutions Perception team develops the next generation of perception capabilities for autonomous systems by combining state-of-the-art machine learning with the proven foundations of computer vision. The team advances how autonomous platforms understand and inter" },
-      { title:"Senior Staff Engineer, ML Ops (R4941)", url:"https://jobs.lever.co/shieldai/0034444c-c0c4-4884-a49f-b921bd661b03", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-05-14", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. Job Description: Shield AI builds autonomy systems for defense applications, including air, maritime, and space platforms operating in complex and contested environments. We are building the AI Factory Reference Architecture, a Kubernetes-native platform for developing, train" },
-      { title:"Senior Staff Software Engineer, Autonomous Pilot Integration –  Emerging Domains (R5398)", url:"https://jobs.lever.co/shieldai/cfc41052-1dd6-47d7-b377-3e629a991d45", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. The Autonomous Pilot Integration team for launched effects builds autonomy solutions for small, often air- or ground-launched platforms that operate in multi-agent fleets and frequently in disconnected or air-gapped environments. We combine capabilities from the Autonomy Capa" },
-      { title:"Senior Staff Software Engineer, Autonomous Pilot Integration –  Weapons (R5398)", url:"https://jobs.lever.co/shieldai/8b13cc38-809d-4aac-a778-a374a3d99167", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. The Autonomous Pilot Integration team for launched effects builds autonomy solutions for small, often air- or ground-launched platforms that operate in multi-agent fleets and frequently in disconnected or air-gapped environments. We combine capabilities from the Autonomy Capa" },
-      { title:"Senior Staff Software Engineer, Autonomous Pilot Integration – Expeditionary (R5193)", url:"https://jobs.lever.co/shieldai/d989b35b-3bcb-4a73-b11c-1e53c4303d86", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube." },
-      { title:"Senior Staff Software Engineer, Autonomous Pilot Integration (R5193)", url:"https://jobs.lever.co/shieldai/cd2da1f3-502e-44cd-9bea-38ffd09c4413", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-06-08", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. The Autonomous Pilot Integration team builds autonomy solutions for a wide range of CONOPs and mission sets. We combine capabilities from the Autonomy Capabilities team (motion planning, tactics), the Perception team (e.g., track fusion), and the HivemindSDK to develop the au" },
-      { title:"Senior Staff Software Engineer, Perception (R4985)", url:"https://jobs.lever.co/shieldai/e8311cd4-6b45-473b-abba-c9cfdcac615e", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-28", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. The Hivemind Solutions Perception team develops the next generation of perception capabilities for autonomous systems by combining state-of-the-art machine learning with the proven foundations of computer vision. The team advances how autonomous platforms understand and inter" },
-      { title:"Forward Deployed Engineer, Operations & Sustainment (R5497)", url:"https://jobs.lever.co/shieldai/41c56241-9a9c-473f-a5a2-b11000aa0c23", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-08-04", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. Job Description: Shield AI builds intelligent systems that protect service members and civilians. Our products include Hivemind autonomy software and V-BAT and X-BAT aircraft, and our teams support customers and operations across the United States, Europe, the Middle East, an" },
-      { title:"Software Engineer II, Autonomy Behaviors (R5202)", url:"https://jobs.lever.co/shieldai/b682f55e-ca09-444b-8251-38422567ada8", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-04-30", descRaw:"Shield AI is a venture-backed defense-tech company with the mission of protecting service members and civilians with intelligent systems. Its products include Hivemind autonomy software, V-BAT and X-BAT aircraft, and Aechelon simulation and synthetic reality technologies. With offices and facilities across the U.S., Europe, the Middle East, and Asia-Pacific, Shield AI’s technology actively supports operations worldwide. For more information, visit www.shield.ai. Follow Shield AI on LinkedIn, X, Instagram, and YouTube. About The Team The Autonomy Capabilities team at Shield AI has assembled a diverse team of experts in software, robotics, control systems, optimization, and data analysis to create software solutions that greatly evolve the capabilities of our customers. The team is responsib" }
+      { title:"Senior Software Engineer, Autonomous Pilot Integration – Emerging Domains (R5423)", url:"https://jobs.lever.co/shieldai/84623e5a-e496-4431-bc15-9bb92a080bc4", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", desc:"Integrate Hivemind autonomy onto new aircraft platforms." },
+      { title:"Senior Software Engineer, Autonomous Pilot Integration – Expeditionary (R5208)", url:"https://jobs.lever.co/shieldai/3adca53e-1c7c-4036-9077-6320f0a69561", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", desc:"Integrate autonomy for expeditionary V-BAT deployments." },
+      { title:"Senior Software Engineer, Autonomous Pilot Integration – Weapons (R5427)", url:"https://jobs.lever.co/shieldai/52ea86e4-8495-4847-b26a-69c7e5b4c574", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", desc:"Build autonomy for air- and ground-launched effects." },
+      { title:"Senior Software Engineer, Autonomous Pilot Integration (R5200)", url:"https://jobs.lever.co/shieldai/aec9e538-6071-47c5-9c9b-8aadc0bd3f7e", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-06-08", desc:"Integrate Hivemind autonomy across mission profiles." },
+      { title:"Senior Software Engineer, Autonomy Behaviors (R4588)", url:"https://jobs.lever.co/shieldai/ccddd964-0a35-4650-9690-28d54b690298", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-04-30", desc:"Write multi-agent behaviors for autonomous aircraft." },
+      { title:"Senior Software Engineer, Autonomy Capabilities - Space", url:"https://jobs.lever.co/shieldai/cc7f8c05-cff0-4222-9319-db05c7d544f3", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-08-05", desc:"Automate multi-agent teaming for space missions." },
+      { title:"Senior Software Engineer, Perception (R5420)", url:"https://jobs.lever.co/shieldai/3587ad7b-e57a-4dea-8e14-db52d1808f40", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-28", desc:"Build perception stacks for GPS-denied flight." },
+      { title:"Senior Staff Engineer, ML Ops (R4941)", url:"https://jobs.lever.co/shieldai/0034444c-c0c4-4884-a49f-b921bd661b03", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-05-14", desc:"Run ML training and deployment pipelines for autonomy." },
+      { title:"Senior Staff Software Engineer, Autonomous Pilot Integration –  Emerging Domains (R5398)", url:"https://jobs.lever.co/shieldai/cfc41052-1dd6-47d7-b377-3e629a991d45", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", desc:"Lead autonomy integration onto emerging aircraft types." },
+      { title:"Senior Staff Software Engineer, Autonomous Pilot Integration –  Weapons (R5398)", url:"https://jobs.lever.co/shieldai/8b13cc38-809d-4aac-a778-a374a3d99167", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", desc:"Lead autonomy work for launched-effects platforms." },
+      { title:"Senior Staff Software Engineer, Autonomous Pilot Integration – Expeditionary (R5193)", url:"https://jobs.lever.co/shieldai/d989b35b-3bcb-4a73-b11c-1e53c4303d86", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-21", desc:"Lead autonomy integration for expeditionary systems." },
+      { title:"Senior Staff Software Engineer, Autonomous Pilot Integration (R5193)", url:"https://jobs.lever.co/shieldai/cd2da1f3-502e-44cd-9bea-38ffd09c4413", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-06-08", desc:"Lead Hivemind integration across aircraft platforms." },
+      { title:"Senior Staff Software Engineer, Perception (R4985)", url:"https://jobs.lever.co/shieldai/e8311cd4-6b45-473b-abba-c9cfdcac615e", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-28", desc:"Lead perception for autonomous flight in denied areas." },
+      { title:"Forward Deployed Engineer, Operations & Sustainment (R5497)", url:"https://jobs.lever.co/shieldai/41c56241-9a9c-473f-a5a2-b11000aa0c23", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-08-04", desc:"Support Hivemind autonomy with operators in the field." },
+      { title:"Software Engineer II, Autonomy Behaviors (R5202)", url:"https://jobs.lever.co/shieldai/b682f55e-ca09-444b-8251-38422567ada8", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-04-30", desc:"Build autonomy behaviors in C++ for uncrewed aircraft." }
     ] },
   { id:"zoox", name:"Zoox", vertical:"automotive",
     sub:"Autonomous ride-hail (Amazon subsidiary)",
+    tagline:"Robotaxis with no steering wheel",
     stage:"Subsidiary", raised:"$1B+ pre-acq", lead:"Amazon",
     badges:["Amazon"],
     totalRoles:9,
     notes:"Purpose-built AV.",
     jobs:[
-      { title:"Senior / Staff Software Systems Engineer - Simulation Evaluation & Validation", url:"https://jobs.lever.co/zoox/2ef807a0-f80d-47ba-a1a1-578ebe195592", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-27", descRaw:"Simulation is central to ensuring the safety and scalability of autonomous vehicles at Zoox. In this role, you will develop metrics and evaluation pipelines to assess simulator fidelity and guide improvements to our GenAI-powered simulator of virtual worlds with dynamic agents and realistic sensor data. You’ll collaborate with autonomy, safety, and simulation teams to define quantitative validation criteria for simulator fidelity, and use exploratory data analysis to root-cause gaps in simulator performance. Your work will directly support Zoox scaling autonomous driving across multiple cities in increasingly complex environments." },
-      { title:"Senior Software Engineer - C++  GPU Performance", url:"https://jobs.lever.co/zoox/2042bc12-6247-48d5-a9fb-a6e41363a5ce", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-04-16", descRaw:"Zoox is building the world's most advanced self-driving hardware and software solution. The efficiency demands of such a system require an expert fine tuning of both the compute hardware architecture as well as the algorithms and middleware that runs on it to achieve maximum throughput at the most optimal power levels. The Software Performance team’s mission is to analyze, optimize and provide guidance to the software and hardware teams in order to meet the required specifications. As a GPU performance software engineer within the Software Performance team, you will instrument, monitor, analyze and optimize GPU-based algorithms that are performance-critical for our solution. The scope for GPU usage ranges from traditional computer vision and deep learning architectures to complex geometric" },
-      { title:"Senior Software Engineer - Full Stack Operational Tools", url:"https://jobs.lever.co/zoox/b6799ed0-252b-4535-a908-af77eb130415", level:"senior", city:"sd", added:"2026-08-24", posted:"2025-10-02", descRaw:"At Zoox, we’re not just building self-driving cars; we’re creating an autonomous ride-hailing service that will revolutionize how people move. Our Ops Tools team is the central nervous system of this mission, and we’re looking for a Senior/Staff Software Engineer to be a technical leader in this critical area. This isn’t just another full-stack role. You’ll be at the intersection of web development, robotics, and real-time operations, building the software that allows us to manage and scale our fleet of autonomous robotaxis. If you’re a seasoned engineer who thrives on solving complex, multi-disciplinary problems and wants to see your work have a tangible impact on the world, we want to hear from you." },
-      { title:"Embedded Software Engineer", url:"https://jobs.lever.co/zoox/0dd5de4b-4e98-4808-85fd-e739e7fc5bba", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-06-10", descRaw:"Zoox is looking for an embedded software engineer to join our Firmware Platforms team. In this role, you will be responsible for developing, extending, and maintaining support for multiple embedded platforms for the Zoox vehicle. You will work closely with electrical engineers, embedded software engineers, and validation engineers to enable support for new advanced platforms and accelerate application development across multiple projects. We are looking for people who are passionate about diving deep into the hardware and creating robust and reusable software." },
-      { title:"Embedded Software Engineer - Battery Management Systems", url:"https://jobs.lever.co/zoox/082ed20c-b8e1-4b1c-9c22-4738ad94055d", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-08-06", descRaw:"Zoox is looking for an embedded software engineer to join our Firmware Power Systems team. Responsibilities include designing, building, and testing real-time embedded code in C/C++ for BMS (Battery Management Systems). Key responsibilities include implementing safety algorithms, managing board bring-up, and ensuring seamless hardware-software integration. The work includes Power management and efficiency, Charging control, a variety of operator controls, integration of supplier systems, coordination and control of all Power sub-systems, and low-level vehicle controls. This work requires collaboration with vehicle engineers, systems engineers, controls engineers, and suppliers to ensure the Zoox vehicle can drive safely and reliably. We are looking for people who are passionate about worki" },
-      { title:"Embedded Software Engineer - MCU Platforms", url:"https://jobs.lever.co/zoox/4c16c18c-18c0-433c-bc21-8bd72824a1d9", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-08-04", descRaw:"The Core Firmware team is responsible for building the foundation upon which Zoox-owned firmware applications are built. Core Firmware engineers work with a diverse set of microcontrollers and application processors. We make sure the embedded platforms available to Firmware and Software teams are safe, stable, performant, secure, and flexible. Many of these things are often at odds with each other, and navigating these tradeoffs while shipping code that our autonomous vehicle platform depends on is core to the job. As a member of the Core Firmware MCU Platforms team, you will build foundational software/firmware that is used across different microcontrollers in the vehicle. The software/firmware we write touches many different microcontrollers and provides the foundation on which other tea" },
-      { title:"Embedded Software Engineer - Power Systems", url:"https://jobs.lever.co/zoox/b1bba11f-2b04-4a4a-8095-752c04182af1", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-07-14", descRaw:"Zoox is looking for an embedded software engineer to join our Firmware Body Systems team. In this role, you will be responsible for embedded software development for the body, thermal, lighting, and power management functions and sub-systems of the Zoox vehicle. This includes integration of supplier systems, coordination and control of all body sub-systems, and interactions with higher-level systems. You will work closely with vehicle engineers, systems engineers, controls engineers, software engineers, and suppliers to create a seamless and highly automated rider experience for the Zoox vehicle. We are looking for people who are passionate about working with hardware and developing production-quality code for complex dynamic systems." },
-      { title:"Software Engineer - C++  GPU Performance", url:"https://jobs.lever.co/zoox/51630efc-50f6-461c-8d56-ebed59a5d0d6", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-04-16", descRaw:"Zoox is building the world's most advanced self-driving hardware and software solution. The efficiency demands of such a system require an expert fine tuning of both the compute hardware architecture as well as the algorithms and middleware that runs on it to achieve maximum throughput at the most optimal power levels. The Software Performance team’s mission is to analyze, optimize and provide guidance to the software and hardware teams in order to meet the required specifications. As a GPU performance software engineer within the Software Performance team, you will instrument, monitor, analyze and optimize GPU-based algorithms that are performance-critical for our solution. The scope for GPU usage ranges from traditional computer vision and deep learning architectures to complex geometric" },
-      { title:"Software Engineer - Ride and Fleet Services", url:"https://jobs.lever.co/zoox/2783987b-5ab8-4447-a9e4-77745439e7ba", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-05-12", descRaw:"Our Ride and Fleet Backend team is looking for a Software Engineer to build out the Fleet Dispatch System to efficiently dispatch missions to our robots. Zoox robots take missions like Rideshare Trips, Charging, Cleaning, Return to Depot, R&D missions, and Roaming missions. It is the backbone of our autonomous fleet management system and the brains behind connecting our riders and vehicle operators to our robots!" }
+      { title:"Senior / Staff Software Systems Engineer - Simulation Evaluation & Validation", url:"https://jobs.lever.co/zoox/2ef807a0-f80d-47ba-a1a1-578ebe195592", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-07-27", desc:"Build metrics and pipelines validating GenAI simulators." },
+      { title:"Senior Software Engineer - C++  GPU Performance", url:"https://jobs.lever.co/zoox/2042bc12-6247-48d5-a9fb-a6e41363a5ce", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-04-16", desc:"Profile and optimize GPU vision and geometry kernels." },
+      { title:"Senior Software Engineer - Full Stack Operational Tools", url:"https://jobs.lever.co/zoox/b6799ed0-252b-4535-a908-af77eb130415", level:"senior", city:"sd", added:"2026-08-24", posted:"2025-10-02", desc:"Build the internal tools running the robotaxi fleet." },
+      { title:"Embedded Software Engineer", url:"https://jobs.lever.co/zoox/0dd5de4b-4e98-4808-85fd-e739e7fc5bba", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-06-10", desc:"Bring up embedded platforms across the robotaxi." },
+      { title:"Embedded Software Engineer - Battery Management Systems", url:"https://jobs.lever.co/zoox/082ed20c-b8e1-4b1c-9c22-4738ad94055d", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-08-06", desc:"Write real-time C++ safety code for battery systems." },
+      { title:"Embedded Software Engineer - MCU Platforms", url:"https://jobs.lever.co/zoox/4c16c18c-18c0-433c-bc21-8bd72824a1d9", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-08-04", desc:"Build foundational firmware across vehicle microcontrollers." },
+      { title:"Embedded Software Engineer - Power Systems", url:"https://jobs.lever.co/zoox/b1bba11f-2b04-4a4a-8095-752c04182af1", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-07-14", desc:"Own embedded body, thermal, lighting and power software." },
+      { title:"Software Engineer - C++  GPU Performance", url:"https://jobs.lever.co/zoox/51630efc-50f6-461c-8d56-ebed59a5d0d6", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-04-16", desc:"Optimize GPU-critical perception and geometry code." },
+      { title:"Software Engineer - Ride and Fleet Services", url:"https://jobs.lever.co/zoox/2783987b-5ab8-4447-a9e4-77745439e7ba", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-05-12", desc:"Build the dispatch backend assigning missions to robots." }
     ] },
   { id:"netradyne", name:"Netradyne", vertical:"ai",
     sub:"Fleet safety AI",
+    tagline:"Vision that watches the road.",
     stage:"", raised:"", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Founding Product Engineer", url:"https://www.netradyne.com/company/careers?gh_jid=4717687005", level:"founding", city:"sd", added:"2026-08-24", posted:"2026-07-29", descRaw:"Netradyne harnesses the power of Computer Vision and Edge Computing to revolutionize the modern-day transportation ecosystem. We are a leader in fleet safety solutions. With growth exceeding 4x year over year, our solution is quickly being recognized as a significant disruptive technology. Our team is growing, and we need forward-thinking, uncompromising, competitive team members to continue to facilitate our growth. About us: At Netradyne, our team is committed to delivering solutions to our customers that advance their market leadership. Our focus is to continuously drive innovation while delivering meaningful, actionable data. The Netradyne Driveri® Vision-Based Driver Recognition Safety Program significantly advances the technology category through the application of Artificial Intelli" }
+      { title:"Founding Product Engineer", url:"https://www.netradyne.com/company/careers?gh_jid=4717687005", level:"founding", city:"sd", added:"2026-08-24", posted:"2026-07-29", desc:"Build fleet-safety products on computer vision at the edge." }
     ] },
   { id:"saronic", name:"Saronic", vertical:"defense",
     sub:"Autonomous surface vessels",
+    tagline:"Uncrewed ships for the Navy.",
     stage:"", raised:"", lead:"",
     badges:[],
     totalRoles:5,
     notes:"",
     jobs:[
-      { title:"Senior Systems Software Engineer", url:"https://jobs.ashbyhq.com/saronic/575fc898-0102-4396-88c8-b45b82abb775", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-08-11", descRaw:"Saronic Technologies is a leader in revolutionizing autonomy at sea, dedicated to developing state-of-the-art solutions that enhance maritime operations through autonomous and intelligent platforms. Job Overview: We are seeking a Senior Systems Software Engineer to design, implement, and optimize software systems for our autonomous surface vessels. This role will involve working closely with cross-functional teams to develop robust software solutions that meet the unique challenges of maritime operations. Responsibilities Design, develop, and maintain software systems using NixOS for autonomous navigation, control, and communication of autonomous surface vessels Collaborate with hardware engineers to integrate software with vessel systems, ensuring seamless operation Implement algorithms f" },
-      { title:"Senior Systems Test Software Engineer", url:"https://jobs.ashbyhq.com/saronic/d5f30d63-303c-4899-8d68-c248c8d7905b", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-06-05", descRaw:"Saronic Technologies is a leader in revolutionizing autonomy at sea, dedicated to developing state-of-the-art solutions that enhance maritime operations through autonomous and intelligent platforms. Job Overview: We are seeking a Systems Software Test Engineer to own and drive the testing strategy for the software stack that runs on every Saronic vessel. You will join the Software team to take an already substantial collection of test capabilities, Hardware-In-The-Loop (HITL) station infrastructure, virtual machine integration tests, replay-based evaluation, and simulation and turn them into a single, principled, easy-to-extend verification platform. Just as importantly, you will introduce other testing approaches like property-based testing, fuzz testing of our protocol and message-bus su" },
-      { title:"Forward Deployed Software Engineer", url:"https://jobs.ashbyhq.com/saronic/4bd52e96-1903-4d2a-8e04-0e4d8851059e", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-03-27", descRaw:"Saronic Technologies is a leader in revolutionizing autonomy at sea, dedicated to developing state-of-the-art solutions that enhance maritime operations through autonomous and intelligent platforms. Job Overview We are seeking a Forward Deployed Software Engineer who will be at the forefront of integrating, deploying, and improving our autonomous systems in real-world environments. You will work hands-on with software, networking, and autonomy, ensuring our autonomous service vessels perform reliably in operational settings. This role blends software development, field deployment, and problem-solving to ensure our technology delivers real mission impact. You will be deeply engaged in debugging and optimizing autonomy algorithms, refining system performance based on real-world data, and wor" },
-      { title:"Forward Deployed Hardware Engineer", url:"https://jobs.ashbyhq.com/saronic/11ba12ec-5438-4c90-b493-62f3a4664051", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-05-21", descRaw:"Saronic Technologies is a leader in revolutionizing autonomy at sea, dedicated to developing state-of-the-art solutions that enhance maritime operations through autonomous and intelligent platforms. Job Overview We are seeking a versatile Forward Deployed Hardware Engineer to join our technical team. You will have a strong mechanical and electrical background and be responsible for bringing our technology from the lab to the fleet. This is not a traditional engineering role. You will be responsible for deploying our systems into the real world, directly supporting maritime missions. You will integrate cutting-edge mechanical and electrical payloads, debug complex system-level problems, and iterate hardware designs in the field to ensure success. This is a highly hands-on and field-oriented" },
-      { title:"Systems Software Engineer, Generalist", url:"https://jobs.ashbyhq.com/saronic/c70261ad-4e3f-47a4-9032-020b9c899752", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-06-03", descRaw:"Saronic Technologies is a leader in revolutionizing autonomy at sea, dedicated to developing state-of-the-art solutions that enhance maritime operations through autonomous and intelligent platforms. About the Role We are seeking experienced Systems Software Engineers to develop software that powers autonomous maritime systems. This role sits at the intersection of software, hardware, robotics, and distributed systems, requiring engineers who are comfortable working across the full stack of autonomous vehicle development\u2014from low-level hardware interfaces and embedded systems to backend services, infrastructure, and mission-critical applications. The ideal candidate brings strong software engineering fundamentals and has experience developing systems that interact with real-world hardware, " }
+      { title:"Senior Systems Software Engineer", url:"https://jobs.ashbyhq.com/saronic/575fc898-0102-4396-88c8-b45b82abb775", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-08-11", desc:"Build NixOS-based navigation and control for sea drones." },
+      { title:"Senior Systems Test Software Engineer", url:"https://jobs.ashbyhq.com/saronic/d5f30d63-303c-4899-8d68-c248c8d7905b", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-06-05", desc:"Unify HITL, sim and replay into one verification platform." },
+      { title:"Forward Deployed Software Engineer", url:"https://jobs.ashbyhq.com/saronic/4bd52e96-1903-4d2a-8e04-0e4d8851059e", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-03-27", desc:"Deploy autonomy onto vessels in operational settings." },
+      { title:"Forward Deployed Hardware Engineer", url:"https://jobs.ashbyhq.com/saronic/11ba12ec-5438-4c90-b493-62f3a4664051", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-05-21", desc:"Take vessel hardware from lab to fleet on real missions." },
+      { title:"Systems Software Engineer, Generalist", url:"https://jobs.ashbyhq.com/saronic/c70261ad-4e3f-47a4-9032-020b9c899752", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-06-03", desc:"Write software spanning robotics, hardware and distributed systems." }
     ] },
   { id:"element-biosciences", name:"Element Biosciences", vertical:"health",
     sub:"DNA sequencing systems",
+    tagline:"Read DNA faster and cheaper.",
     stage:"", raised:"", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Sr Embedded Systems Engineer I", url:"https://job-boards.greenhouse.io/elementbiosciences/jobs/6084872004", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-06-23", descRaw:"At Element Biosciences, we are passionate about our mission to empower the scientific community with more freedom and flexibility to accelerate our collective impact on humanity. We have built a highly efficient product-driven organization where employees can learn, grow, and thrive in a challenging but encouraging environment. We are committed to scientific integrity, collegiality, honesty, objectivity, and openness. We are seeking a Senior Embedded Systems Engineer who will play a pivotal role in the development of our high-performance instrument platform. This is an incredible opportunity for someone who is passionate about embedded system development . We are looking for candidates with a solid background in embedded system development and testing. This role will report to Senior Direc" }
+      { title:"Sr Embedded Systems Engineer I", url:"https://job-boards.greenhouse.io/elementbiosciences/jobs/6084872004", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-06-23", desc:"Write embedded code for DNA sequencing instruments." }
     ] },
   { id:"singular-genomics", name:"Singular Genomics", vertical:"health",
     sub:"Sequencing platforms",
+    tagline:"Benchtop sequencing, G4 fast.",
     stage:"", raised:"", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Software Engineer", url:"https://job-boards.greenhouse.io/singulargenomics/jobs/7822374003", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-08-10", descRaw:"ABOUT SINGULAR GENOMICS Singular Genomics is inventing at the forefront of genomics, one of the world’s fastest-growing industries. The commercially available G4® Sequencing Platform is a powerful, highly versatile benchtop genomic sequencer designed to produce fast and accurate results. In addition, the company is currently developing the G4X™ Spatial Sequencer, an upgrade to the G4, which will leverage Singular’s proprietary sequencing technology, applying it as an in situ readout for transcriptomics, proteomics and fluorescent H&E in tissue, with spatial context. Singular Genomics’ mission is to empower researchers and clinicians to advance science and medicine. We foster a culture of creativity and technical excellence, both catalysts for innovation. We celebrate diversity, emphasize c" }
+      { title:"Software Engineer", url:"https://job-boards.greenhouse.io/singulargenomics/jobs/7822374003", level:"mid", city:"sd", added:"2026-08-24", posted:"2026-08-10", desc:"Build software for the G4 benchtop sequencing platform." }
     ] },
   { id:"servicenow", name:"ServiceNow", vertical:"saas",
     sub:"Enterprise workflow platform (NYSE: NOW)",
-    stage:"", raised:"", lead:"",
-    badges:[],
+    tagline:"Run the enterprise on workflows.",
+    stage:"Public", raised:"", lead:"",
+    badges:["NYSE"],
     totalRoles:2,
     notes:"",
     jobs:[
@@ -14547,8 +14552,9 @@ const COMPANIES = [
     ] },
   { id:"illumina", name:"Illumina", vertical:"health",
     sub:"Genomic sequencing (NASDAQ: ILMN)",
-    stage:"", raised:"", lead:"",
-    badges:[],
+    tagline:"The genome, industrialized.",
+    stage:"Public", raised:"", lead:"",
+    badges:["NASDAQ"],
     totalRoles:1,
     notes:"",
     jobs:[
@@ -15278,6 +15284,13 @@ const COMPANY_DOMAINS = {
   quizlet:'quizlet.com',
   // 2026-08-21 backfill #2 (auto)
   schonfeld:'schonfeld.com', 'equinox-fitness':'equinox.com', pubmatic:'pubmatic.com', 'squarepoint-capital':'squarepoint-capital.com',
+  // 2026-08-24 backfill — San Diego refresh. Each domain was resolved by
+  // fetching it and reading the page title, not guessed from the name:
+  // 'odysseyfi.com' is a parked lander, not this Odyssey.
+  'odyssey-fi':'withodyssey.com', abbvie:'abbvie.com', 'shield-ai':'shield.ai',
+  zoox:'zoox.com', netradyne:'netradyne.com', saronic:'saronic.com',
+  'element-biosciences':'elementbiosciences.com', 'singular-genomics':'singulargenomics.com',
+  servicenow:'servicenow.com', illumina:'illumina.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */

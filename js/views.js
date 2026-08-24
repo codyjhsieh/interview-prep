@@ -5311,6 +5311,11 @@ const COOLNESS = {
   quizlet:6,
   // ── 2026-08-21 auto-scored #2 ──
   schonfeld:2, 'equinox-fitness':4, pubmatic:3, 'squarepoint-capital':2,
+  // ── 2026-08-24 — San Diego refresh. Anchored against the existing scale:
+  // salesforce/blackrock:1, scaleai/datadog:2, harvey/crowdstrike:3, openai:4.
+  // Defense-tech reads as respected-but-not-LES, so it sits with harvey at 3.
+  abbvie:1, servicenow:1, netradyne:2, 'singular-genomics':2,
+  'shield-ai':3, saronic:3, zoox:3, 'element-biosciences':3, illumina:3,
 };
 
 const FRONTIER = new Set([

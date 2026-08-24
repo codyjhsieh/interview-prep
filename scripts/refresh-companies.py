@@ -644,7 +644,13 @@ CANDIDATES = [
   ("bastion-fi","Bastion","ashby","bastion","fintech","Stablecoin + payments infra","Series A","$25M","a16z crypto",["a16z crypto","Nyca"],"NYC HQ."),
   ("halliday","Halliday","ashby","halliday","fintech","No-code onchain workflow deployment","Seed","$6M","a16z crypto",["a16z crypto","Avalanche"],"YC W22. NYC HQ."),
   ("infinite-machine","Infinite Machine","ashby","infinite-machine","consumer","Premium electric micro-mobility","Seed","$9M","Metaplanet",["Metaplanet","YC W23"],"YC W23. NYC HQ."),
-  ("odyssey-fi","Odyssey","ashby","odyssey","fintech","Alternative investments platform","Seed","$5M","Cota",["Cota","YC"],"NYC HQ."),
+  # The `ashby/odyssey` board belongs to Odyssey the K-12 education-savings
+  # company (withodyssey.com), NOT the similarly-named alternative-investments
+  # startup this tuple used to describe. Funding fields cleared: the Seed /
+  # $5M / Cota round was the other Odyssey's, and publishing it here would be
+  # a false claim about a real company. The id keeps its "-fi" suffix so
+  # applied-role history stays keyed the same.
+  ("odyssey-fi","Odyssey","ashby","odyssey","saas","K-12 education savings accounts","","","",[],"NYC HQ. ESA program software for states."),
   ("rutter","Rutter","ashby","rutter","devtools","Unified API for commerce + accounting","Series A","$27M","a16z",["a16z","Haystack","YC W20"],"YC W20."),
   ("motherduck","MotherDuck","ashby","motherduck","devtools","Managed DuckDB in the cloud","Series B","$100M","Felicis",["Felicis","a16z","Redpoint"],"NYC office."),
   ("vanta","Vanta","ashby","vanta","saas","Automated SOC2 compliance","Series C","$150M","Sequoia",["Sequoia","CrowdStrike","YC W18"],"YC W18. NYC office."),
