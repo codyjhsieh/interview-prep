@@ -3642,6 +3642,17 @@ const verticalLabel = {
   devtools:'Dev Tools', fintech:'Fintech',
   saas:'SaaS', infra:'Infra', health:'Health',
 };
+/* The board covers exactly two cities (see scripts/refresh-companies.py's
+ * CITIES). Postings that predate San Diego carry no `city`, so jobCity()
+ * defaults to NYC — the value every one of those rows was filtered on. */
+const cityLabel = { nyc: 'NYC', sd: 'San Diego' };
+// Dense rows get the short form; the full name rides along as a tooltip.
+const cityShort = { nyc: 'NYC', sd: 'SD' };
+const jobCity = (j) => (j && j.city) || 'nyc';
+const cityTagHTML = (j) => {
+  const k = jobCity(j);
+  return `<span class="pill pill-city" title="${esc(cityLabel[k] || k)}">${esc(cityShort[k] || k)}</span>`;
+};
 
 /* ====================== DASHBOARD ====================== */
 /* Compact job-application counter for the dashboard.
@@ -5555,6 +5566,24 @@ function renderCompanies(state, hub) {
   // future refresh can repopulate it) but it shouldn't show an empty card.
   const LIVE = COMPANIES.filter(c => (c.jobs || []).length > 0);
   const totalJobs = LIVE.reduce((s, c) => s + (c.jobs ? c.jobs.length : 0), 0);
+  // City chips are built from what's actually on the board, so San Diego
+  // only appears once a San Diego posting exists. Order follows cityLabel.
+  const cityCounts = {};
+  LIVE.forEach(c => (c.jobs || []).forEach(j => {
+    const k = jobCity(j); cityCounts[k] = (cityCounts[k] || 0) + 1;
+  }));
+  const cityKeys = Object.keys(cityLabel).filter(k => cityCounts[k]);
+  const cityTabs = cityKeys.length > 1
+    ? ['all', ...cityKeys].map(k =>
+        `<div class="tab${k === 'all' ? ' active' : ''}" data-cityfilter="${esc(k)}">`
+        + `${k === 'all' ? 'All cities' : esc(cityLabel[k])}`
+        + `${k === 'all' ? '' : ` <span class="ml-1 muted text-[10px] font-mono">${cityCounts[k]}</span>`}</div>`
+      ).join('')
+    : '';
+  // "N live NYC postings" is only true while the board is one city.
+  const cityBlurb = cityKeys.length > 1
+    ? cityKeys.map(k => `${cityCounts[k]} in ${cityLabel[k]}`).join(', ')
+    : (cityKeys.length ? `all in ${cityLabel[cityKeys[0]]}` : '');
   // Build dynamic vertical filters from the data so we don't hard-code.
   const verticals = Array.from(new Set(LIVE.map(c => c.vertical)));
   const verticalTabs = ['all', ...verticals]
@@ -5582,7 +5611,7 @@ function renderCompanies(state, hub) {
   container.innerHTML = `
     <div>
       <h1 class="font-display text-2xl sm:text-3xl font-semibold">Companies</h1>
-      <p class="muted text-sm mt-1">${LIVE.length} startups, ${totalJobs} live NYC engineering postings. Verified ${esc(verifiedAt || 'recently')}. Ranked by fit for your background — sorted highest first.</p>
+      <p class="muted text-sm mt-1">${LIVE.length} startups, ${totalJobs} live engineering postings${cityBlurb ? ` (${esc(cityBlurb)})` : ''}. Verified ${esc(verifiedAt || 'recently')}. Ranked by fit for your background — sorted highest first.</p>
     </div>
 
     <div class="flex justify-center">
@@ -5595,6 +5624,7 @@ function renderCompanies(state, hub) {
 
     <div class="filter-bar">
       <input id="co-search" type="search" placeholder="Search companies, roles, or investors…" class="search-glass"/>
+      ${cityTabs ? `<div class="tabs" id="co-city-filters">${cityTabs}</div>` : ''}
       <div class="tabs" id="co-filters">
         ${verticalTabs}
         <span class="filter-divider" data-level-only aria-hidden="true"></span>
@@ -5630,6 +5660,7 @@ function renderCompanies(state, hub) {
   }
   let curMode    = 'companies';
   let curVFilter = 'all';
+  let curCityFilter = 'all';
   let curLFilter = 'all';
   let curCatFilter = 'all';
   let curQuery   = '';
@@ -5693,13 +5724,14 @@ function renderCompanies(state, hub) {
            onclick="event.stopPropagation()"
            class="role-pill flex items-center gap-2 text-[12px]" title="${esc(j.title)}">
           ${lvlDot}<span class="truncate flex-1 min-w-0">${esc(j.title)}</span>
+          ${cityTagHTML(j)}
           <span class="role-arrow muted">↗</span>
         </a>`;
     }).join('');
     const fullCount = c.totalRoles || total;
     const extras = Math.max(0, fullCount - previewJobs.length);
     const overflowLabel = extras > 0
-      ? `<div class="text-[11px] mt-1.5 flex items-center justify-between"><span class="muted">+${extras} more open NYC role${extras === 1 ? '' : 's'}</span><span style="color:var(--accent)" class="font-medium">View all →</span></div>`
+      ? `<div class="text-[11px] mt-1.5 flex items-center justify-between"><span class="muted">+${extras} more open role${extras === 1 ? '' : 's'}</span><span style="color:var(--accent)" class="font-medium">View all →</span></div>`
       : `<div class="text-[11px] mt-1.5 flex items-center justify-end"><span style="color:var(--accent)" class="font-medium">View →</span></div>`;
     cardEl.innerHTML = `
       <div class="flex items-start gap-3">
@@ -5755,6 +5787,10 @@ function renderCompanies(state, hub) {
     const matches = new Set();
     for (const c of coOrder) {
       if (curVFilter !== 'all' && c.vertical !== curVFilter) continue;
+      // A company shows under a city filter if it has at least one posting
+      // there; the card's preview pills tag which of them it is.
+      if (curCityFilter !== 'all'
+        && !(c.jobs || []).some(j => jobCity(j) === curCityFilter)) continue;
       if (q && !_coHay(c).includes(q)) continue;
       matches.add(c.id);
     }
@@ -5824,6 +5860,7 @@ function renderCompanies(state, hub) {
     const base = curSort === 'new' ? recRoles : scoredRoles;
     const filtered = base.filter(r => {
       if (curVFilter !== 'all' && r._company.vertical !== curVFilter) return false;
+      if (curCityFilter !== 'all' && jobCity(r) !== curCityFilter) return false;
       if (curLFilter !== 'all' && r.level !== curLFilter) return false;
       if (curCatFilter !== 'all' && roleCategory(r.title) !== curCatFilter) return false;
       if (!q) return true;
@@ -5888,6 +5925,7 @@ function renderCompanies(state, hub) {
             </div>
           </div>
           <div class="role-row-meta">
+            ${cityTagHTML(r)}
             <span class="pill ${lvlClass}" style="font-size:10px">${lvlLabel}</span>
             ${fitBadgeHTML(r._fit)}
             <a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer"
@@ -5963,9 +6001,13 @@ function renderCompanies(state, hub) {
   // Click handler differentiates by data-vfilter vs data-lfilter.
   // Click handler covers both the merged verticals+levels pill AND the
   // separate category-row pill below it.
-  container.querySelectorAll('#co-filters .tab, #co-cat-filters .tab').forEach(tab => {
+  container.querySelectorAll('#co-filters .tab, #co-cat-filters .tab, #co-city-filters .tab').forEach(tab => {
     tab.addEventListener('click', () => {
-      if (tab.dataset.vfilter) {
+      if (tab.dataset.cityfilter) {
+        container.querySelectorAll('#co-city-filters .tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        curCityFilter = tab.dataset.cityfilter;
+      } else if (tab.dataset.vfilter) {
         container.querySelectorAll('#co-filters .tab[data-vfilter]').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         curVFilter = tab.dataset.vfilter;
@@ -6049,9 +6091,10 @@ function renderCompany(state, hub, id) {
     const checked = GAMI.isRoleApplied(state, roleKey);
     const dateStr = fmtDate(j.posted || j.added);
     const newTag = isNewJob(j) ? ' <span class="pill pill-ai" style="font-size:9px;padding:1px 5px">New</span>' : '';
+    const cityName = cityLabel[jobCity(j)] || cityLabel.nyc;
     const dateLine = dateStr
-      ? `${j.posted ? 'Posted' : 'Added'} ${esc(dateStr)} · opens in new tab`
-      : 'Direct posting · opens in new tab';
+      ? `${esc(cityName)} · ${j.posted ? 'Posted' : 'Added'} ${esc(dateStr)} · opens in new tab`
+      : `${esc(cityName)} · Direct posting · opens in new tab`;
     return `
       <div class="job-row flex items-center gap-3 p-3 rounded-xl border border-[color:var(--hairline)] transition"
            data-role-row data-role-key="${esc(roleKey)}" data-role-url="${esc(j.url)}"
@@ -6098,7 +6141,7 @@ function renderCompany(state, hub, id) {
     ${(c.jobs && c.jobs.length) ? `
       <div class="card">
         <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
-          <h3 class="font-display font-semibold text-lg">Live NYC engineering postings</h3>
+          <h3 class="font-display font-semibold text-lg">Live engineering postings</h3>
           <span class="text-[11px] muted">${c.jobs.length} verified · check to log as applied</span>
         </div>
         <div class="space-y-2" id="co-jobs-list">${jobsHTML}</div>

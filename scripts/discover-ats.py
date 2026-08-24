@@ -78,7 +78,7 @@ def discover(item):
         matches = R.filter_jobs(ats, raw, slug)
         meta = list(item[1:]) if (len(item) > 1 and item[1] not in PLATFORMS) else []
         return {"name": name, "ats": ats, "slug": slug,
-                "board": len(raw), "nyc": len(matches), "meta": meta,
+                "board": len(raw), "hits": len(matches), "meta": meta,
                 "titles": [m["title"] for m in matches[:3]]}
     return None
 
@@ -108,10 +108,11 @@ def main():
                 found.append(res)
                 if args.verbose:
                     print(f"  {res['name']:30s} {res['ats']}:{res['slug']:24s} "
-                          f"board={res['board']:4d} nyc={res['nyc']}", file=sys.stderr)
+                          f"board={res['board']:4d} hits={res['hits']}", file=sys.stderr)
 
-    live = [f for f in found if f["nyc"]]
-    print(f"\nfound boards: {len(found)}/{len(items)}   with live NYC eng roles: {len(live)}",
+    live = [f for f in found if f["hits"]]
+    print(f"\nfound boards: {len(found)}/{len(items)}   with live eng roles in a "
+          f"covered city: {len(live)}",
           file=sys.stderr)
     if args.json:
         Path(args.json).write_text(json.dumps(found, indent=1))

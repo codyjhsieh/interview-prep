@@ -18,6 +18,9 @@ const esc = (s) => JSON.stringify(s).slice(1, -1).replace(/—/g, '\\u2014');
 const emitJob = (j) => {
   let s = `      { title:"${esc(j.title)}", url:"${esc(j.url)}"`;
   if (j.level) s += `, level:"${esc(j.level)}"`;
+  // "nyc" | "sd". Always emitted: a silently-dropped city would turn a San
+  // Diego posting into a New York one, which is worse than a missing field.
+  if (j.city) s += `, city:"${esc(j.city)}"`;
   if (j.added) s += `, added:"${esc(j.added)}"`;
   if (j.posted) s += `, posted:"${esc(j.posted)}"`;
   if (j.desc) s += `, desc:"${esc(j.desc)}"`;

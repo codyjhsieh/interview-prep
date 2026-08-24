@@ -87,13 +87,15 @@ for (const rc of src.companies) {
   }
   const have = new Map((ec.jobs || []).map((j) => [j.url, j]));
   const fresh = (rc.jobs || []).filter((j) => !have.has(j.url));
-  // carry posted + descRaw onto already-present jobs if the source now has them.
+  // carry posted + city + descRaw onto already-present jobs if the source now
+  // has them. city backfills the rows that predate the two-city board.
   // descRaw is summarization input only, so a job that already has a desc does
   // not get it back -- otherwise every refresh would re-inflate data.js with
   // raw ATS bodies the UI never reads.
   for (const j of rc.jobs || []) {
     const e = have.get(j.url);
     if (e && j.posted && !e.posted) e.posted = j.posted;
+    if (e && j.city && !e.city) e.city = j.city;
     if (e && j.descRaw && !e.descRaw && !e.desc) e.descRaw = j.descRaw;
   }
   if (fresh.length) {
@@ -156,6 +158,7 @@ const esc = (s) => JSON.stringify(s).slice(1, -1).replace(/—/g, '\\u2014');
 function emitJob(j) {
   let s = `      { title:"${esc(j.title)}", url:"${esc(j.url)}"`;
   if (j.level) s += `, level:"${esc(j.level)}"`;
+  if (j.city) s += `, city:"${esc(j.city)}"`;
   if (j.added) s += `, added:"${esc(j.added)}"`;
   if (j.posted) s += `, posted:"${esc(j.posted)}"`;
   if (j.desc) s += `, desc:"${esc(j.desc)}"`;

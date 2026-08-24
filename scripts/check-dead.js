@@ -257,6 +257,7 @@ function boardTokens(ats, slug) {
     const emitJob = (j) => {
       let s = `      { title:"${esc(j.title)}", url:"${esc(j.url)}"`;
       if (j.level) s += `, level:"${esc(j.level)}"`;
+      if (j.city) s += `, city:"${esc(j.city)}"`;
       if (j.added) s += `, added:"${esc(j.added)}"`;
       if (j.posted) s += `, posted:"${esc(j.posted)}"`;
       if (j.desc) s += `, desc:"${esc(j.desc)}"`;

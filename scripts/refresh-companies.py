@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-refresh-companies.py — re-verify every live NYC engineering posting and
-rewrite the COMPANIES block in js/data.js in place.
+refresh-companies.py — re-verify every live engineering posting in the
+cities this board covers and rewrite the COMPANIES block in js/data.js
+in place.
 
 What it does
 ------------
@@ -9,7 +10,9 @@ For every candidate company in CANDIDATES below, hits the company's
 public ATS JSON (Ashby / Greenhouse / Lever / Workable / Workday /
 Teamtailor / SmartRecruiters) via curl, filters jobs by:
 
-  • Location contains "New York" / NYC / Brooklyn / Manhattan
+  • Location names a covered city: New York / NYC / Brooklyn /
+    Manhattan, or San Diego / La Jolla. Those two are the whole list
+    — see CITIES.
   • Title matches an SDE / SWE / Forward Deployed / Founding /
     Applied AI/ML / Member-of-Technical-Staff pattern
   • Title does NOT contain staff / principal / lead / manager /
@@ -45,12 +48,33 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_JS   = REPO_ROOT / "js" / "data.js"
 
 # ── Regex filters ────────────────────────────────────────────────────────
-NYC = re.compile(r'\b(new[\s-]?york|nyc|brooklyn|manhattan)\b', re.I)
-# Defensive: some multi-location listings tag NYC in their location field but
-# put the actual anchor city in the TITLE ("Security Engineer, San Francisco"
-# / "Senior Research Engineer (Based in Hong Kong)"). Drop those — the title
-# is authoritative when it explicitly names a different city.
-NON_NYC_TITLE_CITY = re.compile(
+# The board covers exactly two cities. Order matters: a listing tagged for
+# several offices resolves to the first key that matches, so NYC wins a
+# "New York / San Diego" posting. The key is what lands in a job's `city`
+# field and drives the city chips in the UI.
+CITIES = [
+  ("nyc", re.compile(r'\b(new[\s-]?york|nyc|brooklyn|manhattan)\b', re.I)),
+  ("sd",  re.compile(r'\b(san[\s-]?diego|la\s+jolla)\b', re.I)),
+]
+CITY_LABEL = {"nyc": "NYC", "sd": "San Diego"}
+# Any supported city, for the "does this title name one of ours?" test.
+IN_CITY = re.compile("|".join(p.pattern for _, p in CITIES), re.I)
+
+def match_city(*blobs):
+  """Key of the first supported city named in any blob, or "" if none."""
+  for key, pat in CITIES:
+    for b in blobs:
+      if b and pat.search(b):
+        return key
+  return ""
+
+# Defensive: some multi-location listings tag a city we cover in their
+# location field but put the actual anchor city in the TITLE ("Security
+# Engineer, San Francisco" / "Senior Research Engineer (Based in Hong Kong)").
+# Drop those — the title is authoritative when it names a city we don't cover.
+# San Diego is deliberately absent from this list: it is a supported city now,
+# so a title naming it sets the job's city rather than rejecting the posting.
+OTHER_TITLE_CITY = re.compile(
   r'\b('
   r'san francisco|palo alto|mountain view|los angeles|chicago|austin|'
   r'boston|cambridge, ma|seattle|denver|miami|atlanta|dallas|houston|'
@@ -127,7 +151,7 @@ TITLE_EXCLUDE = re.compile(
 # Tuple shape: (id, name, ats, slug, vertical, sub, stage, raised, lead, badges, notes)
 # Funding metadata is hand-curated from publicly disclosed rounds. To add a
 # new company, append a tuple; the script will probe its ATS and include
-# the company if any matching NYC engineering postings are live.
+# the company if any matching engineering postings are live in a covered city.
 CANDIDATES = [
   # AI / ML
   ("openai","OpenAI","ashby","openai","ai","GPT / ChatGPT / API","Late stage","$57B+","Microsoft",["Microsoft","Thrive","Khosla"],"FDE-style 'solutions' work + applied research. Bar is extreme; emphasizes shipping + safety judgment."),
@@ -1461,6 +1485,9 @@ CANDIDATES = [
   ("wikimedia-foundation","Wikimedia Foundation","greenhouse","wikimedia","saas","Nonprofit knowledge platform","","","",[],""),
   ("wpp","WPP","greenhouse","wpp","adtech","Advertising holding company","","","",[],""),
   ("xaira-therapeutics","Xaira Therapeutics","greenhouse","xairatherapeutics","health","AI biotech","","","",[],""),
+  # ── 2026-08-24 — San Diego seed (validated boards) ──
+  ("servicenow","ServiceNow","smartrecruiters","servicenow","saas","Enterprise workflow platform (NYSE: NOW)","","","",[],""),
+  ("illumina","Illumina","workday","illumina/wd1/illumina-careers","health","Genomic sequencing (NASDAQ: ILMN)","","","",[],""),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this
@@ -1739,14 +1766,14 @@ def filter_jobs(ats, raw, slug=""):
       title = (j.get("title") or "").strip()
       primary = j.get("location","") or ""
       secs = [s.get("location","") for s in (j.get("secondaryLocations") or [])]
-      is_nyc = bool(NYC.search(primary)) or any(NYC.search(s) for s in secs)
+      city = match_city(primary, *secs)
       url = j.get("jobUrl") or j.get("applyUrl")
       posted = _date10(j.get("publishedDate") or j.get("publishedAt") or j.get("updatedAt"))
       descRaw = _strip_html(j.get("descriptionHtml") or j.get("description") or "")
     elif ats == "greenhouse":
       title = (j.get("title") or "").strip()
       loc = (j.get("location") or {}).get("name","") or ""
-      is_nyc = bool(NYC.search(loc))
+      city = match_city(loc)
       url = j.get("absolute_url")
       posted = _date10(j.get("updated_at") or j.get("first_published") or j.get("created_at"))
       descRaw = _strip_html(j.get("content") or "")
@@ -1756,7 +1783,7 @@ def filter_jobs(ats, raw, slug=""):
       loc = cat.get("location","") or ""
       all_locs = cat.get("allLocations") or []
       blob = loc + " " + " ".join(all_locs if isinstance(all_locs, list) else [])
-      is_nyc = bool(NYC.search(blob))
+      city = match_city(blob)
       url = j.get("hostedUrl") or j.get("applyUrl")
       posted = _date10(j.get("createdAt"))
       descRaw = _strip_html(j.get("descriptionPlain") or j.get("description") or "")
@@ -1766,10 +1793,10 @@ def filter_jobs(ats, raw, slug=""):
       if j.get("state") and j.get("state") != "published": continue
       title = (j.get("title") or "").strip()
       primary = j.get("location") or {}
-      city = (primary.get("city") or "") + " " + (primary.get("region") or "")
+      where = (primary.get("city") or "") + " " + (primary.get("region") or "")
       others = j.get("locations") or []
-      blob = city + " " + " ".join(((l.get("city") or "") + " " + (l.get("region") or "")) for l in others if isinstance(l, dict))
-      is_nyc = bool(NYC.search(blob))
+      blob = where + " " + " ".join(((l.get("city") or "") + " " + (l.get("region") or "")) for l in others if isinstance(l, dict))
+      city = match_city(blob)
       url = f"https://apply.workable.com/{slug}/j/{j.get('shortcode','')}"
       posted = _date10(j.get("published_on") or j.get("created_at"))
       descRaw = _strip_html(j.get("description") or "")
@@ -1785,7 +1812,7 @@ def filter_jobs(ats, raw, slug=""):
       for L in locs:
         a = (L or {}).get("address") or {}
         parts.append(f"{a.get('addressLocality','')} {a.get('addressRegion','')}")
-      is_nyc = bool(NYC.search(" ".join(parts)))
+      city = match_city(" ".join(parts))
       posted = _date10(j.get("date_published"))
       descRaw = _strip_html(j.get("content_html") or j.get("summary") or (jp.get("description") if isinstance(jp, dict) else "") or "")
     elif ats == "smartrecruiters":
@@ -1794,7 +1821,7 @@ def filter_jobs(ats, raw, slug=""):
       title = (j.get("name") or "").strip()
       loc = j.get("location") or {}
       blob = f"{loc.get('city','')} {loc.get('region','')} {loc.get('fullLocation','')}"
-      is_nyc = bool(NYC.search(blob))
+      city = match_city(blob)
       url = f"https://jobs.smartrecruiters.com/{slug}/{j.get('id','')}"
       posted = _date10(j.get("releasedDate"))
       # SR list endpoint typically lacks description body; fall back to name-only.
@@ -1805,7 +1832,7 @@ def filter_jobs(ats, raw, slug=""):
       # tenant URL we know from slug.
       title = (j.get("title") or "").strip()
       loc = j.get("locationsText") or ""
-      is_nyc = bool(NYC.search(loc))
+      city = match_city(loc)
       try:
         tenant, wdn, site = slug.split("/", 2)
         url = f"https://{tenant}.{wdn}.myworkdayjobs.com/en-US/{site}{j.get('externalPath','')}"
@@ -1817,16 +1844,22 @@ def filter_jobs(ats, raw, slug=""):
       descRaw = ""
     else:
       continue
-    if not is_nyc: continue
+    if not city: continue
     if not title: continue
-    # Title-authoritative city override: if the title explicitly names a
-    # non-NYC city, drop even if the ATS location field said "New York"
-    # (common in multi-location listings where NYC was just one of several).
-    if NON_NYC_TITLE_CITY.search(title) and not NYC.search(title): continue
+    # Title-authoritative city: in multi-location listings the location field
+    # lists every office while the title names the real anchor. So a title
+    # that names one of our cities overrides the location field, and a title
+    # that names a city we don't cover drops the posting outright.
+    title_city = match_city(title)
+    if title_city:
+      city = title_city
+    elif OTHER_TITLE_CITY.search(title):
+      continue
     title_for_check = STAFF_PRINCIPAL.sub("", title) if SENIORITY_MARK.search(title) else title
     if TITLE_EXCLUDE.search(title_for_check): continue
     if not TITLE_INCLUDE.search(title): continue
-    job = {"title": title, "url": url, "level": level(title), "posted": posted}
+    job = {"title": title, "url": url, "level": level(title), "city": city,
+           "posted": posted}
     if descRaw: job["descRaw"] = descRaw
     out.append(job)
   # founding > senior > mid
@@ -1841,18 +1874,20 @@ def filter_jobs(ats, raw, slug=""):
 def emit_companies_block(rows, today):
   lines = [
     "/* ---------- COMPANIES ----------",
-    " * NYC-hiring board: companies with $5M+ disclosed VC/accelerator funding",
-    " * that have at least one ACTIVE engineering posting located in New York",
-    " * (HQ doesn't have to be NYC — only the posting). Verified " + today,
+    " * Two-city board (New York + San Diego): companies with $5M+ disclosed",
+    " * VC/accelerator funding that have at least one ACTIVE engineering",
+    " * posting in one of those cities (HQ can be anywhere — only the posting",
+    " * counts). Each job carries city: \"nyc\" or \"sd\". Verified " + today,
     " * against each company's live Ashby / Greenhouse public ATS JSON.",
     " * URLs link directly to the posting (not aggregators).",
     " *",
     " * To refresh: run `python3 scripts/refresh-companies.py` from the repo",
-    " * root. The script re-probes every candidate ATS, filters for live NYC",
-    " * engineering postings, and rewrites this block in place.",
+    " * root. The script re-probes every candidate ATS, filters for live",
+    " * engineering postings in the covered cities, and rewrites this block.",
     " *",
     " * Schema: { id, name, vertical, sub, stage, raised, lead, badges[],",
     " *           totalRoles, notes, jobs[{ title, url, level }] }",
+    " *  - jobs[].city is \"nyc\" or \"sd\"; a missing city means \"nyc\".",
     " *  - totalRoles == jobs.length (full set; the card slices to 3 for preview).",
     " *  - jobs are sorted: founding > senior > mid.",
     " */",
@@ -1862,7 +1897,8 @@ def emit_companies_block(rows, today):
   for c in rows:
     jobs_inner = ",\n      ".join(
       "{ title:" + json.dumps(j["title"]) + ", url:" + json.dumps(j["url"]) +
-      ", level:" + json.dumps(j["level"]) + " }"
+      ", level:" + json.dumps(j["level"]) +
+      ", city:" + json.dumps(j.get("city") or "nyc") + " }"
       for j in c["jobs"]
     )
     badges_inner = ", ".join(json.dumps(b) for b in c["badges"])

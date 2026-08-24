@@ -66,7 +66,7 @@ def main():
         meta = f.get("meta") or []
         vertical = meta[0] if meta and meta[0] in VERTICALS else "saas"
         sub = meta[1] if len(meta) > 1 else ""
-        rows.append((cid, f["name"], f["ats"], f["slug"], vertical, sub, f["nyc"]))
+        rows.append((cid, f["name"], f["ats"], f["slug"], vertical, sub, f.get("hits", f.get("nyc", 0))))
         if args.limit and len(rows) >= args.limit:
             break
 
@@ -74,7 +74,7 @@ def main():
     rows.sort(key=lambda r: (-r[6], r[1].lower()))
 
     def emit(r):
-        cid, name, ats, slug, vertical, sub, nyc = r
+        cid, name, ats, slug, vertical, sub, hits = r
         return ('  ("%s","%s","%s","%s","%s","%s","","","",[],""),'
                 % (cid, name.replace('"', r'\"'), ats, slug, vertical,
                    sub.replace('"', r'\"')))
@@ -82,7 +82,7 @@ def main():
     block = "\n".join(emit(r) for r in rows)
     header = f"  # ── {args.header} ──" if args.header else "  # ── batch ──"
 
-    print(f"{len(rows)} new tuples ({sum(1 for r in rows if r[6])} with live NYC roles today), "
+    print(f"{len(rows)} new tuples ({sum(1 for r in rows if r[6])} hiring in a covered city today), "
           f"{len(skipped)} duplicates skipped", file=sys.stderr)
     for s_ in skipped:
         print(f"   dup: {s_}", file=sys.stderr)

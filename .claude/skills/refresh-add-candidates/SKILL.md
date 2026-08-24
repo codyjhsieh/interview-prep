@@ -28,7 +28,7 @@ Output: new tuples appended to `CANDIDATES` in `scripts/refresh-companies.py`.
 
 ## Then
 
-Run `/refresh-jobs`. Non-NYC-hiring companies silently drop out of `--emit-json` — expected. Companies with only excluded titles (security engineer, research engineer, etc. per TITLE_EXCLUDE) also drop.
+Run `/refresh-jobs`. Companies not hiring in a covered city (New York or San Diego) silently drop out of `--emit-json` — expected. Companies with only excluded titles (security engineer, research engineer, etc. per TITLE_EXCLUDE) also drop.
 
 ## Guardrails
 
@@ -40,5 +40,5 @@ Run `/refresh-jobs`. Non-NYC-hiring companies silently drop out of `--emit-json`
 
 - ATS research (4 parallel agents × 50 names): 5-18 min wall.
 - Of 200 names → ~90-110 have usable public ATS boards (~50% yield).
-- Of those, ~10-20 typically have live NYC engineering openings (~10-20% survival through the NYC + title filter).
+- Of those, ~10-20 typically have live engineering openings in a covered city (~10-20% survival through the city + title filter).
 - Big-tech (Google, Meta, Amazon), old-line banks (JPMC, Wells Fargo), and PE giants (Blackstone, KKR) almost always run custom career sites and drop out.

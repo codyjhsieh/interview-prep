@@ -3,7 +3,7 @@
 probe-slugs.py — try multiple ATS slug variants per failed company.
 
 For each (company, [candidate_slugs]) pair, hit the ATS endpoint, count
-jobs that pass the same NYC + title filters as refresh-companies.py,
+jobs that pass the same city + title filters as refresh-companies.py,
 and print the winning (ats, slug, nyc_role_count) tuple.
 
 Used to recover slug drift without rerunning the full 159-candidate

@@ -1340,6 +1340,16 @@ code, pre, .font-mono {
 .pill-hosp { color: var(--bad);    border-color: rgba(215,56,76,0.26);  background: var(--bad-fill); }
 .pill-mkt  { color: var(--sde);    border-color: rgba(46,111,224,0.28); background: var(--sde-fill); }
 .pill-dev  { color: var(--accent); border-color: rgba(14,163,113,0.28); background: var(--accent-fill); }
+/* City tag on job rows and card previews. Deliberately the quietest pill on
+   the row: it locates a posting, it isn't a signal about it. Tighter padding
+   than the base pill because it sits in the densest cluster on mobile. */
+.pill-city {
+  color: var(--muted); border-color: var(--hairline); background: var(--hl-faint);
+  font-size: 9.5px; padding: 1px 6px; letter-spacing: 0.04em; flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .pill-city { font-size: 10px; padding: 1.5px 6px; }
+}
 
 .diff-easy   { color: var(--accent); }
 .diff-medium { color: var(--warn); }

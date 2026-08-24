@@ -1,6 +1,6 @@
 ---
 name: refresh-jobs
-description: End-to-end refresh of NYC engineering jobs — parallel fetch + prune, additive merge, logo backfill, cache-buster bump, commit, push. Fully autonomous.
+description: End-to-end refresh of New York + San Diego engineering jobs — parallel fetch + prune, additive merge, logo backfill, cache-buster bump, commit, push. Fully autonomous.
 ---
 
 # refresh-jobs
