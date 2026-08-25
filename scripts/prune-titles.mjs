@@ -35,7 +35,7 @@ const FAMILIES = {
   // Network operations only. "Software Engineer, Network Services" and
   // "ML Networking" are software roles on the network and must survive, so
   // this matches the role name rather than the word "network".
-  network:  /\bnetwork\s+engineer\b|\bnetwork\s*(?:&|and|\/)\s*systems?\s+engineer\b|\bsystems?\s+engineer,\s*network\b/i,
+  network:  /\bnetwork\s+engineer\b|\bnetwork\s*(?:&|and|\/)\s*systems?\s+engineer\b|\b(?:software|systems?)\s+engineer,\s*network\s*$/i,
   // Not \b-wrapped: a trailing \b after "+" never matches, so "Engineer, C++"
   // would survive. Covers "C++", "C/C++", "(C++/Java)".
   cpp:      /c\s?\+\+/i,

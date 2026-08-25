@@ -9,13 +9,19 @@
  * to. merge-additive.js cannot fix this — it matches on URL and only ever
  * ADDS jobs, so a stale title survives every refresh once it is written.
  *
- * The live board is authoritative for the title. When a title changes, the
- * stored `desc` was summarized from the OLD posting, so it is dropped rather
- * than left describing a role that no longer exists under that name; the
- * descriptions stage regenerates it from the current body on the next run.
+ * The live board is authoritative for the title. The stored `desc` was
+ * summarized from the OLD posting, but most drift is a seniority relabel
+ * ("Senior+ Software Engineer, Research Tools" -> "Software Engineer,
+ * Research Tools"), and the description of the work is still correct. So the
+ * desc is kept when the titles match after seniority tokens are stripped, and
+ * dropped only on a substantive change, for the descriptions stage to
+ * regenerate. Dropping all of them would throw away good copy to no purpose.
  *
- * Only the title is touched. A retitled posting keeps its url, level, city,
- * added and posted values — the link itself was never wrong.
+ * `level` is recomputed from the new title, since it is derived from exactly
+ * the seniority words that changed.
+ *
+ * Only title, level and (sometimes) desc are touched. The url, city, added
+ * and posted values stand — the link itself was never wrong.
  */
 'use strict';
 import fs from 'node:fs';
@@ -33,21 +39,38 @@ for (const c of rows) for (const j of c.jobs || []) liveTitle.set(j.url, j.title
 
 const { src, companies } = readCompanies(DATA);
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+// Seniority words only. If two titles agree once these are removed, the role
+// is the same and its description still holds.
+const SENIORITY = /\b(senior|sr|staff|principal|lead|junior|associate|entry|new\s+grad|i{1,3}|iv|[1-4])\b\+?|\+/gi;
+const core = (s) => norm(s.replace(SENIORITY, ' '));
+// Mirrors level() in scripts/refresh-companies.py.
+const levelOf = (t) => {
+  const low = t.toLowerCase();
+  if (low.includes('founding')) return 'founding';
+  if (low.includes('senior') || low.includes('sr.') || low.includes('sr ')) return 'senior';
+  return 'mid';
+};
 
-let fixed = 0, descDropped = 0;
+let fixed = 0, descDropped = 0, levelChanged = 0, seniorityOnly = 0;
 for (const c of companies) {
   for (const j of c.jobs || []) {
     const live = liveTitle.get(j.url);
     if (!live || norm(live) === norm(j.title)) continue;
-    console.log(`  ${c.name}\n     was: ${j.title}\n     now: ${live}`);
+    const sameRole = core(live) === core(j.title);
+    console.log(`  ${c.name}${sameRole ? '  [seniority only]' : ''}\n     was: ${j.title}\n     now: ${live}`);
     j.title = live;
-    if (j.desc) { delete j.desc; descDropped++; }
+    const lvl = levelOf(live);
+    if (j.level !== lvl) { j.level = lvl; levelChanged++; }
+    if (sameRole) seniorityOnly++;
+    else if (j.desc) { delete j.desc; descDropped++; }
     fixed++;
   }
 }
 
 console.log(`\n${fixed} title(s) corrected from the live board`
-  + (descDropped ? `, ${descDropped} stale desc(s) dropped for regeneration` : ''));
+  + ` (${seniorityOnly} seniority-only, desc kept)`
+  + (descDropped ? `, ${descDropped} stale desc(s) dropped for regeneration` : '')
+  + (levelChanged ? `, ${levelChanged} level(s) recomputed` : ''));
 if (dry) { console.log('--dry: js/data.js not modified'); process.exit(0); }
 if (!fixed) { console.log('nothing to write'); process.exit(0); }
 writeCompanies(DATA, src, companies);

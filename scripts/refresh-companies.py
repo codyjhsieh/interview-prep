@@ -157,7 +157,11 @@ TITLE_EXCLUDE = re.compile(
   # and must survive. Only a title whose ROLE is network engineering goes.
   r"network\s+engineer\b|"
   r"network\s*(?:&|and|/)\s*systems?\s+engineer\b|"
-  r"systems?\s+engineer,\s*network\b|"
+  # "…Engineer, Network" only when Network ENDS the title. Wealthfront
+  # renamed its pruned "Systems Engineer, Network" to "Software Engineer,
+  # Network", so the noun must not matter — but "Engineer, Network Services"
+  # and "Engineer, Network Infrastructure" are software roles and must stay.
+  r"(?:software|systems?)\s+engineer,\s*network\s*$|"
   # Military / government work. Pure-play defense employers are removed from
   # CANDIDATES outright (Anduril, Shield AI, Saronic, Vannevar Labs); these
   # patterns catch the defense and public-sector roles at employers that are

@@ -5316,6 +5316,8 @@ const COOLNESS = {
   // Defense-tech reads as respected-but-not-LES, so it sits with harvey at 3.
   abbvie:1, servicenow:1, netradyne:2, 'singular-genomics':2,
   'shield-ai':3, saronic:3, zoox:3, 'element-biosciences':3, illumina:3,
+  // 2026-08-25 — flex-office real estate: useful, unglamorous, WeWork-adjacent.
+  industrious:3,
 };
 
 const FRONTIER = new Set([
