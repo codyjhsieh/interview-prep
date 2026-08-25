@@ -158,12 +158,38 @@ TITLE_EXCLUDE = re.compile(
   r"network\s+engineer\b|"
   r"network\s*(?:&|and|/)\s*systems?\s+engineer\b|"
   r"systems?\s+engineer,\s*network\b|"
+  # Military / government work. Pure-play defense employers are removed from
+  # CANDIDATES outright (Anduril, Shield AI, Saronic, Vannevar Labs); these
+  # patterns catch the defense and public-sector roles at employers that are
+  # otherwise civilian (Palantir, Scale AI, Databricks, Anthropic).
+  # Axon and Mark43 stay: police body cameras and first-responder dispatch
+  # are civilian public safety, not military.
+  r"defen[cs]e|military|warfare|weapons?|munitions?|"
+  r"us\s+government|public\s+sector|federal|dod|national\s+security|"
+  r"intelligence\s+community|"
+  # Embedded / firmware / hardware — a different discipline from the
+  # application and infra SDE track this board covers.
+  r"embedded|firmware|fpga|rtos|bare[\s-]?metal|device\s+driver|"
+  r"microcontroller|mcu|hardware\s+engineer|electrical\s+engineer|"
   r"customer\s+engineer|field\s+engineer|"
   r"support\s+engineer|implementation\s+engineer|partner\s+engineer|"
   r"developer\s+advocate|developer\s+relations|devrel|recruiter|recruiting|"
   r"account\s+executive|account\s+manager|operations\s+manager"
   r")\b", re.IGNORECASE)
 
+# C++ roles. This needs its own pattern because TITLE_EXCLUDE wraps its
+# alternation in \b(...)\b and a trailing \b after "+" can never match —
+# "Software Engineer, C++" would slip through. Covers "C++", "C/C++",
+# "(C++/Java)". Only the title is checked: descRaw is dropped once a job has
+# a desc, so a role that is C++ in the body but not the title stays.
+TITLE_EXCLUDE_UNBOUNDED = re.compile(r"c\s?\+\+", re.IGNORECASE)
+
+# Retired employers (2026-08-25): Anduril, Shield AI, Saronic, Vannevar Labs.
+# Pure-play military systems builders — removed rather than title-filtered,
+# because nearly every role at them is defense work regardless of title.
+# Axon and Mark43 are deliberately kept: police body cameras and
+# first-responder dispatch are civilian public safety, not military.
+#
 # ── Candidates ───────────────────────────────────────────────────────────
 # Tuple shape: (id, name, ats, slug, vertical, sub, stage, raised, lead, badges, notes)
 # Funding metadata is hand-curated from publicly disclosed rounds. To add a
@@ -596,7 +622,6 @@ CANDIDATES = [
   ("palantir","Palantir","lever","palantir","saas","Elite FDE consultancy (NYSE: PLTR)","Public","(NYSE: PLTR)","NYSE",["NYSE"],"NYC major eng hub. Original FDE model. 33 NYC eng roles today."),
   ("turing","Turing","greenhouse","turing","ai","AI dev marketplace + staff","Late stage","$140M+","WestBridge",["WestBridge","Foundation"],"NYC HQ. Elite talent network with staff engineers."),
   ("capco","Capco","greenhouse","capco","saas","Financial-services dev consultancy","Acquired","(Wipro subsidiary)","Wipro",["Wipro"],"NYC office. Elite banking tech consultancy."),
-  ("vannevarlabs","Vannevar Labs","greenhouse","vannevarlabs","saas","Defense FDE consultancy","Series C","$100M+","General Catalyst",["General Catalyst","Founders Fund"],"NYC office. Palantir alumni; defense FDE."),
   ("toptal","Toptal","lever","toptal","saas","Elite dev marketplace + staff","Bootstrapped","Profitable","—",["—"],"NYC office. Vetted senior-eng network."),
   ("andela","Andela","ashby","andela","saas","Staff-engineer dev network","Late stage","$381M","SoftBank",["SoftBank","GV","Spark"],"NYC-connected. Staff-eng model."),
   ("pariveda","Pariveda","ashby","pariveda","saas","Elite management + dev consultancy","Bootstrapped","Profitable","—",["Employee-owned"],"NYC office. Boutique employee-owned."),
@@ -828,8 +853,6 @@ CANDIDATES = [
   ("axiom-space","Axiom Space","workday","axiomspace/wd5/External_Career_Site","aerospace","Commercial space stations","Series C","$500M+","N/A",[],"Commercial ISS successor."),
   ("astranis","Astranis","greenhouse","astranis","aerospace","Geostationary comms satellites","Series D","$550M","Andreessen Horowitz",["a16z","Venrock"],"GEO smallsats for connectivity."),
   ("momentus","Momentus","greenhouse","momentus","aerospace","In-space transportation (NASDAQ: MNTS)","Public","N/A","NASDAQ",["NASDAQ"],"In-space last-mile."),
-  ("anduril","Anduril","greenhouse","andurilindustries","defense","Autonomous defense systems","Late stage","$3.8B","Founders Fund",["Founders Fund","Andreessen"],"Palmer Luckey defense co."),
-  ("shield-ai","Shield AI","lever","shieldai","defense","AI autonomy for defense","Series F","$1.5B","US Innovative Tech",["US Innovative","Andreessen"],"Hivemind autonomy."),
   ("skydio","Skydio","ashby","Skydio","defense","Autonomous drones","Series E","$740M","Linse Capital",["Linse","IVP","a16z"],"US drone maker."),
   ("kratos-defense","Kratos Defense","smartrecruiters","Kratos","defense","Unmanned defense systems (NASDAQ: KTOS)","Public","N/A","NASDAQ",["NASDAQ"],"Drones + defense systems."),
   ("two-six","Two Six Technologies","greenhouse","twosixtechnologies","defense","Defense R&D + cyber","Private","N/A","N/A",[],"Defense cyber R&D."),
@@ -933,7 +956,7 @@ CANDIDATES = [
   ("evolutioniq","EvolutionIQ","greenhouse","evolutioniq","ai","Claims guidance AI","","","",[],""),
   ("garner-health","Garner Health","greenhouse","garnerhealth","health","Provider quality data","","","",[],""),
   ("assembled","Assembled","ashby","assembledhq","saas","Support team operations","","","",[],""),
-  ("axon","Axon","greenhouse","axon","defense","Public safety technology","","","",[],""),
+  ("axon","Axon","greenhouse","axon","saas","Public safety technology","","","",[],""),
   ("grow-therapy","Grow Therapy","ashby","grow-therapy","health","Therapist network platform","","","",[],""),
   ("blacksmith","Blacksmith","ashby","blacksmith","devtools","Fast CI runners","","","",[],""),
   ("kalepa","Kalepa","greenhouse","kalepa","ai","Commercial underwriting AI","","","",[],""),
@@ -960,7 +983,7 @@ CANDIDATES = [
   ("harness","Harness","greenhouse","harnessinc","devtools","Software delivery platform","","","",[],""),
   ("icon-savings","Icon Savings","ashby","icon","fintech","Portable retirement plans","","","",[],""),
   ("livekit","LiveKit","ashby","livekit","devtools","Real-time audio and video","","","",[],""),
-  ("mark43","Mark43","greenhouse","mark43","defense","Public safety software","","","",[],""),
+  ("mark43","Mark43","greenhouse","mark43","saas","Public safety software","","","",[],""),
   ("merge","Merge","ashby","merge","devtools","Unified API for integrations","","","",[],""),
   ("nabla","Nabla","ashby","nabla","health","Ambient clinical AI","","","",[],""),
   ("oak-street-health","Oak Street Health","ashby","oak","health","Value-based primary care","","","",[],""),
@@ -1157,7 +1180,6 @@ CANDIDATES = [
   ("salesloft","Salesloft","greenhouse","salesloft","saas","Revenue orchestration","","","",[],""),
   ("salient-predictions","Salient Predictions","ashby","salient","ai","Seasonal weather forecasting","","","",[],""),
   ("sardine","Sardine","ashby","sardine","fintech","Fraud and compliance AI","","","",[],""),
-  ("saronic","Saronic","ashby","saronic","defense","Autonomous surface vessels","","","",[],""),
   ("scout-motors","Scout Motors","greenhouse","scoutmotors","automotive","Electric trucks and SUVs","","","",[],""),
   ("self-financial","Self Financial","greenhouse","selffinancial","fintech","Credit building platform","","","",[],""),
   ("serve-robotics","Serve Robotics","ashby","serverobotics","robotics","Sidewalk delivery robots","","","",[],""),
@@ -1880,6 +1902,7 @@ def filter_jobs(ats, raw, slug=""):
       continue
     title_for_check = STAFF_PRINCIPAL.sub("", title) if SENIORITY_MARK.search(title) else title
     if TITLE_EXCLUDE.search(title_for_check): continue
+    if TITLE_EXCLUDE_UNBOUNDED.search(title): continue
     if not TITLE_INCLUDE.search(title): continue
     job = {"title": title, "url": url, "level": level(title), "city": city,
            "posted": posted}

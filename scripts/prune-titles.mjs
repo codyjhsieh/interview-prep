@@ -36,7 +36,19 @@ const FAMILIES = {
   // "ML Networking" are software roles on the network and must survive, so
   // this matches the role name rather than the word "network".
   network:  /\bnetwork\s+engineer\b|\bnetwork\s*(?:&|and|\/)\s*systems?\s+engineer\b|\bsystems?\s+engineer,\s*network\b/i,
+  // Not \b-wrapped: a trailing \b after "+" never matches, so "Engineer, C++"
+  // would survive. Covers "C++", "C/C++", "(C++/Java)".
+  cpp:      /c\s?\+\+/i,
+  military: /\b(defen[cs]e|military|warfare|weapons?|munitions?|us\s+government|public\s+sector|federal|dod|national\s+security|intelligence\s+community)\b/i,
+  embedded: /\b(embedded|firmware|fpga|rtos|bare[\s-]?metal|device\s+driver|microcontroller|mcu|hardware\s+engineer|electrical\s+engineer)\b/i,
 };
+
+// Employers retired outright, not by title: nearly every role at a pure-play
+// military systems builder is defense work whatever the title says. Their
+// records are DELETED rather than kept-but-empty (the rule for retired
+// families), because they are gone from CANDIDATES too and can never
+// repopulate — an empty record would be permanent dead weight.
+const RETIRED_COMPANIES = new Set(['anduril', 'shield-ai', 'saronic', 'vannevarlabs']);
 
 const argv = process.argv.slice(2);
 const dry = argv.includes('--dry');
@@ -55,7 +67,12 @@ const classify = (title) => {
 const dropped = [];
 const emptied = [];
 const kept = [];
+const retired = [];
 for (const c of companies) {
+  if (RETIRED_COMPANIES.has(c.id)) {
+    retired.push(`${c.name} (${(c.jobs || []).length} jobs)`);
+    continue;
+  }
   const survivors = [];
   for (const j of (c.jobs || [])) {
     const family = classify(j.title);
@@ -80,6 +97,7 @@ for (const [family, list] of Object.entries(byFamily)) {
   console.log(`\n${family}: ${list.length} job(s)`);
   for (const d of list) console.log(`   ${d.company} — ${d.title}`);
 }
+if (retired.length) console.log(`\nretired employers removed: ${retired.join(', ')}`);
 console.log(`\n${dropped.length} job(s) dropped, ${kept.length} companies kept`
   + (emptied.length ? `, ${emptied.length} left with no live roles (record retained, card hidden): ${emptied.join(', ')}` : ''));
 
