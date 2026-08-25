@@ -38,11 +38,22 @@ const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
   + '(KHTML, like Gecko) Chrome/125.0 Safari/537.36';
 
 // Phrases an ATS puts in the <title> or early body when a posting is gone.
-const NOT_FOUND_TITLE = /(404|page not found|not found|job board$|^error|oops)/i;
+// A live Greenhouse posting titles itself "Job Application for <role> at
+// <company>". Checked FIRST as a positive signal, because company names defeat
+// negative patterns: "Sony Music Global Job Board" ends in "job board", and an
+// earlier `job board$` rule condemned a perfectly live posting for it.
+const LIVE_TITLE = /^job application for .+ at /i;
+// Anchored where it matters: "^job board$" is a bare listing page; "job board"
+// appearing anywhere in a title is just a company's branding.
+const NOT_FOUND_TITLE = /(404|page not found|not found|^job board$|^error|oops)/i;
+// Every phrase here must be unambiguous on its own. "position is filled" was
+// here and matched Melio's live boilerplate — "Melio accepts job applications
+// on an ongoing basis until the position is filled" — flagging two open roles
+// as gone. A phrase that can appear in an application form's fine print does
+// not belong in this list.
 const NOT_FOUND_BODY = new RegExp([
   'this job is no longer (?:available|accepting|open)',
   'the job you are looking for',
-  'position (?:is|has been) (?:closed|filled)',
   'no longer accepting applications',
   'job posting (?:is )?(?:no longer|not) (?:available|found)',
   'this posting (?:is|has) (?:closed|expired)',
@@ -85,6 +96,9 @@ function classify(job, res) {
   if (status === 429) return ['unknown', 'HTTP 429 (rate limited)'];
   if (status >= 500) return ['unknown', `HTTP ${status}`];
   const title = titleOf(body);
+  // Positive signal wins: a real application page is live regardless of what
+  // phrases its fine print contains.
+  if (LIVE_TITLE.test(title)) return ['live', title.slice(0, 60)];
   if (title && NOT_FOUND_TITLE.test(title)) return ['dead', `title: "${title.slice(0, 60)}"`];
   const head = (body || '').slice(0, 20000).replace(/<[^>]+>/g, ' ');
   const hit = NOT_FOUND_BODY.exec(head);

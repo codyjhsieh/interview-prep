@@ -11573,11 +11573,10 @@ const COMPANIES = [
     tagline:"Serves open models fast",
     stage:"Series B", raised:"$77M", lead:"Sequoia",
     badges:["Sequoia","Benchmark","NVIDIA"],
-    totalRoles:2,
+    totalRoles:0,
     notes:"Production inference platform for open-weights models. Systems + perf.",
     jobs:[
-      { title:"Applied Machine Learning Engineer", url:"https://job-boards.greenhouse.io/fireworksai/jobs/4001304009", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-06-04" },
-      { title:"Software Engineer, AI Infrastructure", url:"https://job-boards.greenhouse.io/fireworksai/jobs/4056271009", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-06-04" }
+
     ] },
   { id:"logrocket", name:"LogRocket", vertical:"devtools",
     sub:"Frontend session replay + obs",
@@ -11730,10 +11729,10 @@ const COMPANIES = [
     tagline:"AI agents for freight ops",
     stage:"Series B", raised:"$60M", lead:"Founders Fund",
     badges:["Founders Fund","Index"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"Freight/logistics agents. Deploy with top carriers; agent eval + customer integration.",
     jobs:[
-      { title:"Software Engineer, Full-Stack", url:"https://job-boards.greenhouse.io/loop/jobs/5977189004", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-06-08" }
+
     ] },
   { id:"metropolis", name:"Metropolis", vertical:"ai",
     sub:"AI computer-vision parking",
@@ -11783,10 +11782,10 @@ const COMPANIES = [
     tagline:"API for taste and culture",
     stage:"Series C", raised:"$103M", lead:"AXA Venture Partners",
     badges:["AXA","Tribeca"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"Cross-domain taste graph API. Recommender systems, API design, latency.",
     jobs:[
-      { title:"Machine Learning Engineer (LLM / Personalization)", url:"https://jobs.lever.co/qloo/dc353e19-b91e-4c78-b2d0-1e59690d7e4e", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-15" }
+
     ] },
   { id:"sandbar", name:"Sandbar", vertical:"ai",
     sub:"AI for compliance / fincrime",
@@ -12156,10 +12155,10 @@ const COMPANIES = [
     tagline:"Precision mental health care",
     stage:"Series E", raised:"$466M+", lead:"Generation Investment Mgmt",
     badges:["Generation IM","Kinnevik","Tiger Global"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC hybrid available. AI Servicing Platform team is interesting; Rails/React stack. Median NYC SWE comp ~$160K + equity. Behavioral-heavy interview; mission-fit screen is real.",
     jobs:[
-      { title:"Senior Software Engineer I, Member Growth, Care Guide Experience", url:"https://job-boards.greenhouse.io/springhealth66/jobs/4673749005", level:"senior", city:"nyc", added:"2026-05-31" }
+
     ] },
   { id:"k-health", name:"K Health", vertical:"health",
     sub:"NYC AI primary care, partners with Cedars-Sinai, Mayo, Elevance",
@@ -14449,10 +14448,10 @@ const COMPANIES = [
     tagline:"Flex offices, run well",
     stage:"Acquired", raised:"$220M+ (CBRE)", lead:"CBRE",
     badges:["CBRE"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC HQ. Flex workspace tech, global network.",
     jobs:[
-      { title:"Tech Lead, DevOps Engineer", url:"https://jobs.ashbyhq.com/industrious/a750a9f3-7a16-4e0e-ae14-0260eabd3e07", level:"mid", city:"nyc", added:"2026-08-25", posted:"2026-08-25", desc:"Run DevOps for a global flex-workspace network." }
+
     ] }
 ];
 
