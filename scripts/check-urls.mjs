@@ -85,13 +85,6 @@ function classify(job, res) {
   if (status === 429) return ['unknown', 'HTTP 429 (rate limited)'];
   if (status >= 500) return ['unknown', `HTTP ${status}`];
   const title = titleOf(body);
-  // Ashby is a SPA: a dead posting still returns 200, but it serves the bare
-  // shell titled exactly "Jobs" (~7KB), where a live posting renders
-  // "<Job Title> @ <Company>" (~45-55KB). Scoped to ashby URLs so the generic
-  // word "Jobs" can never condemn a page on another ATS.
-  if (/ashbyhq\.com/.test(job.url) && /^jobs$/i.test(title)) {
-    return ['dead', 'Ashby shell page (posting gone)'];
-  }
   if (title && NOT_FOUND_TITLE.test(title)) return ['dead', `title: "${title.slice(0, 60)}"`];
   const head = (body || '').slice(0, 20000).replace(/<[^>]+>/g, ' ');
   const hit = NOT_FOUND_BODY.exec(head);
@@ -100,6 +93,47 @@ function classify(job, res) {
   if (id && final && !final.includes(id)) return ['dead', `redirected off the posting -> ${final.slice(0, 70)}`];
   if (!body) return ['unknown', 'empty body'];
   return ['live', title.slice(0, 60)];
+}
+
+// ── Ashby: the HTTP response cannot be trusted ───────────────────────────
+// Ashby job pages are client-rendered, and whether the server returns the
+// full page or a 7,270-byte shell titled "Jobs" depends on how the COMPANY's
+// board is configured, not on whether the posting is alive. OpenAI's postings
+// render server-side; Cursor's live postings return the same bare shell a
+// deleted posting does. Reading that shell as "gone" flagged all 20 live
+// Cursor roles for deletion.
+// So Ashby is resolved against the public board API instead, which lists the
+// posting ids that actually exist. One fetch per slug, cached.
+const ashbyBoard = new Map();          // slug -> Set(id) | null (unfetchable)
+async function ashbyIds(slug) {
+  if (ashbyBoard.has(slug)) return ashbyBoard.get(slug);
+  // Retry with backoff: the board API rate-limits under concurrency, and a
+  // throttled response must not be read as "this company has no postings" —
+  // that would condemn every one of its links.
+  let ids = null;
+  for (let attempt = 0; attempt < 3 && ids === null; attempt++) {
+    if (attempt) await new Promise((r) => setTimeout(r, 1500 * attempt));
+    const { status, body } = await curl(`https://api.ashbyhq.com/posting-api/job-board/${slug}`);
+    if (status !== 200) continue;
+    try {
+      const jobs = JSON.parse(body).jobs;
+      // An empty array is a real answer only if the board truly has no
+      // postings; treat it as one, but a parse failure stays null (retry).
+      if (Array.isArray(jobs)) ids = new Set(jobs.map((j) => j.id));
+    } catch { /* malformed — retry */ }
+  }
+  ashbyBoard.set(slug, ids);
+  return ids;
+}
+
+async function classifyAshby(job) {
+  const m = job.url.match(/jobs\.ashbyhq\.com\/([^/]+)\/([0-9a-f-]{36})/i);
+  if (!m) return ['unknown', 'unparseable Ashby URL'];
+  const ids = await ashbyIds(m[1]);
+  if (!ids) return ['unknown', `Ashby board ${m[1]} unfetchable`];
+  return ids.has(m[2].toLowerCase())
+    ? ['live', 'listed on the Ashby board']
+    : ['dead', `absent from the Ashby board (${ids.size} postings listed)`];
 }
 
 const { src, companies } = readCompanies(DATA);
@@ -115,7 +149,9 @@ let cursor = 0, done = 0;
 async function worker() {
   while (cursor < tasks.length) {
     const t = tasks[cursor++];
-    const [verdict, why] = classify(t, await curl(t.url));
+    const [verdict, why] = /jobs\.ashbyhq\.com/.test(t.url)
+      ? await classifyAshby(t)
+      : classify(t, await curl(t.url));
     results.push({ ...t, verdict, why });
     if (++done % 100 === 0) console.error(`  ${done}/${tasks.length}`);
   }
