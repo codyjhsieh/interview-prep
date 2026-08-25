@@ -15,9 +15,14 @@ Teamtailor / SmartRecruiters) via curl, filters jobs by:
     — see CITIES.
   • Title matches an SDE / SWE / Forward Deployed / Founding /
     Applied AI/ML / Member-of-Technical-Staff pattern
-  • Title does NOT contain staff / principal / lead / manager /
-    director / intern / research scientist / sales-or-solutions /
-    customer / partner / implementation engineer
+  • Title does NOT name a retired role family. Seniority and
+    management: staff / principal / lead / manager / director / intern.
+    Role families this board doesn't track: research, security, mobile,
+    front-end, sales-or-solutions (incl. presales), network engineering,
+    customer / partner / field / implementation engineer.
+    Retiring a family here only stops NEW postings arriving — the merge
+    is additive, so run scripts/prune-titles.mjs to clear the ones
+    already in js/data.js.
 
 For each company with ≥1 surviving posting, it emits a record with
 all matching jobs (sorted founding > senior > mid) and the funding
@@ -101,20 +106,16 @@ TITLE_INCLUDE = re.compile(
   r"ai[/]ml[\s-]engineer|ml[/]ai[\s-]engineer|"
   r"genai[\s-]engineer|llm[\s-]engineer|agent[\s-]engineer|"
   r"agentic[\s-]engineer|mlops[\s-]engineer|"
-  # Solutions / Sales / Presales Engineer — customer-facing eng roles.
-  # Removed from TITLE_EXCLUDE and explicitly allowed here.
-  r"solutions?[\s-]engineer|sales[\s-]engineer|presales[\s-]engineer|"
   # Agency title variants — reverse-order (Engineer, Back-end) and
   # parenthetical (Engineer (Back-end)) forms common at Code and Theory /
   # DEPT / Instrument / etc. Security, Research, and Front-end omitted.
   r"engineer,\s*(?:back|full[\s-]?stack|backend|fullstack|"
   r"devops|sre|site\s+reliability|cloud|reliability|"
   r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|"
-  r"solutions?|sales|presales)|"
+  r"applied[\s-]ai)|"
   r"engineer\s*\((?:back|full[\s-]?stack|backend|fullstack|"
   r"devops|sre|site\s+reliability|cloud|reliability|"
-  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai|"
-  r"solutions?|sales|presales)|"
+  r"ai|ml|ai[/]ml|ml[/]ai|genai|llm|agent|agentic|mlops|applied[\s-]ai)|"
   # "Developer" role names. Mobile and web developer variants are omitted
   # — see TITLE_EXCLUDE.
   r"software[\s-]developer|"
@@ -139,8 +140,24 @@ TITLE_EXCLUDE = re.compile(
   # Front-end — including "full-stack (front-end leaning)", which is a
   # front-end role wearing a full-stack title.
   r"front[\s-]?end|frontend|web\s+developer|ui\s+engineer|"
-  # Kept excluded: customer / field engineer. Solutions + Sales Engineer
-  # were previously here but are now explicitly allowed (see TITLE_INCLUDE).
+  # Comma/slash forms the bare "ui engineer" pattern misses:
+  # "Software Engineer, UI/UX".
+  r"ui\s*/\s*ux|engineer,\s*ui\b|"
+  # Sales-facing engineering — solutions / sales / presales. These were
+  # briefly allowed; they are a GTM track, not the SDE/FDE one. "Solutions
+  # Engineering" as a suffix is included ("Value Engineer, Solutions
+  # Engineering"), and the comma form needs its word boundary or
+  # "Engineer, Salesforce" gets caught by "sales".
+  r"(?:pre[\s-]?sales|solutions?|sales)\s+engineer(?:ing)?\b|"
+  r"engineer,\s*(?:solutions?|sales|presales)\b|"
+  r"solutions?\s+engineering\b|"
+  # Network engineering — IT/network operations, not the infra SDE track.
+  # Deliberately narrow: "Software Engineer, Network Services" and
+  # "ML Networking" are software roles that happen to touch the network,
+  # and must survive. Only a title whose ROLE is network engineering goes.
+  r"network\s+engineer\b|"
+  r"network\s*(?:&|and|/)\s*systems?\s+engineer\b|"
+  r"systems?\s+engineer,\s*network\b|"
   r"customer\s+engineer|field\s+engineer|"
   r"support\s+engineer|implementation\s+engineer|partner\s+engineer|"
   r"developer\s+advocate|developer\s+relations|devrel|recruiter|recruiting|"

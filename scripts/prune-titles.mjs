@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* prune-titles.mjs — remove jobs whose titles belong to a role family this
- * board doesn't track, and drop any company left with no jobs.
+ * board doesn't track. Companies left with no jobs keep their record.
  *
  *   node scripts/prune-titles.mjs --dry     # report only
  *   node scripts/prune-titles.mjs           # rewrite js/data.js
@@ -24,11 +24,18 @@ import { readCompanies, writeCompanies } from './lib/emit-companies.mjs';
 
 const DATA = 'js/data.js';
 
-// Mirrors the mobile / front-end / research clauses of TITLE_EXCLUDE.
+// Mirrors the retired-family clauses of TITLE_EXCLUDE.
 const FAMILIES = {
   mobile:   /\b(mobile|android|ios|react\s+native)\b/i,
-  frontend: /\b(front[\s-]?end|frontend|web\s+developer|ui\s+engineer)\b/i,
+  frontend: /\b(front[\s-]?end|frontend|web\s+developer|ui\s+engineer)\b|\bui\s*\/\s*ux\b|\bengineer,\s*ui\b/i,
   research: /\b(researcher|research\s+scientist|research\s+engineer|quantitative\s+research)\b/i,
+  // Sales-facing engineering. The comma form needs its trailing \b or
+  // "GTM Systems Engineer, Salesforce" is caught by "sales".
+  sales:    /\b(?:pre[\s-]?sales|solutions?|sales)\s+engineer(?:ing)?\b|\bengineer,\s*(?:solutions?|sales|presales)\b|\bsolutions?\s+engineering\b/i,
+  // Network operations only. "Software Engineer, Network Services" and
+  // "ML Networking" are software roles on the network and must survive, so
+  // this matches the role name rather than the word "network".
+  network:  /\bnetwork\s+engineer\b|\bnetwork\s*(?:&|and|\/)\s*systems?\s+engineer\b|\bsystems?\s+engineer,\s*network\b/i,
 };
 
 const argv = process.argv.slice(2);
@@ -59,7 +66,12 @@ for (const c of companies) {
   // totalRoles is documented as == jobs.length; keep that invariant true.
   if (c.totalRoles !== undefined) c.totalRoles = survivors.length;
   if (!survivors.length) emptied.push(c.name);
-  else kept.push(c);
+  // Keep the record even at zero jobs, matching check-dead.js and what the
+  // UI expects: renderCompanies filters to companies with >=1 job, so an
+  // empty record is invisible, while deleting it would throw away the
+  // hand-written tagline and let a later refresh resurrect the company with
+  // blank copy. CANDIDATES still lists them, so they repopulate on their own.
+  kept.push(c);
 }
 
 const byFamily = {};
@@ -69,7 +81,7 @@ for (const [family, list] of Object.entries(byFamily)) {
   for (const d of list) console.log(`   ${d.company} — ${d.title}`);
 }
 console.log(`\n${dropped.length} job(s) dropped, ${kept.length} companies kept`
-  + (emptied.length ? `, ${emptied.length} company/companies left empty and removed: ${emptied.join(', ')}` : ''));
+  + (emptied.length ? `, ${emptied.length} left with no live roles (record retained, card hidden): ${emptied.join(', ')}` : ''));
 
 if (dry) { console.log('\n--dry: js/data.js not modified'); process.exit(0); }
 if (!dropped.length) { console.log('nothing to do'); process.exit(0); }

@@ -5607,7 +5607,6 @@ function renderCompanies(state, hub) {
     ['backend', 'Backend'],
     ['infra', 'Infra'],
     ['fde', 'FDE'],
-    ['sales', 'Sales'],
   ];
   const categoryTabs = CAT_LABELS
     .map(([v, l]) => `<div class="tab${v==='all' ? ' active' : ''}" data-catfilter="${esc(v)}">${esc(l)}</div>`)
@@ -5848,7 +5847,8 @@ function renderCompanies(state, hub) {
   // companies.
   function roleCategory(title) {
     const t = (title || '').toLowerCase();
-    if (/\b(solutions?\s+engineer|sales\s+engineer|presales\s+engineer)\b/.test(t)) return 'sales';
+    // No 'sales' bucket: solutions / sales / presales engineering is a
+    // retired family (see TITLE_EXCLUDE), so the chip would always read 0.
     if (/\b(forward[\s-]deployed|\bfde\b)\b/.test(t)) return 'fde';
     if (/\b(ai[/]?ml|machine[\s-]learning|genai|\bllm\b|agentic?|agents?\b|research\s+engineer|mlops|applied\s+ai|\bai\s+engineer|\bml\s+engineer)\b/.test(t)
       || /,\s*(ai|ml|agents?|agentic|research|genai|llm|mlops)\b/.test(t)) return 'ai-ml';
