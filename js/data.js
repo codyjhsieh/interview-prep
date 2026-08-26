@@ -10237,7 +10237,7 @@ Note: <i>even saying "100+ writers" is real</i>. That's a public-facing, falsifi
  *  - totalRoles == jobs.length (full set; the card slices to 3 for preview).
  *  - jobs are sorted: founding > senior > mid.
  */
-const COMPANIES_VERIFIED_AT = '2026-08-25';
+const COMPANIES_VERIFIED_AT = '2026-08-26';
 const COMPANIES = [
   { id:"openai", name:"OpenAI", vertical:"ai",
     sub:"GPT / ChatGPT / API",
@@ -10343,7 +10343,7 @@ const COMPANIES = [
     tagline:"Labels and evals AI data",
     stage:"Series F", raised:"$1.6B", lead:"Accel",
     badges:["Accel","Index","Founders Fund"],
-    totalRoles:20,
+    totalRoles:19,
     notes:"Data pipelines for AI labs + DoD. FDE work for enterprise deploys; long async eval workflows.",
     jobs:[
       { title:"AI Infrastructure Engineer, Model Serving Platform", url:"https://job-boards.greenhouse.io/scaleai/jobs/4520320005", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-05-26", desc:"Design fault-tolerant platforms for LLM serving at scale." },
@@ -10364,8 +10364,7 @@ const COMPANIES = [
       { title:"Senior Frontier Agents Engineer (Forward Deployed Engineering)", url:"https://job-boards.greenhouse.io/scaleai/jobs/4694863005", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-08-04", desc:"Build AI agents automating enterprise and government workflows." },
       { title:"Frontier Agents Engineer (Applied AI)", url:"https://job-boards.greenhouse.io/scaleai/jobs/4720573005", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-08-04", desc:"Build AI agents automating workflows with frontier reasoning." },
       { title:"Frontier Agents Engineer (Forward Deployed Engineering)", url:"https://job-boards.greenhouse.io/scaleai/jobs/4694861005", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-08-04", desc:"Deploy AI agents inside finance, healthcare, and government." },
-      { title:"Software Engineer, Gen AI", url:"https://job-boards.greenhouse.io/scaleai/jobs/4591300005", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-08-04", desc:"Build GenAI data pipelines for RLHF and evaluation." },
-      { title:"Forward Deployed Product Designer", url:"https://job-boards.greenhouse.io/scaleai/jobs/4724276005", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-14", desc:"Design decision-support workflows on-site with defense teams." }
+      { title:"Software Engineer, Gen AI", url:"https://job-boards.greenhouse.io/scaleai/jobs/4591300005", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-08-04", desc:"Build GenAI data pipelines for RLHF and evaluation." }
     ] },
   { id:"decagon", name:"Decagon", vertical:"ai",
     sub:"AI customer-support agents",
@@ -10528,7 +10527,7 @@ const COMPANIES = [
     tagline:"Answers questions with sources",
     stage:"Series C", raised:"$165M", lead:"IVP",
     badges:["IVP","NEA","NVIDIA"],
-    totalRoles:21,
+    totalRoles:20,
     notes:"Conversational answer engine with citations. Retrieval + ranking + UX.",
     jobs:[
       { title:"Member of Technical Staff (Software Engineer, Monetization)", url:"https://jobs.ashbyhq.com/perplexity/043d6a58-87a1-4e3c-bf47-4dc351b94cf4", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-23", desc:"Build billing and metering for agentic subscriptions." },
@@ -10537,7 +10536,6 @@ const COMPANIES = [
       { title:"Member of Technical Staff (Software Engineer, Security)", url:"https://jobs.ashbyhq.com/perplexity/6c9b3c71-85ba-47db-bce5-44fd9fa95d03", level:"mid", city:"nyc", added:"2026-05-31", posted:"2025-12-02", desc:"Build security agents for detection, response, and bug bounty." },
       { title:"Member of Technical Staff (Software Engineer, Computer)", url:"https://jobs.ashbyhq.com/perplexity/4c0ac8bb-55bf-4fb0-b7d7-36d69f55e6c8", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-22", desc:"Ship agentic products across Computer and search." },
       { title:"Member of Technical Staff (Software Engineer, Connector Platform)", url:"https://jobs.ashbyhq.com/perplexity/daafcaba-cc39-487a-b941-d7a407753788", level:"mid", city:"nyc", added:"2026-06-16", posted:"2026-06-15", desc:"Turn messy integrations into one typed surface for agents." },
-      { title:"Sales Systems Engineer, Enterprise Operations", url:"https://jobs.ashbyhq.com/perplexity/6eedd99c-ff6a-470b-a7cc-3303e1c0b7fc", level:"mid", city:"nyc", added:"2026-06-16", posted:"2026-05-19", desc:"Own CPQ, lead scoring, and Salesforce/Snowflake integrations." },
       { title:"Member of Technical Staff (Software Engineer, Acceleration)", url:"https://jobs.ashbyhq.com/perplexity/f45ba174-7e99-4743-9d19-6e4d3e196458", level:"mid", city:"nyc", added:"2026-06-16", posted:"2026-06-08", desc:"Build internal tooling that speeds research and product teams." },
       { title:"Member of Technical Staff (Software Engineer, Cloud Infrastructure)", url:"https://jobs.ashbyhq.com/perplexity/0d722589-0f8c-4500-ae79-d3bba5c8a0ea", level:"mid", city:"nyc", added:"2026-06-16", posted:"2026-06-03", desc:"Build multi-tenant cloud and on-prem topologies for enterprise." },
       { title:"Member of Technical Staff (Software Engineer, Data Platform)", url:"https://jobs.ashbyhq.com/perplexity/2e73bc78-684c-47c5-95df-e9973a10e0b6", level:"mid", city:"nyc", added:"2026-06-16", posted:"2026-06-03", desc:"Design batch and streaming platforms on Spark, Kafka, Flink." },
@@ -10576,7 +10574,7 @@ const COMPANIES = [
     tagline:"The AI-first code editor",
     stage:"Series B", raised:"$170M", lead:"Andreessen Horowitz",
     badges:["a16z","Thrive","OpenAI"],
-    totalRoles:20,
+    totalRoles:19,
     notes:"AI code editor. Frontier model integration, latency, UX.",
     jobs:[
       { title:"Software Engineer, Growth", url:"https://jobs.ashbyhq.com/cursor/0ec39ed7-a5dc-4551-bb26-b7f4f9fb4a74", level:"mid", city:"nyc", added:"2026-05-31", posted:"2025-10-30", desc:"Ship onboarding and monetization for an AI code editor." },
@@ -10597,8 +10595,7 @@ const COMPANIES = [
       { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/cursor/34cecd0c-c392-4454-8ef5-261310541011", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-03-13", desc:"Embed with customers shipping production Cursor workflows." },
       { title:"Software Engineer, Agent Evaluation and Quality", url:"https://jobs.ashbyhq.com/cursor/2bbe9f02-83a5-4173-98be-9085d1cb5693", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-13", desc:"Build feedback loops that keep improving the coding agent." },
       { title:"Software Engineer, Storage", url:"https://jobs.ashbyhq.com/cursor/299ce422-0281-4282-aadd-bc22553be0b5", level:"mid", city:"nyc", added:"2026-06-30", posted:"2026-06-28", desc:"Own databases and caches behind every product surface." },
-      { title:"Software Engineer, Services Platform", url:"https://jobs.ashbyhq.com/cursor/6eef7144-f2cc-48a8-b065-01f04e4c70ff", level:"mid", city:"nyc", added:"2026-06-30", posted:"2026-06-28", desc:"Build provisioning and deploy tooling for hundreds of engineers." },
-      { title:"Forward Deployed Strategist", url:"https://jobs.ashbyhq.com/cursor/6960dfef-6dc1-4dbb-887b-0fc9e6e4292e", level:"mid", city:"nyc", added:"2026-07-23", posted:"2026-07-23", desc:"Own strategic customer engagements from scoping to launch." }
+      { title:"Software Engineer, Services Platform", url:"https://jobs.ashbyhq.com/cursor/6eef7144-f2cc-48a8-b065-01f04e4c70ff", level:"mid", city:"nyc", added:"2026-06-30", posted:"2026-06-28", desc:"Build provisioning and deploy tooling for hundreds of engineers." }
     ] },
   { id:"langchain", name:"LangChain", vertical:"ai",
     sub:"LLM app dev framework",
@@ -10690,14 +10687,13 @@ const COMPANIES = [
     tagline:"Ship money at planet scale",
     stage:"Late stage", raised:"$8.7B", lead:"Sequoia",
     badges:["Sequoia","a16z","General Catalyst"],
-    totalRoles:11,
+    totalRoles:10,
     notes:"Payments at planet scale. Distributed systems, idempotency, money.",
     jobs:[
       { title:"Backend Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7235875", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-06-05", desc:"Build wallet APIs powering crypto across many chains." },
       { title:"Forward Deployed Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7230452", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-06-05", desc:"Deploy wallet APIs and crypto rails with developers." },
       { title:"Fullstack Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7091959", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-06-05", desc:"Build wallet APIs used by Ramp, Klarna, Deel, and Kraken." },
       { title:"Infrastructure Engineer, Privy", url:"https://stripe.com/jobs/search?gh_jid=7462961", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-06-05", desc:"Build wallet APIs across chains, Treasury, and Link." },
-      { title:"Software Engineer - Smart Contract, Bridge", url:"https://stripe.com/jobs/search?gh_jid=7507904", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-06-05", desc:"Write contracts powering stablecoin cross-border payments." },
       { title:"Forward Deployed Engineer, Professional Services", url:"https://stripe.com/jobs/search?gh_jid=8075570", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-08-06", desc:"Build custom integrations for Stripe's largest customers." },
       { title:"Backend Engineer, Link", url:"https://stripe.com/jobs/search?gh_jid=8131144", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-14", desc:"Build the backend for Link's one-click wallet." },
       { title:"Software Engineer, Backend Engineer- Credit Coverage", url:"https://stripe.com/jobs/search?gh_jid=8130578", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-14", desc:"Own backends for credit coverage payments infrastructure." },
@@ -10710,12 +10706,11 @@ const COMPANIES = [
     tagline:"Cards that cut company spend",
     stage:"Series E", raised:"$1.3B", lead:"Founders Fund",
     badges:["Founders Fund","Sequoia","Stripe"],
-    totalRoles:18,
+    totalRoles:17,
     notes:"Ledger, fraud, integrations at scale. High autonomy bar.",
     jobs:[
       { title:"Software Engineer, Backend, Marketing Product", url:"https://jobs.ashbyhq.com/ramp/428f41e2-48e8-409d-b5e3-8053f7fc7a27", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-05-13", desc:"Build backend for Ramp's growth and marketing surfaces." },
       { title:"Software Engineer, Data Platform", url:"https://jobs.ashbyhq.com/ramp/bca0346c-b843-4795-96df-6091f51e421b", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-03-11", desc:"Build data infra across billions of business transactions." },
-      { title:"Software Engineer, Security, Stablecoin", url:"https://jobs.ashbyhq.com/ramp/d1183b00-6590-4fe4-a585-28d84e578fe3", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-05-13", desc:"Secure stablecoin money movement at Ramp." },
       { title:"Software Engineer, Growth Platform", url:"https://jobs.ashbyhq.com/ramp/f5b60cf1-c0ec-42c1-89db-ece853e998ab", level:"mid", city:"nyc", added:"2026-05-31", posted:"2025-09-29", desc:"Build the growth platform driving customer activation." },
       { title:"Software Engineer, Enterprise Product", url:"https://jobs.ashbyhq.com/ramp/deca582c-a1d0-4705-9975-60aed81ba89f", level:"mid", city:"nyc", added:"2026-05-31", posted:"2025-11-05", desc:"Build spend management for Ramp's largest customers." },
       { title:"Software Engineer, Core Product", url:"https://jobs.ashbyhq.com/ramp/5fe4c64e-9336-4384-9e6f-ff32eeb3fdae", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-01-20", desc:"Ship features for authorization, spend, and book close." },
@@ -10839,17 +10834,6 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Software Engineer II, Developer Experience", url:"https://job-boards.greenhouse.io/carta/jobs/7713882003", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-04-24", desc:"Build developer tooling for 55,000 companies on the platform." }
     ] },
-  { id:"blockworks", name:"Blockworks", vertical:"fintech",
-    sub:"Crypto data + analytics platform",
-    tagline:"Crypto data for traders",
-    stage:"Series A", raised:"$15M", lead:"Framework",
-    badges:["Framework","10T","S Capital"],
-    totalRoles:2,
-    notes:"Data warehouse + market intelligence for crypto traders/institutions (post-2025 pivot away from media). Dashboards, analytics infra.",
-    jobs:[
-      { title:"Senior Data Engineer", url:"https://jobs.ashbyhq.com/blockworks/6b0b650d-fae6-4cf1-b70f-8225eb7f77f3", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-02-26", desc:"Build pipelines and APIs behind crypto market research." },
-      { title:"Senior Backend Engineer", url:"https://jobs.ashbyhq.com/blockworks/86416d5e-8ae0-453a-abf3-4ac369a14bb4", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-02-05", desc:"Lead backend and APIs for crypto research and events." }
-    ] },
   { id:"betterment", name:"Betterment", vertical:"fintech",
     sub:"Robo-advisor",
     tagline:"Automated investing at scale",
@@ -10872,31 +10856,6 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Platform Engineer", url:"https://jobs.ashbyhq.com/propel/11265618-fbca-405c-b52f-a9b85ffe6aed", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-04-01", desc:"Improve developer platforms behind safety-net products." },
       { title:"Senior Full Stack Engineer", url:"https://jobs.ashbyhq.com/propel/d0e96770-a073-4d53-88b6-586d74db35e8", level:"senior", city:"nyc", added:"2026-08-18", posted:"2026-08-11", desc:"Build features helping millions manage SNAP benefits." }
-    ] },
-  { id:"gemini", name:"Gemini", vertical:"fintech",
-    sub:"Crypto exchange + prediction markets (NASDAQ: GEMI)",
-    tagline:"Trades crypto, regulated",
-    stage:"Public", raised:"$400M", lead:"Morgan Creek",
-    badges:["Morgan Creek"],
-    totalRoles:4,
-    notes:"Public co (GEMI) since Sept 2025. Winklevoss-led; US-focused after intl exit. Exchange + CFTC-regulated derivatives.",
-    jobs:[
-      { title:"Senior Software Engineer, Money", url:"https://boards.greenhouse.io/embed/job_app?for=gemini&token=8069411&gh_jid=8069411", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-07-17", desc:"Bridge traditional finance and crypto money movement." },
-      { title:"Senior Data Engineer", url:"https://boards.greenhouse.io/embed/job_app?for=gemini&token=8076827&gh_jid=8076827", level:"senior", city:"nyc", added:"2026-07-23", posted:"2026-07-21", desc:"Build pipelines and analytics behind crypto exchange products." },
-      { title:"Senior Software Engineer, Tooling (Product)", url:"https://boards.greenhouse.io/embed/job_app?for=gemini&token=8076853&gh_jid=8076853", level:"senior", city:"nyc", added:"2026-07-23", posted:"2026-07-21", desc:"Build internal tooling for crypto trading engineering." },
-      { title:"Senior Data Platform Engineer", url:"https://boards.greenhouse.io/embed/job_app?for=gemini&token=8099895&gh_jid=8099895", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-08-04", desc:"Build the data platform behind crypto in 70+ countries." }
-    ] },
-  { id:"alchemy", name:"Alchemy", vertical:"fintech",
-    sub:"Web3 dev platform",
-    tagline:"Web3 infra for developers",
-    stage:"Series C", raised:"$535M", lead:"Lightspeed",
-    badges:["Lightspeed","Silver Lake","Coatue"],
-    totalRoles:3,
-    notes:"Web3 infra. RPC, indexing, SDKs.",
-    jobs:[
-      { title:"Cloud Infrastructure Engineer", url:"https://jobs.ashbyhq.com/alchemy/42c849ce-8a9b-4015-92fb-b8dfad5c5d0d", level:"mid", city:"nyc", added:"2026-06-16", posted:"2026-04-14", desc:"Run Kubernetes and Terraform across 100+ blockchains." },
-      { title:"Software Engineer - Solutions", url:"https://jobs.ashbyhq.com/alchemy/bb82379e-47be-42ef-b7e6-fef50d2a7682", level:"mid", city:"nyc", added:"2026-06-16", posted:"2025-03-10", desc:"Advise crypto customers architecting blockchain systems." },
-      { title:"Customer Product Engineer", url:"https://jobs.ashbyhq.com/alchemy/8f61f190-33a2-454e-a030-e8e5b041bf3b", level:"mid", city:"nyc", added:"2026-07-21", posted:"2026-06-18", desc:"Onboard customers integrating wallet and AA APIs." }
     ] },
   { id:"datadog", name:"Datadog", vertical:"devtools",
     sub:"Cloud monitoring (NASDAQ)",
@@ -11171,27 +11130,6 @@ const COMPANIES = [
       { title:"Software Engineer, Product", url:"https://jobs.ashbyhq.com/kalshi/3dd97725-4a12-4963-b47a-cb5c562cfd1d", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-01-05", desc:"Ship features across politics, weather, and culture markets." },
       { title:"Site Reliability Engineer", url:"https://jobs.ashbyhq.com/kalshi/ab6fdd99-df25-44ae-b15d-3a9ca7807387", level:"mid", city:"nyc", added:"2026-07-21", posted:"2025-12-04", desc:"Keep thousands of prediction markets running reliably." }
     ] },
-  { id:"polymarket", name:"Polymarket", vertical:"fintech",
-    sub:"Crypto prediction markets",
-    tagline:"Bet on what happens next",
-    stage:"Series B", raised:"$70M", lead:"Founders Fund",
-    badges:["Founders Fund","Peter Thiel"],
-    totalRoles:12,
-    notes:"Decentralized prediction markets. On-chain settlement + UX.",
-    jobs:[
-      { title:"Senior Backend Engineer, Exchange Core", url:"https://jobs.ashbyhq.com/polymarket/27509c31-5cfe-4191-87eb-e993cb500b8a", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-02-17", desc:"Scale the core exchange matching prediction markets." },
-      { title:"Software Engineer, Polymarket US", url:"https://jobs.ashbyhq.com/polymarket/16104382-b3a3-4e6d-934e-6d242afbf1c8", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-01-06", desc:"Build full-stack systems for a US prediction exchange." },
-      { title:"Software Engineer, Mission Control", url:"https://jobs.ashbyhq.com/polymarket/e353d1bc-9b67-476f-846c-961e1db8c49b", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-04-15", desc:"Build full-stack internal tooling at the company's core." },
-      { title:"Senior Backend Engineer, Markets", url:"https://jobs.ashbyhq.com/polymarket/9d61fea9-65d6-43f1-a560-6fe819b25abb", level:"senior", city:"nyc", added:"2026-06-16", posted:"2026-06-09", desc:"Build the systems creating and managing markets." },
-      { title:"Senior Backend Engineer, Perpetuals", url:"https://jobs.ashbyhq.com/polymarket/2ce7eeb4-e294-40d4-b437-2b6656215245", level:"senior", city:"nyc", added:"2026-06-16", posted:"2026-06-16", desc:"Own the core systems behind perpetual futures." },
-      { title:"Forward Deployed Engineer, Services", url:"https://jobs.ashbyhq.com/polymarket/9d54dede-9ca1-4c3e-a404-270b8e3d523c", level:"mid", city:"nyc", added:"2026-07-23", posted:"2026-06-10", desc:"Bridge engineering and third-party service partners." },
-      { title:"Senior Backend Engineer, Exchange Infrastructure", url:"https://jobs.ashbyhq.com/polymarket/face70ab-860c-44c3-bc92-2c9784dd31a1", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-07-28", desc:"Improve the peer-to-peer exchange handling billions." },
-      { title:"Senior Backend Engineer, Trust & Safety", url:"https://jobs.ashbyhq.com/polymarket/1879f7cd-1a6b-4f9e-b285-e9101eb6347a", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-07-24", desc:"Build detection and case management for trust and safety." },
-      { title:"Senior Backend Engineer, Trading & Connectivity", url:"https://jobs.ashbyhq.com/polymarket/48684bfd-bee8-42dc-98a0-68f170c3916e", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-07-24", desc:"Connect the exchange to partners trading $21B a year." },
-      { title:"Senior Backend Engineer, Payments", url:"https://jobs.ashbyhq.com/polymarket/fc406d2c-b36c-43eb-b9ac-b82c28f4bd15", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-07-24", desc:"Scale deposits and withdrawals for the trading platform." },
-      { title:"Senior Backend Engineer, Product Infrastructure", url:"https://jobs.ashbyhq.com/polymarket/ff1aeedc-abc1-4b89-a1c6-01c498a77324", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-07-24", desc:"Own the domain APIs and data models behind trading." },
-      { title:"Backend Engineer, Markets", url:"https://jobs.ashbyhq.com/polymarket/c69d06c3-96df-493a-afdc-80636d494cf2", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-07-31", desc:"Keep thousands of live markets resolving correctly." }
-    ] },
   { id:"unify", name:"Unify", vertical:"saas",
     sub:"AI for outbound sales",
     tagline:"Outbound sales, automated",
@@ -11313,11 +11251,10 @@ const COMPANIES = [
     tagline:"Liquidity for private shares",
     stage:"Public", raised:"$240M pre-IPO", lead:"Tiger",
     badges:["NYSE","Tiger","FTV"],
-    totalRoles:2,
+    totalRoles:1,
     notes:"Secondaries trading + private-market data. Now part of Schwab; hiring under Forge brand. Markets infra + KYC.",
     jobs:[
-      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/forge/ca54fd9a-55eb-45ae-ba48-f666747a24e8", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-01-26" },
-      { title:"Forward Deployed Strategist", url:"https://jobs.ashbyhq.com/forge/c1724ef7-8f2b-40f1-8db6-965104cf8815", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-01-26" }
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/forge/ca54fd9a-55eb-45ae-ba48-f666747a24e8", level:"mid", city:"nyc", added:"2026-05-31", posted:"2026-01-26" }
     ] },
   { id:"middesk", name:"Middesk", vertical:"fintech",
     sub:"KYB / business identity infra",
@@ -12019,15 +11956,13 @@ const COMPANIES = [
     tagline:"AI over finance documents",
     stage:"Series B", raised:"$130M", lead:"Andreessen Horowitz",
     badges:["a16z","Index","Peter Thiel"],
-    totalRoles:10,
+    totalRoles:8,
     notes:"NYC-HQ. Known for very hard live coding and a heavy product-judgment final loop. Candidates report multi-hour pair programming on retrieval/ranking. FDE role specifically prizes finance-domain fluency \u2014 being able to talk to a hedge-fund PM is table stakes.",
     jobs:[
       { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/hebbia-ai/b35852eb-97ac-491a-b375-91fd13d0b7b3", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-03-30", desc:"Deploy AI investment tooling with banks and PE clients." },
       { title:"Backend Engineer, Agents", url:"https://jobs.ashbyhq.com/hebbia-ai/1c18a253-3c4d-4e5a-952d-cd35ba690ea7", level:"senior", city:"nyc", added:"2026-05-31", posted:"2025-07-09", desc:"Build agent infrastructure used by BlackRock and KKR." },
       { title:"Backend Engineer, Agent Collaboration Platform", url:"https://jobs.ashbyhq.com/hebbia-ai/d4efb36c-c59b-4468-b572-88264d555167", level:"senior", city:"nyc", added:"2026-05-31", posted:"2025-07-09", desc:"Build the agent platform behind $30T in analyzed assets." },
       { title:"Integrations Engineer", url:"https://jobs.ashbyhq.com/hebbia-ai/6cf5b93f-c465-497f-811a-008050c143e7", level:"mid", city:"nyc", added:"2026-05-31" },
-      { title:"Forward Deployed Banker (AI Strategist)", url:"https://jobs.ashbyhq.com/hebbia-ai/a1d492a2-efba-4c4f-a243-e98b0ce2a967", level:"mid", city:"nyc", added:"2026-06-22", posted:"2026-04-08", desc:"Deploy the Matrix AI platform inside investment banks." },
-      { title:"Forward Deployed Investor (AI Strategist)", url:"https://jobs.ashbyhq.com/hebbia-ai/0c33fe83-efa3-40bf-8a37-5183197d1b81", level:"mid", city:"nyc", added:"2026-06-22", posted:"2026-04-08", desc:"Deploy AI analysis workflows for asset managers and PE." },
       { title:"Platform Engineer, Document Intelligence", url:"https://jobs.ashbyhq.com/hebbia-ai/3b7a4d3c-bb0a-455c-80b3-91faf94b9523", level:"mid", city:"nyc", added:"2026-06-22", posted:"2025-07-09", desc:"Build document intelligence for asset managers." },
       { title:"Backend Engineer, Growth and Data", url:"https://jobs.ashbyhq.com/hebbia-ai/1710a563-14df-45c5-a6b1-a62adcdead89", level:"mid", city:"nyc", added:"2026-06-22", posted:"2025-07-09", desc:"Build growth and data backends for an investor AI platform." },
       { title:"Software Engineer, Site Reliability", url:"https://jobs.ashbyhq.com/hebbia-ai/07730121-e344-4b07-a23e-47dcfd6b3678", level:"mid", city:"nyc", added:"2026-06-22", posted:"2026-02-26", desc:"Run reliability for AI used by BlackRock and Carlyle." },
@@ -12226,17 +12161,6 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Backend Engineer, Data Modeling and Ingestion Platform", url:"https://job-boards.greenhouse.io/udio/jobs/4988140008", level:"senior", city:"nyc", added:"2026-05-31" },
       { title:"Senior Backend Engineer, Product and Infra", url:"https://job-boards.greenhouse.io/udio/jobs/4987729008", level:"senior", city:"nyc", added:"2026-05-31" }
-    ] },
-  { id:"fireblocks", name:"Fireblocks", vertical:"fintech",
-    sub:"Institutional crypto custody / digital asset infra; Dynamic embedded-wallet platform",
-    tagline:"Secures institutional crypto",
-    stage:"Series E", raised:"$1B+", lead:"D1 Capital",
-    badges:["D1 Capital","Sequoia","Stripes","General Atlantic"],
-    totalRoles:2,
-    notes:"NYC HQ. Director of Engineering ($220–300K) and Full-Stack Blockchain Engineer ($177–230K) NYC-anchored. Crypto domain knowledge expected \u2014 MPC, key management, blockchain wallet basics. Strong security bar.",
-    jobs:[
-      { title:"Director of Engineering, Dynamic Platform", url:"https://www.fireblocks.com/careers/position?gh_jid=4662147006", level:"senior", city:"nyc", added:"2026-05-31" },
-      { title:"Data Analytics AI Engineer", url:"https://www.fireblocks.com/careers/position?gh_jid=4684691006", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-08-04", desc:"Build analytics and AI tooling for sales and marketing." }
     ] },
   { id:"reflex-robotics", name:"Reflex Robotics", vertical:"ai",
     sub:"NYC humanoid mobile-manipulation robots for warehouses",
@@ -12615,19 +12539,6 @@ const COMPANIES = [
       { title:"Senior AI Engineer", url:"https://jobs.ashbyhq.com/socure/eda88068-dad3-44c0-8bd8-393971602aea", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-05-27", desc:"Build AI systems verifying identity and stopping fraud." },
       { title:"Software Engineer - II", url:"https://jobs.ashbyhq.com/socure/d40ea2d5-8b9d-4168-aeee-e63387d25ba9", level:"mid", city:"nyc", added:"2026-07-21", posted:"2025-12-04", desc:"Build document verification for real-time fraud checks." }
     ] },
-  { id:"uniswap", name:"Uniswap Labs", vertical:"fintech",
-    sub:"DeFi + crypto exchange infra",
-    tagline:"Swaps tokens onchain",
-    stage:"Series B", raised:"$165M", lead:"Polychain",
-    badges:["Polychain","a16z"],
-    totalRoles:4,
-    notes:"NYC HQ. Largest DEX protocol.",
-    jobs:[
-      { title:"Senior Backend Engineer", url:"https://jobs.ashbyhq.com/uniswap/cfd492ff-dd07-432a-84b8-8aef0e8984ec", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-03-18", desc:"Build backends for the Uniswap app across 17 chains." },
-      { title:"Senior Backend Engineer, Platform", url:"https://jobs.ashbyhq.com/uniswap/f475ea4a-b8be-442a-b8e2-9a6003d1a51a", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-03-18", desc:"Build shared services behind the app, wallet, and API." },
-      { title:"Software Engineer - Early Career", url:"https://jobs.ashbyhq.com/uniswap/fb4d4137-f003-4669-beb7-2a5caca88012", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-12", desc:"Ship code across the Uniswap app, wallet, and trading API." },
-      { title:"Software Engineer- General Interest", url:"https://jobs.ashbyhq.com/uniswap/bb981823-b923-4f53-95ba-19d732c1caf3", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-12", desc:"Build the largest DEX, wallet, and Unichain L2." }
-    ] },
   { id:"dailypay", name:"DailyPay", vertical:"fintech",
     sub:"Earned wage access",
     tagline:"Get paid as you work",
@@ -12670,19 +12581,6 @@ const COMPANIES = [
     jobs:[
       { title:"Systems Engineer", url:"https://job-boards.greenhouse.io/databento/jobs/7439184", level:"mid", city:"nyc", added:"2026-07-21", posted:"2026-07-09", desc:"Deliver real-time futures and equities feeds via one API." },
       { title:"Software Engineer (TypeScript/JavaScript)", url:"https://job-boards.greenhouse.io/databento/jobs/8076835", level:"mid", city:"nyc", added:"2026-07-23", posted:"2026-07-21", desc:"Build TypeScript SDKs and web tools for market data APIs." }
-    ] },
-  { id:"ripple", name:"Ripple", vertical:"fintech",
-    sub:"Crypto payments + cross-border",
-    tagline:"Moves money across borders",
-    stage:"Late stage", raised:"$15B val", lead:"Andreessen Horowitz",
-    badges:["a16z","Founders Fund"],
-    totalRoles:4,
-    notes:"NYC office. RippleNet + XRP infra.",
-    jobs:[
-      { title:"Senior Software Engineer, Liquidity Management (C#/.NET)", url:"https://ripple.com/careers/all-jobs/job/7944457?gh_jid=7944457", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-07-20", desc:"Scale the treasury platform moving liquidity." },
-      { title:"Senior Site Reliability Engineer, Observability", url:"https://ripple.com/careers/all-jobs/job/8052513?gh_jid=8052513", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-07-08", desc:"Run observability for a crypto payments platform." },
-      { title:"Senior Staff DevOps Engineer", url:"https://ripple.com/careers/all-jobs/job/8002028?gh_jid=8002028", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-07-01", desc:"Manage pipelines and tooling across crypto payment products." },
-      { title:"Site Reliability Engineer, Observability", url:"https://ripple.com/careers/all-jobs/job/7947800?gh_jid=7947800", level:"mid", city:"nyc", added:"2026-07-21", posted:"2026-07-20", desc:"Build observability for crypto payments to institutions." }
     ] },
   { id:"octus", name:"Octus", vertical:"fintech",
     sub:"Legal + credit intelligence SaaS",
@@ -13038,16 +12936,6 @@ const COMPANIES = [
     jobs:[
 
     ] },
-  { id:"notabene", name:"Notabene", vertical:"fintech",
-    sub:"Crypto Travel Rule + compliance",
-    tagline:"Compliance for crypto transfers",
-    stage:"Series A", raised:"$18M", lead:"Y Combinator",
-    badges:["YC","Jump Capital"],
-    totalRoles:0,
-    notes:"NYC HQ. Crypto RegTech.",
-    jobs:[
-
-    ] },
   { id:"symphony", name:"Symphony", vertical:"fintech",
     sub:"Trader collaboration + messaging",
     tagline:"Chat built for traders",
@@ -13097,17 +12985,6 @@ const COMPANIES = [
     notes:"Enterprise AI compliance platform \u2014 legal/compliance review of marketing content in regulated industries (fintech, healthcare, pharma). LLMs + workflow + integrations.",
     jobs:[
       { title:"Full Stack Engineer", url:"https://jobs.ashbyhq.com/blee/18d456d1-587a-4cb2-8faa-5f43af7f700a", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-07-25", desc:"Build marketing compliance for fintech and life sciences." }
-    ] },
-  { id:"elliptic", name:"Elliptic", vertical:"security",
-    sub:"Blockchain analytics + AML",
-    tagline:"Traces crypto crime",
-    stage:"Series C", raised:"$60M", lead:"Evolution",
-    badges:["Evolution","SoftBank"],
-    totalRoles:2,
-    notes:"NYC office. Crypto compliance.",
-    jobs:[
-      { title:"Senior Software Engineer - Data", url:"https://jobs.ashbyhq.com/elliptic/449ea855-3b3f-45cc-aa0d-90c084ec59eb", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-07-30", desc:"Ship the data platform behind blockchain analytics." },
-      { title:"Senior DevOps Engineer", url:"https://jobs.ashbyhq.com/elliptic/0b5cbd30-2b4a-4bee-a1ea-207571708b00", level:"senior", city:"nyc", added:"2026-08-18", posted:"2026-08-07", desc:"Run infrastructure tracing illicit crypto across chains." }
     ] },
   { id:"crusoe", name:"Crusoe", vertical:"climate",
     sub:"Flare-gas + clean-energy AI datacenters",
@@ -13237,16 +13114,6 @@ const COMPANIES = [
     jobs:[
       { title:"Member of Technical Staff - Software Engineer", url:"https://jobs.ashbyhq.com/inductive-bio/02725e91-1a91-4da7-a4bb-b8e1867c9996", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-03-24" }
     ] },
-  { id:"bastion-fi", name:"Bastion", vertical:"fintech",
-    sub:"Stablecoin + payments infra",
-    tagline:"Stablecoin payment rails",
-    stage:"Series A", raised:"$25M", lead:"a16z crypto",
-    badges:["a16z crypto","Nyca"],
-    totalRoles:1,
-    notes:"NYC HQ.",
-    jobs:[
-      { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/bastion/fc523fc6-78a4-4f02-807f-de5218f593e3", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-06-22", desc:"Ship custody and issuance behind regulated stablecoins." }
-    ] },
   { id:"odyssey-fi", name:"Odyssey", vertical:"saas",
     sub:"K-12 education savings accounts",
     tagline:"Public school money, family-run",
@@ -13364,26 +13231,6 @@ const COMPANIES = [
     notes:"NYC office. AHL + GLG + Numeric.",
     jobs:[
       { title:"Software Engineer", url:"https://job-boards.eu.greenhouse.io/mangroup/jobs/4920204101", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-07-22", desc:"Build technology behind systematic investment strategies." }
-    ] },
-  { id:"bitgo", name:"BitGo", vertical:"crypto",
-    sub:"Institutional crypto custody",
-    tagline:"Custody for digital assets",
-    stage:"Series C", raised:"$100M", lead:"Ribbit",
-    badges:["Ribbit","Goldman Sachs"],
-    totalRoles:0,
-    notes:"Institutional custody.",
-    jobs:[
-
-    ] },
-  { id:"moonpay", name:"MoonPay", vertical:"crypto",
-    sub:"Crypto on/off ramp",
-    tagline:"On-ramp to crypto",
-    stage:"Series A", raised:"$642M", lead:"Tiger",
-    badges:["Tiger","Coatue","Sequoia"],
-    totalRoles:1,
-    notes:"Crypto payments.",
-    jobs:[
-      { title:"Senior Blockchain Platform Engineer", url:"https://jobs.lever.co/moonpay/48ec667e-9cfb-415f-9228-7bbd3049f000", level:"senior", city:"nyc", added:"2026-08-18", posted:"2026-08-12", desc:"Build blockchain rails moving assets for 30M customers." }
     ] },
   { id:"snowflake", name:"Snowflake", vertical:"saas",
     sub:"Cloud data warehouse (NYSE: SNOW)",
@@ -13756,11 +13603,11 @@ const COMPANIES = [
     tagline:"AI reps that sell",
     stage:"", raised:"$35M", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     fundingSrc:"posting",
     jobs:[
-      { title:"Forward Deployed GTM Architect", url:"https://jobs.ashbyhq.com/artisan/77f1e47e-61d0-4245-bc99-02bb189ce392", level:"mid", city:"nyc", added:"2026-08-20", posted:"2026-08-07", desc:"Deploy AI sales agents with GTM customers." }
+
     ] },
   { id:"astra", name:"Astra", vertical:"fintech",
     sub:"Payment automation APIs",
@@ -13813,16 +13660,6 @@ const COMPANIES = [
     fundingSrc:"sec",
     jobs:[
       { title:"Senior Software Engineer, Energy Systems", url:"https://jobs.ashbyhq.com/davidenergy/b3550840-6344-46b3-9ebe-be9413907a9f", level:"senior", city:"nyc", added:"2026-08-20", posted:"2026-05-20", desc:"Build systems behind retail energy supply." }
-    ] },
-  { id:"falcon-x", name:"Falcon X", vertical:"fintech",
-    sub:"Institutional crypto brokerage",
-    tagline:"Crypto brokerage, institutional",
-    stage:"", raised:"", lead:"",
-    badges:[],
-    totalRoles:1,
-    notes:"",
-    jobs:[
-      { title:"Senior Infrastructure Engineer - Trading Systems", url:"https://job-boards.greenhouse.io/falconx/jobs/4719441005", level:"senior", city:"nyc", added:"2026-08-20", posted:"2026-08-06", desc:"Run trading systems infrastructure for crypto." }
     ] },
   { id:"harness", name:"Harness", vertical:"devtools",
     sub:"Software delivery platform",
@@ -14099,12 +13936,11 @@ const COMPANIES = [
     tagline:"Turns regulation into code",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:3,
+    totalRoles:2,
     notes:"",
     jobs:[
       { title:"Software Engineer, Full Stack", url:"https://jobs.ashbyhq.com/norm-ai/c1f5a1d9-c750-4cf3-913d-ab9123fcabad", level:"mid", city:"nyc", added:"2026-08-21", posted:"2026-06-29", desc:"Build full-stack tools turning rules into code." },
-      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/norm-ai/366d4079-4842-469d-a5e0-3cc891a136b4", level:"mid", city:"nyc", added:"2026-08-21", posted:"2025-07-15", desc:"Deploy compliance agents inside regulated firms." },
-      { title:"Forward Deployed Product Designer", url:"https://jobs.ashbyhq.com/norm-ai/cb9138eb-aca2-4fdb-83ea-3bd8523ae612", level:"mid", city:"nyc", added:"2026-08-21", posted:"2026-08-18", desc:"Design forward deployed compliance products." }
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/norm-ai/366d4079-4842-469d-a5e0-3cc891a136b4", level:"mid", city:"nyc", added:"2026-08-21", posted:"2025-07-15", desc:"Deploy compliance agents inside regulated firms." }
     ] },
   { id:"catapult-sports", name:"Catapult Sports", vertical:"saas",
     sub:"Athlete performance tech",
@@ -14219,10 +14055,10 @@ const COMPANIES = [
     tagline:"Closes the books on time",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
-      { title:"Forward Deployed Accountant", url:"https://jobs.lever.co/floqast/9a1a9b2a-5c33-4d57-b5f7-27dba212a9b1", level:"mid", city:"nyc", added:"2026-08-21", posted:"2026-04-28", desc:"Deploy accounting automation with customers." }
+
     ] },
   { id:"glean-ai", name:"Glean AI", vertical:"ai",
     sub:"Spend intelligence",
@@ -14452,6 +14288,199 @@ const COMPANIES = [
     notes:"NYC HQ. Flex workspace tech, global network.",
     jobs:[
 
+    ] },
+  { id:"reflection-ai", name:"Reflection AI", vertical:"ai",
+    sub:"Autonomous coding",
+    tagline:"Open models, made yours",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:7,
+    notes:"",
+    jobs:[
+      { title:"Forward Deployed Engineer, Lead - LLM Post-training", url:"https://jobs.ashbyhq.com/reflectionai/1d029ec2-a842-4dff-b784-1328422c03e8", level:"mid", city:"nyc", added:"2026-08-26", posted:"2025-10-29", desc:"Own model customization strategy for customers." },
+      { title:"Forward Deployed Engineer - AI Engineer", url:"https://jobs.ashbyhq.com/reflectionai/8b97b583-3cc6-4834-ae2c-d5aecf22ed7d", level:"mid", city:"nyc", added:"2026-08-26", posted:"2025-12-17", desc:"Take agentic systems from discovery to production." },
+      { title:"Member of Technical Staff - Distributed Systems Engineer", url:"https://jobs.ashbyhq.com/reflectionai/8b05b1e6-0286-464b-9fff-c6ac44c35b8c", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-03-12", desc:"Build distributed systems behind open frontier models." },
+      { title:"Forward Deployed Engineer - LLM Post-training", url:"https://jobs.ashbyhq.com/reflectionai/9e0c3947-a4ca-4c09-b0e8-dfaf634f33d7", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-04-22", desc:"Run fine-tuning and eval harnesses on customer data." },
+      { title:"Member of Technical Staff - Research Software Engineer", url:"https://jobs.ashbyhq.com/reflectionai/bf075674-ad6c-4ab6-aa30-f7c37c59e759", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-03-12", desc:"Turn research algorithms into scalable training systems." },
+      { title:"Forward Deployed Engineer, Lead - AI Engineer", url:"https://jobs.ashbyhq.com/reflectionai/56fbaa8a-63c7-44c2-8f29-c70e5a5a662e", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-05-12", desc:"Lead agentic app delivery from pre-sales to production." },
+      { title:"Member of Technical Staff - Research Software Engineer - Safety Evaluations Infrastructure", url:"https://jobs.ashbyhq.com/reflectionai/239d357b-806f-4d36-9eb8-9e95ba05a120", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-07-27", desc:"Own the infrastructure running model safety evals." }
+    ] },
+  { id:"candid-health", name:"Candid Health", vertical:"health",
+    sub:"Medical billing automation",
+    tagline:"Medical billing that collects",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:4,
+    notes:"",
+    jobs:[
+      { title:"Software Engineer (Senior)", url:"https://jobs.ashbyhq.com/candidhealth/ceb9a3bb-e36a-4a37-bf5f-ca7dc5fe9c8f", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-01-23", desc:"Build healthcare billing across the full stack." },
+      { title:"Software Engineer (Senior)", url:"https://jobs.ashbyhq.com/candidhealth/51dcc6d0-af86-4fe8-bd68-a18b924e47f6", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-01-23", desc:"Build healthcare billing across the full stack." },
+      { title:"Forward Deployed Software Engineer", url:"https://jobs.ashbyhq.com/candidhealth/71365073-41fb-40a8-b23a-3e02306770a5", level:"mid", city:"nyc", added:"2026-08-26", posted:"2025-11-08", desc:"Embed with customers on healthcare billing systems." },
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/candidhealth/f770bdc1-6704-44c6-9417-b98c1a4c75c4", level:"mid", city:"nyc", added:"2026-08-26", posted:"2025-06-03", desc:"Build billing products across the full stack." }
+    ] },
+  { id:"rogo", name:"Rogo", vertical:"ai",
+    sub:"AI analyst for finance",
+    tagline:"An AI analyst for finance",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior Backend Engineer: Financial Data", url:"https://jobs.ashbyhq.com/rogo/67e72240-d37c-4500-9897-f6cc20d8b267", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-07-15", desc:"Build the financial data backend behind AI analysts." },
+      { title:"Data Engineer: Analytics", url:"https://jobs.ashbyhq.com/rogo/f78497ad-e879-4b79-9a28-09a9cdcf94be", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-06-25", desc:"Build analytics pipelines for investment research AI." }
+    ] },
+  { id:"wealth-com", name:"Wealth.com", vertical:"fintech",
+    sub:"Estate planning platform",
+    tagline:"Estate planning, modernized",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:4,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer - AI", url:"https://jobs.ashbyhq.com/wealth-com/aed6e39e-06e5-40c3-8a26-e62a33bc4810", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-05-08", desc:"Build AI features into estate planning software." },
+      { title:"Senior Software Engineer, AI/ML (Infrastructure & Platform)", url:"https://jobs.ashbyhq.com/wealth-com/b7ecb254-5cd9-4788-a55e-f52f990fac6b", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-05-12", desc:"Own the ML infrastructure and platform." },
+      { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/wealth-com/5f50c096-5e61-4ad8-b487-b6d8912e386c", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-05-11", desc:"Build estate planning tools for wealth advisors." },
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/wealth-com/30842daf-a487-4d21-abbc-452acb72518b", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-06-30", desc:"Ship product for 1,000+ wealth management firms." }
+    ] },
+  { id:"anrok", name:"Anrok", vertical:"fintech",
+    sub:"SaaS sales tax compliance",
+    tagline:"Sales tax, handled globally",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:3,
+    notes:"",
+    jobs:[
+      { title:"Software Engineer (7+ years of experience)", url:"https://jobs.ashbyhq.com/anrok/d0087910-ab06-4ee7-a6c4-47ab9283780d", level:"mid", city:"nyc", added:"2026-08-26", posted:"2025-04-29", desc:"Build global sales tax automation for software firms." },
+      { title:"Software Engineer (4+ years of experience)", url:"https://jobs.ashbyhq.com/anrok/4ff7d5d3-e336-41ba-8ab2-11813cb6e321", level:"mid", city:"nyc", added:"2026-08-26", posted:"2025-04-29", desc:"Build tax compliance products for digital businesses." },
+      { title:"Software Engineer, Agentic AI Infrastructure", url:"https://jobs.ashbyhq.com/anrok/a11b3600-9820-44af-ac8e-bdafe037f504", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-06-08", desc:"Build agentic AI infrastructure for tax automation." }
+    ] },
+  { id:"nebius", name:"Nebius", vertical:"infra",
+    sub:"AI cloud platform",
+    tagline:"Cloud built for AI work",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:3,
+    notes:"",
+    jobs:[
+      { title:"Senior Site Reliability Engineer (In-Office Required)", url:"https://careers.nebius.com/?gh_jid=4906480101", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-08-20", desc:"Keep a full-stack AI cloud running reliably." },
+      { title:"Senior Software Engineer (Agentic Search) - Billing", url:"https://careers.nebius.com/?gh_jid=4919759101", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-08-20", desc:"Build billing systems for AI cloud infrastructure." },
+      { title:"Forward Deployed Engineer, Enterprise - Tavily", url:"https://careers.nebius.com/?gh_jid=4880295101", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-08-20", desc:"Deploy Tavily search with enterprise customers." }
+    ] },
+  { id:"adonis", name:"Adonis", vertical:"health",
+    sub:"AI revenue cycle for providers",
+    tagline:"Gets providers paid faster",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/adonis/2b87d599-4a1f-4a1b-a6a4-28f5102662e2", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-08-11", desc:"Run onsite delivery with enterprise health systems." },
+      { title:"Senior Software Engineer - Data Platform", url:"https://jobs.ashbyhq.com/adonis/99551395-7fe7-4c7a-8038-0a60fd26b134", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-04-13", desc:"Lead EHR integrations across healthcare systems." }
+    ] },
+  { id:"blink-health", name:"Blink Health", vertical:"health",
+    sub:"Prescription platform",
+    tagline:"Prescriptions people can afford",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior Design Systems Engineer II", url:"https://job-boards.greenhouse.io/blinkhealth/jobs/8603510002", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-07-30", desc:"Build the design system behind prescription products." },
+      { title:"Senior Software Engineer", url:"https://job-boards.greenhouse.io/blinkhealth/jobs/8610749002", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-07-30", desc:"Build products making prescriptions cheaper to fill." }
+    ] },
+  { id:"harmonic-ai", name:"Harmonic AI", vertical:"saas",
+    sub:"Startup discovery data",
+    tagline:"Finds startups before others",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer - Full Stack", url:"https://jobs.ashbyhq.com/harmonic-ai/8afee83f-b1e5-48c3-a889-4b8a9a7d9116", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-08-06", desc:"Build the startup discovery engine end to end." },
+      { title:"Senior Software Engineer - Backend", url:"https://jobs.ashbyhq.com/harmonic-ai/0c4656e7-b0b4-4850-9022-847d68e4ed8a", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-08-12", desc:"Build the data backend surfacing startup signal." }
+    ] },
+  { id:"parloa", name:"Parloa", vertical:"ai",
+    sub:"AI contact center",
+    tagline:"AI agents answer the phone",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Forward Deployed Engineer, DevOps", url:"https://job-boards.eu.greenhouse.io/parloa/jobs/4947868101", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-08-25", desc:"Scale dedicated infra for custom agent integrations." },
+      { title:"Forward Deployed Engineer - US", url:"https://job-boards.eu.greenhouse.io/parloa/jobs/4604587101", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-08-25", desc:"Deliver enterprise voice AI into complex environments." }
+    ] },
+  { id:"patlytics", name:"Patlytics", vertical:"ai",
+    sub:"Patent analytics",
+    tagline:"Patents, read by AI",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Full Stack Engineer", url:"https://jobs.ashbyhq.com/patlytics/15f8c987-b446-44d4-bdd3-8acc56ef5ea2", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-06-17", desc:"Build an AI-native patent intelligence platform." },
+      { title:"AI Engineer", url:"https://jobs.ashbyhq.com/patlytics/9d208a16-c891-4fb1-928e-2bbdc42345f9", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-06-17", desc:"Build the LLM engine behind patent analytics." }
+    ] },
+  { id:"pure-storage", name:"Pure Storage", vertical:"infra",
+    sub:"Flash storage",
+    tagline:"Flash storage for data",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:0,
+    notes:"",
+    jobs:[
+
+    ] },
+  { id:"solve-intelligence", name:"Solve Intelligence", vertical:"ai",
+    sub:"AI for patent drafting",
+    tagline:"Drafts patents with AI",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Legal and Product Engineer", url:"https://jobs.ashbyhq.com/solveintelligence/55f79054-1af9-4647-9430-030efbfac780", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-01-05", desc:"Bridge patent practice and AI drafting tools." },
+      { title:"Legal and Product Engineer (USPTO Examiner Background)", url:"https://jobs.ashbyhq.com/solveintelligence/efed75b8-88f6-4fe7-aac6-bca09f3d247c", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-08-07", desc:"Build for the patent office side of prosecution." }
+    ] },
+  { id:"ddn", name:"DDN", vertical:"infra",
+    sub:"Storage for AI",
+    tagline:"Storage that feeds AI",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Sr. Software Engineer - Internal Apps", url:"https://jobs.ashbyhq.com/ddn/69712c7d-445e-4247-b18a-8eb2f9235a52", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-07-21", desc:"Build greenfield apps on an enterprise data platform." }
+    ] },
+  { id:"fanatics", name:"Fanatics", vertical:"consumer",
+    sub:"Sports merchandise",
+    tagline:"Sports fandom, commerce scale",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"AI Engineer", url:"https://job-boards.greenhouse.io/fanaticsinc/jobs/4245392009", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-08-20", desc:"Build AI for a global digital sports platform." }
+    ] },
+  { id:"lorikeet", name:"Lorikeet", vertical:"ai",
+    sub:"AI customer support",
+    tagline:"Support that resolves itself",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/lorikeet/470ac68c-52a1-4654-a8d8-0eabb52576c7", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-08-05", desc:"Build AI handling complex high-volume support." }
+    ] },
+  { id:"maven-agi", name:"Maven AGI", vertical:"ai",
+    sub:"Enterprise support AI",
+    tagline:"Support agents that work",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/maven-agi/16caafa0-4e69-450b-8fa1-6582e1b8ef8a", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-08-06", desc:"Deploy production AI support agents at enterprises." }
     ] }
 ];
 
@@ -15187,6 +15216,17 @@ const COMPANY_DOMAINS = {
   // industrious.com is a different company behind a bot challenge; the flex
   // office company is industriousoffice.com (verified by page title).
   industrious:'industriousoffice.com',
+  // 2026-08-25 discovery sweep. Each verified by page title. adonis is absent
+  // on purpose: adonis.health and goadonis.com are both parked landers and
+  // adonis.com is an unrelated B2B marketplace, so it renders a letter tile
+  // rather than a wrong company's favicon.
+  'reflection-ai':'reflectionai.ai', ellipsis:'ellipsis.dev',
+  'candid-health':'candidhealth.com', rogo:'rogo.com', 'wealth-com':'wealth.com',
+  anrok:'anrok.com', nebius:'nebius.com', 'blink-health':'blinkhealth.com',
+  'harmonic-ai':'harmonic.ai', parloa:'parloa.ai', patlytics:'patlytics.com',
+  'pure-storage':'purestorage.com', 'solve-intelligence':'solveintelligence.com',
+  ddn:'ddn.com', fanatics:'fanatics.com', lorikeet:'lorikeetcx.ai',
+  'maven-agi':'mavenagi.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */

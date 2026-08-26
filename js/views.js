@@ -5318,6 +5318,12 @@ const COOLNESS = {
   'shield-ai':3, saronic:3, zoox:3, 'element-biosciences':3, illumina:3,
   // 2026-08-25 — flex-office real estate: useful, unglamorous, WeWork-adjacent.
   industrious:3,
+  // 2026-08-25 sweep, anchored to the scale: salesforce/drata:1, scaleai:2,
+  // harvey:3, openai:4. Compliance and enterprise storage sit at the bottom.
+  anrok:1, 'pure-storage':1, ddn:1, 'wealth-com':2,
+  ellipsis:3, 'candid-health':3, rogo:3, nebius:3, adonis:3, parloa:3,
+  patlytics:3, 'solve-intelligence':3, lorikeet:3, 'maven-agi':3,
+  'reflection-ai':4, 'blink-health':4, fanatics:4, 'harmonic-ai':5,
 };
 
 const FRONTIER = new Set([

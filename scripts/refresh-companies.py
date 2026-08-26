@@ -131,7 +131,7 @@ TITLE_EXCLUDE = re.compile(
   r"\b("
   r"staff[\s,]|principal|^lead\s|\slead\s|\slead$|head\s|chief|director|"
   r"manager|engineering\s+manager|technical\s+program|vp\s|vice\s+president|"
-  r"intern|internship|research\s+scientist|researcher|research\s+engineer|"
+  r"interns?|internships?|research\s+scientist|researchers?|research\s+engineer|"
   r"quantitative\s+research|"
   r"security\s+engineer|application\s+security|appsec|product\s+security|"
   r"detection\s+engineer|"
@@ -149,6 +149,9 @@ TITLE_EXCLUDE = re.compile(
   # Engineering"), and the comma form needs its word boundary or
   # "Engineer, Salesforce" gets caught by "sales".
   r"(?:pre[\s-]?sales|solutions?|sales)\s+engineer(?:ing)?\b|"
+  # "Pre-Sales Systems Engineer" / "Sales Systems Engineer" — a noun between
+  # the qualifier and "engineer" walked straight past the pattern above.
+  r"(?:pre[\s-]?sales|solutions?|sales)\s+\w+\s+engineer\b|"
   r"engineer,\s*(?:solutions?|sales|presales)\b|"
   r"solutions?\s+engineering\b|"
   # Network engineering — IT/network operations, not the infra SDE track.
@@ -175,6 +178,20 @@ TITLE_EXCLUDE = re.compile(
   # application and infra SDE track this board covers.
   r"embedded|firmware|fpga|rtos|bare[\s-]?metal|device\s+driver|"
   r"microcontroller|mcu|hardware\s+engineer|electrical\s+engineer|"
+  # Crypto. The 47 crypto-native employers are gone from CANDIDATES; these
+  # patterns catch crypto roles at companies that are otherwise in scope
+  # (Ramp's stablecoin security role, say). "token" alone is NOT here — it
+  # means auth tokens and PCI card tokenization far more often than it means
+  # crypto, and would drop legitimate identity and payments work.
+  r"crypto|blockchain|web3|stablecoin|defi|onchain|on[\s-]chain|"
+  r"digital\s+assets?|bitcoin|ethereum|nft|smart\s+contract|"
+  # Forward Deployed is an engineering track here, but companies attach it to
+  # every customer-facing role: Banker, Investor, Accountant, Strategist,
+  # Product Designer, GTM Architect. Those enter through the "forward deployed"
+  # clause in TITLE_INCLUDE, so they are named out explicitly. Titles that keep
+  # a real engineering noun ("Forward Deployed Reliability Engineer") survive.
+  r"forward[\s-]deployed\s+(?:\w+\s+)?(?:banker|investor|accountant|"
+  r"strategist|analyst|consultant|designer|architect|specialist|manager|gtm)|"
   r"customer\s+engineer|field\s+engineer|"
   r"support\s+engineer|implementation\s+engineer|partner\s+engineer|"
   r"developer\s+advocate|developer\s+relations|devrel|recruiter|recruiting|"
@@ -188,6 +205,14 @@ TITLE_EXCLUDE = re.compile(
 # a desc, so a role that is C++ in the body but not the title stays.
 TITLE_EXCLUDE_UNBOUNDED = re.compile(r"c\s?\+\+", re.IGNORECASE)
 
+# Retired 2026-08-25: crypto. 47 crypto-native employers removed — exchanges,
+# custody, chain infra, analytics and stablecoin rails. Removed rather than
+# title-filtered because at a crypto company every role is crypto work.
+# Deliberately KEPT: Block, Flow Traders, Jump Trading and the other HFT firms
+# (payments and market-making businesses whose notes merely mention crypto),
+# Public (a stock brokerage that also offers crypto), and Basis Theory (PCI
+# card tokenization, not tokens).
+#
 # Retired employers (2026-08-25): Anduril, Shield AI, Saronic, Vannevar Labs.
 # Pure-play military systems builders — removed rather than title-filtered,
 # because nearly every role at them is defense work regardless of title.
@@ -241,13 +266,9 @@ CANDIDATES = [
   ("sofi","SoFi","greenhouse","sofi","fintech","Personal finance (NASDAQ)","Public","$2.6B pre-IPO","SoftBank",["NASDAQ","SoftBank","Silver Lake"],"Consumer finance super-app. Lending, banking, brokerage."),
   ("modern-treasury","Modern Treasury","ashby","moderntreasury","fintech","Payment operations","Series C","$183M","Altimeter",["Altimeter","Benchmark"],"Money movement infra. Bank integrations, ledger, ops UX."),
   ("carta","Carta","greenhouse","carta","fintech","Cap-table + private markets","Series G","$1.2B","Andreessen Horowitz",["a16z","Spark","Tribe"],"Cap tables + fund admin. Compliance, securities."),
-  ("blockworks","Blockworks","ashby","blockworks","fintech","Crypto data + analytics platform","Series A","$15M","Framework",["Framework","10T","S Capital"],"Data warehouse + market intelligence for crypto traders/institutions (post-2025 pivot away from media). Dashboards, analytics infra."),
   ("betterment","Betterment","greenhouse","betterment","fintech","Robo-advisor","Late stage","$436M","Kinnevik",["Kinnevik","Bessemer","Menlo"],"Robo-advised investing. Algorithms + compliance + UX."),
   ("propel","Propel","ashby","propel","fintech","Fintech for low-income Americans","Series B","$50M","Andreessen Horowitz",["a16z","Kleiner","Serena Williams"],"SNAP-balance app + benefits financial services. Mission-driven."),
   ("public","Public","greenhouse","public","fintech","Social investing","Series D","$310M","Tiger",["Tiger","Accel","Greycroft"],"Stocks + crypto + treasuries. Markets infra + community."),
-  ("fireblocks","Fireblocks","greenhouse","fireblocks","fintech","Crypto custody / MPC","Series E","$1B","D1 Capital",["D1","Sequoia","Stripes"],"Institutional crypto infra. MPC, custody, compliance."),
-  ("gemini","Gemini","greenhouse","gemini","fintech","Crypto exchange + prediction markets (NASDAQ: GEMI)","Public","$400M","Morgan Creek",["Morgan Creek"],"Public co (GEMI) since Sept 2025. Winklevoss-led; US-focused after intl exit. Exchange + CFTC-regulated derivatives."),
-  ("alchemy","Alchemy","ashby","alchemy","fintech","Web3 dev platform","Series C","$535M","Lightspeed",["Lightspeed","Silver Lake","Coatue"],"Web3 infra. RPC, indexing, SDKs."),
 
   # Devtools / Infra / Data
   ("datadog","Datadog","greenhouse","datadog","devtools","Cloud monitoring (NASDAQ)","Public","$148M pre-IPO","Index",["NASDAQ","Index","OpenView"],"Public co. Time-series infra, alerting, observability depth."),
@@ -283,7 +304,6 @@ CANDIDATES = [
 
   # Prediction Markets
   ("kalshi","Kalshi","ashby","kalshi","fintech","Regulated event-contracts exchange","Series C","$185M","Sequoia",["Sequoia","Charles Schwab"],"CFTC-regulated prediction market. Markets infra, compliance."),
-  ("polymarket","Polymarket","ashby","polymarket","fintech","Crypto prediction markets","Series B","$70M","Founders Fund",["Founders Fund","Peter Thiel"],"Decentralized prediction markets. On-chain settlement + UX."),
 
   # Climate
   ("watershed","Watershed","ashby","watershed","climate","Enterprise carbon accounting","Series C","$240M","Sequoia",["Sequoia","Kleiner","a16z"],"Enterprise-grade carbon ledger. Compliance + data pipelines."),
@@ -398,7 +418,6 @@ CANDIDATES = [
   ("cityblock","Cityblock Health","workday","cityblockhealth/wd1/CityblockExternalCareerSite","health","Tech-enabled Medicaid care","Series D","$700M+","Tiger",["Tiger","General Catalyst","Maverick"],"NYC Medicaid care provider. Care platform + data + ops."),
   ("edenhealth","Eden Health","greenhouse","edenhealth","health","Employer-sponsored primary care","Series C","$60M","Flare Capital",["Flare","Greycroft"],"NYC primary care for employers. Care navigation + telehealth."),
   ("wiz","Wiz","greenhouse","wiz","security","Cloud security platform","Series E","$1.9B+","Andreessen Horowitz",["a16z","Sequoia","Lightspeed"],"Agentless cloud security. CSPM/CNAPP at scale; NYC eng presence."),
-  ("chainalysis","Chainalysis","greenhouse","chainalysis","fintech","Blockchain analytics + compliance","Series F","$540M","Insight",["Insight","Accel","Benchmark"],"NYC blockchain analytics. Crypto compliance + investigations + APIs."),
 
   # ── 2026-05-15 — Workday ATS expansion (verified via probe) ────────
   # Tuple-encoded slug = "tenant/wdN/site". See fetch() for the URL shape.
@@ -516,23 +535,15 @@ CANDIDATES = [
 
   # Fintech / crypto / insurance (Ashby + Greenhouse)
   ("socure","Socure","ashby","socure","fintech","Identity verification / KYC","Series E","$744M","Accel",["Accel","T. Rowe Price","Commerce Ventures"],"NYC HQ, $4.5B val. ML fraud detection, security-adjacent."),
-  ("paxos","Paxos","ashby","paxos","fintech","Regulated crypto / stablecoin infra","Series D","$540M","OakHC/FT",["OakHC/FT","Declaration","Founders Fund"],"NYC HQ. Issues PYUSD for PayPal."),
-  ("trm-labs","TRM Labs","ashby","trm-labs","security","Blockchain intelligence + compliance","Series B","$130M","Thoma Bravo",["Thoma Bravo","Tiger","Bessemer"],"NYC office. Chainalysis alternative for law enforcement + banks."),
   ("meow","Meow","ashby","meow","fintech","SMB treasury + business banking","Series A","$27M","Tiger",["Tiger","a16z"],"NYC HQ. T-bill yield for startups."),
-  ("uniswap","Uniswap Labs","ashby","uniswap","fintech","DeFi + crypto exchange infra","Series B","$165M","Polychain",["Polychain","a16z"],"NYC HQ. Largest DEX protocol."),
-  ("ledger","Ledger","ashby","ledger","fintech","Crypto custody + hardware","Series C","$380M+","10T Holdings",["10T Holdings"],"NYC US office. Hardware wallet + institutional custody."),
-  ("notabene","Notabene","ashby","notabene","fintech","Crypto Travel Rule + compliance","Series A","$18M","Y Combinator",["YC","Jump Capital"],"NYC HQ. Crypto RegTech."),
-  ("elliptic","Elliptic","ashby","elliptic","security","Blockchain analytics + AML","Series C","$60M","Evolution",["Evolution","SoftBank"],"NYC office. Crypto compliance."),
   ("dailypay","DailyPay","ashby","dailypay","fintech","Earned wage access","Late stage","$500M+","Carrick",["Carrick","Rockefeller"],"NYC HQ. Payroll infra at scale."),
   ("numeral","Numeral","ashby","numeral","fintech","Sales tax compliance automation","Series A","$28M","Benchmark",["Benchmark"],"NYC hybrid. Tax RegTech, engineer-first."),
   ("imprint","Imprint","ashby","imprint","fintech","Co-branded credit cards","Series C","$95M","Kleiner Perkins",["Kleiner","Thrive"],"NYC HQ. Modern card issuing + rewards."),
   ("tomo","Tomo","ashby","tomo","fintech","Mortgage origination tech","Series B","$70M+","Ribbit",["Ribbit","DST"],"NYC HQ. Mortgage stack rebuild."),
   ("vestwell","Vestwell","greenhouse","vestwell","fintech","Retirement / 401k infra","Series D","$227M","Wellington",["Wellington","Fin Capital"],"NYC HQ. White-label recordkeeping API."),
   ("capitolis","Capitolis","greenhouse","capitolis","fintech","Capital-markets optimization","Series D","$290M","SVB",["SVB","Sequoia","a16z"],"NYC HQ. Novation + compression for banks."),
-  ("ondofinance","Ondo Finance","greenhouse","ondofinance","fintech","Tokenized RWA / DeFi infra","Series A","$34M","Founders Fund",["Founders Fund","Pantera"],"NYC HQ. Tokenized US Treasuries."),
   ("databento","Databento","greenhouse","databento","fintech","Market data infra for quants","Series A","$34M","Point72 Ventures",["Point72","USV"],"NYC office. Low-latency financial data APIs."),
   ("unqork","Unqork","greenhouse","unqork","saas","No-code for insurance + banking enterprises","Series C","$365M","Vista",["Vista","BlackRock"],"NYC HQ. Enterprise fintech platform."),
-  ("ripple","Ripple","greenhouse","ripple","fintech","Crypto payments + cross-border","Late stage","$15B val","Andreessen Horowitz",["a16z","Founders Fund"],"NYC office. RippleNet + XRP infra."),
   ("symphony","Symphony","greenhouse","symphony","fintech","Trader collaboration + messaging","Late stage","$500M+","Goldman Sachs",["Goldman","JPM","BlackRock"],"NYC HQ. Secure comms for capital markets."),
   ("trumid","Trumid","greenhouse","trumid","fintech","Fixed-income electronic bond trading","Late stage","$200M+","Dragoneer",["Dragoneer","TPG"],"NYC HQ. Real-time trading systems."),
 
@@ -687,8 +698,6 @@ CANDIDATES = [
   ("modernfi","ModernFi","ashby","modernfi","fintech","Deposit network for community banks","Series A","$18M","Canapi",["Canapi","a16z","YC S22"],"YC S22. NYC HQ."),
   ("inductive-bio","Inductive Bio","ashby","inductive-bio","ai","ML for medicinal chemistry","Series A","$25M","Obvious",["Obvious","Lux","YC W23"],"YC W23. NYC office."),
   ("deeptune","Deeptune","ashby","deeptune","ai","AI creative image tools","Seed","$3M","Y Combinator",["YC W24"],"YC W24. NYC HQ."),
-  ("bastion-fi","Bastion","ashby","bastion","fintech","Stablecoin + payments infra","Series A","$25M","a16z crypto",["a16z crypto","Nyca"],"NYC HQ."),
-  ("halliday","Halliday","ashby","halliday","fintech","No-code onchain workflow deployment","Seed","$6M","a16z crypto",["a16z crypto","Avalanche"],"YC W22. NYC HQ."),
   ("infinite-machine","Infinite Machine","ashby","infinite-machine","consumer","Premium electric micro-mobility","Seed","$9M","Metaplanet",["Metaplanet","YC W23"],"YC W23. NYC HQ."),
   # The `ashby/odyssey` board belongs to Odyssey the K-12 education-savings
   # company (withodyssey.com), NOT the similarly-named alternative-investments
@@ -720,7 +729,6 @@ CANDIDATES = [
   ("kaizen-labs","Kaizen Labs","ashby","kaizen","saas","Government/municipal SaaS","Seed","$5M","a16z",["a16z"],"NYC HQ. a16z portfolio."),
   ("atrios","Atrios","ashby","atrios","ai","Network intelligence for GTM","Seed","$4M","a16z",["a16z speedrun"],"a16z speedrun SR005. NYC."),
   ("adaptive-security","Adaptive Security","greenhouse","adaptivesecurity","saas","AI-driven security awareness","Series A","$43M","a16z",["a16z","OpenAI Startup Fund"],"NYC HQ. a16z portfolio."),
-  ("blackbird-labs","Blackbird","greenhouse","blackbirdlabs","consumer","Web3 restaurant loyalty","Series A","$24M","a16z",["a16z","USV"],"NYC HQ."),
   ("camber-schools","Camber","greenhouse","camber","health","RCM for behavioral health","Series A","$30M","a16z",["a16z","Craft"],"NYC HQ."),
 
   # ── 2026-08-18 — 94-company expansion (obviously-missing NYC eng employers) ──
@@ -769,17 +777,6 @@ CANDIDATES = [
   ("speak","Speak","ashby","speak","ai","AI language learning","Series C","$78M","OpenAI Startup Fund",["OpenAI","Khosla","Founders Fund"],"Conversational AI language tutor."),
 
   # Crypto
-  ("coinbase","Coinbase","greenhouse","coinbase","crypto","Crypto exchange (NASDAQ: COIN)","Public","$547M pre-IPO","NASDAQ",["NASDAQ","a16z"],"NYC office. Exchange + wallet + custody."),
-  ("consensys","Consensys","greenhouse","consensys","crypto","Ethereum infra (MetaMask, Infura)","Series D","$725M","ParaFi",["ParaFi","Microsoft","JPMorgan"],"NYC HQ. Ethereum tooling + wallets."),
-  ("bitgo","BitGo","greenhouse","bitgo","crypto","Institutional crypto custody","Series C","$100M","Ribbit",["Ribbit","Goldman Sachs"],"Institutional custody."),
-  ("blockchain-com","Blockchain.com","greenhouse","blockchain","crypto","Crypto exchange + wallet","Series D","$300M","Baillie Gifford",["Baillie Gifford","GV"],"Retail + institutional."),
-  ("kraken","Kraken","ashby","kraken.com","crypto","Crypto exchange","Late stage","$118M","N/A",[],"NYC office."),
-  ("grayscale","Grayscale","greenhouse","grayscale","crypto","Crypto asset manager (DCG)","Private","N/A","N/A",[],"NYC HQ. GBTC + Grayscale funds."),
-  ("foundry-digital","Foundry Digital","greenhouse","foundry","crypto","Bitcoin mining (DCG)","Private","N/A","N/A",[],"DCG subsidiary."),
-  ("dcg","Digital Currency Group","greenhouse","digitalcurrencygroup","crypto","Crypto holding company","Private","N/A","N/A",[],"NYC HQ. DCG umbrella."),
-  ("anchorage-digital","Anchorage Digital","lever","anchorage","crypto","Federally chartered crypto bank","Series D","$487M","Andreessen Horowitz",["a16z","Kleiner","GIC"],"OCC-chartered crypto bank."),
-  ("moonpay","MoonPay","lever","moonpay","crypto","Crypto on/off ramp","Series A","$642M","Tiger",["Tiger","Coatue","Sequoia"],"Crypto payments."),
-  ("reservoir","Reservoir","ashby","reservoir","crypto","NFT infrastructure","Seed+","$14M","Paradigm",["Paradigm"],"NYC HQ. NFT protocol + tools."),
 
   # SaaS / infra / dev tools
   ("cloudflare","Cloudflare","greenhouse","cloudflare","infra","Edge + zero-trust (NYSE: NET)","Public","$332M pre-IPO","NYSE",["NYSE","S&P 500"],"NYC office. CDN + Workers + Zero Trust."),
@@ -983,7 +980,6 @@ CANDIDATES = [
   ("copilot-money","Copilot Money","ashby","copilot-money","fintech","Personal finance app","","","",[],""),
   ("cube","Cube","ashby","cube","devtools","Semantic layer for analytics","","","",[],""),
   ("david-energy","David Energy","ashby","davidenergy","infra","Retail energy supplier","","","",[],""),
-  ("falcon-x","Falcon X","greenhouse","falconx","fintech","Institutional crypto brokerage","","","",[],""),
   ("harness","Harness","greenhouse","harnessinc","devtools","Software delivery platform","","","",[],""),
   ("icon-savings","Icon Savings","ashby","icon","fintech","Portable retirement plans","","","",[],""),
   ("livekit","LiveKit","ashby","livekit","devtools","Real-time audio and video","","","",[],""),
@@ -1006,7 +1002,6 @@ CANDIDATES = [
   ("aledade","Aledade","lever","aledade","health","Primary care enablement","","","",[],""),
   ("alertmedia","AlertMedia","greenhouse","alertmedia","saas","Emergency communication","","","",[],""),
   ("altruist","Altruist","greenhouse","altruist","fintech","Advisor custodian platform","","","",[],""),
-  ("amber-group","Amber Group","ashby","amber","fintech","Digital asset trading","","","",[],""),
   ("ambi-robotics","Ambi Robotics","lever","ambirobotics","robotics","AI parcel sorting","","","",[],""),
   ("ambience-healthcare","Ambience Healthcare","ashby","ambiencehealthcare","health","AI clinical documentation","","","",[],""),
   ("ankorstore","Ankorstore","ashby","ankorstore","marketplace","European wholesale marketplace","","","",[],""),
@@ -1028,7 +1023,6 @@ CANDIDATES = [
   ("big-health","Big Health","lever","bighealth","health","Digital mental health","","","",[],""),
   ("bird","Bird","greenhouse","bird","saas","Omnichannel communications","","","",[],""),
   ("blend","Blend","greenhouse","blend","fintech","Digital lending platform","","","",[],""),
-  ("blockdaemon","Blockdaemon","ashby","blockdaemon","fintech","Blockchain node infrastructure","","","",[],""),
   ("bloom-credit","Bloom Credit","lever","bloom","fintech","Credit data infrastructure","","","",[],""),
   ("branch","Branch","greenhouse","branch","fintech","Bundled home and auto insurance","","","",[],""),
   ("buildium","Buildium","smartrecruiters","buildium","proptech","Property management platform","","","",[],""),
@@ -1048,7 +1042,6 @@ CANDIDATES = [
   ("cloudinary","Cloudinary","lever","cloudinary","devtools","Media management APIs","","","",[],""),
   ("coalition","Coalition","greenhouse","coalition","fintech","Cyber insurance","","","",[],""),
   ("cobot","Cobot","ashby","cobot","robotics","Collaborative mobile robots","","","",[],""),
-  ("cointracker","CoinTracker","ashby","cointracker","fintech","Crypto tax and portfolio","","","",[],""),
   ("color-health","Color Health","ashby","color-health","health","Population health platform","","","",[],""),
   ("commercetools","Commercetools","greenhouse","commercetools","saas","Composable commerce","","","",[],""),
   ("common-room","Common Room","ashby","commonroom","saas","Community-led growth","","","",[],""),
@@ -1065,7 +1058,6 @@ CANDIDATES = [
   ("descope","Descope","greenhouse","descope","devtools","Passwordless auth platform","","","",[],""),
   ("dexterity","Dexterity","lever","dexterity","robotics","Warehouse robotics","","","",[],""),
   ("doppler","Doppler","ashby","doppler","devtools","Secrets management","","","",[],""),
-  ("dune","Dune","ashby","dune","devtools","Blockchain analytics","","","",[],""),
   ("edb","EDB","greenhouse","edb","devtools","Enterprise Postgres","","","",[],""),
   ("electric-era","Electric Era","ashby","electric","infra","EV fast charging stations","","","",[],""),
   ("endgame","Endgame","ashby","endgame","saas","Account intelligence","","","",[],""),
@@ -1077,18 +1069,15 @@ CANDIDATES = [
   ("faire","Faire","greenhouse","faire","marketplace","Wholesale marketplace for retailers","","","",[],""),
   ("fastly","Fastly","greenhouse","fastly","infra","Edge cloud platform","","","",[],""),
   ("federato","Federato","greenhouse","federato","ai","Underwriting platform","","","",[],""),
-  ("figment","Figment","greenhouse","figment","fintech","Blockchain staking provider","","","",[],""),
   ("figure-ai","Figure AI","greenhouse","figureai","robotics","General purpose humanoids","","","",[],""),
   ("fleetio","Fleetio","greenhouse","fleetio","saas","Fleet management software","","","",[],""),
   ("flock-homes","Flock Homes","greenhouse","flockhomes","proptech","Rental portfolio rollups","","","",[],""),
   ("flock-safety","Flock Safety","ashby","flock","defense","Public safety technology","","","",[],""),
-  ("flowdesk","Flowdesk","smartrecruiters","flowdesk","fintech","Crypto market infrastructure","","","",[],""),
   ("forward","Forward","greenhouse","forward","health","Technology-driven primary care","","","",[],""),
   ("found-health","Found Health","ashby","found","health","Weight care platform","","","",[],""),
   ("fourkites","FourKites","greenhouse","fourkites","saas","Supply chain visibility","","","",[],""),
   ("fundrise","Fundrise","lever","fundrise","fintech","Real estate investing platform","","","",[],""),
   ("future","Future","greenhouse","future","consumer","Personal training app","","","",[],""),
-  ("goldsky","Goldsky","ashby","goldsky","devtools","Blockchain data indexing","","","",[],""),
   ("gong","Gong","smartrecruiters","gong","ai","Revenue intelligence","","","",[],""),
   ("gradient-ai","Gradient AI","greenhouse","gradientai","ai","Insurance analytics","","","",[],""),
   ("happy-money","Happy Money","greenhouse","happymoney","fintech","Consumer lending","","","",[],""),
@@ -1107,7 +1096,6 @@ CANDIDATES = [
   ("ispot-tv","iSpot.tv","greenhouse","ispottv","adtech","TV ad measurement","","","",[],""),
   ("juniper-square","Juniper Square","ashby","junipersquare","fintech","Private markets software","","","",[],""),
   ("kaia-health","Kaia Health","smartrecruiters","kaiahealth","health","Digital therapeutics","","","",[],""),
-  ("keyrock","Keyrock","ashby","keyrock","fintech","Digital asset market making","","","",[],""),
   ("kiavi","Kiavi","greenhouse","kiavi","fintech","Real estate investor lending","","","",[],""),
   ("kikoff","Kikoff","greenhouse","kikoff","fintech","Credit building","","","",[],""),
   ("kin-insurance","Kin Insurance","ashby","kin","fintech","Home insurance technology","","","",[],""),
@@ -1131,7 +1119,6 @@ CANDIDATES = [
   ("muon-space","Muon Space","greenhouse","muonspace","aerospace","Climate satellite systems","","","",[],""),
   ("mux","Mux","ashby","mux","devtools","Video infrastructure APIs","","","",[],""),
   ("nango","Nango","ashby","nango","devtools","Open-source integrations","","","",[],""),
-  ("nansen","Nansen","greenhouse","nansen","fintech","Onchain analytics","","","",[],""),
   ("neko-health","Neko Health","ashby","neko-health","health","Body scan preventive care","","","",[],""),
   ("netradyne","Netradyne","greenhouse","netradyne","ai","Fleet safety AI","","","",[],""),
   ("ngrok","Ngrok","greenhouse","ngrokinc","devtools","Secure ingress platform","","","",[],""),
@@ -1209,9 +1196,7 @@ CANDIDATES = [
   ("sword-health","Sword Health","greenhouse","swordhealth","health","Digital physical therapy","","","",[],""),
   ("sysdig","Sysdig","lever","sysdig","infra","Cloud-native security","","","",[],""),
   ("tailscale","Tailscale","greenhouse","tailscale","infra","Zero-config VPN","","","",[],""),
-  ("taxbit","TaxBit","greenhouse","taxbit","fintech","Digital asset tax platform","","","",[],""),
   ("temporal-technologies","Temporal Technologies","ashby","temporal","devtools","Durable workflow execution","","","",[],""),
-  ("tenderly","Tenderly","ashby","tenderly","devtools","Web3 development platform","","","",[],""),
   ("tinybird","Tinybird","lever","tinybird","devtools","Real-time analytics APIs","","","",[],""),
   ("tomorrow-io","Tomorrow.io","greenhouse","tomorrow","ai","Weather intelligence","","","",[],""),
   ("tonal","Tonal","ashby","tonal","consumer","Connected strength training","","","",[],""),
@@ -1220,7 +1205,6 @@ CANDIDATES = [
   ("true-anomaly","True Anomaly","greenhouse","trueanomalyinc","defense","Space defense systems","","","",[],""),
   ("truveta","Truveta","greenhouse","truveta","health","Health data and analytics","","","",[],""),
   ("tubi","Tubi","greenhouse","tubi","media","Free streaming service","","","",[],""),
-  ("turnkey","Turnkey","ashby","turnkey","fintech","Crypto key infrastructure","","","",[],""),
   ("turquoise-health","Turquoise Health","ashby","turquoise-health","health","Healthcare price transparency","","","",[],""),
   ("two-chairs","Two Chairs","greenhouse","twochairs","health","Mental health clinics","","","",[],""),
   ("typeface","Typeface","greenhouse","typeface","ai","Enterprise content AI","","","",[],""),
@@ -1296,7 +1280,6 @@ CANDIDATES = [
   ("assemble","Assemble","ashby","assemble","saas","Compensation management","","","",[],""),
   ("assent","Assent","smartrecruiters","assent","saas","Supply chain sustainability","","","",[],""),
   ("atomic-invest","Atomic Invest","ashby","atomic-invest","fintech","Embedded investing APIs","","","",[],""),
-  ("beam","Beam","greenhouse","beam","fintech","Stablecoin payouts","","","",[],""),
   ("beamery","Beamery","ashby","beamery","ai","Talent lifecycle management","","","",[],""),
   ("behavox","Behavox","greenhouse","behavox","ai","Conduct surveillance AI","","","",[],""),
   ("believer-meats","Believer Meats","ashby","believer","consumer","Cultivated meat production","","","",[],""),
@@ -1322,14 +1305,12 @@ CANDIDATES = [
   ("cloudbeds","Cloudbeds","greenhouse","cloudbeds","saas","Hotel management platform","","","",[],""),
   ("cloverly","Cloverly","greenhouse","cloverly","devtools","Carbon offset API","","","",[],""),
   ("compa","Compa","ashby","compa","saas","Compensation intelligence","","","",[],""),
-  ("conduit","Conduit","ashby","conduit","fintech","Cross-border stablecoin payments","","","",[],""),
   ("constructor","Constructor","ashby","constructor","ai","Ecommerce search and discovery","","","",[],""),
   ("contra","Contra","ashby","contra","marketplace","Independent work platform","","","",[],""),
   ("cookunity","CookUnity","greenhouse","cookunity","marketplace","Chef-prepared meal marketplace","","","",[],""),
   ("counterpart","Counterpart","greenhouse","counterpart","fintech","Management liability insurance","","","",[],""),
   ("creem","Creem","ashby","creem","fintech","Payments for SaaS","","","",[],""),
   ("crossing-minds","Crossing Minds","lever","crossing-minds","ai","Recommendation infrastructure","","","",[],""),
-  ("cryptio","Cryptio","ashby","cryptio","fintech","Crypto accounting platform","","","",[],""),
   ("cube-software","Cube Software","ashby","cubesoftware","saas","FP&A platform","","","",[],""),
   ("culture-amp","Culture Amp","greenhouse","cultureamp","saas","Employee experience platform","","","",[],""),
   ("culture-biosciences","Culture Biosciences","greenhouse","culturebiosciences","health","Cloud bioreactors","","","",[],""),
@@ -1417,7 +1398,6 @@ CANDIDATES = [
   ("runway-financial","Runway Financial","ashby","runway","saas","Financial modeling platform","","","",[],""),
   ("salsify","Salsify","greenhouse","salsify","saas","Product experience management","","","",[],""),
   ("scopely","Scopely","greenhouse","scopely","gaming","Mobile game studio","","","",[],""),
-  ("securitize","Securitize","greenhouse","securitize","fintech","Tokenized asset platform","","","",[],""),
   ("seekout","SeekOut","greenhouse","seekout","ai","Talent search platform","","","",[],""),
   ("shaped","Shaped","smartrecruiters","shaped","ai","Recommendation systems API","","","",[],""),
   ("shield-fc","Shield FC","greenhouse","shield","ai","Trade communications compliance","","","",[],""),
@@ -1431,7 +1411,6 @@ CANDIDATES = [
   ("springboard","Springboard","greenhouse","springboard","ed","Mentored career bootcamps","","","",[],""),
   ("steel-eye","Steel Eye","smartrecruiters","steeleye","saas","Compliance and surveillance","","","",[],""),
   ("stream-by-alphasense","Stream by AlphaSense","ashby","stream","fintech","Expert call transcripts","","","",[],""),
-  ("superstate","Superstate","lever","superstate","fintech","Tokenized treasury funds","","","",[],""),
   ("sureify","Sureify","greenhouse","sureify","saas","Life insurance platform","","","",[],""),
   ("sydecar","Sydecar","ashby","sydecar","fintech","Deal execution platform","","","",[],""),
   ("syndigo","Syndigo","greenhouse","syndigo","saas","Product content network","","","",[],""),
@@ -1453,7 +1432,6 @@ CANDIDATES = [
   ("wordsmith","Wordsmith","ashby","wordsmith","ai","In-house legal AI","","","",[],""),
   ("workstream","Workstream","greenhouse","workstream","saas","Hourly hiring platform","","","",[],""),
   ("wysh","Wysh","greenhouse","wysh","fintech","Embedded life insurance","","","",[],""),
-  ("zero-hash","Zero Hash","ashby","zero","fintech","Crypto settlement infrastructure","","","",[],""),
   ("zinnia","Zinnia","greenhouse","zinnia","saas","Annuity and life platform","","","",[],""),
   ("zuora","Zuora","greenhouse","zuora","saas","Subscription billing","","","",[],""),
   # ── 2026-08-21 — non-engineering employers (418 names probed; 93 boards found, 22% — these run Workday/iCIMS more than startup ATSs) ──
@@ -1537,6 +1515,130 @@ CANDIDATES = [
   # ── 2026-08-24 — San Diego seed (validated boards) ──
   ("servicenow","ServiceNow","smartrecruiters","servicenow","saas","Enterprise workflow platform (NYSE: NOW)","","","",[],""),
   ("illumina","Illumina","workday","illumina/wd1/illumina-careers","health","Genomic sequencing (NASDAQ: ILMN)","","","",[],""),
+  # ── 2026-08-25 — 374-name discovery sweep (crypto excluded) ──
+  ("reflection-ai","Reflection AI","ashby","reflectionai","ai","Autonomous coding","","","",[],""),
+  ("candid-health","Candid Health","ashby","candidhealth","health","Medical billing automation","","","",[],""),
+  ("rogo","Rogo","ashby","rogo","ai","AI analyst for finance","","","",[],""),
+  ("wealth-com","Wealth.com","ashby","wealth-com","fintech","Estate planning platform","","","",[],""),
+  ("anrok","Anrok","ashby","anrok","fintech","SaaS sales tax compliance","","","",[],""),
+  ("nebius","Nebius","greenhouse","nebius","infra","AI cloud platform","","","",[],""),
+  ("adonis","Adonis","ashby","adonis","health","AI revenue cycle for providers","","","",[],""),
+  ("blink-health","Blink Health","greenhouse","blinkhealth","health","Prescription platform","","","",[],""),
+  ("harmonic-ai","Harmonic AI","ashby","harmonic-ai","saas","Startup discovery data","","","",[],""),
+  ("parloa","Parloa","greenhouse","parloa","ai","AI contact center","","","",[],""),
+  ("patlytics","Patlytics","ashby","patlytics","ai","Patent analytics","","","",[],""),
+  ("pure-storage","Pure Storage","greenhouse","purestorage","infra","Flash storage","","","",[],""),
+  ("solve-intelligence","Solve Intelligence","ashby","solveintelligence","ai","AI for patent drafting","","","",[],""),
+  ("ddn","DDN","ashby","ddn","infra","Storage for AI","","","",[],""),
+  ("fanatics","Fanatics","greenhouse","fanaticsinc","consumer","Sports merchandise","","","",[],""),
+  ("faro-health","Faro Health","workable","farohealth","health","Clinical trial design","","","",[],""),
+  ("lorikeet","Lorikeet","ashby","lorikeet","ai","AI customer support","","","",[],""),
+  ("maven-agi","Maven AGI","ashby","maven-agi","ai","Enterprise support AI","","","",[],""),
+  ("angle-health","Angle Health","ashby","anglehealth","health","Digital-first health insurance","","","",[],""),
+  ("anomaly","Anomaly","lever","anomaly","health","Healthcare claims AI","","","",[],""),
+  ("artie","Artie","ashby","artie","gaming","Instant mobile games","","","",[],""),
+  ("baselayer","Baselayer","greenhouse","baselayer","fintech","Business identity verification","","","",[],""),
+  ("beam-cloud","Beam Cloud","greenhouse","beam","infra","Serverless GPU","","","",[],""),
+  ("bestow","Bestow","ashby","bestow","fintech","Life insurance technology","","","",[],""),
+  ("bland-ai","Bland AI","ashby","bland","ai","Phone-calling AI","","","",[],""),
+  ("blueberry-pediatrics","Blueberry Pediatrics","ashby","blueberrypediatrics","health","Virtual pediatrics","","","",[],""),
+  ("bot-auto","Bot Auto","greenhouse","botauto","robotics","Driverless trucking","","","",[],""),
+  ("cambio","Cambio","ashby","cambio","fintech","Medical debt resolution","","","",[],""),
+  ("cameo","Cameo","greenhouse","cameo","consumer","Personalized celebrity videos","","","",[],""),
+  ("capital-rx-health","Capital Rx Health","lever","capital","health","Pharmacy benefits","","","",[],""),
+  ("cartesia-ai","Cartesia AI","ashby","cartesia","ai","Realtime voice models","","","",[],""),
+  ("checkly","Checkly","ashby","checkly","devtools","Synthetic monitoring","","","",[],""),
+  ("circleback","Circleback","ashby","circleback","ai","AI meeting notes","","","",[],""),
+  ("citizen","Citizen","ashby","citizen","consumer","Safety alerts app","","","",[],""),
+  ("clerk","Clerk","greenhouse","clerk-ai","devtools","Authentication for developers","","","",[],""),
+  ("clever","Clever","greenhouse","clever","ed","School single sign-on","","","",[],""),
+  ("clipboard-health","Clipboard Health","smartrecruiters","clipboardhealth","health","Healthcare staffing marketplace","","","",[],""),
+  ("cobalt-robotics","Cobalt Robotics","lever","cobaltrobotics","robotics","Security robots","","","",[],""),
+  ("coderabbit","CodeRabbit","ashby","coderabbit","ai","AI code review","","","",[],""),
+  ("collective-health","Collective Health","greenhouse","collectivehealth","health","Health benefits platform","","","",[],""),
+  ("compound-planning","Compound Planning","ashby","compound","fintech","Wealth for tech workers","","","",[],""),
+  ("craft-docs","Craft Docs","ashby","craftdocs","consumer","Document workspace","","","",[],""),
+  ("delfi-diagnostics","Delfi Diagnostics","lever","delfidiagnostics","health","Cancer detection","","","",[],""),
+  ("descript","Descript","greenhouse","descript","ai","AI audio video editing","","","",[],""),
+  ("endex","Endex","ashby","endex","ai","AI for finance workflows","","","",[],""),
+  ("ethos-life","Ethos Life","greenhouse","ethoslife","fintech","Life insurance","","","",[],""),
+  ("eve-legal","Eve Legal","greenhouse","eve","ai","AI for plaintiff firms","","","",[],""),
+  ("fal","Fal","ashby","fal-ai","ai","Generative media inference","","","",[],""),
+  ("filevine","Filevine","lever","filevine","saas","Legal case management","","","",[],""),
+  ("fleetworks","Fleetworks","ashby","fleetworks","ai","AI for freight operations","","","",[],""),
+  ("foundry","Foundry","greenhouse","foundry","infra","Compute orchestration","","","",[],""),
+  ("fragment","Fragment","ashby","fragmentai","fintech","Ledger API for money movement","","","",[],""),
+  ("freenome","Freenome","greenhouse","freenome","health","Blood-based cancer screening","","","",[],""),
+  ("gensyn","Gensyn","greenhouse","gensyn","ai","Distributed ML compute","","","",[],""),
+  ("goguardian","GoGuardian","greenhouse","goguardian","ed","Classroom management","","","",[],""),
+  ("gorgias","Gorgias","ashby","gorgias","saas","Ecommerce helpdesk","","","",[],""),
+  ("greptile","Greptile","ashby","greptile","ai","AI codebase review","","","",[],""),
+  ("helm-ai","Helm ai","ashby","helm-ai","automotive","Autonomous driving software","","","",[],""),
+  ("help-scout","Help Scout","ashby","helpscout","saas","Customer support platform","","","",[],""),
+  ("heygen","HeyGen","greenhouse","heygen","ai","AI avatar video","","","",[],""),
+  ("hone-health","Hone Health","greenhouse","honehealth","health","Hormone health","","","",[],""),
+  ("incident-io","Incident io","ashby","incident","devtools","Incident management","","","",[],""),
+  ("instructure","Instructure","ashby","instructure","ed","Canvas LMS","","","",[],""),
+  ("iterable-inc","Iterable Inc","ashby","iterable","saas","Cross-channel marketing","","","",[],""),
+  ("kodiak-robotics","Kodiak Robotics","greenhouse","kodiak","robotics","Autonomous trucking","","","",[],""),
+  ("lambda-labs","Lambda Labs","ashby","lambda","infra","GPU cloud and hardware","","","",[],""),
+  ("leantaas","LeanTaaS","lever","leantaas","health","Hospital capacity software","","","",[],""),
+  ("loadsmart","Loadsmart","lever","loadsmart","marketplace","Freight technology","","","",[],""),
+  ("loop-returns","Loop Returns","lever","loopreturns","saas","Returns management","","","",[],""),
+  ("machinify","Machinify","greenhouse","machinifyinc","health","Healthcare payment integrity","","","",[],""),
+  ("mesh-payments","Mesh Payments","greenhouse","mesh","fintech","Corporate spend management","","","",[],""),
+  ("midi-health","Midi Health","greenhouse","midihealth","health","Menopause care","","","",[],""),
+  ("narvar","Narvar","greenhouse","narvar","saas","Post-purchase platform","","","",[],""),
+  ("nomad-health","Nomad Health","ashby","nomad","health","Travel nurse marketplace","","","",[],""),
+  ("nuro","Nuro","greenhouse","nuro","robotics","Autonomous delivery","","","",[],""),
+  ("nuvei","Nuvei","workable","nuvei","fintech","Payment technology","","","",[],""),
+  ("opus-clip","Opus Clip","ashby","opusclip","ai","AI video repurposing","","","",[],""),
+  ("osaro","Osaro","lever","osaro","robotics","Robotic picking AI","","","",[],""),
+  ("outrider","Outrider","greenhouse","outrider","robotics","Autonomous yard trucks","","","",[],""),
+  ("overjet","Overjet","ashby","overjet","health","Dental AI","","","",[],""),
+  ("paradigm-health","Paradigm Health","ashby","paradigm-health","health","Clinical trial access","","","",[],""),
+  ("payabli","Payabli","ashby","payabli","fintech","Payments infrastructure","","","",[],""),
+  ("pearl","Pearl","ashby","pearl","health","Dental radiology AI","","","",[],""),
+  ("people-data-labs","People Data Labs","ashby","people-data-labs","saas","People data API","","","",[],""),
+  ("playbook","Playbook","ashby","playbook","fintech","Tax-optimized investing","","","",[],""),
+  ("polyai","PolyAI","greenhouse","polyai","ai","Voice assistants for enterprise","","","",[],""),
+  ("pomelo-care","Pomelo Care","greenhouse","pomelocare","health","Virtual maternity care","","","",[],""),
+  ("postscript","Postscript","greenhouse","postscript","saas","SMS for ecommerce","","","",[],""),
+  ("qventus","Qventus","greenhouse","qventus","health","Hospital operations AI","","","",[],""),
+  ("rad-ai","Rad AI","ashby","radai","health","Radiology report automation","","","",[],""),
+  ("read-ai","Read AI","ashby","read-ai","ai","Meeting intelligence","","","",[],""),
+  ("resilience-cyber","Resilience Cyber","greenhouse","resilience","fintech","Cyber risk platform","","","",[],""),
+  ("retell-ai","Retell AI","ashby","retell-ai","ai","Voice AI agents","","","",[],""),
+  ("rev","Rev","ashby","rev","ai","Transcription and captions","","","",[],""),
+  ("rime-labs","Rime Labs","ashby","rime","ai","Voice synthesis","","","",[],""),
+  ("ritual","Ritual","greenhouse","ritual","ai","Decentralized AI infrastructure","","","",[],""),
+  ("route","Route","greenhouse","route","saas","Package protection","","","",[],""),
+  ("rubrik","Rubrik","greenhouse","rubrik","infra","Data security and backup","","","",[],""),
+  ("rula","Rula","ashby","rula","health","Behavioral health network","","","",[],""),
+  ("runpod","RunPod","ashby","runpod","infra","GPU cloud","","","",[],""),
+  ("sana-benefits","Sana Benefits","lever","sanabenefits","health","Small business health plans","","","",[],""),
+  ("sf-compute","SF Compute","ashby","sfcompute","infra","GPU compute market","","","",[],""),
+  ("shiftkey","ShiftKey","ashby","shiftkey","health","Healthcare shift marketplace","","","",[],""),
+  ("sidecar-health","Sidecar Health","greenhouse","sidecarhealth","health","Transparent health insurance","","","",[],""),
+  ("siena-ai","Siena AI","ashby","siena","ai","Autonomous customer service","","","",[],""),
+  ("sixfold","Sixfold","greenhouse","sixfold","ai","Underwriting AI","","","",[],""),
+  ("sorare","Sorare","ashby","sorare","consumer","Fantasy sports NFTs","","","",[],""),
+  ("specter","Specter","ashby","specter","saas","Company intelligence","","","",[],""),
+  ("sprout-ai","Sprout ai","ashby","sprout-ai","ai","Claims automation","","","",[],""),
+  ("summer-health","Summer Health","ashby","summerhealth","health","Pediatric text care","","","",[],""),
+  ("sunlight","Sunlight","workable","sunlight","health","Behavioral health platform","","","",[],""),
+  ("trusted-health","Trusted Health","ashby","trustedhealth","health","Nurse staffing marketplace","","","",[],""),
+  ("vanilla","Vanilla","ashby","vanilla","fintech","Estate planning software","","","",[],""),
+  ("vast-data","Vast Data","greenhouse","vast","infra","Data platform for AI","","","",[],""),
+  ("vector-fabrics","Vector Fabrics","ashby","vector","devtools","Data routing","","","",[],""),
+  ("vivian-health","Vivian Health","ashby","vivian-health","health","Healthcare job marketplace","","","",[],""),
+  ("vivodyne","Vivodyne","greenhouse","vivodyne","health","Lab-grown human tissue","","","",[],""),
+  ("vooma","Vooma","ashby","vooma","ai","AI for freight brokers","","","",[],""),
+  ("waabi","Waabi","lever","waabi","robotics","Generative AI for driving","","","",[],""),
+  ("waltz-health","Waltz Health","greenhouse","waltzhealth","health","Pharmacy marketplace","","","",[],""),
+  ("warpbuild","WarpBuild","ashby","warpbuild","devtools","CI infrastructure","","","",[],""),
+  ("wheel","Wheel","ashby","wheel","health","Virtual care infrastructure","","","",[],""),
+  ("zoe","Zoe","ashby","zoe","consumer","Personalized nutrition","","","",[],""),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this

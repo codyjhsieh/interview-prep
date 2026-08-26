@@ -31,7 +31,7 @@ const FAMILIES = {
   research: /\b(researcher|research\s+scientist|research\s+engineer|quantitative\s+research)\b/i,
   // Sales-facing engineering. The comma form needs its trailing \b or
   // "GTM Systems Engineer, Salesforce" is caught by "sales".
-  sales:    /\b(?:pre[\s-]?sales|solutions?|sales)\s+engineer(?:ing)?\b|\bengineer,\s*(?:solutions?|sales|presales)\b|\bsolutions?\s+engineering\b/i,
+  sales:    /\b(?:pre[\s-]?sales|solutions?|sales)\s+engineer(?:ing)?\b|\b(?:pre[\s-]?sales|solutions?|sales)\s+\w+\s+engineer\b|\bengineer,\s*(?:solutions?|sales|presales)\b|\bsolutions?\s+engineering\b/i,
   // Network operations only. "Software Engineer, Network Services" and
   // "ML Networking" are software roles on the network and must survive, so
   // this matches the role name rather than the word "network".
@@ -41,14 +41,40 @@ const FAMILIES = {
   cpp:      /c\s?\+\+/i,
   military: /\b(defen[cs]e|military|warfare|weapons?|munitions?|us\s+government|public\s+sector|federal|dod|national\s+security|intelligence\s+community)\b/i,
   embedded: /\b(embedded|firmware|fpga|rtos|bare[\s-]?metal|device\s+driver|microcontroller|mcu|hardware\s+engineer|electrical\s+engineer)\b/i,
+  // "token" is deliberately absent — auth tokens and PCI tokenization are not
+  // crypto, and including it would drop identity and payments roles.
+  crypto:   /\b(crypto|blockchain|web3|stablecoin|defi|onchain|on[\s-]chain|digital\s+assets?|bitcoin|ethereum|nft|smart\s+contract)\b/i,
+  // Non-engineering roles that enter through the "forward deployed" clause in
+  // TITLE_INCLUDE, plus plural "Interns" which the singular pattern missed.
+  nonent:   /\bforward[\s-]deployed\s+(?:\w+\s+)?(?:banker|investor|accountant|strategist|analyst|consultant|designer|architect|specialist|manager|gtm)\b|\binterns?\b|\binternships?\b/i,
 };
+
+const RETIRED_CRYPTO = [
+  'alchemy',, 'amber-group',, 'anchorage-digital',, 'bastion-fi',, 'beam',
+  'bitgo',, 'blackbird-labs',, 'blockchain-com',, 'blockdaemon',, 'blockworks',
+  'chainalysis',, 'coinbase',, 'cointracker',, 'conduit',, 'consensys',
+  'cryptio',, 'dcg',, 'dune',, 'elliptic',, 'falcon-x',
+  'figment',, 'fireblocks',, 'flowdesk',, 'foundry-digital',, 'gemini',
+  'goldsky',, 'grayscale',, 'halliday',, 'keyrock',, 'kraken',
+  'ledger',, 'moonpay',, 'nansen',, 'notabene',, 'ondofinance',
+  'paxos',, 'polymarket',, 'reservoir',, 'ripple',, 'securitize',
+  'superstate',, 'taxbit',, 'tenderly',, 'trm-labs',, 'turnkey',
+  'uniswap',, 'zero-hash',
+];
 
 // Employers retired outright, not by title: nearly every role at a pure-play
 // military systems builder is defense work whatever the title says. Their
 // records are DELETED rather than kept-but-empty (the rule for retired
 // families), because they are gone from CANDIDATES too and can never
 // repopulate — an empty record would be permanent dead weight.
-const RETIRED_COMPANIES = new Set(['anduril', 'shield-ai', 'saronic', 'vannevarlabs']);
+const RETIRED_COMPANIES = new Set([
+  'anduril', 'shield-ai', 'saronic', 'vannevarlabs',
+  // crypto-native employers, retired 2026-08-25 (see refresh-companies.py)
+  ...Array.from(new Set(RETIRED_CRYPTO)),
+  // ashby/ellipsislabs is Ellipsis LABS, a DeFi protocol company — not the
+  // AI code-review tool of the same name. Wrong company and a retired family.
+  'ellipsis',
+]);
 
 const argv = process.argv.slice(2);
 const dry = argv.includes('--dry');
