@@ -5324,6 +5324,8 @@ const COOLNESS = {
   ellipsis:3, 'candid-health':3, rogo:3, nebius:3, adonis:3, parloa:3,
   patlytics:3, 'solve-intelligence':3, lorikeet:3, 'maven-agi':3,
   'reflection-ai':4, 'blink-health':4, fanatics:4, 'harmonic-ai':5,
+  // 2026-08-26 sweep.
+  'clear-street':2, 'adaptive-build':3, encord:3, linkup:4, exa:5,
 };
 
 const FRONTIER = new Set([

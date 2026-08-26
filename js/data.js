@@ -11510,10 +11510,11 @@ const COMPANIES = [
     tagline:"Serves open models fast",
     stage:"Series B", raised:"$77M", lead:"Sequoia",
     badges:["Sequoia","Benchmark","NVIDIA"],
-    totalRoles:0,
+    totalRoles:2,
     notes:"Production inference platform for open-weights models. Systems + perf.",
     jobs:[
-
+      { title:"Applied Machine Learning Engineer", url:"https://jobs.ashbyhq.com/fireworks/fc3845e6-e8ba-4756-a03e-654f14ce605b", level:"mid", city:"nyc", added:"2026-08-26", posted:"2025-05-09", desc:"Bridge model research and production deployments." },
+      { title:"Member of Technical Staff, Software Engineer", url:"https://jobs.ashbyhq.com/fireworks/492db6a8-c757-4c4e-a2b3-f2ed183f8e6f", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-03-08", desc:"Build the backend orchestrating model fine-tuning." }
     ] },
   { id:"logrocket", name:"LogRocket", vertical:"devtools",
     sub:"Frontend session replay + obs",
@@ -14481,6 +14482,65 @@ const COMPANIES = [
     notes:"",
     jobs:[
       { title:"Senior Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/maven-agi/16caafa0-4e69-450b-8fa1-6582e1b8ef8a", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-08-06", desc:"Deploy production AI support agents at enterprises." }
+    ] },
+  { id:"clear-street", name:"Clear Street", vertical:"fintech",
+    sub:"Prime brokerage technology",
+    tagline:"Brokerage, rebuilt modern",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:5,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://job-boards.greenhouse.io/clearstreet/jobs/8113885", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-08-07", desc:"Replace legacy brokerage infrastructure." },
+      { title:"Senior Software Engineer - Platform Engineer", url:"https://job-boards.greenhouse.io/clearstreet/jobs/8089770", level:"senior", city:"nyc", added:"2026-08-26", posted:"2026-08-11", desc:"Build the internal platform product teams ship on." },
+      { title:"Backend Software Engineer - Reference Data Services", url:"https://job-boards.greenhouse.io/clearstreet/jobs/6675504", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-04-18", desc:"Own the reference data behind every asset traded." },
+      { title:"Software Engineer - Market Data", url:"https://job-boards.greenhouse.io/clearstreet/jobs/7120660", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-04-18", desc:"Build market data systems across every market." },
+      { title:"Software Engineer - Pre-trade analytics, risk, portfolio optimization", url:"https://job-boards.greenhouse.io/clearstreet/jobs/8013149", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-06-22", desc:"Build pre-trade risk and portfolio optimization." }
+    ] },
+  { id:"linkup", name:"Linkup", vertical:"ai",
+    sub:"Web search API",
+    tagline:"Web search built for AI",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:5,
+    notes:"",
+    jobs:[
+      { title:"Founding Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/linkup/b4c6f958-61c6-4a5f-80ac-2f6a738ade2d", level:"founding", city:"nyc", added:"2026-08-26", posted:"2025-11-04", desc:"First FDE hire: integrate search APIs with customers." },
+      { title:"Senior Backend Engineer", url:"https://jobs.ashbyhq.com/linkup/06f18ef9-1e35-4966-81b8-0edd12426dff", level:"senior", city:"nyc", added:"2026-08-26", posted:"2025-11-03", desc:"Build the backend behind AI-ready web search APIs." },
+      { title:"Senior Full Stack Engineer", url:"https://jobs.ashbyhq.com/linkup/9bc9f42b-1761-4037-be15-3c8d69b5b806", level:"senior", city:"nyc", added:"2026-08-26", posted:"2025-11-03", desc:"Ship full-stack product on a search API for agents." },
+      { title:"Senior Data Engineer", url:"https://jobs.ashbyhq.com/linkup/59471e25-bcfe-4471-bf87-7e3c7b644107", level:"senior", city:"nyc", added:"2026-08-26", posted:"2025-11-06", desc:"Build the data pipelines feeding AI web search." },
+      { title:"DevOps Engineer", url:"https://jobs.ashbyhq.com/linkup/149d4ffa-4e4b-44e3-a364-06bdb30efe86", level:"mid", city:"nyc", added:"2026-08-26", posted:"2025-11-05", desc:"Run infrastructure for a real-time search API." }
+    ] },
+  { id:"adaptive-build", name:"Adaptive Build", vertical:"fintech",
+    sub:"Construction back office",
+    tagline:"Construction back office, AI",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer (Full Stack)", url:"https://jobs.ashbyhq.com/adaptive/c1a19602-303e-4eb3-8aa6-a40cbc1009da", level:"senior", city:"nyc", added:"2026-08-26", posted:"2025-06-02", desc:"Build an agentic OS for construction accounting." },
+      { title:"Senior Software Engineer (Backend)", url:"https://jobs.ashbyhq.com/adaptive/e8a34d3e-38f6-4f21-ac4e-d2c0ddb24220", level:"senior", city:"nyc", added:"2026-08-26", posted:"2025-11-18", desc:"Build backend for construction back-office agents." }
+    ] },
+  { id:"encord", name:"Encord", vertical:"ai",
+    sub:"Data annotation platform",
+    tagline:"Train AI on right data",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/encord/2eedc8eb-00c2-4cbe-862e-5e22960f0dbf", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-05-18", desc:"Own technical delivery of an AI data platform." }
+    ] },
+  { id:"exa", name:"Exa", vertical:"ai",
+    sub:"Search API for AI",
+    tagline:"The search engine for AIs",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/exa/c542d672-691c-46c1-9741-856d66f2c2ea", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-08-13", desc:"Sit between product and customers on an AI search engine." }
     ] }
 ];
 
@@ -15227,6 +15287,9 @@ const COMPANY_DOMAINS = {
   'pure-storage':'purestorage.com', 'solve-intelligence':'solveintelligence.com',
   ddn:'ddn.com', fanatics:'fanatics.com', lorikeet:'lorikeetcx.ai',
   'maven-agi':'mavenagi.com',
+  // 2026-08-26 sweep, each verified by page title.
+  'clear-street':'clearstreet.com', linkup:'linkup.so',
+  'adaptive-build':'adaptive.build', encord:'encord.com', exa:'exa.ai',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */
