@@ -1988,18 +1988,26 @@ def fetch(ats, slug):
     url = f"https://{tenant}.{wdn}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs"
     referer = f"https://{tenant}.{wdn}.myworkdayjobs.com/en-US/{site}"
     # Workday caps limit at 20 — page through with offset until exhausted.
+    #
+    # `total` is only populated on the FIRST page; every later response carries
+    # total=0. Re-reading it each iteration made `offset >= total` true on page
+    # two, so every Workday board silently stopped at 40 postings. Pfizer
+    # reports total=547 on page one and 0 thereafter. Capture it once.
     all_postings = []
     offset = 0
+    total = None
     while True:
       body = json.dumps({"appliedFacets":{},"limit":20,"offset":offset,"searchText":""})
       d = curl_json(url, method="POST", body=body, referer=referer)
       if not d or not isinstance(d, dict): break
       page = d.get("jobPostings", []) or []
       all_postings.extend(page)
-      total = d.get("total") or 0
+      if total is None:
+        total = d.get("total") or 0
       offset += 20
-      if offset >= total or not page: break
-      if offset > 500: break  # safety
+      if not page: break
+      if total and offset >= total: break
+      if offset >= 2000: break   # safety: the largest boards run to thousands
     return all_postings
   return []
 
