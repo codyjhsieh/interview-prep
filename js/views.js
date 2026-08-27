@@ -5326,6 +5326,8 @@ const COOLNESS = {
   'reflection-ai':4, 'blink-health':4, fanatics:4, 'harmonic-ai':5,
   // 2026-08-26 sweep.
   'clear-street':2, 'adaptive-build':3, encord:3, linkup:4, exa:5,
+  // 2026-08-27: big-consumer, well-liked but not a startup badge.
+  pinterest:5,
 };
 
 const FRONTIER = new Set([
