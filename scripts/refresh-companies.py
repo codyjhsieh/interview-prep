@@ -219,6 +219,14 @@ TITLE_EXCLUDE_UNBOUNDED = re.compile(r"c\s?\+\+", re.IGNORECASE)
 # Public (a stock brokerage that also offers crypto), and Basis Theory (PCI
 # card tokenization, not tokens).
 #
+# Retired 2026-08-27: Leidos. A top-5 US defense contractor — vertical
+# "defense", notes "Federal IT + defense", board full of clearance and DoD
+# language. It had been listed all along but surfaced no roles because the
+# Workday pagination bug truncated its board at 40 postings; with that fixed
+# it showed 12 San Diego engineering roles. Removing it costs most of the San
+# Diego gain from that fix, which is the correct trade under the military
+# retirement rather than a reason to make an exception.
+#
 # Retired employers (2026-08-25): Anduril, Shield AI, Saronic, Vannevar Labs.
 # Pure-play military systems builders — removed rather than title-filtered,
 # because nearly every role at them is defense work regardless of title.
@@ -863,7 +871,6 @@ CANDIDATES = [
   ("skydio","Skydio","ashby","Skydio","defense","Autonomous drones","Series E","$740M","Linse Capital",["Linse","IVP","a16z"],"US drone maker."),
   ("kratos-defense","Kratos Defense","smartrecruiters","Kratos","defense","Unmanned defense systems (NASDAQ: KTOS)","Public","N/A","NASDAQ",["NASDAQ"],"Drones + defense systems."),
   ("two-six","Two Six Technologies","greenhouse","twosixtechnologies","defense","Defense R&D + cyber","Private","N/A","N/A",[],"Defense cyber R&D."),
-  ("leidos","Leidos","workday","leidos/wd5/External","defense","Defense IT + services (NYSE: LDOS)","Public","N/A","NYSE",["NYSE","S&P 500"],"Federal IT + defense."),
 
   # Automotive / mobility
   ("lucid-motors","Lucid Motors","greenhouse","lucidmotors","automotive","EV luxury sedan (NASDAQ: LCID)","Public","N/A","NASDAQ",["NASDAQ"],"EV maker."),
@@ -1771,6 +1778,74 @@ CANDIDATES = [
   ("voxel51","Voxel51","greenhouse","voxel51","ai","Visual data curation","","","",[],""),
   ("workyard","Workyard","ashby","workyard","saas","Construction workforce tracking","","","",[],""),
   ("xona-space","Xona Space","ashby","xona-space","aerospace","Satellite navigation","","","",[],""),
+  # ── 2026-08-27 — Workday tenant sweep (discover-workday.py) ──
+  ("dexcom","Dexcom","workday","dexcom/wd1/Dexcom","health","Continuous glucose monitoring","","","",[],""),
+  ("pfizer","Pfizer","workday","pfizer/wd1/PfizerCareers","health","Pharmaceuticals","","","",[],""),
+  ("agilent","Agilent","workday","agilent/wd5/Agilent_Careers","health","Analytical instruments","","","",[],""),
+  ("baxter","Baxter","workday","baxter/wd1/Baxter","health","Medical products","","","",[],""),
+  ("cigna","Cigna","workday","cigna/wd5/CignaCareers","health","Health services","","","",[],""),
+  ("healthfirst","Healthfirst","workday","healthfirst/wd1/Healthfirst","health","New York health plan","","","",[],""),
+  ("humana","Humana","workday","humana/wd5/Humana_External_Career_Site","health","Health insurance","","","",[],""),
+  ("iqvia","IQVIA","workday","iqvia/wd1/Iqvia","health","Health data and clinical research","","","",[],""),
+  ("neurocrine-biosciences","Neurocrine Biosciences","workday","neurocrine/wd5/NeurocrineCareers","health","Neuroscience therapeutics","","","",[],""),
+  ("novartis","Novartis","workday","novartis/wd3/Novartis_Careers","health","Pharmaceuticals","","","",[],""),
+  ("pvh","PVH","workday","pvh/wd1/Pvh_Careers","consumer","Apparel brands","","","",[],""),
+  ("revvity","Revvity","workday","revvity/wd103/External","health","Life sciences solutions","","","",[],""),
+  ("stryker","Stryker","workday","stryker/wd1/StrykerCareers","health","Medical devices","","","",[],""),
+  # ── 2026-08-27 — 184-name sweep: productivity, finance ops, supply chain, health AI ──
+  ("assembly","Assembly","ashby","assembly","ai","AI app builder for professional services","","","",[],""),
+  ("butterfly-network","Butterfly Network","greenhouse","butterflynetwork","health","Handheld ultrasound","","","",[],""),
+  ("1uphealth","1upHealth","greenhouse","1uphealth","health","FHIR data platform","","","",[],""),
+  ("360learning","360Learning","lever","360learning","ed","Collaborative learning","","","",[],""),
+  ("achievers","Achievers","lever","achievers","saas","Employee engagement","","","",[],""),
+  ("aquant","Aquant","ashby","aquant","ai","Service intelligence AI","","","",[],""),
+  ("arrive-logistics","Arrive Logistics","greenhouse","arrivelogistics","marketplace","Freight brokerage","","","",[],""),
+  ("artera","Artera","lever","artera","health","Patient communication","","","",[],""),
+  ("augury","Augury","greenhouse","augury","ai","Machine health AI","","","",[],""),
+  ("centivo","Centivo","ashby","centivo","health","Employer health plan","","","",[],""),
+  ("cin7","Cin7","lever","cin7","saas","Inventory management","","","",[],""),
+  ("cognito-therapeutics","Cognito Therapeutics","greenhouse","cognitotherapeutics","health","Neurology device therapy","","","",[],""),
+  ("datarails","Datarails","greenhouse","datarails","fintech","FP&A automation","","","",[],""),
+  ("degreed","Degreed","greenhouse","degreed","ed","Learning platform","","","",[],""),
+  ("docebo","Docebo","ashby","docebo","ed","Learning platform","","","",[],""),
+  ("ellipsis-health","Ellipsis Health","ashby","ellipsis-health","ai","Voice biomarkers","","","",[],""),
+  ("emburse","Emburse","lever","emburse","fintech","Expense management","","","",[],""),
+  ("firstup","Firstup","lever","firstup","saas","Employee communication","","","",[],""),
+  ("flexe","Flexe","greenhouse","flexe","marketplace","On-demand warehousing","","","",[],""),
+  ("forma","Forma","ashby","forma","fintech","Flexible benefits","","","",[],""),
+  ("freed","Freed","ashby","freed","ai","AI scribe for clinicians","","","",[],""),
+  ("fulfil","Fulfil","greenhouse","fulfil","saas","ERP for commerce","","","",[],""),
+  ("gravie","Gravie","ashby","gravie","health","Employer health benefits","","","",[],""),
+  ("heartflow","HeartFlow","greenhouse","heartflowinc","ai","Cardiac imaging analysis","","","",[],""),
+  ("inovalon","Inovalon","greenhouse","inovalon","health","Healthcare data analytics","","","",[],""),
+  ("katana","Katana","ashby","katana","saas","Manufacturing ERP","","","",[],""),
+  ("legion","Legion","greenhouse","legion","saas","Workforce management AI","","","",[],""),
+  ("maintainx","MaintainX","ashby","maintainx","saas","Maintenance management","","","",[],""),
+  ("motif-neurotech","Motif Neurotech","greenhouse","motifneurotech","health","Neural implants","","","",[],""),
+  ("neuralink","Neuralink","greenhouse","neuralink","health","Brain interfaces","","","",[],""),
+  ("nomi-health","Nomi Health","lever","nomihealth","health","Direct healthcare","","","",[],""),
+  ("nudge","Nudge","ashby","nudge","saas","Frontline enablement","","","",[],""),
+  ("order","Order","smartrecruiters","order","fintech","Procurement platform","","","",[],""),
+  ("pilot","Pilot","greenhouse","pilothq","fintech","Bookkeeping for startups","","","",[],""),
+  ("plane","Plane","ashby","plane","devtools","Open source project management","","","",[],""),
+  ("platform-science","Platform Science","greenhouse","platformscience","saas","Fleet connectivity","","","",[],""),
+  ("proton","Proton","greenhouse","proton","consumer","Privacy software suite","","","",[],""),
+  ("shippeo","Shippeo","smartrecruiters","shippeo","saas","Transport visibility","","","",[],""),
+  ("simpplr","Simpplr","greenhouse","simpplr","saas","Employee intranet","","","",[],""),
+  ("smartsheet","Smartsheet","greenhouse","smartsheet","saas","Work management platform","","","",[],""),
+  ("smile-digital-health","Smile Digital Health","lever","smiledigitalhealth","health","Health data platform","","","",[],""),
+  ("staffbase","Staffbase","greenhouse","staffbase","saas","Employee communications","","","",[],""),
+  ("subsense","Subsense","lever","subsense","health","Nanoparticle neural interface","","","",[],""),
+  ("thatch","Thatch","greenhouse","thatch","fintech","Health benefit accounts","","","",[],""),
+  ("truckstop","Truckstop","greenhouse","truckstop","marketplace","Freight marketplace","","","",[],""),
+  ("tulip-interfaces","Tulip Interfaces","greenhouse","tulip","saas","Frontline operations platform","","","",[],""),
+  ("twin-health","Twin Health","greenhouse","twinhealth","health","Metabolic digital twin","","","",[],""),
+  ("upkeep","UpKeep","greenhouse","upkeep","saas","Asset management","","","",[],""),
+  ("vim","Vim","greenhouse","vim","health","Care navigation infrastructure","","","",[],""),
+  ("weave","Weave","ashby","weave","saas","Small business communication","","","",[],""),
+  ("workshop","Workshop","greenhouse","workshop","saas","Internal communications","","","",[],""),
+  ("wrike","Wrike","greenhouse","wrike","saas","Work management","","","",[],""),
+  ("xealth","Xealth","greenhouse","xealth","health","Digital health prescribing","","","",[],""),
 ]
 
 # Clearbit logo domains, keyed by company id. Companies absent from this

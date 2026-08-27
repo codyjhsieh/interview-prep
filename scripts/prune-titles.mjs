@@ -50,16 +50,16 @@ const FAMILIES = {
 };
 
 const RETIRED_CRYPTO = [
-  'alchemy',, 'amber-group',, 'anchorage-digital',, 'bastion-fi',, 'beam',
-  'bitgo',, 'blackbird-labs',, 'blockchain-com',, 'blockdaemon',, 'blockworks',
-  'chainalysis',, 'coinbase',, 'cointracker',, 'conduit',, 'consensys',
-  'cryptio',, 'dcg',, 'dune',, 'elliptic',, 'falcon-x',
-  'figment',, 'fireblocks',, 'flowdesk',, 'foundry-digital',, 'gemini',
-  'goldsky',, 'grayscale',, 'halliday',, 'keyrock',, 'kraken',
-  'ledger',, 'moonpay',, 'nansen',, 'notabene',, 'ondofinance',
-  'paxos',, 'polymarket',, 'reservoir',, 'ripple',, 'securitize',
-  'superstate',, 'taxbit',, 'tenderly',, 'trm-labs',, 'turnkey',
-  'uniswap',, 'zero-hash',
+  'alchemy', 'amber-group', 'anchorage-digital', 'bastion-fi', 'beam',
+  'bitgo', 'blackbird-labs', 'blockchain-com', 'blockdaemon', 'blockworks',
+  'chainalysis', 'coinbase', 'cointracker', 'conduit', 'consensys',
+  'cryptio', 'dcg', 'dune', 'elliptic', 'falcon-x',
+  'figment', 'fireblocks', 'flowdesk', 'foundry-digital', 'gemini',
+  'goldsky', 'grayscale', 'halliday', 'keyrock', 'kraken',
+  'ledger', 'moonpay', 'nansen', 'notabene', 'ondofinance',
+  'paxos', 'polymarket', 'reservoir', 'ripple', 'securitize',
+  'superstate', 'taxbit', 'tenderly', 'trm-labs', 'turnkey',
+  'uniswap', 'zero-hash',
 ];
 
 // Employers retired outright, not by title: nearly every role at a pure-play
@@ -74,6 +74,7 @@ const RETIRED_COMPANIES = new Set([
   // ashby/ellipsislabs is Ellipsis LABS, a DeFi protocol company — not the
   // AI code-review tool of the same name. Wrong company and a retired family.
   'ellipsis',
+  'leidos',   // defense contractor, retired 2026-08-27
 ]);
 
 const argv = process.argv.slice(2);
@@ -128,7 +129,10 @@ console.log(`\n${dropped.length} job(s) dropped, ${kept.length} companies kept`
   + (emptied.length ? `, ${emptied.length} left with no live roles (record retained, card hidden): ${emptied.join(', ')}` : ''));
 
 if (dry) { console.log('\n--dry: js/data.js not modified'); process.exit(0); }
-if (!dropped.length) { console.log('nothing to do'); process.exit(0); }
+// A run that removes only RETIRED EMPLOYERS drops no title-matched jobs, so
+// gating the write on `dropped` alone silently discarded that work — Leidos
+// was reported as removed and then not written.
+if (!dropped.length && !retired.length) { console.log('nothing to do'); process.exit(0); }
 
 writeCompanies(DATA, src, kept);
 console.log(`\nRewrote ${DATA}: ${kept.reduce((n, c) => n + c.jobs.length, 0)} jobs across ${kept.length} companies.`);

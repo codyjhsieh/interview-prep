@@ -11898,14 +11898,15 @@ const COMPANIES = [
     tagline:"Streams, studios, and parks",
     stage:"Public", raised:"$1B+ pre-IPO", lead:"NYSE",
     badges:["NYSE","S&P 500"],
-    totalRoles:5,
+    totalRoles:6,
     notes:"NYC tech: ABC News, Hulu, ESPN+, Disney+. Streaming infra + content systems.",
     jobs:[
       { title:"Senior Software Engineer - Java", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Senior-Software-Engineer---Java_10149378", level:"senior", city:"nyc", added:"2026-05-31" },
       { title:"Software Engineer - Java", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Software-Engineer-II---Data-Ingestion---Data-Store_10141160-1", level:"mid", city:"nyc", added:"2026-06-16" },
       { title:"Senior Product Software Engineer", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Senior-Product-Software-Engineer_10153072-2", level:"senior", city:"nyc", added:"2026-06-22" },
       { title:"Sr Product Software Engineer", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Sr-Product-Software-Engineer_10153785", level:"senior", city:"nyc", added:"2026-06-22" },
-      { title:"Sr Software Engineer", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Sr-Software-Engineer_10149863", level:"senior", city:"nyc", added:"2026-08-06" }
+      { title:"Sr Software Engineer", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Sr-Software-Engineer_10149863", level:"senior", city:"nyc", added:"2026-08-06" },
+      { title:"Sr Software Engineer - Media Platform Alliance", url:"https://disney.wd5.myworkdayjobs.com/en-US/disneycareer/job/New-York-NY-USA/Sr-Software-Engineer---Media-Platform-Alliance_10145062", level:"senior", city:"nyc", added:"2026-08-27" }
     ] },
   { id:"blackrock", name:"BlackRock", vertical:"fintech",
     sub:"World's largest asset manager (NYSE: BLK)",
@@ -13179,10 +13180,14 @@ const COMPANIES = [
     tagline:"Banks half of America",
     stage:"Public", raised:"N/A", lead:"NYSE",
     badges:["NYSE","Dow 30"],
-    totalRoles:1,
+    totalRoles:5,
     notes:"NYC office. Markets + retail digital.",
     jobs:[
-      { title:"Software Engineer III - Equities Structured Products Technology", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Software-Engineer-III---Equities-Structured-Products-Technology_26012932-2", level:"mid", city:"nyc", added:"2026-08-18" }
+      { title:"Software Engineer III - Equities Structured Products Technology", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Software-Engineer-III---Equities-Structured-Products-Technology_26012932-2", level:"mid", city:"nyc", added:"2026-08-18" },
+      { title:"Senior Cloud Engineer - GenAI Platform Engineering", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Senior-Cloud-Engineer---GenAI-Platform-Engineering_26019544", level:"senior", city:"nyc", added:"2026-08-27" },
+      { title:"Software Engineer III - Equities Structured Products Technology", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Software-Engineer-III---Equities-Structured-Products-Technology_26014349-2", level:"mid", city:"nyc", added:"2026-08-27" },
+      { title:"Software Engineer III - Global Equities Cash Technolog", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Software-Engineer-III---Global-Equities-Cash-Technolog_26027482", level:"mid", city:"nyc", added:"2026-08-27" },
+      { title:"Software Engineer III - Global Non-Linear (GnL) Front Office team", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Software-Engineer-III---Global-Non-Linear--GnL--Front-Office-team_26017987", level:"mid", city:"nyc", added:"2026-08-27" }
     ] },
   { id:"barclays", name:"Barclays", vertical:"fintech",
     sub:"UK investment bank (LSE: BARC)",
@@ -13818,20 +13823,23 @@ const COMPANIES = [
     tagline:"Banking for the world",
     stage:"Public", raised:"N/A", lead:"NYSE",
     badges:["NYSE","Dow 30"],
-    totalRoles:0,
+    totalRoles:2,
     notes:"NYC HQ. Markets + institutional tech + retail digital.",
     jobs:[
-
+      { title:"Senior Software Engineer (Java/Python)", url:"https://citi.wd5.myworkdayjobs.com/en-US/2/job/New-York-New-York-United-States/Senior-Software-Engineer--Java-Python-_26968452", level:"senior", city:"nyc", added:"2026-08-27" },
+      { title:"Senior Python AI Engineer (Hands-On), VP", url:"https://citi.wd5.myworkdayjobs.com/en-US/2/job/New-York-New-York-United-States/Senior-GenAI-Platform-Engineer---Python--VP_26973317", level:"senior", city:"nyc", added:"2026-08-27" }
     ] },
   { id:"crowdstrike", name:"CrowdStrike", vertical:"saas",
     sub:"Endpoint security (NASDAQ: CRWD)",
     tagline:"Stops breaches at the endpoint",
     stage:"Public", raised:"$481M pre-IPO", lead:"NASDAQ",
     badges:["NASDAQ","S&P 500"],
-    totalRoles:0,
+    totalRoles:3,
     notes:"NYC office. Endpoint + XDR.",
     jobs:[
-
+      { title:"Sr. Software Engineer - Cloud - Asset Platform (Hybrid)", url:"https://crowdstrike.wd5.myworkdayjobs.com/en-US/crowdstrikecareers/job/USA---New-York-NY/Sr-Software-Engineer---Cloud---Asset-Platform--Hybrid-_R29345", level:"senior", city:"nyc", added:"2026-08-27" },
+      { title:"Sr. Backend Engineer - Cloud (Hybrid)", url:"https://crowdstrike.wd5.myworkdayjobs.com/en-US/crowdstrikecareers/job/USA---New-York-NY/Sr-Backend-Engineer---Cloud--Hybrid-_R29007", level:"senior", city:"nyc", added:"2026-08-27" },
+      { title:"Software Engineer III - Cloud Security - FCS Registration (Hybrid NYC)", url:"https://crowdstrike.wd5.myworkdayjobs.com/en-US/crowdstrikecareers/job/USA---New-York-NY/Software-Engineer-III---Cloud-Security---FCS-Registration--Hybrid-_R29327-1", level:"mid", city:"nyc", added:"2026-08-27" }
     ] },
   { id:"freshworks", name:"Freshworks", vertical:"saas",
     sub:"CRM + support (NASDAQ: FRSH)",
@@ -14568,6 +14576,68 @@ const COMPANIES = [
     notes:"NYC office. Discovery + shopping.",
     jobs:[
       { title:"Sr. Staff Software Engineer, Big Data Platform", url:"https://www.pinterestcareers.com/jobs/?gh_jid=7494956", level:"senior", city:"nyc", added:"2026-08-27", posted:"2026-08-25", desc:"Build the big data platform behind visual discovery." }
+    ] },
+  { id:"salesforce", name:"Salesforce", vertical:"saas",
+    sub:"CRM + AI cloud (NYSE: CRM)",
+    tagline:"The agentic AI CRM",
+    stage:"Public", raised:"$2B pre-IPO", lead:"NYSE",
+    badges:["NYSE","Dow 30"],
+    totalRoles:2,
+    notes:"Hyperforce + Data Cloud + Einstein. NYC office for sales eng + applied AI.",
+    jobs:[
+      { title:"DevOps Engineer, GovCloud Mid/Senior", url:"https://salesforce.wd12.myworkdayjobs.com/en-US/External_Career_Site/job/New-York---New-York/DevOps-Engineer--GovCloud-Mid-Senior_JR333947", level:"senior", city:"nyc", added:"2026-08-27" },
+      { title:"Distributed Systems Software Engineer SMTS/LMTS", url:"https://salesforce.wd12.myworkdayjobs.com/en-US/External_Career_Site/job/New-York---New-York/Distributed-Systems-Engineer-SMTS-LMTS_JR347084", level:"mid", city:"nyc", added:"2026-08-27" }
+    ] },
+  { id:"adobe", name:"Adobe", vertical:"saas",
+    sub:"Creative + Experience Cloud (NASDAQ: ADBE)",
+    tagline:"Tools that make the work",
+    stage:"Public", raised:"N/A", lead:"NASDAQ",
+    badges:["NASDAQ","Dow 30"],
+    totalRoles:2,
+    notes:"NYC office.",
+    jobs:[
+      { title:"Senior Site Reliability Engineer", url:"https://adobe.wd5.myworkdayjobs.com/en-US/external_experienced/job/New-York/Senior-Site-Reliability-Engineer_R170788", level:"senior", city:"nyc", added:"2026-08-27" },
+      { title:"Sr. Full-Stack Engineer", url:"https://adobe.wd5.myworkdayjobs.com/en-US/external_experienced/job/New-York/Sr-Full-Stack-Engineer_R170217", level:"senior", city:"nyc", added:"2026-08-27" }
+    ] },
+  { id:"dexcom", name:"Dexcom", vertical:"health",
+    sub:"Continuous glucose monitoring",
+    tagline:"Glucose, read continuously",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Sr. Digital Factory Software Systems Engineer", url:"https://dexcom.wd1.myworkdayjobs.com/en-US/Dexcom/job/San-Diego-California/Sr-Digital-Factory-Software-Systems-Engineer_JR117438", level:"senior", city:"sd", added:"2026-08-27" }
+    ] },
+  { id:"pfizer", name:"Pfizer", vertical:"health",
+    sub:"Pharmaceuticals",
+    tagline:"Medicine at global scale",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior AI/ML Engineer - Research Data AI and Predictive Modeling (Vaccine R&D)", url:"https://pfizer.wd1.myworkdayjobs.com/en-US/PfizerCareers/job/United-States---New-York---Pearl-River/Senior-AI-ML-Engineer---Research-Data-AI-and-Predictive-Modeling--Vaccine-R-D-_4961866-1", level:"senior", city:"nyc", added:"2026-08-27" }
+    ] },
+  { id:"assembly", name:"Assembly", vertical:"ai",
+    sub:"AI app builder for professional services",
+    tagline:"Vibe-code your firm's apps",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://jobs.ashbyhq.com/assembly/3d04eed3-211a-483b-aaee-a73b98147a18", level:"senior", city:"nyc", added:"2026-08-27", posted:"2021-11-01", desc:"Build an AI app builder reporting to the CTO." }
+    ] },
+  { id:"butterfly-network", name:"Butterfly Network", vertical:"health",
+    sub:"Handheld ultrasound",
+    tagline:"Ultrasound in your pocket",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Staff , Site Reliability Engineer - Cloud Platform", url:"https://www.butterflynetwork.com/careers?gh_jid=7822253003", level:"mid", city:"nyc", added:"2026-08-27", posted:"2026-08-25", desc:"Keep the cloud platform behind handheld ultrasound up." }
     ] }
 ];
 
@@ -15318,6 +15388,13 @@ const COMPANY_DOMAINS = {
   'clear-street':'clearstreet.com', linkup:'linkup.so',
   'adaptive-build':'adaptive.build', encord:'encord.com', exa:'exa.ai',
   pinterest:'pinterest.com',
+  // 2026-08-27. Several of these are companies that were already listed but
+  // never surfaced roles until the Workday pagination fix.
+  salesforce:'salesforce.com', adobe:'adobe.com', dexcom:'dexcom.com',
+  pfizer:'pfizer.com', 'butterfly-network':'butterflynetwork.com',
+  // ashby/assembly links to assembly.com, NOT joinassembly.com (a different
+  // Assembly, in employee recognition).
+  assembly:'assembly.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */

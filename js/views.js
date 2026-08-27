@@ -5328,6 +5328,8 @@ const COOLNESS = {
   'clear-street':2, 'adaptive-build':3, encord:3, linkup:4, exa:5,
   // 2026-08-27: big-consumer, well-liked but not a startup badge.
   pinterest:5,
+  // 2026-08-27. Enterprise incumbents sit low; big pharma lower still.
+  pfizer:1, salesforce:1, dexcom:3, adobe:4, 'butterfly-network':4, assembly:4,
 };
 
 const FRONTIER = new Set([
