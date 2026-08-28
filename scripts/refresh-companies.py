@@ -88,6 +88,11 @@ OTHER_TITLE_CITY = re.compile(
   r'delhi|singapore|tokyo|hong kong|sydney|melbourne'
   r')\b', re.I
 )
+# City abbreviations, CASE-SENSITIVE on purpose. OpenAI posts the same role as
+# "…, Legal-NYC" and "…, Legal-SF"; only the first belongs here. This cannot be
+# folded into OTHER_TITLE_CITY above, which is re.I: a case-insensitive \bLA\b
+# matches "La Jolla" — a San Diego location the board explicitly covers.
+OTHER_TITLE_CITY_ABBR = re.compile(r'\b(SF|LA|SEA|ATX|PDX|DEN|CHI|BOS|DFW|LDN)\b')
 TITLE_INCLUDE = re.compile(
   r"\b("
   r"forward[\s-]deployed|fde|founding[\s-]engineer|"
@@ -2219,7 +2224,7 @@ def filter_jobs(ats, raw, slug=""):
     title_city = match_city(title)
     if title_city:
       city = title_city
-    elif OTHER_TITLE_CITY.search(title):
+    elif OTHER_TITLE_CITY.search(title) or OTHER_TITLE_CITY_ABBR.search(title):
       continue
     title_for_check = STAFF_PRINCIPAL.sub("", title) if SENIORITY_MARK.search(title) else title
     if TITLE_EXCLUDE.search(title_for_check): continue

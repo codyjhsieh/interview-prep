@@ -59,6 +59,14 @@ TAIL = re.compile(r"\s+(?:last|in|back|earlier|and now|since|during|after|who|wh
                   r"we|our|this|that)\b.*$", re.I)
 
 
+# Entities that file a Form D on their own behalf while being named after the
+# company they invest in. Their amounts are never the company's funding.
+FUND_VEHICLE = re.compile(
+    r"\bseries\s+of\b|\bfund\b|\bspv\b|\bco[\s-]?invest|\bjv\b|"
+    r"\bholding(s)?,?\s+(lp|llc)\b|\bpartners,?\s+lp\b|\bcapital\s+llc\b",
+    re.I)
+
+
 def curl(url, timeout=20):
     try:
         r = subprocess.run(["curl", "-sS", "-m", str(timeout), "-H", f"User-Agent: {UA}", url],
@@ -143,6 +151,14 @@ def edgar_form_d_total(name):
     a = re.sub(r"[^a-z0-9]", "", conformed.group(1).lower())
     b = re.sub(r"[^a-z0-9]", "", name.lower())
     if not (a.startswith(b) or b.startswith(a)):
+        return None
+    # A prefix match is not enough: investment vehicles are routinely NAMED
+    # after the company they hold, so they sail through it. "Blink Health
+    # 1789/RWP fund a Series of CGF2021 LLC" starts with "Blink Health" and
+    # reported $1.4M for a company that has raised orders of magnitude more.
+    # Same shape as "Regard JV Holding, LP". These file their own Form Ds; the
+    # amounts are the vehicle's, not the company's.
+    if FUND_VEHICLE.search(conformed.group(1)):
         return None
     time.sleep(0.15)                          # SEC asks for <10 req/s
     subs = curl(f"https://data.sec.gov/submissions/CIK{int(cik.group(1)):010d}.json")

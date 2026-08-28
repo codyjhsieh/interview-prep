@@ -46,6 +46,10 @@ const FAMILIES = {
   crypto:   /\b(crypto|blockchain|web3|stablecoin|defi|onchain|on[\s-]chain|digital\s+assets?|bitcoin|ethereum|nft|smart\s+contract)\b/i,
   // Non-engineering roles that enter through the "forward deployed" clause in
   // TITLE_INCLUDE, plus plural "Interns" which the singular pattern missed.
+  // Case-sensitive city abbreviations in titles: OpenAI posts the same role as
+  // "Legal-NYC" and "Legal-SF". Not folded into a case-insensitive pattern —
+  // \bLA\b would match "La Jolla", a covered San Diego location.
+  othercity: /(^|[\s\-,(\/])(SF|LA|SEA|ATX|PDX|DEN|CHI|BOS|DFW|LDN)($|[\s\-,)\/])/,
   nonent:   /\bforward[\s-]deployed\s+(?:\w+\s+)?(?:banker|investor|accountant|strategist|analyst|consultant|designer|architect|specialist|manager|gtm)\b|\binterns?\b|\binternships?\b/i,
 };
 
