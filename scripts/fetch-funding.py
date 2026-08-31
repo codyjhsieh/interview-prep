@@ -207,17 +207,29 @@ const fs=require("fs");const src=fs.readFileSync("js/data.js","utf8");
 const a=src.indexOf("[",src.indexOf("const COMPANIES = ["));
 const e=src.indexOf("\\n];",a);
 const cos=eval("("+src.slice(a,e+2)+")");
-console.log(JSON.stringify(cos.filter(c=>c.raised).map(c=>c.id)));
+console.log(JSON.stringify({
+  funded: cos.filter(c=>c.raised).map(c=>c.id),
+  public: cos.filter(c=>/^public/i.test(c.stage||"")).map(c=>c.id),
+}));
 """], capture_output=True, text=True, cwd=str(ROOT))
+    # Companies already marked Public are skipped entirely. A public company
+    # still files Form Ds — private placements, employee plans, debt — and
+    # those amounts are not venture funding. ServiceNow's $389M was proposed
+    # and rejected by hand on three consecutive refreshes; rendering it beside
+    # seed and Series C peers misstates a company worth orders of magnitude
+    # more. Encoding the rule beats re-deciding it every run.
+    public_ids = set()
     try:
-        have_raised = set(json.loads(probe.stdout or "[]"))
+        _p = json.loads(probe.stdout or "{}")
+        have_raised = set(_p.get("funded", []))
+        public_ids = set(_p.get("public", []))
     except Exception:
         print("warning: could not read existing funding; proposing for all",
               file=sys.stderr)
     # companies already carrying funding are never touched
     proposals, checked = [], 0
     for c in rows:
-        if c["id"] in have_raised:
+        if c["id"] in have_raised or c["id"] in public_ids:
             continue
         claim = from_postings(c)
         if not claim:

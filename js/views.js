@@ -5332,6 +5332,7 @@ const COOLNESS = {
   pfizer:1, salesforce:1, dexcom:3, adobe:4, 'butterfly-network':4, assembly:4,
   // 2026-08-28
   maintainx:2, 'neurocrine-biosciences':2, sixfold:3,
+  'faro-health':3,
 };
 
 const FRONTIER = new Set([
