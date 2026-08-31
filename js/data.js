@@ -14679,6 +14679,42 @@ const COMPANIES = [
     notes:"",
     jobs:[
       { title:"Senior Software Engineer", url:"https://apply.workable.com/farohealth/j/27ACD3CEA5", level:"senior", city:"sd", added:"2026-08-31" }
+    ] },
+  { id:"blackstone", name:"Blackstone", vertical:"fintech",
+    sub:"Alternative asset manager",
+    tagline:"Alternative assets, at scale",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:4,
+    notes:"",
+    jobs:[
+      { title:"Front-office Senior Software Engineer, VP - Liquid Credit", url:"https://blackstone.wd1.myworkdayjobs.com/en-US/Blackstone_Careers/job/New-York-601-Lex/Front-office-Senior-Software-Engineer--VP---Liquid-Credit_44253-1", level:"senior", city:"nyc", added:"2026-08-31" },
+      { title:"Software Engineer, Associate – Enterprise Technology", url:"https://blackstone.wd1.myworkdayjobs.com/en-US/Blackstone_Careers/job/New-York/Platform-Engineer--Associate---Physical-Security_41692-1", level:"mid", city:"nyc", added:"2026-08-31" },
+      { title:"Full-Stack Developer, VP – Investor Portal", url:"https://blackstone.wd1.myworkdayjobs.com/en-US/Blackstone_Careers/job/New-York/Full-Stack-Developer--VP---Investor-Portal_39706", level:"mid", city:"nyc", added:"2026-08-31" },
+      { title:"Site Reliability Engineer - Data, Cloud & Developer Experience", url:"https://blackstone.wd1.myworkdayjobs.com/en-US/Blackstone_Careers/job/New-York-601-Lex/Site-Reliability-Engineer---Data--Cloud---Developer-Experience_41530-1", level:"mid", city:"nyc", added:"2026-08-31" }
+    ] },
+  { id:"target", name:"Target", vertical:"consumer",
+    sub:"Retail",
+    tagline:"Expect more, pay less",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:4,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer \u2014 Developer Platform", url:"https://target.wd5.myworkdayjobs.com/en-US/TargetCareers/job/7000-Target-Pkwy-NNCD-0375-Brooklyn-ParkMN-55445/Senior-Software-Engineer---Developer-Platform_R0000447430-1", level:"senior", city:"nyc", added:"2026-08-31" },
+      { title:"Senior AI Engineer – Apply For CircleCard", url:"https://target.wd5.myworkdayjobs.com/en-US/TargetCareers/job/7000-Target-Pkwy-NNCD-0375-Brooklyn-ParkMN-55445/Senior-AI-Engineer---Apply-For-CircleCard-_R0000444792", level:"senior", city:"nyc", added:"2026-08-31" },
+      { title:"Senior AI Engineer - Circlecard", url:"https://target.wd5.myworkdayjobs.com/en-US/TargetCareers/job/7000-Target-Pkwy-NNCD-0375-Brooklyn-ParkMN-55445/Senior-AI-Engineer---Circlecard_R0000445196", level:"senior", city:"nyc", added:"2026-08-31" },
+      { title:"Data Engineer - Finance AI Solutions", url:"https://target.wd5.myworkdayjobs.com/en-US/TargetCareers/job/7000-Target-Pkwy-NNCD-0375-Brooklyn-ParkMN-55445/Data-Engineer---Finance-Technology-Solutions_R0000444866", level:"mid", city:"nyc", added:"2026-08-31" }
+    ] },
+  { id:"major-league-baseball", name:"Major League Baseball", vertical:"media",
+    sub:"Sports league",
+    tagline:"Baseball, streamed and scored",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Software Engineer", url:"https://www.mlb.com/careers/opportunities?gh_jid=8128180", level:"mid", city:"nyc", added:"2026-08-31", posted:"2026-08-13", desc:"Ship the MLB app and MLB.TV across platforms." }
     ] }
 ];
 
@@ -15440,6 +15476,9 @@ const COMPANY_DOMAINS = {
   sixfold:'sixfold.ai', 'neurocrine-biosciences':'neurocrine.com',
   maintainx:'maintainx.com',
   'faro-health':'farohealth.com',
+  // 2026-08-31 non-engineering sweep
+  blackstone:'blackstone.com', target:'target.com',
+  'major-league-baseball':'mlb.com',
 };
 
 /* ---------- INTERACTIVE GAMES ---------- */

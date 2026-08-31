@@ -5333,6 +5333,9 @@ const COOLNESS = {
   // 2026-08-28
   maintainx:2, 'neurocrine-biosciences':2, sixfold:3,
   'faro-health':3,
+  // 2026-08-31 — non-engineering employers. Anchors: salesforce/blackrock:1,
+  // scaleai:2, etsy:8. Big finance sits at the bottom, MLB reads well.
+  blackstone:1, target:3, 'major-league-baseball':6,
 };
 
 const FRONTIER = new Set([
