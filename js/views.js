@@ -6201,6 +6201,7 @@ function _interviewQuestionsCardHTML(c) {
     ml_research: 'ML Research', behavioral: 'Behavioral', take_home: 'Take-home',
     debugging: 'Debugging', api_design: 'API Design', fde_case: 'FDE Case',
     frontend: 'Frontend',
+    react: 'React Live Coding', algorithms: 'Algorithms', mercor_design: 'Mercor System Design',
   };
   const roundsHTML = (rec.rounds || []).map(r => {
     const label = typeLabel[r.type] || r.type;
@@ -7638,8 +7639,14 @@ function _mockSeededShuffle(arr, seed) {
  * coding slots. Behavioral drops 18→13% because intro covers a chunk
  * of what behav used to absorb (motivation, story compression). */
 const MOCK_ROUND_WEIGHTS = [
-  { type: 'coding',        weight: 0.44, predicate: x => x.cat === 'coding' && x.mod.id !== 'cod-debugging' },
-  { type: 'system_design', weight: 0.22, predicate: x => x.cat === 'sysd'   && x.mod.id !== 'sd-api-design' },
+  { type: 'coding',        weight: 0.30, predicate: x => x.cat === 'coding' && x.mod.id !== 'cod-debugging' },
+  { type: 'system_design', weight: 0.16, predicate: x => x.cat === 'sysd'   && x.mod.id !== 'sd-api-design' },
+  // The three Mercor-round categories are their own draw. Without these
+  // entries they would never surface in a mock, because every predicate
+  // above filters on the category they used to live in.
+  { type: 'react',         weight: 0.08, predicate: x => x.cat === 'react' },
+  { type: 'algorithms',    weight: 0.06, predicate: x => x.cat === 'algos' },
+  { type: 'mercor_design', weight: 0.06, predicate: x => x.cat === 'msd'   },
   { type: 'behavioral',    weight: 0.12, predicate: x => x.cat === 'behav'  && x.mod.id !== 'behav-intro' },
   { type: 'intro',         weight: 0.12, predicate: x => x.mod.id === 'behav-intro' },
   { type: 'debugging',     weight: 0.05, predicate: x => x.mod.id === 'cod-debugging' },
