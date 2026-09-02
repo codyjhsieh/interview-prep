@@ -5336,6 +5336,11 @@ const COOLNESS = {
   // 2026-08-31 — non-engineering employers. Anchors: salesforce/blackrock:1,
   // scaleai:2, etsy:8. Big finance sits at the bottom, MLB reads well.
   blackstone:1, target:3, 'major-league-baseball':6,
+
+  // ── 2026-09-02 auto-scored ──
+  // Voice-agent API for call centers. Peer set: vapi:6, cartesia:5,
+  // deepgram:3 — useful infra, not a name that lands at dinner.
+  'retell-ai':5,
 };
 
 const FRONTIER = new Set([
