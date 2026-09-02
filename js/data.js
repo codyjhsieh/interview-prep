@@ -7769,6 +7769,273 @@ eval_scores:     { faithfulness, relevance, ... } (when LLM-as-judge runs)</pre>
   ]
 },
 
+/* ===== MERCOR-STYLE FULL-STACK SYSTEM DESIGN ===== */
+{
+  cat:'sysd', id:'sd-mercor', name:'Full-stack system design (Mercor-style)',
+  intro:'A different genre from the FAANG primitives. The prompt is deliberately underspecified, the interviewer adds a feature halfway through to see whether you can trace it, and the grading is on reasoning — where state lives, who owns it, what happens on failure — not on whether you reached a canonical answer. Runs the full stack: browser state and optimistic UI on one end, job schedulers and outbox tables on the other.',
+  lessons:[
+
+    {id:'sdm-1', type:'concept', name:'Framing — the first ten minutes', xp:12, time:8,
+     body:`Clarify requirements <b>briefly</b>, then draw. Candidates lose this round two ways: twenty minutes of requirements gathering with nothing on the board, or boxes drawn before anyone has said what the system does.
+<br><br>
+<b>The opening structure:</b>
+<ol style="margin-left:1.2em">
+  <li><b>Requirements</b> — functional, then the non-functional ones that actually change the design (latency, durability, scale).</li>
+  <li><b>Entities / data model</b> — what the nouns are.</li>
+  <li><b>APIs</b> — the operations users perform on those nouns.</li>
+  <li><b>Diagram</b> — client, server, storage, queues, workers, external dependencies.</li>
+  <li><b>The critical request flow</b> — trace one request end to end.</li>
+  <li><b>Failure and scaling trade-offs</b> — where it breaks and what you would do about it.</li>
+</ol>
+<b>What the first diagram must communicate:</b> component boundaries, the client/server split, data flow, <b>state ownership</b>, and which paths are synchronous versus asynchronous. If a reader cannot tell from your diagram who owns the canonical copy of a piece of state, the diagram is not finished.
+<br><br>
+<b>Draw the browser.</b> This is the tell that separates a full-stack design round from a backend one. The interviewer is evaluating <i>where logic and state live</i> — a diagram that starts at the load balancer has already skipped half the question.
+<br><br>
+<b>For every major component, say four things:</b> its responsibility, what state it owns, what inputs it receives, and what outputs or side effects it produces. "This is Redis" is not a description. "Redis holds the read cache for profile documents; it owns no canonical state; a miss falls through to Postgres" is.
+<br><br>
+<b>Get to a working system fast.</b> Establish a complete but simple design first, then optimize the bottleneck the interviewer points at. Designing for a million QPS before you have described the single-server version is how candidates run out of clock with no coherent system on the board.
+<br><br>
+<b>When the interviewer gives feedback, take it.</b> Explicitly incorporate it and revise the architecture. Defending your original design past the point of usefulness reads as rigidity — and the feedback is usually a hint about where they want the deep-dive to go.`,
+     interactive:{ type:'sort',
+       prompt:'Order the opening of a Mercor-style full-stack design round:',
+       items:['Draw the diagram (client, server, storage, queues, workers)','Failure modes and scaling trade-offs','Requirements — functional, then the non-functional ones that bite','Trace the critical request flow end to end','APIs — the operations on those entities','Entities and data model'],
+       correct:[2,5,4,0,3,1],
+       explain:'Requirements anchor it. Entities give you nouns. APIs give you verbs. Only then does the diagram mean anything. Tracing one request proves the diagram is real, and failure/scale is where judgment gets graded.'}},
+
+    {id:'sdm-2', type:'concept', name:'Client/server split — who owns which state', xp:12, time:9,
+     body:`Every full-stack design question is, underneath, one question asked repeatedly: <b>does this state need durability, security, coordination, or a single authoritative source?</b> If yes, it belongs on the server. If no, keeping it on the client is free latency.
+<br><br>
+<b>Belongs on the client:</b>
+<ul class="list-muted">
+  <li>Presentation and rendering</li>
+  <li>Local interaction state — selected tab, expanded row, drag position</li>
+  <li>Form state and unsaved text</li>
+  <li>Optimistic UI</li>
+  <li>Lightweight validation (fast feedback, not enforcement)</li>
+  <li>Caching, where the data tolerates being slightly stale</li>
+</ul>
+<b>Belongs on the server:</b>
+<ul class="list-muted">
+  <li>Authorization — always, without exception</li>
+  <li>Durable state and persistence</li>
+  <li>Business invariants ("a job cannot run twice", "balance cannot go negative")</li>
+  <li>Cross-user coordination</li>
+  <li>Trusted validation</li>
+  <li>Orchestration of multi-step work</li>
+</ul>
+<b>Why client-side validation is never enough.</b> The client can be modified, replayed, or bypassed entirely — curl does not run your React. Client validation exists to make the form feel responsive; the server validation is the one that protects the invariant. Say both, and say why they are different jobs.
+<br><br>
+<b>State that legitimately lives only in the browser:</b> unsaved text, selected tabs, temporary filters, loading flags, drag positions. Ephemeral UI state. Promoting all of it to the server is its own mistake — it adds round trips and a sync problem for state nobody needs after the tab closes.
+<br><br>
+<b>State that must be server-owned:</b> durable user data, permissions, canonical job status, payments, shared resources, workflow state. Anything two users can observe, or that must survive a refresh, or that money depends on.`,
+     interactive:{ type:'match',
+       prompt:'Client-owned or server-owned — match each piece of state to where it lives and why:',
+       pairs:[
+         ['Which tab is currently selected','Client — ephemeral, dies with the tab, no coordination needed'],
+         ['Whether this user may view a candidate profile','Server — authorization is never delegated to the client'],
+         ['Text typed but not yet submitted','Client — unsaved draft state, no durability requirement yet'],
+         ['Canonical status of a running job','Server — two observers must agree, must survive a refresh'],
+         ['Email format looks valid','Both — client for fast feedback, server for enforcement'],
+         ['Whether a payment has settled','Server — money depends on a single authoritative source'],
+       ],
+       explain:'The dividing question is always the same: durability, security, coordination, or single source of truth. Validation appears on both sides precisely because the two copies do different jobs.'}},
+
+    {id:'sdm-3', type:'concept', name:'Optimistic UI — and the rollback everyone forgets', xp:12, time:8,
+     body:`An <b>optimistic update</b> is the client immediately displaying the expected result before the server confirms it. You use it to cut perceived latency on actions that are very likely to succeed — a like, a reorder, a status toggle.
+<br><br>
+<b>Every optimistic update design must include a failure strategy.</b> This is the part candidates skip, and it is the part interviewers ask about. "The UI updates instantly" is half an answer; the other half is what happens when the request comes back 500.
+<br><br>
+<b>What to do when the request fails — pick one and say which:</b>
+<ul class="list-muted">
+  <li><b>Roll back</b> to the previous confirmed state. Right for cheap, repeatable actions (a toggle).</li>
+  <li><b>Preserve the change and surface a retry.</b> Right whenever the user typed something. Keep the edit visible, mark it unsynced, offer retry.</li>
+</ul>
+<b>Silently discarding user input is not an acceptable option.</b> The UI looks fast and is now lying — and if the user wrote three paragraphs, you deleted their work to save 200ms. Say this out loud; it is a judgment signal, not a nitpick.
+<br><br>
+<b>What you need in hand to implement rollback:</b> the previous state, a <code>mutation_id</code>, a version number, or a locally queued mutation. A queue of pending mutations is the general answer — it gives you retry, ordering, and rollback in one structure.
+<br><br>
+<b>Conflicting optimistic updates</b> (two tabs, or a slow request overtaken by a fast one) are resolved with versioning, timestamps, operation IDs, explicit conflict resolution, or simply refetching canonical server state. Refetch is the boring answer and often the correct one.
+<br><br>
+<b>Where NOT to be optimistic:</b> anything where showing an unconfirmed result is itself harmful — payment succeeded, offer accepted, message sent to a customer. If being wrong for two seconds is expensive, take the two seconds.`,
+     interactive:{ type:'truefalse',
+       statements:[
+         { text:'An optimistic update is complete once the client renders the expected result immediately.',
+           answer:false, why:'It is not complete without a failure strategy. Rendering fast is the easy half.'},
+         { text:'If the server rejects an optimistic mutation, silently reverting and saying nothing is acceptable as long as the state is correct.',
+           answer:false, why:'Correct state, destroyed work. If the user typed it, preserve it and surface a retry.'},
+         { text:'A queue of pending mutations gives you retry, ordering, and rollback in one structure.',
+           answer:true, why:'Which is why it is the general answer — better than ad-hoc previous-value snapshots per component.'},
+         { text:'Refetching canonical server state is a legitimate way to resolve conflicting optimistic updates.',
+           answer:true, why:'Boring and often correct. Versioning is more elegant; refetch is more likely to actually be right.'},
+         { text:'Payment confirmation is a good candidate for an optimistic update.',
+           answer:false, why:'Being wrong for two seconds is expensive. Optimism is for cheap, likely-to-succeed actions.'},
+       ]}},
+
+    {id:'sdm-4', type:'concept', name:'APIs and data modeling — entities before endpoints', xp:11, time:7,
+     body:`Before defining APIs, identify the <b>core entities</b> and the <b>operations users perform on them</b>. Endpoints invented before entities produce an API shaped like your first guess at the UI, which the interviewer will then break by adding a feature.
+<br><br>
+<b>What a good API discussion covers</b> — six things, briefly, per important endpoint:
+<ol style="margin-left:1.2em">
+  <li>The endpoint or action</li>
+  <li>Request fields</li>
+  <li>Response shape</li>
+  <li><b>Authorization</b> — who may call this, and scoped to what</li>
+  <li><b>Idempotency</b> — what a retry does</li>
+  <li>The important failure cases</li>
+</ol>
+<b>Idempotency keys on mutations.</b> A client that times out does not know whether the write landed, so it retries. Without an idempotency key that retry creates a second application, a second charge, a second job. With one, the server recognizes the key, skips the side effect, and <b>replays the original response</b>. Say "replays the original response" — returning a fresh 200 with different data is a subtler bug.
+<br><br>
+<b>UI state vs domain state.</b> UI state controls presentation. Domain state represents canonical business entities and workflows. Leaking UI concerns into the domain model ("<code>is_expanded</code>", "<code>sort_order_for_this_user</code>") is how schemas rot; leaking domain state into the client is how invariants get violated.
+<br><br>
+<b>Model workflow status explicitly.</b> A status column with a documented set of transitions — a <b>state machine</b> — makes valid transitions obvious and race conditions <i>expressible</i>. <code>scheduled → running → succeeded | failed | cancelled</code> tells you immediately that <code>cancelled → running</code> is a bug you must prevent, which is exactly the question the interviewer is about to ask.`,
+     interactive:{ type:'mcq',
+       q:'A client POSTs an application, times out, and retries with the same Idempotency-Key. What should the server do?',
+       options:[
+         'Create the application again — the client asked twice',
+         'Return 409 Conflict so the client knows something went wrong',
+         'Detect the key, skip the side effect, and replay the original response',
+         'Return a fresh 200 with the current state of the resource',
+       ],
+       correct:2,
+       explain:'Replaying the original response is what makes the retry invisible. A 409 pushes an error path onto a client that did nothing wrong, and a "fresh 200 with current state" can silently differ from what the first call returned — a subtler bug that shows up as UI drift.'}},
+
+    {id:'sdm-5', type:'concept', name:'Distributed job scheduler — the canonical Mercor prompt', xp:14, time:12,
+     body:`The reference architecture: <b>client → API → durable DB → scheduler → queue → workers → result/status store</b>.
+<br><br>
+<b>Ownership, component by component</b> — this is the part being graded:
+<ul class="list-muted">
+  <li><b>Durable DB</b> — the canonical source of truth for job state. Everything else is derived.</li>
+  <li><b>Scheduler</b> — discovering due jobs and dispatching eligible work. It owns no business state.</li>
+  <li><b>Queue</b> — durable buffering and delivery of work to workers. <b>Not</b> the canonical business state.</li>
+  <li><b>Worker</b> — executing a claimed unit of work and reporting result/status back.</li>
+</ul>
+<b>Finding jobs due soon.</b> Query an indexed <code>run_at</code> field over a <b>bounded time window</b> — "due in the next 60 seconds" — rather than scanning the whole table. At scale, partition by time bucket so the hot partition stays small.
+<br><br>
+<b>Two schedulers, one row.</b> Prevent double-claiming with an atomic conditional update or a row lock:
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">SELECT id FROM jobs
+ WHERE run_at &lt;= now() AND status = 'scheduled'
+ ORDER BY run_at
+ LIMIT 100
+ FOR UPDATE SKIP LOCKED;</pre>
+<code>SKIP LOCKED</code> is the whole trick: without it every scheduler blocks on the same head rows and your fan-out becomes a queue of one.
+<br><br>
+<b>The question that separates seniors: why doesn't the row lock guarantee the job appears exactly once in Kafka?</b> Because Postgres and Kafka are <b>independent systems</b>. You commit the row, then publish — and the process can crash in between. There is no transaction spanning both. So:
+<ul class="list-muted">
+  <li>Assume <b>at-least-once</b> delivery.</li>
+  <li>Make processing <b>idempotent</b> — that is what makes at-least-once safe.</li>
+  <li>If you need the state change and the event to be atomic, use the <b>transactional outbox</b>: write both the state change and the outgoing event row in <i>one</i> DB transaction, and have a separate process publish outbox rows asynchronously.</li>
+</ul>
+<b>Say "exactly-once delivery does not exist; exactly-once <i>effects</i> do."</b> You get them from idempotent processing, not from the transport.`,
+     interactive:{ type:'whyexplain',
+       prompt:'You claim a job row with SELECT ... FOR UPDATE SKIP LOCKED, commit, then publish to Kafka. Why can the job still be delivered twice, and what do you do about it?',
+       modelAnswer:'Postgres and Kafka are independent systems with no shared transaction. The sequence is: lock the row, mark it dispatched, COMMIT, then publish. If the process crashes after the commit but before the publish, the job is marked dispatched and never runs. If it crashes after publishing but before recording that it published, a recovery pass republishes and the job runs twice. Either way you cannot make the two commits atomic. The answer is to stop trying: assume at-least-once delivery and make the work idempotent — key the effect on a stable job execution id so a second delivery is a no-op. If you additionally need the state change and the event emission to be atomic, use a transactional outbox: write the job row update and an outbox row in the same DB transaction, and let a separate relay publish outbox rows to Kafka, marking them sent. The relay itself is at-least-once, which is fine because consumers are idempotent.',
+       rubric:[
+         'Names that Postgres and Kafka are separate systems with no shared transaction',
+         'Describes the crash window between commit and publish (in either order)',
+         'Concludes at-least-once delivery is the guarantee to assume',
+         'Makes processing idempotent, keyed on a stable execution id',
+         'Names the transactional outbox as the way to make state change + event atomic',
+       ]}},
+
+    {id:'sdm-6', type:'concept', name:'Asynchronous workflows — retries, DAGs, and crash recovery', xp:13, time:10,
+     body:`<b>Move work to a queue when it is</b> slow, bursty, retryable, expensive, or simply does not need to block the request/response path. Report generation, video transcription, bulk email, model inference, third-party API fan-out.
+<br><br>
+<b>What you must explain for any async path</b> — an interviewer will walk this list even if they do not say so:
+<ol style="margin-left:1.2em">
+  <li>Enqueueing — what goes in the message, and what stays in the DB</li>
+  <li>Execution — who picks it up</li>
+  <li>State updates — how the canonical record learns what happened</li>
+  <li>Retries</li>
+  <li>Ordering — whether you need it, and how you get it if so</li>
+  <li>Failure recovery</li>
+  <li><b>User-visible progress</b> — the half that gets forgotten. A job with no status endpoint is a spinner forever.</li>
+</ol>
+<b>Multi-step workflows</b> should be modeled as explicit steps and states — a workflow DAG or state machine with declared dependencies — not as a chain of workers that each happen to enqueue the next thing. The DAG is inspectable; the implicit chain is only knowable by reading every worker.
+<br><br>
+<b>Enforce dependency ordering</b> by only enqueueing or activating downstream work <i>after</i> prerequisites reach the required successful state. Ordering by hope ("step 2 takes longer so step 1 will be done") is the bug that only appears under load.
+<br><br>
+<b>Retries:</b> bounded, with <b>exponential backoff</b> and <b>jitter</b>. Backoff stops a failing dependency from being hammered continuously — an unbacked-off retry loop turns one sick service into an outage. Jitter stops every worker retrying on the same tick.
+<br><br>
+<b>After retries are exhausted:</b> mark the operation failed and move it to a <b>dead-letter queue</b> or a manual-recovery path. Infinite retry on a poison message is a slow-motion outage that also costs money.
+<br><br>
+<b>Worker crash recovery:</b> leases, visibility timeouts, or heartbeats, so uncompleted work becomes eligible for retry once the lease expires. Size the timeout to the realistic task duration — too short and you duplicate work, too long and a crash strands the task for an hour.
+<br><br>
+<b>The general rule:</b> anything required to recover business correctness lives in <b>durable storage</b>, not only in process memory. If restarting the service loses it, it was not state — it was luck.`,
+     interactive:{ type:'mcq',
+       q:'A worker picks up a transcription job, starts it, and the pod is killed at minute 12 of a 20-minute task. What recovers the job?',
+       options:[
+         'A retry loop in the worker, since the exception handler will catch the shutdown',
+         'A lease/visibility timeout that expires and returns the job to the pool',
+         'The scheduler noticing the job has been running too long and re-queueing it directly',
+         'Nothing — the client should resubmit',
+       ],
+       correct:1,
+       explain:'A killed pod runs no exception handler, so nothing in-process can save it. The lease is what makes crashes survivable: the worker holds the job for a bounded TTL, and when it stops renewing, the job becomes claimable again. Option 3 describes roughly the same mechanism but puts the decision in the wrong component and races with a worker that is merely slow, not dead.'}},
+
+    {id:'sdm-7', type:'concept', name:'Races and cache consistency', xp:12, time:8,
+     body:`<b>Cancel versus start</b> is the canonical race in any job system. A user cancels at the same moment the scheduler dispatches. Both paths read <code>status = 'scheduled'</code> and both proceed — the job runs and is also marked cancelled.
+<br><br>
+The fix is an <b>atomic conditional transition</b>, not a read followed by a write:
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">UPDATE jobs SET status = 'running'
+ WHERE id = $1 AND status = 'scheduled';
+-- 0 rows updated  =&gt; someone else won. Do not run the job.</pre>
+The same statement shape handles <code>scheduled → cancelled</code>. Whoever's UPDATE matches first wins; the loser sees zero rows affected and takes the other branch. <b>Check the affected row count</b> — that return value <i>is</i> the coordination.
+<br><br>
+<b>Why "read status, then update status" is unsafe:</b> another process may modify the state between the two operations. The window is small and the bug is therefore rare, load-dependent, and nearly impossible to reproduce — which is exactly why interviewers ask.
+<br><br>
+<b>The read-heavy profile cache.</b> Client → API → Redis; on a miss, read Postgres and repopulate Redis. Writes go to <b>Postgres first, then invalidate or update the cache</b>. That order matters: invalidating first leaves a window where a concurrent read repopulates the cache from the pre-write database and the stale value sticks until the TTL.
+<br><br>
+<b>Cache invalidation</b> means preventing stale cached state from continuing to be served after the canonical data changes. Name the trade-off you are accepting: a TTL alone means bounded staleness; explicit invalidation means less staleness but a correctness dependency on every write path remembering to do it. Both are defensible — pretending the cache is always fresh is not.`,
+     interactive:{ type:'truefalse',
+       statements:[
+         { text:'Reading a job\'s status and then updating it in a separate statement is safe as long as both happen quickly.',
+           answer:false, why:'Speed shrinks the window, it does not close it. Another process can interleave. Use one atomic conditional UPDATE.'},
+         { text:'An UPDATE ... WHERE status = \'scheduled\' that affects 0 rows means someone else already transitioned the job.',
+           answer:true, why:'And the affected-row count is the signal you branch on. That return value is the coordination mechanism.'},
+         { text:'On a write, you should invalidate the cache first and then write to Postgres.',
+           answer:false, why:'That leaves a window where a concurrent read repopulates from the old DB value and the stale entry survives. Write first, then invalidate.'},
+         { text:'A TTL alone is never an acceptable invalidation strategy.',
+           answer:false, why:'It is acceptable whenever bounded staleness is acceptable — which is often. What is not acceptable is failing to say which trade-off you took.'},
+       ]}},
+
+    {id:'sdm-8', type:'concept', name:'The extension question — and the checklist for every prompt', xp:12, time:7,
+     body:`Halfway through, the interviewer adds a feature. "Now jobs can depend on other jobs." "Now recruiters can share a shortlist." This is not a new question — it is the actual question, and the previous 25 minutes were setup.
+<br><br>
+<b>Trace it through the architecture you already drew</b>, in order:
+<ol style="margin-left:1.2em">
+  <li><b>Client UX and state</b> — what does the user see and what does the browser hold?</li>
+  <li><b>APIs</b> — new endpoint, or new field on an existing one?</li>
+  <li><b>Data model</b> — new entity, new column, new relation?</li>
+  <li><b>Ownership</b> — who is canonical for the new state?</li>
+  <li><b>Async workflow</b> — does anything move to the queue?</li>
+  <li><b>Consistency</b> — what new race did this create?</li>
+  <li><b>Failure modes</b> — what breaks and what is the recovery?</li>
+  <li><b>Scaling</b> — where does this bend first?</li>
+</ol>
+<b>Modify existing components where appropriate.</b> Bolting on an unrelated subsystem — "I'd add a separate service for that" — reads as avoidance. The strong answer touches the boxes already on the board and says what changes inside each.
+<br><br>
+<b>The checklist for every Mercor-style prompt:</b>
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:12px;line-height:1.7;border:1px solid var(--hairline)">Draw
+  → Client/server split
+  → State ownership
+  → APIs
+  → Data model
+  → Happy path
+  → Async path
+  → Races
+  → Failure / retries
+  → Optimistic UI
+  → Scale / optimization
+  → Extension</pre>
+Run it out loud. The candidates who pass are not the ones who know more patterns — they are the ones whose reasoning is visible at every step.`,
+     interactive:{ type:'sort',
+       prompt:'The interviewer adds "jobs can now depend on other jobs" at minute 30. Order how you trace it:',
+       items:['New races — a parent completing while a child is being cancelled','Data model — a dependency edge between job rows','Async workflow — only enqueue a child once its parent reaches succeeded','Client UX and state — how a blocked job is shown','APIs — expressing dependencies on job creation'],
+       correct:[3,4,1,2,0],
+       explain:'Same order as the original design: client, API, data model, async path, then consistency. Tracing an extension through the existing spine is the whole point of the question — the interviewer already knows the feature is easy.'}},
+  ]
+},
+
 /* ===== CLIENT SIMULATION ===== */
 {
   cat:'client', id:'cli-roleplay', name:'Live client roleplay',
@@ -10188,6 +10455,479 @@ Note: <i>even saying "100+ writers" is real</i>. That's a public-facing, falsifi
     {"id": "db-5", "type": "concept", "name": "Narrating under pressure", "xp": 12, "time": 8, "body": "<p><i>Silent debugging is indistinguishable from being stuck.</i> The interviewer is taking notes the whole time. If you go quiet for two minutes, they don't write &quot;deep thought&quot; — they write &quot;lost.&quot; The actual interview is <b style=\"color:var(--accent)\">talk-while-debugging</b>. The bug is almost a side-quest.</p><h3>What good narration sounds like</h3><p>Good narration has a specific texture: it's <b>observation → hypothesis → next action</b>, in that order, said in roughly one sentence each.</p><blockquote style=\"border-left:2px solid var(--accent);padding:8px 14px;margin:14px 0;color:var(--muted);font-style:italic\">&quot;OK, I see a loop on line 18 over <code style=\"font-family:monospace\">range(len(arr) - 1)</code>. The bug report said the last invoice is missing. That's an off-by-one shape. Let me confirm by checking what index gets reached on the last iteration — I'll add a print at line 21.&quot;</blockquote><p>Three beats: <b style=\"color:var(--accent)\">observation</b> (&quot;I see a loop...&quot;), <b style=\"color:var(--accent)\">hypothesis</b> (&quot;That's an off-by-one shape&quot;), <b style=\"color:var(--accent)\">action</b> (&quot;Let me confirm by...&quot;). Then you go quiet for the 10 seconds it takes to run, then narrate the result.</p><h3>What bad narration sounds like</h3><blockquote style=\"border-left:2px solid var(--bad);padding:8px 14px;margin:14px 0;color:var(--muted);font-style:italic\">&quot;Uhh... let me look... hmm, this loop... I'll try... wait, no... maybe the... hmm.&quot;</blockquote><p>This is filler. It's <i>worse than silence</i> because it broadcasts confusion without providing any information the interviewer can grade. They can't tell if you have a theory; they can only tell you're stalling.</p><h3>The cure: forced-structure narration</h3><p>If you find yourself drifting into &quot;uhhh,&quot; force yourself into this template until you don't need it anymore:</p><ol class=\"list-muted\"><li><b>I observe:</b> &lt;something concrete in the code or output&gt;</li><li><b>I think this means:</b> &lt;one specific hypothesis&gt;</li><li><b>To test that, I'll:</b> &lt;one concrete action, smallest possible&gt;</li><li><b>If I'm right, I expect:</b> &lt;predicted result&gt;</li></ol><p>That fourth beat — <b style=\"color:var(--accent)\">predicting the result before running</b> — is the single highest-signal thing you can do. It tells the interviewer your model is concrete enough to be falsified. Andreas Zeller calls this &quot;<i>making your hypothesis precise enough to be wrong</i>.&quot;</p><h3>Worked example: 3 minutes of debugging narration</h3><p>Setup: you're shown a 60-line Python function <code style=\"font-family:monospace\">compute_monthly_total(invoices)</code>. The interviewer says: &quot;customers in Hawaii are sometimes missing one day's invoices.&quot;</p><blockquote style=\"border-left:2px solid var(--accent);padding:8px 14px;margin:14px 0;color:var(--muted);font-style:italic\"><b>(0:00)</b> &quot;Hawaii customers, sometimes missing a day. That's a strong timezone signal — Hawaii is UTC-10, which is one of the bigger offsets, and 'sometimes' suggests it depends on what time the invoice was created. Let me first scan the file for any datetime handling.&quot;<br><br><b>(0:20)</b> &quot;Scrolling... I see <code style=\"font-family:monospace\">datetime.now()</code> on line 14 and <code style=\"font-family:monospace\">invoice.created_at.date()</code> on line 27. Both of those are suspect. <code style=\"font-family:monospace\">datetime.now()</code> without a timezone is the bigger red flag — it'll use server local time. Let me check what timezone the comparison happens in.&quot;<br><br><b>(0:50)</b> &quot;On line 27, the code does <code style=\"font-family:monospace\">if invoice.created_at.date() == today</code>. If <code style=\"font-family:monospace\">created_at</code> is stored in UTC and <code style=\"font-family:monospace\">today</code> is also UTC, that's fine for UTC users. But for a Hawaii customer at, say, 11pm local time, their <code style=\"font-family:monospace\">created_at</code> in UTC is the next day. So <code style=\"font-family:monospace\">.date()</code> returns a different day than they'd expect. That'd cause an invoice to be filed under tomorrow's bucket, which is the symptom.&quot;<br><br><b>(1:30)</b> &quot;Let me confirm by constructing a test invoice: <code style=\"font-family:monospace\">created_at = datetime(2024, 5, 15, 23, 30, tzinfo=hawaii_tz)</code>. In UTC that's May 16, 9:30am. I predict <code style=\"font-family:monospace\">.date()</code> on the UTC version returns 2024-05-16, while a Hawaii user would call this a May 15th invoice. If my prediction matches, that's the bug.&quot;<br><br><b>(2:10)</b> &quot;Running... yep, prints <code style=\"font-family:monospace\">2024-05-16</code>. So the fix is: convert to the user's local timezone before calling <code style=\"font-family:monospace\">.date()</code>. Something like <code style=\"font-family:monospace\">invoice.created_at.astimezone(user.tz).date()</code>. Let me apply that and re-run the existing test.&quot;</blockquote><p>Notice the texture: every minute or so, there's a <b>visible</b> observation → hypothesis → action → result cycle. No &quot;uhh,&quot; no dead air longer than ~15 seconds. The interviewer is constantly getting new signal.</p><h3>Tactical patches for nerves</h3><ul class=\"list-muted\"><li><b>Permission to think.</b> &quot;Let me read this for 30 seconds before I say anything.&quot; — this <i>is</i> narration. It tells them you're orienting deliberately, not frozen.</li><li><b>Re-state what you know.</b> When stuck: &quot;OK, what do I know for sure? The function takes a list of invoices, returns a Decimal. The symptom is...&quot; Saying knowns aloud often unsticks you.</li><li><b>Externalize wrong guesses.</b> &quot;My first guess was X; the test showed not-X. That rules out X. New candidates are Y and Z.&quot; This makes being wrong look like progress, because it is.</li></ul><p>The Google SRE book makes this same point about on-call debugging: <i>&quot;a single engineer narrating their reasoning out loud during an incident response is dramatically more effective than a silent expert, because the team can correct course in real time.&quot;</i> The interviewer is doing exactly that — they correct course based on your narration.</p>", "interactive": {"type": "mcq", "question": "Which is the strongest narration beat to add right before running a test?", "options": ["'OK, let's see what happens.'", "'I'll just try this and see.'", "'If my theory is right, this print should show 16 (UTC date), not 15 (Hawaii date).'", "(Stay silent and run it.)"], "correct": 2, "explain": "Predicting the result before running is the single highest-signal narration move. It proves your hypothesis is concrete enough to be falsified. The other phrasings are filler, and silence reads as 'maybe lost.'"}, "sources": ["Google SRE Book — 'Effective Troubleshooting' and on-call communication chapters", "Andreas Zeller — Why Programs Fail (precision of hypothesis)", "Bryan Cantrill / Adam Leventhal — DTrace talks on debugging narration", "interviewing.io — Stripe interview guide (on narration in the bug round)"]},
     {"id": "db-6", "type": "concept", "name": "How to practice", "xp": 10, "time": 6, "body": "<p>The debugging round is one of the few interview formats that <b style=\"color:var(--accent)\">improves dramatically with practice</b> — more than LeetCode does, in less time. The reason: the skills are narrow (read fast, hypothesize, narrate) and feedback is immediate (you either found the bug or you didn't).</p><h3>Where to drill</h3><ul class=\"list-muted\"><li><b>Codecrafters</b> — the &quot;build your own X&quot; tracks (Redis, Git, Docker) plant subtle test failures. Excellent for practicing &quot;read this stranger's code, find why a test is red.&quot;</li><li><b>Exercism</b> — has a <i>mentoring</i> mode where you read others' solutions. Great for fast unfamiliar-code reading even without bugs.</li><li><b>Intentionally-broken open-source repos</b> — clone a small project (a few hundred lines), introduce a known bug via <code style=\"font-family:monospace\">git revert</code> of a specific fix commit, set a timer, and re-find it. Repeat with different commits.</li><li><b>The &quot;<i>Wrong</i>&quot; series</b> — sites like <a>buggycode.com</a>-style challenges, or the &quot;Defects4J&quot; corpus used in academic debugging research (overkill, but every defect is a real bug from a real Java project).</li><li><b>HackerRank's &quot;debugging&quot; category</b> — small, time-pressured, well-graded for warmups.</li></ul><h3>What to time yourself on</h3><p>Three drills, in order of priority:</p><ol class=\"list-muted\"><li><b style=\"color:var(--accent)\">The 5-minute orient.</b> Open a file you've never seen. Set a 5-minute timer. By the time it rings, you must be able to verbally state: (a) what the program does, (b) the data shapes in and out, (c) where the most complex logic lives, (d) where you'd start looking if you were told there's a bug. Do this <i>every day</i> on a different file. It is the single highest-ROI exercise.</li><li><b style=\"color:var(--accent)\">The 15-minute fix.</b> Same setup, but now there's a planted bug. 15-minute timer. Must find AND fix while narrating aloud (record yourself). Watch the recording — listen for &quot;uhh&quot; and dead air.</li><li><b style=\"color:var(--accent)\">The pattern-recall drill.</b> Pull up the 8 bug patterns from lesson 4. For each, write a 5-line example from memory. If you can't, you don't actually know the pattern.</li></ol><h3>A 4-week schedule</h3><table style=\"width:100%;border-collapse:collapse;margin:12px 0\"><thead><tr><th style=\"text-align:left;padding:8px;border-bottom:1px solid var(--hairline)\">Week</th><th style=\"text-align:left;padding:8px;border-bottom:1px solid var(--hairline)\">Focus</th><th style=\"text-align:left;padding:8px;border-bottom:1px solid var(--hairline)\">Daily commitment</th></tr></thead><tbody><tr><td style=\"padding:8px;vertical-align:top;border-bottom:1px solid var(--hairline)\"><b>1</b></td><td style=\"padding:8px;vertical-align:top;border-bottom:1px solid var(--hairline)\">Code-reading speed. 5-minute orient drill on unfamiliar files. No bug-fixing yet.</td><td style=\"padding:8px;vertical-align:top;border-bottom:1px solid var(--hairline)\">~20 min/day, 5 days</td></tr><tr><td style=\"padding:8px;vertical-align:top;border-bottom:1px solid var(--hairline)\"><b>2</b></td><td style=\"padding:8px;vertical-align:top;border-bottom:1px solid var(--hairline)\">Bug-pattern recognition. Drill the 8 patterns from lesson 4 until you can spot each in &lt;30 sec.</td><td style=\"padding:8px;vertical-align:top;border-bottom:1px solid var(--hairline)\">~30 min/day, 5 days</td></tr><tr><td style=\"padding:8px;vertical-align:top;border-bottom:1px solid var(--hairline)\"><b>3</b></td><td style=\"padding:8px;vertical-align:top;border-bottom:1px solid var(--hairline)\">Hypothesis discipline. Codecrafters or git-revert drills with timer. Force one hypothesis at a time. Record yourself.</td><td style=\"padding:8px;vertical-align:top;border-bottom:1px solid var(--hairline)\">~45 min/day, 4 days</td></tr><tr><td style=\"padding:8px;vertical-align:top\"><b>4</b></td><td style=\"padding:8px;vertical-align:top\">Full simulations. Friend hands you a bug-planted file. 45-minute timer. Narrate aloud the whole way. They grade narration only.</td><td style=\"padding:8px;vertical-align:top\">~60 min, 2-3 sessions</td></tr></tbody></table><h3>The most common practice mistake</h3><p><b style=\"color:var(--bad)\">Practicing silently.</b> If you practice without narrating, you've trained the wrong skill — finding bugs alone in your head. The actual round demands finding bugs <i>while talking</i>. Those are different muscles. Always narrate aloud (even alone in a room) or record yourself. Brian Kernighan, when discussing how he and Pike trained debugging in <i>The Practice of Programming</i>, emphasizes &quot;the most valuable debugging is the kind you do <i>with</i> someone&quot; — because the act of explaining forces precision.</p><h3>Studying the canon (optional but pays off)</h3><p>The four short books worth a one-evening skim each, in order of practical-to-theoretical:</p><ol class=\"list-muted\"><li><b>David Agans — Debugging.</b> 9 rules, ~150 pages, no code. Read in 2 hours.</li><li><b>Kernighan &amp; Pike — The Practice of Programming, Ch. 5.</b> ~30 pages on debugging specifically.</li><li><b>Andreas Zeller — Why Programs Fail.</b> Academic, but the &quot;scientific method&quot; chapters are gold.</li><li><b>Google SRE Book — &quot;Effective Troubleshooting&quot;.</b> Free online. Production-flavored but the loop is identical.</li></ol><p>Plus: <b>Julia Evans's zines</b> (jvns.ca) on Linux debugging, strace, and how to ask good debugging questions — these are short, visual, and disproportionately practical for the live-debugging vibe.</p>", "interactive": {"type": "fillblank", "text": "The single highest-ROI daily practice for the debugging round is the ___-minute orient drill: open an unfamiliar file and force yourself to verbally state what it does, the data shapes, where the complex logic lives, and where you'd start looking for a bug — without actually fixing anything.", "correct": "5", "explain": "The 5-minute orient is the highest-leverage drill because it trains exactly the skill the interviewer grades in the first phase: how fast you build a mental model. Bug-fixing drills come later (lesson 4-week plan, week 2+). Read first, fix second."}, "sources": ["David Agans — Debugging (the 9 rules book)", "Brian Kernighan & Rob Pike — The Practice of Programming (Ch. 5)", "Andreas Zeller — Why Programs Fail", "Google SRE Book — 'Effective Troubleshooting' (free online)", "Julia Evans (jvns.ca) — debugging zines", "Codecrafters and Exercism platforms for hands-on drills"]},
   ],
+},
+
+/* ===== FRONTEND LIVE CODING (REACT) ===== */
+{
+  cat:'coding', id:'cod-react', name:'Frontend live coding — React, 60 minutes',
+  intro:'A 60-minute live round in a browser sandbox — the link arrives at the start, so there is nothing to set up. You build something in React from scratch, in steps, starting simple and building up. Finishing every part is explicitly not the goal. It is collaborative: think out loud, talk through the approach, ask questions. AI assistants are not allowed, so the muscle being tested is writing React without autocomplete filling in the hook signatures.',
+  lessons:[
+
+    {id:'rx-1', type:'concept', name:'The format — and what it actually grades', xp:12, time:7,
+     body:`<b>Mechanics:</b> 60 minutes, screen shared, a browser sandbox link handed to you at the start. No local setup, no repo, no dependencies you chose. Assume plain React with hooks and nothing else unless they say otherwise — do not plan a design system.
+<br><br>
+<b>The question builds in steps.</b> It starts small ("render this list") and escalates ("now add filtering", "now debounce it", "now handle the loading state"). <b>Finishing every part is not the goal.</b> The steps exist to find the edge of what you can reason about, so running out of clock on step 5 is the expected outcome, not a failure.
+<br><br>
+<b>What this changes about your strategy:</b>
+<ul class="list-muted">
+  <li><b>Never leave the code broken between steps.</b> The state that matters is the state at each checkpoint, not the end. A working step 3 beats a half-typed step 5.</li>
+  <li><b>Do the simplest version of each step first.</b> You can always be asked to improve it. You cannot un-spend ten minutes on abstraction nobody asked for.</li>
+  <li><b>Do not build for step 4 during step 2.</b> You often guess wrong about what comes next, and the speculative structure becomes something you now have to work around.</li>
+</ul>
+<b>It is collaborative — behave accordingly.</b> Think out loud, narrate the approach before you type it, and ask questions when the spec is ambiguous. <b>They care most about how you reason through the problem.</b> Silence is the single most costly habit in this round: a candidate typing quietly for four minutes produces no gradeable signal, even if the code is right.
+<br><br>
+<b>No AI tools.</b> Practise the way you will be tested — turn Copilot off for your mock runs. The specific thing that goes wrong otherwise is muscle memory: candidates who never type <code>useEffect(() => { ... }, [deps])</code> by hand fumble the dependency array live, and that fumble is what the interviewer remembers.
+<br><br>
+<b>Say your plan before you type it.</b> "I'll start with a single component holding the list in state, render it, then lift the filter out once we need it in two places." Thirty seconds of plan buys you the interviewer's help when your plan is wrong.`,
+     interactive:{ type:'truefalse',
+       statements:[
+         { text:'Not finishing every step means you failed the round.',
+           answer:false, why:'The steps are designed to escalate past your stopping point. Where you stop, and how clean it is when you stop, is the signal.'},
+         { text:'Working silently for a few minutes is fine as long as the code you produce is correct.',
+           answer:false, why:'This round grades reasoning. Silent correct code is worth less than narrated near-correct code.'},
+         { text:'Building an abstraction early because you suspect step 4 will need it is good planning.',
+           answer:false, why:'You usually guess wrong, and the speculative structure becomes an obstacle. Simplest version per step, refactor when the need is real.'},
+         { text:'You should practise with Copilot disabled before this round.',
+           answer:true, why:'The round bans AI tools, and hook syntax you have never typed unassisted is exactly what breaks under observation.'},
+       ]}},
+
+    {id:'rx-2', type:'concept', name:'The build order that survives escalation', xp:13, time:9,
+     body:`A repeatable order that keeps you shippable at every checkpoint:
+<ol style="margin-left:1.2em">
+  <li><b>Clarify in one or two questions.</b> "Is the data local or fetched?" "Should the filter be case-insensitive?" Not ten questions — two, then move.</li>
+  <li><b>Name the state.</b> Say what pieces of state exist and where they live <i>before</i> writing JSX. This is the decision the whole component hangs on.</li>
+  <li><b>Render static markup from hardcoded data.</b> Get something on the screen inside the first few minutes.</li>
+  <li><b>Wire the interaction</b> — one handler, one state update.</li>
+  <li><b>Handle the async and edge states</b> — loading, empty, error.</li>
+  <li><b>Only then</b> extract components or optimize, and only if asked or clearly needed.</li>
+</ol>
+<b>The state question, asked properly:</b> for each candidate piece of state — <b>can I derive this instead of storing it?</b> Derived values (filtered lists, counts, "is the form valid") should be computed during render, not stored in a second <code>useState</code> that you must remember to keep in sync. Storing derived state is the most common bug planted <i>by the candidate</i> in this round.
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">// bad — two sources of truth, they will drift
+const [items, setItems] = useState([]);
+const [filtered, setFiltered] = useState([]);
+
+// good — one source of truth, filtered is derived
+const [items, setItems] = useState([]);
+const [query, setQuery] = useState('');
+const filtered = items.filter(i =&gt; i.name.includes(query));</pre>
+<b>Where does state live?</b> Start it in the component that uses it. Lift it to the nearest common parent only when a second component needs it. Reaching for context or a store in a 60-minute round is almost always premature — say "I'd reach for context if this grew, but prop drilling one level is fine here" and move on. Naming the alternative earns the credit without spending the time.
+<br><br>
+<b>Say the shape out loud.</b> "Items are an array of objects with id, name, done. Query is a string. Selected is a Set of ids." A stated shape gives the interviewer a chance to correct you before you write forty lines against the wrong model.`,
+     interactive:{ type:'mcq',
+       q:'You have a list of items and a search box. The interviewer then asks for a count of matching items. What do you add?',
+       options:[
+         'A matchCount state variable updated in the search input handler',
+         'A useEffect that recomputes matchCount whenever items or query change',
+         'Nothing stored — compute filtered during render and read filtered.length',
+         'A useMemo storing matchCount, to avoid recomputing on every render',
+       ],
+       correct:2,
+       explain:'The count is derived from state you already have, so it needs no storage at all. Option 1 drifts the moment items change by any other path; option 2 is the same bug with an extra render cycle and is the classic "useEffect as a synchronizer" antipattern; option 4 is not wrong but optimizes a filter over a small array before anyone has measured anything — mention it as an option if the list grows, do not open with it.'}},
+
+    {id:'rx-3', type:'concept', name:'Hooks under pressure — useState, useEffect, and the stale-response race', xp:15, time:11,
+     body:`<b>useState:</b> use the functional form whenever the next value depends on the previous one. <code>setCount(c =&gt; c + 1)</code>, not <code>setCount(count + 1)</code>. Inside an async callback or a rapid sequence of updates, the captured <code>count</code> is stale and the second form silently drops updates.
+<br><br>
+<b>useEffect is for synchronizing with something outside React</b> — a fetch, a subscription, a timer, the DOM. It is <i>not</i> for computing derived state, and it is not a lifecycle hook. If you find yourself writing an effect whose only job is <code>setSomething(f(otherState))</code>, delete it and compute during render.
+<br><br>
+<b>The cleanup function is not optional.</b> Every subscription, interval, and listener needs one, or you leak on every re-render:
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">useEffect(() =&gt; {
+  const t = setInterval(tick, 1000);
+  return () =&gt; clearInterval(t);
+}, []);</pre>
+<b>The race condition that gets asked about</b> — a typeahead where a slow request for "ab" resolves <i>after</i> the fast request for "abcd", overwriting fresh results with stale ones. Two accepted fixes; know both and say which you chose:
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">// 1. ignore flag — simplest, works everywhere
+useEffect(() =&gt; {
+  let ignore = false;
+  fetch(url).then(r =&gt; r.json()).then(d =&gt; { if (!ignore) setData(d); });
+  return () =&gt; { ignore = true; };
+}, [url]);
+
+// 2. AbortController — also cancels the request itself
+useEffect(() =&gt; {
+  const c = new AbortController();
+  fetch(url, { signal: c.signal })
+    .then(r =&gt; r.json()).then(setData)
+    .catch(e =&gt; { if (e.name !== 'AbortError') setError(e); });
+  return () =&gt; c.abort();
+}, [url]);</pre>
+Naming this race <i>before</i> the interviewer points at it is one of the strongest signals available in the round.
+<br><br>
+<b>Debounce, correctly.</b> The debounce timer belongs in an effect keyed on the query, with a cleanup that clears it — not in the input's onChange handler where a re-render orphans the timer:
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">useEffect(() =&gt; {
+  const t = setTimeout(() =&gt; setDebounced(query), 300);
+  return () =&gt; clearTimeout(t);
+}, [query]);</pre>
+<b>The dependency array:</b> include everything the effect reads. If a dependency changes too often, fix it at the source (functional updates, moving the function inside the effect, <code>useCallback</code>) rather than lying to the array — a lie there produces a bug that only appears on the third interaction.`,
+     interactive:{ type:'findbug',
+       prompt:'This typeahead intermittently shows results for a query the user has already replaced. Which line is the defect?',
+       codeLines:[
+         "function Search() {",
+         "  const [query, setQuery] = useState('');",
+         "  const [results, setResults] = useState([]);",
+         "",
+         "  useEffect(() => {",
+         "    if (!query) return;",
+         "    fetch('/api/search?q=' + encodeURIComponent(query))",
+         "      .then(r => r.json())",
+         "      .then(setResults);",
+         "  }, [query]);",
+         "",
+         "  return <input value={query} onChange={e => setQuery(e.target.value)} />;",
+         "}",
+       ],
+       correctLine:9,
+       explain:'Line 9 calls setResults unconditionally whenever a response lands, with nothing checking whether that response is still the one the user wants. Responses do not arrive in request order, so a slow request for "ab" can resolve after a fast one for "abcd" and overwrite the fresh results. The fix is an ignore flag captured per effect run — let ignore = false; ... .then(d => { if (!ignore) setResults(d); }); return () => { ignore = true; } — or an AbortController, which also cancels the request. There is a second, less severe issue: every keystroke fires a request, so a debounce is usually the next step the interviewer asks for.'}},
+
+    {id:'rx-4', type:'concept', name:'The prompts that actually get asked', xp:14, time:10,
+     body:`These recur because each has an obvious first version and three natural escalations.
+<br><br>
+<b>1. Typeahead / autocomplete.</b> Render suggestions for a query. <i>Escalations:</i> debounce → cancel stale responses → keyboard navigation (arrow keys, Enter, Escape) → highlight the matched substring → cache results per query. <b>The most common prompt in the genre.</b>
+<br><br>
+<b>2. Todo / editable list.</b> Add, toggle, delete, filter by status. <i>Escalations:</i> inline edit with Escape-to-cancel → persist to localStorage → optimistic add against a fake API → undo.
+<br><br>
+<b>3. Infinite scroll / paginated list.</b> <i>Escalations:</i> IntersectionObserver instead of a scroll handler → loading and end-of-list states → deduplicate items across pages → preserve scroll position.
+<br><br>
+<b>4. Star rating / like button.</b> Trivially simple, then: hover preview distinct from selected value → keyboard and ARIA → optimistic update with rollback on failure.
+<br><br>
+<b>5. Tabs / accordion / modal.</b> <i>Escalations:</i> controlled vs uncontrolled → keyboard support → focus trap and Escape-to-close → render position.
+<br><br>
+<b>6. Form with validation.</b> <i>Escalations:</i> validate on blur vs on submit → async uniqueness check → disable submit while pending → show server-side field errors.
+<br><br>
+<b>7. Nested / tree data.</b> A comment thread or file tree. <i>Escalations:</i> recursive component → expand/collapse state for many nodes → update one node in a nested immutable structure.
+<br><br>
+<b>The shared spine.</b> Every one of these is: <i>model the state → render from it → wire one handler → handle async and edge states → make it keyboard-usable</i>. Prepare the spine rather than memorizing seven implementations, because the eighth prompt will be one you have not seen.
+<br><br>
+<b>Edge states are free points.</b> Empty list, loading, error, and "no results for this query" take one line each and almost every candidate under time pressure skips all four. Saying "let me handle the empty case" out loud costs three seconds even when you defer it.`,
+     interactive:{ type:'match',
+       prompt:'Match each classic prompt to the escalation the interviewer most likely reaches for:',
+       pairs:[
+         ['Typeahead search','Debounce, then cancel stale in-flight responses'],
+         ['Infinite scroll list','IntersectionObserver plus an end-of-list state'],
+         ['Star rating widget','Hover preview distinct from committed value, plus keyboard/ARIA'],
+         ['Modal dialog','Focus trap, Escape to close, restore focus on unmount'],
+         ['Signup form','Async uniqueness check with the submit button disabled while pending'],
+         ['Comment thread','Recursive rendering and an immutable update deep in the tree'],
+       ],
+       explain:'Each prompt has a canonical second step. Knowing which one is coming lets you structure the first version so the escalation is an addition rather than a rewrite.'}},
+
+    {id:'rx-5', type:'concept', name:'Lists, keys, and controlled inputs — the silent bug factory', xp:12, time:8,
+     body:`<b>Keys.</b> <code>key={index}</code> is fine only for a list that is append-only and never reordered, filtered, or deleted from. The moment items move, React reuses the wrong DOM node and component state attaches to the wrong row — the checkbox stays ticked on the item that replaced the one you deleted. Use a stable id from the data. If the data genuinely has no id, generate one when you create the item, not during render.
+<br><br>
+<b>Controlled vs uncontrolled.</b> A controlled input has <code>value</code> and <code>onChange</code>, and React owns the text. An uncontrolled one uses <code>defaultValue</code> and a ref, and the DOM owns it. Both are legitimate. What is not legitimate is <code>value</code> with no <code>onChange</code> — a field the user cannot type into — or switching a component between the two mid-life, which React warns about loudly and live.
+<br><br>
+<b>Default to controlled</b> in this round: it is what interviewers expect, and every escalation (validation, clearing, syncing two fields) is easier when React owns the value.
+<br><br>
+<b>Immutable updates.</b> React compares by reference, so mutating and re-setting the same array renders nothing:
+<pre style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;font-size:11.5px;line-height:1.5;border:1px solid var(--hairline)">// no re-render — same array reference
+items.push(newItem); setItems(items);
+
+// re-renders
+setItems(prev =&gt; [...prev, newItem]);
+
+// updating one item
+setItems(prev =&gt; prev.map(i =&gt;
+  i.id === id ? { ...i, done: !i.done } : i));
+
+// removing one
+setItems(prev =&gt; prev.filter(i =&gt; i.id !== id));</pre>
+<b>Nested updates</b> are where this gets ugly. If you are three spreads deep, say so — "this is where I'd reach for Immer, or flatten the state shape" — because recognizing that the state shape is the problem is the senior read, and hand-writing four levels of spread under time pressure is where candidates introduce a bug they then spend ten minutes finding.`,
+     interactive:{ type:'truefalse',
+       statements:[
+         { text:'key={index} is acceptable for a list that can be reordered as long as the items render correctly on first paint.',
+           answer:false, why:'On reorder React reuses DOM nodes by key, so component state attaches to the wrong row. First paint being correct is what makes this bug so hard to spot.'},
+         { text:'items.push(x); setItems(items) triggers a re-render because the array contents changed.',
+           answer:false, why:'React compares by reference. Same reference, no render. Spread into a new array.'},
+         { text:'Passing value without onChange gives you a read-only input.',
+           answer:false, why:'It gives you a broken input and a console warning. For read-only use readOnly or disabled explicitly.'},
+         { text:'Saying "the state shape is wrong here, I would flatten it or use Immer" is a good move when spreads get deep.',
+           answer:true, why:'Recognizing the shape is the problem reads as senior, and it beats hand-writing four levels of spread live.'},
+       ]}},
+
+    {id:'rx-6', type:'concept', name:'When they ask you to make it fast', xp:13, time:9,
+     body:`Late in the round: "this list is now 10,000 items — what do you do?" The wrong answer is scattering <code>useMemo</code> everywhere. The right answer is ordered by effect size.
+<br><br>
+<b>1. Do less work.</b> Filter and paginate on the server, or cap what you render. Rendering fewer things beats rendering many things faster.
+<br><br>
+<b>2. Virtualize.</b> Render only the visible window — <code>react-window</code> / <code>react-virtual</code>, or describe the mechanism: a scroll container with the full height, an absolutely positioned window of rows, and an index computed from scrollTop. <b>This is the answer for a long list</b>, and describing the mechanism is worth more than naming the library.
+<br><br>
+<b>3. Then memoize, with a reason.</b>
+<ul class="list-muted">
+  <li><code>useMemo</code> — an expensive computation, not every derived value. Filtering 50 items is not expensive.</li>
+  <li><code>useCallback</code> — only when the callback is a dependency of something (an effect, or a <code>memo</code>-wrapped child). On its own it does nothing but allocate.</li>
+  <li><code>React.memo</code> — a child that re-renders often with the same props. Useless if you also pass it a fresh inline object or arrow each render, which is the mistake that makes memo look like it "doesn't work".</li>
+</ul>
+<b>4. Fix the state placement.</b> State held too high re-renders the whole tree on every keystroke. Pushing the input's state down into a small leaf component often removes more work than any memo — and it is the fix candidates almost never reach for.
+<br><br>
+<b>Say the measurement step.</b> "I'd profile before optimizing — React DevTools shows what actually re-rendered." Interviewers ask this question specifically to see whether you optimize by reflex or by evidence. The strongest possible answer opens with what you would measure and closes with which of the four levers you expect it to point at.`,
+     interactive:{ type:'mcq',
+       q:'A 10,000-row table re-renders sluggishly on every keystroke in its filter box. Which change removes the most work?',
+       options:[
+         'Wrap every row in React.memo',
+         'Wrap the filtered array in useMemo',
+         'Virtualize the table so only visible rows render, and move the filter input state into its own component',
+         'Wrap the onChange handler in useCallback',
+       ],
+       correct:2,
+       explain:'The cost is rendering 10,000 rows, so the fix is rendering ~30 of them. Memoizing rows still reconciles 10,000 elements; useMemo on the filter saves a cheap array pass, not the render; useCallback alone changes nothing. Moving the input state down is the second half — it stops the keystroke from re-rendering the parent at all.'}},
+
+    {id:'rx-7', type:'concept', name:'Talking while you code', xp:11, time:7,
+     body:`This round is <b>graded on reasoning</b>, and reasoning is only observable if you say it. A concrete narration pattern that does not slow you down:
+<br><br>
+<b>Before a block:</b> one sentence of intent. <i>"I'll hold the query in state and derive the filtered list — I don't want two sources of truth."</i>
+<br><br>
+<b>While typing:</b> mostly quiet is fine. Narrating every character is worse than silence. Break the quiet when you make a <i>choice</i>: <i>"functional update here because this runs inside a callback."</i>
+<br><br>
+<b>After a block:</b> what you skipped and why. <i>"I've hardcoded the data for now — I'll swap in the fetch once the render works."</i> This converts a shortcut from an oversight into a decision.
+<br><br>
+<b>When stuck</b> — and you will be, this is a live round with no autocomplete — say what you are checking. <i>"The list isn't updating. I'm suspecting a mutation rather than a new array, so let me look at the handler."</i> A visible hypothesis lets the interviewer nudge you. Silent flailing gets no help and no credit.
+<br><br>
+<b>When you disagree with a suggestion,</b> engage rather than comply silently. <i>"I could lift that to context — is it worth it here, or should I keep it local for now?"</i> Collaboration means having a view.
+<br><br>
+<b>Things worth saying even when you do not implement them:</b>
+<ul class="list-muted">
+  <li>"Empty and error states would go here."</li>
+  <li>"This needs a label and a role for accessibility."</li>
+  <li>"In production I'd debounce this."</li>
+  <li>"I'd extract this once a second component needs it."</li>
+</ul>
+Each costs three seconds and shows the interviewer the full picture in your head, which is the thing being scored. <b>The finished code is the artifact; your reasoning is the submission.</b>
+<br><br>
+<b>Two habits worth drilling:</b> ask before assuming when the spec is ambiguous, and <b>keep the code runnable at every checkpoint</b> — if the sandbox is red when time is called, the interviewer has nothing to look at.`,
+     interactive:{ type:'whyexplain',
+       prompt:'You are 40 minutes into a 60-minute React round, three steps in, and the interviewer asks for a feature you know will take 25 minutes to do properly. What do you do and say?',
+       modelAnswer:'I say the estimate out loud rather than starting and running out of clock. Something like: "Doing that properly means a focus trap, keyboard handling, and portal rendering — realistically 20-25 minutes. I have about 20 left. I would rather ship a simple version that works and tell you what I would add, unless you would rather see the full thing partially done." That hands the scoping decision to the interviewer, which is theirs to make, and it demonstrates estimation. Then I build the simplest correct version, keeping the code runnable, and I narrate the gaps as I go: "no focus trap yet, so Tab escapes the dialog; Escape-to-close is two lines and I will add it if there is time." At the end I summarize what works, what is stubbed, and what I would do next. The failure mode I am avoiding is starting the ambitious version silently and having the sandbox in a broken half-state when time is called, which leaves nothing to grade.',
+       rubric:[
+         'States the time estimate out loud instead of silently starting',
+         'Hands the scope decision to the interviewer rather than deciding unilaterally',
+         'Chooses the simplest working version and keeps the code runnable',
+         'Narrates the specific gaps rather than hiding them',
+         'Closes with a summary of what works, what is stubbed, and what is next',
+       ]}},
+  ]
+},
+
+/* ===== ALGORITHMS ROUND (INFRA-FLAVORED, 30 MIN) ===== */
+{
+  cat:'coding', id:'cod-algos', name:'Algorithms round — 30 min, infra-flavored',
+  intro:'A 30-minute live discussion with an engineer. Explicitly not LeetCode and explicitly not system design: it is real architecture, infrastructure and scaling problems attacked with true algorithmic reasoning. You will usually not write much code. You will be asked what data structure, what complexity, what happens at 100x, and what you give up.',
+  lessons:[
+
+    {id:'alg-1', type:'concept', name:'What this round is — and how to answer in it', xp:12, time:8,
+     body:`<b>The framing they gave you:</b> "problem-solving on real architecture challenges, infrastructure decisions, and scaling strategies that mirror a challenge you may face here. Interactive, discussion-based. Not LeetCode, not system design. True algorithms."
+<br><br>
+Read that carefully — it rules out two things and leaves a narrow, specific target:
+<ul class="list-muted">
+  <li><b>Not LeetCode</b> — nobody wants "reverse a linked list". No trick, no memorized template.</li>
+  <li><b>Not system design</b> — do not draw boxes. Nobody is asking about load balancers or which database.</li>
+  <li><b>True algorithms, on infra problems</b> — "we need to know how many distinct users hit this endpoint today, across 40 machines, without storing user ids". That is a <b>HyperLogLog</b> question wearing an infrastructure costume.</li>
+</ul>
+<b>The answer template</b> — say these in order, out loud:
+<ol style="margin-left:1.2em">
+  <li><b>Restate the problem as a computation.</b> "So: distinct count over a stream, distributed, approximate is acceptable?"</li>
+  <li><b>State the constraint that dominates.</b> Memory? Latency? Number of passes over the data? Rebalancing cost? <i>The dominant constraint chooses the algorithm</i>, and naming it is most of the round.</li>
+  <li><b>Give the naive solution and its cost.</b> "A hash set — exact, but O(n) memory per machine and you have to merge them."</li>
+  <li><b>Name what you trade to improve it.</b> Accuracy, staleness, memory, or worst-case latency. You are always spending one of those four.</li>
+  <li><b>Give the improved algorithm with its complexity</b>, in time <i>and</i> space, and say when it stops working.</li>
+</ol>
+<b>It is 30 minutes and interactive.</b> That is roughly two problems, or one with escalations. Thinking silently for 90 seconds costs a meaningful fraction of the round — narrate the search: "I'm looking for something with sublinear memory here, which points at sketches."
+<br><br>
+<b>The two failure modes:</b> jumping to a named exotic structure without saying what problem it solves (pattern-matching, not reasoning), and reciting big-O without ever saying <b>what n is</b>. Define n explicitly — n is requests per second, or n is keys in the shard, or n is the number of machines — because the interesting infra problems are the ones where two different n's compete.`,
+     interactive:{ type:'sort',
+       prompt:'Order how to answer a question in this round:',
+       items:['Give the improved algorithm, its time AND space complexity, and where it breaks','Restate the problem as a computation','Name what you are trading — accuracy, staleness, memory, or tail latency','State the naive solution and its cost','Name the dominant constraint: memory, latency, passes, or rebalancing'],
+       correct:[1,4,3,2,0],
+       explain:'Restating proves you understood. The dominant constraint chooses the algorithm, so it comes before any solution. Naive-first gives you a baseline to improve against, and naming the trade before the answer shows you know an improvement is never free.'}},
+
+    {id:'alg-2', type:'concept', name:'Partitioning — consistent hashing and what it costs to reshard', xp:14, time:10,
+     body:`<b>The question shape:</b> "We have N cache servers keyed by <code>hash(key) % N</code>. We add one. What happens?"
+<br><br>
+<b>The answer:</b> nearly <b>every key</b> remaps — modulo by a different N is a different function — so the entire cache misses at once and the origin takes the full read load. This is a cache stampede caused by a deploy, and it is one of the most commonly asked infra-algorithms questions there is.
+<br><br>
+<b>Consistent hashing.</b> Place servers and keys on a ring of hash values; a key belongs to the first server clockwise. Adding a server moves only the keys between it and its predecessor — <b>O(K/N) keys move</b> instead of O(K).
+<ul class="list-muted">
+  <li><b>Virtual nodes</b> are required, not optional. With one point per server the ring is lumpy and load variance is large; with 100-200 virtual nodes per server the distribution tightens toward uniform.</li>
+  <li>Lookup is a binary search over sorted ring positions — <b>O(log V)</b> where V is total virtual nodes.</li>
+  <li><b>Weakness:</b> it balances <i>key count</i>, not <i>load</i>. One hot key still lands on one server.</li>
+</ul>
+<b>Rendezvous (highest random weight) hashing.</b> For each key, compute <code>hash(key, server)</code> for every server and pick the maximum. O(N) per lookup instead of O(log V), but no ring to maintain, and it gives you a natural ordered fallback list (second-highest is your replica). Better when N is small; consistent hashing wins when N is large.
+<br><br>
+<b>Consistent hashing with bounded loads.</b> Walk the ring but skip any server already above <code>c × average</code> load. Caps the damage from hot keys at a small constant factor while keeping most of the stability.
+<br><br>
+<b>The follow-up worth pre-empting:</b> "what if one key is 40% of the traffic?" Hashing cannot fix that — no assignment function saves you when a single key exceeds one machine's capacity. You need to <b>replicate the hot key across several servers</b> and pick randomly among them, or split it. Saying "no hashing scheme solves this, it needs replication" is the senior answer.`,
+     interactive:{ type:'mcq',
+       q:'Your cache uses hash(key) % N across 10 servers. You add an 11th. Roughly what fraction of keys now map to a different server?',
+       options:[
+         'About 1/11 — only the new server takes keys',
+         'About 1/10 — one server\'s worth of keys move',
+         'About 10/11 — nearly all of them',
+         'None until the next key rotation',
+       ],
+       correct:2,
+       explain:'Modulo 11 is an unrelated function from modulo 10. A key stays put only if hash % 10 happens to equal hash % 11, which is roughly a 1-in-11 coincidence — so about 10/11 of keys move and the cache misses almost entirely at once. Consistent hashing exists precisely to turn this O(K) remap into O(K/N).'}},
+
+    {id:'alg-3', type:'concept', name:'Rate limiting and scheduling as algorithms', xp:13, time:10,
+     body:`<b>Rate limiting</b> is a pure algorithms question dressed as infrastructure. Know four, and the memory each costs <i>per key</i>:
+<ul class="list-muted">
+  <li><b>Fixed window counter</b> — one integer per key per window. Cheapest, and wrong at the boundary: a caller can send 2x the limit across the seam between two windows.</li>
+  <li><b>Sliding window log</b> — a timestamp per request. Exact, but O(requests) memory per key. Unusable at scale for a large key space.</li>
+  <li><b>Sliding window counter</b> — interpolate between the previous and current window counts. Two integers per key, small bounded error. <b>The usual production answer.</b></li>
+  <li><b>Token bucket</b> — two numbers per key (tokens, last-refill timestamp), refilled lazily on read. O(1) time and space, and it <b>allows bursts up to the bucket size</b>, which is usually what you actually want.</li>
+</ul>
+<b>The distributed follow-up:</b> "now it runs on 20 machines." Options, in order of accuracy and cost: a shared counter in Redis with an atomic increment (accurate, one network hop per request); local buckets of <code>limit/20</code> each (no coordination, unfair when traffic is skewed); or local buckets with periodic gossip (approximate, cheap). Name the trade — <b>coordination cost against accuracy</b> — rather than picking one silently.
+<br><br>
+<b>Scheduling</b> is the other half of this family:
+<ul class="list-muted">
+  <li><b>Earliest deadline first</b> — optimal for meeting deadlines on one machine when the work fits; a priority queue on deadline, O(log n) per operation.</li>
+  <li><b>Weighted fair queueing / deficit round robin</b> — the answer to "one tenant must not starve the others". Deficit round robin is O(1) per packet, which is why it is what actually ships.</li>
+  <li><b>Shortest job first</b> — minimizes average wait, starves long jobs. Say the starvation out loud; it is the thing being tested.</li>
+  <li><b>Aging</b> — the standard fix for starvation: raise priority with wait time.</li>
+</ul>
+<b>The pattern across both:</b> these are all "bounded resource, competing claimants". The interesting question is never which algorithm — it is <b>what unfairness you are willing to accept</b>, and every one of these algorithms is a different answer to that.`,
+     interactive:{ type:'match',
+       prompt:'Match each rate-limiting algorithm to the property that decides whether you pick it:',
+       pairs:[
+         ['Fixed window counter','Cheapest, but allows 2x the limit across a window boundary'],
+         ['Sliding window log','Exact, but memory grows with request count per key'],
+         ['Sliding window counter','Two integers per key with small bounded error — the usual production pick'],
+         ['Token bucket','O(1) state, refilled lazily, permits a burst up to bucket size'],
+         ['Local buckets of limit/N','No coordination at all, unfair when traffic is skewed across machines'],
+         ['Shared Redis counter','Accurate across machines, costs a network hop on every request'],
+       ],
+       explain:'Every one of these is the same computation with a different memory/accuracy/coordination price. Naming the price is the answer; naming the algorithm is not.'}},
+
+    {id:'alg-4', type:'concept', name:'Sketches — answering at scale without storing the data', xp:15, time:11,
+     body:`The signature of this family: <b>"we cannot store all of it, and approximate is fine"</b>. If a question includes a memory bound and tolerates error, it is a sketch question.
+<br><br>
+<b>Bloom filter</b> — set membership. m bits, k hash functions. <b>No false negatives, tunable false positives.</b> "Is this URL already crawled?" "Might this key exist before we hit disk?" Roughly <b>10 bits per element for ~1% error</b> — know that number. Cannot delete (use a counting Bloom filter) and cannot enumerate.
+<br><br>
+<b>Count-min sketch</b> — approximate frequency. A d×w counter matrix; increment one cell per row, query the minimum. <b>Overestimates, never underestimates.</b> The answer to "find the heavy hitters without a per-key counter" — pair it with a small heap to keep the top-k.
+<br><br>
+<b>HyperLogLog</b> — approximate distinct count. ~<b>1.5 KB for about 2% error at any cardinality</b>, and — the property that matters in infrastructure — <b>sketches merge</b>. Forty machines each keep one and you union them at the end with no re-scan. This is the answer to "distinct users per day across the fleet".
+<br><br>
+<b>Reservoir sampling</b> — a uniform sample of k items from a stream of unknown length, in one pass and O(k) memory. Keep the first k; for item i &gt; k, keep it with probability k/i, evicting a random incumbent. The answer to "log 1% of requests, uniformly, without knowing how many there will be".
+<br><br>
+<b>t-digest / DDSketch</b> — approximate quantiles. This is how p99 gets computed at scale, and it is why <b>averaging p99 across machines is meaningless</b> while merging digests is correct. That observation alone answers a common follow-up.
+<br><br>
+<b>The two questions to ask before choosing:</b> which direction does the error go (a Bloom filter's false positives are safe if a miss is merely expensive, fatal if it is a correctness gate), and <b>does it merge</b> — because in a distributed system, mergeability is usually worth more than accuracy.`,
+     interactive:{ type:'mcq',
+       q:'You need the count of distinct users per day across 40 machines, in a dashboard, with a few percent error acceptable and no user ids retained. What do you reach for?',
+       options:[
+         'A hash set per machine, unioned nightly',
+         'A count-min sketch per machine, summed',
+         'A HyperLogLog per machine, merged',
+         'A Bloom filter per machine, with popcount on the bit array',
+       ],
+       correct:2,
+       explain:'HLL is the distinct-count sketch: ~1.5KB per machine, ~2% error, and mergeable — the union of the sketches equals the sketch of the union, so no re-scan and no ids retained. Hash sets are exact but O(distinct users) memory and a large nightly shuffle. Count-min answers frequency, not cardinality. A Bloom filter can be inverted to estimate cardinality but is far larger for the same error and does not merge cleanly across differing parameters.'}},
+
+    {id:'alg-5', type:'concept', name:'Caching and eviction as an algorithms question', xp:12, time:8,
+     body:`"Design the cache" is system design. <b>"Which eviction policy, and why"</b> is this round.
+<br><br>
+<b>LRU</b> — hash map plus doubly linked list, O(1) get and put. The default answer, and it fails on <b>scans</b>: one pass over a large cold dataset evicts your entire hot set. Say this weakness before you are asked.
+<br><br>
+<b>LFU</b> — evicts least frequently used. Survives scans, but is slow to adapt when the popular set changes and needs aging or windowing so a once-popular item does not squat forever.
+<br><br>
+<b>CLOCK / second chance</b> — a circular buffer with a reference bit, approximating LRU with far less bookkeeping and no per-access list surgery. What operating systems actually use, and the right answer whenever the metadata cost of true LRU matters.
+<br><br>
+<b>ARC, W-TinyLFU, S3-FIFO</b> — modern hybrids that keep both a recency and a frequency signal. Naming one and saying <i>why</i> ("W-TinyLFU admits a new item only if a frequency sketch says it beats the eviction candidate") is a strong signal. Note that W-TinyLFU uses a count-min sketch — this family connects directly to the previous lesson.
+<br><br>
+<b>The metric is hit rate, and hit rate is not linear in size.</b> Doubling a cache rarely halves misses; you are climbing a flattening curve. The right instrument is a <b>miss-ratio curve</b>, and the right answer to "should we double the cache?" is "let me look at the MRC" rather than a yes.
+<br><br>
+<b>The classic follow-ups:</b>
+<ul class="list-muted">
+  <li><b>Thundering herd</b> — a hot key expires and a thousand requests hit the origin at once. Fix with a per-key lock or single-flight, so one request refills and the rest wait.</li>
+  <li><b>Stampede on restart</b> — an empty cache takes full origin load. Fix by warming, or by staggering TTLs with jitter so keys do not expire in lockstep.</li>
+  <li><b>Staleness</b> — TTL gives bounded staleness for free; explicit invalidation gives freshness at the cost of coupling every write path to the cache.</li>
+</ul>`,
+     interactive:{ type:'truefalse',
+       statements:[
+         { text:'A single scan over a large cold dataset can evict the entire hot working set from an LRU cache.',
+           answer:true, why:'LRU\'s known weakness. Every cold item looks maximally recent on touch. It is why scan-resistant policies exist.'},
+         { text:'Doubling cache size roughly halves the miss rate.',
+           answer:false, why:'Hit rate is a flattening curve, not linear. The miss-ratio curve is the instrument; the answer to "should we double it" is "let me look at the MRC".'},
+         { text:'CLOCK is used over true LRU mainly because it has a better hit rate.',
+           answer:false, why:'It has a slightly worse hit rate. It wins on metadata cost and on not needing list surgery on every access.'},
+         { text:'Adding jitter to TTLs helps because it stops many keys expiring on the same tick.',
+           answer:true, why:'Lockstep expiry converts a cache into a synchronized origin stampede. Jitter spreads the refills.'},
+       ]}},
+
+    {id:'alg-6', type:'concept', name:'Assignment, balancing, and matching', xp:13, time:9,
+     body:`<b>The power of two choices.</b> Randomly assigning each request to one of N servers gives a maximum load of about <code>log n / log log n</code> above the mean. <b>Sampling two at random and picking the less loaded</b> drops that to <code>log log n</code> — an exponential improvement for one extra sample. This is the single highest-value fact in this family, and it is why "least connections over two random choices" beats both pure random and a global least-loaded query, which needs coordination.
+<br><br>
+<b>Bin packing</b> — fitting jobs onto machines by resource requirement. NP-hard, so nobody wants optimal; they want the heuristic and its guarantee. <b>First-fit decreasing</b> (sort by size descending, place in the first bin that fits) is within 11/9 of optimal, and saying that ratio is the answer. The infra version is pod scheduling, and the follow-up is always <b>fragmentation</b>: many machines with 30% free that cannot fit one large job. Fixes: bin-packing scoring instead of spread, or preemption and repacking.
+<br><br>
+<b>Bipartite matching</b> — assign workers to tasks with constraints. Greedy by score is O(n log n) and usually good enough; the Hungarian algorithm is O(n³) and optimal. In practice you almost always want <b>greedy plus an explicit fairness or diversity constraint</b>, because the optimal matching on a proxy objective is often worse for the business than a decent matching on the real one.
+<br><br>
+<b>Work stealing</b> — idle workers take from the tail of a busy worker's deque while the owner works from the head, so the common case needs no synchronization. The answer to "some workers are idle while others have a backlog" when the work is unevenly sized and you cannot predict duration.
+<br><br>
+<b>Interval and resource questions</b> — "how many machines do we need for these overlapping jobs?" is the meeting-rooms problem: sort by start, use a min-heap on end time, and the peak heap size is the answer, O(n log n). Recognizing that an infra capacity question <i>is</i> an interval problem is exactly the transfer this round tests.`,
+     interactive:{ type:'mcq',
+       q:'Requests are assigned to 1,000 servers. What is the cheapest change that meaningfully reduces the maximum load on any one server?',
+       options:[
+         'Query all 1,000 for their current load and pick the least loaded',
+         'Sample two servers at random and send to the less loaded of the two',
+         'Use a global round-robin counter shared across all load balancers',
+         'Increase the number of servers so each holds less',
+       ],
+       correct:1,
+       explain:'The power of two choices: one extra sample takes maximum load from about log n / log log n above the mean down to log log n. Querying all 1,000 is more accurate but needs global coordination on every request and its information is stale by the time you act. A shared round-robin counter is a contention point that still ignores actual load. Adding servers costs money without fixing the imbalance.'}},
+
+    {id:'alg-7', type:'concept', name:'Dedup, ordering, and convergence', xp:13, time:9,
+     body:`<b>Deduplication at scale.</b> "Have we seen this event before?" over billions of events. An exact hash set does not fit in memory, so: a <b>Bloom filter as a cheap pre-filter</b> in front of an exact store, and <b>bound the window</b> — dedup over 24 hours, not forever, because unbounded dedup is unbounded state. Naming the window is most of the answer, and candidates who miss it design a system that grows without limit.
+<br><br>
+<b>Ordering without a global clock.</b> Wall clocks on different machines disagree, so "latest write wins by timestamp" silently drops writes.
+<ul class="list-muted">
+  <li><b>Lamport timestamps</b> — a counter per node, take the max on receive plus one. Gives a total order consistent with causality, but cannot tell you whether two events were <i>actually</i> concurrent.</li>
+  <li><b>Vector clocks</b> — a counter per node, per node. <b>Can detect concurrency</b>, which is the whole point, at O(N) space per entry.</li>
+  <li><b>Hybrid logical clocks</b> — physical time that stays close to wall clock but never goes backwards. What modern databases actually use, because timestamps you can read as dates are operationally worth a lot.</li>
+</ul>
+<b>Convergence — CRDTs.</b> If merge is commutative, associative, and idempotent, replicas converge regardless of message order or duplication, with no coordination. G-counter, OR-set, LWW-register. The trade to name: <b>CRDTs buy coordination-free convergence at the cost of metadata that grows with the number of writers</b>, plus semantics you may not want (a removed item can reappear under some set designs).
+<br><br>
+<b>Anti-entropy with Merkle trees.</b> Two replicas hold a billion keys and you need the ones that differ. Comparing all of them is O(n) transfer; a Merkle tree makes it <b>O(differences × log n)</b> — compare root hashes, descend only where they disagree. This is the answer to "how do you find what diverged without shipping everything", and it is how Dynamo-style systems repair.
+<br><br>
+<b>The unifying question:</b> can you make the operation <b>idempotent and commutative</b>? If yes, most distributed hard parts dissolve — retries are free, ordering stops mattering, and duplicates are harmless. That reframing is what this round is looking for.`,
+     interactive:{ type:'whyexplain',
+       prompt:'Two replicas each hold a billion key-value pairs and a small unknown number have diverged. How do you find which ones, without transferring a billion keys?',
+       modelAnswer:'Use a Merkle tree over the key space. Each replica builds a tree whose leaves hash a contiguous range of keys and whose internal nodes hash their children. The replicas exchange root hashes first: if they match, the datasets are identical and you have transferred one hash. If they differ, you descend only into the children whose hashes disagree, and each level halves the space you are searching. The cost is O(d log n) hash comparisons for d differing ranges, rather than O(n) key transfer, because identical subtrees are eliminated wholesale at their root. The trees can be maintained incrementally as writes land, so building one is not a full scan. The trade-offs worth naming: the leaf granularity sets the floor on how precisely you localize a difference — coarse leaves mean you re-sync a whole range for one changed key — and the tree must be built over a stable key ordering, so it interacts with how the data is partitioned. This is the anti-entropy mechanism in Dynamo-style stores, and it is the same idea as rsync block hashing and git object trees.',
+       rubric:[
+         'Proposes a Merkle tree (hash tree) over ranges of the key space',
+         'Compares root hashes first and descends only into differing subtrees',
+         'States the cost as roughly O(differences x log n) rather than O(n)',
+         'Notes leaf granularity as the trade-off on how precisely differences localize',
+         'Connects it to a real system — Dynamo-style anti-entropy, rsync, or git',
+       ]}},
+
+    {id:'alg-8', type:'concept', name:'Complexity under real constraints', xp:13, time:9,
+     body:`In this round, big-O alone is not the answer, because the constant factors are the infrastructure.
+<br><br>
+<b>Always define n.</b> "O(n log n)" is meaningless until you say whether n is rows, requests per second, machines, or bytes. The interesting infra questions are the ones where <b>two n's compete</b> — O(machines) coordination against O(keys) storage — and choosing which to make small is the actual decision.
+<br><br>
+<b>When memory is the binding constraint.</b> Sorting a dataset larger than RAM is <b>external merge sort</b>: sort chunks that fit, write runs to disk, then k-way merge with a heap. That heap merge is the same shape as merging k sorted log streams, or merging per-shard top-k lists — recognize the pattern once and it recurs everywhere. Joining two datasets that do not fit is either a <b>hash join with partitioning</b> (partition both by key so each partition fits) or a <b>broadcast join</b> when one side is small — and knowing which side is small is the whole optimization.
+<br><br>
+<b>When I/O is the binding constraint,</b> count round trips rather than operations. An O(n) algorithm doing n network calls loses to an O(n log n) one doing a single batched call — every time. <b>Batching is the highest-leverage move in most real infra problems</b>, and reaching for it early is a strong signal.
+<br><br>
+<b>Amortized versus worst case.</b> A dynamic array append is O(1) amortized, but the resize is O(n) — and in a latency-sensitive path that resize <i>is</i> your p99. The same holds for hash table rehashing, LSM compaction, and garbage collection. <b>"Amortized" is a statement about the average and a warning about the tail.</b> Say which one the question cares about.
+<br><br>
+<b>Answering "make it 10x cheaper".</b> Four levers, in this order:
+<ol style="margin-left:1.2em">
+  <li><b>Do less work</b> — filter earlier, sample, or precompute. Almost always the biggest win.</li>
+  <li><b>Do it approximately</b> — a sketch instead of an exact structure, when error is acceptable.</li>
+  <li><b>Do it in bulk</b> — batch to amortize per-operation overhead.</li>
+  <li><b>Do it once</b> — cache or materialize a repeated computation.</li>
+</ol>
+Only after those does a better asymptotic algorithm usually matter, because in practice the naive algorithm on 1% of the data beats the clever algorithm on all of it.`,
+     interactive:{ type:'truefalse',
+       statements:[
+         { text:'An O(n) algorithm always beats an O(n log n) one on the same data.',
+           answer:false, why:'Not if the O(n) one makes n network round trips and the other makes one batched call. Count round trips when I/O binds.'},
+         { text:'"O(1) amortized" means you can ignore the occasional expensive operation in a latency-sensitive path.',
+           answer:false, why:'That expensive operation is your p99. Amortized describes the average and warns about the tail.'},
+         { text:'Sorting data larger than RAM is done by sorting chunks into runs and k-way merging them with a heap.',
+           answer:true, why:'External merge sort — and the same k-way heap merge appears in log merging, LSM compaction, and merging per-shard top-k.'},
+         { text:'When asked to make something 10x cheaper, a better asymptotic algorithm is usually the first lever to reach for.',
+           answer:false, why:'Do less work, approximate, batch, cache — in that order. The naive algorithm on 1% of the data usually beats the clever one on all of it.'},
+       ]}},
+  ]
 },
 
 {
@@ -15108,6 +15848,59 @@ const FLASHCARDS = [
   { id:'fc-cod-58', cat:'coding', module:'cod-stack', lesson:'st-LC2', q:'Sum of Subarray Minimums: what\'s the monotonic-stack counting trick?', a:'**Approach:** For each index `i`, find `PLE` (previous less element index) and `NLE` (next less element index) using a monotonic stack.\n\n**Contribution of `A[i]`** as the min of subarrays = `A[i] * (i - PLE) * (NLE - i)`.\n\n**Key detail:** make one side **strict** and the other **non-strict** when there are ties (e.g., PLE strict, NLE non-strict). This avoids double-counting subarrays whose minimum appears more than once.\n\n**Complexity:** `O(N)` time.' },
   { id:'fc-cod-59', cat:'coding', module:'cod-select', lesson:'sel-LC3', q:'Kth smallest in a row+column sorted matrix: binary search on what?', a:'**Approach:** Binary-search on the **value**, not on indices. For a candidate `v`, count cells `<= v` in `O(N)` using the **staircase walk** from the bottom-left corner: move up when current cell `> v`, right otherwise.\n\n- If count `< K`, raise `lo`\n- If count `>= K`, lower `hi`\n\n**Complexity:** `O(N log(maxVal - minVal))`. Heap-based alternative is `O(K log N)` but loses on large `K`.' },
   { id:'fc-cod-60', cat:'coding', module:'cod-greedy', lesson:'gr-LC3', q:'Minimum Refueling Stops: how does the "borrow from the past" heap-greedy work?', a:'**Approach:** Drive forward without stopping, but **drop each reachable station\'s fuel into a max-heap** as you pass it. When you run out of fuel before the next station (or before the target), **pop the largest remembered tank** and add it to your fuel -- that\'s one stop.\n\n**Repeat** until you reach the target or the heap is empty (impossible).\n\n**Why it\'s optimal:** any optimal strategy can be exchanged into one that always takes the largest available past tank when forced to refuel.\n\n**Complexity:** `O(N log N)` time, `O(N)` space.' },
+  { id:'fc-cod-61', cat:'coding', module:'cod-react', lesson:'rx-1', q:"What is the format of the Mercor frontend live-coding round?", a:"**60 minutes**, screen shared, in a **browser sandbox** whose link is handed to you at the start — nothing to set up beforehand.\n\nYou build something in **React** from scratch, in steps that start simple and build up. **Finishing every part is explicitly not the goal.** AI tools are not allowed." },
+  { id:'fc-cod-62', cat:'coding', module:'cod-react', lesson:'rx-1', q:"The prompt escalates in steps and you won't finish. What does that change about your strategy?", a:"- **Never leave the code broken between steps** — a working step 3 beats a half-typed step 5\n- **Do the simplest version of each step first**; you can always be asked to improve it\n- **Don't build for step 4 during step 2** — you usually guess wrong, and the speculative structure becomes an obstacle\n\nThe steps exist to find the edge of what you can reason about. Stopping at step 5 is the expected outcome." },
+  { id:'fc-cod-63', cat:'coding', module:'cod-react', lesson:'rx-1', q:"What is the single most costly habit in a collaborative live-coding round?", a:"**Silence.**\n\nThey care most about *how you reason through the problem*. A candidate typing quietly for four minutes produces no gradeable signal even when the code is right. Narrate intent before a block, and break the quiet whenever you make a **choice**." },
+  { id:'fc-cod-64', cat:'coding', module:'cod-react', lesson:'rx-1', q:"Why does the AI-tools ban actually change how you prepare?", a:"Muscle memory. Candidates who have never typed `useEffect(() => { ... }, [deps])` unassisted **fumble the dependency array live** — and that fumble is what the interviewer remembers.\n\nPractise mocks with Copilot **off**." },
+  { id:'fc-cod-65', cat:'coding', module:'cod-react', lesson:'rx-2', q:"What build order keeps you shippable at every checkpoint?", a:"1. **Clarify** in one or two questions — not ten\n2. **Name the state** out loud, before writing JSX\n3. **Render static markup** from hardcoded data — something on screen early\n4. **Wire one interaction** — one handler, one state update\n5. **Handle async and edge states** — loading, empty, error\n6. **Only then** extract components or optimize" },
+  { id:'fc-cod-66', cat:'coding', module:'cod-react', lesson:'rx-2', q:"What question do you ask about every candidate piece of state?", a:"**Can I derive this instead of storing it?**\n\nFiltered lists, counts, \"is the form valid\" — compute during render. Storing derived state in a second `useState` you must keep in sync is **the most common bug candidates plant in themselves** in this round." },
+  { id:'fc-cod-67', cat:'coding', module:'cod-react', lesson:'rx-2', q:"Where should a piece of state live?", a:"**Start it in the component that uses it.** Lift to the nearest common parent only when a second component needs it.\n\nContext or a store in a 60-minute round is almost always premature — say *\"I'd reach for context if this grew, but prop drilling one level is fine here\"*. **Naming the alternative earns the credit without spending the time.**" },
+  { id:'fc-cod-68', cat:'coding', module:'cod-react', lesson:'rx-3', q:"When must you use the functional form of a state setter?", a:"Whenever the next value **depends on the previous one**: `setCount(c => c + 1)`, not `setCount(count + 1)`.\n\nInside an async callback or a rapid sequence of updates, the captured `count` is **stale** and the second form silently drops updates." },
+  { id:'fc-cod-69', cat:'coding', module:'cod-react', lesson:'rx-3', q:"What is useEffect actually for — and what is it not for?", a:"**For:** synchronizing with something outside React — a fetch, subscription, timer, or the DOM.\n\n**Not for:** computing derived state, and not a lifecycle hook. If an effect's only job is `setSomething(f(otherState))`, **delete it** and compute during render." },
+  { id:'fc-cod-70', cat:'coding', module:'cod-react', lesson:'rx-3', q:"A typeahead intermittently shows results for a query the user already replaced. What's the bug and the two fixes?", a:"**Responses don't arrive in request order.** A slow request for \"ab\" resolves *after* the fast one for \"abcd\" and overwrites fresh results.\n\n**Fix 1 — ignore flag** (simplest, works everywhere):\n```\nlet ignore = false;\nfetch(url).then(r=>r.json())\n  .then(d => { if (!ignore) setData(d); });\nreturn () => { ignore = true; };\n```\n**Fix 2 — AbortController**, which also cancels the request itself.\n\nNaming this race *before* the interviewer points at it is one of the strongest signals available in the round." },
+  { id:'fc-cod-71', cat:'coding', module:'cod-react', lesson:'rx-3', q:"Where does the debounce timer belong?", a:"**In an effect keyed on the query, with a cleanup that clears it** — not in the input's `onChange`, where a re-render orphans the timer:\n```\nuseEffect(() => {\n  const t = setTimeout(() => setDebounced(query), 300);\n  return () => clearTimeout(t);\n}, [query]);\n```" },
+  { id:'fc-cod-72', cat:'coding', module:'cod-react', lesson:'rx-3', q:"A dependency changes too often and your effect re-runs constantly. What do you do?", a:"**Fix it at the source** — functional updates, move the function inside the effect, or `useCallback` — rather than lying to the dependency array.\n\nA lie there produces a bug that only appears on the third interaction, which is the worst possible time for it to appear." },
+  { id:'fc-cod-73', cat:'coding', module:'cod-react', lesson:'rx-4', q:"What are the recurring prompts in a React live-coding round?", a:"**Typeahead/autocomplete** (the most common), **todo/editable list**, **infinite scroll**, **star rating**, **tabs/modal**, **form with validation**, **nested tree or comment thread**.\n\nEach has an obvious first version and three natural escalations — which is exactly why they get chosen." },
+  { id:'fc-cod-74', cat:'coding', module:'cod-react', lesson:'rx-4', q:"Rather than memorizing seven implementations, what should you prepare?", a:"**The shared spine:** model the state → render from it → wire one handler → handle async and edge states → make it keyboard-usable.\n\nEvery classic prompt is that spine. The eighth prompt will be one you haven't seen, and the spine still works." },
+  { id:'fc-cod-75', cat:'coding', module:'cod-react', lesson:'rx-4', q:"What are the free points almost every candidate skips under time pressure?", a:"**Edge states** — empty list, loading, error, and \"no results for this query\". One line each.\n\nSaying *\"let me handle the empty case\"* out loud costs three seconds even when you defer the code." },
+  { id:'fc-cod-76', cat:'coding', module:'cod-react', lesson:'rx-5', q:"When is key={index} acceptable, and what breaks when it isn't?", a:"Acceptable only for a list that is **append-only** and never reordered, filtered, or deleted from.\n\nOtherwise React reuses the wrong DOM node and **component state attaches to the wrong row** — the checkbox stays ticked on the item that replaced the one you deleted. First paint looks correct, which is what makes this bug so hard to spot." },
+  { id:'fc-cod-77', cat:'coding', module:'cod-react', lesson:'rx-5', q:"Why does items.push(x); setItems(items) render nothing?", a:"**React compares by reference.** Same array reference means no re-render.\n```\nsetItems(prev => [...prev, newItem]);\nsetItems(prev => prev.map(i => i.id===id ? {...i, done:!i.done} : i));\nsetItems(prev => prev.filter(i => i.id !== id));\n```" },
+  { id:'fc-cod-78', cat:'coding', module:'cod-react', lesson:'rx-5', q:"You're three spreads deep in a nested state update. What's the move?", a:"**Say the state shape is the problem** — *\"this is where I'd reach for Immer, or flatten the state shape\"*.\n\nRecognizing that is the senior read. Hand-writing four levels of spread under time pressure is where candidates introduce a bug they then spend ten minutes finding." },
+  { id:'fc-cod-79', cat:'coding', module:'cod-react', lesson:'rx-6', q:"\"This list is now 10,000 items — what do you do?\" Answer in order of effect size.", a:"1. **Do less work** — filter/paginate server-side, or cap what you render\n2. **Virtualize** — render only the visible window. *This is the answer for a long list*; describing the mechanism beats naming the library\n3. **Then memoize, with a reason**\n4. **Fix state placement** — state held too high re-renders the tree on every keystroke\n\nOpen with what you'd **measure**. This question is asked to see whether you optimize by reflex or by evidence." },
+  { id:'fc-cod-80', cat:'coding', module:'cod-react', lesson:'rx-6', q:"When does each memoization tool actually earn its place?", a:"- `useMemo` — an **expensive** computation. Filtering 50 items is not expensive\n- `useCallback` — only when the callback is a **dependency** of an effect or a `memo`-wrapped child. Alone it just allocates\n- `React.memo` — a child that re-renders often with the same props. **Useless if you also pass it a fresh inline object or arrow each render** — the mistake that makes memo look like it \"doesn't work\"" },
+  { id:'fc-cod-81', cat:'coding', module:'cod-react', lesson:'rx-7', q:"You're at minute 40 of 60 and the interviewer asks for a feature that needs 25 minutes. What do you say?", a:"**Say the estimate out loud and hand the scoping decision back:**\n\n*\"Doing that properly is a focus trap, keyboard handling, and portal rendering — realistically 20-25 minutes, and I have 20. I'd rather ship a simple version that works and tell you what I'd add, unless you'd rather see the full thing partially done.\"*\n\nThen build the simple version, narrate the gaps, and summarize what works vs what's stubbed. **The failure mode is starting the ambitious version silently and having a broken sandbox when time is called.**" },
+  { id:'fc-cod-82', cat:'coding', module:'cod-react', lesson:'rx-7', q:"What's worth saying out loud even when you don't implement it?", a:"- \"Empty and error states would go here\"\n- \"This needs a label and a role for accessibility\"\n- \"In production I'd debounce this\"\n- \"I'd extract this once a second component needs it\"\n\nThree seconds each, and each one shows the full picture in your head. **The finished code is the artifact; your reasoning is the submission.**" },
+  { id:'fc-cod-83', cat:'coding', module:'cod-algos', lesson:'alg-1', q:"What is the Mercor algorithms round, given it's \"not LeetCode, not system design\"?", a:"**30 minutes**, live and discussion-based with an engineer. Real **architecture, infrastructure and scaling** problems attacked with **true algorithmic reasoning**.\n\nYou write little or no code. \"How many distinct users hit this endpoint today, across 40 machines, without storing user ids\" is a **HyperLogLog** question wearing an infrastructure costume." },
+  { id:'fc-cod-84', cat:'coding', module:'cod-algos', lesson:'alg-1', q:"What is the answer template for this round?", a:"1. **Restate the problem as a computation**\n2. **Name the dominant constraint** — memory, latency, passes over the data, or rebalancing cost. *The dominant constraint chooses the algorithm*\n3. **Give the naive solution and its cost**\n4. **Name what you're trading** — accuracy, staleness, memory, or tail latency. You always spend one of the four\n5. **Give the improved algorithm with time AND space complexity**, and say when it stops working" },
+  { id:'fc-cod-85', cat:'coding', module:'cod-algos', lesson:'alg-1', q:"What are the two failure modes in an infra-algorithms round?", a:"1. **Naming an exotic structure without saying what problem it solves** — that's pattern-matching, not reasoning\n2. **Reciting big-O without ever saying what n is**\n\nDefine n explicitly. The interesting infra problems are exactly the ones where **two n's compete** — O(machines) coordination against O(keys) storage." },
+  { id:'fc-cod-86', cat:'coding', module:'cod-algos', lesson:'alg-2', q:"You have 10 cache servers keyed by hash(key) % N and add an 11th. What happens?", a:"**About 10/11 of all keys remap.** Modulo 11 is an unrelated function from modulo 10 — a key stays put only on a ~1-in-11 coincidence.\n\nThe cache misses almost entirely at once and the origin takes full read load. **A cache stampede caused by a deploy.**" },
+  { id:'fc-cod-87', cat:'coding', module:'cod-algos', lesson:'alg-2', q:"How does consistent hashing fix the resharding problem, and what does it not fix?", a:"Servers and keys sit on a hash ring; a key belongs to the first server clockwise. Adding one moves only the keys between it and its predecessor — **O(K/N) instead of O(K)**.\n\n- **Virtual nodes are required, not optional** — ~100-200 per server, or the ring is lumpy\n- Lookup is a binary search, **O(log V)**\n- **What it doesn't fix:** it balances *key count*, not *load*. One hot key still lands on one server" },
+  { id:'fc-cod-88', cat:'coding', module:'cod-algos', lesson:'alg-2', q:"\"What if one key is 40% of the traffic?\"", a:"**No hashing scheme solves this.** When a single key exceeds one machine's capacity, no assignment function saves you.\n\nYou must **replicate the hot key across several servers** and pick randomly among them, or split it. Saying \"hashing can't fix this\" *is* the senior answer.\n\nRelated: **consistent hashing with bounded loads** skips any server above `c × average`, capping hot-key damage at a constant factor." },
+  { id:'fc-cod-89', cat:'coding', module:'cod-algos', lesson:'alg-3', q:"Name four rate-limiting algorithms and the property that decides each.", a:"- **Fixed window counter** — one integer/key. Cheapest; allows **2x the limit** across a window boundary\n- **Sliding window log** — exact, but O(requests) memory per key. Unusable at scale\n- **Sliding window counter** — interpolate between windows. Two integers, small bounded error. **The usual production pick**\n- **Token bucket** — two numbers, refilled lazily. O(1), and **permits bursts up to bucket size**, which is usually what you want" },
+  { id:'fc-cod-90', cat:'coding', module:'cod-algos', lesson:'alg-3', q:"Rate limiting now runs on 20 machines. What are the options?", a:"- **Shared Redis counter** with atomic increment — accurate, one network hop per request\n- **Local buckets of limit/20** — no coordination, unfair when traffic is skewed\n- **Local buckets plus periodic gossip** — approximate, cheap\n\n**Name the trade — coordination cost against accuracy — rather than picking one silently.**" },
+  { id:'fc-cod-91', cat:'coding', module:'cod-algos', lesson:'alg-3', q:"What's the real question behind every scheduling algorithm?", a:"**What unfairness are you willing to accept?**\n\n- **EDF** — optimal for deadlines on one machine when the work fits\n- **Weighted fair queueing / deficit round robin** — stops one tenant starving the others; DRR is O(1) per packet, which is why it ships\n- **Shortest job first** — minimizes average wait, **starves long jobs** (say this out loud)\n- **Aging** — the standard starvation fix: priority rises with wait time" },
+  { id:'fc-cod-92', cat:'coding', module:'cod-algos', lesson:'alg-4', q:"What's the signature of a sketch question?", a:"**\"We can't store all of it, and approximate is fine.\"**\n\nA memory bound plus tolerance for error means: Bloom filter, count-min sketch, HyperLogLog, reservoir sampling, or t-digest." },
+  { id:'fc-cod-93', cat:'coding', module:'cod-algos', lesson:'alg-4', q:"Bloom filter, count-min sketch, HyperLogLog — what does each answer?", a:"- **Bloom filter** — *set membership*. **No false negatives**, tunable false positives. ~**10 bits/element for ~1% error**. Can't delete, can't enumerate\n- **Count-min sketch** — *approximate frequency*. **Overestimates, never underestimates**. Pair with a small heap for top-k\n- **HyperLogLog** — *approximate distinct count*. ~**1.5KB for ~2% error at any cardinality**, and **it merges**" },
+  { id:'fc-cod-94', cat:'coding', module:'cod-algos', lesson:'alg-4', q:"Why is mergeability often worth more than accuracy in a distributed system?", a:"Because 40 machines each keeping a sketch can be **unioned at the end with no re-scan and no data movement**. The union of the sketches equals the sketch of the union.\n\nThis is why **averaging p99 across machines is meaningless** while merging t-digests is correct — and it's why HLL beats an exact hash set for fleet-wide distinct counts." },
+  { id:'fc-cod-95', cat:'coding', module:'cod-algos', lesson:'alg-4', q:"How do you take a uniform sample of k items from a stream of unknown length, in one pass?", a:"**Reservoir sampling.** Keep the first k; for item i > k, keep it with probability **k/i**, evicting a random incumbent.\n\nO(k) memory, one pass, no need to know the stream length. The answer to \"log 1% of requests, uniformly\"." },
+  { id:'fc-cod-96', cat:'coding', module:'cod-algos', lesson:'alg-4', q:"What two questions do you ask before choosing a sketch?", a:"1. **Which direction does the error go?** A Bloom filter's false positives are safe if a miss is merely expensive, **fatal if it's a correctness gate**\n2. **Does it merge?**" },
+  { id:'fc-cod-97', cat:'coding', module:'cod-algos', lesson:'alg-5', q:"LRU is the default cache eviction answer. What's its known failure, and what fixes it?", a:"**Scans.** One pass over a large cold dataset makes every cold item look maximally recent and **evicts your entire hot set**. Say this before you're asked.\n\n- **LFU** survives scans but adapts slowly; needs aging\n- **CLOCK** approximates LRU with a reference bit and far less bookkeeping — what operating systems use\n- **ARC / W-TinyLFU / S3-FIFO** keep both recency and frequency. W-TinyLFU admits a new item only if a **count-min sketch** says it beats the eviction candidate" },
+  { id:'fc-cod-98', cat:'coding', module:'cod-algos', lesson:'alg-5', q:"\"Should we double the cache size?\"", a:"**\"Let me look at the miss-ratio curve.\"**\n\nHit rate is **not linear in size** — you're climbing a flattening curve, and doubling rarely halves misses. The MRC is the instrument; a bare yes is the wrong answer." },
+  { id:'fc-cod-99', cat:'coding', module:'cod-algos', lesson:'alg-5', q:"What are the two cache stampede modes and their fixes?", a:"- **Thundering herd** — a hot key expires and a thousand requests hit the origin at once. Fix: **per-key lock / single-flight** so one request refills and the rest wait\n- **Stampede on restart** — an empty cache takes full origin load. Fix: **warming**, or **TTL jitter** so keys don't expire in lockstep" },
+  { id:'fc-cod-100', cat:'coding', module:'cod-algos', lesson:'alg-6', q:"What is the power of two choices, and why does it matter?", a:"Random assignment to N servers gives max load ~**log n / log log n** above the mean. **Sampling two at random and picking the less loaded** drops that to **log log n** — an exponential improvement for one extra sample.\n\nIt beats both pure random *and* a global least-loaded query, which needs coordination and is stale by the time you act. **The highest-value single fact in this family.**" },
+  { id:'fc-cod-101', cat:'coding', module:'cod-algos', lesson:'alg-6', q:"Jobs must be packed onto machines by resource requirement. What's the answer?", a:"**Bin packing — NP-hard**, so nobody wants optimal. Give the heuristic and its guarantee: **first-fit decreasing** (sort descending, place in the first bin that fits) is within **11/9 of optimal**.\n\nThe follow-up is always **fragmentation** — many machines with 30% free that can't fit one large job. Fixes: bin-packing scoring instead of spread, or preemption and repacking." },
+  { id:'fc-cod-102', cat:'coding', module:'cod-algos', lesson:'alg-6', q:"\"How many machines do we need for these overlapping jobs?\"", a:"**It's the meeting-rooms problem.** Sort by start time, use a **min-heap on end time**, and the peak heap size is the answer. O(n log n).\n\nRecognizing that an infra capacity question *is* an interval problem is exactly the transfer this round tests." },
+  { id:'fc-cod-103', cat:'coding', module:'cod-algos', lesson:'alg-6', q:"Workers are idle while others have a backlog, and job durations are unpredictable. What algorithm?", a:"**Work stealing.** Idle workers take from the **tail** of a busy worker's deque while the owner works from the **head** — so the common case needs no synchronization at all.\n\nThat head/tail split is the whole trick; contention only occurs when the deque is nearly empty." },
+  { id:'fc-cod-104', cat:'coding', module:'cod-algos', lesson:'alg-7', q:"How do you deduplicate billions of events when an exact hash set won't fit?", a:"- **Bloom filter as a cheap pre-filter** in front of an exact store\n- **Bound the window** — dedup over 24 hours, not forever\n\n**Naming the window is most of the answer.** Unbounded dedup is unbounded state, and candidates who miss it design a system that grows without limit." },
+  { id:'fc-cod-105', cat:'coding', module:'cod-algos', lesson:'alg-7', q:"Wall clocks disagree across machines, so \"latest write wins by timestamp\" drops writes. What are the options?", a:"- **Lamport timestamps** — counter per node, max-plus-one on receive. Total order consistent with causality, but **can't detect concurrency**\n- **Vector clocks** — a counter per node, per node. **Can detect concurrency**, at O(N) space per entry\n- **Hybrid logical clocks** — close to wall clock but never goes backwards. What modern databases use, because timestamps you can read as dates are operationally worth a lot" },
+  { id:'fc-cod-106', cat:'coding', module:'cod-algos', lesson:'alg-7', q:"What do CRDTs buy, and what do they cost?", a:"**Buy:** if merge is commutative, associative and idempotent, replicas converge regardless of message order or duplication — **with no coordination**.\n\n**Cost:** metadata that grows with the number of writers, plus semantics you may not want (a removed item can reappear under some set designs)." },
+  { id:'fc-cod-107', cat:'coding', module:'cod-algos', lesson:'alg-7', q:"Two replicas hold a billion keys and a few have diverged. How do you find them?", a:"**Merkle tree.** Leaves hash contiguous key ranges, internal nodes hash their children. Compare root hashes; **descend only where they disagree**.\n\n**O(differences × log n)** instead of O(n) transfer, because identical subtrees are eliminated wholesale at their root. Leaf granularity is the trade-off — coarse leaves mean re-syncing a whole range for one changed key. This is Dynamo-style anti-entropy, and the same idea as rsync block hashing and git object trees." },
+  { id:'fc-cod-108', cat:'coding', module:'cod-algos', lesson:'alg-7', q:"What single reframing dissolves most distributed hard parts?", a:"**Can you make the operation idempotent and commutative?**\n\nIf yes: retries are free, ordering stops mattering, and duplicates are harmless. That reframing is what this round is looking for." },
+  { id:'fc-cod-109', cat:'coding', module:'cod-algos', lesson:'alg-8', q:"Why is \"O(n log n)\" not yet an answer in this round?", a:"Because **n is undefined** until you say whether it's rows, requests per second, machines, or bytes.\n\nThe interesting infra questions are the ones where **two n's compete** — O(machines) coordination against O(keys) storage — and choosing which to make small is the actual decision." },
+  { id:'fc-cod-110', cat:'coding', module:'cod-algos', lesson:'alg-8', q:"When is an O(n) algorithm worse than an O(n log n) one?", a:"**When I/O binds and it makes n network round trips** while the other makes one batched call.\n\nCount round trips, not operations. **Batching is the highest-leverage move in most real infra problems**, and reaching for it early is a strong signal." },
+  { id:'fc-cod-111', cat:'coding', module:'cod-algos', lesson:'alg-8', q:"What does \"O(1) amortized\" hide?", a:"**The tail.** A dynamic array append is O(1) amortized, but the resize is O(n) — and in a latency-sensitive path **that resize is your p99**.\n\nSame for hash table rehashing, LSM compaction, and GC pauses. Amortized is a statement about the average and a warning about the tail. Say which one the question cares about." },
+  { id:'fc-cod-112', cat:'coding', module:'cod-algos', lesson:'alg-8', q:"\"Make it 10x cheaper.\" What are the levers, in order?", a:"1. **Do less work** — filter earlier, sample, precompute. Almost always the biggest win\n2. **Do it approximately** — a sketch instead of an exact structure\n3. **Do it in bulk** — batch to amortize per-operation overhead\n4. **Do it once** — cache or materialize\n\nA better asymptotic algorithm comes *after* these: **the naive algorithm on 1% of the data beats the clever algorithm on all of it.**" },
+  { id:'fc-cod-113', cat:'coding', module:'cod-algos', lesson:'alg-8', q:"Data doesn't fit in RAM. What are the two shapes you should recognize?", a:"- **External merge sort** — sort chunks that fit, write runs to disk, **k-way merge with a heap**. The same heap merge appears in log merging, LSM compaction, and merging per-shard top-k\n- **Joins** — **hash join with partitioning** (partition both sides so each partition fits), or a **broadcast join** when one side is small. Knowing which side is small is the whole optimization" },
   { id:'fc-sql-21', cat:'data', module:'data-sql', lesson:'sq-1', q:'How do `ROW_NUMBER()`, `RANK()`, and `DENSE_RANK()` differ on a tie?', a:'Two rows tied at position 2 produce different sequences:\n\n- **`ROW_NUMBER()`** -- `1, 2, 3, 4` -- arbitrary tiebreak, always unique\n- **`RANK()`** -- `1, 2, 2, 4` -- ties share the rank, skips the next number\n- **`DENSE_RANK()`** -- `1, 2, 2, 3` -- ties share the rank, no gap\n\n**Pick:** `ROW_NUMBER` for top-N (one winner per group), `DENSE_RANK` when ties should all qualify.' },
   { id:'fc-sql-22', cat:'data', module:'data-sql', lesson:'sq-1', q:'What does the SQL `NTILE(4)` window function do?', a:'Divides an ordered partition into roughly equal buckets and labels each row.\n\n- **`NTILE(4)`** -- quartiles, label 1 to 4\n- **`NTILE(10)`** -- deciles\n- **`NTILE(100)`** -- percentile bands\n\n**Example:** `NTILE(4) OVER (ORDER BY revenue) AS quartile`\n\n**Use case:** customer segmentation, percentile rankings, A/B test bucketing.' },
   { id:'fc-sql-23', cat:'data', module:'data-sql', lesson:'sq-1', q:'What is the difference between `ROWS` and `RANGE` in a SQL window frame?', a:'- **`ROWS BETWEEN N PRECEDING AND CURRENT ROW`** -- counts physical rows in the partition\n- **`RANGE BETWEEN N PRECEDING AND CURRENT ROW`** -- counts logical values of the `ORDER BY` column; ties are grouped\n\n**Gotcha:** the default frame when you omit it is `RANGE UNBOUNDED PRECEDING TO CURRENT ROW`. On duplicate timestamps this lumps tied rows together -- a subtle bug source.\n\n**Rule of thumb:** if you want exactly N rows, always say `ROWS` explicitly.' },
@@ -15205,6 +15998,57 @@ const FLASHCARDS = [
   { id:'fc-sd-62', cat:'sysd', module:'sd-classic', lesson:'sd-bo', q:"Before designing a matching system, what numbers do you put on the board — and which one usually decides the architecture?", a:"**Put these up first:**\n- **Corpus**: `1M` candidate profiles, `10K` open roles\n- **Traffic**: `100 QPS` matching requests, `~10x` peak\n- **Latency**: `p95 < 200ms` end-to-end\n- **Embedding size**: `1536 dims x 4 bytes = ~6KB` per vector\n- **Vector index**: `1M x 6KB = ~6GB` raw — **fits in RAM on one machine**\n- **LLM rerank**: `~500ms` and `~$0.01` per call\n\n**The number that decides the architecture:** that last one. At `100 QPS`, reranking every request with an `LLM` is `$1/second` (`~$2.6M/month`) and blows the latency budget on its own.\n\n**So the architecture follows from arithmetic:** rerank only the top `~50`, cache aggressively by `(candidate, role)` pair, and **precompute offline** for common queries. You didn't choose the multi-stage funnel for elegance — you chose it because the cost math forced it.\n\n**Do this arithmetic out loud.** It is the difference between a design and a diagram." },
   { id:'fc-sd-63', cat:'sysd', module:'sd-fde', lesson:'fd-1', q:"Recruiters, candidates and internal reviewers all hit the same API. Walk through authn/authz — and name the bug that ships most often.", a:"**Authentication**: short-lived `JWT` access token (`~15min`) + rotating refresh token. Enterprise customers want **SSO** (`OIDC`/`SAML`) and eventually `SCIM` for provisioning — say it, because a two-sided B2B marketplace always gets there.\n\n**Authorization is the graded part.** Three principals, three views of the same row:\n- **Candidate** sees their own profile and applications\n- **Recruiter** sees candidates who applied **to their org's roles** — and nothing else\n- **Reviewer** sees transcripts, possibly identity-redacted\n\n**The bug that ships most often: IDOR.** `GET /applications/{id}` authenticates the caller, loads the row, and returns it — never checking that the row belongs to them. Sequential ids make it trivially enumerable.\n\n**Defenses, in order of strength:**\n1. **Scope every query at the data layer**: `WHERE org_id = $current_org` in the repository, not in a controller someone will forget. Postgres **row-level security** makes it structural\n2. **Deny by default** — a new endpoint with no policy returns `403`, not `200`\n3. **Opaque ids** (`UUID`) — defense in depth, *not* an authz control\n\n**Multi-tenancy:** shared tables with `org_id` is the right default; a per-tenant schema or DB only when a customer contractually requires isolation. Name the cost: the isolated tier is a separate migration and deploy path forever." },
   { id:'fc-sd-64', cat:'sysd', module:'sd-classic', lesson:'sd-5', q:"The recruiter dashboard — pipeline counts, top matches, recent activity — takes 4 seconds to load. Diagnose it before you reach for a cache.", a:"**Cache last.** Caching a slow query hides the bug and adds an invalidation problem.\n\n**Diagnose in this order:**\n1. **N+1 queries** — the single most common cause. 50 matches, each triggering a profile lookup, is 51 round trips. Fix with a **join or batch load** (`WHERE id = ANY($1)`, or a DataLoader). Check the query count before the query time\n2. **Missing index** — `EXPLAIN ANALYZE` the slow one. A sequential scan on `applications` is the usual answer\n3. **Aggregates over the whole table** — `COUNT(*)` across a growing pipeline gets slower forever. Maintain a **counter table** updated on write, or accept an approximate count\n4. **Serial fan-out in the handler** — three independent service calls awaited one after another. Parallelise them\n\n**Then, if it's still slow:**\n- **Denormalized read model** — a `dashboard_summary` row per recruiter, updated by a consumer off the event stream. This is `CQRS`, and it trades **freshness** for latency: say out loud that counts may lag by seconds\n- **Cache with an explicit invalidation story.** Key on `(recruiter_id, filters)`, `TTL` short, and **invalidate on write** — not just on expiry, or a recruiter who moves a candidate won't see it move\n\n**Frontend half:** paginate, load the panels **independently** so one slow widget doesn't block the page, and render a skeleton rather than blocking on the slowest call." },
+  { id:'fc-sd-65', cat:'sysd', module:'sd-mercor', lesson:'sdm-1', q:"What should you do first in a system design interview?", a:"Clarify requirements **briefly**, then draw a clean high-level diagram showing **client, server, storage, queues, workers, and external dependencies**.\n\nNot twenty minutes of requirements with nothing on the board, and not boxes before anyone has said what the system does." },
+  { id:'fc-sd-66', cat:'sysd', module:'sd-mercor', lesson:'sdm-1', q:"What should your first diagram communicate?", a:"**Component boundaries**, the **client/server split**, **data flow**, **state ownership**, and which paths are **synchronous vs asynchronous**.\n\nIf a reader can't tell from the diagram who owns the canonical copy of a piece of state, the diagram isn't finished." },
+  { id:'fc-sd-67', cat:'sysd', module:'sd-mercor', lesson:'sdm-1', q:"Why explicitly draw the browser/client?", a:"Because full-stack design evaluates **where logic and state live**, not just backend architecture.\n\nA diagram that starts at the load balancer has already skipped half the question." },
+  { id:'fc-sd-68', cat:'sysd', module:'sd-mercor', lesson:'sdm-1', q:"What should you say about every major component?", a:"Four things:\n1. Its **responsibility**\n2. What **state it owns**\n3. What **inputs** it receives\n4. What **outputs / side effects** it produces\n\n\"This is Redis\" is not a description. \"Redis holds the read cache for profile documents, owns no canonical state, and a miss falls through to Postgres\" is." },
+  { id:'fc-sd-69', cat:'sysd', module:'sd-mercor', lesson:'sdm-1', q:"What is a strong opening structure for a full-stack design round?", a:"**Requirements → entities/data model → APIs → diagram → critical request flow → failure/scaling trade-offs.**\n\nEntities give you nouns, APIs give you verbs, and only then does the diagram mean anything. Tracing one request end to end proves the diagram is real." },
+  { id:'fc-sd-70', cat:'sysd', module:'sd-mercor', lesson:'sdm-1', q:"What does \"get to a working system fast\" mean?", a:"Establish a **complete but simple** design first, then optimize the bottleneck the interviewer points at — instead of prematurely designing for maximum scale.\n\nDesigning for a million QPS before describing the single-server version is how candidates run out of clock with no coherent system on the board." },
+  { id:'fc-sd-71', cat:'sysd', module:'sd-mercor', lesson:'sdm-1', q:"What should you do when the interviewer gives feedback mid-design?", a:"**Explicitly incorporate it and revise the architecture** rather than defending the original design unnecessarily.\n\nThe feedback is usually a hint about where they want the deep-dive to go. Defending past the point of usefulness reads as rigidity." },
+  { id:'fc-sd-72', cat:'sysd', module:'sd-mercor', lesson:'sdm-2', q:"What belongs on the client?", a:"Presentation, **local interaction state**, form state, **optimistic UI**, lightweight validation, caching where appropriate, and rendering.\n\nAll of it shares one property: nobody else needs to agree about it." },
+  { id:'fc-sd-73', cat:'sysd', module:'sd-mercor', lesson:'sdm-2', q:"What belongs on the server?", a:"**Authorization**, durable state, **business invariants**, cross-user coordination, trusted validation, orchestration, and persistence.\n\nAuthorization has no client-side half at all — the rest have client-side conveniences, but the server holds the enforcement." },
+  { id:'fc-sd-74', cat:'sysd', module:'sd-mercor', lesson:'sdm-2', q:"Why not trust client-side validation alone?", a:"Clients can be **modified or bypassed** — `curl` doesn't run your React.\n\nClient validation exists to make the form feel responsive. **Server-side validation protects the system invariant.** They're two different jobs, and you should say so." },
+  { id:'fc-sd-75', cat:'sysd', module:'sd-mercor', lesson:'sdm-2', q:"What state might legitimately exist only in the browser?", a:"Unsaved text, selected tabs, temporary filters, loading states, drag positions — **ephemeral UI state**.\n\nPromoting all of it to the server is its own mistake: round trips and a sync problem for state nobody needs after the tab closes." },
+  { id:'fc-sd-76', cat:'sysd', module:'sd-mercor', lesson:'sdm-2', q:"What state should usually be server-owned?", a:"Durable user data, **permissions**, canonical job status, payments, shared resources, and workflow state.\n\nRule of thumb: anything two users can observe, anything that must survive a refresh, and anything money depends on." },
+  { id:'fc-sd-77', cat:'sysd', module:'sd-mercor', lesson:'sdm-2', q:"What question should you ask whenever deciding client vs server?", a:"**Does this state need durability, security, coordination, or a single authoritative source?**\n\nAny yes puts it on the server. All no means keeping it client-side is free latency." },
+  { id:'fc-sd-78', cat:'sysd', module:'sd-mercor', lesson:'sdm-3', q:"What is an optimistic update?", a:"The client **immediately displays the expected result** before the server confirms the operation." },
+  { id:'fc-sd-79', cat:'sysd', module:'sd-mercor', lesson:'sdm-3', q:"Why use optimistic updates?", a:"They **reduce perceived latency** for actions that are very likely to succeed — a like, a reorder, a status toggle.\n\nThe qualifier matters: optimism is only free when you're usually right." },
+  { id:'fc-sd-80', cat:'sysd', module:'sd-mercor', lesson:'sdm-3', q:"What must every optimistic update design include?", a:"**A failure strategy.**\n\nThis is the half candidates skip and the half interviewers ask about. \"The UI updates instantly\" is not a design." },
+  { id:'fc-sd-81', cat:'sysd', module:'sd-mercor', lesson:'sdm-3', q:"What happens if an optimistic server request fails?", a:"One of two things — say which you're choosing and why:\n\n1. **Roll back** to the previous confirmed state — right for cheap, repeatable actions like a toggle\n2. **Preserve the user's change and surface a retry/error state** — right whenever the user typed something" },
+  { id:'fc-sd-82', cat:'sysd', module:'sd-mercor', lesson:'sdm-3', q:"Why is silently discarding user input unacceptable?", a:"The UI **appears fast but becomes incorrect**, and it can destroy user work.\n\nIf someone wrote three paragraphs, you deleted their writing to save 200ms. This is a judgment signal, not a nitpick." },
+  { id:'fc-sd-83', cat:'sysd', module:'sd-mercor', lesson:'sdm-3', q:"What data helps you implement optimistic rollback?", a:"**Previous state**, a **mutation ID**, a **version number**, or a **locally queued mutation**.\n\nA queue of pending mutations is the general answer — it gives you retry, ordering, and rollback in one structure." },
+  { id:'fc-sd-84', cat:'sysd', module:'sd-mercor', lesson:'sdm-3', q:"How can conflicting optimistic updates be handled?", a:"**Versioning, timestamps, operation IDs, explicit conflict resolution, or refetching canonical server state.**\n\nRefetch is the boring answer and often the correct one." },
+  { id:'fc-sd-85', cat:'sysd', module:'sd-mercor', lesson:'sdm-4', q:"What should you identify before defining APIs?", a:"**Core entities** and the **operations users perform on them**.\n\nEndpoints invented before entities end up shaped like your first guess at the UI — which the interviewer will then break by adding a feature." },
+  { id:'fc-sd-86', cat:'sysd', module:'sd-mercor', lesson:'sdm-4', q:"What makes a good API discussion in an interview?", a:"Six things per important endpoint:\n1. **Endpoint / action**\n2. **Request fields**\n3. **Response shape**\n4. **Authorization** — who may call it, scoped to what\n5. **Idempotency** — what a retry does\n6. **Important failure cases**" },
+  { id:'fc-sd-87', cat:'sysd', module:'sd-mercor', lesson:'sdm-4', q:"Why include an idempotency key on mutation APIs?", a:"So a **retried request avoids producing duplicate side effects** — a second application, a second charge, a second job.\n\nA client that times out doesn't know whether the write landed. The server recognizes the key, skips the side effect, and **replays the original response**." },
+  { id:'fc-sd-88', cat:'sysd', module:'sd-mercor', lesson:'sdm-4', q:"What is the difference between UI state and domain state?", a:"**UI state controls presentation.** **Domain state represents canonical business entities and workflows.**\n\nLeaking UI concerns into the domain model (`is_expanded`) rots the schema; leaking domain state into the client violates invariants." },
+  { id:'fc-sd-89', cat:'sysd', module:'sd-mercor', lesson:'sdm-4', q:"Why model workflow status explicitly as a state machine?", a:"Because it makes **valid transitions and race conditions easier to reason about**.\n\n`scheduled → running → succeeded | failed | cancelled` tells you immediately that `cancelled → running` is a bug you must prevent — which is exactly the question coming next." },
+  { id:'fc-sd-90', cat:'sysd', module:'sd-mercor', lesson:'sdm-5', q:"What is the basic distributed job scheduler architecture?", a:"**Client → API → durable DB → scheduler → queue → workers → result store / status DB.**" },
+  { id:'fc-sd-91', cat:'sysd', module:'sd-mercor', lesson:'sdm-5', q:"Who owns scheduled job state?", a:"The **durable database** is the canonical source of truth. Everything else is derived." },
+  { id:'fc-sd-92', cat:'sysd', module:'sd-mercor', lesson:'sdm-5', q:"What does the scheduler own?", a:"**Discovering due jobs and dispatching eligible work.** It owns no business state of its own." },
+  { id:'fc-sd-93', cat:'sysd', module:'sd-mercor', lesson:'sdm-5', q:"What does the queue own?", a:"**Durable buffering and delivery of work to workers** — *not* the canonical business state.\n\nTreating the queue as the source of truth is the classic mistake: you can't query it, you can't audit it, and a replay rewrites history." },
+  { id:'fc-sd-94', cat:'sysd', module:'sd-mercor', lesson:'sdm-5', q:"What does a worker own?", a:"**Executing a claimed unit of work and reporting its result/status.**" },
+  { id:'fc-sd-95', cat:'sysd', module:'sd-mercor', lesson:'sdm-5', q:"How does a scheduler efficiently find jobs due soon?", a:"Query an **indexed `run_at` field**, over **bounded time windows** or partitions — \"due in the next 60 seconds\" rather than scanning the table.\n\nAt scale, partition by time bucket so the hot partition stays small." },
+  { id:'fc-sd-96', cat:'sysd', module:'sd-mercor', lesson:'sdm-5', q:"How do multiple schedulers avoid claiming the same DB row simultaneously?", a:"**Conditional atomic updates**, or row locking — `SELECT ... FOR UPDATE SKIP LOCKED`.\n\n`SKIP LOCKED` is the whole trick: without it every scheduler blocks on the same head rows and your fan-out becomes a queue of one." },
+  { id:'fc-sd-97', cat:'sysd', module:'sd-mercor', lesson:'sdm-5', q:"Why don't row locks guarantee a job appears only once in Kafka?", a:"Because **Postgres and Kafka are independent systems** — there is no transaction spanning both.\n\nYou commit the row, then publish, and the process can crash in between. No amount of locking inside one system fixes a gap between two." },
+  { id:'fc-sd-98', cat:'sysd', module:'sd-mercor', lesson:'sdm-5', q:"What delivery guarantee should you usually assume?", a:"**At-least-once delivery.**\n\nExactly-once *delivery* does not exist. Exactly-once *effects* do." },
+  { id:'fc-sd-99', cat:'sysd', module:'sd-mercor', lesson:'sdm-5', q:"How do you make at-least-once delivery safe?", a:"**Make processing idempotent** — key the effect on a stable execution id so a second delivery is a no-op.\n\nThat is the entire answer, and it's why arguing about transport guarantees is a detour." },
+  { id:'fc-sd-100', cat:'sysd', module:'sd-mercor', lesson:'sdm-5', q:"What is the transactional outbox pattern?", a:"**Store the state change and the outgoing event in one DB transaction**, then have a separate process publish outbox rows asynchronously.\n\nIt converts \"two systems, no shared transaction\" into \"one transaction, plus an at-least-once relay\" — which is safe because consumers are idempotent." },
+  { id:'fc-sd-101', cat:'sysd', module:'sd-mercor', lesson:'sdm-6', q:"When should work move to a queue?", a:"When it is **slow, bursty, retryable, expensive**, or simply **doesn't need to block the request/response path**.\n\nReport generation, transcription, bulk email, model inference, third-party fan-out." },
+  { id:'fc-sd-102', cat:'sysd', module:'sd-mercor', lesson:'sdm-6', q:"What must you explain for any asynchronous work?", a:"**Enqueueing, execution, state updates, retries, ordering, failure recovery, and user-visible progress.**\n\nThe last one is the one candidates forget. A job with no status endpoint is a spinner forever." },
+  { id:'fc-sd-103', cat:'sysd', module:'sd-mercor', lesson:'sdm-6', q:"How should multi-step asynchronous workflows be modeled?", a:"As **explicit steps/states** — a **workflow DAG or state machine** with declared dependencies.\n\nNot as a chain of workers that each happen to enqueue the next thing: the DAG is inspectable, the implicit chain is only knowable by reading every worker." },
+  { id:'fc-sd-104', cat:'sysd', module:'sd-mercor', lesson:'sdm-6', q:"How do you enforce dependency ordering?", a:"**Only enqueue or activate downstream work after prerequisites reach the required successful state.**\n\nOrdering by hope (\"step 2 is slower so step 1 will be done\") is the bug that only appears under load." },
+  { id:'fc-sd-105', cat:'sysd', module:'sd-mercor', lesson:'sdm-6', q:"What retry strategy should workers use?", a:"**Bounded retries with exponential backoff, and usually jitter.**" },
+  { id:'fc-sd-106', cat:'sysd', module:'sd-mercor', lesson:'sdm-6', q:"Why use exponential backoff?", a:"It **prevents a failing dependency from being hammered continuously**.\n\nAn unbacked-off retry loop turns one sick service into an outage. Jitter stops every worker retrying on the same tick." },
+  { id:'fc-sd-107', cat:'sysd', module:'sd-mercor', lesson:'sdm-6', q:"What happens after retries are exhausted?", a:"**Mark the operation failed** and move it to a **dead-letter queue** or manual-recovery path.\n\nInfinite retry on a poison message is a slow-motion outage that also costs money." },
+  { id:'fc-sd-108', cat:'sysd', module:'sd-mercor', lesson:'sdm-6', q:"How does a worker crash get recovered?", a:"**Leases, visibility timeouts, or heartbeats** — uncompleted work becomes eligible for retry once the lease expires.\n\nA killed pod runs no exception handler, so nothing in-process can save it. Size the timeout to the realistic task duration." },
+  { id:'fc-sd-109', cat:'sysd', module:'sd-mercor', lesson:'sdm-6', q:"What must survive a service restart?", a:"**Anything required to recover business correctness belongs in durable storage, not only process memory.**\n\nIf restarting the service loses it, it wasn't state — it was luck." },
+  { id:'fc-sd-110', cat:'sysd', module:'sd-mercor', lesson:'sdm-7', q:"How do you handle cancel-vs-start races for a job?", a:"**Atomic conditional state transitions** — `scheduled → running` versus `scheduled → cancelled`:\n\n```\nUPDATE jobs SET status='running'\n WHERE id=$1 AND status='scheduled';\n```\n\nWhoever's UPDATE matches first wins. **0 rows affected means you lost** — take the other branch. That return value *is* the coordination." },
+  { id:'fc-sd-111', cat:'sysd', module:'sd-mercor', lesson:'sdm-7', q:"Why is \"read status, then update status\" unsafe?", a:"**Another process may modify the state between the two operations.**\n\nThe window is small, so the bug is rare, load-dependent, and nearly impossible to reproduce — which is exactly why interviewers ask about it." },
+  { id:'fc-sd-112', cat:'sysd', module:'sd-mercor', lesson:'sdm-7', q:"How should a read-heavy profile cache work?", a:"**Client → API → Redis**; on a miss, read **Postgres** and repopulate Redis. **Writes go to Postgres first, then invalidate/update the cache.**\n\nThat order matters: invalidating first leaves a window where a concurrent read repopulates from the pre-write DB and the stale value sticks until TTL." },
+  { id:'fc-sd-113', cat:'sysd', module:'sd-mercor', lesson:'sdm-7', q:"What does cache invalidation mean, and what trade-off should you name?", a:"**Preventing stale cached state from continuing to be served after the canonical data changes.**\n\nName which you took: a **TTL alone** gives bounded staleness with no write-path coupling; **explicit invalidation** gives less staleness but makes correctness depend on every write path remembering. Both are defensible — pretending the cache is always fresh is not." },
+  { id:'fc-sd-114', cat:'sysd', module:'sd-mercor', lesson:'sdm-8', q:"How should you respond when the interviewer adds a new feature halfway through?", a:"**Trace it through the architecture you already drew** — client UX/state → APIs → data model → ownership → async workflow → consistency → failure modes → scaling.\n\n**Modify existing components** where appropriate instead of bolting on an unrelated subsystem. \"I'd add a separate service for that\" reads as avoidance.\n\nThis isn't a new question — it's the actual question. The previous 25 minutes were setup." },
+  { id:'fc-sd-115', cat:'sysd', module:'sd-mercor', lesson:'sdm-8', q:"What is the mental checklist for every Mercor-style full-stack prompt?", a:"**Draw → Client/server split → State ownership → APIs → Data model → Happy path → Async path → Races → Failure/retries → Optimistic UI → Scale/optimization → Extension.**\n\nRun it out loud. The candidates who pass aren't the ones who know more patterns — they're the ones whose reasoning is visible at every step." },
 ];
 
 /* ---------- SOURCES (in-app citations) ---------- */
