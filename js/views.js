@@ -5341,6 +5341,14 @@ const COOLNESS = {
   // Voice-agent API for call centers. Peer set: vapi:6, cartesia:5,
   // deepgram:3 — useful infra, not a name that lands at dinner.
   'retell-ai':5,
+
+  // ── 2026-09-06 auto-scored ──
+  // Durable-execution infra with real developer mindshare; peer set is
+  // vercel:7, neon:6, cockroachlabs:5 — respected, not scene-y.
+  'temporal-technologies':6,
+  // YC climate/proptech, Waterloo-based. Good mission, low NYC name
+  // recognition — the axis is whether it lands at dinner, and it doesn't yet.
+  'cambio':5,
 };
 
 const FRONTIER = new Set([

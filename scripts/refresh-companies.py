@@ -1561,7 +1561,10 @@ CANDIDATES = [
   ("bland-ai","Bland AI","ashby","bland","ai","Phone-calling AI","","","",[],""),
   ("blueberry-pediatrics","Blueberry Pediatrics","ashby","blueberrypediatrics","health","Virtual pediatrics","","","",[],""),
   ("bot-auto","Bot Auto","greenhouse","botauto","robotics","Driverless trucking","","","",[],""),
-  ("cambio","Cambio","ashby","cambio","fintech","Medical debt resolution","","","",[],""),
+  # ashby/cambio is Cambio the real-estate decarbonization platform (YC,
+  # Waterloo/Toronto, NYC secondary), NOT the medical-debt fintech of the
+  # same name. Verified against the board's own posting bodies 2026-09-06.
+  ("cambio","Cambio","ashby","cambio","climate","Real estate decarbonization","","","",[],""),
   ("cameo","Cameo","greenhouse","cameo","consumer","Personalized celebrity videos","","","",[],""),
   ("capital-rx-health","Capital Rx Health","lever","capital","health","Pharmacy benefits","","","",[],""),
   ("cartesia-ai","Cartesia AI","ashby","cartesia","ai","Realtime voice models","","","",[],""),
