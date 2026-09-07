@@ -5538,6 +5538,27 @@ function makeRoleKey(company, job) {
   return company.id + '|' + (job && job.title || '');
 }
 
+// Company ids the user has logged at least one application to, from any of
+// that company's roles. roleKey is `companyId|url` (see makeRoleKey), so the
+// prefix is the id.
+//
+// Entries created by the dashboard's generic "+1 application" button carry
+// no roleKey — they are anonymous counter bumps that cannot be attributed to
+// a company — so they are skipped. The "never applied" flag therefore
+// reflects role-level logging only, which is the only thing that knows which
+// company was applied to.
+function appliedCompanyIdSet(state) {
+  const out = new Set();
+  const apps = Array.isArray(state && state.jobApps) ? state.jobApps : [];
+  for (let i = 0; i < apps.length; i++) {
+    const k = apps[i] && apps[i].roleKey;
+    if (typeof k !== 'string' || !k) continue;
+    const bar = k.indexOf('|');
+    out.add(bar === -1 ? k : k.slice(0, bar));
+  }
+  return out;
+}
+
 // Wires the .applied-cb toggle behavior on a container. Click anywhere
 // on the row's checkbox toggles applied-state via GAMI.applyRole /
 // unapplyRole + propagates the change through afterStateChange (which
@@ -5586,6 +5607,24 @@ function bindApplyToggles(container) {
       if (isApplied) parent.appendChild(row);
       else parent.insertBefore(row, parent.firstElementChild);
     }
+    // A company's FIRST application (or the removal of its LAST) flips the
+    // "Never applied" flag on every other row for that company, not just this
+    // one — so refresh them all. Cheaper and less disruptive than repainting
+    // the list, which would also undo the reorder just performed above.
+    const coId = row.getAttribute('data-co-id');
+    if (coId) {
+      const stillApplied = appliedCompanyIdSet(st).has(coId);
+      const sel = '[data-role-row][data-co-id="' + coId.replace(/["\\]/g, '\\$&') + '"]';
+      document.querySelectorAll(sel).forEach(el => {
+        const flag = el.querySelector('[data-untouched-flag]');
+        if (flag) flag.hidden = stillApplied;
+      });
+    }
+    // The chip's count is mode-dependent (roles vs companies) and this
+    // handler also runs from the dashboard mini-list, so it cannot compute
+    // the new number itself. Announce the change and let whoever owns the
+    // chip recompute it.
+    document.dispatchEvent(new CustomEvent('applied-state-changed'));
     GAMI.saveImmediate(st);     // wrapped → triggers sync push
     if (window.APP && window.APP.afterStateChange) window.APP.afterStateChange();
   });
@@ -5670,11 +5709,16 @@ function renderCompanies(state, hub) {
       <div class="tabs" id="co-cat-filters">
         ${categoryTabs}
       </div>
-      <div class="flex items-center gap-2 mt-2">
+      <div class="flex items-center gap-2 mt-2 flex-wrap">
         <span class="text-[11px] muted">Sort</span>
         <div class="tabs" id="co-sort">
           <div class="tab active" data-co-sort="fit">Top fit</div>
           <div class="tab" data-co-sort="new">Newest</div>
+        </div>
+        <span class="text-[11px] muted ml-1">Applied</span>
+        <div class="tabs" id="co-applied-filters">
+          <div class="tab active" data-appliedfilter="all">Any</div>
+          <div class="tab" data-appliedfilter="untouched" title="Only companies you have never logged an application to">Never applied <span class="ml-1 muted text-[10px] font-mono" data-untouched-count></span></div>
         </div>
       </div>
     </div>
@@ -5700,6 +5744,7 @@ function renderCompanies(state, hub) {
   let curCityFilter = 'all';
   let curLFilter = 'all';
   let curCatFilter = 'all';
+  let curAppliedFilter = 'all';   // 'all' | 'untouched' (company never applied to)
   let curQuery   = '';
   let curSort    = 'fit';            // 'fit' (offer-probability) | 'new' (recency)
   let _lastCoSort = null;            // detect sort change to force a grid reorder
@@ -5821,9 +5866,12 @@ function renderCompanies(state, hub) {
    * No DOM teardown -> no long tasks on filter clicks / keystrokes. */
   function paintCompanies() {
     const q = curQuery.trim().toLowerCase();
+    const appliedCos = appliedCompanyIdSet(
+      (window.APP && window.APP.getState) ? window.APP.getState() : state);
     const matches = new Set();
     for (const c of coOrder) {
       if (curVFilter !== 'all' && c.vertical !== curVFilter) continue;
+      if (curAppliedFilter === 'untouched' && appliedCos.has(c.id)) continue;
       // A company shows under a city filter if it has at least one posting
       // there; the card's preview pills tag which of them it is.
       if (curCityFilter !== 'all'
@@ -5894,6 +5942,10 @@ function renderCompanies(state, hub) {
 
   function paintRoles() {
     rolelist.innerHTML = '';
+    // Recomputed per paint, not cached: toggling one row's checkbox can flip
+    // this for every other row at the same company.
+    const appliedCos = appliedCompanyIdSet(
+      (window.APP && window.APP.getState) ? window.APP.getState() : state);
     const q = curQuery.trim().toLowerCase();
     const base = curSort === 'new' ? recRoles : scoredRoles;
     const filtered = base.filter(r => {
@@ -5901,6 +5953,7 @@ function renderCompanies(state, hub) {
       if (curCityFilter !== 'all' && jobCity(r) !== curCityFilter) return false;
       if (curLFilter !== 'all' && r.level !== curLFilter) return false;
       if (curCatFilter !== 'all' && roleCategory(r.title) !== curCatFilter) return false;
+      if (curAppliedFilter === 'untouched' && appliedCos.has(r._company.id)) return false;
       if (!q) return true;
       const hay = (r.title + ' ' + r._company.name + ' ' + r._company.sub + ' ' + (r._company.badges||[]).join(' ')).toLowerCase();
       return hay.includes(q);
@@ -5943,6 +5996,11 @@ function renderCompanies(state, hub) {
       const lvlLabel = lvl === 'founding' ? 'Founding' : (lvl === 'senior' ? 'Senior' : 'Mid');
       const dateStr = fmtDate(r.posted || r.added);
       const newTag = isNewJob(r) ? '<span class="pill pill-ai" style="font-size:9px;padding:1px 5px">New</span>' : '';
+      // Always rendered, `hidden` when the company has been applied to, so
+      // bindApplyToggles can flip it in place across every row for that
+      // company without forcing a full repaint.
+      const untouched = !appliedCos.has(c.id);
+      const untouchedTag = `<span class="pill pill-untouched" data-untouched-flag${untouched ? '' : ' hidden'} title="No application logged to this company yet">Never applied</span>`;
       return `
         <div class="role-row" data-role-row data-role-key="${esc(roleKey)}" data-role-url="${esc(r.url)}"
              data-co-id="${esc(c.id)}" data-co-name="${esc(c.name)}" data-role-title="${esc(r.title)}">
@@ -5954,7 +6012,7 @@ function renderCompanies(state, hub) {
             <div class="role-row-title truncate">${esc(r.title)} ${newTag}</div>
             ${r.desc ? `<div class="role-row-desc truncate muted text-xs mt-0.5" style="font-style:italic">${esc(r.desc)}</div>` : ''}
             <div class="role-row-co truncate">
-              <span class="font-medium">${esc(c.name)}</span>${c.tagline ? ` <span class="muted text-xs">— ${esc(c.tagline)}</span>` : ''}
+              <span class="font-medium">${esc(c.name)}</span> ${untouchedTag}${c.tagline ? ` <span class="muted text-xs">— ${esc(c.tagline)}</span>` : ''}
               <span class="dim mx-1">·</span>
               <span class="muted">${esc(verticalLabel[c.vertical] || c.vertical)}</span>
               ${c.stage ? `<span class="dim mx-1">·</span><span class="muted">${esc(c.stage)}</span>` : ''}
@@ -5985,8 +6043,27 @@ function renderCompanies(state, hub) {
     }
   }
 
+  // Count shown on the "Never applied" chip: roles in roles mode, companies
+  // in companies mode, so the number always describes what the chip selects.
+  // Ignores the other active filters on purpose — it is a standing total, not
+  // a preview of the intersection, which would flicker as you change chips.
+  function syncUntouchedCount() {
+    // A listener registered below outlives this view, so bail once the
+    // container has been unmounted.
+    if (!container.isConnected) return;
+    const slot = container.querySelector('[data-untouched-count]');
+    if (!slot) return;
+    const appliedCos = appliedCompanyIdSet(
+      (window.APP && window.APP.getState) ? window.APP.getState() : state);
+    const n = curMode === 'roles'
+      ? scoredRoles.reduce((acc, r) => acc + (appliedCos.has(r._company.id) ? 0 : 1), 0)
+      : scoredCos.reduce((acc, c) => acc + (appliedCos.has(c.id) ? 0 : 1), 0);
+    slot.textContent = String(n);
+  }
+
   function paint() {
     syncLevelVis();
+    syncUntouchedCount();
     coOrder = curSort === 'new' ? recCos : scoredCos;
     if (curMode === 'companies') {
       grid.classList.remove('hidden');
@@ -6039,7 +6116,8 @@ function renderCompanies(state, hub) {
   // Click handler differentiates by data-vfilter vs data-lfilter.
   // Click handler covers both the merged verticals+levels pill AND the
   // separate category-row pill below it.
-  container.querySelectorAll('#co-filters .tab, #co-cat-filters .tab, #co-city-filters .tab').forEach(tab => {
+  document.addEventListener('applied-state-changed', syncUntouchedCount);
+  container.querySelectorAll('#co-filters .tab, #co-cat-filters .tab, #co-city-filters .tab, #co-applied-filters .tab').forEach(tab => {
     tab.addEventListener('click', () => {
       if (tab.dataset.cityfilter) {
         container.querySelectorAll('#co-city-filters .tab').forEach(t => t.classList.remove('active'));
@@ -6057,6 +6135,10 @@ function renderCompanies(state, hub) {
         container.querySelectorAll('#co-cat-filters .tab[data-catfilter]').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         curCatFilter = tab.dataset.catfilter;
+      } else if (tab.dataset.appliedfilter) {
+        container.querySelectorAll('#co-applied-filters .tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        curAppliedFilter = tab.dataset.appliedfilter;
       }
       rolesShown = ROLES_PAGE;            // reset pagination on filter change
       paint();
