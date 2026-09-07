@@ -44,6 +44,25 @@ const FAMILIES = {
   // "token" is deliberately absent — auth tokens and PCI tokenization are not
   // crypto, and including it would drop identity and payments roles.
   crypto:   /\b(crypto|blockchain|web3|stablecoin|defi|onchain|on[\s-]chain|digital\s+assets?|bitcoin|ethereum|nft|smart\s+contract)\b/i,
+  // Systems engineering, retired 2026-09-07 as a whole family. At most
+  // employers the title means IT/desktop/VDI operations, business systems, or
+  // hardware — not the SDE track, and every narrower pattern kept leaking a
+  // new variant. Deliberately also removes Distributed Systems Engineer, ML
+  // Systems Engineer and the HFT trading-systems roles.
+  systemseng: /\bsystems?\s+engineer\b/i,
+  // Not \b-wrapped, same reason as cpp: a trailing \b after "+" never matches,
+  // so "Staff+ Software Engineer" survived TITLE_EXCLUDE's staff[\s,] clause.
+  staffplus: /staff\s?\+/i,
+  // Legal / patent roles arriving through "product engineer". Anchored on the
+  // legal noun so OpenAI's "Forward Deployed Engineer (FDE), Legal-NYC" stays.
+  legal: /\blegal\s+and\s+\w+\s+engineer\b|\bpatent\s+(?:litigator|attorney|agent|examiner)\b/i,
+  // GTM / post-sales business systems — the sales-engineer track under a name
+  // the sales patterns don't anchor on.
+  gtm: /\bgtm\s+\w*\s*engineer\b|\bquote[\s-]to[\s-]cash\b|\bpost[\s-]sales\b/i,
+  // "…Engineer, Lead" — the comma form the \slead\s clause misses.
+  leadcomma: /\bengineer,\s*lead\b/i,
+  // Desktop / sysadmin ops with an engineer title but no "systems engineer".
+  itops: /\bvirtual\s+desktop\b|\bsysadmin\b|\bsystem\s+administrator\b|\bhelp\s?desk\b/i,
   // Non-engineering roles that enter through the "forward deployed" clause in
   // TITLE_INCLUDE, plus plural "Interns" which the singular pattern missed.
   // Case-sensitive city abbreviations in titles: OpenAI posts the same role as

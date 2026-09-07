@@ -101,7 +101,10 @@ TITLE_INCLUDE = re.compile(
   r"full[\s-]stack[\s-]engineer|product[\s-]engineer|"
   r"ai[\s-]engineer|applied[\s-]ai[\s-]engineer|ml[\s-]engineer|"
   r"machine[\s-]learning[\s-]engineer|infrastructure[\s-]engineer|"
-  r"platform[\s-]engineer|data[\s-]engineer|systems[\s-]engineer|"
+  r"platform[\s-]engineer|data[\s-]engineer|"
+  # "systems engineer" removed 2026-09-07 — retired as a family in
+  # TITLE_EXCLUDE above. Left here it would only be include-then-exclude.
+
   # DevOps / SRE / Cloud / Reliability — infra-adjacent IC roles.
   # (Security engineers explicitly excluded — see TITLE_EXCLUDE.)
   r"devops[\s-]engineer|site[\s-]reliability[\s-]engineer|sre(?:\s|$)|"
@@ -159,6 +162,36 @@ TITLE_EXCLUDE = re.compile(
   r"(?:pre[\s-]?sales|solutions?|sales)\s+\w+\s+engineer\b|"
   r"engineer,\s*(?:solutions?|sales|presales)\b|"
   r"solutions?\s+engineering\b|"
+  # Systems engineering, retired 2026-09-07. At most employers the title means
+  # IT/desktop/VDI operations, business-systems (Salesforce/quote-to-cash), or
+  # hardware/MEP systems — not the SDE track. Retired as a whole family rather
+  # than case by case because every narrower pattern kept leaking a new variant
+  # (IT, Tech Ops, Design, GTM Business, Legal, Public Safety, Vulnerability
+  # Management, Digital Factory, Internal, Technical Solutions).
+  #
+  # The cost is real and was accepted deliberately: this also drops
+  # "Distributed Systems Engineer", Cohere's "ML Systems Engineer", and the
+  # HFT trading-systems roles (Kalshi, DRW, Flow Traders, Tower, Databento),
+  # which are genuine software jobs. "systems engineer" is also removed from
+  # TITLE_INCLUDE below so the two lists don't disagree.
+  r"systems?\s+engineer\b|"
+  # Legal / patent roles that enter through "product engineer" and "forward
+  # deployed". Solve Intelligence's "Legal and Product Engineer (Patent
+  # Litigator)" wants a litigator, not an engineer. Anchored on the legal noun
+  # so OpenAI's "Forward Deployed Engineer (FDE), Legal-NYC" — an FDE embedded
+  # with a legal team — survives.
+  r"legal\s+and\s+\w+\s+engineer\b|patent\s+(?:litigator|attorney|agent|examiner)|"
+  # GTM / post-sales business systems. Same track as the retired sales-engineer
+  # family; "GTM" and a trailing "Post Sales" both walked past the patterns
+  # below, which anchor on the word "sales" before "engineer".
+  r"gtm\s+\w*\s*engineer\b|quote[\s-]to[\s-]cash|post[\s-]sales\b|"
+  # "…, Lead" — the comma form. The `\slead\s` clause below needs whitespace
+  # before "lead" and a comma is not whitespace, so "Forward Deployed
+  # Engineer, Lead" survived it.
+  r"engineer,\s*lead\b|"
+  # Desktop / sysadmin operations that carry an engineer title but no
+  # "systems engineer" — Barclays' "SRE Virtual Desktop Operations Engineer".
+  r"virtual\s+desktop|sysadmin|system\s+administrator|help\s?desk|"
   # Network engineering — IT/network operations, not the infra SDE track.
   # Deliberately narrow: "Software Engineer, Network Services" and
   # "ML Networking" are software roles that happen to touch the network,
@@ -208,7 +241,13 @@ TITLE_EXCLUDE = re.compile(
 # "Software Engineer, C++" would slip through. Covers "C++", "C/C++",
 # "(C++/Java)". Only the title is checked: descRaw is dropped once a job has
 # a desc, so a role that is C++ in the body but not the title stays.
-TITLE_EXCLUDE_UNBOUNDED = re.compile(r"c\s?\+\+", re.IGNORECASE)
+# C++ roles, and "Staff+" seniority. Both need this pattern rather than
+# TITLE_EXCLUDE because that one wraps its alternation in \b(...)\b and a
+# trailing \b after "+" can never match — "Software Engineer, C++" and
+# "Staff+ Software Engineer" both slipped through. The staff[\s,] clause in
+# TITLE_EXCLUDE catches "Staff Software Engineer" but not "Staff+ ...",
+# because "+" is neither whitespace nor a comma.
+TITLE_EXCLUDE_UNBOUNDED = re.compile(r"c\s?\+\+|staff\s?\+", re.IGNORECASE)
 
 # Name collisions removed 2026-08-26: ashby/latent is a clinical-AI company
 # (SF), not Latent Labs the protein-AI lab; ashby/neptune is a couples'
