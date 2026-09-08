@@ -12880,7 +12880,7 @@ const COMPANIES = [
     tagline:"Banking built for startups",
     stage:"Series C", raised:"$152M", lead:"CRV",
     badges:["CRV","a16z","Coatue"],
-    totalRoles:7,
+    totalRoles:8,
     notes:"Banking UX + ops. Compliance, money movement.",
     jobs:[
       { title:"Senior Software Engineer - Mercury Command", url:"https://job-boards.greenhouse.io/mercury/jobs/5803347004", level:"senior", city:"nyc", added:"2026-06-30", posted:"2026-06-29", desc:"Build an LLM assistant that banks in natural language." },
@@ -12889,7 +12889,8 @@ const COMPANIES = [
       { title:"Software Engineer - Product", url:"https://job-boards.greenhouse.io/mercury/jobs/6101145004", level:"mid", city:"nyc", added:"2026-07-21", posted:"2026-07-10", desc:"Ship features improving startup banking on core product." },
       { title:"Senior Software Engineer - Fraud", url:"https://job-boards.greenhouse.io/mercury/jobs/5847987004", level:"senior", city:"nyc", added:"2026-08-19", posted:"2026-08-18", desc:"Build fraud detection screening new business applications." },
       { title:"Software Engineer - Infrastructure", url:"https://job-boards.greenhouse.io/mercury/jobs/6150432004", level:"mid", city:"nyc", added:"2026-08-21", posted:"2026-08-21", desc:"Build infrastructure behind startup banking." },
-      { title:"Senior Software Engineer - Investments", url:"https://job-boards.greenhouse.io/mercury/jobs/6183014004", level:"senior", city:"nyc", added:"2026-09-06", posted:"2026-09-04", desc:"Build investment products on top of business banking." }
+      { title:"Senior Software Engineer - Investments", url:"https://job-boards.greenhouse.io/mercury/jobs/6183014004", level:"senior", city:"nyc", added:"2026-09-06", posted:"2026-09-04", desc:"Build investment products on top of business banking." },
+      { title:"Senior Software Engineer - SRE", url:"https://job-boards.greenhouse.io/mercury/jobs/6184992004", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-09-08", descRaw:"When the Tarr Steps, a footbridge assembled of heavy stones in Exmoor National Park in England, washed away in a flood in 1942, the Royal Engineers rebuilt it. Then it washed away again in 1952. So the Royal Engineers heaved in more stones: on and on, like a Sisyphean lesson in absurdity. Of course, they do this because the Tarr Steps are a historical monument, believed to be built during the Bronze Age. Modern bridge building looks a lot different and generally requires less upkeep. While we appreciate the charm of ancient things, Mercury is engineering the future of banking*. \"Quaint\" and \"archaic\" are not values we seek in our systems. Rebooting a tumbling server and hoping a flood of requests doesn't wash it away can be an emergency tactic, but we actively seek out durable solutions ov" }
     ] },
   { id:"plaid", name:"Plaid", vertical:"fintech",
     sub:"Banking API + financial data",
@@ -13290,11 +13291,10 @@ const COMPANIES = [
     tagline:"Closes the books with AI",
     stage:"Series B", raised:"$67M", lead:"Menlo",
     badges:["Menlo","8VC"],
-    totalRoles:2,
+    totalRoles:0,
     notes:"Modern accounting close. Spreadsheet UX + workflow + AI.",
     jobs:[
-      { title:"Software Engineer, Product", url:"https://jobs.ashbyhq.com/numeric/ab300c31-df75-48a7-937a-d882774be688", level:"mid", city:"nyc", added:"2026-07-21", posted:"2026-07-17", desc:"Automate ingest, matching, and reporting across financial data." },
-      { title:"Software Engineer, Cash & Close", url:"https://jobs.ashbyhq.com/numeric/27ab9605-e901-41b9-ba19-ddc3d16543a2", level:"mid", city:"nyc", added:"2026-08-06", posted:"2026-07-27", desc:"Build cash and close tools for accounting teams." }
+
     ] },
   { id:"glide", name:"Glide", vertical:"devtools",
     sub:"No-code apps from spreadsheets",
@@ -13439,14 +13439,13 @@ const COMPANIES = [
     tagline:"Streams the world's audio",
     stage:"Public", raised:"$540M pre-IPO", lead:"TCV",
     badges:["NYSE","TCV","DST"],
-    totalRoles:6,
+    totalRoles:5,
     notes:"Public co. Audio infra + recs + ads + creator tools.",
     jobs:[
       { title:"Senior Machine Learning Engineer - Policy & Safety", url:"https://jobs.lever.co/spotify/9eca14d3-8e0b-46de-8161-704e07f3d9d0", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-05-04", desc:"Build ML keeping millions of users and creators safe." },
       { title:"Senior Machine Learning Engineer, Personalization, Magenta", url:"https://jobs.lever.co/spotify/3cf07bc7-2b9f-4531-af88-a09cfdf7b3ab", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-05-07", desc:"Build conversational products for music discovery." },
       { title:"Senior Machine Learning Engineer, Personalization, Muse", url:"https://jobs.lever.co/spotify/d7c43743-2240-45b6-bc31-33e50cbaba4a", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-04-29", desc:"Build the models behind Discover Weekly and Blend." },
       { title:"Senior Software Engineer - Enterprise AI", url:"https://jobs.lever.co/spotify/c73be71c-1a63-4906-9925-95f2115d1f1d", level:"senior", city:"nyc", added:"2026-08-18", posted:"2026-08-13", desc:"Build the internal AI platform with governance and identity." },
-      { title:"Senior Backend Engineer, Podcast", url:"https://jobs.lever.co/spotify/481e84f8-9048-4da3-9ad4-e2fba06e005f", level:"senior", city:"nyc", added:"2026-08-21", posted:"2026-08-21", desc:"Build backends behind podcast streaming." },
       { title:"Senior Machine Learning Engineer - Artist-First AI Music Lab", url:"https://jobs.lever.co/spotify/0d82639f-54c4-4e44-984e-4c9de7e8fffe", level:"senior", city:"nyc", added:"2026-09-06", posted:"2026-09-01", desc:"Build generative music models in an artist-first AI lab." }
     ] },
   { id:"point72", name:"Point72", vertical:"fintech",
@@ -13588,11 +13587,12 @@ const COMPANIES = [
     tagline:"CRM built for support teams",
     stage:"Series F", raised:"$174M", lead:"Tiger",
     badges:["Tiger","Coatue"],
-    totalRoles:2,
+    totalRoles:3,
     notes:"Modern support CRM. Unified customer record + automation + AI.",
     jobs:[
       { title:"Software Engineer, Infrastructure", url:"https://jobs.ashbyhq.com/kustomer/ff55a88e-f510-4d9a-93fe-add4a50879ac", level:"mid", city:"nyc", added:"2026-07-21", posted:"2026-07-08", desc:"Run infrastructure behind a conversational CRM platform." },
-      { title:"Software Engineer, Infrastructure (Optimization)", url:"https://jobs.ashbyhq.com/kustomer/50bf7508-e199-4136-a11f-705f06b834c4", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-06", desc:"Optimize infrastructure behind the conversational CRM." }
+      { title:"Software Engineer, Infrastructure (Optimization)", url:"https://jobs.ashbyhq.com/kustomer/50bf7508-e199-4136-a11f-705f06b834c4", level:"mid", city:"nyc", added:"2026-08-18", posted:"2026-08-06", desc:"Optimize infrastructure behind the conversational CRM." },
+      { title:"Software Engineer, Full Stack (Early Career)", url:"https://jobs.ashbyhq.com/kustomer/4037272a-7fd3-4040-906b-47fde875a817", level:"mid", city:"nyc", added:"2026-09-08", posted:"2026-09-08", descRaw:"About Kustomer Kustomer is the industry leading conversational CRM platform perfecting every customer experience. Built with intelligent tools such as AI and Automation, no code-configuration and a connected data platform that unifies data from multiple sources through a single timeline, Kustomer empowers businesses to operate with greater efficiency and deliver more personalized service to customers across any channel, making every interaction more meaningful and memorable. Today, Kustomer is the core platform for some of the leading customer service brands like Sweetgreen, Starz, Vuori, Resy and Cotopaxi. Kustomer was founded in 2015 by serial entrepreneurs Brad Birnbaum and Jeremy Suriel and has raised over $230M in funding backed by leading VCs. Meta announced its intention to acquire " }
     ] },
   { id:"doubleverify", name:"DoubleVerify", vertical:"saas",
     sub:"Ad measurement (NYSE)",
@@ -14618,10 +14618,10 @@ const COMPANIES = [
     tagline:"Browsers built for agents",
     stage:"Series A", raised:"$27M", lead:"Kleiner",
     badges:["Kleiner","CRV"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC + SF. Stagehand SDK, key primitive for agentic web.",
     jobs:[
-      { title:"Software Engineer (Dashboard) - New York", url:"https://jobs.ashbyhq.com/browserbase/689df609-4658-4769-bc2c-5962516237bb", level:"mid", city:"nyc", added:"2026-07-21", posted:"2026-07-13", desc:"Build dashboards with data viz, auth, and billing." }
+
     ] },
   { id:"midpage", name:"Midpage", vertical:"ai",
     sub:"AI legal research assistant",
@@ -16348,7 +16348,7 @@ const COMPANIES = [
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Founding Product Engineer", url:"https://www.netradyne.com/company/careers?gh_jid=4717687005", level:"founding", city:"sd", added:"2026-08-24", posted:"2026-07-29", desc:"Build fleet-safety products on computer vision at the edge." }
+      { title:"Founding Product Engineer", url:"https://www.netradyne.com/company/careers?gh_jid=4717687005", level:"founding", city:"sd", added:"2026-09-08", posted:"2026-08-26", descRaw:"Netradyne harnesses the power of Computer Vision and Edge Computing to revolutionize the modern-day transportation ecosystem. We are a leader in fleet safety solutions. With growth exceeding 4x year over year, our solution is quickly being recognized as a significant disruptive technology. Our team is growing, and we need forward-thinking, uncompromising, competitive team members to continue to facilitate our growth. About us: At Netradyne, our team is committed to delivering solutions to our customers that advance their market leadership. Our focus is to continuously drive innovation while delivering meaningful, actionable data. The Netradyne Driveri® Vision-Based Driver Recognition Safety Program significantly advances the technology category through the application of Artificial Intelli" }
     ] },
   { id:"element-biosciences", name:"Element Biosciences", vertical:"health",
     sub:"DNA sequencing systems",
@@ -16375,12 +16375,13 @@ const COMPANIES = [
     tagline:"Run the enterprise on workflows.",
     stage:"Public", raised:"", lead:"",
     badges:["NYSE"],
-    totalRoles:3,
+    totalRoles:4,
     notes:"",
     jobs:[
       { title:"Senior Staff Software Engineer", url:"https://jobs.smartrecruiters.com/servicenow/744000142983469", level:"senior", city:"sd", added:"2026-08-24", posted:"2026-08-11" },
       { title:"Senior Staff Data Platform Engineer - Apache Iceberg - Apache Spark", url:"https://jobs.smartrecruiters.com/servicenow/744000146708409", level:"senior", city:"sd", added:"2026-09-02", posted:"2026-09-01" },
-      { title:"Data Platform Software Engineer", url:"https://jobs.smartrecruiters.com/servicenow/744000146570652", level:"mid", city:"sd", added:"2026-09-02", posted:"2026-08-31" }
+      { title:"Data Platform Software Engineer", url:"https://jobs.smartrecruiters.com/servicenow/744000146570652", level:"mid", city:"sd", added:"2026-09-02", posted:"2026-08-31" },
+      { title:"Senior Software Engineer", url:"https://jobs.smartrecruiters.com/servicenow/744000148314159", level:"senior", city:"sd", added:"2026-09-08", posted:"2026-09-08" }
     ] },
   { id:"illumina", name:"Illumina", vertical:"health",
     sub:"Genomic sequencing (NASDAQ: ILMN)",
@@ -16872,6 +16873,115 @@ const COMPANIES = [
     notes:"",
     jobs:[
       { title:"Backend Engineer", url:"https://jobs.ashbyhq.com/cambio/34400221-9b07-4db9-929b-3441bdf00dd4", level:"mid", city:"nyc", added:"2026-09-06", posted:"2026-09-02", desc:"Build backend for a real estate decarbonization platform." }
+    ] },
+  { id:"bedrock-robotics", name:"Bedrock Robotics", vertical:"proptech",
+    sub:"construction autonomy",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:6,
+    notes:"",
+    jobs:[
+      { title:"Machine Learning Engineer: Evaluation", url:"https://jobs.ashbyhq.com/bedrock-robotics/5c2c834d-61f1-4ec9-812b-8665a9f5024d", level:"mid", city:"nyc", added:"2026-09-08", posted:"2026-01-31", descRaw:"Join the team bringing advanced autonomy to the built world At Bedrock, we're moving AI out of the lab and into the real world. Our team includes veterans who helped launch Waymo, scaled Segment to a $3.2B acquisition, and grew Uber Freight to $5B in revenue. Today, we're deploying autonomous systems on heavy construction equipment across the country, improving safety on job sites and accelerating schedules on critical infrastructure projects. We're not here debating the future of AI. We're deploying it in the real world. In just two years, we've raised $350M and achieved the first fully autonomous excavator deployments in construction. This is where algorithms meet steel-toed boots. You'll work alongside construction veterans and world-class engineers to solve physical-world problems that" },
+      { title:"Software Engineer", url:"https://jobs.ashbyhq.com/bedrock-robotics/8d061c9d-631a-4230-b2e5-402ed1dae5ee", level:"mid", city:"nyc", added:"2026-09-08", posted:"2026-06-17", descRaw:"Join the team bringing advanced autonomy to the built world At Bedrock, we're moving AI out of the lab and into the real world. Our team includes veterans who helped launch Waymo, scaled Segment to a $3.2B acquisition, and grew Uber Freight to $5B in revenue. Today, we're deploying autonomous systems on heavy construction equipment across the country, improving safety on job sites and accelerating schedules on critical infrastructure projects. We're not here debating the future of AI. We're deploying it in the real world. In just two years, we've raised $350M and achieved the first fully autonomous excavator deployments in construction. This is where algorithms meet steel-toed boots. You'll work alongside construction veterans and world-class engineers to solve physical-world problems that" },
+      { title:"Simulation Infrastructure Engineer", url:"https://jobs.ashbyhq.com/bedrock-robotics/b4fb93b3-2df3-4647-bfea-a402bc22a498", level:"mid", city:"nyc", added:"2026-09-08", posted:"2026-04-29", descRaw:"Join the team bringing advanced autonomy to the built world At Bedrock, we're moving AI out of the lab and into the real world. Our team includes veterans who helped launch Waymo, scaled Segment to a $3.2B acquisition, and grew Uber Freight to $5B in revenue. Today, we're deploying autonomous systems on heavy construction equipment across the country, improving safety on job sites and accelerating schedules on critical infrastructure projects. We're not here debating the future of AI. We're deploying it in the real world. In just two years, we've raised $350M and achieved the first fully autonomous excavator deployments in construction. This is where algorithms meet steel-toed boots. You'll work alongside construction veterans and world-class engineers to solve physical-world problems that" },
+      { title:"Data Engineer", url:"https://jobs.ashbyhq.com/bedrock-robotics/3ea721d7-eed6-44b3-a5b7-1e6698bf621f", level:"mid", city:"nyc", added:"2026-09-08", posted:"2026-06-17", descRaw:"Join the team bringing advanced autonomy to the built world At Bedrock, we're moving AI out of the lab and into the real world. Our team includes veterans who helped launch Waymo, scaled Segment to a $3.2B acquisition, and grew Uber Freight to $5B in revenue. Today, we're deploying autonomous systems on heavy construction equipment across the country, improving safety on job sites and accelerating schedules on critical infrastructure projects. We're not here debating the future of AI. We're deploying it in the real world. In just two years, we've raised $350M and achieved the first fully autonomous excavator deployments in construction. This is where algorithms meet steel-toed boots. You'll work alongside construction veterans and world-class engineers to solve physical-world problems that" },
+      { title:"Developer Platform Engineer", url:"https://jobs.ashbyhq.com/bedrock-robotics/f9ed6795-60e2-42f2-b532-eb393df0f810", level:"mid", city:"nyc", added:"2026-09-08", posted:"2026-06-17", descRaw:"Join the team bringing advanced autonomy to the built world At Bedrock, we're moving AI out of the lab and into the real world. Our team includes veterans who helped launch Waymo, scaled Segment to a $3.2B acquisition, and grew Uber Freight to $5B in revenue. Today, we're deploying autonomous systems on heavy construction equipment across the country, improving safety on job sites and accelerating schedules on critical infrastructure projects. We're not here debating the future of AI. We're deploying it in the real world. In just two years, we've raised $350M and achieved the first fully autonomous excavator deployments in construction. This is where algorithms meet steel-toed boots. You'll work alongside construction veterans and world-class engineers to solve physical-world problems that" },
+      { title:"Software Engineer, Simulation", url:"https://jobs.ashbyhq.com/bedrock-robotics/1dcb4a02-a789-4d15-a42f-6de115410397", level:"mid", city:"nyc", added:"2026-09-08", posted:"2026-07-10", descRaw:"Join the team bringing advanced autonomy to the built world At Bedrock, we're moving AI out of the lab and into the real world. Our team includes veterans who helped launch Waymo, scaled Segment to a $3.2B acquisition, and grew Uber Freight to $5B in revenue. Today, we're deploying autonomous systems on heavy construction equipment across the country, improving safety on job sites and accelerating schedules on critical infrastructure projects. We're not here debating the future of AI. We're deploying it in the real world. In just two years, we've raised $350M and achieved the first fully autonomous excavator deployments in construction. This is where algorithms meet steel-toed boots. You'll work alongside construction veterans and world-class engineers to solve physical-world problems that" }
+    ] },
+  { id:"forge-global", name:"Forge Global", vertical:"saas",
+    sub:"private markets",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:5,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer I", url:"https://job-boards.greenhouse.io/forgeglobal/jobs/5984947004", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-07-20", descRaw:"At Forge, we know our team is our greatest asset. As technology innovators in the private market, our vision is to deliver a richer future for everyone. We live that vision through our values of being bold, accountable, and humble. We experience the value that our vision brings to the world every day, helping the teams behind the greatest innovations of our generation, from space travel to artificial intelligence, and more. With liquidity solutions, exclusive data and insights, a custody offering, and a vibrant marketplace, Forge’s goal is to build the best-in-class technology infrastructure to power a global private market that is transparent, accessible, and seamless for companies, their employees, and investors. Through Forge, employees can sell their private shares, employers can rewar" },
+      { title:"Senior Software Engineer I, Broker Platform Engineering", url:"https://job-boards.greenhouse.io/forgeglobal/jobs/6111977004", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-08-17", descRaw:"At Forge, we know our team is our greatest asset. As technology innovators in the private market, our vision is to deliver a richer future for everyone. We live that vision through our values of being bold, accountable, and humble. We experience the value that our vision brings to the world every day, helping the teams behind the greatest innovations of our generation, from space travel to artificial intelligence, and more. With liquidity solutions, exclusive data and insights, a custody offering, and a vibrant marketplace, Forge’s goal is to build the best-in-class technology infrastructure to power a global private market that is transparent, accessible, and seamless for companies, their employees, and investors. Through Forge, employees can sell their private shares, employers can rewar" },
+      { title:"Senior Software Engineer II, Customer Domain & Marketplace Middleware Engineering", url:"https://job-boards.greenhouse.io/forgeglobal/jobs/5971240004", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-08-25", descRaw:"At Forge, we know our team is our greatest asset. As technology innovators in the private market, our vision is to deliver a richer future for everyone. We live that vision through our values of being bold, accountable, and humble. We experience the value that our vision brings to the world every day, helping the teams behind the greatest innovations of our generation, from space travel to artificial intelligence, and more. With liquidity solutions, exclusive data and insights, a custody offering, and a vibrant marketplace, Forge’s goal is to build the best-in-class technology infrastructure to power a global private market that is transparent, accessible, and seamless for companies, their employees, and investors. Through Forge, employees can sell their private shares, employers can rewar" },
+      { title:"Senior Software Engineer II of Trading", url:"https://job-boards.greenhouse.io/forgeglobal/jobs/6008397004", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-07-20", descRaw:"At Forge, we know our team is our greatest asset. As technology innovators in the private market, our vision is to deliver a richer future for everyone. We live that vision through our values of being bold, accountable, and humble. We experience the value that our vision brings to the world every day, helping the teams behind the greatest innovations of our generation, from space travel to artificial intelligence, and more. With liquidity solutions, exclusive data and insights, a custody offering, and a vibrant marketplace, Forge’s goal is to build the best-in-class technology infrastructure to power a global private market that is transparent, accessible, and seamless for companies, their employees, and investors. Through Forge, employees can sell their private shares, employers can rewar" },
+      { title:"Senior Software Engineer (Tech Lead), Customer Domain Engineering", url:"https://job-boards.greenhouse.io/forgeglobal/jobs/6008460004", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-07-20", descRaw:"At Forge, we know our team is our greatest asset. As technology innovators in the private market, our vision is to deliver a richer future for everyone. We live that vision through our values of being bold, accountable, and humble. We experience the value that our vision brings to the world every day, helping the teams behind the greatest innovations of our generation, from space travel to artificial intelligence, and more. With liquidity solutions, exclusive data and insights, a custody offering, and a vibrant marketplace, Forge’s goal is to build the best-in-class technology infrastructure to power a global private market that is transparent, accessible, and seamless for companies, their employees, and investors. Through Forge, employees can sell their private shares, employers can rewar" }
+    ] },
+  { id:"stackadapt", name:"StackAdapt", vertical:"adtech",
+    sub:"DSP",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer, EngOps", url:"https://job-boards.greenhouse.io/stackadapt/jobs/4119074009", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-08-16", descRaw:"StackAdapt is the leading technology company that empowers marketers to reach, engage, and convert audiences with precision. With 465 billion automated optimizations per second, the AI-powered StackAdapt Marketing Platform seamlessly connects brand and performance marketing to drive measurable results across the entire customer journey. The most forward-thinking marketers choose StackAdapt to orchestrate high-impact campaigns across programmatic advertising and marketing channels. The Core Services Site Reliability Engineering team sets the foundations and maintains the principles of reliable engineering across StackAdapt's core service teams. Core service teams power StackAdapt's software backend, where all data processing occurs. The Core Services SRE team ensures robust and reliable sof" },
+      { title:"Machine Learning Engineer", url:"https://job-boards.greenhouse.io/stackadapt/jobs/4018063009", level:"mid", city:"nyc", added:"2026-09-08", posted:"2026-08-18", descRaw:"StackAdapt is the leading technology company that empowers marketers to reach, engage, and convert audiences with precision. With 465 billion automated optimizations per second, the AI-powered StackAdapt Marketing Platform seamlessly connects brand and performance marketing to drive measurable results across the entire customer journey. The most forward-thinking marketers choose StackAdapt to orchestrate high-impact campaigns across programmatic advertising and marketing channels. We're looking to add a Machine Learning Engineer to our Data Science team! This team works on solving complex problems for StackAdapt's digital advertising platform. You'll be working directly with our Applied Machine Learning Scientists, Machine Learning Engineers, Engineering teams, and our CTO/Co-Founder on bu" }
+    ] },
+  { id:"genalyte", name:"Genalyte", vertical:"health",
+    sub:"diagnostics",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Software Engineer II", url:"https://jobs.lever.co/genalyte/ca901b92-5fe1-4843-9a4a-c404d24da9d5", level:"mid", city:"sd", added:"2026-09-08", posted:"2026-08-28", descRaw:"ABOUT GENALYTE At Genalyte, we’re revolutionizing diagnostic testing to empower a healthier future. Genalyte is a San Diego-based diagnostics company developing the Merlin platform, a novel photonic ring resonator-based system designed to deliver rapid, multiplexed diagnostic results. We believe that timely and accurate health insights shouldn’t be a luxury, but a necessity. We are driven by a vision where advanced diagnostic capabilities are accessible, efficient, and seamlessly integrated into healthcare. Genalyte is more than just a laboratory; we are advocates for health empowerment, dedicated to providing insights that can transform lives and communities. WHY WORK FOR US Joining Genalyte at this pivotal pre-commercial stage means your work will have real, visible impact \u2014 on our techn" }
+    ] },
+  { id:"shopmy", name:"Shopmy", vertical:"saas",
+    sub:"creator commerce",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer, Agent Platform", url:"https://job-boards.greenhouse.io/shopmy/jobs/5364583008", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-07-29", descRaw:"Join ShopMy – Powering the Future of Digital Marketing ShopMy is transforming e-commerce by building the infrastructure for human-led curation at scale. We help brands run performance-driven creator programs while enabling top creators to monetize their influence and partner directly with the brands they love\u2014driving discovery through trusted tastemakers and authentic recommendations. ShopMy recently became a unicorn, raising at a $1.5B valuation with backing from Bessemer Venture Partners, Avenir Growth Capital, and Bain Capital Ventures. At ShopMy, you're building the future of human-led commerce for the world's best brands, tastemakers, and shoppers. You move fast and see immediate impact in your work, alongside accomplished teammates who are driven by helping find the world's best thin" }
+    ] },
+  { id:"pallet", name:"Pallet", vertical:"marketplace",
+    sub:"logistics AI",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Platform Engineer, Security (Senior/Staff)", url:"https://job-boards.greenhouse.io/pallet/jobs/5107230007", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-08-21", descRaw:"About Pallet Pallet is building AI Agents to transform the physical economy \u2014 a $12 trillion global industry. We’ve raised $50M from top investors, including General Catalyst, Bessemer Venture Partners, and Bain Capital Ventures. In under two years, we’ve achieved 700% revenue growth and are just getting started. Our mission is to increase the efficiency of the global supply chain by automating the manual workflows that slow supply chain teams down \u2014 from scheduling and appointment setting to data entry and load management. Our flagship platform provides end-to-end visibility, control, and optimization, while our newest product, CoPallet, introduces AI Agents that can understand and execute requests in real time and integrate directly with customer systems. As companies across the physical" }
+    ] },
+  { id:"nexxen", name:"Nexxen", vertical:"adtech",
+    sub:"adtech",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Software Engineer 1 - DSP Runtime", url:"https://jobs.ashbyhq.com/nexxen/53cbef54-13b1-4539-9a18-bdd0c3431d32", level:"mid", city:"nyc", added:"2026-09-08", posted:"2026-07-30", descRaw:"We are seeking a Software Engineer I to build core components of our Demand Side Platform (DSP) that powers real-time programmatic advertising. The role focuses on developing high-throughput, low-latency distributed systems capable of processing billions of bid requests per day while delivering optimized bidding decisions within strict latency constraints. You will experiment with new and innovative technologies designed for Programmatic Ad serving and Ad Tech solutions. You will work on the core bidding infrastructure, targeting systems, and integrations with supply partners to drive efficient ad delivery and maximize campaign performance. This role will be based in our NYC local office. Our team follows a hybrid schedule, working in the office three days a week and remotely for the rest." }
+    ] },
+  { id:"postman", name:"Postman", vertical:"devtools",
+    sub:"API platform",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer - Fern", url:"https://job-boards.greenhouse.io/postman/jobs/7767101003", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-08-17", descRaw:"Who Are We? Postman is the world’s leading API platform, used by more than 45 million+ developers and 500,000 organizations, including 98% of the Fortune 500. Postman is helping developers and professionals across the globe build the API-first world by simplifying each step of the API lifecycle and streamlining collaboration\u2014enabling users to create better APIs, faster. The company is headquartered in San Francisco and has offices in Boston, New York, Austin, Tokyo, London, and Bangalore - where Postman was founded. Postman is privately held, with funding from Battery Ventures, BOND, Coatue, CRV, Insight Partners, and Nexus Venture Partners. Learn more at postman.com or connect with Postman on X via @getpostman. P.S: We highly recommend reading The \"API-First World\" graphic novel to unders" }
+    ] },
+  { id:"you-com", name:"You com", vertical:"ai",
+    sub:"search AI",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Backend Engineer", url:"https://job-boards.greenhouse.io/youcom/jobs/4528457008", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-08-06", descRaw:"About Us At You.com, we are building the AI Search Infrastructure that powers modern AI systems. Our goal is to create the trusted knowledge layer that agents, applications, and enterprises rely on to retrieve real-time, accurate, and citation-backed information. Our platform combines proprietary vertical indexes with LLM-optimized retrieval systems to power AI agents, applications, and enterprise workflows. We are solving hard problems across search, large language models, and large-scale infrastructure to make AI systems more reliable, transparent, and useful. Our team includes engineers, researchers, product builders, and operators who care about solving meaningful problems and delivering real-world impact. Whether you are improving core infrastructure, shaping product experiences, or h" }
+    ] },
+  { id:"luma-ai", name:"Luma AI", vertical:"saas",
+    sub:"video models",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/lumaai/3fd52f19-c2b8-4cd4-8cb2-3db7aaee0483", level:"mid", city:"nyc", added:"2026-09-08", posted:"2026-07-24", descRaw:"Forward Deployed Engineers turn what Luma's models can do into systems customers actually rely on. You embed with a customer, learn their workflow, define the problem with them, and build the production system that solves it, with their data and their constraints. You own both the relationship and the code. This is engineering at the edge, where ambiguity is the default and \"what should we build?\" is yours to answer. It's built for people who've already been the single point of ownership on a hard problem: a technical founder, the engineer who flew out and rebuilt a customer's workflow, a consultant who actually wrote the system. If you need a PRD and a well-defined ticket queue, this isn't it. What You'll Own Work directly with customers to understand their workflows, constraints, and goa" }
+    ] },
+  { id:"vise", name:"Vise", vertical:"fintech",
+    sub:"AI wealth management",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer", url:"https://job-boards.greenhouse.io/viseai/jobs/5474811003", level:"senior", city:"nyc", added:"2026-09-08", posted:"2026-03-02", descRaw:"We are not working with external recruiting partners at this time, please apply directly to the role if you have further interest in joining Vise Engineering at Vise has the unique opportunity to use technology to revolutionize the investment industry. Team members are given ownership and trust with the understanding that they are supported by industry experts and together can build a best-in-class product. We are a small and fast-paced team where everyone has a voice in the development of our product and technology. As a senior full-stack software engineer, you will play a flexible role across our product\u2014working on everything from our core portfolio creation engine to our trading system to our client-facing web application. You will have significant ownership and will have the opportunit" }
     ] }
 ];
 
