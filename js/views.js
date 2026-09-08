@@ -5349,6 +5349,19 @@ const COOLNESS = {
   // YC climate/proptech, Waterloo-based. Good mission, low NYC name
   // recognition — the axis is whether it lands at dinner, and it doesn't yet.
   'cambio':5,
+
+  // ── 2026-09-08 auto-scored ──
+  'luma-ai':8,          // generative video, genuinely scene-y
+  'you-com':6,          // AI search, known but not admired
+  'postman':5,          // ubiquitous dev tool, neutral to name
+  'bedrock-robotics':6, // Waymo/Uber Freight founders, construction autonomy
+  'shopmy':6,           // creator commerce, downtown-adjacent
+  'stackadapt':4,       // adtech DSP
+  'nexxen':3,           // adtech, enterprise-flavoured
+  'pallet':5,           // logistics AI, well funded, low profile
+  'forge-global':4,     // private-markets infrastructure
+  'vise':5,             // AI wealth management
+  'genalyte':4,         // San Diego diagnostics
 };
 
 const FRONTIER = new Set([
