@@ -5362,6 +5362,11 @@ const COOLNESS = {
   'forge-global':4,     // private-markets infrastructure
   'vise':5,             // AI wealth management
   'genalyte':4,         // San Diego diagnostics
+
+  // ── 2026-09-14 auto-scored ──
+  'fastly':5,        // CDN/edge infra; respected, not a name that lands
+  'iterable-inc':4,  // marketing engagement SaaS
+  'kong':5,          // API gateway, strong developer mindshare
 };
 
 const FRONTIER = new Set([

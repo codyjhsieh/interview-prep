@@ -1639,7 +1639,7 @@ CANDIDATES = [
   ("hone-health","Hone Health","greenhouse","honehealth","health","Hormone health","","","",[],""),
   ("incident-io","Incident io","ashby","incident","devtools","Incident management","","","",[],""),
   ("instructure","Instructure","ashby","instructure","ed","Canvas LMS","","","",[],""),
-  ("iterable-inc","Iterable Inc","ashby","iterable","saas","Cross-channel marketing","","","",[],""),
+  ("iterable-inc","Iterable","ashby","iterable","saas","Cross-channel marketing","","","",[],""),
   ("kodiak-robotics","Kodiak Robotics","greenhouse","kodiak","robotics","Autonomous trucking","","","",[],""),
   ("lambda-labs","Lambda Labs","ashby","lambda","infra","GPU cloud and hardware","","","",[],""),
   ("leantaas","LeanTaaS","lever","leantaas","health","Hospital capacity software","","","",[],""),
