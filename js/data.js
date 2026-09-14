@@ -14061,8 +14061,8 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Staff Machine Learning Engineer", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Senior-Staff-Machine-Learning-Engineer_JR5795-1", level:"senior", city:"nyc", added:"2026-08-06" },
       { title:"Software Engineer II, Developer Platform", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Software-Engineer-II--Developer-Platform_JR5773-2", level:"mid", city:"nyc", added:"2026-09-06" },
-      { title:"Senior Staff Machine Learning Engineer", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Senior-Staff-Machine-Learning-Engineer_JR5413-1", level:"senior", city:"nyc", added:"2026-09-14" },
-      { title:"Machine Learning Engineer II, Fulfillment", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Machine-Learning-Engineer-II--Fulfillment_JR5859-1", level:"mid", city:"nyc", added:"2026-09-14" }
+      { title:"Machine Learning Engineer II, Fulfillment", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Machine-Learning-Engineer-II--Fulfillment_JR5859-1", level:"mid", city:"nyc", added:"2026-09-14" },
+      { title:"Senior Staff Machine Learning Engineer", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Senior-Staff-Machine-Learning-Engineer_JR5413-1", level:"senior", city:"nyc", added:"2026-09-14" }
     ] },
   { id:"linear", name:"Linear", vertical:"saas",
     sub:"product development platform",
