@@ -129,12 +129,25 @@ TITLE_INCLUDE = re.compile(
   r"software[\s-]developer|"
   r"(?:full[\s-]?stack|backend)[\s-]developer"
   r")\b", re.IGNORECASE)
-# Dual-tagged seniority ("Senior/Staff Backend Engineer") = still senior IC.
-# When the title contains "senior" we mask out staff/principal tokens BEFORE
-# running TITLE_EXCLUDE so those titles survive; the rest of the exclusions
-# (manager, sales/solutions/customer eng, etc.) still apply.
+# Dual-tagged seniority ("Senior/Staff Backend Engineer", "Senior or Staff
+# SWE") is one req open at EITHER level, so the senior half qualifies and the
+# staff token is removed before TITLE_EXCLUDE runs.
+#
+# "Senior Staff Software Engineer" is NOT that. It is a single title one rung
+# ABOVE Staff, which this board already drops — so keeping it was incoherent.
+# The old gate was `SENIORITY_MARK.search(title)`, which masked staff whenever
+# "senior" appeared anywhere in the title, so every Senior Staff role walked
+# through a filter built to exclude Staff (19 rows by 2026-09-15).
+#
+# Requiring an explicit separator distinguishes the two, and removing only the
+# matched construct — rather than every staff token — keeps titles that are
+# staff-level on BOTH sides out: "Staff/Sr. Staff Software Engineer" loses
+# "Staff/Sr." and still has a bare "Staff" left for TITLE_EXCLUDE to catch.
 SENIORITY_MARK = re.compile(r'\bsenior\b|\bsr[.\s]', re.I)
 STAFF_PRINCIPAL = re.compile(r'\b(staff|principal)\b', re.I)
+DUAL_SENIORITY = re.compile(
+  r'\b(?:senior|sr\.?)\s*(?:/|or|,)\s*(?:staff|principal)\b|'
+  r'\b(?:staff|principal)\s*(?:/|or|,)\s*(?:senior|sr\.?)\b', re.I)
 TITLE_EXCLUDE = re.compile(
   r"\b("
   r"staff[\s,]|principal|^lead\s|\slead\s|\slead$|head\s|chief|director|"
@@ -2480,7 +2493,7 @@ def filter_jobs(ats, raw, slug=""):
       city = title_city
     elif OTHER_TITLE_CITY.search(title) or OTHER_TITLE_CITY_ABBR.search(title):
       continue
-    title_for_check = STAFF_PRINCIPAL.sub("", title) if SENIORITY_MARK.search(title) else title
+    title_for_check = DUAL_SENIORITY.sub(" ", title)
     if TITLE_EXCLUDE.search(title_for_check): continue
     if TITLE_EXCLUDE_UNBOUNDED.search(title): continue
     if not TITLE_INCLUDE.search(title): continue

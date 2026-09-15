@@ -5367,6 +5367,14 @@ const COOLNESS = {
   'fastly':5,        // CDN/edge infra; respected, not a name that lands
   'iterable-inc':4,  // marketing engagement SaaS
   'kong':5,          // API gateway, strong developer mindshare
+
+  // ── 2026-09-15 auto-scored ──
+  'sleeper':7,        // fantasy sports app with real cultural pull
+  'meow':6,           // startup business banking, downtown-adjacent
+  'givebutter':5,     // nonprofit fundraising SaaS
+  'h1':4,             // healthcare data, enterprise-flavoured
+  'komodohealth':4,   // healthcare data for life sciences
+  'jll':2,            // global commercial real estate services
 };
 
 const FRONTIER = new Set([

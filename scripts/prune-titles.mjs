@@ -50,6 +50,25 @@ const FAMILIES = {
   // new variant. Deliberately also removes Distributed Systems Engineer, ML
   // Systems Engineer and the HFT trading-systems roles.
   systemseng: /\bsystems?\s+engineer\b/i,
+  // "Senior Staff" / "Sr. Staff", retired 2026-09-15. One rung ABOVE Staff,
+  // which this board already drops, so keeping them was incoherent. The
+  // negative lookahead spares genuinely dual-tagged reqs open at either level
+  // ("Senior/Staff Software Engineer") — there the two are joined by a
+  // separator rather than juxtaposed.
+  // Matches any staff/principal-level title, then excludes the two things that
+  // legitimately contain those words:
+  //   - dual-tagged reqs open at either level ("Senior/Staff", "(Senior or
+  //     Staff)"), where the senior half qualifies
+  //   - "Member of Technical Staff", the flat IC title at Perplexity,
+  //     Reflection AI and Fireworks — ~27 rows that must survive
+  // TITLE_EXCLUDE already blocks new bare-Staff arrivals; this is the cleanup
+  // half for rows that predate it (2 were still on the board on 2026-09-15).
+  seniorstaff: (t) =>
+    /\b(staff|principal)\b/i.test(t)
+    && !/\b(?:senior|sr\.?)\s*(?:\/|or|,)\s*(?:staff|principal)\b/i.test(t)
+    && !/\b(?:staff|principal)\s*(?:\/|or|,)\s*(?:senior|sr\.?)\b/i.test(t)
+    && !/\(\s*senior\s+or\s+staff/i.test(t)
+    && !/member\s+of\s+technical\s+staff/i.test(t),
   // Not \b-wrapped, same reason as cpp: a trailing \b after "+" never matches,
   // so "Staff+ Software Engineer" survived TITLE_EXCLUDE's staff[\s,] clause.
   staffplus: /staff\s?\+/i,
@@ -109,8 +128,15 @@ const active = argv.includes('--only')
 
 const { src, companies } = readCompanies(DATA);
 
+// A family is normally a RegExp. `seniorstaff` is a predicate instead, because
+// it needs to match staff/principal titles while carving out dual-tagged reqs
+// and "Member of Technical Staff" — expressible as one regex only with nested
+// lookaheads that nobody would be able to edit later.
+const matches = (rule, title) =>
+  typeof rule === 'function' ? rule(title) : rule.test(title);
+
 const classify = (title) => {
-  for (const [name, re] of Object.entries(active)) if (re.test(title)) return name;
+  for (const [name, rule] of Object.entries(active)) if (matches(rule, title)) return name;
   return null;
 };
 
