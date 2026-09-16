@@ -1,6 +1,6 @@
 ---
 name: refresh-fetch-merge
-description: Fetch fresh ATS boards in parallel (10 workers) and additively merge New York + San Diego engineering roles into js/data.js. Refuses to write on suspiciously sparse fetches.
+description: Fetch fresh ATS boards in parallel (10 workers) and additively merge engineering roles across the seven covered cities into js/data.js. Refuses to write on suspiciously sparse fetches.
 ---
 
 # refresh-fetch-merge
@@ -24,15 +24,31 @@ Expect ~1-2 min wall for fetch alone (was 7 min before parallelization).
 
 ## Cities
 
-The board covers **exactly two**: New York and San Diego. They live in one
-place — the `CITIES` list at the top of `scripts/refresh-companies.py`:
+The board covers **seven**: New York, San Diego, Los Angeles, London, Paris,
+Madrid and Barcelona. They live in one place — the `CITIES` list at the top of
+`scripts/refresh-companies.py`, plus `CITY_ABBR` for the ambiguous
+abbreviations:
 
 ```python
 CITIES = [
-  ("nyc", re.compile(r'\b(new[\s-]?york|nyc|brooklyn|manhattan)\b', re.I)),
-  ("sd",  re.compile(r'\b(san[\s-]?diego|la\s+jolla)\b', re.I)),
+  ("nyc", ...), ("sd", ...), ("la", ...),
+  ("mad", ...), ("bcn", ...), ("par", ...), ("ldn", ...),
 ]
+CITY_ABBR = [("la", re.compile(r'\bLA\b')), ("ldn", re.compile(r'\bLDN\b'))]
 ```
+
+Three things to keep straight when adding another:
+
+1. **Order matters.** `match_city` returns the first hit, so `sd` stays ahead
+   of `la` — "La Jolla, CA" must resolve to San Diego.
+2. **`CITY_ABBR` is case-sensitive on purpose.** The `CITIES` patterns are
+   `re.I`, and a case-insensitive `\bla\b` matches "La Jolla". Bare
+   abbreviations belong in `CITY_ABBR`, which runs only after every
+   spelled-out name has been ruled out.
+3. **Remove the city from `OTHER_TITLE_CITY` and `OTHER_TITLE_CITY_ABBR`.**
+   Those reject titles naming a city the board does *not* cover, so leaving a
+   newly-supported city there is at best confusing and at worst a silent drop.
+   `js/views.js`'s `cityLabel` / `cityShort` need the new key too.
 
 `match_city()` returns the first matching key, so a posting tagged for several
 offices resolves to whichever city is listed first (NYC wins a NYC/SD posting).

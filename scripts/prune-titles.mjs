@@ -39,7 +39,7 @@ const FAMILIES = {
   // Not \b-wrapped: a trailing \b after "+" never matches, so "Engineer, C++"
   // would survive. Covers "C++", "C/C++", "(C++/Java)".
   cpp:      /c\s?\+\+/i,
-  military: /\b(defen[cs]e|military|warfare|weapons?|munitions?|us\s+government|public\s+sector|federal|dod|national\s+security|intelligence\s+community)\b/i,
+  military: /\b(secret\s+clearance|security\s+clearance|ts\/sci|top\s+secret|polygraph|defen[cs]e|military|warfare|weapons?|munitions?|us\s+government|public\s+sector|federal|dod|national\s+security|intelligence\s+community)\b/i,
   embedded: /\b(embedded|firmware|fpga|rtos|bare[\s-]?metal|device\s+driver|microcontroller|mcu|hardware\s+engineer|electrical\s+engineer)\b/i,
   // "token" is deliberately absent — auth tokens and PCI tokenization are not
   // crypto, and including it would drop identity and payments roles.
@@ -117,6 +117,9 @@ const RETIRED_COMPANIES = new Set([
   // AI code-review tool of the same name. Wrong company and a retired family.
   'ellipsis',
   'leidos',   // defense contractor, retired 2026-08-27
+  // Space-defence company, same class as the primes above. Arrived on the
+  // board when Los Angeles was added, 2026-09-16.
+  'true-anomaly',
 ]);
 
 const argv = process.argv.slice(2);

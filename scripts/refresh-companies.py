@@ -57,11 +57,33 @@ DATA_JS   = REPO_ROOT / "js" / "data.js"
 # several offices resolves to the first key that matches, so NYC wins a
 # "New York / San Diego" posting. The key is what lands in a job's `city`
 # field and drives the city chips in the UI.
+# Order matters: match_city returns the FIRST hit, so "sd" stays ahead of "la"
+# — "La Jolla, CA" must resolve to San Diego, not Los Angeles.
 CITIES = [
   ("nyc", re.compile(r'\b(new[\s-]?york|nyc|brooklyn|manhattan)\b', re.I)),
   ("sd",  re.compile(r'\b(san[\s-]?diego|la\s+jolla)\b', re.I)),
+  # Los Angeles is spelled out plus the tech-heavy neighbourhoods employers
+  # actually name. A bare "la" is deliberately ABSENT: these patterns are re.I,
+  # and a case-insensitive \bla\b matches "La Jolla". The capitalised
+  # abbreviation is handled by CITY_ABBR below, where case disambiguates it.
+  ("la",  re.compile(r'\b(los[\s-]?angeles|santa monica|culver city|pasadena|'
+                     r'burbank|el segundo|playa vista|west hollywood|'
+                     r'marina del rey|long beach)\b', re.I)),
+  ("mad", re.compile(r'\bmadrid\b', re.I)),
+  ("bcn", re.compile(r'\bbarcelona\b', re.I)),
+  ("par", re.compile(r'\bparis\b', re.I)),
+  ("ldn", re.compile(r'\b(london|greater london)\b', re.I)),
 ]
-CITY_LABEL = {"nyc": "NYC", "sd": "San Diego"}
+CITY_LABEL = {"nyc": "NYC", "sd": "San Diego", "la": "Los Angeles",
+              "mad": "Madrid", "bcn": "Barcelona", "par": "Paris",
+              "ldn": "London"}
+# Ambiguous city abbreviations, CASE-SENSITIVE. "LA" and "LDN" only mean a city
+# when capitalised; lowercase "la" is Spanish/French filler and the start of
+# "La Jolla". Checked after CITIES so a spelled-out city always wins.
+CITY_ABBR = [
+  ("la",  re.compile(r'\bLA\b')),
+  ("ldn", re.compile(r'\bLDN\b')),
+]
 # Any supported city, for the "does this title name one of ours?" test.
 IN_CITY = re.compile("|".join(p.pattern for _, p in CITIES), re.I)
 
@@ -71,19 +93,27 @@ def match_city(*blobs):
     for b in blobs:
       if b and pat.search(b):
         return key
+  # Only after every spelled-out name has been ruled out, so "La Jolla, CA"
+  # has already resolved to San Diego before "LA" is ever considered.
+  for key, pat in CITY_ABBR:
+    for b in blobs:
+      if b and pat.search(b):
+        return key
   return ""
 
 # Defensive: some multi-location listings tag a city we cover in their
 # location field but put the actual anchor city in the TITLE ("Security
 # Engineer, San Francisco" / "Senior Research Engineer (Based in Hong Kong)").
 # Drop those — the title is authoritative when it names a city we don't cover.
-# San Diego is deliberately absent from this list: it is a supported city now,
-# so a title naming it sets the job's city rather than rejecting the posting.
+# Every supported city is deliberately absent from this list: a title naming one
+# sets the job's city rather than rejecting the posting. San Diego came out when
+# it was added; Los Angeles, London and Paris came out on 2026-09-15 for the
+# same reason. Madrid and Barcelona were never here.
 OTHER_TITLE_CITY = re.compile(
   r'\b('
-  r'san francisco|palo alto|mountain view|los angeles|chicago|austin|'
+  r'san francisco|palo alto|mountain view|chicago|austin|'
   r'boston|cambridge, ma|seattle|denver|miami|atlanta|dallas|houston|'
-  r'portland|toronto|montreal|vancouver|london|dublin|berlin|paris|'
+  r'portland|toronto|montreal|vancouver|dublin|berlin|'
   r'amsterdam|stockholm|copenhagen|bangalore|bengaluru|hyderabad|mumbai|'
   r'delhi|singapore|tokyo|hong kong|sydney|melbourne'
   r')\b', re.I
@@ -92,7 +122,9 @@ OTHER_TITLE_CITY = re.compile(
 # "…, Legal-NYC" and "…, Legal-SF"; only the first belongs here. This cannot be
 # folded into OTHER_TITLE_CITY above, which is re.I: a case-insensitive \bLA\b
 # matches "La Jolla" — a San Diego location the board explicitly covers.
-OTHER_TITLE_CITY_ABBR = re.compile(r'\b(SF|LA|SEA|ATX|PDX|DEN|CHI|BOS|DFW|LDN)\b')
+# LA and LDN are gone from this reject list — both are supported cities now and
+# are recognised by CITY_ABBR above instead.
+OTHER_TITLE_CITY_ABBR = re.compile(r'\b(SF|SEA|ATX|PDX|DEN|CHI|BOS|DFW)\b')
 TITLE_INCLUDE = re.compile(
   r"\b("
   r"forward[\s-]deployed|fde|founding[\s-]engineer|"
@@ -222,6 +254,10 @@ TITLE_EXCLUDE = re.compile(
   # otherwise civilian (Palantir, Scale AI, Databricks, Anthropic).
   # Axon and Mark43 stay: police body cameras and first-responder dispatch
   # are civilian public safety, not military.
+  # Clearance-gated roles are defence work by another name, and the board's
+  # user cannot apply to them regardless — Rocket Lab posts otherwise-normal
+  # flight-software roles with "- Secret Clearance" appended.
+  r"secret\s+clearance|security\s+clearance|ts/sci|top\s+secret|polygraph|"
   r"defen[cs]e|military|warfare|weapons?|munitions?|"
   r"us\s+government|public\s+sector|federal|dod|national\s+security|"
   r"intelligence\s+community|"
@@ -950,7 +986,7 @@ CANDIDATES = [
   ("tiger-global","Tiger Global","greenhouse","tigerglobal","hft","Global growth PE + hedge fund","Private","N/A","N/A",[],"NYC HQ."),
   ("sequoia-capital","Sequoia Capital","greenhouse","sequoiacapital","hft","Venture capital","Private","N/A","N/A",[],"Menlo Park HQ, NYC office."),
   ("a16z","Andreessen Horowitz","greenhouse","a16z","hft","Venture capital","Private","N/A","N/A",[],"a16z. NYC office."),
-  ("general-atlantic","General Atlantic","greenhouse","generalatlantic","hft","Growth equity","Private","N/A","N/A",[],"NYC HQ."),
+  ("general-atlantic","General Atlantic","greenhouse","generalatlantic","fintech","Growth equity","Private","N/A","N/A",[],"NYC HQ."),
 
   # Fintech
   ("melio","Melio","greenhouse","melio","fintech","SMB B2B payments","Series D","$500M+","Coatue",["Coatue","General Catalyst","Accel"],"NYC office. B2B payments."),
@@ -1272,7 +1308,6 @@ CANDIDATES = [
   ("tonal","Tonal","ashby","tonal","consumer","Connected strength training","","","",[],""),
   ("tractable","Tractable","ashby","tractable","ai","Computer vision for insurance","","","",[],""),
   ("trellis","Trellis","lever","trellis","fintech","Insurance data APIs","","","",[],""),
-  ("true-anomaly","True Anomaly","greenhouse","trueanomalyinc","defense","Space defense systems","","","",[],""),
   ("truveta","Truveta","greenhouse","truveta","health","Health data and analytics","","","",[],""),
   ("tubi","Tubi","greenhouse","tubi","media","Free streaming service","","","",[],""),
   ("turquoise-health","Turquoise Health","ashby","turquoise-health","health","Healthcare price transparency","","","",[],""),
@@ -1343,7 +1378,7 @@ CANDIDATES = [
   ("aleph","Aleph","ashby","aleph","ai","Financial data automation","","","",[],""),
   ("alex","Alex","ashby","alexai","ai","AI recruiting agents","","","",[],""),
   ("ansa-biotechnologies","Ansa Biotechnologies","greenhouse","ansabiotechnologies","health","Enzymatic DNA synthesis","","","",[],""),
-  ("applied-systems","Applied Systems","ashby","applied","saas","Insurance agency platform","","","",[],""),
+  ("applied-systems","Applied Intuition","ashby","applied","robotics","Autonomy software for machines","","","",[],""),
   ("applovin","AppLovin","greenhouse","applovin","adtech","Mobile marketing platform","","","",[],""),
   ("arch","Arch","ashby","arch","fintech","Private markets automation","","","",[],""),
   ("arkestro","Arkestro","greenhouse","arkestroinc","ai","Predictive procurement","","","",[],""),
@@ -1702,7 +1737,7 @@ CANDIDATES = [
   ("sunlight","Sunlight","workable","sunlight","health","Behavioral health platform","","","",[],""),
   ("trusted-health","Trusted Health","ashby","trustedhealth","health","Nurse staffing marketplace","","","",[],""),
   ("vanilla","Vanilla","ashby","vanilla","fintech","Estate planning software","","","",[],""),
-  ("vast-data","Vast Data","greenhouse","vast","infra","Data platform for AI","","","",[],""),
+  ("vast-data","Vast","greenhouse","vast","aerospace","Space stations","","","",[],""),
   ("vector-fabrics","Vector Fabrics","ashby","vector","devtools","Data routing","","","",[],""),
   ("vivian-health","Vivian Health","ashby","vivian-health","health","Healthcare job marketplace","","","",[],""),
   ("vivodyne","Vivodyne","greenhouse","vivodyne","health","Lab-grown human tissue","","","",[],""),
@@ -1915,7 +1950,7 @@ CANDIDATES = [
   ("allstate","Allstate","workday","allstate/wd5/Allstate_Careers","fintech","Insurance","","","",[],""),
   ("alvarez-and-marsal","Alvarez and Marsal","workday","alvarezandmarsal/wd1/Alvarezandmarsal","saas","Advisory","","","",[],""),
   ("angelo-gordon","Angelo Gordon","workday","angelogordon/wd1/AngelogordonCareers","fintech","Alternative investments","","","",[],""),
-  ("antares-capital","Antares Capital","ashby","antares","fintech","Private credit","","","",[],""),
+  ("antares-capital","Antares","ashby","antares","climate","Advanced nuclear reactors","","","",[],""),
   ("assurant","Assurant","workday","assurant/wd1/Assurant_Careers","fintech","Risk products","","","",[],""),
   ("barstool-sports","Barstool Sports","greenhouse","barstoolsports","media","Sports media","","","",[],""),
   ("brookfield","Brookfield","workday","brookfield/wd5/Brookfield","fintech","Asset management","","","",[],""),

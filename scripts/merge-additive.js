@@ -88,7 +88,7 @@ for (const rc of src.companies) {
   const have = new Map((ec.jobs || []).map((j) => [j.url, j]));
   const fresh = (rc.jobs || []).filter((j) => !have.has(j.url));
   // carry posted + city + descRaw onto already-present jobs if the source now
-  // has them. city backfills the rows that predate the two-city board.
+  // has them. city backfills the rows that predate the multi-city board.
   // descRaw is summarization input only, so a job that already has a desc does
   // not get it back -- otherwise every refresh would re-inflate data.js with
   // raw ATS bodies the UI never reads.
