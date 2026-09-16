@@ -3642,12 +3642,20 @@ const verticalLabel = {
   devtools:'Dev Tools', fintech:'Fintech',
   saas:'SaaS', infra:'Infra', health:'Health',
 };
-/* The board covers exactly two cities (see scripts/refresh-companies.py's
- * CITIES). Postings that predate San Diego carry no `city`, so jobCity()
- * defaults to NYC — the value every one of those rows was filtered on. */
-const cityLabel = { nyc: 'NYC', sd: 'San Diego' };
+/* Mirrors CITIES in scripts/refresh-companies.py — keep the two in step, and
+ * keep this insertion order: the city chips are built from Object.keys(), so
+ * this is the order they appear in. Postings that predate the multi-city board
+ * carry no `city`, so jobCity() defaults to NYC — the value every one of those
+ * rows was filtered on. */
+const cityLabel = {
+  nyc: 'NYC', sd: 'San Diego', la: 'Los Angeles',
+  ldn: 'London', par: 'Paris', mad: 'Madrid', bcn: 'Barcelona',
+};
 // Dense rows get the short form; the full name rides along as a tooltip.
-const cityShort = { nyc: 'NYC', sd: 'SD' };
+const cityShort = {
+  nyc: 'NYC', sd: 'SD', la: 'LA',
+  ldn: 'LDN', par: 'PAR', mad: 'MAD', bcn: 'BCN',
+};
 const jobCity = (j) => (j && j.city) || 'nyc';
 const cityTagHTML = (j) => {
   const k = jobCity(j);
