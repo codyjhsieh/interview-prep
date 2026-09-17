@@ -87,6 +87,8 @@ COLLIDING = {
   ("greenhouse", "moon"):       "Variloom, 3D-printed textile manufacturing",
   ("ashby", "foundation"):      "Foundation, homebuilding and home transactions",
   ("greenhouse", "nucleus"):    "Nucleus Global, medical communications",
+  ("ashby", "ampersand"):       "Ampersand, AI integration infrastructure (SF)",
+  ("ashby", "sabi"):            "a neural-wearable startup, not Sabi the market",
 }
 
 def variants(name):
