@@ -1020,7 +1020,6 @@ CANDIDATES = [
   # Media / news
   ("semafor","Semafor","greenhouse","semafor","media","Global news startup","Series A","$25M","Justin Smith",["Emerson","Alphabet","3B"],"NYC HQ. News."),
   ("conde-nast","Condé Nast","smartrecruiters","CondeNast","media","Magazines + digital (Vogue, Wired, GQ, VF)","Private","N/A","N/A",[],"NYC HQ. Vogue + Wired + GQ + Vanity Fair + The New Yorker."),
-  ("genius","Genius","workable","genius","media","Music annotation + lyrics","Private","N/A","N/A",[],"NYC HQ. Music intelligence."),
 
   # Ed tech
   ("coursera","Coursera","greenhouse","coursera","ed","MOOC platform (NYSE: COUR)","Public","N/A","NYSE",["NYSE"],"NYC office. Online learning."),
@@ -2256,7 +2255,7 @@ CANDIDATES = [
   ("freewill","FreeWill","ashby","freewill","saas","online estate planning","","","",[],""),
   ("fullstory","Fullstory","ashby","fullstory","saas","session analytics","","","",[],""),
   ("genedx","GeneDx","greenhouse","genedx","health","rare disease genomics","","","",[],""),
-  ("genius-2","Genius","greenhouse","genius","media","lyrics and music stories","","","",[],""),
+  ("genius-2","Genius","greenhouse","genius","media","Music annotation + lyrics","Private","N/A","N/A",[],"LA + NYC. Music intelligence."),
   ("grail-bio","Grail Bio","lever","grailbio","health","early cancer detection","","","",[],""),
   ("graphyte","Graphyte","ashby","graphyte","climate","carbon casting","","","",[],""),
   ("great-question","Great Question","ashby","greatquestion","saas","user research ops","","","",[],""),
@@ -2267,7 +2266,7 @@ CANDIDATES = [
   ("guidde","Guidde","greenhouse","guidde","saas","video documentation","","","",[],""),
   ("gumgum","GumGum","greenhouse","gumgum","adtech","contextual advertising","","","",[],""),
   ("haven-life","Haven Life","greenhouse","haven","fintech","term life insurance","","","",[],""),
-  ("hazel-health","Hazel Health","ashby","hazel","health","school telehealth","","","",[],""),
+  ("hazel","Hazel","ashby","hazel","ai","AI coworker for brands","","","",[],""),
   ("heartbeat-health","Heartbeat Health","lever","heartbeathealth","health","virtual cardiology","","","",[],""),
   ("heirloom-carbon","Heirloom Carbon","ashby","heirloomcarbon","climate","direct air capture","","","",[],""),
   ("hiddenlayer","HiddenLayer","greenhouse","hiddenlayer","security","AI model security","","","",[],""),

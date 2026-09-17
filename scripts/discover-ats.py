@@ -91,6 +91,9 @@ COLLIDING = {
   ("ashby", "sabi"):            "a neural-wearable startup, not Sabi the market",
   ("ashby", "vivid"):           "Vivid, resilience posture management (Tel Aviv)",
   ("greenhouse", "playlist"):   "Playlist, an outdoor recreation company",
+  # ashby:hazel is on the board as Hazel in its own right; the name that must
+  # not reach it is Hazel Health, the K-12 telehealth company.
+  ("ashby", "hazel"):           "Hazel the AI data coworker, not Hazel Health",
 }
 
 def variants(name):
