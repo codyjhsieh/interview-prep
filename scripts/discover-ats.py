@@ -36,6 +36,56 @@ NOISE = re.compile(r"\b(inc|llc|ltd|corp|corporation|technologies|technology|"
                    r"labs|lab|group|holdings|company|co)\b\.?", re.I)
 
 
+# Slugs that resolve to a live board belonging to a DIFFERENT company than the
+# name being probed. Each one was confirmed by reading the board's own posting
+# bodies, and each one kept coming back on later sweeps because the knowledge
+# lived only in a prose comment — ashby:neptune was re-proposed three times.
+# Skipping them here means a name that can only reach a board through a
+# colliding slug reports no board at all, which is the correct answer.
+COLLIDING = {
+  ("ashby", "latent"):       "clinical-AI company in SF, not Latent Labs the protein-AI lab",
+  ("ashby", "neptune"):      "couples' wedding concierge (meetneptune.com)",
+  ("ashby", "arlo"):         "hospitality group, not Arlo Technologies the camera maker",
+  ("ashby", "ellipsislabs"): "Ellipsis Labs the DeFi protocol company",
+  ("ashby", "odyssey"):      "a different Odyssey than the one usually meant",
+  ("ashby", "assembly"):     "a different Assembly",
+  ("ashby", "cambio"):       "a different Cambio",
+  ("ashby", "antares"):      "Antares nuclear",
+  ("ashby", "applied"):      "Applied Intuition",
+  ("greenhouse", "vast"):    "Vast the space-station company",
+  # ── 2026-09-17 sweep: each read off the board's own posting bodies ──
+  ("ashby", "castle"):          "Castle the homeowner-finance app (Boston)",
+  ("ashby", "prompt"):          "Prompt the rehab-therapy EMR vendor",
+  ("greenhouse", "fleet"):      "Fleet Data Centers",
+  ("ashby", "relay"):           "Relay the UK logistics company",
+  ("ashby", "aim"):             "AIM, autonomous heavy machinery (Seattle)",
+  ("greenhouse", "spin"):       "Spin, FEMSA's Mexican fintech",
+  ("ashby", "sphere"):          "Sphere, trade-compliance infrastructure",
+  ("greenhouse", "karat"):      "Karat the technical-interview company",
+  ("ashby", "fourier"):         "Fourier, hydrogen electrolyzers",
+  ("greenhouse", "ezra"):       "Ezra, emerging-market digital lending",
+  ("greenhouse", "mantis"):     "Mantis, talent + production staffing",
+  ("ashby", "lightspeed"):      "LightSpeed Build, construction robotics",
+  ("ashby", "oligo"):           "Oligo, spacecraft design automation",
+  ("ashby", "symmetry"):        "Symmetry, AI context tooling (Seattle)",
+  ("greenhouse", "manifest"):   "Manifest, software supply-chain security",
+  ("greenhouse", "raven"):      "Raven, RA Capital's healthcare incubator",
+  ("lever", "latch"):           "LatchBio, software for biology",
+  ("ashby", "crisp"):           "Crisp, Dutch grocery delivery",
+  ("lever", "veo"):             "Veo, AI sports cameras",
+  ("ashby", "safe"):            "Safe Software, maker of FME",
+  ("greenhouse", "ess"):        "a cleared federal IT services contractor",
+  ("greenhouse", "quilt"):      "Quilt, residential heat pumps",
+  ("ashby", "duckbill"):        "Skyway, GPU infrastructure procurement",
+  ("smartrecruiters", "hh2"):   "not hh2 the construction back-office vendor",
+  ("ashby", "fig"):             "a single-row test board, no real postings",
+  ("lever", "anomaly"):         "Anomaly the London ad agency",
+  ("smartrecruiters", "nextgen"): "not NextGen Healthcare — a Las Vegas trades firm",
+  ("greenhouse", "noah"):       "a veterinary hospital group in Virginia",
+  ("ashby", "zoe"):             "ZOE the nutrition company (London)",
+  ("smartrecruiters", "whatfix"): "a single 'test' posting, no real board",
+}
+
 def variants(name):
     """Plausible ATS slugs for a display name, most likely first."""
     base = NOISE.sub("", name).strip()
@@ -68,6 +118,7 @@ def discover(item):
     if len(item) >= 3 and item[1] in PLATFORMS and item[2]:
         hints = [(item[1], item[2])]
     tries = hints + [(p, v) for v in variants(name) for p in PLATFORMS]
+    tries = [t for t in tries if t not in COLLIDING]
     for ats, slug in tries:
         try:
             raw = R.fetch(ats, slug)
