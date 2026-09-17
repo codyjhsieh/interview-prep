@@ -1,6 +1,6 @@
 ---
 name: refresh-jobs
-description: End-to-end refresh of engineering jobs across the seven covered cities — parallel fetch + prune, additive merge, logo backfill, cache-buster bump, commit, push. Fully autonomous.
+description: End-to-end refresh of engineering jobs across the three covered cities — parallel fetch + prune, additive merge, logo backfill, cache-buster bump, commit, push. Fully autonomous.
 ---
 
 # refresh-jobs

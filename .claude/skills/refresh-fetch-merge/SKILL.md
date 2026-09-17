@@ -1,6 +1,6 @@
 ---
 name: refresh-fetch-merge
-description: Fetch fresh ATS boards in parallel (10 workers) and additively merge engineering roles across the seven covered cities into js/data.js. Refuses to write on suspiciously sparse fetches.
+description: Fetch fresh ATS boards in parallel (10 workers) and additively merge engineering roles across the three covered cities into js/data.js. Refuses to write on suspiciously sparse fetches.
 ---
 
 # refresh-fetch-merge
@@ -24,20 +24,21 @@ Expect ~1-2 min wall for fetch alone (was 7 min before parallelization).
 
 ## Cities
 
-The board covers **seven**: New York, San Diego, Los Angeles, London, Paris,
-Madrid and Barcelona. They live in one place — the `CITIES` list at the top of
-`scripts/refresh-companies.py`, plus `CITY_ABBR` for the ambiguous
-abbreviations:
+The board covers **three**: New York, San Diego and Los Angeles. They live in
+one place — the `CITIES` list at the top of `scripts/refresh-companies.py`,
+plus `CITY_ABBR` for the ambiguous abbreviations:
 
 ```python
-CITIES = [
-  ("nyc", ...), ("sd", ...), ("la", ...),
-  ("mad", ...), ("bcn", ...), ("par", ...), ("ldn", ...),
-]
-CITY_ABBR = [("la", re.compile(r'\bLA\b')), ("ldn", re.compile(r'\bLDN\b'))]
+CITIES = [("nyc", ...), ("sd", ...), ("la", ...)]
+CITY_ABBR = [("la", re.compile(r'\bLA\b'))]
 ```
 
-Three things to keep straight when adding another:
+London, Paris, Madrid and Barcelona were covered for one day (2026-09-16) and
+dropped again: they produced ~420 rows, but a US-based candidate needs UK/EU
+work authorisation and only a couple of dozen of those employers would
+realistically sponsor and relocate one. Volume is not the same as reach.
+
+Four things to keep straight when adding or removing one:
 
 1. **Order matters.** `match_city` returns the first hit, so `sd` stays ahead
    of `la` — "La Jolla, CA" must resolve to San Diego.
@@ -45,10 +46,15 @@ Three things to keep straight when adding another:
    `re.I`, and a case-insensitive `\bla\b` matches "La Jolla". Bare
    abbreviations belong in `CITY_ABBR`, which runs only after every
    spelled-out name has been ruled out.
-3. **Remove the city from `OTHER_TITLE_CITY` and `OTHER_TITLE_CITY_ABBR`.**
-   Those reject titles naming a city the board does *not* cover, so leaving a
-   newly-supported city there is at best confusing and at worst a silent drop.
-   `js/views.js`'s `cityLabel` / `cityShort` need the new key too.
+3. **Move the city in or out of `OTHER_TITLE_CITY` and
+   `OTHER_TITLE_CITY_ABBR`.** Those reject titles naming a city the board does
+   *not* cover, so a newly-supported city has to come out and a dropped one has
+   to go back in. `js/views.js`'s `cityLabel` / `cityShort` track the same set.
+
+4. **Removing a city needs `scripts/prune-cities.mjs`.** The merge is additive,
+   so narrowing `CITIES` stops new postings but leaves the existing ones in
+   `js/data.js`. That script reads the keep-list straight out of `CITY_LABEL`,
+   so there is still only one place to edit.
 
 `match_city()` returns the first matching key, so a posting tagged for several
 offices resolves to whichever city is listed first (NYC wins a NYC/SD posting).

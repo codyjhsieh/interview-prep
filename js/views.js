@@ -3647,15 +3647,9 @@ const verticalLabel = {
  * this is the order they appear in. Postings that predate the multi-city board
  * carry no `city`, so jobCity() defaults to NYC — the value every one of those
  * rows was filtered on. */
-const cityLabel = {
-  nyc: 'NYC', sd: 'San Diego', la: 'Los Angeles',
-  ldn: 'London', par: 'Paris', mad: 'Madrid', bcn: 'Barcelona',
-};
+const cityLabel = { nyc: 'NYC', sd: 'San Diego', la: 'Los Angeles' };
 // Dense rows get the short form; the full name rides along as a tooltip.
-const cityShort = {
-  nyc: 'NYC', sd: 'SD', la: 'LA',
-  ldn: 'LDN', par: 'PAR', mad: 'MAD', bcn: 'BCN',
-};
+const cityShort = { nyc: 'NYC', sd: 'SD', la: 'LA' };
 const jobCity = (j) => (j && j.city) || 'nyc';
 const cityTagHTML = (j) => {
   const k = jobCity(j);

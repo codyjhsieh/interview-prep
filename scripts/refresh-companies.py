@@ -69,20 +69,13 @@ CITIES = [
   ("la",  re.compile(r'\b(los[\s-]?angeles|santa monica|culver city|pasadena|'
                      r'burbank|el segundo|playa vista|west hollywood|'
                      r'marina del rey|long beach)\b', re.I)),
-  ("mad", re.compile(r'\bmadrid\b', re.I)),
-  ("bcn", re.compile(r'\bbarcelona\b', re.I)),
-  ("par", re.compile(r'\bparis\b', re.I)),
-  ("ldn", re.compile(r'\b(london|greater london)\b', re.I)),
 ]
-CITY_LABEL = {"nyc": "NYC", "sd": "San Diego", "la": "Los Angeles",
-              "mad": "Madrid", "bcn": "Barcelona", "par": "Paris",
-              "ldn": "London"}
+CITY_LABEL = {"nyc": "NYC", "sd": "San Diego", "la": "Los Angeles"}
 # Ambiguous city abbreviations, CASE-SENSITIVE. "LA" and "LDN" only mean a city
 # when capitalised; lowercase "la" is Spanish/French filler and the start of
 # "La Jolla". Checked after CITIES so a spelled-out city always wins.
 CITY_ABBR = [
   ("la",  re.compile(r'\bLA\b')),
-  ("ldn", re.compile(r'\bLDN\b')),
 ]
 # Any supported city, for the "does this title name one of ours?" test.
 IN_CITY = re.compile("|".join(p.pattern for _, p in CITIES), re.I)
@@ -107,13 +100,18 @@ def match_city(*blobs):
 # Drop those — the title is authoritative when it names a city we don't cover.
 # Every supported city is deliberately absent from this list: a title naming one
 # sets the job's city rather than rejecting the posting. San Diego came out when
-# it was added; Los Angeles, London and Paris came out on 2026-09-15 for the
-# same reason. Madrid and Barcelona were never here.
+# it was added, and Los Angeles on 2026-09-15.
+#
+# London, Paris, Madrid and Barcelona were briefly covered (2026-09-16) and are
+# back here a day later: a US-based candidate needs UK/EU work authorisation, and
+# of ~420 European rows only a couple of dozen employers would realistically
+# sponsor and relocate one. The rest were noise.
 OTHER_TITLE_CITY = re.compile(
   r'\b('
   r'san francisco|palo alto|mountain view|chicago|austin|'
   r'boston|cambridge, ma|seattle|denver|miami|atlanta|dallas|houston|'
-  r'portland|toronto|montreal|vancouver|dublin|berlin|'
+  r'portland|toronto|montreal|vancouver|london|dublin|berlin|paris|'
+  r'madrid|barcelona|'
   r'amsterdam|stockholm|copenhagen|bangalore|bengaluru|hyderabad|mumbai|'
   r'delhi|singapore|tokyo|hong kong|sydney|melbourne'
   r')\b', re.I
@@ -122,9 +120,9 @@ OTHER_TITLE_CITY = re.compile(
 # "…, Legal-NYC" and "…, Legal-SF"; only the first belongs here. This cannot be
 # folded into OTHER_TITLE_CITY above, which is re.I: a case-insensitive \bLA\b
 # matches "La Jolla" — a San Diego location the board explicitly covers.
-# LA and LDN are gone from this reject list — both are supported cities now and
-# are recognised by CITY_ABBR above instead.
-OTHER_TITLE_CITY_ABBR = re.compile(r'\b(SF|SEA|ATX|PDX|DEN|CHI|BOS|DFW)\b')
+# LA is gone from this reject list — it is a supported city and is recognised by
+# CITY_ABBR above instead. LDN is back, London having been dropped again.
+OTHER_TITLE_CITY_ABBR = re.compile(r'\b(SF|SEA|ATX|PDX|DEN|CHI|BOS|DFW|LDN)\b')
 TITLE_INCLUDE = re.compile(
   r"\b("
   r"forward[\s-]deployed|fde|founding[\s-]engineer|"
