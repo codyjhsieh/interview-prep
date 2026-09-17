@@ -5469,6 +5469,18 @@ const COOLNESS = {
   'general-atlantic':2,
   'antares-capital':6, // Antares, advanced nuclear — not the credit fund
   'experian':2,
+
+  // ── 2026-09-17 — 297-company sweep. Anchored to the existing scale:
+  // salesforce/drata:1, scaleai/datadog:2, harvey:3, openai:4, seatgeek:7.
+  // Genius and Too Lost score high on music/culture; adtech, identity
+  // verification and core banking sit at the bottom with the compliance tier.
+  'genius-2':8, crunchyroll:7, 'too-lost':7, 'deep-sky':6,
+  hazel:5, speechify:5, 'texture-energy':5,
+  antimetal:4, roku:4,
+  'arize-ai':3, spade:3, tapcart:3,
+  'farther-finance':2, footprint:2, gumgum:2, 'lead-bank':2, moloco:2,
+  'thought-machine':2, triplelift:2, 'viant-technology':2,
+  'td-bank':1, trulioo:1,
 };
 
 const FRONTIER = new Set([
