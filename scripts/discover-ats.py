@@ -84,6 +84,9 @@ COLLIDING = {
   ("greenhouse", "noah"):       "a veterinary hospital group in Virginia",
   ("ashby", "zoe"):             "ZOE the nutrition company (London)",
   ("smartrecruiters", "whatfix"): "a single 'test' posting, no real board",
+  ("greenhouse", "moon"):       "Variloom, 3D-printed textile manufacturing",
+  ("ashby", "foundation"):      "Foundation, homebuilding and home transactions",
+  ("greenhouse", "nucleus"):    "Nucleus Global, medical communications",
 }
 
 def variants(name):
