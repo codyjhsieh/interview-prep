@@ -66,20 +66,16 @@ Output: new tuples appended to `CANDIDATES` in `scripts/refresh-companies.py`.
    probed, how many resolved, how many were already known and how many were
    collisions. Add logo domains via `/refresh-logos`, which verifies them.
 
-8. **Verify**: parse, count, and check for duplicates.
-   ```bash
-   python3 -c "
-   import importlib.util, re
-   from pathlib import Path
-   s=importlib.util.spec_from_file_location('r', Path('scripts/refresh-companies.py'))
-   m=importlib.util.module_from_spec(s); s.loader.exec_module(m)
-   C=m.CANDIDATES
-   print('rows', len(C))
-   print('dup ids', len(C)-len({c[0] for c in C}))
-   print('dup (ats,slug)', len(C)-len({(c[2],c[3]) for c in C}))
-   print('bad arity', [c[0] for c in C if len(c)!=11])
-   print('taglines over 32', [c[1] for c in C if len(c[5])>32])"
-   ```
+8. **Verify**: `python3 scripts/check-candidates.py`. It checks arity, unique
+   ids, unique `(ats, slug)` and unique company names, and exits non-zero
+   naming every offender. Run it after every edit — the duplicate-name check
+   in particular exists because renaming a drafted company to match its board
+   happens *after* the dedupe and has re-introduced a duplicate on three
+   separate sweeps (Genius, Cocoon, Tubi).
+   When it flags a duplicate name, fetch both slugs before deleting anything:
+   usually one is dead and the other is the company's current board, so the
+   fix is to point the existing row at the live slug and drop the new one,
+   which keeps the original id and its funding data.
 
 ## Then
 

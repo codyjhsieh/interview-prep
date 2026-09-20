@@ -17019,16 +17019,6 @@ const COMPANIES = [
     jobs:[
       { title:"Senior Software Engineer, Edge Security", url:"https://www.fastly.com/about/jobs/apply?gh_jid=8189311", level:"senior", city:"nyc", added:"2026-09-14", posted:"2026-09-10", desc:"Build security services at the edge of the network." }
     ] },
-  { id:"iterable-inc", name:"Iterable", vertical:"saas",
-    sub:"Cross-channel marketing",
-    tagline:"Reach customers everywhere.",
-    stage:"", raised:"", lead:"",
-    badges:[],
-    totalRoles:0,
-    notes:"",
-    jobs:[
-
-    ] },
   { id:"kong", name:"Kong", vertical:"devtools",
     sub:"API gateway",
     tagline:"Connect every API and model.",
