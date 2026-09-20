@@ -75,7 +75,12 @@ CITY_LABEL = {"nyc": "NYC", "sd": "San Diego", "la": "Los Angeles"}
 # when capitalised; lowercase "la" is Spanish/French filler and the start of
 # "La Jolla". Checked after CITIES so a spelled-out city always wins.
 CITY_ABBR = [
-  ("la",  re.compile(r'\bLA\b')),
+  # "LA" is also Louisiana's postal code, and "Baton Rouge, LA, USA" reached the
+  # board as a Los Angeles role on 2026-09-17 because of it. In a "City, ST"
+  # location the token after the comma is the state, so a comma-preceded LA is
+  # Louisiana unless California follows it ("LA, CA"). An LA that is not
+  # comma-preceded ("LA", "Remote - LA") is still the city.
+  ("la",  re.compile(r'(?<!,\s)\bLA\b|(?<=,\s)LA\b(?=\s*,\s*CA\b)')),
 ]
 # Any supported city, for the "does this title name one of ours?" test.
 IN_CITY = re.compile("|".join(p.pattern for _, p in CITIES), re.I)
@@ -2511,7 +2516,6 @@ CANDIDATES = [
   ("harbinger-motors","Harbinger Motors","greenhouse","harbingermotors","automotive","electric medium trucks","","","",[],""),
   ("hasbro","Hasbro","greenhouse","hasbro","gaming","toys and games","","","",[],""),
   ("haus","Haus","ashby","haus","adtech","causal ad measurement","","","",[],""),
-  ("hermeus","Hermeus","lever","hermeus","aerospace","hypersonic aircraft","","","",[],""),
   ("heron-data","Heron Data","ashby","herondata","fintech","lending data automation","","","",[],""),
   ("home-chef","Home Chef","greenhouse","homechef","consumer","meal kits","","","",[],""),
   ("huntress","Huntress","greenhouse","huntress","security","managed threat detection","","","",[],""),

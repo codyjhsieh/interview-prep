@@ -5484,6 +5484,8 @@ const COOLNESS = {
 
   // ── 2026-09-20 refresh ──
   'iterative-health':4,
+  twitch:7, bubble:6, n8n:6, 'krafton-americas':5, nanit:4,
+  shein:2, 'rumble-video':2,
 };
 
 const FRONTIER = new Set([

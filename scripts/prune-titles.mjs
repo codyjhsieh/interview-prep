@@ -120,6 +120,10 @@ const RETIRED_COMPANIES = new Set([
   // Space-defence company, same class as the primes above. Arrived on the
   // board when Los Angeles was added, 2026-09-16.
   'true-anomaly',
+  // "Hermeus is a venture-backed defense aviation company... We work with
+  // the Department of War" — its own words. Arrived on the 2026-09-20 LA
+  // sweep, where its titles alone read as ordinary flight software.
+  'hermeus',
 ]);
 
 const argv = process.argv.slice(2);

@@ -13321,7 +13321,7 @@ const COMPANIES = [
     tagline:"Answers about your brand",
     stage:"Public", raised:"$255M pre-IPO", lead:"Insight",
     badges:["NYSE","Insight","Marker"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"Public co. Knowledge-graph platform + AI answers.",
     jobs:[
 
@@ -13637,7 +13637,7 @@ const COMPANIES = [
     tagline:"Builds apps from prompts",
     stage:"Series A", raised:"$15M", lead:"Creandum",
     badges:["Creandum","byFounders"],
-    totalRoles:3,
+    totalRoles:0,
     notes:"AI builder for apps. Frontier model integration + product engineering.",
     jobs:[
 
@@ -14572,7 +14572,7 @@ const COMPANIES = [
     tagline:"Where new music breaks",
     stage:"Late stage", raised:"$655M+", lead:"Sirius XM",
     badges:["Sirius XM","Atlantic"],
-    totalRoles:2,
+    totalRoles:0,
     notes:"Audio + creator platform. Streaming infra, recs, monetization.",
     jobs:[
 
@@ -14655,7 +14655,7 @@ const COMPANIES = [
     tagline:"CRM that builds itself",
     stage:"Series B", raised:"$33M", lead:"Redpoint",
     badges:["Redpoint","Balderton"],
-    totalRoles:5,
+    totalRoles:1,
     notes:"NYC office (also London). Modern relationship-graph CRM.",
     jobs:[
       { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/attio/cef00929-63ab-4927-8a3c-1ea1d4224606", level:"mid", city:"nyc", added:"2026-07-21", posted:"2026-05-29", desc:"Deploy CRM integrations for agentic revenue teams." }
@@ -15300,7 +15300,7 @@ const COMPANIES = [
     tagline:"Measures what shoppers buy",
     stage:"Public", raised:"(NIQ post-Advent spinout)", lead:"NYSE",
     badges:["NYSE"],
-    totalRoles:2,
+    totalRoles:0,
     notes:"NYC HQ 85 Broad St. Sr Director Engineering roles.",
     jobs:[
 
@@ -15890,7 +15890,7 @@ const COMPANIES = [
     tagline:"Connects physical operations",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -16121,7 +16121,7 @@ const COMPANIES = [
     tagline:"Runs company purchasing",
     stage:"", raised:"$75M", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     fundingSrc:"posting",
     jobs:[
@@ -16588,7 +16588,7 @@ const COMPANIES = [
     tagline:"Drafts patents with AI",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17107,7 +17107,7 @@ const COMPANIES = [
     tagline:"Turn meetings into notes.",
     stage:"Series C", raised:"$192M", lead:"Lightspeed",
     badges:["Lightspeed","NFDG","Spark"],
-    totalRoles:5,
+    totalRoles:0,
     notes:"AI note-taking → enterprise AI workspace; $1.5B valuation (Mar 2026). ASR, summarization, LLM eval.",
     jobs:[
 
@@ -17117,7 +17117,7 @@ const COMPANIES = [
     tagline:"Fund SaaS growth upfront.",
     stage:"Series B", raised:"$280M", lead:"QED",
     badges:["QED","SciFi","Bling"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC RBF for SaaS founders. Underwriting models + capital-markets plumbing.",
     jobs:[
 
@@ -17127,7 +17127,7 @@ const COMPANIES = [
     tagline:"Read property deeds with AI.",
     stage:"Series B", raised:"$27M", lead:"Spark",
     badges:["Spark","NfX"],
-    totalRoles:3,
+    totalRoles:0,
     notes:"NYC + London. Vertical legal AI with big-law traction.",
     jobs:[
 
@@ -17137,7 +17137,7 @@ const COMPANIES = [
     tagline:"Pipe SMB financial data.",
     stage:"Series C", raised:"$175M+", lead:"JP Morgan",
     badges:["JP Morgan","Index","Tiger"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC office. Unified API for accounting/banking data.",
     jobs:[
 
@@ -17147,7 +17147,7 @@ const COMPANIES = [
     tagline:"Guard every password.",
     stage:"Series D", raised:"$200M+", lead:"Sequoia",
     badges:["Sequoia","Bessemer"],
-    totalRoles:2,
+    totalRoles:0,
     notes:"NYC HQ. Snyk-adjacent security, mature eng org.",
     jobs:[
 
@@ -17157,7 +17157,7 @@ const COMPANIES = [
     tagline:"Turn cancer care into data.",
     stage:"Late stage", raised:"$500M+ (Roche-owned)", lead:"Roche",
     badges:["Roche"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC HQ. Oncology real-world data.",
     jobs:[
 
@@ -17167,7 +17167,7 @@ const COMPANIES = [
     tagline:"Test and inspect everything.",
     stage:"Public", raised:"(SIX: SGSN)", lead:"SIX",
     badges:["SIX"],
-    totalRoles:3,
+    totalRoles:0,
     notes:"Farmingdale NY lab. Sr SWE hybrid roles.",
     jobs:[
 
@@ -17177,7 +17177,7 @@ const COMPANIES = [
     tagline:"Rebuild banking tech.",
     stage:"Acquired", raised:"(Wipro subsidiary)", lead:"Wipro",
     badges:["Wipro"],
-    totalRoles:5,
+    totalRoles:0,
     notes:"NYC office. Elite banking tech consultancy.",
     jobs:[
 
@@ -17187,7 +17187,7 @@ const COMPANIES = [
     tagline:"Answer patient calls with AI.",
     stage:"Seed", raised:"YC", lead:"Y Combinator",
     badges:["YC"],
-    totalRoles:3,
+    totalRoles:0,
     notes:"YC S23. NYC.",
     jobs:[
 
@@ -17197,7 +17197,7 @@ const COMPANIES = [
     tagline:"Ship and return orders fast.",
     stage:"Series B", raised:"$27M", lead:"QED",
     badges:["QED","YC S22"],
-    totalRoles:2,
+    totalRoles:0,
     notes:"YC S22. NYC office.",
     jobs:[
 
@@ -17207,7 +17207,7 @@ const COMPANIES = [
     tagline:"Automate SOC 2 compliance.",
     stage:"Series C", raised:"$150M", lead:"Sequoia",
     badges:["Sequoia","CrowdStrike","YC W18"],
-    totalRoles:2,
+    totalRoles:0,
     notes:"YC W18. NYC office.",
     jobs:[
 
@@ -17217,7 +17217,7 @@ const COMPANIES = [
     tagline:"Trade markets with math.",
     stage:"Private", raised:"N/A", lead:"N/A",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC office. Quantitative trading + ML.",
     jobs:[
 
@@ -17227,7 +17227,7 @@ const COMPANIES = [
     tagline:"Build Grok, chase AGI.",
     stage:"Series C", raised:"$12B+", lead:"Sequoia",
     badges:["Sequoia","a16z","Valor"],
-    totalRoles:2,
+    totalRoles:0,
     notes:"Frontier training. AI lab.",
     jobs:[
 
@@ -17237,7 +17237,7 @@ const COMPANIES = [
     tagline:"Serve open models fast.",
     stage:"Series B", raised:"$228M", lead:"Salesforce",
     badges:["Salesforce","Kleiner"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"Open-source AI cloud.",
     jobs:[
 
@@ -17259,7 +17259,7 @@ const COMPANIES = [
     tagline:"See inside your software.",
     stage:"Private", raised:"N/A", lead:"Francisco Partners",
     badges:["Francisco Partners","TPG"],
-    totalRoles:4,
+    totalRoles:0,
     notes:"NYC office. APM.",
     jobs:[
 
@@ -17269,7 +17269,7 @@ const COMPANIES = [
     tagline:"Cover sports like it matters.",
     stage:"Subsidiary", raised:"$139M pre-acq", lead:"NYT",
     badges:["NYT"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC/SF.",
     jobs:[
 
@@ -17279,7 +17279,7 @@ const COMPANIES = [
     tagline:"Target shoppers at scale.",
     stage:"Public", raised:"N/A", lead:"NASDAQ",
     badges:["NASDAQ"],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC office. Commerce media.",
     jobs:[
 
@@ -17339,7 +17339,7 @@ const COMPANIES = [
     tagline:"Back companies as they grow.",
     stage:"Private", raised:"N/A", lead:"N/A",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"NYC HQ.",
     jobs:[
 
@@ -17349,7 +17349,7 @@ const COMPANIES = [
     tagline:"Rate and book every trip.",
     stage:"Public", raised:"N/A", lead:"NASDAQ",
     badges:["NASDAQ"],
-    totalRoles:2,
+    totalRoles:0,
     notes:"Travel reviews.",
     jobs:[
 
@@ -17380,7 +17380,7 @@ const COMPANIES = [
     tagline:"Assemble commerce from APIs.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17400,7 +17400,7 @@ const COMPANIES = [
     tagline:"Answer customers instantly.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:5,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17410,7 +17410,7 @@ const COMPANIES = [
     tagline:"Keep your databases running.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17420,7 +17420,7 @@ const COMPANIES = [
     tagline:"Build support into your app.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:3,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17448,7 +17448,7 @@ const COMPANIES = [
     tagline:"Turn data into marketing.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17458,7 +17458,7 @@ const COMPANIES = [
     tagline:"Find every buyer's contact.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17468,7 +17468,7 @@ const COMPANIES = [
     tagline:"Move money across borders.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17478,7 +17478,7 @@ const COMPANIES = [
     tagline:"Give machines autonomy.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:7,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17488,7 +17488,7 @@ const COMPANIES = [
     tagline:"Let her make the first move.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17498,7 +17498,7 @@ const COMPANIES = [
     tagline:"Run legal discovery with AI.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17508,7 +17508,7 @@ const COMPANIES = [
     tagline:"Rate supplier sustainability.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17518,7 +17518,7 @@ const COMPANIES = [
     tagline:"Build worlds, play Fortnite.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17528,7 +17528,7 @@ const COMPANIES = [
     tagline:"Break down the game film.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17538,7 +17538,7 @@ const COMPANIES = [
     tagline:"Price hotel rooms smarter.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17548,7 +17548,7 @@ const COMPANIES = [
     tagline:"Control company spending.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17558,7 +17558,7 @@ const COMPANIES = [
     tagline:"Model business plans live.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:5,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17579,7 +17579,7 @@ const COMPANIES = [
     tagline:"Build games for your phone.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17589,7 +17589,7 @@ const COMPANIES = [
     tagline:"Feed live sports data.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17599,7 +17599,7 @@ const COMPANIES = [
     tagline:"Move money to any wallet.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:5,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17609,7 +17609,7 @@ const COMPANIES = [
     tagline:"Answer legal questions fast.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17619,7 +17619,7 @@ const COMPANIES = [
     tagline:"Design drugs with AI.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17629,7 +17629,7 @@ const COMPANIES = [
     tagline:"Find a sitter for your dog.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:4,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17639,7 +17639,7 @@ const COMPANIES = [
     tagline:"Auction art to the world.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17659,7 +17659,7 @@ const COMPANIES = [
     tagline:"Make ads for global brands.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17669,7 +17669,7 @@ const COMPANIES = [
     tagline:"Test your site every minute.",
     stage:"", raised:"$20M", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     fundingSrc:"posting",
     jobs:[
@@ -17680,7 +17680,7 @@ const COMPANIES = [
     tagline:"Answer shopper tickets fast.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:3,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17704,7 +17704,7 @@ const COMPANIES = [
     tagline:"Run incidents from Slack.",
     stage:"", raised:"$96M", lead:"",
     badges:[],
-    totalRoles:6,
+    totalRoles:0,
     notes:"",
     fundingSrc:"posting",
     jobs:[
@@ -17735,7 +17735,7 @@ const COMPANIES = [
     tagline:"Break software before users do.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17755,7 +17755,7 @@ const COMPANIES = [
     tagline:"Orchestrate every process.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17765,7 +17765,7 @@ const COMPANIES = [
     tagline:"Edit genomes, treat cancer.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17775,7 +17775,7 @@ const COMPANIES = [
     tagline:"Ship code in containers.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17785,7 +17785,7 @@ const COMPANIES = [
     tagline:"Design medicines with AI.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17795,7 +17795,7 @@ const COMPANIES = [
     tagline:"Trace and debug LLM apps.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:3,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17805,7 +17805,7 @@ const COMPANIES = [
     tagline:"Catch bad code early.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17815,7 +17815,7 @@ const COMPANIES = [
     tagline:"Automate the busywork.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:3,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17825,7 +17825,7 @@ const COMPANIES = [
     tagline:"Train models that see.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17835,7 +17835,7 @@ const COMPANIES = [
     tagline:"Build the instruments labs use.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17845,7 +17845,7 @@ const COMPANIES = [
     tagline:"Run trials on real data.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17855,7 +17855,7 @@ const COMPANIES = [
     tagline:"Let teams teach each other.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17865,7 +17865,7 @@ const COMPANIES = [
     tagline:"Tame expense reports.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:6,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17875,7 +17875,7 @@ const COMPANIES = [
     tagline:"Reach every worker, everywhere.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17885,7 +17885,7 @@ const COMPANIES = [
     tagline:"Encrypt your mail and files.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:19,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17895,7 +17895,7 @@ const COMPANIES = [
     tagline:"Run projects in a grid.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17919,7 +17919,7 @@ const COMPANIES = [
     tagline:"Craft watches and jewelry.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17929,7 +17929,7 @@ const COMPANIES = [
     tagline:"Decode disease with AI.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17939,7 +17939,7 @@ const COMPANIES = [
     tagline:"Compute ML features fast.",
     stage:"Series A", raised:"$50M", lead:"Felicis",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     fundingSrc:"posting",
     jobs:[
@@ -17950,7 +17950,7 @@ const COMPANIES = [
     tagline:"Ship mobile games that hook.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:5,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17960,7 +17960,7 @@ const COMPANIES = [
     tagline:"Score credit for the world.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -17981,7 +17981,7 @@ const COMPANIES = [
     tagline:"Mix shampoo for your hair.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -18001,7 +18001,7 @@ const COMPANIES = [
     tagline:"Generate art designers use.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -18011,7 +18011,7 @@ const COMPANIES = [
     tagline:"Erase backgrounds in a tap.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -18021,7 +18021,7 @@ const COMPANIES = [
     tagline:"Design anything in a browser.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -18031,7 +18031,7 @@ const COMPANIES = [
     tagline:"Structure content as data.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -18041,7 +18041,7 @@ const COMPANIES = [
     tagline:"Sell flights with one API.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -18051,7 +18051,7 @@ const COMPANIES = [
     tagline:"Plan the whole wedding.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -18061,7 +18061,7 @@ const COMPANIES = [
     tagline:"Resell luxury fashion.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
 
@@ -18226,10 +18226,9 @@ const COMPANIES = [
     tagline:"Anything can be read aloud.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:9,
+    totalRoles:8,
     notes:"",
     jobs:[
-      { title:"Software Engineer, Platform - Baton Rouge, LA, USA", url:"https://job-boards.greenhouse.io/speechify/jobs/5974269004", level:"mid", city:"la", added:"2026-09-17", posted:"2026-09-16", desc:"Platform engineering for text-to-speech, Baton Rouge." },
       { title:"Software Engineer, Platform - Culver City, CA, USA", url:"https://job-boards.greenhouse.io/speechify/jobs/5974135004", level:"mid", city:"la", added:"2026-09-17", posted:"2026-09-15", desc:"Platform engineering for text-to-speech, Culver City." },
       { title:"Software Engineer, Platform - Los Angeles, CA, USA", url:"https://job-boards.greenhouse.io/speechify/jobs/5976206004", level:"mid", city:"la", added:"2026-09-17", posted:"2026-09-16", desc:"Platform engineering for text-to-speech, Los Angeles." },
       { title:"Software Engineer, Platform - Los Angeles, CA, USA", url:"https://job-boards.greenhouse.io/speechify/jobs/5974133004", level:"mid", city:"la", added:"2026-09-17", posted:"2026-09-15", desc:"Platform engineering for text-to-speech, Los Angeles." },
@@ -18327,82 +18326,76 @@ const COMPANIES = [
     ] },
   { id:"bubble", name:"Bubble", vertical:"devtools",
     sub:"no-code app builder",
+    tagline:"Build apps without code.",
     stage:"", raised:"", lead:"",
     badges:[],
     totalRoles:3,
     notes:"",
     jobs:[
-      { title:"Senior Software Engineer, Backend", url:"https://jobs.ashbyhq.com/bubble/242caaf7-dad8-4ffe-83f0-666972e5a031", level:"senior", city:"nyc", added:"2026-09-20", posted:"2025-06-17", descRaw:"We built Bubble with a clear mission: to empower everyone to create software. Our AI visual development platform lets anyone, from first-time entrepreneurs to enterprise teams, take an idea from prompt to fully-functional, scalable app across web, iOS, and Android. With over 6 million users in more than 100 countries, Bubble is breaking down the barriers to entrepreneurship and innovation worldwide. Our Product Bubble is the only fully visual AI app builder that lets you vibe code without the code to go beyond prototypes and launch real apps to real users. Chat with AI when you want speed, edit directly when you want control. Bubble's visual editor lets you fine-tune any detail, from the design to privacy rules and programming logic, so you're never stuck, even if AI hits its limits. Every" },
-      { title:"Senior Applied AI Engineer", url:"https://jobs.ashbyhq.com/bubble/32a3ade2-1e62-4ad9-9ab8-32036d6f7b6b", level:"senior", city:"nyc", added:"2026-09-20", posted:"2025-10-23", descRaw:"We built Bubble with a clear mission: to empower everyone to create software. Our AI visual development platform lets anyone, from first-time entrepreneurs to enterprise teams, take an idea from prompt to fully-functional, scalable app across web, iOS, and Android. With over 6 million users in more than 100 countries, Bubble is breaking down the barriers to entrepreneurship and innovation worldwide. Our Product Bubble is the only fully visual AI app builder that lets you vibe code without the code to go beyond prototypes and launch real apps to real users. Chat with AI when you want speed, edit directly when you want control. Bubble's visual editor lets you fine-tune any detail, from the design to privacy rules and programming logic, so you're never stuck, even if AI hits its limits. Every" },
-      { title:"Senior Software Engineer, Core Developer Experience", url:"https://jobs.ashbyhq.com/bubble/419d9dbe-4703-4364-b75e-58559c3572da", level:"senior", city:"nyc", added:"2026-09-20", posted:"2025-09-18", descRaw:"We built Bubble with a clear mission: to empower everyone to create software. Our AI visual development platform lets anyone, from first-time entrepreneurs to enterprise teams, take an idea from prompt to fully-functional, scalable app across web, iOS, and Android. With over 6 million users in more than 100 countries, Bubble is breaking down the barriers to entrepreneurship and innovation worldwide. Our Product Bubble is the only fully visual AI app builder that lets you vibe code without the code to go beyond prototypes and launch real apps to real users. Chat with AI when you want speed, edit directly when you want control. Bubble's visual editor lets you fine-tune any detail, from the design to privacy rules and programming logic, so you're never stuck, even if AI hits its limits. Every" }
-    ] },
-  { id:"hermeus", name:"Hermeus", vertical:"aerospace",
-    sub:"hypersonic aircraft",
-    stage:"", raised:"", lead:"",
-    badges:[],
-    totalRoles:5,
-    notes:"",
-    jobs:[
-      { title:"Senior Autonomy Software Engineer", url:"https://jobs.lever.co/hermeus/57b7c954-2e19-4875-823a-278d84be3018", level:"senior", city:"la", added:"2026-09-20", posted:"2026-08-28", descRaw:"Hermeus is a venture-backed defense aviation company reclaiming the lost art of rapid iterative prototyping to build the fastest aircraft in the world today. By prioritizing relentless hardware iteration, we deliver high-speed systems at the pace of the modern battlefield. We work with the Department of War to provide the high-speed capabilities our nation and its allies need to maintain a durable, asymmetric advantage." },
-      { title:"Senior Flight Software Engineer", url:"https://jobs.lever.co/hermeus/7b67e340-00ad-4cf3-bd45-2449d01540c9", level:"senior", city:"la", added:"2026-09-20", posted:"2025-06-17", descRaw:"Hermeus is a venture-backed defense aviation company reclaiming the lost art of rapid iterative prototyping to build the fastest aircraft in the world today. By prioritizing relentless hardware iteration, we deliver high-speed systems at the pace of the modern battlefield. We work with the Department of War to provide the high-speed capabilities our nation and its allies need to maintain a durable, asymmetric advantage." },
-      { title:"Senior/Principal Mission Software Engineer", url:"https://jobs.lever.co/hermeus/b27bc2f6-f62d-4e5e-ae92-6dd5bebe9fc8", level:"senior", city:"la", added:"2026-09-20", posted:"2025-12-18", descRaw:"Hermeus is a venture-backed defense aviation company reclaiming the lost art of rapid iterative prototyping to build the fastest aircraft in the world today. By prioritizing relentless hardware iteration, we deliver high-speed systems at the pace of the modern battlefield. We work with the Department of War to provide the high-speed capabilities our nation and its allies need to maintain a durable, asymmetric advantage. About The Role: The Mission Systems Engineering team develops the Mission Management System\u2014the software platform connecting mission subsystems, autonomy services, operator interfaces, communications links, and telemetry across Hermeus aircraft and ground systems. As a Senior/Principal Mission Software Engineer, you will architect, build, integrate, and validate critical po" },
-      { title:"Autonomy Software Engineer", url:"https://jobs.lever.co/hermeus/4b1f62d7-4a70-4d79-b83d-f8a6cae6ccaa", level:"mid", city:"la", added:"2026-09-20", posted:"2026-08-28", descRaw:"Hermeus is a venture-backed defense aviation company reclaiming the lost art of rapid iterative prototyping to build the fastest aircraft in the world today. By prioritizing relentless hardware iteration, we deliver high-speed systems at the pace of the modern battlefield. We work with the Department of War to provide the high-speed capabilities our nation and its allies need to maintain a durable, asymmetric advantage." },
-      { title:"Flight Software Engineer", url:"https://jobs.lever.co/hermeus/de110c1f-faa3-4442-a5ff-bcffb958608a", level:"mid", city:"la", added:"2026-09-20", posted:"2025-11-13", descRaw:"Hermeus is a venture-backed defense aviation company reclaiming the lost art of rapid iterative prototyping to build the fastest aircraft in the world today. By prioritizing relentless hardware iteration, we deliver high-speed systems at the pace of the modern battlefield. We work with the Department of War to provide the high-speed capabilities our nation and its allies need to maintain a durable, asymmetric advantage." }
+      { title:"Senior Software Engineer, Backend", url:"https://jobs.ashbyhq.com/bubble/242caaf7-dad8-4ffe-83f0-666972e5a031", level:"senior", city:"nyc", added:"2026-09-20", posted:"2025-06-17", desc:"Senior backend on the no-code app platform." },
+      { title:"Senior Applied AI Engineer", url:"https://jobs.ashbyhq.com/bubble/32a3ade2-1e62-4ad9-9ab8-32036d6f7b6b", level:"senior", city:"nyc", added:"2026-09-20", posted:"2025-10-23", desc:"Applied AI for visual app generation." },
+      { title:"Senior Software Engineer, Core Developer Experience", url:"https://jobs.ashbyhq.com/bubble/419d9dbe-4703-4364-b75e-58559c3572da", level:"senior", city:"nyc", added:"2026-09-20", posted:"2025-09-18", desc:"Core developer experience for app builders." }
     ] },
   { id:"krafton-americas", name:"Krafton Americas", vertical:"gaming",
     sub:"PUBG publisher",
+    tagline:"The studio behind PUBG.",
     stage:"", raised:"", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Game Security Software Engineer", url:"https://job-boards.greenhouse.io/kraftonamericas/jobs/8645900002", level:"mid", city:"la", added:"2026-09-20", posted:"2026-08-28", descRaw:"THE COMPANY KRAFTON is dedicated to identifying and publishing games worldwide that offer a uniquely enjoyable experience, crafted by our globally recognized production studios known for their distinctive creativity. We continuously push the boundaries of gaming enjoyment by embracing new challenges and technologies and expanding our platforms and services to captivate an even larger fan base. Best known for the genre-defining worldwide sensation PUBG: Battlegrounds, our stellar studios based across the globe include PUBG Studios, Striking Distance Studios, Unknown Worlds, Bluehole Studio, RisingWings and more. In collaboration with our passionate and driven team, we strive to establish ourselves as a renowned creator of masterpieces in the global gaming market. THE OPPORTUNITY We develop," }
+      { title:"Game Security Software Engineer", url:"https://job-boards.greenhouse.io/kraftonamericas/jobs/8645900002", level:"mid", city:"la", added:"2026-09-20", posted:"2026-08-28", desc:"Anti-cheat and game security engineering." }
     ] },
   { id:"n8n", name:"n8n", vertical:"devtools",
     sub:"workflow automation",
+    tagline:"Wire your tools together.",
     stage:"", raised:"", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Forward Deployed Engineer - US East Coast", url:"https://jobs.ashbyhq.com/n8n/98dc8c86-b135-4803-8044-1d6f6a631aa8", level:"mid", city:"nyc", added:"2026-09-20", posted:"2026-09-15", descRaw:"The AI orchestration of your wildest imagination. n8n is the open workflow orchestration platform built for the new era of AI. We give technical teams the freedom of code with the speed of no-code, so they can automate faster, smarter, and without limits. Backed by a fiercely inventive community and 500+ builder-approved integrations, we’re changing the way people bring systems together and scale ideas for impact. Since our founding in 2019, we’ve grown into a diverse team of over 260 - working across Europe and the US, connected by a shared builder spirit and with our centre of gravity in Berlin. Along the way, we’ve: Cultivated a community of more than 650,000 active developers and builders Earned 190K+ GitHub stars, making us one of the world’s Top 40 most popular projects Backed by top" }
+      { title:"Forward Deployed Engineer - US East Coast", url:"https://jobs.ashbyhq.com/n8n/98dc8c86-b135-4803-8044-1d6f6a631aa8", level:"mid", city:"nyc", added:"2026-09-20", posted:"2026-09-15", desc:"Forward-deployed work on workflow automation." }
     ] },
   { id:"nanit", name:"Nanit", vertical:"consumer",
     sub:"smart baby monitor",
+    tagline:"See how the baby slept.",
     stage:"", raised:"", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Senior Backend Engineer, Growth (US)", url:"https://www.nanit.com/pages/careers?gh_jid=6136191004", level:"senior", city:"nyc", added:"2026-09-20", posted:"2026-08-17", descRaw:"Nanit is moving families beyond overwhelm by transforming how parents understand their baby's early years. We combine advanced AI, real-world data from billions of sleep hours, and clinical expertise to deliver the clarity and confidence every parent deserves. Trusted by over one million families and backed by $125M in funding, we're building an entirely new category: predictive parenting intelligence. Here, your work directly impacts millions of families. Our team of scientists, engineers, and parents is small but mighty - we share a mission to make early childhood easier, healthier, and more connected. If you want to work on technology that genuinely matters, join us. You'll be the founding backend engineer on a new Growth team - a cross-functional squad owning the full customer funnel, " }
+      { title:"Senior Backend Engineer, Growth (US)", url:"https://www.nanit.com/pages/careers?gh_jid=6136191004", level:"senior", city:"nyc", added:"2026-09-20", posted:"2026-08-17", desc:"Backend on growth for the baby monitor platform." }
     ] },
   { id:"rumble-video", name:"Rumble Video", vertical:"media",
     sub:"video platform",
+    tagline:"Video without gatekeepers.",
     stage:"", raised:"", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Senior Infrastructure Engineer - CDN", url:"https://job-boards.greenhouse.io/rumble/jobs/4706932006", level:"senior", city:"nyc", added:"2026-09-20", posted:"2026-09-18", descRaw:"About RUM Group Inc. RUM Group Inc. is an AI infrastructure and video company. Its Quake AI business delivers AI compute as a service, operating AI data centers including GPU and CPU compute, storage, and networking at scale. Rumble, RUM Group's video business and the original tenant of Quake AI, provides creators and enterprises a full suite of video technologies, unlocking reach, scale, and monetization. RUM Group is building the rails of the agentic-first enterprise: the AI compute, cloud infrastructure, and trust layer for the agentic AI future, advancing RUM Group's mission to maximize the power of human imagination. For more information visit www.rum.group . Rumble is seeking a Senior Infrastructure Engineer (CDN) to build, operate, and evolve the content delivery infrastructure at t" }
+      { title:"Senior Infrastructure Engineer - CDN", url:"https://job-boards.greenhouse.io/rumble/jobs/4706932006", level:"senior", city:"nyc", added:"2026-09-20", posted:"2026-09-18", desc:"CDN infrastructure for a video platform." }
     ] },
   { id:"shein", name:"SHEIN", vertical:"consumer",
     sub:"fast fashion",
+    tagline:"Fashion at internet speed.",
     stage:"", raised:"", lead:"",
     badges:[],
     totalRoles:2,
     notes:"",
     jobs:[
-      { title:"Senior Data Engineer", url:"https://job-boards.greenhouse.io/shein/jobs/5395924008", level:"senior", city:"sd", added:"2026-09-20", posted:"2026-08-19", descRaw:"About SHEIN SHEIN is a global online fashion and lifestyle retailer, offering SHEIN branded apparel and products from a global network of vendors, all at affordable prices. Headquartered in Singapore, SHEIN remains committed to making the beauty of fashion accessible to all, promoting its industry-leading, on-demand production methodology for a smarter, future-ready industry. Founded in 2012, SHEIN has more than 16,000 employees operating from offices around the world and continues to expand operations globally. Join SHEIN and be the future! Position Summary SHEIN Technology is seeking a full-time Senior Data Engineer I (Intelligent Automation) embedded within the Data Engineering team, reporting to Director, Data Engineering. This role applies GenAI/LLM capabilities to real data-engineeri" },
-      { title:"Senior Site Reliability Engineer", url:"https://job-boards.greenhouse.io/shein/jobs/5126431008", level:"senior", city:"sd", added:"2026-09-20", posted:"2026-08-07", descRaw:"About SHEIN SHEIN is a global online fashion and lifestyle retailer, offering SHEIN branded apparel and products from a global network of vendors, all at affordable prices. Headquartered in Singapore, with more than 15,000 employees operating from offices around the world, SHEIN is committed to making the beauty of fashion accessible to all, promoting its industry-leading, on-demand production methodology, for a smarter, future-ready industry. Position Summary We are seeking a Senior Site Reliability Engineer (Official Title: Senior Site Reliability Engineer I) with deep experience operating and evolving large-scale, mission-critical systems where availability and reliability are non-negotiable. At SHEIN, Site Reliability Engineers are hybrid software and systems engineers responsible for " }
+      { title:"Senior Data Engineer", url:"https://job-boards.greenhouse.io/shein/jobs/5395924008", level:"senior", city:"sd", added:"2026-09-20", posted:"2026-08-19", desc:"Data engineering for global fashion retail." },
+      { title:"Senior Site Reliability Engineer", url:"https://job-boards.greenhouse.io/shein/jobs/5126431008", level:"senior", city:"sd", added:"2026-09-20", posted:"2026-08-07", desc:"Reliability engineering at retail scale." }
     ] },
   { id:"twitch", name:"Twitch", vertical:"media",
     sub:"live streaming",
+    tagline:"Where the stream happens.",
     stage:"", raised:"", lead:"",
     badges:[],
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Software Engineer II, Fintech", url:"https://job-boards.greenhouse.io/twitch/jobs/8747652002", level:"mid", city:"nyc", added:"2026-09-20", posted:"2026-09-18", descRaw:"About Us Twitch is the world’s biggest live streaming service, with global communities built around gaming, entertainment, music, sports, cooking, and more. It is where thousands of communities come together for whatever, every day. We’re about community, inside and out. You’ll find coworkers who are eager to team up, collaborate, and smash (or elegantly solve) problems together. We’re on a quest to empower live communities, so if this sounds good to you, see what we’re up to on LinkedIn and X , and discover the projects we’re solving on our Blog . Be sure to explore our Interviewing Guide to learn how to ace our interview process. About the Team Twitch's Enterprise Platform & Technology (EPT) organization is looking for a Software Development Engineer II to build the systems where SAP mee" }
+      { title:"Software Engineer II, Fintech", url:"https://job-boards.greenhouse.io/twitch/jobs/8747652002", level:"mid", city:"nyc", added:"2026-09-20", posted:"2026-09-18", desc:"Backend on payments and creator payouts." }
     ] }
 ];
 
@@ -19216,6 +19209,13 @@ const IMAGE_REFS = [
 
 /* ---------- COMPANY DOMAINS (for Clearbit public logo CDN) ---------- */
 const COMPANY_DOMAINS = {
+  bubble:'bubble.io',
+  'krafton-americas':'krafton.com',
+  n8n:'n8n.io',
+  nanit:'nanit.com',
+  'rumble-video':'rumble.com',
+  shein:'shein.com',
+  twitch:'twitch.tv',
   'iterative-health':'iterative.health',
   'antares-capital':'antaresindustries.com',
   antimetal:'antimetal.com',
