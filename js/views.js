@@ -5481,6 +5481,9 @@ const COOLNESS = {
   'farther-finance':2, footprint:2, gumgum:2, 'lead-bank':2, moloco:2,
   'thought-machine':2, triplelift:2, 'viant-technology':2,
   'td-bank':1, trulioo:1,
+
+  // ── 2026-09-20 refresh ──
+  'iterative-health':4,
 };
 
 const FRONTIER = new Set([
