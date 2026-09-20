@@ -18324,6 +18324,85 @@ const COMPANIES = [
     notes:"",
     jobs:[
       { title:"Applied AI Engineer", url:"https://job-boards.greenhouse.io/iterativehealth/jobs/4714222006", level:"mid", city:"nyc", added:"2026-09-20", posted:"2026-09-18", desc:"Applied AI across a global clinical-trial network." }
+    ] },
+  { id:"bubble", name:"Bubble", vertical:"devtools",
+    sub:"no-code app builder",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:3,
+    notes:"",
+    jobs:[
+      { title:"Senior Software Engineer, Backend", url:"https://jobs.ashbyhq.com/bubble/242caaf7-dad8-4ffe-83f0-666972e5a031", level:"senior", city:"nyc", added:"2026-09-20", posted:"2025-06-17", descRaw:"We built Bubble with a clear mission: to empower everyone to create software. Our AI visual development platform lets anyone, from first-time entrepreneurs to enterprise teams, take an idea from prompt to fully-functional, scalable app across web, iOS, and Android. With over 6 million users in more than 100 countries, Bubble is breaking down the barriers to entrepreneurship and innovation worldwide. Our Product Bubble is the only fully visual AI app builder that lets you vibe code without the code to go beyond prototypes and launch real apps to real users. Chat with AI when you want speed, edit directly when you want control. Bubble's visual editor lets you fine-tune any detail, from the design to privacy rules and programming logic, so you're never stuck, even if AI hits its limits. Every" },
+      { title:"Senior Applied AI Engineer", url:"https://jobs.ashbyhq.com/bubble/32a3ade2-1e62-4ad9-9ab8-32036d6f7b6b", level:"senior", city:"nyc", added:"2026-09-20", posted:"2025-10-23", descRaw:"We built Bubble with a clear mission: to empower everyone to create software. Our AI visual development platform lets anyone, from first-time entrepreneurs to enterprise teams, take an idea from prompt to fully-functional, scalable app across web, iOS, and Android. With over 6 million users in more than 100 countries, Bubble is breaking down the barriers to entrepreneurship and innovation worldwide. Our Product Bubble is the only fully visual AI app builder that lets you vibe code without the code to go beyond prototypes and launch real apps to real users. Chat with AI when you want speed, edit directly when you want control. Bubble's visual editor lets you fine-tune any detail, from the design to privacy rules and programming logic, so you're never stuck, even if AI hits its limits. Every" },
+      { title:"Senior Software Engineer, Core Developer Experience", url:"https://jobs.ashbyhq.com/bubble/419d9dbe-4703-4364-b75e-58559c3572da", level:"senior", city:"nyc", added:"2026-09-20", posted:"2025-09-18", descRaw:"We built Bubble with a clear mission: to empower everyone to create software. Our AI visual development platform lets anyone, from first-time entrepreneurs to enterprise teams, take an idea from prompt to fully-functional, scalable app across web, iOS, and Android. With over 6 million users in more than 100 countries, Bubble is breaking down the barriers to entrepreneurship and innovation worldwide. Our Product Bubble is the only fully visual AI app builder that lets you vibe code without the code to go beyond prototypes and launch real apps to real users. Chat with AI when you want speed, edit directly when you want control. Bubble's visual editor lets you fine-tune any detail, from the design to privacy rules and programming logic, so you're never stuck, even if AI hits its limits. Every" }
+    ] },
+  { id:"hermeus", name:"Hermeus", vertical:"aerospace",
+    sub:"hypersonic aircraft",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:5,
+    notes:"",
+    jobs:[
+      { title:"Senior Autonomy Software Engineer", url:"https://jobs.lever.co/hermeus/57b7c954-2e19-4875-823a-278d84be3018", level:"senior", city:"la", added:"2026-09-20", posted:"2026-08-28", descRaw:"Hermeus is a venture-backed defense aviation company reclaiming the lost art of rapid iterative prototyping to build the fastest aircraft in the world today. By prioritizing relentless hardware iteration, we deliver high-speed systems at the pace of the modern battlefield. We work with the Department of War to provide the high-speed capabilities our nation and its allies need to maintain a durable, asymmetric advantage." },
+      { title:"Senior Flight Software Engineer", url:"https://jobs.lever.co/hermeus/7b67e340-00ad-4cf3-bd45-2449d01540c9", level:"senior", city:"la", added:"2026-09-20", posted:"2025-06-17", descRaw:"Hermeus is a venture-backed defense aviation company reclaiming the lost art of rapid iterative prototyping to build the fastest aircraft in the world today. By prioritizing relentless hardware iteration, we deliver high-speed systems at the pace of the modern battlefield. We work with the Department of War to provide the high-speed capabilities our nation and its allies need to maintain a durable, asymmetric advantage." },
+      { title:"Senior/Principal Mission Software Engineer", url:"https://jobs.lever.co/hermeus/b27bc2f6-f62d-4e5e-ae92-6dd5bebe9fc8", level:"senior", city:"la", added:"2026-09-20", posted:"2025-12-18", descRaw:"Hermeus is a venture-backed defense aviation company reclaiming the lost art of rapid iterative prototyping to build the fastest aircraft in the world today. By prioritizing relentless hardware iteration, we deliver high-speed systems at the pace of the modern battlefield. We work with the Department of War to provide the high-speed capabilities our nation and its allies need to maintain a durable, asymmetric advantage. About The Role: The Mission Systems Engineering team develops the Mission Management System\u2014the software platform connecting mission subsystems, autonomy services, operator interfaces, communications links, and telemetry across Hermeus aircraft and ground systems. As a Senior/Principal Mission Software Engineer, you will architect, build, integrate, and validate critical po" },
+      { title:"Autonomy Software Engineer", url:"https://jobs.lever.co/hermeus/4b1f62d7-4a70-4d79-b83d-f8a6cae6ccaa", level:"mid", city:"la", added:"2026-09-20", posted:"2026-08-28", descRaw:"Hermeus is a venture-backed defense aviation company reclaiming the lost art of rapid iterative prototyping to build the fastest aircraft in the world today. By prioritizing relentless hardware iteration, we deliver high-speed systems at the pace of the modern battlefield. We work with the Department of War to provide the high-speed capabilities our nation and its allies need to maintain a durable, asymmetric advantage." },
+      { title:"Flight Software Engineer", url:"https://jobs.lever.co/hermeus/de110c1f-faa3-4442-a5ff-bcffb958608a", level:"mid", city:"la", added:"2026-09-20", posted:"2025-11-13", descRaw:"Hermeus is a venture-backed defense aviation company reclaiming the lost art of rapid iterative prototyping to build the fastest aircraft in the world today. By prioritizing relentless hardware iteration, we deliver high-speed systems at the pace of the modern battlefield. We work with the Department of War to provide the high-speed capabilities our nation and its allies need to maintain a durable, asymmetric advantage." }
+    ] },
+  { id:"krafton-americas", name:"Krafton Americas", vertical:"gaming",
+    sub:"PUBG publisher",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Game Security Software Engineer", url:"https://job-boards.greenhouse.io/kraftonamericas/jobs/8645900002", level:"mid", city:"la", added:"2026-09-20", posted:"2026-08-28", descRaw:"THE COMPANY KRAFTON is dedicated to identifying and publishing games worldwide that offer a uniquely enjoyable experience, crafted by our globally recognized production studios known for their distinctive creativity. We continuously push the boundaries of gaming enjoyment by embracing new challenges and technologies and expanding our platforms and services to captivate an even larger fan base. Best known for the genre-defining worldwide sensation PUBG: Battlegrounds, our stellar studios based across the globe include PUBG Studios, Striking Distance Studios, Unknown Worlds, Bluehole Studio, RisingWings and more. In collaboration with our passionate and driven team, we strive to establish ourselves as a renowned creator of masterpieces in the global gaming market. THE OPPORTUNITY We develop," }
+    ] },
+  { id:"n8n", name:"n8n", vertical:"devtools",
+    sub:"workflow automation",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Forward Deployed Engineer - US East Coast", url:"https://jobs.ashbyhq.com/n8n/98dc8c86-b135-4803-8044-1d6f6a631aa8", level:"mid", city:"nyc", added:"2026-09-20", posted:"2026-09-15", descRaw:"The AI orchestration of your wildest imagination. n8n is the open workflow orchestration platform built for the new era of AI. We give technical teams the freedom of code with the speed of no-code, so they can automate faster, smarter, and without limits. Backed by a fiercely inventive community and 500+ builder-approved integrations, we’re changing the way people bring systems together and scale ideas for impact. Since our founding in 2019, we’ve grown into a diverse team of over 260 - working across Europe and the US, connected by a shared builder spirit and with our centre of gravity in Berlin. Along the way, we’ve: Cultivated a community of more than 650,000 active developers and builders Earned 190K+ GitHub stars, making us one of the world’s Top 40 most popular projects Backed by top" }
+    ] },
+  { id:"nanit", name:"Nanit", vertical:"consumer",
+    sub:"smart baby monitor",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Backend Engineer, Growth (US)", url:"https://www.nanit.com/pages/careers?gh_jid=6136191004", level:"senior", city:"nyc", added:"2026-09-20", posted:"2026-08-17", descRaw:"Nanit is moving families beyond overwhelm by transforming how parents understand their baby's early years. We combine advanced AI, real-world data from billions of sleep hours, and clinical expertise to deliver the clarity and confidence every parent deserves. Trusted by over one million families and backed by $125M in funding, we're building an entirely new category: predictive parenting intelligence. Here, your work directly impacts millions of families. Our team of scientists, engineers, and parents is small but mighty - we share a mission to make early childhood easier, healthier, and more connected. If you want to work on technology that genuinely matters, join us. You'll be the founding backend engineer on a new Growth team - a cross-functional squad owning the full customer funnel, " }
+    ] },
+  { id:"rumble-video", name:"Rumble Video", vertical:"media",
+    sub:"video platform",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Senior Infrastructure Engineer - CDN", url:"https://job-boards.greenhouse.io/rumble/jobs/4706932006", level:"senior", city:"nyc", added:"2026-09-20", posted:"2026-09-18", descRaw:"About RUM Group Inc. RUM Group Inc. is an AI infrastructure and video company. Its Quake AI business delivers AI compute as a service, operating AI data centers including GPU and CPU compute, storage, and networking at scale. Rumble, RUM Group's video business and the original tenant of Quake AI, provides creators and enterprises a full suite of video technologies, unlocking reach, scale, and monetization. RUM Group is building the rails of the agentic-first enterprise: the AI compute, cloud infrastructure, and trust layer for the agentic AI future, advancing RUM Group's mission to maximize the power of human imagination. For more information visit www.rum.group . Rumble is seeking a Senior Infrastructure Engineer (CDN) to build, operate, and evolve the content delivery infrastructure at t" }
+    ] },
+  { id:"shein", name:"SHEIN", vertical:"consumer",
+    sub:"fast fashion",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:2,
+    notes:"",
+    jobs:[
+      { title:"Senior Data Engineer", url:"https://job-boards.greenhouse.io/shein/jobs/5395924008", level:"senior", city:"sd", added:"2026-09-20", posted:"2026-08-19", descRaw:"About SHEIN SHEIN is a global online fashion and lifestyle retailer, offering SHEIN branded apparel and products from a global network of vendors, all at affordable prices. Headquartered in Singapore, SHEIN remains committed to making the beauty of fashion accessible to all, promoting its industry-leading, on-demand production methodology for a smarter, future-ready industry. Founded in 2012, SHEIN has more than 16,000 employees operating from offices around the world and continues to expand operations globally. Join SHEIN and be the future! Position Summary SHEIN Technology is seeking a full-time Senior Data Engineer I (Intelligent Automation) embedded within the Data Engineering team, reporting to Director, Data Engineering. This role applies GenAI/LLM capabilities to real data-engineeri" },
+      { title:"Senior Site Reliability Engineer", url:"https://job-boards.greenhouse.io/shein/jobs/5126431008", level:"senior", city:"sd", added:"2026-09-20", posted:"2026-08-07", descRaw:"About SHEIN SHEIN is a global online fashion and lifestyle retailer, offering SHEIN branded apparel and products from a global network of vendors, all at affordable prices. Headquartered in Singapore, with more than 15,000 employees operating from offices around the world, SHEIN is committed to making the beauty of fashion accessible to all, promoting its industry-leading, on-demand production methodology, for a smarter, future-ready industry. Position Summary We are seeking a Senior Site Reliability Engineer (Official Title: Senior Site Reliability Engineer I) with deep experience operating and evolving large-scale, mission-critical systems where availability and reliability are non-negotiable. At SHEIN, Site Reliability Engineers are hybrid software and systems engineers responsible for " }
+    ] },
+  { id:"twitch", name:"Twitch", vertical:"media",
+    sub:"live streaming",
+    stage:"", raised:"", lead:"",
+    badges:[],
+    totalRoles:1,
+    notes:"",
+    jobs:[
+      { title:"Software Engineer II, Fintech", url:"https://job-boards.greenhouse.io/twitch/jobs/8747652002", level:"mid", city:"nyc", added:"2026-09-20", posted:"2026-09-18", descRaw:"About Us Twitch is the world’s biggest live streaming service, with global communities built around gaming, entertainment, music, sports, cooking, and more. It is where thousands of communities come together for whatever, every day. We’re about community, inside and out. You’ll find coworkers who are eager to team up, collaborate, and smash (or elegantly solve) problems together. We’re on a quest to empower live communities, so if this sounds good to you, see what we’re up to on LinkedIn and X , and discover the projects we’re solving on our Blog . Be sure to explore our Interviewing Guide to learn how to ace our interview process. About the Team Twitch's Enterprise Platform & Technology (EPT) organization is looking for a Software Development Engineer II to build the systems where SAP mee" }
     ] }
 ];
 
