@@ -12402,7 +12402,7 @@ Read it three ways, because interviewers ask it in all three:
  *  - totalRoles == jobs.length (full set; the card slices to 3 for preview).
  *  - jobs are sorted: founding > senior > mid.
  */
-const COMPANIES_VERIFIED_AT = '2026-09-20';
+const COMPANIES_VERIFIED_AT = '2026-09-21';
 const COMPANIES = [
   { id:"openai", name:"OpenAI", vertical:"ai",
     sub:"GPT / ChatGPT / API",
@@ -12446,7 +12446,7 @@ const COMPANIES = [
     tagline:"Builds safe frontier models",
     stage:"Series F", raised:"$18B+", lead:"Amazon",
     badges:["Amazon","Google","Spark"],
-    totalRoles:22,
+    totalRoles:23,
     notes:"Heavy values screen; expect ethical-dilemma and downside-risk questions. Applied-AI eng roles are FDE-flavored.",
     jobs:[
       { title:"Senior Software Engineer, Full-stack", url:"https://job-boards.greenhouse.io/anthropic/jobs/5174743008", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-06-04", desc:"Ship full-stack work across Claude.ai, API, and Claude Code." },
@@ -12470,7 +12470,8 @@ const COMPANIES = [
       { title:"Software Engineer, Business Technology", url:"https://job-boards.greenhouse.io/anthropic/jobs/5400153008", level:"mid", city:"nyc", added:"2026-08-25", posted:"2026-08-24", desc:"Own internal products end to end, design included." },
       { title:"Data Engineer, GTM", url:"https://job-boards.greenhouse.io/anthropic/jobs/5418610008", level:"mid", city:"nyc", added:"2026-09-14", posted:"2026-09-08", desc:"Build the data pipelines behind go-to-market." },
       { title:"Software Engineer, Research Infrastructure", url:"https://job-boards.greenhouse.io/anthropic/jobs/5283063008", level:"mid", city:"nyc", added:"2026-09-14", posted:"2026-09-09", desc:"Build the infrastructure research teams train on." },
-      { title:"Software Engineer, Tokens and Prompt Structures", url:"https://job-boards.greenhouse.io/anthropic/jobs/5421263008", level:"mid", city:"nyc", added:"2026-09-17", posted:"2026-09-16", desc:"Tokenizer and prompt-format internals for the Claude API." }
+      { title:"Software Engineer, Tokens and Prompt Structures", url:"https://job-boards.greenhouse.io/anthropic/jobs/5421263008", level:"mid", city:"nyc", added:"2026-09-17", posted:"2026-09-16", desc:"Tokenizer and prompt-format internals for the Claude API." },
+      { title:"Software Engineer, Beneficial Deployments", url:"https://job-boards.greenhouse.io/anthropic/jobs/4942024008", level:"mid", city:"nyc", added:"2026-09-21", posted:"2026-09-21", descRaw:"About Anthropic Anthropic’s mission is to create reliable, interpretable, and steerable AI systems. We want AI to be safe and beneficial for our users and for society as a whole. Our team is a quickly growing group of committed researchers, engineers, policy experts, and business leaders working together to build beneficial AI systems. About the Role: We're looking for experienced software engineers to join our Beneficial Deployments Engineering team to help bring Claude to communities that need AI most\u2014nonprofits, educational institutions, healthcare organizations, life sciences researchers, and economic mobility initiatives globally. This role requires strong full-stack engineering skills combined with deep empathy for underserved communities and mission-driven organizations. As an IC en" }
     ] },
   { id:"scaleai", name:"Scale AI", vertical:"ai",
     sub:"AI data + evals + RLHF",
@@ -13006,7 +13007,7 @@ const COMPANIES = [
     tagline:"Watches every cloud metric",
     stage:"Public", raised:"$148M pre-IPO", lead:"Index",
     badges:["NASDAQ","Index","OpenView"],
-    totalRoles:7,
+    totalRoles:6,
     notes:"Public co. Time-series infra, alerting, observability depth.",
     jobs:[
       { title:"Senior Software Engineer - Distributed Systems", url:"https://careers.datadoghq.com/detail/3851927/?gh_jid=3851927", level:"senior", city:"nyc", added:"2026-05-31", posted:"2026-06-16", desc:"Build pipelines ingesting billions of events per second." },
@@ -13014,8 +13015,7 @@ const COMPANIES = [
       { title:"Senior Software Engineer - Streaming Platform", url:"https://careers.datadoghq.com/detail/7993551/?gh_jid=7993551", level:"senior", city:"nyc", added:"2026-06-16", posted:"2026-06-23", desc:"Run the streaming platform most Datadog services need." },
       { title:"Senior Software Engineer - Streaming Platform Client", url:"https://careers.datadoghq.com/detail/8035492/?gh_jid=8035492", level:"senior", city:"nyc", added:"2026-06-30", posted:"2026-06-29", desc:"Own the Rust streaming client handling millions of messages." },
       { title:"Senior Software Engineer - Bazel Tools", url:"https://careers.datadoghq.com/detail/8095166/?gh_jid=8095166", level:"senior", city:"nyc", added:"2026-08-06", posted:"2026-07-29", desc:"Own Bazel builds for 1,500 developers on a polyglot monorepo." },
-      { title:"Senior Forward Deployed Engineer, Feature Flags", url:"https://careers.datadoghq.com/detail/8144946/?gh_jid=8144946", level:"senior", city:"nyc", added:"2026-08-25", posted:"2026-08-24", desc:"Architect feature-flag rollouts alongside customers." },
-      { title:"Senior Data Engineer - Revenue Data Platform", url:"https://careers.datadoghq.com/detail/8141967/?gh_jid=8141967", level:"senior", city:"nyc", added:"2026-09-02", posted:"2026-09-01", desc:"Build the revenue data platform behind billing analytics." }
+      { title:"Senior Forward Deployed Engineer, Feature Flags", url:"https://careers.datadoghq.com/detail/8144946/?gh_jid=8144946", level:"senior", city:"nyc", added:"2026-08-25", posted:"2026-08-24", desc:"Architect feature-flag rollouts alongside customers." }
     ] },
   { id:"mongodb", name:"MongoDB", vertical:"devtools",
     sub:"Document database (NASDAQ)",
@@ -14064,7 +14064,7 @@ const COMPANIES = [
       { title:"Machine Learning Engineer II, Fulfillment", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Machine-Learning-Engineer-II--Fulfillment_JR5859-1", level:"mid", city:"nyc", added:"2026-09-14" },
       { title:"Senior Machine Learning Engineer I, Search Ads", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Senior-Machine-Learning-Engineer-I--Search-Ads_JR5900-1", level:"senior", city:"nyc", added:"2026-09-15" },
       { title:"Senior Software Engineer I, Machine Learning, ML Enablement", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Senior-Software-Engineer-I--Machine-Learning--ML-Enablement_JR5901", level:"senior", city:"nyc", added:"2026-09-15" },
-      { title:"Software Engineer II, Developer Platform", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Software-Engineer-II--Developer-Platform_JR5773-2", level:"mid", city:"nyc", added:"2026-09-20" }
+      { title:"Software Engineer II, Developer Platform", url:"https://etsy.wd5.myworkdayjobs.com/en-US/Etsy_Careers/job/Brooklyn-New-York/Software-Engineer-II--Developer-Platform_JR5773-2", level:"mid", city:"nyc", added:"2026-09-21" }
     ] },
   { id:"linear", name:"Linear", vertical:"saas",
     sub:"product development platform",
@@ -14746,11 +14746,9 @@ const COMPANIES = [
     tagline:"Bet on the game live",
     stage:"Public", raised:"(Flutter subsidiary)", lead:"Flutter",
     badges:["Flutter","LSE"],
-    totalRoles:4,
+    totalRoles:2,
     notes:"NYC HQ. Leading US sportsbook, real-time betting infra.",
     jobs:[
-      { title:"Senior Machine Learning Engineer", url:"https://www.fanduel.careers/open-positions?gh_jid=7524024", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-07-20", desc:"Turn live sports data into personalized betting features." },
-      { title:"Senior Machine Learning Engineer", url:"https://www.fanduel.careers/open-positions?gh_jid=7524004", level:"senior", city:"nyc", added:"2026-07-21", posted:"2026-07-20", desc:"Build ML personalizing sports betting in real time." },
       { title:"Data Engineer", url:"https://www.fanduel.careers/open-positions?gh_jid=8180103", level:"mid", city:"nyc", added:"2026-09-06", posted:"2026-09-04", desc:"Build pipelines powering analytics and ML across betting." },
       { title:"Data Engineer", url:"https://www.fanduel.careers/open-positions?gh_jid=8081487", level:"mid", city:"nyc", added:"2026-09-20", posted:"2026-09-18", desc:"Data pipelines behind sportsbook and betting products." }
     ] },
@@ -15310,13 +15308,14 @@ const COMPANIES = [
     tagline:"Banks half of America",
     stage:"Public", raised:"N/A", lead:"NYSE",
     badges:["NYSE","Dow 30"],
-    totalRoles:4,
+    totalRoles:5,
     notes:"NYC office. Markets + retail digital.",
     jobs:[
       { title:"Software Engineer III - Equities Structured Products Technology", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Software-Engineer-III---Equities-Structured-Products-Technology_26012932-2", level:"mid", city:"nyc", added:"2026-08-18" },
       { title:"Software Engineer III - Global Equities Cash Technolog", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Software-Engineer-III---Global-Equities-Cash-Technolog_26027482", level:"mid", city:"nyc", added:"2026-08-27" },
       { title:"Software Engineer III - AMRS Linear Rates Technology team", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Software-Engineer-III---AMRS-Linear-Rates-Technology-team_26032401", level:"mid", city:"nyc", added:"2026-09-06" },
-      { title:"Software Engineer III - Equities Structured Products Technology", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Software-Engineer-III---Equities-Structured-Products-Technology_26034291-1", level:"mid", city:"nyc", added:"2026-09-17" }
+      { title:"Software Engineer III - Equities Structured Products Technology", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Software-Engineer-III---Equities-Structured-Products-Technology_26034291-1", level:"mid", city:"nyc", added:"2026-09-17" },
+      { title:"Software Engineer III - Java/C#", url:"https://ghr.wd1.myworkdayjobs.com/en-US/lateral-us/job/New-York/Software-Engineer-III---Java-C-_26033249", level:"mid", city:"nyc", added:"2026-09-21" }
     ] },
   { id:"barclays", name:"Barclays", vertical:"fintech",
     sub:"UK investment bank (LSE: BARC)",
@@ -15489,12 +15488,11 @@ const COMPANIES = [
     tagline:"Runs Airflow in production",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:3,
+    totalRoles:2,
     notes:"",
     jobs:[
       { title:"Senior Software Engineer, Platform", url:"https://jobs.ashbyhq.com/astronomer/1a7e12f6-efb9-4a72-9137-a3c409689abb", level:"senior", city:"nyc", added:"2026-08-20", posted:"2026-06-18", desc:"Build the platform behind managed Airflow." },
-      { title:"Senior Software Engineer, Core Platform", url:"https://jobs.ashbyhq.com/astronomer/89a60cf7-cdde-45b4-b09c-c0e527217cb0", level:"senior", city:"nyc", added:"2026-08-20", posted:"2026-08-14", desc:"Build the core platform behind managed Airflow." },
-      { title:"Senior Software Engineer - Build, NYC", url:"https://jobs.ashbyhq.com/astronomer/3c72cd98-3493-4d30-8897-dc5e836db67e", level:"senior", city:"nyc", added:"2026-08-27", posted:"2026-08-26", desc:"Own the build systems behind the Astro platform." }
+      { title:"Senior Software Engineer, Core Platform", url:"https://jobs.ashbyhq.com/astronomer/89a60cf7-cdde-45b4-b09c-c0e527217cb0", level:"senior", city:"nyc", added:"2026-08-20", posted:"2026-08-14", desc:"Build the core platform behind managed Airflow." }
     ] },
   { id:"evolutioniq", name:"EvolutionIQ", vertical:"ai",
     sub:"Claims guidance AI",
@@ -15943,7 +15941,7 @@ const COMPANIES = [
     totalRoles:1,
     notes:"NYC HQ. Markets + institutional tech + retail digital.",
     jobs:[
-      { title:"Senior Python AI Engineer (Hands-On), VP", url:"https://citi.wd5.myworkdayjobs.com/en-US/2/job/New-York-New-York-United-States/Senior-GenAI-Platform-Engineer---Python--VP_26973317", level:"senior", city:"nyc", added:"2026-09-20" }
+      { title:"Senior Python AI Engineer (Hands-On), VP", url:"https://citi.wd5.myworkdayjobs.com/en-US/2/job/New-York-New-York-United-States/Senior-GenAI-Platform-Engineer---Python--VP_26973317", level:"senior", city:"nyc", added:"2026-09-21" }
     ] },
   { id:"crowdstrike", name:"CrowdStrike", vertical:"saas",
     sub:"Endpoint security (NASDAQ: CRWD)",
@@ -15953,9 +15951,9 @@ const COMPANIES = [
     totalRoles:3,
     notes:"NYC office. Endpoint + XDR.",
     jobs:[
-      { title:"Software Engineer III - Cloud Security - FCS Registration (Hybrid)", url:"https://crowdstrike.wd5.myworkdayjobs.com/en-US/crowdstrikecareers/job/USA---New-York-NY/Software-Engineer-III---Cloud-Security---FCS-Registration--Hybrid-_R29327-1", level:"mid", city:"nyc", added:"2026-09-20" },
-      { title:"Sr. Software Engineer - Cloud - Asset Platform (Hybrid)", url:"https://crowdstrike.wd5.myworkdayjobs.com/en-US/crowdstrikecareers/job/USA---New-York-NY/Sr-Software-Engineer---Cloud---Asset-Platform--Hybrid-_R29345", level:"senior", city:"nyc", added:"2026-09-20" },
-      { title:"Sr. Backend Engineer - Cloud (Hybrid)", url:"https://crowdstrike.wd5.myworkdayjobs.com/en-US/crowdstrikecareers/job/USA---New-York-NY/Sr-Backend-Engineer---Cloud--Hybrid-_R29007", level:"senior", city:"nyc", added:"2026-09-20" }
+      { title:"Software Engineer III - Cloud Security - FCS Registration (Hybrid)", url:"https://crowdstrike.wd5.myworkdayjobs.com/en-US/crowdstrikecareers/job/USA---New-York-NY/Software-Engineer-III---Cloud-Security---FCS-Registration--Hybrid-_R29327-1", level:"mid", city:"nyc", added:"2026-09-21" },
+      { title:"Sr. Software Engineer - Cloud - Asset Platform (Hybrid)", url:"https://crowdstrike.wd5.myworkdayjobs.com/en-US/crowdstrikecareers/job/USA---New-York-NY/Sr-Software-Engineer---Cloud---Asset-Platform--Hybrid-_R29345", level:"senior", city:"nyc", added:"2026-09-21" },
+      { title:"Sr. Backend Engineer - Cloud (Hybrid)", url:"https://crowdstrike.wd5.myworkdayjobs.com/en-US/crowdstrikecareers/job/USA---New-York-NY/Sr-Backend-Engineer---Cloud--Hybrid-_R29007", level:"senior", city:"nyc", added:"2026-09-21" }
     ] },
   { id:"freshworks", name:"Freshworks", vertical:"saas",
     sub:"CRM + support (NASDAQ: FRSH)",
@@ -16029,13 +16027,12 @@ const COMPANIES = [
     tagline:"Automates B2B revenue",
     stage:"", raised:"$91M", lead:"",
     badges:[],
-    totalRoles:4,
+    totalRoles:3,
     notes:"",
     fundingSrc:"posting",
     jobs:[
       { title:"Senior Software Engineer, Payments", url:"https://jobs.ashbyhq.com/tabs/780e0391-3d89-4384-9022-ba88efac392d", level:"senior", city:"nyc", added:"2026-08-21", posted:"2026-07-14", desc:"Build payments behind B2B revenue automation." },
       { title:"Senior Software Engineer, Platform", url:"https://jobs.ashbyhq.com/tabs/c7234d3b-e983-4912-b17e-6b7d4ffd8225", level:"senior", city:"nyc", added:"2026-08-21", posted:"2026-08-19", desc:"Build the platform behind revenue automation." },
-      { title:"Forward Deployed Engineer", url:"https://jobs.ashbyhq.com/tabs/0674a245-cc66-4dec-a0c1-f8236dfcc9c1", level:"mid", city:"nyc", added:"2026-08-21", posted:"2026-05-15", desc:"Deploy revenue automation with finance teams." },
       { title:"Senior Software Engineer, Financial Sync", url:"https://jobs.ashbyhq.com/tabs/fabadd5c-4b15-4da3-9d58-c022261a27db", level:"senior", city:"nyc", added:"2026-09-02", posted:"2026-09-02", desc:"Sync billing and payments data across finance systems." }
     ] },
   { id:"traba", name:"Traba", vertical:"marketplace",
@@ -16400,7 +16397,7 @@ const COMPANIES = [
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Sr Software Engineer", url:"https://illumina.wd1.myworkdayjobs.com/en-US/illumina-careers/job/US---California---San-Diego/Sr-Software-Engineer_43277-JOB-1", level:"senior", city:"sd", added:"2026-09-20" }
+      { title:"Sr Software Engineer", url:"https://illumina.wd1.myworkdayjobs.com/en-US/illumina-careers/job/US---California---San-Diego/Sr-Software-Engineer_43277-JOB-1", level:"senior", city:"sd", added:"2026-09-21" }
     ] },
   { id:"hopper", name:"Hopper", vertical:"hospitality",
     sub:"B2B travel tech + fintech (HTS)",
@@ -16555,10 +16552,9 @@ const COMPANIES = [
     tagline:"AI agents answer the phone",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:2,
+    totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Forward Deployed Engineer, DevOps", url:"https://job-boards.eu.greenhouse.io/parloa/jobs/4947868101", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-08-25", desc:"Scale dedicated infra for custom agent integrations." },
       { title:"Forward Deployed Engineer - US", url:"https://job-boards.eu.greenhouse.io/parloa/jobs/4604587101", level:"mid", city:"nyc", added:"2026-08-26", posted:"2026-08-25", desc:"Deliver enterprise voice AI into complex environments." }
     ] },
   { id:"patlytics", name:"Patlytics", vertical:"ai",
@@ -16714,9 +16710,9 @@ const COMPANIES = [
     totalRoles:3,
     notes:"Hyperforce + Data Cloud + Einstein. NYC office for sales eng + applied AI.",
     jobs:[
-      { title:"Senior Software Engineer", url:"https://salesforce.wd12.myworkdayjobs.com/en-US/External_Career_Site/job/New-York---New-York/Senior-Software-Engineer_JR357399", level:"senior", city:"nyc", added:"2026-09-20" },
-      { title:"Senior Software Engineer - Trusted Services", url:"https://salesforce.wd12.myworkdayjobs.com/en-US/External_Career_Site/job/New-York---New-York/Distributed-Systems-Engineer-SMTS-LMTS_JR347084", level:"senior", city:"nyc", added:"2026-09-20" },
-      { title:"DevOps Engineer, GovCloud Mid/Senior", url:"https://salesforce.wd12.myworkdayjobs.com/en-US/External_Career_Site/job/New-York---New-York/DevOps-Engineer--GovCloud-Mid-Senior_JR333947", level:"senior", city:"nyc", added:"2026-09-20" }
+      { title:"Senior Software Engineer", url:"https://salesforce.wd12.myworkdayjobs.com/en-US/External_Career_Site/job/New-York---New-York/Senior-Software-Engineer_JR357399", level:"senior", city:"nyc", added:"2026-09-21" },
+      { title:"Senior Software Engineer - Trusted Services", url:"https://salesforce.wd12.myworkdayjobs.com/en-US/External_Career_Site/job/New-York---New-York/Distributed-Systems-Engineer-SMTS-LMTS_JR347084", level:"senior", city:"nyc", added:"2026-09-21" },
+      { title:"DevOps Engineer, GovCloud Mid/Senior", url:"https://salesforce.wd12.myworkdayjobs.com/en-US/External_Career_Site/job/New-York---New-York/DevOps-Engineer--GovCloud-Mid-Senior_JR333947", level:"senior", city:"nyc", added:"2026-09-21" }
     ] },
   { id:"adobe", name:"Adobe", vertical:"saas",
     sub:"Creative + Experience Cloud (NASDAQ: ADBE)",
@@ -16726,8 +16722,8 @@ const COMPANIES = [
     totalRoles:2,
     notes:"NYC office.",
     jobs:[
-      { title:"Senior Site Reliability Engineer", url:"https://adobe.wd5.myworkdayjobs.com/en-US/external_experienced/job/New-York/Senior-Site-Reliability-Engineer_R170788", level:"senior", city:"nyc", added:"2026-09-20" },
-      { title:"Sr. Full-Stack Engineer", url:"https://adobe.wd5.myworkdayjobs.com/en-US/external_experienced/job/New-York/Sr-Full-Stack-Engineer_R170217", level:"senior", city:"nyc", added:"2026-09-20" }
+      { title:"Senior Site Reliability Engineer", url:"https://adobe.wd5.myworkdayjobs.com/en-US/external_experienced/job/New-York/Senior-Site-Reliability-Engineer_R170788", level:"senior", city:"nyc", added:"2026-09-21" },
+      { title:"Sr. Full-Stack Engineer", url:"https://adobe.wd5.myworkdayjobs.com/en-US/external_experienced/job/New-York/Sr-Full-Stack-Engineer_R170217", level:"senior", city:"nyc", added:"2026-09-21" }
     ] },
   { id:"dexcom", name:"Dexcom", vertical:"health",
     sub:"Continuous glucose monitoring",
@@ -16747,7 +16743,7 @@ const COMPANIES = [
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Senior AI/ML Engineer - Research Data AI and Predictive Modeling (Vaccine R&D)", url:"https://pfizer.wd1.myworkdayjobs.com/en-US/PfizerCareers/job/United-States---New-York---Pearl-River/Senior-AI-ML-Engineer---Research-Data-AI-and-Predictive-Modeling--Vaccine-R-D-_4961866-1", level:"senior", city:"nyc", added:"2026-09-20" }
+      { title:"Senior AI/ML Engineer - Research Data AI and Predictive Modeling (Vaccine R&D)", url:"https://pfizer.wd1.myworkdayjobs.com/en-US/PfizerCareers/job/United-States---New-York---Pearl-River/Senior-AI-ML-Engineer---Research-Data-AI-and-Predictive-Modeling--Vaccine-R-D-_4961866-1", level:"senior", city:"nyc", added:"2026-09-21" }
     ] },
   { id:"assembly", name:"Assembly", vertical:"ai",
     sub:"AI app builder for professional services",
@@ -16822,8 +16818,8 @@ const COMPANIES = [
     jobs:[
       { title:"AI Engineer, Analyst – Data Analytics & AI", url:"https://blackstone.wd1.myworkdayjobs.com/en-US/Blackstone_Careers/job/New-York/AI-Engineer--Analyst---Data-Analytics---AI_45238-1", level:"mid", city:"nyc", added:"2026-09-06" },
       { title:"AI Engineer, Associate – Data Analytics & AI", url:"https://blackstone.wd1.myworkdayjobs.com/en-US/Blackstone_Careers/job/New-York/AI-Engineer--Associate---Data-Analytics---AI_45237-1", level:"mid", city:"nyc", added:"2026-09-06" },
-      { title:"Front-office Senior Software Engineer, VP - Liquid Credit", url:"https://blackstone.wd1.myworkdayjobs.com/en-US/Blackstone_Careers/job/New-York-601-Lex/Front-office-Senior-Software-Engineer--VP---Liquid-Credit_44253-1", level:"senior", city:"nyc", added:"2026-09-20" },
-      { title:"Software Engineer, Associate – Enterprise Technology", url:"https://blackstone.wd1.myworkdayjobs.com/en-US/Blackstone_Careers/job/New-York/Platform-Engineer--Associate---Physical-Security_41692-1", level:"mid", city:"nyc", added:"2026-09-20" }
+      { title:"Front-office Senior Software Engineer, VP - Liquid Credit", url:"https://blackstone.wd1.myworkdayjobs.com/en-US/Blackstone_Careers/job/New-York-601-Lex/Front-office-Senior-Software-Engineer--VP---Liquid-Credit_44253-1", level:"senior", city:"nyc", added:"2026-09-21" },
+      { title:"Software Engineer, Associate – Enterprise Technology", url:"https://blackstone.wd1.myworkdayjobs.com/en-US/Blackstone_Careers/job/New-York/Platform-Engineer--Associate---Physical-Security_41692-1", level:"mid", city:"nyc", added:"2026-09-21" }
     ] },
   { id:"target", name:"Target", vertical:"consumer",
     sub:"Retail",
@@ -17100,7 +17096,7 @@ const COMPANIES = [
     totalRoles:1,
     notes:"",
     jobs:[
-      { title:"Reliability Engineer", url:"https://jll.wd1.myworkdayjobs.com/en-US/JllCareers/job/San-Diego-CA/Reliability-Engineer_REQ517310", level:"mid", city:"sd", added:"2026-09-20" }
+      { title:"Reliability Engineer", url:"https://jll.wd1.myworkdayjobs.com/en-US/JllCareers/job/San-Diego-CA/Reliability-Engineer_REQ517310", level:"mid", city:"sd", added:"2026-09-21" }
     ] },
   { id:"granola", name:"Granola", vertical:"ai",
     sub:"AI meeting notes / enterprise context",
@@ -17433,15 +17429,15 @@ const COMPANIES = [
     totalRoles:9,
     notes:"",
     jobs:[
-      { title:"Senior Mission Software Engineer", url:"https://job-boards.greenhouse.io/vardaspace/jobs/7993731003", level:"senior", city:"la", added:"2026-09-16", posted:"2026-09-12", desc:"Own mission planning and operations software for flights." },
       { title:"Senior Site Reliability Engineer", url:"https://job-boards.greenhouse.io/vardaspace/jobs/7723514003", level:"senior", city:"la", added:"2026-09-16", posted:"2026-06-24", desc:"Keep spacecraft ground infrastructure reliable as an SRE." },
       { title:"Data Engineer", url:"https://job-boards.greenhouse.io/vardaspace/jobs/7819855003", level:"mid", city:"la", added:"2026-09-16", posted:"2026-08-03", desc:"Build data pipelines for in-orbit manufacturing missions." },
-      { title:"Ground Systems Software Engineer II", url:"https://job-boards.greenhouse.io/vardaspace/jobs/7993733003", level:"mid", city:"la", added:"2026-09-16", posted:"2026-09-12", desc:"Build ground software for commanding capsules in orbit." },
-      { title:"Mission Software Engineer II", url:"https://job-boards.greenhouse.io/vardaspace/jobs/7993732003", level:"mid", city:"la", added:"2026-09-16", posted:"2026-09-12", desc:"Build mission software for orbital operations and reentry." },
       { title:"Senior Spacecraft Build Reliability Engineer", url:"https://job-boards.greenhouse.io/vardaspace/jobs/7999559003", level:"senior", city:"la", added:"2026-09-20", posted:"2026-09-18", desc:"Reliability engineering for spacecraft manufacturing." },
       { title:"Senior Spacecraft Flight Software Engineer", url:"https://job-boards.greenhouse.io/vardaspace/jobs/7999659003", level:"senior", city:"la", added:"2026-09-20", posted:"2026-09-18", desc:"Senior flight software for orbital capsules." },
       { title:"Spacecraft Flight Software Engineer II", url:"https://job-boards.greenhouse.io/vardaspace/jobs/7999658003", level:"mid", city:"la", added:"2026-09-20", posted:"2026-09-18", desc:"Flight software for in-orbit pharmaceutical missions." },
-      { title:"Spacecraft Hardware Build Reliability Engineer II", url:"https://job-boards.greenhouse.io/vardaspace/jobs/7999560003", level:"mid", city:"la", added:"2026-09-20", posted:"2026-09-18", desc:"Hardware build reliability for spacecraft production." }
+      { title:"Spacecraft Hardware Build Reliability Engineer II", url:"https://job-boards.greenhouse.io/vardaspace/jobs/7999560003", level:"mid", city:"la", added:"2026-09-20", posted:"2026-09-18", desc:"Hardware build reliability for spacecraft production." },
+      { title:"Senior Spacecraft Mission Software Engineer", url:"https://job-boards.greenhouse.io/vardaspace/jobs/8000326003", level:"senior", city:"la", added:"2026-09-21", posted:"2026-09-20", descRaw:"About Varda Low Earth orbit is open for business. Varda is accelerating the development of commercial space infrastructure, from in-orbit pharmaceutical processing to reliable and economical reentry capsules. Varda’s W-Series vehicles are built, designed, and operated by Varda in-house, including the pharmaceutical processing payloads, the capsules, the C-PICA heat shields, and the satellite buses. From life-saving pharmaceuticals to more powerful fiber optics, there is a world of products used on Earth today that can only be manufactured in space. Varda is accelerating innovation in the orbital economy by creating both the products and infrastructure needed so space can directly benefit life on Earth. Our mission is to expand the economic bounds of humankind. Our team is uniquely suited t" },
+      { title:"Spacecraft Ground Systems Software Engineer II", url:"https://job-boards.greenhouse.io/vardaspace/jobs/8000328003", level:"mid", city:"la", added:"2026-09-21", posted:"2026-09-21", descRaw:"About Varda Low Earth orbit is open for business. Varda is accelerating the development of commercial space infrastructure, from in-orbit pharmaceutical processing to reliable and economical reentry capsules. Varda’s W-Series vehicles are built, designed, and operated by Varda in-house, including the pharmaceutical processing payloads, the capsules, the C-PICA heat shields, and the satellite buses. From life-saving pharmaceuticals to more powerful fiber optics, there is a world of products used on Earth today that can only be manufactured in space. Varda is accelerating innovation in the orbital economy by creating both the products and infrastructure needed so space can directly benefit life on Earth. Our mission is to expand the economic bounds of humankind. Our team is uniquely suited t" },
+      { title:"Spacecraft Mission Software Engineer II", url:"https://job-boards.greenhouse.io/vardaspace/jobs/8000327003", level:"mid", city:"la", added:"2026-09-21", posted:"2026-09-20", descRaw:"About Varda Low Earth orbit is open for business. Varda is accelerating the development of commercial space infrastructure, from in-orbit pharmaceutical processing to reliable and economical reentry capsules. Varda’s W-Series vehicles are built, designed, and operated by Varda in-house, including the pharmaceutical processing payloads, the capsules, the C-PICA heat shields, and the satellite buses. From life-saving pharmaceuticals to more powerful fiber optics, there is a world of products used on Earth today that can only be manufactured in space. Varda is accelerating innovation in the orbital economy by creating both the products and infrastructure needed so space can directly benefit life on Earth. Our mission is to expand the economic bounds of humankind. Our team is uniquely suited t" }
     ] },
   { id:"zeta-global", name:"Zeta Global", vertical:"adtech",
     sub:"Marketing technology",
@@ -18074,7 +18070,7 @@ const COMPANIES = [
     totalRoles:1,
     notes:"NYC office. Retail + digital.",
     jobs:[
-      { title:"Software Engineer – Compliance Technology", url:"https://td.wd3.myworkdayjobs.com/en-US/TD_Bank_Careers/job/New-York-New-York/Software-Engineer---Compliance-Technology_R_1511685", level:"mid", city:"nyc", added:"2026-09-20" }
+      { title:"Software Engineer – Compliance Technology", url:"https://td.wd3.myworkdayjobs.com/en-US/TD_Bank_Careers/job/New-York-New-York/Software-Engineer---Compliance-Technology_R_1511685", level:"mid", city:"nyc", added:"2026-09-21" }
     ] },
   { id:"antimetal", name:"Antimetal", vertical:"devtools",
     sub:"AWS cost optimization",
@@ -18267,10 +18263,10 @@ const COMPANIES = [
     tagline:"Core banking in the cloud.",
     stage:"", raised:"", lead:"",
     badges:[],
-    totalRoles:1,
+    totalRoles:0,
     notes:"",
     jobs:[
-      { title:"Forward Deployed Engineer - Infrastructure", url:"https://jobs.ashbyhq.com/thought-machine/971d2ef1-63f8-4c80-86bb-594f4a1110d3", level:"mid", city:"nyc", added:"2026-09-17", posted:"2026-09-17", desc:"Forward-deployed infrastructure work on core banking deploys." }
+
     ] },
   { id:"too-lost", name:"Too Lost", vertical:"media",
     sub:"music rights SaaS",
